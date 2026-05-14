@@ -3,7 +3,10 @@ Authentication Routes Blueprint
 Handles unified login, signup, email verification, and password setup.
 """
 from functools import wraps
+import os
+from datetime import datetime
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, current_app
+from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
 from ... import db, csrf

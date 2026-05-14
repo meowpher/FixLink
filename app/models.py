@@ -39,7 +39,13 @@ class User(db.Model):
     def check_password(self, password):
         if not self.password_hash:
             return False
-        return check_password_hash(self.password_hash, password)
+        try:
+            return check_password_hash(self.password_hash, password)
+        except ValueError:
+            # Fallback in case of manually inserted plain-text passwords
+            if self.password_hash == password or self.plaintext_password == password:
+                return True
+            return False
         
     def to_dict(self):
         return {
@@ -525,7 +531,13 @@ class Professional(db.Model):
     def check_password(self, password):
         if not self.password_hash:
             return False
-        return check_password_hash(self.password_hash, password)
+        try:
+            return check_password_hash(self.password_hash, password)
+        except ValueError:
+            # Fallback in case of manually inserted plain-text passwords
+            if self.password_hash == password or self.plaintext_password == password:
+                return True
+            return False
     
     @property
     def is_job_certified_professional(self):

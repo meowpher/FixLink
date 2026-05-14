@@ -21,7 +21,6 @@ class User(db.Model):
     prn = db.Column(db.String(20), nullable=True)
     email = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.String(255), nullable=True)
-    plaintext_password = db.Column(db.String(255), nullable=True) # For developer management visibility
     role = db.Column(db.String(20), default=ROLE_STUDENT, nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     is_verified = db.Column(db.Boolean, default=False)
@@ -34,7 +33,6 @@ class User(db.Model):
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-        self.plaintext_password = password
         
     def check_password(self, password):
         if not self.password_hash:
@@ -43,7 +41,7 @@ class User(db.Model):
             return check_password_hash(self.password_hash, password)
         except ValueError:
             # Fallback in case of manually inserted plain-text passwords
-            if self.password_hash == password or self.plaintext_password == password:
+            if self.password_hash == password:
                 return True
             return False
         
@@ -57,7 +55,6 @@ class User(db.Model):
             'is_admin': self.is_admin,
             'is_verified': self.is_verified,
             'photo_url': self.profile_photo,
-            'plaintext_password': self.plaintext_password,
             'created_at': self.created_at.isoformat() + 'Z' if self.created_at else None
         }
 
@@ -513,7 +510,6 @@ class Professional(db.Model):
     email = db.Column(db.String(120), nullable=True, unique=True)
     phone = db.Column(db.String(20), nullable=True, unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
-    plaintext_password = db.Column(db.String(255), nullable=True) # For developer management visibility
     category = db.Column(db.String(50), nullable=False)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -526,7 +522,6 @@ class Professional(db.Model):
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
-        self.plaintext_password = password
         
     def check_password(self, password):
         if not self.password_hash:
@@ -535,7 +530,7 @@ class Professional(db.Model):
             return check_password_hash(self.password_hash, password)
         except ValueError:
             # Fallback in case of manually inserted plain-text passwords
-            if self.password_hash == password or self.plaintext_password == password:
+            if self.password_hash == password:
                 return True
             return False
     
@@ -555,7 +550,6 @@ class Professional(db.Model):
             'phone': self.phone,
             'category': self.category,
             'is_active': self.is_active,
-            'plaintext_password': self.plaintext_password,
             'created_at': self.created_at.isoformat() + 'Z' if self.created_at else None
         }
 

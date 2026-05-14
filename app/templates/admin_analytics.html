@@ -219,10 +219,20 @@
     document.addEventListener('DOMContentLoaded', function() {
         // Theme-aware colors
         const isDark = document.body.getAttribute('data-theme') === 'dark';
-        const primaryColor = '#003399';
-        const secondaryColor = '#60a5fa';
-        const gridColor = isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
-        const textColor = isDark ? '#f8fafc' : '#1e293b';
+        const primaryColor = isDark ? '#C8D8E8' : '#003399';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+        const textColor = isDark ? '#EDEDF0' : '#1e293b';
+        
+        // Strict pie chart palette using only ice-hint opacities
+        const darkPieColors = [
+            'rgba(200, 216, 232, 1)',
+            'rgba(200, 216, 232, 0.8)',
+            'rgba(200, 216, 232, 0.6)',
+            'rgba(200, 216, 232, 0.4)',
+            'rgba(200, 216, 232, 0.2)',
+            'rgba(200, 216, 232, 0.1)'
+        ];
+        const lightPieColors = ['#003399', '#ffcc00', '#28a745', '#dc3545', '#17a2b8', '#6610f2', '#fd7e14'];
 
         // 1. Trend Chart
         const trendData = {{ monthly_trend|tojson }};
@@ -236,7 +246,7 @@
                     label: 'Monthly Tickets',
                     data: trendData.map(d => d[1]),
                     borderColor: primaryColor,
-                    backgroundColor: 'rgba(0, 51, 153, 0.1)',
+                    backgroundColor: isDark ? 'rgba(200, 216, 232, 0.1)' : 'rgba(0, 51, 153, 0.1)',
                     fill: true,
                     tension: 0.4,
                     borderWidth: 3,
@@ -276,11 +286,9 @@
                 labels: catLabels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
                 datasets: [{
                     data: catValues,
-                    backgroundColor: [
-                        '#003399', '#ffcc00', '#28a745', '#dc3545', '#17a2b8', '#6610f2', '#fd7e14'
-                    ],
+                    backgroundColor: isDark ? darkPieColors : lightPieColors,
                     borderWidth: isDark ? 2 : 0,
-                    borderColor: '#1e293b'
+                    borderColor: isDark ? '#080809' : '#1e293b'
                 }]
             },
             options: {

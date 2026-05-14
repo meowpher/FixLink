@@ -5484,3 +5484,73 @@ html[data-theme="dark"] {
 [data-theme="dark"] .modal-footer {
     border-top: 1px solid var(--border) !important;
 }
+
+/* ============================================
+   STRICT DARK MODE - SCREENSHOT FIXES 
+   ============================================ */
+
+/* Fix 1: Admin Dashboard & Insights Header Banners */
+[data-theme="dark"] .admin-header,
+[data-theme="dark"] .vyas-admin-header,
+[data-theme="dark"] .page-header {
+    background: var(--surface) !important;
+    background-image: none !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+
+/* Fix 5: Faculty Dashboard Sidebar Gradient */
+[data-theme="dark"] .faculty-hero {
+    background: var(--surface) !important;
+    background-image: none !important;
+    border-right: 1px solid var(--border) !important;
+    box-shadow: none !important;
+}
+
+/* Fix 2: Floor Pills & Active Tabs */
+[data-theme="dark"] .floor-pill.active,
+[data-theme="dark"] .nav-pills .nav-link.active,
+[data-theme="dark"] .room-btn.selected,
+[data-theme="dark"] .choice-btn.selected {
+    background-color: var(--ice-hint) !important;
+    color: var(--void) !important;
+    border-color: var(--ice-hint) !important;
+    box-shadow: none !important;
+}
+
+/* Fix 4: Avatars in Messages Sidebar */
+[data-theme="dark"] .mc-avatar,
+[data-theme="dark"] .nav-avatar,
+[data-theme="dark"] .avatar,
+[data-theme="dark"] .rounded-circle {
+    background-color: var(--raised) !important;
+    color: var(--ice-hint) !important;
+    border: 1px solid var(--border) !important;
+}
+
+/* Fix 2 (Map Legend): Strict removal of any colors for dots and indicators */
+[data-theme="dark"] .dot,
+[data-theme="dark"] .legend-color,
+[data-theme="dark"] .legend-box {
+    background-color: var(--surface) !important;
+    border: 2px solid var(--ice-hint) !important;
+    box-shadow: none !important;
+}
+
+/* Override any inline styles or specific JS classes for dots */
+[data-theme="dark"] .dot.available,
+[data-theme="dark"] .dot.occupied,
+[data-theme="dark"] .dot.selected {
+    background-color: var(--surface) !important;
+    border: 2px solid var(--ice-hint) !important;
+    box-shadow: none !important;
+}
+
+/* Fix for inline styled elements in Map Legend */
+[data-theme="dark"] [style*="background-color: #28a745"],
+[data-theme="dark"] [style*="background-color: #ffc107"],
+[data-theme="dark"] [style*="background-color: #007bff"],
+[data-theme="dark"] [style*="background-color: #dc3545"],
+[data-theme="dark"] [style*="background-color: #20c997"] {
+    background-color: var(--surface) !important;
+    border: 2px solid var(--ice-hint) !important;
+}

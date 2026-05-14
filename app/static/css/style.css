@@ -5554,3 +5554,51 @@ html[data-theme="dark"] {
     background-color: var(--surface) !important;
     border: 2px solid var(--ice-hint) !important;
 }
+
+/* ============================================
+   STRICT DARK MODE - CORRECTIONS 
+   ============================================ */
+
+/* Correction 1: Remove background from text classes */
+[data-theme="dark"] .text-primary,
+[data-theme="dark"] .text-success,
+[data-theme="dark"] .text-danger,
+[data-theme="dark"] .text-warning,
+[data-theme="dark"] .text-info,
+[data-theme="dark"] .text-dark,
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .text-secondary {
+    background-color: transparent !important;
+    border-color: transparent !important;
+}
+
+[data-theme="dark"] .text-primary,
+[data-theme="dark"] .text-success,
+[data-theme="dark"] .text-danger,
+[data-theme="dark"] .text-warning,
+[data-theme="dark"] .text-info {
+    color: var(--ice-hint) !important;
+}
+
+/* Correction 2: Add missing cards to Card Token */
+[data-theme="dark"] .analytics-card,
+[data-theme="dark"] .stat-mini-card,
+[data-theme="dark"] .slot-card,
+[data-theme="dark"] .schedule-card,
+[data-theme="dark"] .room-card,
+[data-theme="dark"] .feature-card,
+[data-theme="dark"] .ticket-info,
+[data-theme="dark"] .glass-card,
+[data-theme="dark"] .pop-card {
+    background-color: var(--card) !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+    background-image: none !important;
+}
+
+/* Correction 3: Fix Map Containers */
+[data-theme="dark"] .map-container,
+[data-theme="dark"] .svg-container {
+    background-color: var(--surface) !important;
+    border-color: var(--border) !important;
+}

@@ -4239,14 +4239,21 @@ img {
         top: 12px;
         left: 12px;
         z-index: 1100;
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        background: rgba(255, 255, 255, 0.06);
-        border: 1px solid rgba(255, 255, 255, 0.10);
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         cursor: pointer;
         padding: 0;
-        transition: background 200ms ease;
+        transition: all 200ms ease;
+    }
+
+    body[data-theme="dark"] .mobile-hamburger {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: none;
     }
 
     .mobile-hamburger:hover {
@@ -4255,13 +4262,17 @@ img {
 
     .ham-bar {
         display: block;
-        width: 16px;
-        height: 1.5px;
-        background: #f1f5f9;
+        width: 18px;
+        height: 2px;
+        background: #1e293b;
         border-radius: 2px;
         transform-origin: center;
         transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1),
             opacity 280ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    body[data-theme="dark"] .ham-bar {
+        background: #f1f5f9;
     }
 
     .mobile-hamburger.ham-open {
@@ -4305,17 +4316,20 @@ img {
         position: fixed;
         top: 0;
         left: 0;
-        width: 280px;
+        width: 290px;
         height: 100dvh;
-        background: #0F1117;
-        border-right: 0.5px solid rgba(255, 255, 255, 0.07);
-        border-radius: 0 16px 16px 0;
+        background: rgba(13, 17, 23, 0.82);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 0 24px 24px 0;
         z-index: 1000;
         overflow-y: auto;
         overflow-x: hidden;
         transform: translateX(-100%);
-        transition: transform 280ms cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
         -webkit-overflow-scrolling: touch;
+        box-shadow: 20px 0 80px rgba(0, 0, 0, 0.5);
     }
 
     .mobile-sidebar.msb-open {
@@ -4358,22 +4372,26 @@ img {
     }
 
     .msb-brand-name {
-        font-size: 13px;
-        font-weight: 500;
-        color: #5B8FF9;
-        line-height: 1.3;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        line-height: 1.2;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        letter-spacing: -0.2px;
     }
 
     .msb-brand-sub {
         font-size: 9px;
-        color: #475569;
-        line-height: 1.3;
+        color: rgba(255, 255, 255, 0.45);
+        line-height: 1.2;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 500;
     }
 
     .msb-close-btn {
@@ -4403,9 +4421,11 @@ img {
     /* ── Section label ── */
     .msb-section-label {
         font-size: 10px;
-        letter-spacing: 0.08em;
-        color: #334155;
-        padding: 14px 14px 6px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(255, 255, 255, 0.25);
+        padding: 20px 20px 8px;
         flex-shrink: 0;
     }
 
@@ -4427,10 +4447,10 @@ img {
     .msb-item {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 9px 10px;
-        border-radius: 8px;
-        font-size: 13px;
+        gap: 12px;
+        padding: 11px 14px;
+        border-radius: 12px;
+        font-size: 14px;
         color: #94A3B8;
         text-decoration: none;
         cursor: pointer;
@@ -4438,30 +4458,32 @@ img {
         border: none;
         background: transparent;
         text-align: left;
-        transition: background 180ms ease, color 180ms ease;
+        transition: all 200ms ease;
+        margin-bottom: 2px;
     }
 
     .msb-item:hover {
-        background: rgba(255, 255, 255, 0.04);
-        color: #CBD5E1;
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
     }
 
     .msb-item i.bi {
-        font-size: 15px;
-        width: 16px;
+        font-size: 17px;
+        width: 20px;
         text-align: center;
         flex-shrink: 0;
         color: #64748B;
-        transition: color 180ms ease;
+        transition: color 200ms ease;
     }
 
     .msb-item:hover i.bi {
-        color: #94A3B8;
+        color: #fff;
     }
 
     .msb-item.msb-active {
-        background: #1E2535;
-        color: #F1F5F9;
+        background: rgba(91, 143, 249, 0.12);
+        color: #5B8FF9;
+        font-weight: 600;
     }
 
     .msb-item.msb-active i.bi {
@@ -4475,6 +4497,7 @@ img {
         background: #5B8FF9;
         margin-left: auto;
         flex-shrink: 0;
+        box-shadow: 0 0 10px rgba(91, 143, 249, 0.5);
     }
 
     .msb-chevron {
@@ -4593,7 +4616,7 @@ img {
 
     .msb-user-email {
         font-size: 10px;
-        color: #475569;
+        color: rgba(255, 255, 255, 0.4);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -4611,23 +4634,24 @@ img {
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 28px;
-        height: 28px;
-        border-radius: 6px;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
         background: rgba(255, 255, 255, 0.05);
         border: 1px solid rgba(255, 255, 255, 0.08);
-        color: #64748B;
-        font-size: 14px;
+        color: #94A3B8;
+        font-size: 16px;
         cursor: pointer;
-        transition: background 180ms ease, color 180ms ease;
+        transition: all 180ms ease;
         text-decoration: none;
         padding: 0;
         position: relative;
     }
 
     .msb-util-btn:hover {
-        background: rgba(255, 255, 255, 0.10);
-        color: #94A3B8;
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        transform: translateY(-1px);
     }
 
     .msb-notif-dot {

@@ -1,70 +1,30 @@
-{% extends "base.html" %}
-{% block title %}Login - MIT-WPU FixLink{% endblock %}
+import os
+import re
 
-{% block extra_css %}
-<style>
-    /* Auth Page Navbar Customizations */
-    .vyas-navbar {
-        border-bottom: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-    }
-    
-    /* Hide mobile hamburger menu */
-    #mobileMenuBtn {
-        display: none !important;
-    }
-    
-    /* Hide Login/Signup links in the navbar, leaving only the theme toggle */
-    .vyas-navbar .nav-item a[href*="/login"],
-    .vyas-navbar .nav-item a[href*="/signup"] {
-        display: none !important;
-    }
-    
-    /* Align navbar content with the login card (light mode = centered) */
-    .vyas-navbar .container-fluid {
-        padding-left: 24px !important;
-        padding-right: 24px !important;
-    }
-    
-    /* Transparent theme toggle button */
-    #themeToggleBtn, #themeToggleBtnGuest {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-    }
+file_path = r"d:\FixLink-V1\app\templates\login.html"
+with open(file_path, "r", encoding="utf-8") as f:
+    content = f.read()
 
-    
+new_css = """<style>
+    /* ====================================================
+       LIGHT MODE (Default fallback)
+       ==================================================== */
     .bg-orb-top-right, .bg-orb-bottom-left {
         display: none;
     }
-    
-    .main-content {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: calc(100vh - 52px);
-        position: relative;
-        z-index: 1;
-        padding: 20px;
-    }
-    
     .glass-login-card {
         width: 100%;
         max-width: 460px;
         padding: 40px 36px;
         background: #ffffff;
         border: none;
-        border-radius: 8px;
+        border-radius: 12px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         z-index: 1;
         position: relative;
     }
     .glass-login-card .form-logo {
-        max-width: 180px;
-        width: auto;
-        height: auto;
-        object-fit: contain;
+        max-width: 140px;
         margin: 0 auto 24px auto;
         display: block;
     }
@@ -198,12 +158,11 @@
         overflow: hidden !important;
     }
     
-    
     body[data-theme="dark"] .vyas-navbar {
-        background: transparent !important;
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        border-bottom: none !important;
+        background: rgba(255,255,255,0.03) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border-bottom: 1px solid rgba(255,255,255,0.07) !important;
         box-shadow: none !important;
     }
     body[data-theme="dark"] .vyas-navbar .nav-link,
@@ -311,149 +270,11 @@
     body[data-theme="dark"] .glass-login-card .btn-close {
         filter: invert(1) grayscale(100%) brightness(200%);
     }
+</style>"""
 
-    /* ── Mobile Responsive (must be last) ── */
-    @media (max-width: 575px) {
-        .vyas-navbar .navbar-brand { display: none !important; }
-        .vyas-navbar .container-fluid { justify-content: flex-end !important; }
+pattern = re.compile(r"<style>.*?</style>", re.DOTALL)
+new_content = pattern.sub(new_css, content)
 
-        .main-content {
-            flex-direction: column !important;
-            justify-content: center !important;
-            align-items: center !important;
-            padding: 16px !important;
-        }
-
-        .mobile-brand-header {
-            display: flex !important;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 16px;
-            width: 100%;
-        }
-        .mobile-brand-header .brand-name {
-            font-size: 20px;
-            font-weight: 700;
-            color: #111;
-            letter-spacing: -0.3px;
-        }
-        .mobile-brand-header .brand-sub {
-            font-size: 10px;
-            color: #888;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-        body[data-theme="dark"] .mobile-brand-header .brand-name { color: #fff; }
-        body[data-theme="dark"] .mobile-brand-header .brand-sub { color: rgba(255,255,255,0.35); }
-
-        .glass-login-card {
-            width: 100% !important;
-            max-width: 420px !important;
-            border-radius: 12px !important;
-            padding: 24px 20px 28px !important;
-        }
-        .glass-login-card .form-logo { max-width: 120px !important; margin-bottom: 14px !important; }
-        .glass-login-card h3 { font-size: 20px !important; margin-bottom: 4px !important; }
-        .glass-login-card .subtext { font-size: 12px !important; margin-bottom: 16px !important; }
-        .glass-login-card .form-control { height: 42px !important; font-size: 13px !important; }
-        .glass-login-card .form-label { font-size: 12px !important; }
-        .glass-login-card .field-group { margin-bottom: 12px !important; }
-        .glass-login-card .forgot-pwd { font-size: 11px !important; margin-bottom: 14px !important; }
-        .glass-login-card .btn-primary { height: 42px !important; font-size: 14px !important; }
-        .glass-login-card .footer-links { font-size: 12px !important; margin-top: 14px !important; }
-        .glass-login-card .pro-link-group { font-size: 11px !important; padding-top: 12px !important; margin-top: 10px !important; }
-
-        body, html { overflow-x: hidden !important; }
-    }
-</style>
-{% endblock %}
-
-{% block content %}
-<div class="bg-orb-top-right"></div>
-<div class="bg-orb-bottom-left"></div>
-
-<div class="mobile-brand-header" style="display:none;">
-    <span class="brand-name">Fix Link</span>
-    <span class="brand-sub">Smart Room Maintenance</span>
-</div>
-
-<div class="glass-login-card">
-    <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
-    <h3>Welcome Back</h3>
-    <p class="subtext">Sign in to your account</p>
-    
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-    
-    <form method="POST" action="{{ url_for('auth.login') }}{% if show_phone_hint %}?pro=1{% endif %}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        
-        <div class="field-group">
-            <label class="form-label" id="loginLabel">
-                {% if show_phone_hint %}
-                    Email, Username, or Phone
-                {% else %}
-                    Email Address
-                {% endif %}
-            </label>
-            <input type="text" name="email" id="loginInput" class="form-control" required autocomplete="off"
-                   placeholder="{% if show_phone_hint %}name@mitwpu.edu.in or username or 9876543210{% else %}name@mitwpu.edu.in{% endif %}">
-            {% if show_phone_hint %}
-            <div class="form-text mt-2 mb-0" style="color: rgba(255,255,255,0.4); font-size: 12px;">
-                <i class="bi bi-info-circle me-1"></i>
-                Job Certified Professionals can use their username or phone number
-            </div>
-            {% endif %}
-        </div>
-        
-        <div class="field-group" style="margin-bottom: 0;">
-            <label class="form-label">Password<span class="text-danger">*</span></label>
-            <div class="pwd-wrapper">
-                <input type="password" name="password" id="loginPassword" class="form-control" required autocomplete="new-password">
-                <button type="button" class="btn-eye" onclick="togglePwd()" tabindex="-1">
-                    <i class="bi bi-eye" id="loginEyeIcon"></i>
-                </button>
-            </div>
-        </div>
-        
-        <a href="{{ url_for('auth.forgot_password') }}" class="forgot-pwd">Forgot password?</a>
-        
-        <button type="submit" class="btn btn-primary">Login</button>
-    </form>
-    
-    <div class="footer-links">
-        <span class="footer-text">Don't have an account?</span> 
-        <a href="{{ url_for('auth.signup') }}" class="footer-link">Sign Up</a>
-    </div>
-    
-    <div class="pro-link-group">
-        <span class="pro-text">Are you a <span class="pro-highlight">Job Certified Professional</span>?</span> 
-        <a href="?pro=1" class="pro-link">Click here</a>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function togglePwd() {
-    const inp  = document.getElementById('loginPassword');
-    const icon = document.getElementById('loginEyeIcon');
-    if (inp.type === 'password') {
-        inp.type = 'text';
-        icon.classList.replace('bi-eye', 'bi-eye-slash');
-    } else {
-        inp.type = 'password';
-        icon.classList.replace('bi-eye-slash', 'bi-eye');
-    }
-}
-</script>
-{% endblock %}
+with open(file_path, "w", encoding="utf-8") as f:
+    f.write(new_content)
+print("Updated successfully")

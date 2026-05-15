@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MIT-WPU FixLink</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/static/css/style.css?v=5.8" rel="stylesheet">
+    <meta name="csrf-token" content="ImEzZjA1YzhkZWFiZWE4Y2U4NTE5OTg1OTM5OTI3ZmIzMzE3NGJjMDMi.agcrYQ.lQoIKuZgl6rNnBNZoTUskIlRSN0">
+
+    <!-- Vercel Speed Insights -->
+    <script>
+        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+
+    
+<style>
+    /* Full viewport background */
+    body {
+        background-color: #080808 !important;
+        background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.02%22/%3E%3C/svg%3E') !important;
+        color: #ffffff;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        -webkit-font-smoothing: antialiased;
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Navbar override */
+    .vyas-navbar {
+        background: rgba(255,255,255,0.03) !important;
+        backdrop-filter: blur(16px) !important;
+        -webkit-backdrop-filter: blur(16px) !important;
+        border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+        height: 52px !important;
+        padding: 0 24px !important;
+        box-shadow: none !important;
+    }
+    .vyas-navbar .nav-link,
+    .vyas-navbar .navbar-brand .brand-text,
+    .vyas-navbar .navbar-brand .brand-subtitle,
+    .vyas-navbar .bi {
+        color: rgba(255,255,255,0.75) !important;
+    }
+    .vyas-navbar .nav-link:hover,
+    .vyas-navbar .nav-link:hover .bi,
+    .vyas-navbar .navbar-brand:hover .brand-text,
+    .vyas-navbar button:hover .bi {
+        color: #ffffff !important;
+    }
+    
+    /* Background Orbs */
+    .bg-orb-top-right {
+        position: absolute;
+        top: -100px;
+        right: -100px;
+        width: 600px;
+        height: 600px;
+        background: rgba(255,255,255,0.04);
+        filter: blur(140px);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .bg-orb-bottom-left {
+        position: absolute;
+        bottom: -50px;
+        left: -50px;
+        width: 450px;
+        height: 450px;
+        background: rgba(255,255,255,0.03);
+        filter: blur(120px);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Main Content Layout */
+    .main-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 52px);
+        position: relative;
+        z-index: 1;
+        padding: 20px;
+    }
+    
+    /* Hide the extra container from base.html to prevent spacing issues */
+    .main-content > .container.mt-3 {
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        z-index: 10;
+        width: 100%;
+        max-width: 460px;
+        margin: 0 auto !important;
+    }
+
+    /* Login Card / Form Container */
+    .glass-login-card {
+        width: 460px;
+        padding: 40px 36px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 20px;
+        backdrop-filter: blur(24px) saturate(140%);
+        -webkit-backdrop-filter: blur(24px) saturate(140%);
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+        z-index: 1;
+        position: relative;
+    }
+
+    /* Card Content */
+    .glass-login-card .form-logo {
+        max-width: 180px;
+        margin: 0 auto 20px auto;
+        display: block;
+    }
+
+    .glass-login-card h3 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #ffffff;
+        text-align: center;
+        letter-spacing: normal;
+        margin: 0 0 6px 0;
+    }
+
+    .glass-login-card .subtext {
+        font-size: 13px;
+        font-weight: 400;
+        color: rgba(255,255,255,0.4);
+        text-align: center;
+        margin: 0 0 24px 0;
+    }
+
+    /* Field Labels */
+    .glass-login-card .form-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.6);
+        margin: 0 0 6px 0;
+        display: block;
+    }
+    .glass-login-card .text-danger {
+        color: rgba(255,100,100,0.8) !important;
+    }
+
+    /* Input Fields */
+    .glass-login-card .form-control {
+        width: 100%;
+        height: 46px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.07) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #ffffff !important;
+        font-size: 14px;
+        padding: 0 14px;
+        box-shadow: none !important;
+        transition: all 0.2s ease;
+        margin: 0;
+    }
+    .glass-login-card .form-control::placeholder {
+        color: rgba(255,255,255,0.3) !important;
+    }
+    .glass-login-card .form-control:focus {
+        border-color: rgba(255,255,255,0.3) !important;
+        background: rgba(255,255,255,0.1) !important;
+        outline: none;
+    }
+
+    .glass-login-card .field-group {
+        margin-bottom: 14px;
+    }
+
+    .glass-login-card .pwd-wrapper {
+        position: relative;
+        display: block;
+        width: 100%;
+    }
+    
+    .glass-login-card .btn-eye {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: rgba(255,255,255,0.4);
+        padding: 0;
+        z-index: 10;
+        transition: color 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+    }
+    .glass-login-card .btn-eye:hover {
+        color: #ffffff;
+    }
+
+    /* Forgot Password */
+    .glass-login-card .forgot-pwd {
+        display: block;
+        text-align: right;
+        font-size: 12px;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        margin-top: 6px;
+        margin-bottom: 20px;
+    }
+    .glass-login-card .forgot-pwd:hover {
+        color: #ffffff;
+        text-decoration: underline;
+    }
+
+    /* Login Button */
+    .glass-login-card .btn-primary {
+        width: 100%;
+        height: 46px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.13) !important;
+        border: 1px solid rgba(255,255,255,0.18) !important;
+        color: #ffffff !important;
+        font-size: 15px;
+        font-weight: 600;
+        box-shadow: none !important;
+        transition: all 0.2s ease;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .glass-login-card .btn-primary:hover {
+        background: rgba(255,255,255,0.2) !important;
+        border-color: rgba(255,255,255,0.28) !important;
+    }
+    .glass-login-card .btn-primary:active {
+        transform: scale(0.98);
+    }
+
+    /* Footer Links */
+    .glass-login-card .footer-links {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 13px;
+    }
+    .glass-login-card .footer-text {
+        color: rgba(255,255,255,0.4);
+    }
+    .glass-login-card .footer-link {
+        color: #ffffff;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .glass-login-card .footer-link:hover {
+        text-decoration: underline;
+    }
+    
+    .glass-login-card .pro-link-group {
+        margin-top: 12px;
+        text-align: center;
+        font-size: 13px;
+    }
+    .glass-login-card .pro-text {
+        color: rgba(255,255,255,0.4);
+    }
+    .glass-login-card .pro-highlight {
+        color: rgba(255,255,255,0.85);
+        font-weight: 600;
+    }
+    .glass-login-card .pro-link {
+        color: rgba(255,255,255,0.85);
+        font-weight: 600;
+        text-decoration: none;
+    }
+    .glass-login-card .pro-link:hover {
+        text-decoration: underline;
+    }
+    
+    /* Alerts */
+    .glass-login-card .alert {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: #fff;
+        backdrop-filter: blur(10px);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 13px;
+        margin-bottom: 20px;
+    }
+    .glass-login-card .alert-danger {
+        border-color: rgba(255,100,100,0.3);
+        background: rgba(255,100,100,0.05);
+    }
+    .glass-login-card .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+        padding: 12px;
+    }
+</style>
+
+</head>
+
+<body>
+
+    <!-- ═══════════════════════════════════════════════════
+         MOBILE SLIDE-IN SIDEBAR  (hidden on ≥768px)
+    ══════════════════════════════════════════════════════ -->
+
+    <!-- Fixed hamburger trigger -->
+    <button id="mobileMenuBtn" class="mobile-hamburger" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileSidebar">
+        <span class="ham-bar"></span>
+        <span class="ham-bar"></span>
+        <span class="ham-bar"></span>
+    </button>
+
+    <!-- Backdrop overlay -->
+    <div id="mobileBackdrop" class="mobile-backdrop" aria-hidden="true"></div>
+
+    <!-- Sidebar panel -->
+    <nav id="mobileSidebar" class="mobile-sidebar" role="navigation" aria-label="Main navigation">
+
+        <!-- Sidebar header -->
+        <div class="msb-header">
+            <img src="/static/images/logo-lm.png"
+                 alt="MIT-WPU"
+                 class="mitwpu-logo msb-logo"
+                 id="msbLogoImg">
+            <div class="msb-header-divider"></div>
+            <div class="msb-brand">
+                <div class="msb-brand-name">Fix Link</div>
+                <div class="msb-brand-sub">Smart Room Maintenance</div>
+            </div>
+            <button id="mobileCloseSidebar" class="msb-close-btn" aria-label="Close navigation">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+
+        <!-- Nav section -->
+        <div class="msb-section-label">NAVIGATION</div>
+
+        <ul class="msb-nav" role="list">
+
+            
+
+            
+            <li>
+                <a class="msb-item msb-active" href="/login">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                    <span class="msb-dot"></span>
+                </a>
+            </li>
+            <li>
+                <a class="msb-item " href="/signup">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Sign Up</span>
+                    
+                </a>
+            </li>
+            
+
+        </ul>
+
+        <!-- Divider -->
+        <div class="msb-divider"></div>
+
+        <!-- Bottom utility bar -->
+        <div class="msb-bottom">
+            <div class="msb-user">
+                <div class="msb-avatar" id="msbAvatar">?</div>
+                <div class="msb-user-info">
+                    <div class="msb-user-name" id="msbUserName">Loading…</div>
+                    <div class="msb-user-email" id="msbUserEmail">—</div>
+                </div>
+            </div>
+            <div class="msb-utils">
+                
+                <button class="msb-util-btn" id="msbThemeBtn" aria-label="Toggle dark mode">
+                    <i class="bi bi-moon-fill" id="msbThemeIcon"></i>
+                </button>
+                
+            </div>
+        </div>
+
+    </nav>
+    <!-- ═══════════════════════════════════════════════════ -->
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg vyas-navbar">
+        <div class="container-fluid px-4">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <img src="/static/images/logo-lm.png" alt="MIT-WPU Logo"
+                    class="mitwpu-logo me-2">
+                <div class="brand-text-wrapper">
+                    <span class="brand-text">Fix Link</span>
+                    <small class="brand-subtitle">Smart Room Maintenance</small>
+                </div>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    
+
+                    
+                        <li class="nav-item">
+                            <a class="nav-link" href="/login">
+                                <i class="bi bi-box-arrow-in-right "></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/signup">
+                                <i class="bi bi-person-plus "></i>Sign Up
+                            </a>
+                        </li>
+                        <!-- Theme Toggle for Guests -->
+                        <li class="nav-item">
+                            <button id="themeToggleBtnGuest" class="btn nav-link" title="Toggle dark mode">
+                                <i class="bi bi-moon-fill" id="themeToggleIconGuest"></i>
+                            </button>
+                        </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container mt-3">
+            
+                
+            
+        </div>
+        
+<div class="bg-orb-top-right"></div>
+<div class="bg-orb-bottom-left"></div>
+
+<div class="glass-login-card">
+    <img src="/static/images/logo-lm.png" alt="MIT-WPU Logo" class="form-logo">
+    <h3>Welcome Back</h3>
+    <p class="subtext">Sign in to your account</p>
+    
+    
+        
+    
+    
+    <form method="POST" action="/login">
+        <input type="hidden" name="csrf_token" value="ImEzZjA1YzhkZWFiZWE4Y2U4NTE5OTg1OTM5OTI3ZmIzMzE3NGJjMDMi.agcrYQ.lQoIKuZgl6rNnBNZoTUskIlRSN0">
+        
+        <div class="field-group">
+            <label class="form-label" id="loginLabel">
+                
+                    Email Address
+                
+            </label>
+            <input type="text" name="email" id="loginInput" class="form-control" required 
+                   placeholder="name@mitwpu.edu.in">
+            
+        </div>
+        
+        <div class="field-group" style="margin-bottom: 0;">
+            <label class="form-label">Password<span class="text-danger">*</span></label>
+            <div class="pwd-wrapper">
+                <input type="password" name="password" id="loginPassword" class="form-control" required>
+                <button type="button" class="btn-eye" onclick="togglePwd()" tabindex="-1">
+                    <i class="bi bi-eye" id="loginEyeIcon"></i>
+                </button>
+            </div>
+        </div>
+        
+        <a href="/forgot-password" class="forgot-pwd">Forgot password?</a>
+        
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    
+    <div class="footer-links">
+        <span class="footer-text">Don't have an account?</span> 
+        <a href="/signup" class="footer-link">Sign Up</a>
+    </div>
+    
+    <div class="pro-link-group">
+        <span class="pro-text">Are you a <span class="pro-highlight">Job Certified Professional</span>?</span> 
+        <a href="?pro=1" class="pro-link">Click here</a>
+    </div>
+</div>
+
+    </main>
+
+    <!-- Footer -->
+
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- GSAP for Smooth Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <!-- Custom JS -->
+    <script type="module" src="/static/js/animations.js"></script>
+
+    
+<script>
+function togglePwd() {
+    const inp  = document.getElementById('loginPassword');
+    const icon = document.getElementById('loginEyeIcon');
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.classList.replace('bi-eye', 'bi-eye-slash');
+    } else {
+        inp.type = 'password';
+        icon.classList.replace('bi-eye-slash', 'bi-eye');
+    }
+}
+</script>
+
+
+
+    <script>
+    // Theme Toggle Logic
+    (function() {
+        // Function to set theme
+        function setTheme(isDark, animate = false) {
+            const body = document.body;
+            const navbar = document.querySelector('.vyas-navbar');
+            
+            const performThemeSwitch = () => {
+                if (isDark) {
+                    document.body.setAttribute('data-theme', 'dark');
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    // Update icons depending on which button exists
+                    const icon = document.getElementById('themeToggleIcon');
+                    if (icon) {
+                        icon.classList.remove('bi-moon-fill');
+                        icon.classList.add('bi-sun-fill');
+                    }
+                    const iconGuest = document.getElementById('themeToggleIconGuest');
+                    if (iconGuest) {
+                        iconGuest.classList.remove('bi-moon-fill');
+                        iconGuest.classList.add('bi-sun-fill');
+                    }
+                    // Update Logos
+                    const logos = document.querySelectorAll('.mitwpu-logo');
+                    logos.forEach(logo => logo.src = "/static/images/logo-dm.png");
+                } else {
+                    document.body.removeAttribute('data-theme');
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    const icon = document.getElementById('themeToggleIcon');
+                    if (icon) {
+                        icon.classList.remove('bi-sun-fill');
+                        icon.classList.add('bi-moon-fill');
+                    }
+                    const iconGuest = document.getElementById('themeToggleIconGuest');
+                    if (iconGuest) {
+                        iconGuest.classList.remove('bi-sun-fill');
+                        iconGuest.classList.add('bi-moon-fill');
+                    }
+                    // Update Logos
+                    const logos = document.querySelectorAll('.mitwpu-logo');
+                    logos.forEach(logo => logo.src = "/static/images/logo-lm.png");
+                }
+            };
+
+            if (animate && window.gsap) {
+                // Determine target elements (only the main visible page content fades, not the navbar)
+                const contents = document.querySelector('.main-content');
+                
+                // Initialize GSAP Timeline for a premium breathing cross-fade
+                const tl = gsap.timeline();
+                
+                // Phase 1: Fade out and scale down slightly
+                tl.to(contents, {
+                    opacity: 0,
+                    scale: 0.98,
+                    duration: 0.2, // Quick exit
+                    ease: "power2.inOut",
+                    onComplete: () => {
+                        // Crucial turning point: The content is invisible.
+                        // Instantly swap the theme attributes underneath.
+                        performThemeSwitch();
+                    }
+                })
+                // Phase 2: Fade back in and scale up to normal with a gentle deceleration
+                .to(contents, {
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.35, // Slightly slower entrance for a premium feel
+                    ease: "power2.out",
+                    clearProps: "all" // Clean up inline transforms when done
+                });
+            } else {
+                performThemeSwitch();
+            }
+        }
+
+        // Initialize theme on load
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            setTheme(true, false);
+        } else {
+            setTheme(false, false);
+        }
+
+        // Add event listeners to buttons
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) {
+            btn.addEventListener('click', () => {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                setTheme(!isDark, true);
+            });
+        }
+        
+        const btnGuest = document.getElementById('themeToggleBtnGuest');
+        if (btnGuest) {
+            btnGuest.addEventListener('click', () => {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                setTheme(!isDark, true);
+            });
+        }
+    })();
+
+    // Profile Avatar — load user info and wire up photo upload
+    (function () {
+        if (!document.getElementById('navAvatar')) return; // not logged in
+
+        function getInitials(name) {
+            if (!name || typeof name !== 'string' || name.trim() === '') return '?';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length === 1) return parts[0][0].toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        function setAvatar(name, photoUrl, email, prn) {
+            const initials = getInitials(name || '?');
+            [
+                { ini: 'navAvatarInitials',        img: 'navAvatarImg' },
+                { ini: 'navAvatarInitialsDropdown', img: 'navAvatarImgDropdown' }
+            ].forEach(({ ini, img }) => {
+                const iniEl = document.getElementById(ini);
+                const imgEl = document.getElementById(img);
+                if (!iniEl || !imgEl) return;
+                if (photoUrl) {
+                    imgEl.src = photoUrl;
+                    imgEl.classList.remove('d-none');
+                    iniEl.classList.add('d-none');
+                } else {
+                    iniEl.textContent = initials;
+                    iniEl.classList.remove('d-none');
+                    imgEl.classList.add('d-none');
+                }
+            });
+            const nameEl = document.getElementById('profileName');
+            if (document.getElementById('removePhotoBtn'))
+                document.getElementById('removePhotoBtn').classList.toggle('d-none', !photoUrl);
+            if (nameEl) nameEl.textContent = name;
+        }
+
+        // Fetch current user from server
+        fetch('/api/me')
+            .then(r => r.json())
+            .then(result => {
+                if (!result.success) return;
+                const data = result.data;
+                const emailEl = document.getElementById('profileEmail');
+                const prnEl = document.getElementById('profilePRN');
+                if (emailEl) emailEl.textContent = data.email;
+                if (prnEl) prnEl.textContent = data.prn || '—';
+                setAvatar(data.name, data.photo_url);
+            })
+            .catch(() => {});
+
+        // Photo upload
+        const uploadInput = document.getElementById('photoUploadInput');
+        if (uploadInput) {
+            uploadInput.addEventListener('change', function () {
+                if (!this.files[0]) return;
+                const formData = new FormData();
+                formData.append('photo', this.files[0]);
+                fetch('/profile/upload-photo', { method: 'POST', body: formData })
+                    .then(r => r.json())
+                    .then(result => {
+                        if (result.success) setAvatar(document.getElementById('profileName').textContent, result.data.photo_url);
+                    });
+            });
+        }
+
+        // Remove photo
+        const removeBtn = document.getElementById('removePhotoBtn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                fetch('/profile/remove-photo', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) setAvatar(document.getElementById('profileName').textContent, null);
+                    });
+            });
+        }
+    })();
+
+    // Admin Notification System
+    (function() {
+        const dropBtn = document.getElementById('notificationsDropdown');
+        if (!dropBtn) return;
+
+        const badge = document.getElementById('notificationBadge');
+        const list = document.getElementById('notificationList');
+        const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+        async function fetchNotifications() {
+            try {
+                const res = await fetch('/api/notifications');
+                const result = await res.json();
+                if (result.success) {
+                    updateUI(result.data.notifications, result.data.unread_count);
+                }
+            } catch (err) {
+                console.error('Failed to fetch notifications:', err);
+            }
+        }
+
+        function updateUI(notifications, unreadCount) {
+            // Cache for modal access
+            localStorage.setItem('cached_notifications', JSON.stringify(notifications));
+            // Update badge
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+
+            // Update list
+            if (!notifications || notifications.length === 0) {
+                list.innerHTML = `
+                    <li class="dropdown-item text-center py-4 text-muted border-0">
+                        <div class="mb-2"><i class="bi bi-bell-slash fs-4"></i></div>
+                        <span>No notifications yet</span>
+                    </li>`;
+                return;
+            }
+
+            list.innerHTML = notifications.map(n => `
+                <li class="notification-item ${n.is_read ? '' : 'unread'} p-0 border-bottom">
+                    <a class="dropdown-item py-2 px-3" href="${n.link || '#'}" onclick="handleNotificationClick(${n.id}, event, '${n.link || '#'}')">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <span class="fw-bold text-primary" style="font-size: 0.85rem;">${n.title}</span>
+                            <small class="text-muted" style="font-size: 0.7rem;">${formatTime(n.created_at)}</small>
+                        </div>
+                        <p class="mb-0 text-wrap text-muted" style="font-size: 0.8rem; line-height: 1.3;">${n.message}</p>
+                    </a>
+                </li>
+            `).join('');
+        }
+
+        window.handleNotificationClick = async function(id, e, link) {
+            e.preventDefault();
+            try {
+                // Mark as read in background
+                fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+                
+                // Show in modal instead of navigating
+                const notificationItems = JSON.parse(localStorage.getItem('cached_notifications') || '[]');
+                const notification = notificationItems.find(n => n.id === id);
+                
+                if (notification) {
+                    // Special case: If it's a ticket notification and we're on admin dashboard, use viewTicket
+                    const urlParams = new URLSearchParams(notification.link.split('?')[1] || '');
+                    const ticketId = urlParams.get('ticket_id') || urlParams.get('id');
+                    
+                    if (ticketId && typeof window.viewTicket === 'function') {
+                        window.viewTicket(parseInt(ticketId));
+                        return;
+                    }
+                    
+                    // General notification modal
+                    document.getElementById('notificationModalTitle').textContent = notification.title;
+                    document.getElementById('notificationModalBody').textContent = notification.message;
+                    
+                    const actionBtn = document.getElementById('notificationModalActionBtn');
+                    if (notification.link && notification.link !== '#') {
+                        actionBtn.classList.remove('d-none');
+                        actionBtn.href = notification.link;
+                    } else {
+                        actionBtn.classList.add('d-none');
+                    }
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+                    modal.show();
+                } else if (link && link !== '#') {
+                    // Fallback to link if notification not found in cache
+                    window.location.href = link;
+                }
+                
+                // Reload list to update unread status in the background
+                fetchNotifications();
+            } catch (err) {
+                console.error('Error handling notification click:', err);
+                if (link && link !== '#') window.location.href = link;
+            }
+        };
+
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                    await fetch('/api/notifications/read-all', { method: 'POST' });
+                    fetchNotifications();
+                } catch (err) {
+                    console.error('Failed to mark all as read:', err);
+                }
+            });
+        }
+
+        function formatTime(isoStr) {
+            const date = new Date(isoStr);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + 'm ago';
+            if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + 'h ago';
+            return date.toLocaleDateString();
+        }
+
+        // Initially fetch and poll
+        fetchNotifications();
+        setInterval(fetchNotifications, 15000); // Poll every 15s
+
+        // Fetch when dropdown is opened to be fresh
+        dropBtn.addEventListener('show.bs.dropdown', fetchNotifications);
+    })();
+    </script>
+
+    <!-- Notification Detail Modal -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                <div class="modal-header border-0 bg-primary text-white py-3">
+                    <h5 class="modal-title d-flex align-items-center" id="notificationModalTitle">
+                        <i class="bi bi-bell-fill me-2"></i>Notification
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="notification-icon-wrapper mb-3">
+                        <i class="bi bi-info-circle text-primary display-4"></i>
+                    </div>
+                    <p class="lead mb-0 text-dark fw-medium" id="notificationModalBody"></p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500;">Close</button>
+                    <a href="#" id="notificationModalActionBtn" class="btn btn-primary px-4 d-none" style="border-radius: 10px; font-weight: 500; background-color: var(--mitwpu-blue);">Go to Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ═══════════════════════════════════════════════════
+         MOBILE SIDEBAR — JavaScript
+    ══════════════════════════════════════════════════════ -->
+    <script>
+    (function () {
+        // Only run on mobile
+        if (window.innerWidth >= 768) return;
+
+        const sidebar  = document.getElementById('mobileSidebar');
+        const backdrop = document.getElementById('mobileBackdrop');
+        const openBtn  = document.getElementById('mobileMenuBtn');
+        const closeBtn = document.getElementById('mobileCloseSidebar');
+        if (!sidebar || !openBtn) return;
+
+        /* ---- Open / Close ---- */
+        function openSidebar() {
+            sidebar.classList.add('msb-open');
+            backdrop.classList.add('msb-backdrop-open');
+            document.body.classList.add('msb-body-lock');
+            openBtn.setAttribute('aria-expanded', 'true');
+            openBtn.classList.add('ham-open');
+            // Move focus to first focusable element
+            const first = sidebar.querySelector('a, button');
+            if (first) first.focus();
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('msb-open');
+            backdrop.classList.remove('msb-backdrop-open');
+            document.body.classList.remove('msb-body-lock');
+            openBtn.setAttribute('aria-expanded', 'false');
+            openBtn.classList.remove('ham-open');
+            openBtn.focus();
+        }
+
+        openBtn.addEventListener('click', openSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+        backdrop.addEventListener('click', closeSidebar);
+
+        /* ---- Escape key ---- */
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('msb-open')) closeSidebar();
+        });
+
+        /* ---- Focus trap ---- */
+        sidebar.addEventListener('keydown', function (e) {
+            if (e.key !== 'Tab') return;
+            const focusable = Array.from(sidebar.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])'));
+            const first = focusable[0];
+            const last  = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault(); first.focus();
+            }
+        });
+
+        /* ---- Manage submenu accordion ---- */
+        const subToggle = sidebar.querySelector('.msb-submenu-toggle');
+        const subMenu   = document.getElementById('msb-manage-sub');
+        if (subToggle && subMenu) {
+            subToggle.addEventListener('click', function () {
+                const expanded = subToggle.getAttribute('aria-expanded') === 'true';
+                subToggle.setAttribute('aria-expanded', String(!expanded));
+                subMenu.setAttribute('aria-hidden', String(expanded));
+                subMenu.classList.toggle('msb-sub-open', !expanded);
+                subToggle.querySelector('.msb-chevron').style.transform = !expanded ? 'rotate(180deg)' : '';
+            });
+        }
+
+        /* ---- Sidebar theme toggle syncs with main toggle ---- */
+        const msbTheme = document.getElementById('msbThemeBtn');
+        const msbIcon  = document.getElementById('msbThemeIcon');
+        if (msbTheme) {
+            // Sync icon on load
+            function syncMsbThemeIcon() {
+                const dark = document.body.getAttribute('data-theme') === 'dark';
+                if (msbIcon) {
+                    msbIcon.className = dark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+                }
+            }
+            syncMsbThemeIcon();
+            msbTheme.addEventListener('click', function () {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                // Reuse main setTheme if available
+                if (typeof setTheme === 'function') {
+                    setTheme(!isDark, true);
+                } else {
+                    const mainBtn = document.getElementById('themeToggleBtn');
+                    if (mainBtn) mainBtn.click();
+                }
+                setTimeout(syncMsbThemeIcon, 400);
+            });
+        }
+
+        /* ---- Populate user info from /api/me ---- */
+        const msbAvatar = document.getElementById('msbAvatar');
+        const msbName   = document.getElementById('msbUserName');
+        const msbEmail  = document.getElementById('msbUserEmail');
+        if (msbAvatar || msbName) {
+            fetch('/api/me').then(r => r.json()).then(res => {
+                if (!res.success) return;
+                const d = res.data;
+                if (msbName)  msbName.textContent  = d.name  || '—';
+                if (msbEmail) msbEmail.textContent = d.email || '—';
+                if (msbAvatar) {
+                    const initials = d.name ? (d.name.trim().split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase()) : '?';
+                    msbAvatar.textContent = initials;
+                }
+            }).catch(() => {});
+        }
+
+        /* ---- Sync notification dot ---- */
+        const msbNotifDot = document.getElementById('msbNotifDot');
+        if (msbNotifDot) {
+            const mainBadge = document.getElementById('notificationBadge');
+            if (mainBadge) {
+                const observer = new MutationObserver(() => {
+                    msbNotifDot.classList.toggle('d-none', mainBadge.classList.contains('d-none'));
+                });
+                observer.observe(mainBadge, { attributes: true, attributeFilter: ['class'] });
+            }
+        }
+
+        /* ---- Bell button opens notification dropdown ---- */
+        const msbBell = document.getElementById('msbBellBtn');
+        if (msbBell) {
+            msbBell.addEventListener('click', function () {
+                closeSidebar();
+                const mainBell = document.getElementById('notificationsDropdown');
+                if (mainBell) setTimeout(() => mainBell.click(), 320);
+            });
+        }
+    })();
+    </script>
+
+</body>
+
+</html>

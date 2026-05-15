@@ -18,17 +18,97 @@
         box-shadow: none !important;
     }
 
-    /* ── Mobile Responsive ── */
+    /* ── Mobile Responsive (must be last) ── */
     @media (max-width: 575px) {
-        .vyas-navbar .navbar-brand { display: none !important; }
-        .vyas-navbar .container-fluid { justify-content: flex-end !important; }
+        /* Hide vyas-navbar on mobile — custom topbar used instead */
+        .vyas-navbar, #mobileMenuBtn { display: none !important; }
+
+        /* Custom mobile top bar */
+        .mobile-topbar {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            padding: 0 14px;
+            z-index: 100;
+            background: transparent;
+        }
+        .mobile-topbar .topbar-left {
+            display: flex;
+            align-items: center;
+        }
+        .mobile-topbar .topbar-logo {
+            height: 34px;
+            width: auto;
+            object-fit: contain;
+        }
+        .mobile-topbar .topbar-divider {
+            width: 1.5px;
+            height: 28px;
+            background: rgba(0,0,0,0.15);
+            margin: 0 12px;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-divider {
+            background: rgba(255,255,255,0.2);
+        }
+        .mobile-topbar .topbar-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-topbar .topbar-brand {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111;
+            letter-spacing: -0.4px;
+            line-height: 1.1;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-brand { color: #fff; }
+        .mobile-topbar .topbar-sub {
+            font-size: 9px;
+            color: #666;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-sub { color: rgba(255,255,255,0.45); }
+        .mobile-topbar .topbar-theme-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            color: #555;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-theme-btn { color: rgba(255,255,255,0.7); }
+
+        .main-content {
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 80px 16px 16px !important;
+        }
+
         .glass-signup-card {
             width: 100% !important;
-            max-width: 100% !important;
-            border-radius: 16px !important;
-            padding: 28px 20px !important;
+            max-width: 420px !important;
+            border-radius: 12px !important;
+            padding: 24px 20px 28px !important;
         }
-        .main-content { padding: 12px !important; }
+        .glass-signup-card .form-logo { max-width: 120px !important; margin-bottom: 14px !important; }
+        .glass-signup-card h3 { font-size: 20px !important; margin-bottom: 4px !important; }
+        .glass-signup-card .subtext { font-size: 12px !important; margin-bottom: 16px !important; }
+        .glass-signup-card .form-control { height: 42px !important; font-size: 13px !important; }
+        .glass-signup-card .form-label { font-size: 12px !important; }
+        .glass-signup-card .btn-primary { height: 42px !important; font-size: 14px !important; }
+        .glass-signup-card .footer-links { font-size: 12px !important; margin-top: 14px !important; }
+
         body, html { overflow-x: hidden !important; }
     }
 
@@ -51,7 +131,7 @@
         padding: 40px 36px;
         background: #ffffff;
         border: none;
-        border-radius: 12px;
+        border-radius: 8px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.08);
         z-index: 1;
         position: relative;
@@ -172,6 +252,24 @@
 {% endblock %}
 
 {% block content %}
+<div class="bg-orb-top-right"></div>
+<div class="bg-orb-bottom-left"></div>
+
+<!-- Mobile-only custom top bar -->
+<div class="mobile-topbar" style="display:none;">
+    <div class="topbar-left">
+        <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo">
+        <div class="topbar-divider"></div>
+        <div class="topbar-text">
+            <span class="topbar-brand">Fix Link</span>
+            <span class="topbar-sub">Smart Room Maintenance</span>
+        </div>
+    </div>
+    <button class="topbar-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme">
+        <i class="bi bi-moon-fill" id="mobileThemeIcon"></i>
+    </button>
+</div>
+
 <div class="glass-signup-card">
     <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
     <h3>Student Sign Up</h3>
@@ -199,4 +297,47 @@
         Already have an account? <a href="{{ url_for('auth.login') }}">Login</a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Mobile topbar theme toggle
+(function() {
+    const mobileBtn = document.getElementById('mobileThemeToggle');
+    const mobileIcon = document.getElementById('mobileThemeIcon');
+    if (!mobileBtn || !mobileIcon) return;
+
+    // Sync icon with current theme
+    function syncMobileIcon() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        mobileIcon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    }
+    syncMobileIcon();
+
+    mobileBtn.addEventListener('click', function() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        // Reuse the existing setTheme from base.html via themeToggleBtnGuest click simulation
+        const guestBtn = document.getElementById('themeToggleBtnGuest');
+        if (guestBtn) {
+            guestBtn.click();
+        } else {
+            // Fallback: toggle manually
+            if (isDark) {
+                document.body.removeAttribute('data-theme');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
+            }
+        }
+        syncMobileIcon();
+    });
+})();
+</script>
 {% endblock %}

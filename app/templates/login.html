@@ -314,38 +314,80 @@
 
     /* ── Mobile Responsive (must be last) ── */
     @media (max-width: 575px) {
-        .vyas-navbar .navbar-brand { display: none !important; }
-        .vyas-navbar .container-fluid { justify-content: flex-end !important; }
+        /* Hide vyas-navbar on mobile — custom topbar used instead */
+        .vyas-navbar, #mobileMenuBtn { display: none !important; }
+
+        /* Custom mobile top bar */
+        .mobile-topbar {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            padding: 0 14px;
+            z-index: 100;
+            background: transparent;
+        }
+        .mobile-topbar .topbar-left {
+            display: flex;
+            align-items: center;
+        }
+        .mobile-topbar .topbar-logo {
+            height: 34px;
+            width: auto;
+            object-fit: contain;
+        }
+        .mobile-topbar .topbar-divider {
+            width: 1.5px;
+            height: 28px;
+            background: rgba(0,0,0,0.15);
+            margin: 0 12px;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-divider {
+            background: rgba(255,255,255,0.2);
+        }
+        .mobile-topbar .topbar-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-topbar .topbar-brand {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111;
+            letter-spacing: -0.4px;
+            line-height: 1.1;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-brand { color: #fff; }
+        .mobile-topbar .topbar-sub {
+            font-size: 9px;
+            color: #666;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-sub { color: rgba(255,255,255,0.45); }
+        .mobile-topbar .topbar-theme-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            color: #555;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-theme-btn { color: rgba(255,255,255,0.7); }
 
         .main-content {
             flex-direction: column !important;
             justify-content: center !important;
             align-items: center !important;
-            padding: 16px !important;
+            padding: 80px 16px 16px !important;
         }
-
-        .mobile-brand-header {
-            display: flex !important;
-            flex-direction: column;
-            align-items: center;
-            margin-bottom: 16px;
-            width: 100%;
-        }
-        .mobile-brand-header .brand-name {
-            font-size: 20px;
-            font-weight: 700;
-            color: #111;
-            letter-spacing: -0.3px;
-        }
-        .mobile-brand-header .brand-sub {
-            font-size: 10px;
-            color: #888;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            margin-top: 2px;
-        }
-        body[data-theme="dark"] .mobile-brand-header .brand-name { color: #fff; }
-        body[data-theme="dark"] .mobile-brand-header .brand-sub { color: rgba(255,255,255,0.35); }
 
         .glass-login-card {
             width: 100% !important;
@@ -373,10 +415,21 @@
 <div class="bg-orb-top-right"></div>
 <div class="bg-orb-bottom-left"></div>
 
-<div class="mobile-brand-header" style="display:none;">
-    <span class="brand-name">Fix Link</span>
-    <span class="brand-sub">Smart Room Maintenance</span>
+<!-- Mobile-only custom top bar -->
+<div class="mobile-topbar" style="display:none;">
+    <div class="topbar-left">
+        <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo">
+        <div class="topbar-divider"></div>
+        <div class="topbar-text">
+            <span class="topbar-brand">Fix Link</span>
+            <span class="topbar-sub">Smart Room Maintenance</span>
+        </div>
+    </div>
+    <button class="topbar-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme">
+        <i class="bi bi-moon-fill" id="mobileThemeIcon"></i>
+    </button>
 </div>
+
 
 <div class="glass-login-card">
     <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
@@ -455,5 +508,44 @@ function togglePwd() {
         icon.classList.replace('bi-eye-slash', 'bi-eye');
     }
 }
+
+// Mobile topbar theme toggle
+(function() {
+    const mobileBtn = document.getElementById('mobileThemeToggle');
+    const mobileIcon = document.getElementById('mobileThemeIcon');
+    if (!mobileBtn || !mobileIcon) return;
+
+    // Sync icon with current theme
+    function syncMobileIcon() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        mobileIcon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    }
+    syncMobileIcon();
+
+    mobileBtn.addEventListener('click', function() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        // Reuse the existing setTheme from base.html via themeToggleBtnGuest click simulation
+        const guestBtn = document.getElementById('themeToggleBtnGuest');
+        if (guestBtn) {
+            guestBtn.click();
+        } else {
+            // Fallback: toggle manually
+            if (isDark) {
+                document.body.removeAttribute('data-theme');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
+            }
+        }
+        syncMobileIcon();
+    });
+})();
 </script>
 {% endblock %}

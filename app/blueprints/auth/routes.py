@@ -180,11 +180,12 @@ def signup():
                     email_sent = send_verification_email(email, existing_user.name, verification_link)
                 except Exception as e:
                     print(f"ERROR: Failed to send verification email: {e}")
+                # SECURITY: Do NOT pass verification_link to the template.
+                # It must only be delivered via email to the registered address.
                 return render_template(
                     'signup_success.html',
                     email=email,
-                    email_sent=email_sent,
-                    verification_link=verification_link
+                    email_sent=email_sent
                 )
 
         # Create new unverified user
@@ -207,11 +208,12 @@ def signup():
         except Exception as e:
             print(f"ERROR: Failed to send verification email: {e}")
 
+        # SECURITY: Do NOT pass verification_link to the template.
+        # It must only be delivered via email to the registered address.
         return render_template(
             'signup_success.html',
             email=email,
-            email_sent=email_sent,
-            verification_link=verification_link
+            email_sent=email_sent
         )
         
     return render_template('signup.html')

@@ -40,10 +40,9 @@ class User(db.Model):
         try:
             return check_password_hash(self.password_hash, password)
         except ValueError:
-            # Fallback in case of manually inserted plain-text passwords
-            if self.password_hash == password:
-                return True
+            # Hash is malformed/unsupported — deny access rather than fall back to plain-text
             return False
+
         
     def to_dict(self):
         return {
@@ -203,7 +202,9 @@ class Room(db.Model):
                 'subject': active_booking.subject,
                 'faculty': active_booking.faculty.name if active_booking.faculty else 'Faculty',
                 'faculty_id': active_booking.faculty_id,
-                'is_owner': active_booking.faculty_id == user_id,
+                # NOTE: is_owner is intentionally omitted here.
+                # It is session-dependent and must be computed client-side
+                # to prevent cache poisoning across users.
                 'end_time': (active_booking.slot_start + timedelta(hours=6, minutes=30)).strftime('%I:%M %p') # +1h from start, +5:30 for IST
             }
             
@@ -228,7 +229,9 @@ class Room(db.Model):
                 'subject': active_timetable.subject,
                 'faculty': active_timetable.faculty.name if active_timetable.faculty else 'Faculty',
                 'faculty_id': active_timetable.faculty_id,
-                'is_owner': active_timetable.faculty_id == user_id,
+                # NOTE: is_owner is intentionally omitted here.
+                # It is session-dependent and must be computed client-side
+                # to prevent cache poisoning across users.
                 'end_time': (datetime.combine(now_ist.date(), active_timetable.end_time)).strftime('%I:%M %p')
             }
             

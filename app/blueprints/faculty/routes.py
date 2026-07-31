@@ -78,7 +78,8 @@ def dashboard():
                            my_adhoc=my_adhoc,
                            booking_history=booking_history,
                            bookings_this_week=bookings_this_week,
-                           current_day=current_day)
+                           current_day=current_day,
+                           current_user_id=user_id)
 
 
 @faculty_bp.route('/api/claim-room', methods=['POST'])

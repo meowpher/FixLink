@@ -22,10 +22,18 @@
     </script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
 
+    <!-- Advanced UI Animations CSS -->
+    <link href="{{ url_for('static', filename='css/page_transitions.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard_stats.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/skeleton.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/carousels.css') }}" rel="stylesheet">
+
     {% block extra_css %}{% endblock %}
 </head>
 
 <body>
+    <!-- Advanced UI Curtain -->
+    <div id="page-transition-curtain" class="page-curtain"></div>
 
     <!-- ═══════════════════════════════════════════════════
          MOBILE SLIDE-IN SIDEBAR  (hidden on ≥768px)
@@ -210,190 +218,151 @@
     </nav>
     <!-- ═══════════════════════════════════════════════════ -->
 
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg vyas-navbar">
-        <div class="container-fluid px-4">
-            <a class="navbar-brand d-flex align-items-center" href="{{ url_for('main.index') }}">
-                <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo"
-                    class="mitwpu-logo me-2">
-                <div class="brand-text-wrapper">
-                    <span class="brand-text">Fix Link</span>
-                    <small class="brand-subtitle">Smart Room Maintenance</small>
-                </div>
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    {% if session.get('is_super_admin') %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('superadmin.dashboard') }}">
-                                <i class="bi bi-code-square "></i>Developer
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('superadmin.list_users') }}">
-                                <i class="bi bi-people "></i>Users
-                            </a>
-                        </li>
-                    {% endif %}
+    <!-- Navigation (Modern Capsule) -->
+    <style>
+        .pointer-events-none { pointer-events: none; }
+        .pointer-events-auto { pointer-events: auto; }
+        .nav-capsule {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 40px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+        }
+        [data-theme="dark"] .nav-capsule {
+            background: rgba(15, 22, 36, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .nav-capsule .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-capsule .nav-link:hover {
+            background: rgba(var(--mitwpu-blue-rgb), 0.1);
+            color: var(--mitwpu-blue);
+        }
+        .nav-capsule .nav-link.active {
+            background: var(--mitwpu-blue);
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(0, 114, 198, 0.2);
+        }
+        [data-theme="dark"] .nav-capsule .nav-link.active {
+            box-shadow: 0 4px 12px rgba(0, 210, 255, 0.2);
+        }
+        .brand-text-capsule {
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+    </style>
 
-                    {% if session.get('user_id') or session.get('professional_id') %}
-                        {% if session.get('is_admin') %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
-                                <i class="bi bi-speedometer2 "></i>Dashboard
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.status_map') }}">
-                                <i class="bi bi-map "></i>Status Map
-                            </a>
-                        </li>
+    <div class="fixed-top mt-4 d-none d-lg-flex justify-content-center pointer-events-none" style="z-index: 1040;">
+        <div class="nav-capsule pointer-events-auto">
+            <!-- Brand -->
+            <a class="d-flex align-items-center me-3 text-decoration-none" href="{{ url_for('main.index') }}">
+                <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="Logo" class="mitwpu-logo me-2" style="height: 28px;">
+                <span class="brand-text-capsule">FixLink</span>
+            </a>
+
+            <!-- Nav Links -->
+            <ul class="nav nav-pills align-items-center m-0">
+                {% if session.get('is_super_admin') %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin.dashboard') }}"><i class="bi bi-code-square"></i> Developer</a></li>
+                {% endif %}
+
+                {% if session.get('user_id') or session.get('professional_id') %}
+                    {% if session.get('is_admin') %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.status_map' %}active{% endif %}" href="{{ url_for('admin.status_map') }}"><i class="bi bi-map"></i> Status Map</a></li>
+                        
+                        <!-- Manage Dropdown -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="bi bi-gear "></i>Manage
-                            </a>
-                            <ul class="dropdown-menu shadow">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
+                            <ul class="dropdown-menu shadow rounded-4 border-0">
                                 <li><a class="dropdown-item" href="{{ url_for('admin.timetable') }}"><i class="bi bi-calendar-event me-2"></i>Timetable</a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history me-2"></i>Full History</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('admin.booking_history') }}"><i class="bi bi-calendar3-range me-2"></i>Classroom Bookings</a></li>
-                                {% if session.get('is_super_admin') or (SUPER_ADMIN_EMAIL and session.get('user_email') == SUPER_ADMIN_EMAIL) or (session.get('user_name') == 'Admin' and session.get('is_admin')) %}
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-primary fw-bold" href="{{ url_for('superadmin.login') }}"><i class="bi bi-code-square me-2"></i>Developer Dashboard</a></li>
-                                {% endif %}
                             </ul>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.analytics') }}">
-                                <i class="bi bi-graph-up "></i>Insights
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('admin.chat') }}">
-                                <i class="bi bi-chat-dots "></i>Chat
-                            </a>
-                        </li>
-                        {% endif %}
-                        
-                        {% if session.get('professional_id') %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('professional.dashboard') }}">
-                                <i class="bi bi-tools "></i>My Tasks
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('professional.chat') }}">
-                                <i class="bi bi-chat-dots "></i>Chat
-                            </a>
-                        </li>
-                        {% endif %}
-                        
-                        {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
-                        <li class="nav-item">
-                            <a class="nav-link text-warning" href="{{ url_for('faculty.dashboard') }}">
-                                <i class="bi bi-calendar-check "></i>Faculty Portal
-                            </a>
-                        </li>
-                        {% endif %}
 
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.report_form') }}">
-                                <i class="bi bi-plus-circle "></i>Report Issue
-                            </a>
-                        </li>
-                        
-                        {% if session.get('is_admin') %}
-                        <!-- Notifications Dropdown -->
-                        <li class="nav-item dropdown ms-lg-4 d-flex align-items-center">
-                            <a class="nav-link position-relative d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="notificationsDropdown" style="width: 40px; height: 40px;">
-                                <i class="bi bi-bell-fill" style="font-size: 1.2rem;"></i>
-                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge" style="font-size: 0.65rem; padding: 0.25em 0.5em;">
-                                    0
-                                </span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end notification-dropdown px-0 py-0" aria-labelledby="notificationsDropdown" style="min-width: 320px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border-color); box-shadow: var(--shadow-lg);">
-                                <li class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom">
-                                    <span class="fw-bold text-dark">Notifications</span>
-                                    <button class="btn btn-sm btn-link p-0 text-decoration-none" id="markAllReadBtn" style="font-size: 0.75rem; color: var(--mitwpu-blue);">Mark all as read</button>
-                                </li>
-                                <div id="notificationList" style="max-height: 350px; overflow-y: auto;">
-                                    <li class="dropdown-item text-center py-4 text-muted">
-                                        <div class="mb-2"><i class="bi bi-bell-slash fs-4"></i></div>
-                                        <span>Loading notifications...</span>
-                                    </li>
-                                </div>
-                            </ul>
-                        </li>
-                        {% endif %}
-
-                        <!-- Theme Toggle -->
-                        <li class="nav-item ms-2 d-flex align-items-center">
-                            <button id="themeToggleBtn" class="btn nav-link d-flex align-items-center justify-content-center" title="Toggle dark mode" style="width: 40px; height: 40px;">
-                                <i class="bi bi-moon-fill" id="themeToggleIcon" style="font-size: 1.2rem;"></i>
-                            </button>
-                        </li>
-
-                        <!-- Profile Avatar Dropdown -->
-                        <li class="nav-item dropdown ms-2 d-flex align-items-center">
-                            <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false" id="profileDropdown" style="width: 40px; height: 40px;">
-                                <div class="nav-avatar m-0" id="navAvatar" style="width: 34px; height: 34px;">
-                                    <span class="nav-avatar-initials" id="navAvatarInitials">?</span>
-                                    <img class="nav-avatar-img d-none" id="navAvatarImg" src="" alt="Profile">
-                                </div>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end profile-dropdown" aria-labelledby="profileDropdown">
-                                <li class="dropdown-header-item px-3 py-3">
-                                    <div class="d-flex align-items-center gap-3 mb-2">
-                                        <div class="nav-avatar nav-avatar-sm" id="navAvatarDropdown">
-                                            <span class="nav-avatar-initials" id="navAvatarInitialsDropdown">?</span>
-                                            <img class="nav-avatar-img d-none" id="navAvatarImgDropdown" src="" alt="Profile">
-                                        </div>
-                                        <div class="fw-semibold" id="profileName" style="font-size:0.9rem;">Loading…</div>
-                                    </div>
-                                    <div class="profile-info-row">
-                                        <span class="profile-info-label">Email</span>
-                                        <span class="profile-info-value" id="profileEmail">—</span>
-                                    </div>
-                                    <div class="profile-info-row" id="prnRow">
-                                        <span class="profile-info-label">ID/PRN</span>
-                                        <span class="profile-info-value" id="profilePRN">—</span>
-                                    </div>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                        <i class="bi bi-box-arrow-right me-2"></i>Logout
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">
-                                <i class="bi bi-box-arrow-in-right "></i>Login
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.signup') }}">
-                                <i class="bi bi-person-plus "></i>Sign Up
-                            </a>
-                        </li>
-                        <!-- Theme Toggle for Guests -->
-                        <li class="nav-item">
-                            <button id="themeToggleBtnGuest" class="btn nav-link" title="Toggle dark mode">
-                                <i class="bi bi-moon-fill" id="themeToggleIconGuest"></i>
-                            </button>
-                        </li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" href="{{ url_for('admin.analytics') }}"><i class="bi bi-graph-up"></i> Insights</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.chat' %}active{% endif %}" href="{{ url_for('admin.chat') }}"><i class="bi bi-chat-dots"></i> Chat</a></li>
                     {% endif %}
-                </ul>
+
+                    {% if session.get('professional_id') %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.dashboard' %}active{% endif %}" href="{{ url_for('professional.dashboard') }}"><i class="bi bi-tools"></i> My Tasks</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.chat' %}active{% endif %}" href="{{ url_for('professional.chat') }}"><i class="bi bi-chat-dots"></i> Chat</a></li>
+                    {% endif %}
+
+                    {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'faculty.dashboard' %}active{% endif %}" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check"></i> Faculty Portal</a></li>
+                    {% endif %}
+                {% endif %}
+
+                <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
+            </ul>
+
+            <!-- Utils (Right Side) -->
+            <div class="d-flex align-items-center ms-3 border-start ps-3" style="border-color: var(--border-color) !important;">
+                {% if not (session.get('user_id') or session.get('professional_id')) %}
+                    <a class="nav-link d-flex align-items-center me-2 text-decoration-none text-muted" href="{{ url_for('auth.login') }}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
+                {% endif %}
+                
+                <button id="themeToggleBtn" class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 35px; height: 35px; border: 1px solid var(--border-color);">
+                    <i class="bi bi-moon-fill" id="themeToggleIcon"></i>
+                </button>
+
+                {% if session.get('user_id') or session.get('professional_id') %}
+                    <!-- Notifications -->
+                    {% if session.get('is_admin') %}
+                        <a class="nav-link position-relative d-flex align-items-center justify-content-center me-2" href="#" role="button" data-bs-toggle="dropdown" id="notificationsDropdown">
+                            <i class="bi bi-bell-fill fs-5 text-muted"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge" style="font-size: 0.6rem;">0</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0" aria-labelledby="notificationsDropdown" style="width: 320px;">
+                            <li class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom">
+                                <span class="fw-bold text-dark">Notifications</span>
+                                <button class="btn btn-sm btn-link p-0 text-decoration-none" id="markAllReadBtn" style="font-size: 0.75rem;">Mark all as read</button>
+                            </li>
+                            <div id="notificationList" style="max-height: 350px; overflow-y: auto;"></div>
+                        </ul>
+                    {% endif %}
+
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="nav-avatar m-0" id="navAvatar" style="width: 35px; height: 35px; border-radius: 50%; background: var(--mitwpu-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600;">
+                                <span class="nav-avatar-initials" id="navAvatarInitials">?</span>
+                                <img class="nav-avatar-img d-none w-100 h-100 object-fit-cover rounded-circle" id="navAvatarImg" src="" alt="Profile">
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2">
+                            <li class="px-3 py-3 border-bottom">
+                                <div class="fw-bold" id="profileName">Loading…</div>
+                                <div class="text-muted small" id="profileEmail">—</div>
+                            </li>
+                            <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                {% endif %}
             </div>
         </div>
-    </nav>
+    </div>
 
     <!-- Main Content -->
     <main class="main-content">
@@ -420,9 +389,16 @@
 
     <!-- GSAP for Smooth Animations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <!-- Custom JS -->
     <script type="module" src="{{ url_for('static', filename='js/animations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/page_transitions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/skeleton_loader.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard_stats.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/carousels.js') }}"></script>
 
     {% block extra_js %}{% endblock %}
 
@@ -430,108 +406,72 @@
     <script>
     // Theme Toggle Logic
     (function() {
-        // Function to set theme
-        function setTheme(isDark, animate = false) {
-            const body = document.body;
-            const navbar = document.querySelector('.vyas-navbar');
-            
-            const performThemeSwitch = () => {
-                if (isDark) {
-                    document.body.setAttribute('data-theme', 'dark');
-                    document.documentElement.setAttribute('data-bs-theme', 'dark');
-                    localStorage.setItem('theme', 'dark');
-                    // Update icons depending on which button exists
-                    const icon = document.getElementById('themeToggleIcon');
-                    if (icon) {
-                        icon.classList.remove('bi-moon-fill');
-                        icon.classList.add('bi-sun-fill');
-                    }
-                    const iconGuest = document.getElementById('themeToggleIconGuest');
-                    if (iconGuest) {
-                        iconGuest.classList.remove('bi-moon-fill');
-                        iconGuest.classList.add('bi-sun-fill');
-                    }
-                    // Update Logos
-                    const logos = document.querySelectorAll('.mitwpu-logo');
-                    logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
-                } else {
-                    document.body.removeAttribute('data-theme');
-                    document.documentElement.setAttribute('data-bs-theme', 'light');
-                    localStorage.setItem('theme', 'light');
-                    const icon = document.getElementById('themeToggleIcon');
-                    if (icon) {
-                        icon.classList.remove('bi-sun-fill');
-                        icon.classList.add('bi-moon-fill');
-                    }
-                    const iconGuest = document.getElementById('themeToggleIconGuest');
-                    if (iconGuest) {
-                        iconGuest.classList.remove('bi-sun-fill');
-                        iconGuest.classList.add('bi-moon-fill');
-                    }
-                    // Update Logos
-                    const logos = document.querySelectorAll('.mitwpu-logo');
-                    logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+        // Function to perform the DOM attributes swap
+        const performThemeSwitch = (isDark) => {
+            if (isDark) {
+                document.body.setAttribute('data-theme', 'dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                const icon = document.getElementById('themeToggleIcon');
+                if (icon) {
+                    icon.classList.remove('bi-moon-fill');
+                    icon.classList.add('bi-sun-fill');
                 }
-            };
-
-            if (animate && window.gsap) {
-                // Determine target elements (only the main visible page content fades, not the navbar)
-                const contents = document.querySelector('.main-content');
-                
-                // Initialize GSAP Timeline for a premium breathing cross-fade
-                const tl = gsap.timeline();
-                
-                // Phase 1: Fade out and scale down slightly
-                tl.to(contents, {
-                    opacity: 0,
-                    scale: 0.98,
-                    duration: 0.2, // Quick exit
-                    ease: "power2.inOut",
-                    onComplete: () => {
-                        // Crucial turning point: The content is invisible.
-                        // Instantly swap the theme attributes underneath.
-                        performThemeSwitch();
-                    }
-                })
-                // Phase 2: Fade back in and scale up to normal with a gentle deceleration
-                .to(contents, {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 0.35, // Slightly slower entrance for a premium feel
-                    ease: "power2.out",
-                    clearProps: "all" // Clean up inline transforms when done
-                });
+                const iconGuest = document.getElementById('themeToggleIconGuest');
+                if (iconGuest) {
+                    iconGuest.classList.remove('bi-moon-fill');
+                    iconGuest.classList.add('bi-sun-fill');
+                }
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
             } else {
-                performThemeSwitch();
+                document.body.removeAttribute('data-theme');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                const icon = document.getElementById('themeToggleIcon');
+                if (icon) {
+                    icon.classList.remove('bi-sun-fill');
+                    icon.classList.add('bi-moon-fill');
+                }
+                const iconGuest = document.getElementById('themeToggleIconGuest');
+                if (iconGuest) {
+                    iconGuest.classList.remove('bi-sun-fill');
+                    iconGuest.classList.add('bi-moon-fill');
+                }
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
             }
-        }
+        };
 
-        // Initialize theme on load
+        // Initialize theme on load (instantly, no animation)
         const savedTheme = localStorage.getItem('theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         
         if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-            setTheme(true, false);
+            performThemeSwitch(true);
         } else {
-            setTheme(false, false);
+            performThemeSwitch(false);
         }
 
-        // Add event listeners to buttons
+        // Handle Toggle Button Click (Trigger Curtain)
+        const handleToggle = () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const willBeDark = !isDark;
+            
+            if (window.performThemeCurtainTransition) {
+                // Call the curtain transition logic in page_transitions.js
+                window.performThemeCurtainTransition(willBeDark, performThemeSwitch);
+            } else {
+                // Fallback
+                performThemeSwitch(willBeDark);
+            }
+        };
+
         const btn = document.getElementById('themeToggleBtn');
-        if (btn) {
-            btn.addEventListener('click', () => {
-                const isDark = document.body.getAttribute('data-theme') === 'dark';
-                setTheme(!isDark, true);
-            });
-        }
+        if (btn) btn.addEventListener('click', handleToggle);
         
         const btnGuest = document.getElementById('themeToggleBtnGuest');
-        if (btnGuest) {
-            btnGuest.addEventListener('click', () => {
-                const isDark = document.body.getAttribute('data-theme') === 'dark';
-                setTheme(!isDark, true);
-            });
-        }
+        if (btnGuest) btnGuest.addEventListener('click', handleToggle);
     })();
 
     // Profile Avatar — load user info and wire up photo upload
@@ -738,10 +678,9 @@
             return date.toLocaleDateString();
         }
 
-        // Initially fetch and poll
+        // Fetch once on load and then only when the dropdown is opened
         fetchNotifications();
-        setInterval(fetchNotifications, 15000); // Poll every 15s
-
+        // NOTE: Polling removed — Pusher WebSockets handle real-time updates.
         // Fetch when dropdown is opened to be fresh
         dropBtn.addEventListener('show.bs.dropdown', fetchNotifications);
     })();

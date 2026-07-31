@@ -63,36 +63,44 @@
 </section>
 
 <div class="container py-4">
-    <!-- Summary Stats -->
-    <div class="row g-4 mb-5">
+    <!-- Summary Stats with Advanced UI -->
+    <div class="row g-4 mb-5 advanced-stats-row">
+        {% set advanced_stats = [
+            {'label': 'Total Volume', 'value': total_tickets, 'trend': '+12%', 'desc': 'Tickets in selected window', 'color': 'primary'},
+            {'label': 'Resolved', 'value': fixed_count, 'trend': '+8%', 'desc': 'Fixed in selected window', 'color': 'success'},
+            {'label': 'Success Rate', 'value': success_rate, 'is_percent': true, 'trend': '+2%', 'desc': 'Window resolution efficiency', 'color': 'info'},
+            {'label': 'Avg. Fix Time', 'value': avg_res_time, 'is_hour': true, 'trend': '-1.5h', 'desc': 'Mean TTR for this window', 'color': 'warning'}
+        ] %}
+        
+        {% for stat in advanced_stats %}
         <div class="col-md-3">
-            <div class="analytics-card p-4 text-center">
-                <div class="stat-label mb-2">Total Volume</div>
-                <div class="stat-value">{{ total_tickets }}</div>
-                <div class="mt-2 small text-muted">Tickets in selected window</div>
+            <div class="analytics-card advanced-stat-card p-4 text-center position-relative overflow-hidden" data-target-value="{{ stat.value }}">
+                <!-- Skeleton Overlay -->
+                <div class="skeleton-overlay skeleton-shimmer"></div>
+                
+                <div class="stat-content">
+                    <div class="stat-label mb-2 d-flex justify-content-between align-items-center">
+                        <span>{{ stat.label }}</span>
+                        <span class="text-{{ stat.color }} small fw-bold">{{ stat.trend }}</span>
+                    </div>
+                    <div class="stat-value-container mb-1 justify-content-center">
+                        <span class="stat-value animated-counter">0</span>
+                        {% if stat.is_percent %}<span class="stat-value-unit">%</span>{% endif %}
+                        {% if stat.is_hour %}<span class="stat-value-unit">h</span>{% endif %}
+                    </div>
+                    
+                    <!-- SVG Trend Line -->
+                    <div class="trend-line-container">
+                        <svg class="trend-svg text-{{ stat.color }}" viewBox="0 0 100 30" preserveAspectRatio="none">
+                            <path class="trend-path" d="M0,25 C20,20 40,30 60,10 C80,-5 100,15 100,15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    
+                    <div class="mt-2 small text-muted text-center">{{ stat.desc }}</div>
+                </div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="analytics-card p-4 text-center">
-                <div class="stat-label mb-2">Resolved</div>
-                <div class="stat-value text-success">{{ fixed_count }}</div>
-                <div class="mt-2 small text-muted">Fixed in selected window</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="analytics-card p-4 text-center">
-                <div class="stat-label mb-2">Success Rate</div>
-                <div class="stat-value text-primary">{{ success_rate }}%</div>
-                <div class="mt-2 small text-muted">Window resolution efficiency</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="analytics-card p-4 text-center">
-                <div class="stat-label mb-2">Avg. Fix Time</div>
-                <div class="stat-value text-warning">{{ avg_res_time }}h</div>
-                <div class="mt-2 small text-muted">Mean TTR for this window</div>
-            </div>
-        </div>
+        {% endfor %}
     </div>
 
     <!-- Visualizations -->

@@ -1,0 +1,33 @@
+/* Skeleton Loader CSS */
+.skeleton-shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--bg-card) 0%, var(--border-color) 50%, var(--bg-card) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite linear;
+    border-radius: inherit;
+    z-index: 2;
+    transition: opacity 0.4s ease;
+}
+
+[data-theme="dark"] .skeleton-shimmer {
+    background: linear-gradient(90deg, var(--bg-surface) 0%, var(--bg-overlay) 50%, var(--bg-surface) 100%);
+    background-size: 200% 100%;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+.skeleton-overlay.hidden {
+    opacity: 0;
+    pointer-events: none;
+}

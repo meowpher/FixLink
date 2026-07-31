@@ -19,10 +19,13 @@ admin_bp = Blueprint('admin', __name__)
 @admin_required
 def dashboard():
     """Admin dashboard - view tickets and statistics."""
+    from sqlalchemy import func
     # Get filter parameters
     status_filter = request.args.get('status', 'all')
     floor_filter = request.args.get('floor', 'all')
     category_filter = request.args.get('category', 'all')
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
     
     # Base query
     query = Ticket.query
@@ -49,26 +52,31 @@ def dashboard():
         elif category_filter == 'other':
             query = query.filter(Ticket.issue_type.in_(['cleaning', 'other']))
     
-    tickets = query.order_by(Ticket.created_at.desc()).all()
+    # Paginate instead of loading all tickets into memory
+    pagination = query.order_by(Ticket.created_at.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    tickets = pagination.items
     
-    # Statistics
-    total_tickets = Ticket.query.count()
-    real_open = Ticket.query.filter_by(status=Ticket.STATUS_OPEN).count()
-    real_cancelled = Ticket.query.filter_by(status=Ticket.STATUS_CANCELLED).count()
-    assigned_tickets = Ticket.query.filter_by(status=Ticket.STATUS_ASSIGNED).count()
-    in_progress_tickets = Ticket.query.filter_by(status=Ticket.STATUS_IN_PROGRESS).count()
-    fixed_tickets = Ticket.query.filter_by(status=Ticket.STATUS_FIXED).count()
+    # Statistics — single grouped query instead of 6 separate COUNT queries
+    status_counts = dict(
+        db.session.query(Ticket.status, func.count(Ticket.id))
+        .group_by(Ticket.status)
+        .all()
+    )
+    real_open = status_counts.get(Ticket.STATUS_OPEN, 0)
+    real_cancelled = status_counts.get(Ticket.STATUS_CANCELLED, 0)
     
     # Today's tickets
     today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
     today_tickets = Ticket.query.filter(Ticket.created_at >= today).count()
     
     stats = {
-        'total': total_tickets,
-        'open': real_open + real_cancelled, # Unified metric
-        'assigned': assigned_tickets,
-        'in_progress': in_progress_tickets,
-        'fixed': fixed_tickets,
+        'total': sum(status_counts.values()),
+        'open': real_open + real_cancelled,  # Unified metric
+        'assigned': status_counts.get(Ticket.STATUS_ASSIGNED, 0),
+        'in_progress': status_counts.get(Ticket.STATUS_IN_PROGRESS, 0),
+        'fixed': status_counts.get(Ticket.STATUS_FIXED, 0),
         'cancelled': real_cancelled,
         'today': today_tickets
     }
@@ -90,6 +98,7 @@ def dashboard():
     
     return render_template('admin.html',
                          tickets=tickets,
+                         pagination=pagination,
                          stats=stats,
                          floors=floors,
                          categories=categories,
@@ -99,6 +108,7 @@ def dashboard():
 
 
 @admin_bp.route('/map')
+
 @admin_required
 def status_map():
     """Visual status map showing all floors with room status - Optimized."""

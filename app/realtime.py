@@ -2,31 +2,41 @@
 Pusher Real-time Utilities - Stateless replacement for SocketIO
 """
 import os
-import pusher
+import logging
 from flask import current_app, session
+
+logger = logging.getLogger(__name__)
 
 # Initialize Pusher client lazily
 _pusher_client = None
 
 def get_pusher():
+    """Return a Pusher client, or None if credentials are missing or pusher is unavailable."""
     global _pusher_client
     if _pusher_client is None:
         app_id = os.environ.get('PUSHER_APP_ID')
         key = os.environ.get('PUSHER_KEY')
         secret = os.environ.get('PUSHER_SECRET')
         cluster = os.environ.get('PUSHER_CLUSTER')
-        
+
         if all([app_id, key, secret, cluster]):
-            _pusher_client = pusher.Pusher(
-                app_id=app_id,
-                key=key,
-                secret=secret,
-                cluster=cluster,
-                ssl=True
-            )
+            try:
+                import pusher as pusher_lib  # lazy import — keeps startup safe if pusher is missing
+                _pusher_client = pusher_lib.Pusher(
+                    app_id=app_id,
+                    key=key,
+                    secret=secret,
+                    cluster=cluster,
+                    ssl=True
+                )
+            except ImportError:
+                logger.warning("pusher package not installed. Real-time features disabled.")
+                return None
+            except Exception as e:
+                logger.warning(f"Pusher init failed: {e}. Real-time features disabled.")
+                return None
         else:
-            # Fallback for development if keys are missing
-            print("WARNING: Pusher credentials missing. Real-time features will be disabled.")
+            logger.warning("Pusher credentials missing. Real-time features disabled.")
             return None
     return _pusher_client
 

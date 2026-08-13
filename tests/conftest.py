@@ -7,11 +7,9 @@ from app.models import User, Professional
 def mock_external_services():
     """Mock external network calls like EmailJS, WebPush, and SocketIO for all tests."""
     with patch('app.utils.send_ticket_email') as mock_email, \
-         patch('app.utils.send_web_push') as mock_push, \
-         patch('flask_socketio.SocketIO.emit') as mock_emit:
+         patch('app.utils.send_web_push') as mock_push:
         mock_email.return_value = True
         mock_push.return_value = True
-        mock_emit.return_value = None
         yield
 
 @pytest.fixture
@@ -41,16 +39,17 @@ def client(app):
 @pytest.fixture
 def run_app_context(app):
     """Allows running db operations easily in testing context."""
-    with app.app_context():
-        yield
+    return app.app_context()
 
 @pytest.fixture
 def admin_user(app, run_app_context):
     """Fixture to create and return an admin user."""
-    admin = User(name="Test Admin", email="admin@mitwpu.edu.in", is_admin=True)
-    admin.set_password("password")
-    db.session.add(admin)
-    db.session.commit()
+    admin = User.query.filter_by(email="admin@mitwpu.edu.in").first()
+    if not admin:
+        admin = User(name="Test Admin", email="admin@mitwpu.edu.in", is_admin=True)
+        admin.set_password("password")
+        db.session.add(admin)
+        db.session.commit()
     return admin
 
 @pytest.fixture

@@ -8,7 +8,7 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, professional_us
     # Setup initial infrastructure
     with run_app_context:
         b = Building(name="Test Building")
-        f = Floor(level=1, building=b)
+        f = Floor(level=1, name="1st Floor", building=b)
         r = Room(number="TEST101", floor=f)
         db.session.add_all([b, f, r])
         db.session.commit()

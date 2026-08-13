@@ -4,12 +4,13 @@
 
 import { fetchRoomsByFloor } from './api.js';
 import { renderFloorMap } from './render.js';
-import { resetRoomSelection } from './ui.js';
+import { resetRoomSelection, initializeIssueDropdown } from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializeFloorMap();
     initializeReportForm();
     initializeValidation();
+    initializeIssueDropdown();
 });
 
 /**
@@ -60,7 +61,7 @@ function initializeReportForm() {
         try {
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Submitting...';
+                submitBtn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:0.5rem"><i class="bi bi-hourglass-split"></i>Submitting...</span>';
             }
 
             const response = await fetch(reportForm.action, {
@@ -87,7 +88,7 @@ function initializeReportForm() {
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="bi bi-send me-2"></i>Submit Report';
+                submitBtn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:0.5rem"><i class="bi bi-send-fill"></i>Submit Report</span>';
             }
         }
     });

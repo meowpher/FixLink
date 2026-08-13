@@ -47,6 +47,16 @@ def init_db(app):
         elif not admin_email or not admin_password:
              logger.warning('ADMIN_EMAIL or ADMIN_PASSWORD not set. Skipping default admin creation.')
 
+        # 3. Auto-seed Vyas Building and Floors if missing
+        from .models import Building
+        if not Building.query.filter_by(name='Vyas').first():
+            try:
+                from scripts.init_data import create_vyas_data
+                logger.info("Vyas building missing. Auto-seeding database...")
+                create_vyas_data()
+            except Exception as e:
+                logger.error(f"Auto-seeding Vyas data failed: {str(e)}")
+
         # Temporary Reset Hook for Om Mahadik
         om_user = User.query.filter_by(email='om.mahadik@mitwpu.edu.in').first()
         if om_user:

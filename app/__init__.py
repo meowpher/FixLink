@@ -147,7 +147,9 @@ def create_app(config_name=None):
     @app.before_request
     def refresh_user_session():
         from flask import session
-        from .models import User
+        from .models import User, Professional
+        
+        # Check regular user session
         if 'user_id' in session and not session.get('is_super_admin'):
             user = User.query.get(session['user_id'])
             if user:
@@ -155,6 +157,17 @@ def create_app(config_name=None):
                 session['is_admin'] = user.is_admin
                 session['user_role'] = user.role
                 session['user_email'] = user.email
+            else:
+                session.pop('user_id', None)
+                session.pop('is_admin', None)
+                session.pop('user_role', None)
+                session.pop('user_email', None)
+                
+        # Check professional session
+        if 'professional_id' in session:
+            professional = Professional.query.get(session['professional_id'])
+            if not professional:
+                session.pop('professional_id', None)
     
     # Global Template Context
     @app.context_processor

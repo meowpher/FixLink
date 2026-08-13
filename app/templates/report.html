@@ -530,8 +530,10 @@
                             <i class="bi bi-map"></i>Select Your Room
                         </h4>
                         <div class="floor-selector">
-                            <label for="floorSelect" class="form-label mb-0">Floor:</label>
-                            <select class="form-select form-select-sm" id="floorSelect" style="width: auto;">
+                            <label class="form-label mb-0">Floor:</label>
+
+                            <!-- Hidden native select kept for JS compatibility -->
+                            <select id="floorSelect" style="display:none;">
                                 <option value="">Select Floor</option>
                                 {% for floor in floors %}
                                 {% if floor.level != 6 %}
@@ -541,6 +543,26 @@
                                 {% endif %}
                                 {% endfor %}
                             </select>
+
+                            <!-- Custom animated dropdown -->
+                            <div class="custom-floor-dropdown" id="floorDropdown">
+                                <button type="button" class="cfd-trigger" id="floorDropdownTrigger" aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="cfd-trigger-label" id="floorDropdownLabel">Select Floor</span>
+                                    <svg class="cfd-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                        <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </button>
+                                <div class="cfd-menu" id="floorDropdownMenu" role="listbox">
+                                    <div class="cfd-menu-inner">
+                                        <div class="cfd-item" data-value="" data-level="" role="option">Select Floor</div>
+                                        {% for floor in floors %}
+                                        {% if floor.level != 6 %}
+                                        <div class="cfd-item" data-value="{{ floor.id }}" data-level="{{ floor.level }}" role="option">{{ floor.name }}</div>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -618,10 +640,25 @@
                                 <i class="bi bi-exclamation-circle"></i>Issue Details
                             </h6>
                             <div class="mb-3">
-                                <label for="issue_type" class="form-label">Issue Type *</label>
-                                <select class="form-select" id="issue_type" name="issue_type" required disabled>
+                                <label class="form-label">Issue Type *</label>
+
+                                <!-- Hidden native select for form submission -->
+                                <select id="issue_type" name="issue_type" required disabled style="display:none;">
                                     <option value="">Select a Room First</option>
                                 </select>
+
+                                <!-- Custom animated dropdown -->
+                                <div class="custom-floor-dropdown w-100" id="issueDropdown">
+                                    <button type="button" class="cfd-trigger w-100" id="issueDropdownTrigger" aria-haspopup="listbox" aria-expanded="false" disabled>
+                                        <span class="cfd-trigger-label" id="issueDropdownLabel">Select a Room First</span>
+                                        <svg class="cfd-chevron ms-auto" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    </button>
+                                    <div class="cfd-menu w-100" id="issueDropdownMenu" role="listbox">
+                                        <div class="cfd-menu-inner" id="issueDropdownItems"></div>
+                                    </div>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="description" class="form-label">Description *</label>
@@ -643,7 +680,7 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+                        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
                             <i class="bi bi-send-fill"></i>
                             <span>Submit Report</span>
                         </button>
@@ -656,6 +693,72 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    // ── Custom Floor Dropdown ────────────────────────────────────────
+    (function () {
+        const trigger  = document.getElementById('floorDropdownTrigger');
+        const menu     = document.getElementById('floorDropdownMenu');
+        const label    = document.getElementById('floorDropdownLabel');
+        const select   = document.getElementById('floorSelect');
+        const items    = menu ? menu.querySelectorAll('.cfd-item') : [];
+
+        if (!trigger || !menu || !select) return;
+
+        function open() {
+            menu.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+        }
+
+        function close() {
+            menu.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menu.classList.contains('open') ? close() : open();
+        });
+
+        items.forEach(item => {
+            item.addEventListener('click', () => {
+                const value = item.dataset.value;
+                const text  = item.textContent.trim();
+
+                // Update label
+                label.textContent = text;
+
+                // Highlight selection
+                items.forEach(i => i.classList.remove('selected'));
+                if (value) item.classList.add('selected');
+
+                // Sync to native select + fire change
+                select.value = value;
+                select.dispatchEvent(new Event('change'));
+
+                close();
+            });
+        });
+
+        // Close on outside click or Escape
+        document.addEventListener('click', (e) => {
+            if (!trigger.contains(e.target) && !menu.contains(e.target)) close();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') close();
+        });
+
+        // Sync initial state if server pre-selected a floor
+        const preVal = select.value;
+        if (preVal) {
+            items.forEach(item => {
+                if (item.dataset.value === preVal) {
+                    label.textContent = item.textContent.trim();
+                    item.classList.add('selected');
+                }
+            });
+        }
+    })();
+</script>
 <script>
     // Pre-selected values from server (if room param was provided)
     const preSelectedFloor = {{ selected_floor|tojson|safe if selected_floor else 'null' }};

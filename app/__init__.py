@@ -74,18 +74,27 @@ def create_app(config_name=None):
         
     # Add SSL mode if on Vercel and it's missing
     if os.environ.get('VERCEL') and 'sslmode=' not in database_url:
-        database_url += '?sslmode=require'
+        separator = '&' if '?' in database_url else '?'
+        database_url += f'{separator}sslmode=require'
 
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # PostgreSQL connection pool settings (ignored by SQLite)
+    # PostgreSQL connection pool settings
     if database_url.startswith('postgresql'):
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-            'pool_size': 5,
-            'pool_recycle': 300,
-            'pool_pre_ping': True,
-        }
+        if os.environ.get('VERCEL'):
+            # Vercel is serverless — use NullPool to avoid stale connections
+            from sqlalchemy.pool import NullPool
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+                'poolclass': NullPool,
+                'pool_pre_ping': True,
+            }
+        else:
+            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+                'pool_size': 5,
+                'pool_recycle': 300,
+                'pool_pre_ping': True,
+            }
     
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size

@@ -349,7 +349,7 @@ def analytics():
     # Current Risks (Always current)
     critical_assets = get_critical_assets(5)
 
-    if request.path.endswith('/api/analytics') or request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+    if request.path.endswith('/api/analytics') or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         return jsonify({
             'success': True,
             'total_tickets': total_tickets,

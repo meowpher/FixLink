@@ -123,7 +123,7 @@
 [data-theme="dark"] .floor-stats,
 [data-theme="dark"] .issues-header {
     background: transparent;
-    border-color: var(--border-subtle);
+    
 }
 
 [data-theme="dark"] .stat-number,
@@ -2635,7 +2635,7 @@ body[data-theme="dark"] .stat-label {
 
 [data-theme="dark"] .floor-nav-display {
     background: var(--bg-surface);
-    border-color: var(--border-subtle);
+    
     color: var(--text-primary);
     box-shadow: var(--shadow-sm);
 }
@@ -2805,12 +2805,12 @@ body[data-theme="dark"] .stat-label {
     overflow: hidden;
     background-color: var(--border-color, #dee2e6);
     gap: 1px;
-    border: 1px solid var(--border-color, #dee2e6);
+    
 }
 
 [data-theme="dark"] .filter-tabs {
     background-color: var(--border-subtle);
-    border-color: var(--border-subtle);
+    
 }
 
 .filter-tab {

@@ -2520,6 +2520,7 @@ body {
 .stat-content {
     flex: 1;
     min-width: 0;
+    opacity: 1;
     /* Fix flex overflow issue */
 }
 
@@ -2529,17 +2530,29 @@ body {
     margin-bottom: 0;
     line-height: 1.1;
     /* Tighter line height */
-    color: #333;
+    color: var(--text-main);
 }
 
 .stat-label {
-    color: var(--mitwpu-gray-dark);
+    color: var(--text-muted);
     margin-bottom: 0;
     font-size: 0.9rem;
     white-space: nowrap;
     /* Prevent wrapping */
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+[data-theme="dark"] .stat-number,
+[data-bs-theme="dark"] .stat-number,
+body[data-theme="dark"] .stat-number {
+    color: #f1f5f9 !important;
+}
+
+[data-theme="dark"] .stat-label,
+[data-bs-theme="dark"] .stat-label,
+body[data-theme="dark"] .stat-label {
+    color: #94a3b8 !important;
 }
 
    

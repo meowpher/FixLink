@@ -12,7 +12,7 @@
     z-index: 1;
 }
 
-.stat-content {
+.advanced-stat-card .stat-content {
     opacity: 0; /* Hidden initially until handoff */
     transform: translateY(10px);
     transition: opacity 0.5s ease, transform 0.5s ease;
@@ -21,7 +21,7 @@
     height: 100%;
 }
 
-.stat-content.loaded {
+.advanced-stat-card .stat-content.loaded {
     opacity: 1;
     transform: translateY(0);
 }

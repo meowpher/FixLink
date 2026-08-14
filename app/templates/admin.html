@@ -5,9 +5,19 @@
 {% block content %}
 <!-- Admin Header -->
 <style>
+    .stat-content {
+        opacity: 1 !important;
+        transform: none !important;
+    }
     [data-theme="dark"] .stat-number,
-    [data-theme="dark"] .stat-label {
-        color: whitesmoke !important;
+    [data-bs-theme="dark"] .stat-number,
+    body[data-theme="dark"] .stat-number {
+        color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] .stat-label,
+    [data-bs-theme="dark"] .stat-label,
+    body[data-theme="dark"] .stat-label {
+        color: #94a3b8 !important;
     }
 </style>
 <section class="admin-header vyas-admin-header">

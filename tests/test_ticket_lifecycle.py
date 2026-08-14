@@ -41,7 +41,7 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, professional_us
         sess['user_id'] = admin_user.id
         sess['is_admin'] = True
         
-    response = client.post('/admin/api/assign_ticket', json={
+    response = client.post(f'/admin/api/ticket/{ticket_id}/assign', json={
         'ticket_id': ticket_id,
         'professional_id': prof_id,
         'time_limit_hours': 24

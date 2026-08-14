@@ -31,6 +31,9 @@ def create_app(config_name=None):
                 template_folder='templates',
                 static_folder='static')
     
+    if config_name == 'testing' or os.environ.get('TESTING') == 'True':
+        app.config['TESTING'] = True
+    
     # Configuration — all secrets come from .env
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:

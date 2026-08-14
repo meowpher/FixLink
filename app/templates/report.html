@@ -17,6 +17,7 @@
         z-index: -1;
         pointer-events: none;
     }
+
     .bg-orb-bottom-left {
         position: fixed;
         bottom: -150px;
@@ -37,7 +38,8 @@
     }
 
     /* Shared Panel Styles */
-    .map-panel, .form-panel {
+    .map-panel,
+    .form-panel {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
         border-radius: 20px;
@@ -91,7 +93,7 @@
 
     .floor-map-container {
         padding: 30px;
-        background: rgba(0,0,0,0.02);
+        background: rgba(0, 0, 0, 0.02);
         flex-grow: 1;
         display: flex;
         align-items: center;
@@ -125,7 +127,7 @@
     .form-logo {
         height: 48px;
         margin-bottom: 16px;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     }
 
     .form-title {
@@ -153,7 +155,7 @@
     }
 
     .selected-room-display {
-        background: rgba(0,0,0,0.02);
+        background: rgba(0, 0, 0, 0.02);
         border: 1px solid var(--border-color);
         border-radius: 16px;
         padding: 24px;
@@ -163,8 +165,8 @@
     }
 
     body[data-theme="dark"] .selected-room-display {
-        background: rgba(255,255,255,0.03);
-        border-color: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.1);
     }
 
     .room-placeholder {
@@ -176,7 +178,9 @@
         opacity: 0.8;
     }
 
-    .room-placeholder i { font-size: 28px; }
+    .room-placeholder i {
+        font-size: 28px;
+    }
 
     .room-selected-active {
         background: rgba(11, 77, 140, 0.04) !important;
@@ -196,7 +200,9 @@
         gap: 10px;
     }
 
-    .form-section-title i { font-size: 14px; }
+    .form-section-title i {
+        font-size: 14px;
+    }
 
     .form-label {
         font-size: 13px;
@@ -204,7 +210,8 @@
         margin-bottom: 8px;
     }
 
-    .form-control, .form-select {
+    .form-control,
+    .form-select {
         border-radius: 12px;
         padding: 12px 16px;
         font-size: 14px;
@@ -250,7 +257,7 @@
         border-radius: 12px;
         padding: 24px;
         text-align: center;
-        background: rgba(0,0,0,0.01);
+        background: rgba(0, 0, 0, 0.01);
         transition: all 0.2s ease;
         cursor: pointer;
         display: flex;
@@ -260,8 +267,8 @@
     }
 
     body[data-theme="dark"] .file-upload-zone {
-        background: rgba(255,255,255,0.02);
-        border-color: rgba(255,255,255,0.1);
+        background: rgba(255, 255, 255, 0.02);
+        border-color: rgba(255, 255, 255, 0.1);
     }
 
     .file-upload-zone:hover {
@@ -319,8 +326,11 @@
 
     /* ── Mobile Responsiveness (must be last) ── */
     @media (max-width: 575px) {
+
         /* Hide vyas-navbar on mobile — custom topbar used instead */
-        .vyas-navbar { display: none !important; }
+        .vyas-navbar {
+            display: none !important;
+        }
 
         /* Ensure mobileMenuBtn is visible and styled for the topbar */
         #mobileMenuBtn {
@@ -332,11 +342,11 @@
             border: none !important;
             box-shadow: none !important;
         }
-        
+
         body[data-theme="dark"] #mobileMenuBtn .ham-bar {
             background: #fff !important;
         }
-        
+
         #mobileMenuBtn .ham-bar {
             background: #111 !important;
             width: 20px !important;
@@ -352,33 +362,40 @@
             left: 0;
             right: 0;
             height: 64px;
-            padding: 0 14px 0 54px; /* Added left padding for hamburger */
+            padding: 0 14px 0 54px;
+            /* Added left padding for hamburger */
             z-index: 1050;
             background: var(--bg-main);
             border-bottom: 1px solid var(--border-color);
         }
+
         .mobile-topbar .topbar-left {
             display: flex;
             align-items: center;
         }
+
         .mobile-topbar .topbar-logo {
             height: 34px;
             width: auto;
             object-fit: contain;
         }
+
         .mobile-topbar .topbar-divider {
             width: 1.5px;
             height: 28px;
-            background: rgba(0,0,0,0.15);
+            background: rgba(0, 0, 0, 0.15);
             margin: 0 12px;
         }
+
         body[data-theme="dark"] .mobile-topbar .topbar-divider {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
+
         .mobile-topbar .topbar-text {
             display: flex;
             flex-direction: column;
         }
+
         .mobile-topbar .topbar-brand {
             font-size: 18px;
             font-weight: 600;
@@ -386,7 +403,11 @@
             letter-spacing: -0.4px;
             line-height: 1.1;
         }
-        body[data-theme="dark"] .mobile-topbar .topbar-brand { color: #fff; }
+
+        body[data-theme="dark"] .mobile-topbar .topbar-brand {
+            color: #fff;
+        }
+
         .mobile-topbar .topbar-sub {
             font-size: 9px;
             color: #666;
@@ -394,7 +415,11 @@
             text-transform: uppercase;
             font-weight: 500;
         }
-        body[data-theme="dark"] .mobile-topbar .topbar-sub { color: rgba(255,255,255,0.45); }
+
+        body[data-theme="dark"] .mobile-topbar .topbar-sub {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
         .mobile-topbar .topbar-theme-btn {
             background: transparent;
             border: none;
@@ -406,13 +431,17 @@
             align-items: center;
             justify-content: center;
         }
-        body[data-theme="dark"] .mobile-topbar .topbar-theme-btn { color: rgba(255,255,255,0.7); }
+
+        body[data-theme="dark"] .mobile-topbar .topbar-theme-btn {
+            color: rgba(255, 255, 255, 0.7);
+        }
 
         .report-section {
             padding: 80px 12px 24px !important;
         }
 
-        .map-panel, .form-panel {
+        .map-panel,
+        .form-panel {
             width: 100% !important;
             max-width: 480px !important;
             margin-left: auto !important;
@@ -424,14 +453,20 @@
         .form-header {
             padding: 24px 20px !important;
         }
-        .form-title { font-size: 1.25rem !important; }
-        #reportForm { padding: 20px !important; }
-        
+
+        .form-title {
+            font-size: 1.25rem !important;
+        }
+
+        #reportForm {
+            padding: 20px !important;
+        }
+
         .selected-room-display {
             padding: 16px !important;
             margin-bottom: 20px !important;
         }
-        
+
         .form-section-title {
             margin-bottom: 16px !important;
             font-size: 11px !important;
@@ -442,7 +477,10 @@
             padding: 12px !important;
         }
 
-        body, html { overflow-x: hidden !important; }
+        body,
+        html {
+            overflow-x: hidden !important;
+        }
     }
 
     /* Fix for the submit button in the provided screenshots */
@@ -457,9 +495,22 @@
         gap: 4px;
         padding: 12px;
     }
-    #submitBtn i { font-size: 20px; margin: 0 !important; }
-    #submitBtn .btn-text-main { font-size: 16px; font-weight: 700; }
-    #submitBtn .btn-text-sub { font-size: 11px; opacity: 0.7; font-weight: 500; }
+
+    #submitBtn i {
+        font-size: 20px;
+        margin: 0 !important;
+    }
+
+    #submitBtn .btn-text-main {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    #submitBtn .btn-text-sub {
+        font-size: 11px;
+        opacity: 0.7;
+        font-weight: 500;
+    }
 
     body[data-theme="dark"] #submitBtn {
         background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
@@ -467,8 +518,11 @@
         border: none;
         box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
     }
-    
-    #submitBtn i { font-size: 18px; margin: 0 !important; }
+
+    #submitBtn i {
+        font-size: 18px;
+        margin: 0 !important;
+    }
 
     /* ── Success Modal Glassmorphic & Modern Styling ── */
     .success-modal-content {
@@ -522,14 +576,32 @@
     }
 
     @keyframes successPop {
-        0% { transform: scale(0.4); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
+        0% {
+            transform: scale(0.4);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
     }
 
     @keyframes successPulse {
-        0% { transform: scale(0.85); opacity: 0.8; }
-        50% { transform: scale(1.3); opacity: 0; }
-        100% { transform: scale(1.3); opacity: 0; }
+        0% {
+            transform: scale(0.85);
+            opacity: 0.8;
+        }
+
+        50% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
     }
 
     .success-modal-title {
@@ -691,7 +763,8 @@
 <!-- Mobile-only custom top bar -->
 <div class="mobile-topbar" style="display:none;">
     <div class="topbar-left">
-        <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo">
+        <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo"
+            class="topbar-logo mitwpu-logo">
         <div class="topbar-divider"></div>
         <div class="topbar-text">
             <span class="topbar-brand">Fix Link</span>
@@ -704,11 +777,13 @@
 </div>
 
 <!-- Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true" data-bs-backdrop="static">
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true"
+    data-bs-backdrop="static">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
         <div class="modal-content success-modal-content">
             <div class="modal-header border-0 pb-0 pt-3 px-3">
-                <button type="button" class="btn-close ms-auto" onclick="closeSuccessModal()" aria-label="Close"></button>
+                <button type="button" class="btn-close ms-auto" onclick="closeSuccessModal()"
+                    aria-label="Close"></button>
             </div>
             <div class="modal-body text-center px-4 pb-4 pt-1">
                 <div class="success-icon-wrapper">
@@ -718,18 +793,20 @@
                     </div>
                 </div>
                 <h3 class="success-modal-title" id="successModalLabel">Thank You!</h3>
-                <p class="success-modal-desc">Your report has been submitted successfully and assigned to our maintenance team.</p>
-                
+                <p class="success-modal-desc">Your report has been submitted successfully and assigned to our
+                    maintenance team.</p>
+
                 <div class="success-ticket-card">
                     <div class="ticket-card-label">TICKET REFERENCE</div>
                     <div class="ticket-card-id-row">
                         <span class="ticket-card-id" id="successTicketId">#0000</span>
-                        <button type="button" class="btn-copy-ticket" id="copyTicketBtn" onclick="copyTicketId()" title="Copy Ticket ID" aria-label="Copy Ticket ID">
+                        <button type="button" class="btn-copy-ticket" id="copyTicketBtn" onclick="copyTicketId()"
+                            title="Copy Ticket ID" aria-label="Copy Ticket ID">
                             <i class="bi bi-clipboard" id="copyIcon"></i>
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="success-modal-actions">
                     <button type="button" class="btn btn-submit-another" onclick="closeSuccessModal()">
                         <i class="bi bi-plus-circle me-2"></i>Submit Another Report
@@ -762,7 +839,8 @@
                                 <option value="">Select Floor</option>
                                 {% for floor in floors %}
                                 {% if floor.level != 6 %}
-                                <option value="{{ floor.id }}" data-level="{{ floor.level }}" {% if selected_floor==floor.id %}selected{% endif %}>
+                                <option value="{{ floor.id }}" data-level="{{ floor.level }}" {% if
+                                    selected_floor==floor.id %}selected{% endif %}>
                                     {{ floor.name }}
                                 </option>
                                 {% endif %}
@@ -771,18 +849,22 @@
 
                             <!-- Custom animated dropdown -->
                             <div class="custom-floor-dropdown" id="floorDropdown">
-                                <button type="button" class="cfd-trigger" id="floorDropdownTrigger" aria-haspopup="listbox" aria-expanded="false">
+                                <button type="button" class="cfd-trigger" id="floorDropdownTrigger"
+                                    aria-haspopup="listbox" aria-expanded="false">
                                     <span class="cfd-trigger-label" id="floorDropdownLabel">Select Floor</span>
                                     <svg class="cfd-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                        <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8"
+                                            stroke-linecap="round" stroke-linejoin="round" />
                                     </svg>
                                 </button>
                                 <div class="cfd-menu" id="floorDropdownMenu" role="listbox">
                                     <div class="cfd-menu-inner">
-                                        <div class="cfd-item" data-value="" data-level="" role="option">Select Floor</div>
+                                        <div class="cfd-item" data-value="" data-level="" role="option">Select Floor
+                                        </div>
                                         {% for floor in floors %}
                                         {% if floor.level != 6 %}
-                                        <div class="cfd-item" data-value="{{ floor.id }}" data-level="{{ floor.level }}" role="option">{{ floor.name }}</div>
+                                        <div class="cfd-item" data-value="{{ floor.id }}" data-level="{{ floor.level }}"
+                                            role="option">{{ floor.name }}</div>
                                         {% endif %}
                                         {% endfor %}
                                     </div>
@@ -874,10 +956,14 @@
 
                                 <!-- Custom animated dropdown -->
                                 <div class="custom-floor-dropdown w-100" id="issueDropdown">
-                                    <button type="button" class="cfd-trigger w-100" id="issueDropdownTrigger" aria-haspopup="listbox" aria-expanded="false" disabled>
-                                        <span class="cfd-trigger-label" id="issueDropdownLabel">Select a Room First</span>
-                                        <svg class="cfd-chevron ms-auto" width="12" height="12" viewBox="0 0 12 12" fill="none">
-                                            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <button type="button" class="cfd-trigger w-100" id="issueDropdownTrigger"
+                                        aria-haspopup="listbox" aria-expanded="false" disabled>
+                                        <span class="cfd-trigger-label" id="issueDropdownLabel">Select a Room
+                                            First</span>
+                                        <svg class="cfd-chevron ms-auto" width="12" height="12" viewBox="0 0 12 12"
+                                            fill="none">
+                                            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8"
+                                                stroke-linecap="round" stroke-linejoin="round" />
                                         </svg>
                                     </button>
                                     <div class="cfd-menu w-100" id="issueDropdownMenu" role="listbox">
@@ -905,7 +991,9 @@
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" id="submitBtn">
+                        <button type="submit"
+                            class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                            id="submitBtn">
                             <i class="bi bi-send-fill"></i>
                             <span>Submit Report</span>
                         </button>
@@ -921,11 +1009,11 @@
 <script>
     // ── Custom Floor Dropdown ────────────────────────────────────────
     (function () {
-        const trigger  = document.getElementById('floorDropdownTrigger');
-        const menu     = document.getElementById('floorDropdownMenu');
-        const label    = document.getElementById('floorDropdownLabel');
-        const select   = document.getElementById('floorSelect');
-        const items    = menu ? menu.querySelectorAll('.cfd-item') : [];
+        const trigger = document.getElementById('floorDropdownTrigger');
+        const menu = document.getElementById('floorDropdownMenu');
+        const label = document.getElementById('floorDropdownLabel');
+        const select = document.getElementById('floorSelect');
+        const items = menu ? menu.querySelectorAll('.cfd-item') : [];
 
         if (!trigger || !menu || !select) return;
 
@@ -947,7 +1035,7 @@
         items.forEach(item => {
             item.addEventListener('click', () => {
                 const value = item.dataset.value;
-                const text  = item.textContent.trim();
+                const text = item.textContent.trim();
 
                 // Update label
                 label.textContent = text;
@@ -986,12 +1074,12 @@
 </script>
 <script>
     // Pre-selected values from server (if room param was provided)
-    const preSelectedFloor = {{ selected_floor|tojson|safe if selected_floor else 'null' }};
-    const preSelectedRoom = {{ selected_room|tojson|safe if selected_room else 'null' }};
+    const preSelectedFloor = {{ selected_floor| tojson | safe if selected_floor else 'null' }};
+    const preSelectedRoom = {{ selected_room| tojson | safe if selected_room else 'null' }};
     const preSelectedRoomNumber = '{{ room_param|default("") }}';
 
     // Success, Dismiss, and Copy Handlers
-    window.showSuccessModal = function(ticketId) {
+    window.showSuccessModal = function (ticketId) {
         const ticketIdEl = document.getElementById('successTicketId');
         if (ticketIdEl) ticketIdEl.textContent = '#' + ticketId;
         const modalEl = document.getElementById('successModal');
@@ -1001,7 +1089,7 @@
         }
     };
 
-    window.closeSuccessModal = function() {
+    window.closeSuccessModal = function () {
         const modalEl = document.getElementById('successModal');
         if (modalEl) {
             const modal = bootstrap.Modal.getInstance(modalEl);
@@ -1016,24 +1104,24 @@
                 document.body.style.removeProperty('overflow');
             }
         }
-        
+
         // Reset form inputs & UI
         const form = document.getElementById('reportForm');
         if (form) form.reset();
-        
+
         const fileNameEl = document.getElementById('fileName');
         if (fileNameEl) {
             fileNameEl.textContent = '';
             fileNameEl.style.display = 'none';
         }
-        
+
         const alertEl = document.getElementById('errorAlert');
         if (alertEl) alertEl.style.display = 'none';
 
         // Clear room selection state
         const hiddenRoomInput = document.getElementById('roomId');
         if (hiddenRoomInput) hiddenRoomInput.value = '';
-        
+
         const selectedRoomDisplay = document.getElementById('selectedRoomDisplay');
         if (selectedRoomDisplay) {
             selectedRoomDisplay.classList.remove('room-selected-active');
@@ -1044,7 +1132,7 @@
                 </div>
             `;
         }
-        
+
         // Unhighlight any active SVG rooms
         document.querySelectorAll('.room-active, .selected-room').forEach(el => {
             el.classList.remove('room-active', 'selected-room');
@@ -1054,7 +1142,7 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    window.copyTicketId = function() {
+    window.copyTicketId = function () {
         const ticketIdEl = document.getElementById('successTicketId');
         if (!ticketIdEl) return;
         const text = ticketIdEl.textContent.replace('#', '').trim();
@@ -1067,11 +1155,11 @@
                         copyIcon.className = 'bi bi-clipboard';
                     }, 2000);
                 }
-            }).catch(() => {});
+            }).catch(() => { });
         }
     };
 
-    window.showErrors = function(errors) {
+    window.showErrors = function (errors) {
         const errorAlert = document.getElementById('errorAlert');
         const errorMessage = document.getElementById('errorMessage');
         if (errorAlert && errorMessage) {
@@ -1082,7 +1170,7 @@
     };
 
     // Mobile topbar theme toggle
-    (function() {
+    (function () {
         const mobileBtn = document.getElementById('mobileThemeToggle');
         const mobileIcon = document.getElementById('mobileThemeIcon');
         if (!mobileBtn || !mobileIcon) return;
@@ -1093,7 +1181,7 @@
         }
         syncMobileIcon();
 
-        mobileBtn.addEventListener('click', function() {
+        mobileBtn.addEventListener('click', function () {
             const guestBtn = document.getElementById('themeToggleBtnGuest') || document.getElementById('themeToggleBtn');
             if (guestBtn) {
                 guestBtn.click();
@@ -1118,7 +1206,7 @@
     })();
 
     // File Upload Preview
-    document.getElementById('image').addEventListener('change', function(e) {
+    document.getElementById('image').addEventListener('change', function (e) {
         const fileName = e.target.files[0] ? e.target.files[0].name : '';
         const display = document.getElementById('fileName');
         if (fileName) {

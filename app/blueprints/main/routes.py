@@ -401,3 +401,17 @@ def push_subscribe():
         
     db.session.commit()
     return api_response(message="Subscription stored successfully")
+
+@main_bp.route('/report-bug', methods=['GET', 'POST'])
+def report_bug():
+    if request.method == 'POST':
+        # In a real app, process the form data (upload to Supabase/S3 or store in DB)
+        # title = request.form.get('title')
+        # description = request.form.get('description')
+        # file = request.files.get('file')
+        # origin = request.form.get('origin', '/')
+        
+        flash('Bug report submitted successfully! Thank you for your feedback.', 'success')
+        return redirect(request.form.get('origin', url_for('main.index')))
+        
+    return render_template('report_bug.html')

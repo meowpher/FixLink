@@ -380,6 +380,16 @@
     </main>
 
     <!-- Footer -->
+    <footer class="mt-auto py-4 border-top" style="border-color: var(--border-color, #333) !important; background-color: var(--bg-main, #121212);">
+        <div class="container-fluid d-flex flex-column flex-sm-row justify-content-between align-items-center text-muted small px-4">
+            <div class="mb-2 mb-sm-0">&copy; <script>document.write(new Date().getFullYear())</script> Your Company. All rights reserved.</div>
+            <div>
+                <a href="{{ url_for('main.report_bug', origin=request.path) }}" class="text-decoration-none d-flex align-items-center gap-1" style="color: var(--text-secondary, #8A8A96); transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='var(--text-secondary, #8A8A96)'">
+                    <i class="bi bi-bug"></i> Report Bug
+                </a>
+            </div>
+        </div>
+    </footer>
 
 
     <!-- Bootstrap 5 JS -->

@@ -9,7 +9,7 @@ def test_analytics_computation(client, admin_user, professional_user, run_app_co
     with run_app_context:
         # Create foundational entities
         b = Building(name="Analytics Building")
-        f = Floor(level=1, building=b)
+        f = Floor(level=1, name="1st Floor", building=b)
         r = Room(number="ANA101", floor=f)
         db.session.add_all([b, f, r])
         db.session.commit()

@@ -7,14 +7,18 @@ import secrets
 import logging
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
 
 # Core instances
 db = SQLAlchemy()
-migrate = Migrate()
 csrf = CSRFProtect()
+
+try:
+    from flask_migrate import Migrate
+    migrate = Migrate()
+except ImportError:
+    migrate = None
 
 # Load environment variables
 load_dotenv()
@@ -105,7 +109,8 @@ def create_app(config_name=None):
     
     # Initialize extensions
     db.init_app(app)
-    migrate.init_app(app, db)
+    if migrate:
+        migrate.init_app(app, db)
     
     # Initialize Cache
     from .cache import init_cache
@@ -114,15 +119,18 @@ def create_app(config_name=None):
     # Security: CSRF Protection
     csrf.init_app(app)
     
-    # Security: Rate Limiting
-    from flask_limiter import Limiter
-    from flask_limiter.util import get_remote_address
-    limiter = Limiter(
-        key_func=get_remote_address,
-        app=app,
-        default_limits=["1000 per day", "100 per hour"],
-        storage_uri="memory://",
-    )
+    # Security: Rate Limiting (Optional)
+    try:
+        from flask_limiter import Limiter
+        from flask_limiter.util import get_remote_address
+        limiter = Limiter(
+            key_func=get_remote_address,
+            app=app,
+            default_limits=["1000 per day", "100 per hour"],
+            storage_uri="memory://",
+        )
+    except ImportError:
+        limiter = None
     
     # Initialize database and run migrations (Selective on Vercel)
     from .database import init_db
@@ -155,7 +163,12 @@ def create_app(config_name=None):
     # Global Session Refresh Hook
     @app.before_request
     def refresh_user_session():
-        from flask import session
+        from flask import session, request
+        
+        # Bypass DB queries on static assets, favicons, or ping requests to keep initial render fast
+        if request.endpoint == 'static' or request.path.startswith('/static/') or request.path == '/favicon.ico':
+            return
+            
         from .models import User, Professional
         
         # Check regular user session

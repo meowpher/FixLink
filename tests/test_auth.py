@@ -11,7 +11,7 @@ def test_admin_dashboard_access(client, admin_user, student_user, professional_u
         sess['is_admin'] = False
     
     response = client.get('/admin/')
-    assert response.status_code == 403 # Forbidden
+    assert response.status_code == 302 # Redirects non-admin to login
     
     # 3. Professional request
     with client.session_transaction() as sess:

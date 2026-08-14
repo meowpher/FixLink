@@ -999,9 +999,9 @@ def respond_to_help_request(help_request_id):
 @admin_required
 def export_report(fmt):
     """Export maintenance data as PDF or CSV."""
-    import pandas as pd
+    import csv
     from flask import make_response
-    from io import BytesIO, StringIO
+    from io import StringIO
     
     # Fetch filters for report
     start_date_str = request.args.get('start_date')
@@ -1022,17 +1022,26 @@ def export_report(fmt):
         flash('No data available for export.', 'info')
         return redirect(url_for('admin.dashboard'))
         
-    df = pd.DataFrame(data)
-    
     # Format dates for export
-    date_cols = ['created_at', 'updated_at', 'job_started_at', 'job_completed_at', 'fixed_at', 'deadline_datetime']
-    for col in date_cols:
-        if col in df.columns:
-            df[col] = pd.to_datetime(df[col]).dt.strftime('%Y-%m-%d %H:%M:%S')
+    date_cols = {'created_at', 'updated_at', 'job_started_at', 'job_completed_at', 'fixed_at', 'deadline_datetime'}
+    for row in data:
+        for col in date_cols:
+            val = row.get(col)
+            if isinstance(val, datetime):
+                row[col] = val.strftime('%Y-%m-%d %H:%M:%S')
+            elif isinstance(val, str) and val:
+                try:
+                    dt = datetime.fromisoformat(val.replace('Z', '+00:00'))
+                    row[col] = dt.strftime('%Y-%m-%d %H:%M:%S')
+                except Exception:
+                    pass
 
     if fmt == 'csv':
         output = StringIO()
-        df.to_csv(output, index=False)
+        fieldnames = list(data[0].keys())
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerows(data)
         response = make_response(output.getvalue())
         response.headers["Content-Disposition"] = f"attachment; filename=fixlink_report_{datetime.now().strftime('%Y%m%d')}.csv"
         response.headers["Content-type"] = "text/csv"
@@ -1099,8 +1108,8 @@ def export_report(fmt):
         pdf.chapter_title('Executive Summary')
         
         # KPI Boxes
-        total_count = len(df)
-        fixed_count = len(df[df['status'] == 'fixed'])
+        total_count = len(data)
+        fixed_count = sum(1 for r in data if str(r.get('status', '')).lower() == 'fixed')
         success_rate = round((fixed_count / total_count * 100), 1) if total_count > 0 else 0
         
         pdf.set_font('helvetica', 'B', 10)
@@ -1153,58 +1162,52 @@ def export_report(fmt):
         }
         
         consolidated_counts = {}
-        for _, row in df.iterrows():
-            group_name = category_map.get(row['issue_type'], 'Other')
+        for row in data:
+            group_name = category_map.get(row.get('issue_type'), 'Other')
             consolidated_counts[group_name] = consolidated_counts.get(group_name, 0) + 1
             
         pdf.set_font('helvetica', 'B', 9)
         pdf.set_fill_color(*BRAND_BLUE)
         pdf.set_text_color(255, 255, 255)
-        pdf.cell(70, 10, ' Category Group', border=1, fill=True)
-        pdf.cell(30, 10, ' Count', border=1, fill=True, align='C')
-        pdf.cell(40, 10, ' Distribution', border=1, fill=True, align='C')
+        pdf.cell(60, 10, ' Category Group', border=1, fill=True)
+        pdf.cell(25, 10, ' Count', border=1, fill=True, align='C')
+        pdf.cell(30, 10, ' Distribution', border=1, fill=True, align='C')
+        pdf.cell(75, 10, ' Visual Proportion', border=1, fill=True)
         pdf.ln()
         
         pdf.set_font('helvetica', '', 9)
         pdf.set_text_color(*TEXT_DARK)
         
-        # Prepare data for pie chart
         sorted_cats = sorted(consolidated_counts.items(), key=lambda x: x[1], reverse=True)
-        labels = [c[0] for c in sorted_cats]
-        sizes = [c[1] for c in sorted_cats]
         
-        for cat, count in sorted_cats:
+        palette = [
+            (11, 77, 140),   # #0b4d8c
+            (255, 204, 0),   # #ffcc00
+            (40, 167, 69),   # #28a745
+            (220, 53, 69),   # #dc3545
+            (23, 162, 184),  # #17a2b8
+            (102, 16, 242),  # #6610f2
+            (253, 126, 20)   # #fd7e14
+        ]
+        
+        for idx, (cat, count) in enumerate(sorted_cats):
             pct = (count / total_count * 100) if total_count > 0 else 0
-            pdf.cell(70, 8, f" {cat}", border=1)
-            pdf.cell(30, 8, str(count), border=1, align='C')
-            pdf.cell(40, 8, f"{round(pct, 1)}%", border=1, align='C')
+            pdf.cell(60, 8, f" {cat}", border=1)
+            pdf.cell(25, 8, str(count), border=1, align='C')
+            pdf.cell(30, 8, f"{round(pct, 1)}%", border=1, align='C')
+            
+            # Draw native vector visual bar cell
+            cur_x = pdf.get_x()
+            cur_y = pdf.get_y()
+            pdf.cell(75, 8, '', border=1)
+            
+            bar_color = palette[idx % len(palette)]
+            pdf.set_fill_color(*bar_color)
+            bar_w = max(2, (pct / 100.0) * 70)
+            pdf.rect(cur_x + 2.5, cur_y + 2, bar_w, 4, style='F')
+            
             pdf.ln()
             
-        # Generate Pie Chart using Matplotlib
-        import matplotlib.pyplot as plt
-        import io
-        plt.switch_backend('Agg') # Headless mode
-        
-        # Consistent color palette matching the dashboard
-        colors = ['#0b4d8c', '#ffcc00', '#28a745', '#dc3545', '#17a2b8', '#6610f2', '#fd7e14']
-        
-        fig, ax = plt.subplots(figsize=(6, 4))
-        wedges, texts, autotexts = ax.pie(sizes, labels=labels, autopct='%1.1f%%', 
-                                       colors=colors[:len(labels)], startangle=140,
-                                       textprops={'fontsize': 8})
-        plt.setp(autotexts, size=8, weight="bold", color="white")
-        ax.axis('equal')
-        plt.tight_layout()
-        
-        img_buf = io.BytesIO()
-        plt.savefig(img_buf, format='png', dpi=150)
-        img_buf.seek(0)
-        
-        # Insert Chart into PDF (positioned next to/below table)
-        pdf.ln(5)
-        # Use 140mm width (center it roughly)
-        pdf.image(img_buf, x=35, w=140)
-        plt.close(fig) # Cleanup
         pdf.ln(10)
 
         # --- SECTION 4: DETAILED TICKET LOG ---
@@ -1224,7 +1227,7 @@ def export_report(fmt):
         pdf.set_font('helvetica', '', 8)
         pdf.set_text_color(*TEXT_DARK)
         
-        for _, row in df.iterrows():
+        for row in data:
             # Check for page break
             if pdf.get_y() > 260:
                 pdf.add_page()
@@ -1239,7 +1242,7 @@ def export_report(fmt):
                 pdf.set_text_color(*TEXT_DARK)
 
             # Determine status color
-            status = str(row['status']).lower()
+            status = str(row.get('status', '')).lower()
             if status == 'fixed':
                 pdf.set_text_color(*SUCCESS_GREEN)
             elif status in ['open', 'cancelled']:
@@ -1249,7 +1252,7 @@ def export_report(fmt):
             
             # Draw row
             h = 8
-            pdf.cell(15, h, f" {row['id']}", border=1)
+            pdf.cell(15, h, f" {row.get('id', '')}", border=1)
             pdf.set_text_color(*TEXT_DARK) # Reset color for rest of row
             pdf.cell(25, h, f" {row.get('room_number', 'N/A')}", border=1)
             
@@ -1259,10 +1262,10 @@ def export_report(fmt):
             pdf.cell(30, h, f" {status.upper()}", border=1)
             pdf.set_text_color(*TEXT_DARK)
             
-            pdf.cell(30, h, f" {str(row['issue_type']).title()}", border=1)
+            pdf.cell(30, h, f" {str(row.get('issue_type', '')).title()}", border=1)
             
             # Issue description (handles long text)
-            issue_text = str(row.get('description', row['issue_type']))
+            issue_text = str(row.get('description', row.get('issue_type', '')))
             if len(issue_text) > 55:
                 issue_text = issue_text[:52] + "..."
             pdf.cell(90, h, f" {issue_text}", border=1)

@@ -19,7 +19,11 @@ import argparse
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import qrcode
-from PIL import Image, ImageDraw, ImageFont
+try:
+    from PIL import Image, ImageDraw, ImageFont
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
 from app import create_app, db
 from app.models import Building, Floor, Room
 
@@ -47,64 +51,78 @@ def generate_qr_code(room, host=DEFAULT_HOST, port=DEFAULT_PORT):
         port: Server port
     
     Returns:
-        PIL Image object
+        PIL Image object or SVG Image object
     """
     # Generate URL
     room_number = room.number
     url = f"http://{host}:{port}/report?room={room_number}"
     
-    # Create QR code
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_H,
-        box_size=10,
-        border=4,
-    )
-    qr.add_data(url)
-    qr.make(fit=True)
-    
-    # Generate image
-    img = qr.make_image(fill_color="#0b4d8c", back_color="white")
-    
-    # Add text label at the bottom
-    width, height = img.size
-    new_height = height + 70
-    new_img = Image.new('RGB', (width, new_height), 'white')
-    new_img.paste(img, (0, 0))
-    
-    # Add text
-    draw = ImageDraw.Draw(new_img)
-    
-    # Try to use a nice font, fall back to default
-    try:
-        font_large = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 22)
-        font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
-    except:
-        font_large = ImageFont.load_default()
-        font_small = ImageFont.load_default()
-    
-    # Room label
-    room_label = f"Vyas {room_number}"
-    bbox = draw.textbbox((0, 0), room_label, font=font_large)
-    text_width = bbox[2] - bbox[0]
-    x = (width - text_width) // 2
-    draw.text((x, height + 10), room_label, fill="#0b4d8c", font=font_large)
-    
-    # Floor label
-    floor_label = room.floor.name if room.floor else ""
-    bbox = draw.textbbox((0, 0), floor_label, font=font_small)
-    text_width = bbox[2] - bbox[0]
-    x = (width - text_width) // 2
-    draw.text((x, height + 38), floor_label, fill="#6c757d", font=font_small)
-    
-    # URL label
-    url_label = "Scan to report issue"
-    bbox = draw.textbbox((0, 0), url_label, font=font_small)
-    text_width = bbox[2] - bbox[0]
-    x = (width - text_width) // 2
-    draw.text((x, height + 55), url_label, fill="#20c997", font=font_small)
-    
-    return new_img
+    if HAS_PIL:
+        # Create QR code with PIL PNG rendering
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=4,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+        
+        # Generate image
+        img = qr.make_image(fill_color="#0b4d8c", back_color="white")
+        
+        # Add text label at the bottom
+        width, height = img.size
+        new_height = height + 70
+        new_img = Image.new('RGB', (width, new_height), 'white')
+        new_img.paste(img, (0, 0))
+        
+        # Add text
+        draw = ImageDraw.Draw(new_img)
+        
+        # Try to use a nice font, fall back to default
+        try:
+            font_large = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 22)
+            font_small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 14)
+        except:
+            font_large = ImageFont.load_default()
+            font_small = ImageFont.load_default()
+        
+        # Room label
+        room_label = f"Vyas {room_number}"
+        bbox = draw.textbbox((0, 0), room_label, font=font_large)
+        text_width = bbox[2] - bbox[0]
+        x = (width - text_width) // 2
+        draw.text((x, height + 10), room_label, fill="#0b4d8c", font=font_large)
+        
+        # Floor label
+        floor_label = room.floor.name if room.floor else ""
+        bbox = draw.textbbox((0, 0), floor_label, font=font_small)
+        text_width = bbox[2] - bbox[0]
+        x = (width - text_width) // 2
+        draw.text((x, height + 38), floor_label, fill="#6c757d", font=font_small)
+        
+        # URL label
+        url_label = "Scan to report issue"
+        bbox = draw.textbbox((0, 0), url_label, font=font_small)
+        text_width = bbox[2] - bbox[0]
+        x = (width - text_width) // 2
+        draw.text((x, height + 55), url_label, fill="#20c997", font=font_small)
+        
+        return new_img
+    else:
+        # Fallback to pure SVG image factory without Pillow dependency
+        import qrcode.image.svg
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_H,
+            box_size=10,
+            border=4,
+            image_factory=qrcode.image.svg.SvgPathImage
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+        return qr.make_image()
 
 
 def save_qr_code(room, host=DEFAULT_HOST, port=DEFAULT_PORT):
@@ -117,11 +135,12 @@ def save_qr_code(room, host=DEFAULT_HOST, port=DEFAULT_PORT):
     img = generate_qr_code(room, host, port)
     
     # Generate filename
-    filename = f"Vyas_{room.number}_QR.png"
+    ext = "png" if HAS_PIL else "svg"
+    filename = f"Vyas_{room.number}_QR.{ext}"
     filepath = os.path.join(QR_CODE_DIR, filename)
     
     # Save image
-    img.save(filepath, 'PNG')
+    img.save(filepath)
     
     return filepath
 

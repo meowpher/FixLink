@@ -16,9 +16,9 @@ def init_db(app):
     3. Create default admin user if configured.
     """
     with app.app_context():
-        # Skip setup logic on Vercel (Assume DB is already migrated)
-        if os.environ.get('VERCEL'):
-            logger.info('Skipping database setup on Vercel.')
+        # Skip setup logic on Vercel or in Testing mode (Assume DB is already migrated or managed by test runner)
+        if os.environ.get('VERCEL') or app.config.get('TESTING') or os.environ.get('TESTING') == 'True':
+            logger.info('Skipping database setup on Vercel / Testing environment.')
             return
 
         # 0. Import models to ensure they are registered with SQLAlchemy

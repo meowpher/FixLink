@@ -250,7 +250,7 @@ def users():
 
 
 @admin_bp.route('/analytics')
-@admin_bp.route('/api/analytics')
+@admin_bp.route('/api/analytics', endpoint='api_analytics')
 @admin_required
 def analytics():
     """Admin analytics and insights dashboard with dynamic filtering."""

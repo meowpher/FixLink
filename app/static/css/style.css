@@ -2154,6 +2154,7 @@ body {
 .floor-tab {
     padding: 0.75rem 1.25rem;
     background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: var(--border-radius-sm);
     text-decoration: none;
     color: var(--text-muted);
@@ -2164,21 +2165,30 @@ body {
 
 .floor-tab:hover {
     background: var(--mitwpu-blue-light);
-    color: var(--mitwpu-white);
+    color: #ffffff;
 }
 
 .floor-tab.active {
-    background: var(--mitwpu-blue);
-    color: var(--mitwpu-white);
+    background: #0b4d8c !important;
+    color: #ffffff !important;
+    font-weight: 600;
+    border-color: #0b4d8c !important;
+    box-shadow: 0 2px 8px rgba(11, 77, 140, 0.3);
 }
 
 .tab-badge {
     background: var(--lab-teal);
-    color: white;
+    color: #ffffff !important;
     font-size: 0.65rem;
+    font-weight: 700;
     padding: 0.15rem 0.4rem;
     border-radius: 10px;
     margin-left: 0.5rem;
+}
+
+.floor-tab.active .tab-badge {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
 }
 
 /* Floor Map Section */
@@ -2204,11 +2214,54 @@ body {
 }
 
 .room-count {
-    background: var(--mitwpu-blue);
-    color: white;
+    background: #0b4d8c;
+    color: #ffffff !important;
+    font-weight: 600;
     padding: 0.25rem 0.75rem;
     border-radius: 20px;
     font-size: 0.85rem;
+}
+
+/* Dark Mode Overrides for Floor Tabs & Map Header */
+[data-theme="dark"] .floor-tab,
+[data-bs-theme="dark"] .floor-tab {
+    background: var(--bg-surface);
+    color: var(--text-body);
+    border: 1px solid var(--border-subtle);
+}
+
+[data-theme="dark"] .floor-tab:hover,
+[data-bs-theme="dark"] .floor-tab:hover {
+    background: var(--bg-overlay);
+    color: #f1f5f9;
+    border-color: var(--border-default);
+}
+
+[data-theme="dark"] .floor-tab.active,
+[data-bs-theme="dark"] .floor-tab.active {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+}
+
+[data-theme="dark"] .floor-tab.active .tab-badge,
+[data-bs-theme="dark"] .floor-tab.active .tab-badge {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .room-count,
+[data-bs-theme="dark"] .room-count {
+    background: rgba(59, 130, 246, 0.18) !important;
+    color: #93c5fd !important;
+    border: 1px solid rgba(59, 130, 246, 0.35) !important;
+    font-weight: 600;
+}
+
+[data-theme="dark"] .floor-map-header .small,
+[data-bs-theme="dark"] .floor-map-header .small {
+    color: var(--text-muted) !important;
 }
 
 .floor-stats {
@@ -5548,37 +5601,111 @@ html[data-theme="dark"],
     background: var(--sub-text) !important;
 }
 
-/* Map Polygons overrides */
+/* Map Polygons overrides for Dark Mode */
+[data-theme="dark"] .building-outline,
+[data-bs-theme="dark"] .building-outline {
+    fill: #1a2233 !important;
+    stroke: #334155 !important;
+    stroke-width: 2px !important;
+}
+
 [data-theme="dark"] .room-poly,
-[data-theme="dark"] .room-poly.fill-silver,
-[data-theme="dark"] .room-poly.fill-orange,
-[data-theme="dark"] .room-poly.fill-red,
+[data-bs-theme="dark"] .room-poly {
+    stroke: #475569;
+    stroke-width: 1.5px;
+}
+
 [data-theme="dark"] .room-poly.fill-blue,
+[data-bs-theme="dark"] .room-poly.fill-blue {
+    fill: #1e3a8a !important;
+    stroke: #3b82f6 !important;
+}
+
 [data-theme="dark"] .room-poly.fill-teal,
+[data-bs-theme="dark"] .room-poly.fill-teal {
+    fill: #064e3b !important;
+    stroke: #10b981 !important;
+}
+
+[data-theme="dark"] .room-poly.fill-red,
+[data-bs-theme="dark"] .room-poly.fill-red {
+    fill: #7f1d1d !important;
+    stroke: #ef4444 !important;
+}
+
+[data-theme="dark"] .room-poly.fill-orange,
+[data-bs-theme="dark"] .room-poly.fill-orange {
+    fill: #7c2d12 !important;
+    stroke: #f97316 !important;
+}
+
 [data-theme="dark"] .room-poly.fill-pink,
-[data-theme="dark"] .building-outline {
-    fill: var(--surface) !important;
-    stroke: var(--border) !important;
+[data-bs-theme="dark"] .room-poly.fill-pink {
+    fill: #701a75 !important;
+    stroke: #ec4899 !important;
 }
 
-[data-theme="dark"] .room-group:hover .room-poly {
-    fill: var(--raised) !important;
-    stroke: var(--border-hover) !important;
-    filter: none !important;
+[data-theme="dark"] .room-poly.fill-silver,
+[data-bs-theme="dark"] .room-poly.fill-silver {
+    fill: #334155 !important;
+    stroke: #64748b !important;
 }
 
-[data-theme="dark"] .room-group.selected .room-poly {
-    fill: var(--ice-hint) !important;
-    stroke: var(--text-primary) !important;
-    filter: drop-shadow(0 0 8px rgba(200, 216, 232, 0.4)) !important;
+[data-theme="dark"] .room-poly.has-issue,
+[data-bs-theme="dark"] .room-poly.has-issue {
+    fill: #dc2626 !important;
+    stroke: #f87171 !important;
 }
 
-[data-theme="dark"] .legend-color,
-[data-theme="dark"] .legend-box,
-[data-theme="dark"] .room-block {
-    background-color: var(--surface) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border) !important;
+[data-theme="dark"] .room-poly.in-progress,
+[data-bs-theme="dark"] .room-poly.in-progress {
+    fill: #d97706 !important;
+    stroke: #fbbf24 !important;
+}
+
+[data-theme="dark"] .room-poly.assigned,
+[data-bs-theme="dark"] .room-poly.assigned {
+    fill: #2563eb !important;
+    stroke: #60a5fa !important;
+}
+
+[data-theme="dark"] .room-group:hover .room-poly,
+[data-bs-theme="dark"] .room-group:hover .room-poly {
+    filter: brightness(1.3) !important;
+    stroke: #ffffff !important;
+    stroke-width: 2px !important;
+}
+
+[data-theme="dark"] .room-group.selected .room-poly,
+[data-bs-theme="dark"] .room-group.selected .room-poly {
+    fill: #15803d !important;
+    stroke: #86efac !important;
+    filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.7)) !important;
+}
+
+[data-theme="dark"] .room-text,
+[data-bs-theme="dark"] .room-text {
+    fill: #ffffff !important;
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+[data-theme="dark"] .legend-box.class,
+[data-bs-theme="dark"] .legend-box.class {
+    background-color: #1e3a8a !important;
+    border: 1px solid #3b82f6 !important;
+}
+
+[data-theme="dark"] .legend-box.lab,
+[data-bs-theme="dark"] .legend-box.lab {
+    background-color: #064e3b !important;
+    border: 1px solid #10b981 !important;
+}
+
+[data-theme="dark"] .legend-box.washroom,
+[data-bs-theme="dark"] .legend-box.washroom {
+    background-color: #7f1d1d !important;
+    border: 1px solid #ef4444 !important;
 }
 
 /* ============================================

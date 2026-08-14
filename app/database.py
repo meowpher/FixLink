@@ -53,7 +53,7 @@ def init_db(app):
             try:
                 from scripts.init_data import create_vyas_data
                 logger.info("Vyas building missing. Auto-seeding database...")
-                create_vyas_data()
+                create_vyas_data(app)
             except Exception as e:
                 logger.error(f"Auto-seeding Vyas data failed: {str(e)}")
 

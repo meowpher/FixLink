@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python3
+#!/usr/bin/env python3
 """
 MIT-WPU Vyas Smart-Room Maintenance Tracker
 Database Initialization Script
@@ -20,9 +20,10 @@ from app import create_app, db
 from app.models import Building, Floor, Room, Asset
 
 
-def create_vyas_data():
+def create_vyas_data(app=None):
     """Create Vyas building with floors and rooms."""
-    app = create_app()
+    if app is None:
+        app = create_app()
     
     with app.app_context():
         print("=" * 60)

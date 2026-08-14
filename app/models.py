@@ -760,6 +760,10 @@ class Timetable(db.Model):
     subject = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    __table_args__ = (
+        db.Index('idx_timetable_day_start', 'day_of_week', 'start_time'),
+    )
+    
     faculty = db.relationship('User', foreign_keys=[faculty_id], backref=db.backref('timetables', lazy=True))
     collaborator = db.relationship('User', foreign_keys=[collaborator_id], backref=db.backref('collab_timetables', lazy=True))
     
@@ -795,6 +799,10 @@ class RoomBooking(db.Model):
     division = db.Column(db.String(50), nullable=True)
     course = db.Column(db.String(100), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (
+        db.Index('idx_booking_status_slot', 'status', 'slot_start'),
+    )
     
     faculty = db.relationship('User', backref=db.backref('room_bookings', lazy=True))
     

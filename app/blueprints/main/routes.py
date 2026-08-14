@@ -224,9 +224,12 @@ def get_rooms_by_floor(floor_id):
         return api_response(data=cached)
     
     from sqlalchemy.orm import joinedload
+    from ...models import RoomBooking, Timetable
     rooms = Room.query.options(
         joinedload(Room.tickets),
-        joinedload(Room.assets)
+        joinedload(Room.assets),
+        joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
+        joinedload(Room.timetables).joinedload(Timetable.faculty)
     ).filter_by(floor_id=floor_id).all()
     
     result = {

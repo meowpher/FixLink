@@ -130,9 +130,12 @@ def status_map():
         
         if selected_floor:
             from sqlalchemy.orm import joinedload
+            from ...models import RoomBooking, Timetable
             rooms = Room.query.options(
                 joinedload(Room.tickets),
-                joinedload(Room.assets)
+                joinedload(Room.assets),
+                joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
+                joinedload(Room.timetables).joinedload(Timetable.faculty)
             ).filter_by(floor_id=selected_floor.id).all()
     
     return render_template('status_map.html',
@@ -501,9 +504,12 @@ def get_floor_data(floor_id):
     floor = Floor.query.get_or_404(floor_id)
     
     from sqlalchemy.orm import joinedload
+    from ...models import RoomBooking, Timetable
     rooms = Room.query.options(
         joinedload(Room.tickets),
-        joinedload(Room.assets)
+        joinedload(Room.assets),
+        joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
+        joinedload(Room.timetables).joinedload(Timetable.faculty)
     ).filter_by(floor_id=floor_id).all()
     
     result = {

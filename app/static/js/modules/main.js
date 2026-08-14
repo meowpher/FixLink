@@ -21,6 +21,8 @@ function initializeFloorMap() {
     const floorMapContainer = document.getElementById('floorMapContainer');
     if (!floorSelect || !floorMapContainer) return;
 
+    let hasLoadedInitialData = false;
+
     floorSelect.addEventListener('change', async function () {
         const floorId = this.value;
         const option = this.options[this.selectedIndex];
@@ -31,9 +33,14 @@ function initializeFloorMap() {
         }
 
         try {
-            renderLoading(floorMapContainer);
-            const rooms = await fetchRoomsByFloor(floorId);
-            renderFloorMap(floorMapContainer, rooms, option.dataset.level, false, true);
+            if (!hasLoadedInitialData && window.initialRoomsData && floorId == window.preSelectedFloor) {
+                hasLoadedInitialData = true;
+                renderFloorMap(floorMapContainer, window.initialRoomsData, option.dataset.level, false, true);
+            } else {
+                renderLoading(floorMapContainer);
+                const rooms = await fetchRoomsByFloor(floorId);
+                renderFloorMap(floorMapContainer, rooms, option.dataset.level, false, true);
+            }
         } catch (error) {
             renderError(floorMapContainer, error.message);
         }

@@ -138,10 +138,12 @@
     
     // Global floor data from server
     const currentFloorId = {{ selected_floor.id if selected_floor else 'null' }};
+    const currentFloorLevel = '{{ selected_floor.level if selected_floor else "" }}';
+    const initialRoomsData = {{ rooms_data | tojson | safe if rooms_data else 'null' }};
     
     // Auto-initialize if floor is selected
     if (currentFloorId) {
-        initializeAdminMap(currentFloorId);
+        initializeAdminMap(currentFloorId, initialRoomsData, currentFloorLevel);
     }
 
     // Override selectRoom for admin view

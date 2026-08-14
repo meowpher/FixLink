@@ -1077,6 +1077,9 @@
     const preSelectedFloor = {{ selected_floor| tojson | safe if selected_floor else 'null' }};
     const preSelectedRoom = {{ selected_room| tojson | safe if selected_room else 'null' }};
     const preSelectedRoomNumber = '{{ room_param|default("") }}';
+    const initialRoomsData = {{ rooms_data | tojson | safe if rooms_data else 'null' }};
+    window.preSelectedFloor = preSelectedFloor;
+    window.initialRoomsData = initialRoomsData;
 
     // Success, Dismiss, and Copy Handlers
     window.showSuccessModal = function (ticketId) {

@@ -137,11 +137,14 @@ def status_map():
                 joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
                 joinedload(Room.timetables).joinedload(Timetable.faculty)
             ).filter_by(floor_id=selected_floor.id).all()
+            
+    rooms_data = [room.to_map_dict() for room in rooms] if rooms else []
     
     return render_template('status_map.html',
                          floors=floors,
                          selected_floor=selected_floor,
-                         rooms=rooms)
+                         rooms=rooms,
+                         rooms_data=rooms_data)
 
 
 @admin_bp.route('/history')

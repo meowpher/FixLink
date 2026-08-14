@@ -53,9 +53,21 @@ def report_form():
     # Get Vyas building and floors
     building = Building.query.filter_by(name='Vyas').first()
     floors = []
+    rooms_data = []
     if building:
         floors = Floor.query.filter_by(building_id=building.id).order_by(Floor.level).all()
         selected_building = building.id
+        
+        if selected_floor:
+            from sqlalchemy.orm import joinedload
+            from ...models import RoomBooking, Timetable
+            rooms = Room.query.options(
+                joinedload(Room.tickets),
+                joinedload(Room.assets),
+                joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
+                joinedload(Room.timetables).joinedload(Timetable.faculty)
+            ).filter_by(floor_id=selected_floor).all()
+            rooms_data = [room.to_map_dict() for room in rooms]
     
     issue_types = [
         ('electrical', 'Electrical Issue'),
@@ -82,7 +94,8 @@ def report_form():
                          selected_building=selected_building,
                          selected_floor=selected_floor,
                          selected_room=selected_room,
-                         room_param=room_param)
+                         room_param=room_param,
+                         rooms_data=rooms_data)
 
 
 @main_bp.route('/report', methods=['POST'])

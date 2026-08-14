@@ -8,9 +8,34 @@ import { renderFloorMap } from './render.js';
  * Initialize the Admin Map view.
  * @param {number} floorId 
  */
-export async function initializeAdminMap(floorId) {
+export async function initializeAdminMap(floorId, initialData = null, floorLevel = null) {
     const container = document.getElementById('adminMapContainer');
     if (!container || !floorId) return;
+
+    const renderData = (rooms, level) => {
+        container.innerHTML = '';
+        renderFloorMap(container, rooms, level.toString(), true);
+
+        // Handle deep-linking to specific room
+        const urlParams = new URLSearchParams(window.location.search);
+        const target = urlParams.get('room');
+        if (target) {
+            setTimeout(() => {
+                const el = document.querySelector(`g[data-room="${target}"]`);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    window.selectRoom(target, null, null);
+                    el.classList.add('pulse-focus');
+                    setTimeout(() => el.classList.remove('pulse-focus'), 2000);
+                }
+            }, 200);
+        }
+    };
+
+    if (initialData && floorLevel !== null) {
+        renderData(initialData, floorLevel);
+        return;
+    }
 
     renderLoading(container);
 
@@ -19,25 +44,7 @@ export async function initializeAdminMap(floorId) {
         const result = await response.json();
 
         if (result.success) {
-            container.innerHTML = '';
-            renderFloorMap(container, result.rooms, result.floor.level.toString(), true);
-            
-            // Handler is now managed in the status_map.html template for contextual positioning
-
-            // Handle deep-linking to specific room
-            const urlParams = new URLSearchParams(window.location.search);
-            const target = urlParams.get('room');
-            if (target) {
-                setTimeout(() => {
-                    const el = document.querySelector(`g[data-room="${target}"]`);
-                    if (el) {
-                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                        window.selectRoom(target, null, null);
-                        el.classList.add('pulse-focus');
-                        setTimeout(() => el.classList.remove('pulse-focus'), 2000);
-                    }
-                }, 200);
-            }
+            renderData(result.rooms, result.floor.level);
         } else {
             renderError(container, result.error || 'Failed to load floor data');
         }

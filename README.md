@@ -10,7 +10,7 @@ A Flask-based web application for the Vyas Building at MIT-WPU featuring an inte
 - **QR Code Support** - Generate QR codes for quick room access
 - **Real-time Status Map** - Admin view showing rooms with issues highlighted in red
 
-## Tech Stack
+## Tech Stack 
 
 - **Backend**: Flask 3.0+, Flask-SQLAlchemy, Werkzeug
 - **Database**: Supabase (PostgreSQL)

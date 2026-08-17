@@ -1,0 +1,58 @@
+/* Dashboard Stats CSS */
+.advanced-stat-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 160px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    z-index: 1;
+}
+
+.advanced-stat-card .stat-content {
+    opacity: 0; /* Hidden initially until handoff */
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.advanced-stat-card .stat-content.loaded {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.stat-value-container {
+    display: flex;
+    align-items: baseline;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.stat-value-unit {
+    font-size: 1.2rem;
+    margin-left: 4px;
+    color: var(--text-muted);
+}
+
+.trend-line-container {
+    width: 100%;
+    height: 40px;
+    margin-top: auto;
+    overflow: hidden;
+}
+
+.trend-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.trend-path {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200; /* Hidden initially */
+}

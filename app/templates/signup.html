@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% block title %}Sign Up - MIT-WPU FixLink{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Auth Page Navbar Customizations */
+    .vyas-navbar {
+        border-bottom: none !important;
+        background: transparent !important;
+        box-shadow: none !important;
+    }
+    #mobileMenuBtn { display: none !important; }
+    .vyas-navbar .nav-item a[href*="/login"],
+    .vyas-navbar .nav-item a[href*="/signup"] { display: none !important; }
+    #themeToggleBtn, #themeToggleBtnGuest {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* ── Mobile Responsive (must be last) ── */
+    @media (max-width: 575px) {
+        /* Hide vyas-navbar on mobile — custom topbar used instead */
+        .vyas-navbar, #mobileMenuBtn { display: none !important; }
+
+        /* Custom mobile top bar */
+        .mobile-topbar {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            padding: 0 14px;
+            z-index: 100;
+            background: transparent;
+        }
+        .mobile-topbar .topbar-left {
+            display: flex;
+            align-items: center;
+        }
+        .mobile-topbar .topbar-logo {
+            height: 34px;
+            width: auto;
+            object-fit: contain;
+        }
+        .mobile-topbar .topbar-divider {
+            width: 1.5px;
+            height: 28px;
+            background: rgba(0,0,0,0.15);
+            margin: 0 12px;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-divider {
+            background: rgba(255,255,255,0.2);
+        }
+        .mobile-topbar .topbar-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .mobile-topbar .topbar-brand {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111;
+            letter-spacing: -0.4px;
+            line-height: 1.1;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-brand { color: #fff; }
+        .mobile-topbar .topbar-sub {
+            font-size: 9px;
+            color: #666;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-sub { color: rgba(255,255,255,0.45); }
+        .mobile-topbar .topbar-theme-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            color: #555;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        body[data-theme="dark"] .mobile-topbar .topbar-theme-btn { color: rgba(255,255,255,0.7); }
+
+        .main-content {
+            flex-direction: column !important;
+            justify-content: center !important;
+            align-items: center !important;
+            padding: 80px 16px 16px !important;
+        }
+
+        .glass-signup-card {
+            width: 100% !important;
+            max-width: 420px !important;
+            border-radius: 12px !important;
+            padding: 24px 20px 28px !important;
+        }
+        .glass-signup-card .form-logo { max-width: 120px !important; margin-bottom: 14px !important; }
+        .glass-signup-card h3 { font-size: 20px !important; margin-bottom: 4px !important; }
+        .glass-signup-card .subtext { font-size: 12px !important; margin-bottom: 16px !important; }
+        .glass-signup-card .form-control { height: 42px !important; font-size: 13px !important; }
+        .glass-signup-card .form-label { font-size: 12px !important; }
+        .glass-signup-card .btn-primary { height: 42px !important; font-size: 14px !important; }
+        .glass-signup-card .footer-links { font-size: 12px !important; margin-top: 14px !important; }
+
+        body, html { overflow-x: hidden !important; }
+    }
+
+    /* Layout */
+    .main-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 52px);
+        position: relative;
+        z-index: 1;
+        padding: 20px;
+    }
+    .main-content > .container.mt-3 { display: none; }
+
+    /* Signup Card */
+    .glass-signup-card {
+        width: 100%;
+        max-width: 460px;
+        padding: 40px 36px;
+        background: #ffffff;
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        z-index: 1;
+        position: relative;
+    }
+    .glass-signup-card .form-logo {
+        max-width: 180px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        margin: 0 auto 24px auto;
+        display: block;
+    }
+    .glass-signup-card h3 {
+        font-size: 26px;
+        font-weight: 700;
+        color: #212529;
+        text-align: center;
+        margin: 0 0 6px 0;
+    }
+    .glass-signup-card .subtext {
+        font-size: 14px;
+        color: #6c757d;
+        text-align: center;
+        margin: 0 0 24px 0;
+    }
+    .glass-signup-card .form-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #212529;
+        margin: 0 0 6px 0;
+        display: block;
+    }
+    .glass-signup-card .form-control {
+        width: 100%;
+        height: 46px;
+        border-radius: 8px;
+        background: #ffffff !important;
+        border: 1px solid #ced4da !important;
+        color: #212529 !important;
+        font-size: 14px;
+        padding: 0 14px;
+        box-shadow: none !important;
+        transition: all 0.2s ease;
+    }
+    .glass-signup-card .form-control:focus {
+        border-color: #86b7fe !important;
+        box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25) !important;
+    }
+    .glass-signup-card .form-text { font-size: 12px; color: #6c757d; margin-top: 4px; }
+    .glass-signup-card .mb-3, .glass-signup-card .mb-4 { margin-bottom: 14px !important; }
+    .glass-signup-card .btn-primary {
+        width: 100%;
+        height: 46px;
+        border-radius: 8px;
+        background: #0b4d8c !important;
+        border: 1px solid #0b4d8c !important;
+        color: #ffffff !important;
+        font-size: 15px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .glass-signup-card .btn-primary:hover {
+        background: #083968 !important;
+        border-color: #083968 !important;
+    }
+    .glass-signup-card .footer-links {
+        margin-top: 20px;
+        text-align: center;
+        font-size: 14px;
+        color: #6c757d;
+    }
+    .glass-signup-card .footer-links a { color: #0b4d8c; font-weight: 600; text-decoration: none; }
+    .glass-signup-card .footer-links a:hover { text-decoration: underline; }
+
+    /* Dark Mode */
+    body[data-theme="dark"] {
+        background-color: #080808 !important;
+        overflow: hidden !important;
+    }
+    body[data-theme="dark"] .glass-signup-card {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 20px;
+        backdrop-filter: blur(24px) saturate(140%);
+        -webkit-backdrop-filter: blur(24px) saturate(140%);
+        box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
+    }
+    body[data-theme="dark"] .glass-signup-card h3 { color: #ffffff; }
+    body[data-theme="dark"] .glass-signup-card .subtext { color: rgba(255,255,255,0.4); }
+    body[data-theme="dark"] .glass-signup-card .form-label { color: rgba(255,255,255,0.6); }
+    body[data-theme="dark"] .glass-signup-card .form-control {
+        background: rgba(255,255,255,0.07) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #ffffff !important;
+        border-radius: 10px;
+    }
+    body[data-theme="dark"] .glass-signup-card .form-control::placeholder { color: rgba(255,255,255,0.3) !important; }
+    body[data-theme="dark"] .glass-signup-card .form-control:focus {
+        border-color: rgba(255,255,255,0.3) !important;
+        background: rgba(255,255,255,0.1) !important;
+        box-shadow: none !important;
+    }
+    body[data-theme="dark"] .glass-signup-card .form-text { color: rgba(255,255,255,0.35); }
+    body[data-theme="dark"] .glass-signup-card .btn-primary {
+        border-radius: 10px;
+        background: rgba(255,255,255,0.13) !important;
+        border: 1px solid rgba(255,255,255,0.18) !important;
+        color: #ffffff !important;
+    }
+    body[data-theme="dark"] .glass-signup-card .btn-primary:hover {
+        background: rgba(255,255,255,0.2) !important;
+    }
+    body[data-theme="dark"] .glass-signup-card .footer-links { color: rgba(255,255,255,0.4); }
+    body[data-theme="dark"] .glass-signup-card .footer-links a { color: #ffffff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-orb-top-right"></div>
+<div class="bg-orb-bottom-left"></div>
+
+<!-- Mobile-only custom top bar -->
+<div class="mobile-topbar" style="display:none;">
+    <div class="topbar-left">
+        <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo">
+        <div class="topbar-divider"></div>
+        <div class="topbar-text">
+            <span class="topbar-brand">Fix Link</span>
+            <span class="topbar-sub">Smart Room Maintenance</span>
+        </div>
+    </div>
+    <button class="topbar-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme">
+        <i class="bi bi-moon-fill" id="mobileThemeIcon"></i>
+    </button>
+</div>
+
+<div class="glass-signup-card">
+    <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
+    <h3>Student Sign Up</h3>
+    <p class="subtext">Create an account to report issues</p>
+
+    <form method="POST" action="{{ url_for('auth.signup') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div class="mb-3">
+            <label class="form-label">Full Name</label>
+            <input type="text" name="name" class="form-control" required value="{{ name|default('') }}">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">PRN</label>
+            <input type="text" name="prn" class="form-control" required value="{{ prn|default('') }}">
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Email Address</label>
+            <input type="email" name="email" class="form-control" required placeholder="name@mitwpu.edu.in" value="{{ email|default('') }}">
+            <div class="form-text">Must be a valid @mitwpu.edu.in email.</div>
+        </div>
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+    </form>
+
+    <div class="footer-links">
+        Already have an account? <a href="{{ url_for('auth.login') }}">Login</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Mobile topbar theme toggle
+(function() {
+    const mobileBtn = document.getElementById('mobileThemeToggle');
+    const mobileIcon = document.getElementById('mobileThemeIcon');
+    if (!mobileBtn || !mobileIcon) return;
+
+    // Sync icon with current theme
+    function syncMobileIcon() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        mobileIcon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+    }
+    syncMobileIcon();
+
+    mobileBtn.addEventListener('click', function() {
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        // Reuse the existing setTheme from base.html via themeToggleBtnGuest click simulation
+        const guestBtn = document.getElementById('themeToggleBtnGuest');
+        if (guestBtn) {
+            guestBtn.click();
+        } else {
+            // Fallback: toggle manually
+            if (isDark) {
+                document.body.removeAttribute('data-theme');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+            } else {
+                document.body.setAttribute('data-theme', 'dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
+            }
+        }
+        syncMobileIcon();
+    });
+})();
+</script>
+{% endblock %}

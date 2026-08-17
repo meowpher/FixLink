@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.filter-tabs {
+    display: flex;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #dee2e6;
+    gap: 1px;
+    border: 1px solid #dee2e6;
+    height: 50px;
+}
+.filter-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 24px;
+    margin: 0;
+}
+.active { background-color: lightblue; }
+.inactive { background-color: white; }
+</style>
+</head>
+<body style="background: black; padding: 50px;">
+<div class="filter-tabs">
+  <a class="filter-tab active">Pending</a>
+  <a class="filter-tab inactive">Approved</a>
+</div>
+</body>
+</html>

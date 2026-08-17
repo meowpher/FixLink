@@ -1,0 +1,95 @@
+/* Logo Ticker */
+.logo-ticker-wrapper {
+    overflow: hidden;
+    width: 100%;
+    position: relative;
+    padding: 10px 0;
+}
+
+.logo-ticker-wrapper::before,
+.logo-ticker-wrapper::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    z-index: 2;
+}
+
+.logo-ticker-wrapper::before {
+    left: 0;
+    background: linear-gradient(to right, var(--bg-main), transparent);
+}
+
+.logo-ticker-wrapper::after {
+    right: 0;
+    background: linear-gradient(to left, var(--bg-main), transparent);
+}
+
+.ticker-track {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    animation: ticker-scroll 20s linear infinite;
+}
+
+.ticker-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.ticker-item:hover {
+    opacity: 1;
+    color: var(--text-main);
+}
+
+@keyframes ticker-scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Draggable Card Stack */
+.draggable-stack-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+    perspective: 1000px;
+}
+
+.card-stack-container {
+    position: relative;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform-style: preserve-3d;
+}
+
+.stack-card {
+    position: absolute;
+    width: 90%;
+    height: 160px;
+    border-radius: 20px;
+    cursor: grab;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-shadow: var(--shadow-lg);
+    user-select: none;
+    will-change: transform;
+}
+
+.stack-card:active {
+    cursor: grabbing;
+}

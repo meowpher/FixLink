@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Status Map - MIT-WPU Vyas Tracker{% endblock %}
+
+{% block content %}
+<!-- Status Map Header -->
+<section class="status-map-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="status-map-title">
+                    <i class="bi bi-map me-2"></i>Live Status Map
+                </h1>
+                <p class="status-map-subtitle">Real-time view of room status across Vyas Building</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Status Legend -->
+<section class="status-legend-section">
+    <div class="container">
+        <div class="legend-bar">
+            <span class="legend-title">Status:</span>
+            <span class="legend-item">
+                <span class="legend-dot normal"></span>
+                <span>Normal</span>
+            </span>
+            <span class="legend-item">
+                <span class="legend-dot issue"></span>
+                <span>Issue Reported</span>
+            </span>
+            <span class="legend-item">
+                <span class="legend-dot" style="background-color: #ffc107;"></span>
+                <span>Issue In Progress</span>
+            </span>
+            <span class="legend-item">
+                <span class="legend-dot" style="background-color: #0d6efd;"></span>
+                <span>Assigned</span>
+            </span>
+            <span class="legend-divider"></span>
+            <span class="legend-title">Room Types:</span>
+            <span class="legend-item">
+                <span class="legend-box class"></span>
+                <span>Classroom</span>
+            </span>
+            <span class="legend-item">
+                <span class="legend-box lab"></span>
+                <span>Lab</span>
+            </span>
+            <span class="legend-item">
+                <span class="legend-box washroom"></span>
+                <span>Washroom</span>
+            </span>
+        </div>
+    </div>
+</section>
+
+<!-- Floor Selection -->
+<section class="floor-tabs-section">
+    <div class="container">
+        <div class="floor-tabs">
+            {% for floor in floors %}
+            <a href="{{ url_for('admin.status_map', floor=floor.id) }}"
+                class="floor-tab {% if selected_floor and selected_floor.id == floor.id %}active{% endif %}">
+                {{ floor.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Floor Map -->
+<section class="floor-map-section">
+    <div class="container">
+        {% if selected_floor %}
+        <div class="floor-map-wrapper fade-in">
+            <div class="floor-map-header">
+                <h4 class="mb-0">{{ selected_floor.name }}</h4>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="room-count">{{ rooms|length }} rooms</span>
+                    <!-- Legend -->
+                    <div class="small text-muted">
+                        <span class="me-2"><i class="bi bi-circle-fill text-danger small"></i> Issue</span>
+                        <span class="me-2"><i class="bi bi-circle-fill text-primary small"></i> Assigned</span>
+                        <span class="me-2"><i class="bi bi-circle-fill text-warning small"></i> In Progress</span>
+                        <span><i class="bi bi-circle-fill text-success small"></i> Normal</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Floor Map Container -->
+            <div id="adminMapContainer" class="vyas-floor-map-container"
+                style="min-height: 600px; display: flex; justify-content: center;">
+                <div class="spinner-border text-primary m-5" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+<!-- Admin Room Details Panel moved to root of content -->
+<div class="room-details-panel" id="roomDetailsPanel">
+    <div class="panel-header">
+        <h5 id="panelRoomNumber">Room Details</h5>
+        <button class="btn-close" onclick="closeRoomDetails()"></button>
+    </div>
+    <div class="panel-body" id="panelBody">
+        <!-- Dynamic content -->
+    </div>
+</div>
+        {% else %}
+        <div class="empty-state-card text-center py-5 fade-in">
+            <i class="bi bi-building display-1 text-muted"></i>
+            <h4 class="mt-4">Select a Floor</h4>
+            <p class="text-muted">Choose a floor from the tabs above to view the status map</p>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- ... (Issues Summary Section remains same) ... -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script type="module">
+    import { initializeAdminMap, highlightRoom, showRoomDetails } from "{{ url_for('static', filename='js/modules/admin_map.js') }}";
+    
+    // Global floor data from server
+    const currentFloorId = {{ selected_floor.id if selected_floor else 'null' }};
+    const currentFloorLevel = '{{ selected_floor.level if selected_floor else "" }}';
+    const initialRoomsData = {{ rooms_data | tojson | safe if rooms_data else 'null' }};
+    
+    // Auto-initialize if floor is selected
+    if (currentFloorId) {
+        initializeAdminMap(currentFloorId, initialRoomsData, currentFloorLevel);
+    }
+
+    // Override selectRoom for admin view
+    window.selectRoom = (event, roomNumber, roomId, roomName) => {
+        highlightRoom(roomNumber);
+        
+        const panel = document.getElementById('roomDetailsPanel');
+        panel.style.display = 'block';
+        
+        // Static Slide Animation
+        gsap.fromTo(panel, { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.3 });
+
+        showRoomDetails(roomNumber, roomId);
+    };
+
+    window.closeRoomDetails = () => {
+        const panel = document.getElementById('roomDetailsPanel');
+        if (panel) {
+            gsap.to(panel, { opacity: 0, x: 50, duration: 0.2, onComplete: () => {
+                panel.style.display = 'none';
+            }});
+        }
+        document.querySelectorAll('.room-group, .room-poly').forEach(el => el.classList.remove('selected'));
+    };
+
+    // Handle room deep-linking and focus
+    function focusRoom(roomNumber) {
+        const targetElement = document.querySelector(`g[data-room="${roomNumber}"]`);
+        if(targetElement) {
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            targetElement.classList.add('pulse-focus');
+            setTimeout(() => targetElement.classList.remove('pulse-focus'), 2000);
+        }
+    }
+    
+    window.focusRoom = focusRoom;
+</script>
+
+<style>
+    /* Static Side Position for Admin */
+    #roomDetailsPanel {
+        position: fixed !important;
+        top: 100px !important;
+        right: 30px !important;
+        left: auto !important;
+        transform: none !important;
+        width: 380px;
+        background: var(--bg-surface, var(--bg-card));
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        z-index: 1050;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        display: none;
+    }
+
+    /* Static Floating Pop-up - Locked to Side */
+    #roomPopUp {
+        position: fixed !important;
+        top: 100px !important;
+        right: 30px !important;
+        left: auto !important;
+        transform: none !important;
+        z-index: 1050;
+        width: 380px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: none;
+    }
+
+    .action-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .action-btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    
+    .btn-assign { background-color: #34495e; }
+    .btn-complete { background-color: #27ae60; }
+    .btn-delete { background-color: #e74c3c; }
+    .btn-map { background-color: #2980b9; }
+
+    .pulse-focus {
+        animation: pulseFocus 1s ease-in-out infinite;
+    }
+    @keyframes pulseFocus {
+        0% { filter: drop-shadow(0 0 0px #0d6efd); }
+        50% { filter: drop-shadow(0 0 15px #0d6efd); }
+        100% { filter: drop-shadow(0 0 0px #0d6efd); }
+    }
+    
+    .panel-header {
+        padding: 15px 20px;
+        background: var(--bg-main);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+    
+    .x-small { font-size: 0.7rem; }
+    .uppercase { text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .room-group.selected .room-poly {
+        stroke: #0d6efd !important;
+        stroke-width: 3px !important;
+    }
+
+    @media (max-width: 767px) {
+        #roomDetailsPanel, #roomPopUp {
+            width: calc(100% - 24px) !important;
+            right: 12px !important;
+            left: 12px !important;
+            top: auto !important;
+            bottom: 20px !important;
+            max-height: 70vh !important;
+            overflow-y: auto !important;
+            z-index: 1100 !important;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,1230 @@
+{% extends "base.html" %}
+
+{% block title %}Report Issue - MIT-WPU Vyas Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ── Report Page Glassmorphism ── */
+    /* ── Background Orbs ── */
+    .bg-orb-top-right {
+        position: fixed;
+        top: -150px;
+        right: -100px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(11, 77, 140, 0.08) 0%, rgba(11, 77, 140, 0) 70%);
+        border-radius: 50%;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .bg-orb-bottom-left {
+        position: fixed;
+        bottom: -150px;
+        left: -100px;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(11, 77, 140, 0.06) 0%, rgba(11, 77, 140, 0) 70%);
+        border-radius: 50%;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+    .report-section {
+        padding: 24px 16px;
+        background: var(--bg-main);
+        min-height: calc(100vh - 80px);
+        position: relative;
+    }
+
+    /* Shared Panel Styles */
+    .map-panel,
+    .form-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        box-shadow: var(--shadow-md);
+        transition: all 0.3s ease;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    body[data-theme="dark"] .map-panel,
+    body[data-theme="dark"] .form-panel {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(12px);
+    }
+
+    /* Map Panel Refinement */
+    .map-header {
+        padding: 20px 24px;
+        background: transparent;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .map-title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .floor-selector {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .floor-selector select {
+        border-radius: 10px;
+        padding-left: 12px;
+        padding-right: 32px;
+        font-weight: 500;
+    }
+
+    .floor-map-container {
+        padding: 30px;
+        background: rgba(0, 0, 0, 0.02);
+        flex-grow: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 500px;
+    }
+
+    .map-legend {
+        padding: 16px 24px;
+        background: transparent;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    .legend-item {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Form Panel Refinement */
+    .form-header {
+        padding: 32px 24px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .form-logo {
+        height: 48px;
+        margin-bottom: 16px;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+    }
+
+    .form-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+    }
+
+    .room-detected-badge {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(40, 167, 69, 0.08);
+        color: #28a745;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 4px;
+        border: 1px solid rgba(40, 167, 69, 0.15);
+    }
+
+    #reportForm {
+        padding: 24px;
+    }
+
+    .selected-room-display {
+        background: rgba(0, 0, 0, 0.02);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        text-align: center;
+        transition: all 0.2s ease;
+    }
+
+    body[data-theme="dark"] .selected-room-display {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .room-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        color: var(--text-muted);
+        opacity: 0.8;
+    }
+
+    .room-placeholder i {
+        font-size: 28px;
+    }
+
+    .room-selected-active {
+        background: rgba(11, 77, 140, 0.04) !important;
+        border: 1.5px solid var(--mitwpu-blue) !important;
+        color: var(--mitwpu-blue);
+    }
+
+    .form-section-title {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--text-muted);
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .form-section-title i {
+        font-size: 14px;
+    }
+
+    .form-label {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .form-control,
+    .form-select {
+        border-radius: 12px;
+        padding: 12px 16px;
+        font-size: 14px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+        height: 54px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 16px;
+        letter-spacing: 0.3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        background: linear-gradient(135deg, var(--mitwpu-blue) 0%, var(--mitwpu-blue-dark) 100%);
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 12px rgba(11, 77, 140, 0.2);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(11, 77, 140, 0.3);
+        filter: brightness(1.1);
+    }
+
+    .btn-primary:active {
+        transform: scale(0.98);
+    }
+
+    /* ── Custom File Upload ── */
+    .file-upload-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .file-upload-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        text-align: center;
+        background: rgba(0, 0, 0, 0.01);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+    }
+
+    body[data-theme="dark"] .file-upload-zone {
+        background: rgba(255, 255, 255, 0.02);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .file-upload-zone:hover {
+        border-color: var(--mitwpu-blue);
+        background: rgba(11, 77, 140, 0.03);
+    }
+
+    .file-upload-zone i {
+        font-size: 24px;
+        color: var(--text-muted);
+    }
+
+    .file-upload-zone .upload-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+
+    .file-upload-zone .upload-hint {
+        font-size: 11px;
+        color: var(--text-muted);
+    }
+
+    .file-name-display {
+        font-size: 12px;
+        color: var(--mitwpu-blue);
+        font-weight: 600;
+        margin-top: 8px;
+        display: none;
+        word-break: break-all;
+    }
+
+    #image {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+    }
+
+    textarea.form-control {
+        min-height: 120px !important;
+        resize: none;
+    }
+
+    /* Fixed truncation for selects */
+    .form-select {
+        padding-right: 40px !important;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+
+    /* ── Mobile Responsiveness (must be last) ── */
+    @media (max-width: 575px) {
+
+        /* Hide vyas-navbar on mobile — custom topbar used instead */
+        .vyas-navbar {
+            display: none !important;
+        }
+
+        /* Ensure mobileMenuBtn is visible and styled for the topbar */
+        #mobileMenuBtn {
+            display: flex !important;
+            top: 13px !important;
+            left: 12px !important;
+            z-index: 1060 !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        body[data-theme="dark"] #mobileMenuBtn .ham-bar {
+            background: #fff !important;
+        }
+
+        #mobileMenuBtn .ham-bar {
+            background: #111 !important;
+            width: 20px !important;
+        }
+
+        /* Custom mobile top bar */
+        .mobile-topbar {
+            display: flex !important;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            padding: 0 14px 0 54px;
+            /* Added left padding for hamburger */
+            z-index: 1050;
+            background: var(--bg-main);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mobile-topbar .topbar-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .mobile-topbar .topbar-logo {
+            height: 34px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .mobile-topbar .topbar-divider {
+            width: 1.5px;
+            height: 28px;
+            background: rgba(0, 0, 0, 0.15);
+            margin: 0 12px;
+        }
+
+        body[data-theme="dark"] .mobile-topbar .topbar-divider {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .mobile-topbar .topbar-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-topbar .topbar-brand {
+            font-size: 18px;
+            font-weight: 600;
+            color: #111;
+            letter-spacing: -0.4px;
+            line-height: 1.1;
+        }
+
+        body[data-theme="dark"] .mobile-topbar .topbar-brand {
+            color: #fff;
+        }
+
+        .mobile-topbar .topbar-sub {
+            font-size: 9px;
+            color: #666;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        body[data-theme="dark"] .mobile-topbar .topbar-sub {
+            color: rgba(255, 255, 255, 0.45);
+        }
+
+        .mobile-topbar .topbar-theme-btn {
+            background: transparent;
+            border: none;
+            font-size: 18px;
+            color: #555;
+            cursor: pointer;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        body[data-theme="dark"] .mobile-topbar .topbar-theme-btn {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .report-section {
+            padding: 80px 12px 24px !important;
+        }
+
+        .map-panel,
+        .form-panel {
+            width: 100% !important;
+            max-width: 480px !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            border-radius: 16px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .form-header {
+            padding: 24px 20px !important;
+        }
+
+        .form-title {
+            font-size: 1.25rem !important;
+        }
+
+        #reportForm {
+            padding: 20px !important;
+        }
+
+        .selected-room-display {
+            padding: 16px !important;
+            margin-bottom: 20px !important;
+        }
+
+        .form-section-title {
+            margin-bottom: 16px !important;
+            font-size: 11px !important;
+        }
+
+        .floor-map-container {
+            min-height: 300px !important;
+            padding: 12px !important;
+        }
+
+        body,
+        html {
+            overflow-x: hidden !important;
+        }
+    }
+
+    /* Fix for the submit button in the provided screenshots */
+    #submitBtn {
+        background: #f1f5f9;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 12px;
+    }
+
+    #submitBtn i {
+        font-size: 20px;
+        margin: 0 !important;
+    }
+
+    #submitBtn .btn-text-main {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    #submitBtn .btn-text-sub {
+        font-size: 11px;
+        opacity: 0.7;
+        font-weight: 500;
+    }
+
+    body[data-theme="dark"] #submitBtn {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: #fff;
+        border: none;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    }
+
+    #submitBtn i {
+        font-size: 18px;
+        margin: 0 !important;
+    }
+
+    /* ── Success Modal Glassmorphic & Modern Styling ── */
+    .success-modal-content {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+        border-radius: 24px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    body[data-theme="dark"] .success-modal-content {
+        background: #181c24;
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .success-icon-wrapper {
+        position: relative;
+        width: 84px;
+        height: 84px;
+        margin: 0.5rem auto 1.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .success-icon-circle {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
+        z-index: 2;
+        animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    .success-icon-pulse {
+        position: absolute;
+        width: 84px;
+        height: 84px;
+        border-radius: 50%;
+        background: rgba(16, 185, 129, 0.2);
+        z-index: 1;
+        animation: successPulse 2s infinite ease-out;
+    }
+
+    @keyframes successPop {
+        0% {
+            transform: scale(0.4);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    @keyframes successPulse {
+        0% {
+            transform: scale(0.85);
+            opacity: 0.8;
+        }
+
+        50% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+
+        100% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+    }
+
+    .success-modal-title {
+        font-size: 1.65rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--text-main, #0f172a);
+        margin-bottom: 0.5rem;
+    }
+
+    body[data-theme="dark"] .success-modal-title {
+        color: #f8fafc;
+    }
+
+    .success-modal-desc {
+        font-size: 0.95rem;
+        color: var(--text-muted, #64748b);
+        margin-bottom: 1.5rem;
+        line-height: 1.5;
+    }
+
+    body[data-theme="dark"] .success-modal-desc {
+        color: #94a3b8;
+    }
+
+    .success-ticket-card {
+        background: rgba(15, 23, 42, 0.04);
+        border: 1.5px dashed var(--border-color, rgba(0, 0, 0, 0.12));
+        border-radius: 16px;
+        padding: 14px 20px;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+    }
+
+    body[data-theme="dark"] .success-ticket-card {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .ticket-card-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        color: var(--text-muted, #64748b);
+        text-transform: uppercase;
+    }
+
+    .ticket-card-id-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .ticket-card-id {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--mitwpu-blue, #0b4d8c);
+        letter-spacing: -0.5px;
+    }
+
+    body[data-theme="dark"] .ticket-card-id {
+        color: #60a5fa;
+    }
+
+    .btn-copy-ticket {
+        background: transparent;
+        border: none;
+        color: var(--text-muted, #64748b);
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-copy-ticket:hover {
+        background: rgba(0, 0, 0, 0.06);
+        color: var(--text-main, #0f172a);
+    }
+
+    body[data-theme="dark"] .btn-copy-ticket:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #f8fafc;
+    }
+
+    .success-modal-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .btn-submit-another {
+        background: linear-gradient(135deg, var(--mitwpu-blue, #0b4d8c) 0%, #073866 100%);
+        color: #ffffff !important;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 700;
+        font-size: 0.95rem;
+        transition: all 0.25s ease;
+        box-shadow: 0 4px 14px rgba(11, 77, 140, 0.25);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    body[data-theme="dark"] .btn-submit-another {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-submit-another:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(11, 77, 140, 0.35);
+        filter: brightness(1.08);
+    }
+
+    .btn-modal-close {
+        background: transparent;
+        color: var(--text-muted, #64748b);
+        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
+        border-radius: 12px;
+        padding: 10px 24px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    body[data-theme="dark"] .btn-modal-close {
+        color: #94a3b8;
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-modal-close:hover {
+        background: rgba(0, 0, 0, 0.04);
+        color: var(--text-main, #0f172a);
+    }
+
+    body[data-theme="dark"] .btn-modal-close:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: #f8fafc;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bg-orb-top-right"></div>
+<div class="bg-orb-bottom-left"></div>
+
+<!-- Mobile-only custom top bar -->
+<div class="mobile-topbar" style="display:none;">
+    <div class="topbar-left">
+        <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo"
+            class="topbar-logo mitwpu-logo">
+        <div class="topbar-divider"></div>
+        <div class="topbar-text">
+            <span class="topbar-brand">Fix Link</span>
+            <span class="topbar-sub">Smart Room Maintenance</span>
+        </div>
+    </div>
+    <button class="topbar-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme">
+        <i class="bi bi-moon-fill" id="mobileThemeIcon"></i>
+    </button>
+</div>
+
+<!-- Success Modal -->
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true"
+    data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
+        <div class="modal-content success-modal-content">
+            <div class="modal-header border-0 pb-0 pt-3 px-3">
+                <button type="button" class="btn-close ms-auto" onclick="closeSuccessModal()"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center px-4 pb-4 pt-1">
+                <div class="success-icon-wrapper">
+                    <div class="success-icon-pulse"></div>
+                    <div class="success-icon-circle">
+                        <i class="bi bi-check-lg"></i>
+                    </div>
+                </div>
+                <h3 class="success-modal-title" id="successModalLabel">Thank You!</h3>
+                <p class="success-modal-desc">Your report has been submitted successfully and assigned to our
+                    maintenance team.</p>
+
+                <div class="success-ticket-card">
+                    <div class="ticket-card-label">TICKET REFERENCE</div>
+                    <div class="ticket-card-id-row">
+                        <span class="ticket-card-id" id="successTicketId">#0000</span>
+                        <button type="button" class="btn-copy-ticket" id="copyTicketBtn" onclick="copyTicketId()"
+                            title="Copy Ticket ID" aria-label="Copy Ticket ID">
+                            <i class="bi bi-clipboard" id="copyIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="success-modal-actions">
+                    <button type="button" class="btn btn-submit-another" onclick="closeSuccessModal()">
+                        <i class="bi bi-plus-circle me-2"></i>Submit Another Report
+                    </button>
+                    <button type="button" class="btn btn-modal-close" onclick="closeSuccessModal()">
+                        Done
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Section -->
+<section class="report-section">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Left Panel: Map -->
+            <div class="col-lg-7 col-xl-8">
+                <div class="map-panel slide-up">
+                    <div class="map-header">
+                        <h4 class="map-title">
+                            <i class="bi bi-map"></i>Select Your Room
+                        </h4>
+                        <div class="floor-selector">
+                            <label class="form-label mb-0">Floor:</label>
+
+                            <!-- Hidden native select kept for JS compatibility -->
+                            <select id="floorSelect" style="display:none;">
+                                <option value="">Select Floor</option>
+                                {% for floor in floors %}
+                                {% if floor.level != 6 %}
+                                <option value="{{ floor.id }}" data-level="{{ floor.level }}" {% if
+                                    selected_floor==floor.id %}selected{% endif %}>
+                                    {{ floor.name }}
+                                </option>
+                                {% endif %}
+                                {% endfor %}
+                            </select>
+
+                            <!-- Custom animated dropdown -->
+                            <div class="custom-floor-dropdown" id="floorDropdown">
+                                <button type="button" class="cfd-trigger" id="floorDropdownTrigger"
+                                    aria-haspopup="listbox" aria-expanded="false">
+                                    <span class="cfd-trigger-label" id="floorDropdownLabel">Select Floor</span>
+                                    <svg class="cfd-chevron" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                        <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8"
+                                            stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </button>
+                                <div class="cfd-menu" id="floorDropdownMenu" role="listbox">
+                                    <div class="cfd-menu-inner">
+                                        <div class="cfd-item" data-value="" data-level="" role="option">Select Floor
+                                        </div>
+                                        {% for floor in floors %}
+                                        {% if floor.level != 6 %}
+                                        <div class="cfd-item" data-value="{{ floor.id }}" data-level="{{ floor.level }}"
+                                            role="option">{{ floor.name }}</div>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floor Map Container -->
+                    <div class="floor-map-container" id="floorMapContainer">
+                        <div class="floor-map-placeholder text-center">
+                            <i class="bi bi-building display-1 text-muted"></i>
+                            <p class="mt-3 mb-0">Select a floor to view the interactive map</p>
+                        </div>
+                    </div>
+
+                    <!-- Map Legend -->
+                    <div class="map-legend">
+                        <span class="legend-item">
+                            <span class="legend-color lift"></span>
+                            <span>Lifts</span>
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-color class"></span>
+                            <span>Classroom</span>
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-color lab"></span>
+                            <span>Lab</span>
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-color washroom"></span>
+                            <span>Washroom</span>
+                        </span>
+                        <span class="legend-item">
+                            <span class="legend-color faculty"></span>
+                            <span>Faculty Rooms</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Form -->
+            <div class="col-lg-5 col-xl-4">
+                <div class="form-panel slide-up">
+                    <div class="form-header">
+                        <h4 class="form-title">Report Issue</h4>
+                        {% if room_param %}
+                        <div class="room-detected-badge">
+                            <i class="bi bi-check-circle-fill me-1"></i>
+                            Room detected: <strong>{{ room_param }}</strong>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div id="errorAlert" class="alert alert-danger" style="display: none;">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <span id="errorMessage"></span>
+                    </div>
+
+                    <form id="reportForm" method="POST" action="{{ url_for('main.submit_report') }}"
+                        enctype="multipart/form-data">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <!-- Hidden Room Selection -->
+                        <input type="hidden" id="room_id" name="room_id" value="{{ selected_room or '' }}">
+
+                        <!-- Selected Room Display -->
+                        <div class="selected-room-display" id="selectedRoomDisplay">
+                            <div class="room-placeholder">
+                                <i class="bi bi-door-closed"></i>
+                                <span>No room selected</span>
+                            </div>
+                        </div>
+
+
+                        <!-- Issue Details -->
+                        <div class="form-section">
+                            <h6 class="form-section-title">
+                                <i class="bi bi-exclamation-circle"></i>Issue Details
+                            </h6>
+                            <div class="mb-3">
+                                <label class="form-label">Issue Type *</label>
+
+                                <!-- Hidden native select for form submission -->
+                                <select id="issue_type" name="issue_type" required disabled style="display:none;">
+                                    <option value="">Select a Room First</option>
+                                </select>
+
+                                <!-- Custom animated dropdown -->
+                                <div class="custom-floor-dropdown w-100" id="issueDropdown">
+                                    <button type="button" class="cfd-trigger w-100" id="issueDropdownTrigger"
+                                        aria-haspopup="listbox" aria-expanded="false" disabled>
+                                        <span class="cfd-trigger-label" id="issueDropdownLabel">Select a Room
+                                            First</span>
+                                        <svg class="cfd-chevron ms-auto" width="12" height="12" viewBox="0 0 12 12"
+                                            fill="none">
+                                            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8"
+                                                stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </button>
+                                    <div class="cfd-menu w-100" id="issueDropdownMenu" role="listbox">
+                                        <div class="cfd-menu-inner" id="issueDropdownItems"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description *</label>
+                                <textarea class="form-control" id="description" name="description" rows="3"
+                                    placeholder="Describe the issue in detail..." required></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="image" class="form-label">Upload Image</label>
+                                <div class="file-upload-wrapper">
+                                    <div class="file-upload-zone" id="dropZone">
+                                        <i class="bi bi-cloud-arrow-up"></i>
+                                        <span class="upload-text">Choose File or Drag & Drop</span>
+                                        <span class="upload-hint">Max 16MB (PNG, JPG, GIF)</span>
+                                        <div id="fileName" class="file-name-display"></div>
+                                    </div>
+                                    <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit"
+                            class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                            id="submitBtn">
+                            <i class="bi bi-send-fill"></i>
+                            <span>Submit Report</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // ── Custom Floor Dropdown ────────────────────────────────────────
+    (function () {
+        const trigger = document.getElementById('floorDropdownTrigger');
+        const menu = document.getElementById('floorDropdownMenu');
+        const label = document.getElementById('floorDropdownLabel');
+        const select = document.getElementById('floorSelect');
+        const items = menu ? menu.querySelectorAll('.cfd-item') : [];
+
+        if (!trigger || !menu || !select) return;
+
+        function open() {
+            menu.classList.add('open');
+            trigger.setAttribute('aria-expanded', 'true');
+        }
+
+        function close() {
+            menu.classList.remove('open');
+            trigger.setAttribute('aria-expanded', 'false');
+        }
+
+        trigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menu.classList.contains('open') ? close() : open();
+        });
+
+        items.forEach(item => {
+            item.addEventListener('click', () => {
+                const value = item.dataset.value;
+                const text = item.textContent.trim();
+
+                // Update label
+                label.textContent = text;
+
+                // Highlight selection
+                items.forEach(i => i.classList.remove('selected'));
+                if (value) item.classList.add('selected');
+
+                // Sync to native select + fire change
+                select.value = value;
+                select.dispatchEvent(new Event('change'));
+
+                close();
+            });
+        });
+
+        // Close on outside click or Escape
+        document.addEventListener('click', (e) => {
+            if (!trigger.contains(e.target) && !menu.contains(e.target)) close();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') close();
+        });
+
+        // Sync initial state if server pre-selected a floor
+        const preVal = select.value;
+        if (preVal) {
+            items.forEach(item => {
+                if (item.dataset.value === preVal) {
+                    label.textContent = item.textContent.trim();
+                    item.classList.add('selected');
+                }
+            });
+        }
+    })();
+</script>
+<script id="preSelectedFloorData" type="application/json">{{ selected_floor|tojson|safe if selected_floor else 'null' }}</script>
+<script id="preSelectedRoomData" type="application/json">{{ selected_room|tojson|safe if selected_room else 'null' }}</script>
+<script id="initialRoomsDataJson" type="application/json">{{ rooms_data|tojson|safe if rooms_data else 'null' }}</script>
+<script>
+    // Pre-selected values from server (if room param was provided)
+    const preSelectedFloor = JSON.parse(document.getElementById('preSelectedFloorData').textContent);
+    const preSelectedRoom = JSON.parse(document.getElementById('preSelectedRoomData').textContent);
+    const preSelectedRoomNumber = '{{ room_param|default("") }}';
+    const initialRoomsData = JSON.parse(document.getElementById('initialRoomsDataJson').textContent);
+    window.preSelectedFloor = preSelectedFloor;
+    window.initialRoomsData = initialRoomsData;
+
+    // Success, Dismiss, and Copy Handlers
+    window.showSuccessModal = function (ticketId) {
+        const ticketIdEl = document.getElementById('successTicketId');
+        if (ticketIdEl) ticketIdEl.textContent = '#' + ticketId;
+        const modalEl = document.getElementById('successModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+            modal.show();
+        }
+    };
+
+    window.closeSuccessModal = function () {
+        const modalEl = document.getElementById('successModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) {
+                modal.hide();
+            } else {
+                modalEl.classList.remove('show');
+                modalEl.style.display = 'none';
+                document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('padding-right');
+                document.body.style.removeProperty('overflow');
+            }
+        }
+
+        // Reset form inputs & UI
+        const form = document.getElementById('reportForm');
+        if (form) form.reset();
+
+        const fileNameEl = document.getElementById('fileName');
+        if (fileNameEl) {
+            fileNameEl.textContent = '';
+            fileNameEl.style.display = 'none';
+        }
+
+        const alertEl = document.getElementById('errorAlert');
+        if (alertEl) alertEl.style.display = 'none';
+
+        // Clear room selection state
+        const hiddenRoomInput = document.getElementById('roomId');
+        if (hiddenRoomInput) hiddenRoomInput.value = '';
+
+        const selectedRoomDisplay = document.getElementById('selectedRoomDisplay');
+        if (selectedRoomDisplay) {
+            selectedRoomDisplay.classList.remove('room-selected-active');
+            selectedRoomDisplay.innerHTML = `
+                <div class="room-placeholder">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>No room selected. Click a room on the map.</span>
+                </div>
+            `;
+        }
+
+        // Unhighlight any active SVG rooms
+        document.querySelectorAll('.room-active, .selected-room').forEach(el => {
+            el.classList.remove('room-active', 'selected-room');
+        });
+
+        // Smooth scroll to top of form
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.copyTicketId = function () {
+        const ticketIdEl = document.getElementById('successTicketId');
+        if (!ticketIdEl) return;
+        const text = ticketIdEl.textContent.replace('#', '').trim();
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(() => {
+                const copyIcon = document.getElementById('copyIcon');
+                if (copyIcon) {
+                    copyIcon.className = 'bi bi-check2 text-success';
+                    setTimeout(() => {
+                        copyIcon.className = 'bi bi-clipboard';
+                    }, 2000);
+                }
+            }).catch(() => { });
+        }
+    };
+
+    window.showErrors = function (errors) {
+        const errorAlert = document.getElementById('errorAlert');
+        const errorMessage = document.getElementById('errorMessage');
+        if (errorAlert && errorMessage) {
+            errorMessage.innerHTML = Array.isArray(errors) ? errors.join('<br>') : errors;
+            errorAlert.style.display = 'block';
+            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
+
+    // Mobile topbar theme toggle
+    (function () {
+        const mobileBtn = document.getElementById('mobileThemeToggle');
+        const mobileIcon = document.getElementById('mobileThemeIcon');
+        if (!mobileBtn || !mobileIcon) return;
+
+        function syncMobileIcon() {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            mobileIcon.className = isDark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+        }
+        syncMobileIcon();
+
+        mobileBtn.addEventListener('click', function () {
+            const guestBtn = document.getElementById('themeToggleBtnGuest') || document.getElementById('themeToggleBtn');
+            if (guestBtn) {
+                guestBtn.click();
+            } else {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                if (isDark) {
+                    document.body.removeAttribute('data-theme');
+                    document.documentElement.setAttribute('data-bs-theme', 'light');
+                    localStorage.setItem('theme', 'light');
+                    const logos = document.querySelectorAll('.mitwpu-logo');
+                    logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+                } else {
+                    document.body.setAttribute('data-theme', 'dark');
+                    document.documentElement.setAttribute('data-bs-theme', 'dark');
+                    localStorage.setItem('theme', 'dark');
+                    const logos = document.querySelectorAll('.mitwpu-logo');
+                    logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
+                }
+            }
+            syncMobileIcon();
+        });
+    })();
+
+    // File Upload Preview
+    document.getElementById('image').addEventListener('change', function (e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : '';
+        const display = document.getElementById('fileName');
+        if (fileName) {
+            display.textContent = 'Selected: ' + fileName;
+            display.style.display = 'block';
+        } else {
+            display.style.display = 'none';
+        }
+    });
+</script>
+<script type="module" src="{{ url_for('static', filename='js/modules/main.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MIT-WPU Vyas Tracker{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="{{ url_for('static', filename='css/style.css') }}?v=5.8" rel="stylesheet">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <!-- Vercel Speed Insights -->
+    <script>
+        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    </script>
+    <script defer src="/_vercel/speed-insights/script.js"></script>
+
+    <!-- Advanced UI Animations CSS -->
+    <link href="{{ url_for('static', filename='css/page_transitions.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/dashboard_stats.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/skeleton.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/carousels.css') }}" rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Advanced UI Curtain -->
+    <div id="page-transition-curtain" class="page-curtain"></div>
+
+    <!-- ═══════════════════════════════════════════════════
+         MOBILE SLIDE-IN SIDEBAR  (hidden on ≥768px)
+    ══════════════════════════════════════════════════════ -->
+
+    <!-- Fixed hamburger trigger -->
+    <button id="mobileMenuBtn" class="mobile-hamburger" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileSidebar">
+        <span class="ham-bar"></span>
+        <span class="ham-bar"></span>
+        <span class="ham-bar"></span>
+    </button>
+
+    <!-- Backdrop overlay -->
+    <div id="mobileBackdrop" class="mobile-backdrop" aria-hidden="true"></div>
+
+    <!-- Sidebar panel -->
+    <nav id="mobileSidebar" class="mobile-sidebar" role="navigation" aria-label="Main navigation">
+
+        <!-- Sidebar header -->
+        <div class="msb-header">
+            <img src="{{ url_for('static', filename='images/logo-lm.png') }}"
+                 alt="MIT-WPU"
+                 class="mitwpu-logo msb-logo"
+                 id="msbLogoImg">
+            <div class="msb-header-divider"></div>
+            <div class="msb-brand">
+                <div class="msb-brand-name">Fix Link</div>
+                <div class="msb-brand-sub">Smart Room Maintenance</div>
+            </div>
+            <button id="mobileCloseSidebar" class="msb-close-btn" aria-label="Close navigation">
+                <i class="bi bi-x"></i>
+            </button>
+        </div>
+
+        <!-- Nav section -->
+        <div class="msb-section-label">NAVIGATION</div>
+
+        <ul class="msb-nav" role="list">
+
+            {% if session.get('is_super_admin') %}
+            <li>
+                <a class="msb-item {% if request.endpoint and 'superadmin.dashboard' == request.endpoint %}msb-active{% endif %}" href="{{ url_for('superadmin.dashboard') }}">
+                    <i class="bi bi-code-square"></i>
+                    <span>Developer</span>
+                    {% if request.endpoint and 'superadmin.dashboard' == request.endpoint %}<span class="msb-dot"></span>{% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+            {% if session.get('user_id') or session.get('professional_id') %}
+
+                {% if session.get('is_admin') %}
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'admin.dashboard' %}msb-active{% endif %}" href="{{ url_for('admin.dashboard') }}">
+                        <i class="bi bi-speedometer2"></i>
+                        <span>Dashboard</span>
+                        {% if request.endpoint == 'admin.dashboard' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'admin.status_map' %}msb-active{% endif %}" href="{{ url_for('admin.status_map') }}">
+                        <i class="bi bi-map"></i>
+                        <span>Status Map</span>
+                        {% if request.endpoint == 'admin.status_map' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                <li class="msb-submenu-wrap">
+                    <button class="msb-item msb-submenu-toggle" aria-expanded="false" aria-controls="msb-manage-sub">
+                        <i class="bi bi-gear"></i>
+                        <span>Manage</span>
+                        <i class="bi bi-chevron-down msb-chevron ms-auto"></i>
+                    </button>
+                    <ul id="msb-manage-sub" class="msb-sub" aria-hidden="true">
+                        <li><a class="msb-subitem" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people"></i>Professionals</a></li>
+                        <li><a class="msb-subitem" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up"></i>Help Requests</a></li>
+                        <li><a class="msb-subitem" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history"></i>Full History</a></li>
+                        <li><a class="msb-subitem" href="{{ url_for('admin.booking_history') }}"><i class="bi bi-calendar3-range"></i>Bookings</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'admin.analytics' %}msb-active{% endif %}" href="{{ url_for('admin.analytics') }}">
+                        <i class="bi bi-graph-up"></i>
+                        <span>Insights</span>
+                        {% if request.endpoint == 'admin.analytics' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'admin.chat' %}msb-active{% endif %}" href="{{ url_for('admin.chat') }}">
+                        <i class="bi bi-chat-dots"></i>
+                        <span>Chat</span>
+                        <span class="msb-badge d-none" id="msbChatBadge">0</span>
+                        {% if request.endpoint == 'admin.chat' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if session.get('professional_id') %}
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'professional.dashboard' %}msb-active{% endif %}" href="{{ url_for('professional.dashboard') }}">
+                        <i class="bi bi-tools"></i>
+                        <span>My Tasks</span>
+                        {% if request.endpoint == 'professional.dashboard' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'professional.chat' %}msb-active{% endif %}" href="{{ url_for('professional.chat') }}">
+                        <i class="bi bi-chat-dots"></i>
+                        <span>Chat</span>
+                        {% if request.endpoint == 'professional.chat' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                {% endif %}
+
+                {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'faculty.dashboard' %}msb-active{% endif %}" href="{{ url_for('faculty.dashboard') }}">
+                        <i class="bi bi-calendar-check"></i>
+                        <span>Faculty Portal</span>
+                        {% if request.endpoint == 'faculty.dashboard' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                {% endif %}
+
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'main.report_form' %}msb-active{% endif %}" href="{{ url_for('main.report_form') }}">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Report Issue</span>
+                        {% if request.endpoint == 'main.report_form' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+
+            {% else %}
+            <li>
+                <a class="msb-item {% if request.endpoint == 'auth.login' %}msb-active{% endif %}" href="{{ url_for('auth.login') }}">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span>Login</span>
+                    {% if request.endpoint == 'auth.login' %}<span class="msb-dot"></span>{% endif %}
+                </a>
+            </li>
+            <li>
+                <a class="msb-item {% if request.endpoint == 'auth.signup' %}msb-active{% endif %}" href="{{ url_for('auth.signup') }}">
+                    <i class="bi bi-person-plus"></i>
+                    <span>Sign Up</span>
+                    {% if request.endpoint == 'auth.signup' %}<span class="msb-dot"></span>{% endif %}
+                </a>
+            </li>
+            {% endif %}
+
+        </ul>
+
+        <!-- Divider -->
+        <div class="msb-divider"></div>
+
+        <!-- Bottom utility bar -->
+        <div class="msb-bottom">
+            <div class="msb-user">
+                <div class="msb-avatar" id="msbAvatar">?</div>
+                <div class="msb-user-info">
+                    <div class="msb-user-name" id="msbUserName">Loading…</div>
+                    <div class="msb-user-email" id="msbUserEmail">—</div>
+                </div>
+            </div>
+            <div class="msb-utils">
+                {% if session.get('is_admin') %}
+                <button class="msb-util-btn" id="msbBellBtn" aria-label="Notifications">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="msb-notif-dot d-none" id="msbNotifDot"></span>
+                </button>
+                {% endif %}
+                <button class="msb-util-btn" id="msbThemeBtn" aria-label="Toggle dark mode">
+                    <i class="bi bi-moon-fill" id="msbThemeIcon"></i>
+                </button>
+                {% if session.get('user_id') or session.get('professional_id') %}
+                <a class="msb-util-btn" href="{{ url_for('auth.logout') }}" aria-label="Logout">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+    </nav>
+    <!-- ═══════════════════════════════════════════════════ -->
+
+    <!-- Navigation (Modern Capsule) -->
+    <style>
+        .pointer-events-none { pointer-events: none; }
+        .pointer-events-auto { pointer-events: auto; }
+        .nav-capsule {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 40px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+        }
+        [data-theme="dark"] .nav-capsule {
+            background: rgba(15, 22, 36, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        .nav-capsule .nav-link {
+            color: var(--text-color);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 8px 16px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-capsule .nav-link:hover {
+            background: rgba(var(--mitwpu-blue-rgb), 0.1);
+            color: var(--mitwpu-blue);
+        }
+        .nav-capsule .nav-link.active {
+            background: var(--mitwpu-blue);
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(0, 114, 198, 0.2);
+        }
+        [data-theme="dark"] .nav-capsule .nav-link.active {
+            box-shadow: 0 4px 12px rgba(0, 210, 255, 0.2);
+        }
+        .brand-text-capsule {
+            font-weight: 800;
+            font-size: 1.15rem;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+        }
+    </style>
+
+    <div class="fixed-top mt-4 d-none d-lg-flex justify-content-center pointer-events-none" style="z-index: 1040;">
+        <div class="nav-capsule pointer-events-auto">
+            <!-- Brand -->
+            <a class="d-flex align-items-center me-3 text-decoration-none" href="{{ url_for('main.index') }}">
+                <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="Logo" class="mitwpu-logo me-2" style="height: 28px;">
+                <span class="brand-text-capsule">FixLink</span>
+            </a>
+
+            <!-- Nav Links -->
+            <ul class="nav nav-pills align-items-center m-0">
+                {% if session.get('is_super_admin') %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin.dashboard') }}"><i class="bi bi-code-square"></i> Developer</a></li>
+                {% endif %}
+
+                {% if session.get('user_id') or session.get('professional_id') %}
+                    {% if session.get('is_admin') %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.status_map' %}active{% endif %}" href="{{ url_for('admin.status_map') }}"><i class="bi bi-map"></i> Status Map</a></li>
+                        
+                        <!-- Manage Dropdown -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
+                            <ul class="dropdown-menu shadow rounded-4 border-0">
+                                <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history me-2"></i>Full History</a></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" href="{{ url_for('admin.analytics') }}"><i class="bi bi-graph-up"></i> Insights</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.chat' %}active{% endif %}" href="{{ url_for('admin.chat') }}"><i class="bi bi-chat-dots"></i> Chat</a></li>
+                    {% endif %}
+
+                    {% if session.get('professional_id') %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.dashboard' %}active{% endif %}" href="{{ url_for('professional.dashboard') }}"><i class="bi bi-tools"></i> My Tasks</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.chat' %}active{% endif %}" href="{{ url_for('professional.chat') }}"><i class="bi bi-chat-dots"></i> Chat</a></li>
+                    {% endif %}
+
+                    {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'faculty.dashboard' %}active{% endif %}" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check"></i> Faculty Portal</a></li>
+                    {% endif %}
+                {% endif %}
+
+                <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
+            </ul>
+
+            <!-- Utils (Right Side) -->
+            <div class="d-flex align-items-center ms-3 border-start ps-3" style="border-color: var(--border-color) !important;">
+                {% if not (session.get('user_id') or session.get('professional_id')) %}
+                    <a class="nav-link d-flex align-items-center me-2 text-decoration-none text-muted" href="{{ url_for('auth.login') }}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
+                {% endif %}
+                
+                <button id="themeToggleBtn" class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 35px; height: 35px; border: 1px solid var(--border-color);">
+                    <i class="bi bi-moon-fill" id="themeToggleIcon"></i>
+                </button>
+
+                {% if session.get('user_id') or session.get('professional_id') %}
+                    <!-- Notifications -->
+                    {% if session.get('is_admin') %}
+                        <a class="nav-link position-relative d-flex align-items-center justify-content-center me-2" href="#" role="button" data-bs-toggle="dropdown" id="notificationsDropdown">
+                            <i class="bi bi-bell-fill fs-5 text-muted"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge" style="font-size: 0.6rem;">0</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0" aria-labelledby="notificationsDropdown" style="width: 320px;">
+                            <li class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom">
+                                <span class="fw-bold text-dark">Notifications</span>
+                                <button class="btn btn-sm btn-link p-0 text-decoration-none" id="markAllReadBtn" style="font-size: 0.75rem;">Mark all as read</button>
+                            </li>
+                            <div id="notificationList" style="max-height: 350px; overflow-y: auto;"></div>
+                        </ul>
+                    {% endif %}
+
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown">
+                            <div class="nav-avatar m-0" id="navAvatar" style="width: 35px; height: 35px; border-radius: 50%; background: var(--mitwpu-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600;">
+                                <span class="nav-avatar-initials" id="navAvatarInitials">?</span>
+                                <img class="nav-avatar-img d-none w-100 h-100 object-fit-cover rounded-circle" id="navAvatarImg" src="" alt="Profile">
+                            </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2">
+                            <li class="px-3 py-3 border-bottom">
+                                <div class="fw-bold" id="profileName">Loading…</div>
+                                <div class="text-muted small" id="profileEmail">—</div>
+                            </li>
+                            <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container mt-3">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show shadow-sm" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto py-4 border-top" style="border-color: var(--border-color, #333) !important; background-color: var(--bg-main, #121212);">
+        <div class="container-fluid d-flex flex-column flex-sm-row justify-content-between align-items-center text-muted small px-4">
+            <div class="mb-2 mb-sm-0">&copy; <script>document.write(new Date().getFullYear())</script> Your Company. All rights reserved.</div>
+            <div>
+                <a href="{{ url_for('main.report_bug', origin=request.path) }}" class="text-decoration-none d-flex align-items-center gap-1" style="color: var(--text-secondary, #8A8A96); transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='var(--text-secondary, #8A8A96)'">
+                    <i class="bi bi-bug"></i> Report Bug
+                </a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- GSAP for Smooth Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <!-- Custom JS -->
+    <script type="module" src="{{ url_for('static', filename='js/animations.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/page_transitions.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/skeleton_loader.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dashboard_stats.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/carousels.js') }}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+
+    <script>
+    // Theme Toggle Logic
+    (function() {
+        // Function to perform the DOM attributes swap
+        const performThemeSwitch = (isDark) => {
+            if (isDark) {
+                document.body.setAttribute('data-theme', 'dark');
+                document.documentElement.setAttribute('data-bs-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                const icon = document.getElementById('themeToggleIcon');
+                if (icon) {
+                    icon.classList.remove('bi-moon-fill');
+                    icon.classList.add('bi-sun-fill');
+                }
+                const iconGuest = document.getElementById('themeToggleIconGuest');
+                if (iconGuest) {
+                    iconGuest.classList.remove('bi-moon-fill');
+                    iconGuest.classList.add('bi-sun-fill');
+                }
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
+            } else {
+                document.body.removeAttribute('data-theme');
+                document.documentElement.setAttribute('data-bs-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                const icon = document.getElementById('themeToggleIcon');
+                if (icon) {
+                    icon.classList.remove('bi-sun-fill');
+                    icon.classList.add('bi-moon-fill');
+                }
+                const iconGuest = document.getElementById('themeToggleIconGuest');
+                if (iconGuest) {
+                    iconGuest.classList.remove('bi-sun-fill');
+                    iconGuest.classList.add('bi-moon-fill');
+                }
+                const logos = document.querySelectorAll('.mitwpu-logo');
+                logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+            }
+        };
+
+        // Initialize theme on load (instantly, no animation)
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+            performThemeSwitch(true);
+        } else {
+            performThemeSwitch(false);
+        }
+
+        // Handle Toggle Button Click (Trigger Curtain)
+        const handleToggle = () => {
+            const isDark = document.body.getAttribute('data-theme') === 'dark';
+            const willBeDark = !isDark;
+            
+            if (window.performThemeCurtainTransition) {
+                // Call the curtain transition logic in page_transitions.js
+                window.performThemeCurtainTransition(willBeDark, performThemeSwitch);
+            } else {
+                // Fallback
+                performThemeSwitch(willBeDark);
+            }
+        };
+
+        const btn = document.getElementById('themeToggleBtn');
+        if (btn) btn.addEventListener('click', handleToggle);
+        
+        const btnGuest = document.getElementById('themeToggleBtnGuest');
+        if (btnGuest) btnGuest.addEventListener('click', handleToggle);
+    })();
+
+    // Profile Avatar — load user info and wire up photo upload
+    (function () {
+        if (!document.getElementById('navAvatar')) return; // not logged in
+
+        function getInitials(name) {
+            if (!name || typeof name !== 'string' || name.trim() === '') return '?';
+            const parts = name.trim().split(/\s+/);
+            if (parts.length === 1) return parts[0][0].toUpperCase();
+            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+        }
+
+        function setAvatar(name, photoUrl, email, prn) {
+            const initials = getInitials(name || '?');
+            [
+                { ini: 'navAvatarInitials',        img: 'navAvatarImg' },
+                { ini: 'navAvatarInitialsDropdown', img: 'navAvatarImgDropdown' }
+            ].forEach(({ ini, img }) => {
+                const iniEl = document.getElementById(ini);
+                const imgEl = document.getElementById(img);
+                if (!iniEl || !imgEl) return;
+                if (photoUrl) {
+                    imgEl.src = photoUrl;
+                    imgEl.classList.remove('d-none');
+                    iniEl.classList.add('d-none');
+                } else {
+                    iniEl.textContent = initials;
+                    iniEl.classList.remove('d-none');
+                    imgEl.classList.add('d-none');
+                }
+            });
+            const nameEl = document.getElementById('profileName');
+            if (document.getElementById('removePhotoBtn'))
+                document.getElementById('removePhotoBtn').classList.toggle('d-none', !photoUrl);
+            if (nameEl) nameEl.textContent = name;
+        }
+
+        // Fetch current user from server
+        fetch('/api/me')
+            .then(r => r.json())
+            .then(result => {
+                if (!result.success) return;
+                const data = result.data;
+                const emailEl = document.getElementById('profileEmail');
+                const prnEl = document.getElementById('profilePRN');
+                if (emailEl) emailEl.textContent = data.email;
+                if (prnEl) prnEl.textContent = data.prn || '—';
+                setAvatar(data.name, data.photo_url);
+            })
+            .catch(() => {});
+
+        // Photo upload
+        const uploadInput = document.getElementById('photoUploadInput');
+        if (uploadInput) {
+            uploadInput.addEventListener('change', function () {
+                if (!this.files[0]) return;
+                const formData = new FormData();
+                formData.append('photo', this.files[0]);
+                fetch('/profile/upload-photo', { method: 'POST', body: formData })
+                    .then(r => r.json())
+                    .then(result => {
+                        if (result.success) setAvatar(document.getElementById('profileName').textContent, result.data.photo_url);
+                    });
+            });
+        }
+
+        // Remove photo
+        const removeBtn = document.getElementById('removePhotoBtn');
+        if (removeBtn) {
+            removeBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                fetch('/profile/remove-photo', { method: 'POST' })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) setAvatar(document.getElementById('profileName').textContent, null);
+                    });
+            });
+        }
+    })();
+
+    // Admin Notification System
+    (function() {
+        const dropBtn = document.getElementById('notificationsDropdown');
+        if (!dropBtn) return;
+
+        const badge = document.getElementById('notificationBadge');
+        const list = document.getElementById('notificationList');
+        const markAllReadBtn = document.getElementById('markAllReadBtn');
+
+        async function fetchNotifications() {
+            try {
+                const res = await fetch('/api/notifications');
+                const result = await res.json();
+                if (result.success) {
+                    updateUI(result.data.notifications, result.data.unread_count);
+                }
+            } catch (err) {
+                console.error('Failed to fetch notifications:', err);
+            }
+        }
+
+        function updateUI(notifications, unreadCount) {
+            // Cache for modal access
+            localStorage.setItem('cached_notifications', JSON.stringify(notifications));
+            // Update badge
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                badge.classList.remove('d-none');
+            } else {
+                badge.classList.add('d-none');
+            }
+
+            // Update list
+            if (!notifications || notifications.length === 0) {
+                list.innerHTML = `
+                    <li class="dropdown-item text-center py-4 text-muted border-0">
+                        <div class="mb-2"><i class="bi bi-bell-slash fs-4"></i></div>
+                        <span>No notifications yet</span>
+                    </li>`;
+                return;
+            }
+
+            list.innerHTML = notifications.map(n => `
+                <li class="notification-item ${n.is_read ? '' : 'unread'} p-0 border-bottom">
+                    <a class="dropdown-item py-2 px-3" href="${n.link || '#'}" onclick="handleNotificationClick(${n.id}, event, '${n.link || '#'}')">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <span class="fw-bold text-primary" style="font-size: 0.85rem;">${n.title}</span>
+                            <small class="text-muted" style="font-size: 0.7rem;">${formatTime(n.created_at)}</small>
+                        </div>
+                        <p class="mb-0 text-wrap text-muted" style="font-size: 0.8rem; line-height: 1.3;">${n.message}</p>
+                    </a>
+                </li>
+            `).join('');
+        }
+
+        window.handleNotificationClick = async function(id, e, link) {
+            e.preventDefault();
+            try {
+                // Mark as read in background
+                fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+                
+                // Show in modal instead of navigating
+                const notificationItems = JSON.parse(localStorage.getItem('cached_notifications') || '[]');
+                const notification = notificationItems.find(n => n.id === id);
+                
+                if (notification) {
+                    // Special case: If it's a ticket notification and we're on admin dashboard, use viewTicket
+                    const urlParams = new URLSearchParams(notification.link.split('?')[1] || '');
+                    const ticketId = urlParams.get('ticket_id') || urlParams.get('id');
+                    
+                    if (ticketId && typeof window.viewTicket === 'function') {
+                        window.viewTicket(parseInt(ticketId));
+                        return;
+                    }
+                    
+                    // General notification modal
+                    document.getElementById('notificationModalTitle').textContent = notification.title;
+                    document.getElementById('notificationModalBody').textContent = notification.message;
+                    
+                    const actionBtn = document.getElementById('notificationModalActionBtn');
+                    if (notification.link && notification.link !== '#') {
+                        actionBtn.classList.remove('d-none');
+                        actionBtn.href = notification.link;
+                    } else {
+                        actionBtn.classList.add('d-none');
+                    }
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
+                    modal.show();
+                } else if (link && link !== '#') {
+                    // Fallback to link if notification not found in cache
+                    window.location.href = link;
+                }
+                
+                // Reload list to update unread status in the background
+                fetchNotifications();
+            } catch (err) {
+                console.error('Error handling notification click:', err);
+                if (link && link !== '#') window.location.href = link;
+            }
+        };
+
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                    await fetch('/api/notifications/read-all', { method: 'POST' });
+                    fetchNotifications();
+                } catch (err) {
+                    console.error('Failed to mark all as read:', err);
+                }
+            });
+        }
+
+        function formatTime(isoStr) {
+            const date = new Date(isoStr);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            if (diffInSeconds < 60) return 'Just now';
+            if (diffInSeconds < 3600) return Math.floor(diffInSeconds / 60) + 'm ago';
+            if (diffInSeconds < 86400) return Math.floor(diffInSeconds / 3600) + 'h ago';
+            return date.toLocaleDateString();
+        }
+
+        // Fetch once on load and then only when the dropdown is opened
+        fetchNotifications();
+        // NOTE: Polling removed — Pusher WebSockets handle real-time updates.
+        // Fetch when dropdown is opened to be fresh
+        dropBtn.addEventListener('show.bs.dropdown', fetchNotifications);
+    })();
+    </script>
+
+    <!-- Notification Detail Modal -->
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
+                <div class="modal-header border-0 bg-primary text-white py-3">
+                    <h5 class="modal-title d-flex align-items-center" id="notificationModalTitle">
+                        <i class="bi bi-bell-fill me-2"></i>Notification
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="notification-icon-wrapper mb-3">
+                        <i class="bi bi-info-circle text-primary display-4"></i>
+                    </div>
+                    <p class="lead mb-0 text-dark fw-medium" id="notificationModalBody"></p>
+                </div>
+                <div class="modal-footer border-0 justify-content-center pb-4">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500;">Close</button>
+                    <a href="#" id="notificationModalActionBtn" class="btn btn-primary px-4 d-none" style="border-radius: 10px; font-weight: 500; background-color: var(--mitwpu-blue);">Go to Page</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- ═══════════════════════════════════════════════════
+         MOBILE SIDEBAR — JavaScript
+    ══════════════════════════════════════════════════════ -->
+    <script>
+    (function () {
+        // Only run on mobile
+        if (window.innerWidth >= 768) return;
+
+        const sidebar  = document.getElementById('mobileSidebar');
+        const backdrop = document.getElementById('mobileBackdrop');
+        const openBtn  = document.getElementById('mobileMenuBtn');
+        const closeBtn = document.getElementById('mobileCloseSidebar');
+        if (!sidebar || !openBtn) return;
+
+        /* ---- Open / Close ---- */
+        function openSidebar() {
+            sidebar.classList.add('msb-open');
+            backdrop.classList.add('msb-backdrop-open');
+            document.body.classList.add('msb-body-lock');
+            openBtn.setAttribute('aria-expanded', 'true');
+            openBtn.classList.add('ham-open');
+            // Move focus to first focusable element
+            const first = sidebar.querySelector('a, button');
+            if (first) first.focus();
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('msb-open');
+            backdrop.classList.remove('msb-backdrop-open');
+            document.body.classList.remove('msb-body-lock');
+            openBtn.setAttribute('aria-expanded', 'false');
+            openBtn.classList.remove('ham-open');
+            openBtn.focus();
+        }
+
+        openBtn.addEventListener('click', openSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+        backdrop.addEventListener('click', closeSidebar);
+
+        /* ---- Escape key ---- */
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && sidebar.classList.contains('msb-open')) closeSidebar();
+        });
+
+        /* ---- Focus trap ---- */
+        sidebar.addEventListener('keydown', function (e) {
+            if (e.key !== 'Tab') return;
+            const focusable = Array.from(sidebar.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])'));
+            const first = focusable[0];
+            const last  = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault(); last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault(); first.focus();
+            }
+        });
+
+        /* ---- Manage submenu accordion ---- */
+        const subToggle = sidebar.querySelector('.msb-submenu-toggle');
+        const subMenu   = document.getElementById('msb-manage-sub');
+        if (subToggle && subMenu) {
+            subToggle.addEventListener('click', function () {
+                const expanded = subToggle.getAttribute('aria-expanded') === 'true';
+                subToggle.setAttribute('aria-expanded', String(!expanded));
+                subMenu.setAttribute('aria-hidden', String(expanded));
+                subMenu.classList.toggle('msb-sub-open', !expanded);
+                subToggle.querySelector('.msb-chevron').style.transform = !expanded ? 'rotate(180deg)' : '';
+            });
+        }
+
+        /* ---- Sidebar theme toggle syncs with main toggle ---- */
+        const msbTheme = document.getElementById('msbThemeBtn');
+        const msbIcon  = document.getElementById('msbThemeIcon');
+        if (msbTheme) {
+            // Sync icon on load
+            function syncMsbThemeIcon() {
+                const dark = document.body.getAttribute('data-theme') === 'dark';
+                if (msbIcon) {
+                    msbIcon.className = dark ? 'bi bi-sun-fill' : 'bi bi-moon-fill';
+                }
+            }
+            syncMsbThemeIcon();
+            msbTheme.addEventListener('click', function () {
+                const isDark = document.body.getAttribute('data-theme') === 'dark';
+                // Reuse main setTheme if available
+                if (typeof setTheme === 'function') {
+                    setTheme(!isDark, true);
+                } else {
+                    const mainBtn = document.getElementById('themeToggleBtn');
+                    if (mainBtn) mainBtn.click();
+                }
+                setTimeout(syncMsbThemeIcon, 400);
+            });
+        }
+
+        /* ---- Populate user info from /api/me ---- */
+        const msbAvatar = document.getElementById('msbAvatar');
+        const msbName   = document.getElementById('msbUserName');
+        const msbEmail  = document.getElementById('msbUserEmail');
+        if (msbAvatar || msbName) {
+            fetch('/api/me').then(r => r.json()).then(res => {
+                if (!res.success) return;
+                const d = res.data;
+                if (msbName)  msbName.textContent  = d.name  || '—';
+                if (msbEmail) msbEmail.textContent = d.email || '—';
+                if (msbAvatar) {
+                    const initials = d.name ? (d.name.trim().split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase()) : '?';
+                    msbAvatar.textContent = initials;
+                }
+            }).catch(() => {});
+        }
+
+        /* ---- Sync notification dot ---- */
+        const msbNotifDot = document.getElementById('msbNotifDot');
+        if (msbNotifDot) {
+            const mainBadge = document.getElementById('notificationBadge');
+            if (mainBadge) {
+                const observer = new MutationObserver(() => {
+                    msbNotifDot.classList.toggle('d-none', mainBadge.classList.contains('d-none'));
+                });
+                observer.observe(mainBadge, { attributes: true, attributeFilter: ['class'] });
+            }
+        }
+
+        /* ---- Bell button opens notification dropdown ---- */
+        const msbBell = document.getElementById('msbBellBtn');
+        if (msbBell) {
+            msbBell.addEventListener('click', function () {
+                closeSidebar();
+                const mainBell = document.getElementById('notificationsDropdown');
+                if (mainBell) setTimeout(() => mainBell.click(), 320);
+            });
+        }
+    })();
+    </script>
+
+</body>
+
+</html>

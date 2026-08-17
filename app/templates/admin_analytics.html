@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics & Insights - Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
+        background: #fff;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .analytics-card:hover {
+        transform: translateY(-5px);
+    }
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--mitwpu-blue);
+    }
+    .stat-label {
+        font-size: 0.9rem;
+        color: #6c757d;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        flex-grow: 1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
+<section class="admin-header vyas-admin-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="admin-title">
+                    <i class="bi bi-graph-up-arrow me-2"></i>Insights
+                </h1>
+                <p class="admin-subtitle">Performance Metrics & Maintenance Trends</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <div class="admin-actions">
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light me-2">
+                        <i class="bi bi-speedometer2 me-1"></i>Dashboard
+                    </a>
+                    <a href="{{ url_for('admin.export_report', fmt='pdf', start_date=start_date, end_date=end_date) }}" class="btn btn-outline-light">
+                        <i class="bi bi-printer me-1"></i>Export PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container py-4">
+    <!-- Summary Stats with Advanced UI -->
+    <div class="row g-4 mb-5 advanced-stats-row">
+        {% set advanced_stats = [
+            {'label': 'Total Volume', 'value': total_tickets, 'trend': '+12%', 'desc': 'Tickets in selected window', 'color': 'primary'},
+            {'label': 'Resolved', 'value': fixed_count, 'trend': '+8%', 'desc': 'Fixed in selected window', 'color': 'success'},
+            {'label': 'Success Rate', 'value': success_rate, 'is_percent': true, 'trend': '+2%', 'desc': 'Window resolution efficiency', 'color': 'info'},
+            {'label': 'Avg. Fix Time', 'value': avg_res_time, 'is_hour': true, 'trend': '-1.5h', 'desc': 'Mean TTR for this window', 'color': 'warning'}
+        ] %}
+        
+        {% for stat in advanced_stats %}
+        <div class="col-md-3">
+            <div class="analytics-card advanced-stat-card p-4 text-center position-relative overflow-hidden" data-target-value="{{ stat.value }}">
+                <!-- Skeleton Overlay -->
+                <div class="skeleton-overlay skeleton-shimmer"></div>
+                
+                <div class="stat-content">
+                    <div class="stat-label mb-2 d-flex justify-content-between align-items-center">
+                        <span>{{ stat.label }}</span>
+                        <span class="text-{{ stat.color }} small fw-bold">{{ stat.trend }}</span>
+                    </div>
+                    <div class="stat-value-container mb-1 justify-content-center">
+                        <span class="stat-value animated-counter">0</span>
+                        {% if stat.is_percent %}<span class="stat-value-unit">%</span>{% endif %}
+                        {% if stat.is_hour %}<span class="stat-value-unit">h</span>{% endif %}
+                    </div>
+                    
+                    <!-- SVG Trend Line -->
+                    <div class="trend-line-container">
+                        <svg class="trend-svg text-{{ stat.color }}" viewBox="0 0 100 30" preserveAspectRatio="none">
+                            <path class="trend-path" d="M0,25 C20,20 40,30 60,10 C80,-5 100,15 100,15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+                        </svg>
+                    </div>
+                    
+                    <div class="mt-2 small text-muted text-center">{{ stat.desc }}</div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Visualizations -->
+    <div class="row g-4">
+        <!-- Trend Chart -->
+        <div class="col-lg-8">
+            <div class="analytics-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="mb-0 fw-bold">Ticket Volume Trend ({{ period|title }})</h5>
+                    <span class="badge bg-primary-subtle text-primary py-2 px-3">
+                        {% if start_date and end_date %}
+                            {{ start_date }} to {{ end_date }}
+                        {% else %}
+                            Live Trends
+                        {% endif %}
+                    </span>
+                </div>
+
+                <!-- Integrated Filter Bar -->
+                <div class="pb-3 mb-3 border-bottom">
+                    <form action="{{ url_for('admin.analytics') }}" method="GET" class="row g-2 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label smallest fw-bold text-uppercase mb-1">From</label>
+                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date or '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label smallest fw-bold text-uppercase mb-1">To</label>
+                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date or '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label smallest fw-bold text-uppercase mb-1">Period</label>
+                            <div class="btn-group btn-group-sm w-100" role="group">
+                                <input type="radio" class="btn-check" name="period" id="pd_daily" value="daily" {% if period == 'daily' %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="btn btn-outline-primary" for="pd_daily">Daily</label>
+                                
+                                <input type="radio" class="btn-check" name="period" id="pd_weekly" value="weekly" {% if period == 'weekly' %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="btn btn-outline-primary" for="pd_weekly">Weekly</label>
+                                
+                                <input type="radio" class="btn-check" name="period" id="pd_monthly" value="monthly" {% if period == 'monthly' or not period %}checked{% endif %} onchange="this.form.submit()">
+                                <label class="btn btn-outline-primary" for="pd_monthly">Monthly</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="chart-container">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Category Distribution -->
+        <div class="col-lg-4">
+            <div class="analytics-card p-4">
+                <h5 class="mb-4 fw-bold">Issue Breakdown</h5>
+                <div class="chart-container">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+                <div class="mt-3 small text-muted text-center">
+                    Distribution across different issue types
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Insights -->
+        <div class="col-12 mt-4">
+            <div class="analytics-card p-4">
+                <h5 class="mb-4 fw-bold">Service Category Distribution</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Category</th>
+                                <th>Ticket Count</th>
+                                <th>Percentage</th>
+                                <th>Trend State</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for cat, count in category_data.items() %}
+                            <tr>
+                                <td class="fw-semibold">{{ cat|title }}</td>
+                                <td>{{ count }}</td>
+                                <td>
+                                    <div class="progress" style="height: 8px; width: 100px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ (count / total_tickets * 100)|round|int if total_tickets > 0 else 0 }}%"></div>
+                                    </div>
+                                    <small class="text-muted">{{ (count / total_tickets * 100)|round(1) if total_tickets > 0 else 0 }}%</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success-subtle text-success">Stable</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Theme-aware colors
+        const isDark = document.body.getAttribute('data-theme') === 'dark';
+        const primaryColor = isDark ? '#C8D8E8' : '#003399';
+        const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
+        const textColor = isDark ? '#EDEDF0' : '#1e293b';
+        
+        // Strict pie chart palette using only ice-hint opacities
+        const darkPieColors = [
+            'rgba(200, 216, 232, 1)',
+            'rgba(200, 216, 232, 0.8)',
+            'rgba(200, 216, 232, 0.6)',
+            'rgba(200, 216, 232, 0.4)',
+            'rgba(200, 216, 232, 0.2)',
+            'rgba(200, 216, 232, 0.1)'
+        ];
+        const lightPieColors = ['#003399', '#ffcc00', '#28a745', '#dc3545', '#17a2b8', '#6610f2', '#fd7e14'];
+
+        // 1. Trend Chart
+        const trendData = {{ monthly_trend|tojson }};
+        const trendCtx = document.getElementById('trendChart').getContext('2d');
+        
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: trendData.map(d => d[0]),
+                datasets: [{
+                    label: 'Monthly Tickets',
+                    data: trendData.map(d => d[1]),
+                    borderColor: primaryColor,
+                    backgroundColor: isDark ? 'rgba(200, 216, 232, 0.1)' : 'rgba(0, 51, 153, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 4,
+                    pointBackgroundColor: primaryColor
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        grid: { color: gridColor },
+                        ticks: { color: textColor }
+                    },
+                    x: { 
+                        grid: { display: false },
+                        ticks: { color: textColor }
+                    }
+                }
+            }
+        });
+
+        // 2. Category Pie Chart
+        const catLabels = {{ category_data.keys()|list|tojson }};
+        const catValues = {{ category_data.values()|list|tojson }};
+        const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+
+        new Chart(categoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: catLabels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                datasets: [{
+                    data: catValues,
+                    backgroundColor: isDark ? darkPieColors : lightPieColors,
+                    borderWidth: isDark ? 2 : 0,
+                    borderColor: isDark ? '#080809' : '#1e293b'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: textColor,
+                            boxWidth: 12,
+                            padding: 15,
+                            font: { size: 11 }
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,17 @@
+/* Curtain Element */
+.page-curtain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--mitwpu-blue);
+    z-index: 1040; /* Below bootstrap navbar (1050) but above content */
+    pointer-events: none;
+    transform: scaleY(0);
+    transform-origin: bottom;
+}
+
+[data-theme="dark"] .page-curtain {
+    background-color: var(--bg-surface);
+}

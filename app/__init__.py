@@ -164,35 +164,10 @@ def create_app(config_name=None):
         logger.info("Running on Vercel: Background scheduler disabled.")
     
     # Global Session Refresh Hook
-    @app.before_request
-    def refresh_user_session():
-        from flask import session, request
-        
-        # Bypass DB queries on static assets, favicons, or ping requests to keep initial render fast
-        if request.endpoint == 'static' or request.path.startswith('/static/') or request.path == '/favicon.ico':
-            return
-            
-        from .models import User, Professional
-        
-        # Check regular user session
-        if 'user_id' in session and not session.get('is_super_admin'):
-            user = User.query.get(session['user_id'])
-            if user:
-                # Sync critical flags
-                session['is_admin'] = user.is_admin
-                session['user_role'] = user.role
-                session['user_email'] = user.email
-            else:
-                session.pop('user_id', None)
-                session.pop('is_admin', None)
-                session.pop('user_role', None)
-                session.pop('user_email', None)
-                
-        # Check professional session
-        if 'professional_id' in session:
-            professional = Professional.query.get(session['professional_id'])
-            if not professional:
-                session.pop('professional_id', None)
+    # NOTE: The database queries in @app.before_request were removed to optimize 
+    # Vercel serverless latency. We now fully trust the cryptographically signed 
+    # Flask session cookies for user roles and emails, which avoids opening a 
+    # costly PostgreSQL connection on every single request.
     
     # Global Template Context
     @app.context_processor

@@ -7,10 +7,17 @@ from flask_caching import Cache
 cache = Cache()
 
 
+import os
+
 def init_cache(app):
-    """Initialize the cache with the Flask app."""
+    """Initialize the cache with the Flask app using FileSystemCache for serverless persistence."""
+    # Vercel allows writing to /tmp which can persist across warm starts better than memory
+    cache_dir = '/tmp/fixlink_cache' if os.environ.get('VERCEL') else os.path.join(app.root_path, '.cache')
+    os.makedirs(cache_dir, exist_ok=True)
+    
     cache_config = {
-        'CACHE_TYPE': 'SimpleCache',
+        'CACHE_TYPE': 'FileSystemCache',
+        'CACHE_DIR': cache_dir,
         'CACHE_DEFAULT_TIMEOUT': 3600,  # 1 hour default
         'CACHE_THRESHOLD': 256,
     }

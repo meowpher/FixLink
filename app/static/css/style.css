@@ -1831,8 +1831,8 @@ body {
 .stat-number {
     font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 0;
-    line-height: 1.1;
+    margin-bottom: 0.2rem;
+    line-height: 1;
     color: var(--text-main);
 }
 
@@ -2835,6 +2835,26 @@ body[data-theme="dark"] .stat-label {
 .filter-tab.active-all {
     background-color: #6c757d;
     color: #ffffff;
+}
+
+[data-theme="dark"] .filter-tab.active-pending {
+    background-color: #3b82f6 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .filter-tab.active-approved {
+    background-color: #10b981 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .filter-tab.active-rejected {
+    background-color: #ef4444 !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .filter-tab.active-all {
+    background-color: #64748b !important;
+    color: #ffffff !important;
 }
 
 .filter-tab.inactive {

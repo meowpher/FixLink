@@ -104,11 +104,11 @@
                 </div>
                 
                 {% if req.status == 'pending' %}
-                <div class="card-footer bg-light border-0 p-3 d-flex gap-2">
+                <div class="card-footer bg-transparent border-top p-3 d-flex gap-2">
                     <button class="btn btn-success w-100 shadow-sm d-flex align-items-center justify-content-center" onclick="approveRequest({{ req.id }})" style="border-radius: 10px;">
                         <i class="bi bi-check-lg me-1"></i> Approve
                     </button>
-                    <button class="btn btn-outline-danger bg-white w-100 shadow-sm d-flex align-items-center justify-content-center" onclick="rejectRequest({{ req.id }})" style="border-radius: 10px;">
+                    <button class="btn btn-outline-danger w-100 shadow-sm d-flex align-items-center justify-content-center" onclick="rejectRequest({{ req.id }})" style="border-radius: 10px;">
                         <i class="bi bi-x-lg me-1"></i> Reject
                     </button>
                 </div>

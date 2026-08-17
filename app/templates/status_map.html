@@ -69,7 +69,6 @@
             <a href="{{ url_for('admin.status_map', floor=floor.id) }}"
                 class="floor-tab {% if selected_floor and selected_floor.id == floor.id %}active{% endif %}">
                 {{ floor.name }}
-                {% if floor.level == 4 %}<span class="tab-badge">Demo</span>{% endif %}
             </a>
             {% endfor %}
         </div>

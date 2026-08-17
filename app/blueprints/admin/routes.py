@@ -126,7 +126,7 @@ def status_map():
         if floor_id:
             selected_floor = Floor.query.get(floor_id)
         elif floors:
-            selected_floor = next((f for f in floors if f.level == 4), floors[0])
+            selected_floor = floors[0]
         
         if selected_floor:
             from sqlalchemy.orm import joinedload

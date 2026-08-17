@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <footer className="w-full bg-[#121212] border-t border-gray-800 py-6 text-sm text-gray-400 mt-auto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row justify-between items-center">
-        <p>© {new Date().getFullYear()} Your Company. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} Fixlink. All rights reserved.</p>
         <div className="mt-4 sm:mt-0">
           <Link 
             href={`/report-bug?origin=${encodeURIComponent(pathname || '/')}`}

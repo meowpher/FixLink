@@ -96,8 +96,25 @@ def dashboard():
         {'id': 'other', 'name': 'Others'}
     ]
     
+    # Separate full-list queries for the three status boxes (not affected by filter/pagination)
+    from sqlalchemy.orm import joinedload
+    open_tickets = Ticket.query.filter(
+        Ticket.status.in_([Ticket.STATUS_OPEN, Ticket.STATUS_CANCELLED])
+    ).order_by(Ticket.created_at.desc()).all()
+
+    assigned_tickets = Ticket.query.filter(
+        Ticket.status == Ticket.STATUS_ASSIGNED
+    ).order_by(Ticket.created_at.desc()).all()
+
+    in_progress_tickets = Ticket.query.filter(
+        Ticket.status == Ticket.STATUS_IN_PROGRESS
+    ).order_by(Ticket.created_at.desc()).all()
+
     return render_template('admin.html',
                          tickets=tickets,
+                         open_tickets=open_tickets,
+                         assigned_tickets=assigned_tickets,
+                         in_progress_tickets=in_progress_tickets,
                          pagination=pagination,
                          stats=stats,
                          floors=floors,

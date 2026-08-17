@@ -1072,12 +1072,15 @@
         }
     })();
 </script>
+<script id="preSelectedFloorData" type="application/json">{{ selected_floor|tojson|safe if selected_floor else 'null' }}</script>
+<script id="preSelectedRoomData" type="application/json">{{ selected_room|tojson|safe if selected_room else 'null' }}</script>
+<script id="initialRoomsDataJson" type="application/json">{{ rooms_data|tojson|safe if rooms_data else 'null' }}</script>
 <script>
     // Pre-selected values from server (if room param was provided)
-    const preSelectedFloor = {{ selected_floor| tojson | safe if selected_floor else 'null' }};
-    const preSelectedRoom = {{ selected_room| tojson | safe if selected_room else 'null' }};
+    const preSelectedFloor = JSON.parse(document.getElementById('preSelectedFloorData').textContent);
+    const preSelectedRoom = JSON.parse(document.getElementById('preSelectedRoomData').textContent);
     const preSelectedRoomNumber = '{{ room_param|default("") }}';
-    const initialRoomsData = {{ rooms_data | tojson | safe if rooms_data else 'null' }};
+    const initialRoomsData = JSON.parse(document.getElementById('initialRoomsDataJson').textContent);
     window.preSelectedFloor = preSelectedFloor;
     window.initialRoomsData = initialRoomsData;
 

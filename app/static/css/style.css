@@ -146,12 +146,6 @@
     color: var(--text-primary);
 }
 
-[data-theme="dark"] p,
-[data-theme="dark"] span,
-[data-theme="dark"] div {
-    /* Fallback if not specifically styled */
-}
-
 /* Dark Mode Map Overrides */
 [data-theme="dark"] .room-poly {
     fill: #2d3748;
@@ -2608,8 +2602,6 @@ body[data-theme="dark"] .stat-label {
     color: #94a3b8 !important;
 }
 
-   
-
 /* Dark Mode Overrides for Statuses and Badges */
 [data-theme="dark"] .status-open {
     background: rgba(239, 68, 68, 0.15);
@@ -4306,6 +4298,7 @@ img {
         margin-bottom: 0.6rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
+        line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }

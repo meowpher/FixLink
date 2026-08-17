@@ -236,7 +236,7 @@
                 <!-- Mobile Cards — hidden on tablet/desktop -->
                 <div class="mobile-card-list d-md-none p-3">
                     {% for ticket in filtered_tickets %}
-                    <div class="mc-card" onclick="viewTicket({{ ticket.id }})">
+                    <div class="mc-card" onclick="viewTicket('{{ ticket.id }}')">
                         <div class="mc-top">
                             <div class="mc-id-title">
                                 <span class="mc-id">#{{ ticket.id }}</span>
@@ -269,7 +269,7 @@
                             </div>
                             {% if ticket.status == 'cancelled' %}
                             <button class="mc-btn" style="background:#ef444420;color:#ef4444;"
-                                    onclick="event.stopPropagation(); viewCancellationReport({{ ticket.id }})">
+                                    onclick="event.stopPropagation(); viewCancellationReport('{{ ticket.id }}')">
                                 <i class="bi bi-exclamation-triangle-fill"></i>
                             </button>
                             {% endif %}

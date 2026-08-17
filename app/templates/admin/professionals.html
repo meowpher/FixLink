@@ -16,9 +16,9 @@
     </div>
 
     <!-- Quick Stats -->
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mb-4 align-items-stretch">
         <div class="col-md-3">
-            <div class="stat-card total prof-stats-card">
+            <div class="stat-card total prof-stats-card h-100">
                 <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
                 <div class="stat-content">
                     <h3 class="stat-number">{{ total }}</h3>
@@ -27,7 +27,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card fixed prof-stats-card">
+            <div class="stat-card fixed prof-stats-card h-100">
                 <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
                 <div class="stat-content">
                     <h3 class="stat-number">{{ professionals | selectattr('is_active', 'equalto', true) | list | length }}</h3>
@@ -36,7 +36,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card assigned prof-stats-card">
+            <div class="stat-card assigned prof-stats-card h-100">
                 <div class="stat-icon"><i class="bi bi-tools"></i></div>
                 <div class="stat-content">
                     <h3 class="stat-number">{{ category_names | length }}</h3>
@@ -45,7 +45,7 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card open prof-stats-card">
+            <div class="stat-card open prof-stats-card h-100">
                 <div class="stat-icon"><i class="bi bi-person-x-fill"></i></div>
                 <div class="stat-content">
                     <h3 class="stat-number">{{ professionals | selectattr('is_active', 'equalto', false) | list | length }}</h3>
@@ -57,15 +57,15 @@
     
     <!-- Filters -->
     <div class="filter-card mb-4 border-0">
-        <form method="GET" class="row g-3">
+        <form method="GET" class="row g-3 align-items-center">
             <div class="col-md-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search name, email, phone..." value="{{ search_query }}">
+                <div class="input-group" style="height: 48px;">
+                    <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 10px 0 0 10px;"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control border-start-0 ps-0 h-100" placeholder="Search name, email, phone..." value="{{ search_query }}" style="border-radius: 0 10px 10px 0;">
                 </div>
             </div>
             <div class="col-md-3">
-                <select name="category" class="form-select border-0 shadow-sm px-3" style="background-color: var(--bg-main);">
+                <select name="category" class="form-select border-0 shadow-sm px-3 h-100" style="background-color: var(--bg-main); height: 48px; border-radius: 10px;">
                     <option value="all">All Categories</option>
                     {% for cat in categories %}
                     <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>
@@ -75,14 +75,14 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <select name="status" class="form-select border-0 shadow-sm px-3" style="background-color: var(--bg-main);">
+                <select name="status" class="form-select border-0 shadow-sm px-3 h-100" style="background-color: var(--bg-main); height: 48px; border-radius: 10px;">
                     <option value="all">All Status</option>
                     <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
                     <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
                 </select>
             </div>
             <div class="col-md-2">
-                <button type="submit" class="btn btn-dark w-100 shadow-sm" style="border-radius: 10px;">
+                <button type="submit" class="btn btn-dark w-100 shadow-sm h-100" style="border-radius: 10px; height: 48px;">
                     <i class="bi bi-funnel me-1"></i> Filter
                 </button>
             </div>
@@ -146,7 +146,7 @@
                                 </span>
                                 {% endif %}
                             </td>
-                            <td class="text-center pe-4">
+                            <td class="text-center">
                                 <div class="d-flex justify-content-center gap-2">
                                     <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" 
                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center"

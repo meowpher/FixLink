@@ -3,7 +3,7 @@ Main Routes Blueprint - Student Portal and API Endpoints
 """
 import os
 from datetime import datetime
-from flask import Blueprint, render_template, request, jsonify, current_app, session, redirect, url_for
+from flask import Blueprint, render_template, request, jsonify, current_app, session, redirect, url_for, flash
 from werkzeug.utils import secure_filename
 from ... import db
 from ...models import Building, Floor, Room, Asset, Ticket, User, Notification, Professional
@@ -379,14 +379,46 @@ def push_subscribe():
 @main_bp.route('/report-bug', methods=['GET', 'POST'])
 def report_bug():
     if request.method == 'POST':
-        # In a real app, process the form data (upload to Supabase/S3 or store in DB)
-        # title = request.form.get('title')
-        # description = request.form.get('description')
-        # file = request.files.get('file')
-        # origin = request.form.get('origin', '/')
+        from ...models import BugReport
+        
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        file = request.files.get('file')
+        origin = request.form.get('origin', '/')
+        
+        if not title or not description:
+            flash('Title and description are required.', 'error')
+            return redirect(url_for('main.report_bug', origin=origin))
+            
+        file_path = None
+        if file and file.filename:
+            file_path = save_webapp_file(file)
+            
+        # Determine reporter if logged in
+        reporter_id = None
+        reporter_type = 'guest'
+        
+        if session.get('user_id'):
+            reporter_id = session.get('user_id')
+            reporter_type = 'admin' if session.get('is_admin') else 'user'
+            if session.get('is_super_admin'):
+                reporter_type = 'superadmin'
+        elif session.get('professional_id'):
+            reporter_id = session.get('professional_id')
+            reporter_type = 'professional'
+            
+        bug = BugReport(
+            title=title,
+            description=description,
+            file_path=file_path,
+            reporter_id=reporter_id,
+            reporter_type=reporter_type
+        )
+        db.session.add(bug)
+        db.session.commit()
         
         flash('Bug report submitted successfully! Thank you for your feedback.', 'success')
-        return redirect(request.form.get('origin', url_for('main.index')))
+        return redirect(origin if origin else url_for('main.index'))
         
     return render_template('report_bug.html')
 

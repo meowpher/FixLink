@@ -620,8 +620,15 @@
         window.handleNotificationClick = async function(id, e, link) {
             e.preventDefault();
             try {
+                // Get CSRF token
+                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfTokenMeta ? (csrfTokenMeta.getAttribute('content') || csrfTokenMeta.content) : '';
+                
                 // Mark as read in background
-                fetch(`/api/notifications/${id}/read`, { method: 'POST' });
+                fetch(`/api/notifications/${id}/read`, { 
+                    method: 'POST',
+                    headers: { 'X-CSRFToken': csrfToken }
+                });
                 
                 // Show in modal instead of navigating
                 const notificationItems = JSON.parse(localStorage.getItem('cached_notifications') || '[]');
@@ -669,7 +676,13 @@
                 e.preventDefault();
                 e.stopPropagation();
                 try {
-                    await fetch('/api/notifications/read-all', { method: 'POST' });
+                    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                    const csrfToken = csrfTokenMeta ? (csrfTokenMeta.getAttribute('content') || csrfTokenMeta.content) : '';
+                    
+                    await fetch('/api/notifications/read-all', { 
+                        method: 'POST',
+                        headers: { 'X-CSRFToken': csrfToken }
+                    });
                     fetchNotifications();
                 } catch (err) {
                     console.error('Failed to mark all as read:', err);

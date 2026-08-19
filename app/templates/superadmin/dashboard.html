@@ -320,6 +320,88 @@
         </div>
     </div>
 
+    <!-- Bug Tracking Section -->
+    <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="mb-0 fw-bold"><i class="bi bi-bug-fill text-danger me-2"></i>Reported Bugs</h5>
+            <span class="badge bg-primary rounded-pill">{{ bugs|length }} Total</span>
+        </div>
+        
+        <div class="card bg-card border shadow-sm" style="border-radius: 16px; overflow: hidden; border-color: var(--border-color) !important;">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light text-muted">
+                        <tr>
+                            <th class="ps-4 border-bottom-0 py-3 fw-semibold">Status</th>
+                            <th class="border-bottom-0 py-3 fw-semibold">Title & Description</th>
+                            <th class="border-bottom-0 py-3 fw-semibold">Reporter</th>
+                            <th class="border-bottom-0 py-3 fw-semibold">Date</th>
+                            <th class="border-bottom-0 py-3 fw-semibold text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bug in bugs %}
+                        <tr>
+                            <td class="ps-4 py-3">
+                                {% if bug.status == 'open' %}
+                                    <span class="badge bg-danger rounded-pill px-3 py-2"><i class="bi bi-exclamation-circle me-1"></i>Open</span>
+                                {% else %}
+                                    <span class="badge bg-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i>Resolved</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3" style="max-width: 400px;">
+                                <div class="fw-bold mb-1" style="color: var(--text-main);">{{ bug.title }}</div>
+                                <div class="text-muted small text-truncate">{{ bug.description }}</div>
+                            </td>
+                            <td class="py-3">
+                                {% if bug.reporter_type == 'guest' %}
+                                    <span class="badge bg-secondary">Guest</span>
+                                {% else %}
+                                    <span class="badge bg-info text-dark text-capitalize">{{ bug.reporter_type }}</span>
+                                    <div class="small text-muted mt-1">ID: {{ bug.reporter_id }}</div>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 text-muted small">
+                                {{ bug.created_at.strftime('%b %d, %Y %H:%M') }}
+                            </td>
+                            <td class="py-3 text-end pe-4">
+                                <div class="btn-group">
+                                    {% if bug.file_path %}
+                                    <a href="{{ url_for('static', filename='uploads/media/' ~ bug.file_path) }}" target="_blank" class="btn btn-sm btn-outline-info" title="View Attachment">
+                                        <i class="bi bi-paperclip"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if bug.status == 'open' %}
+                                    <form action="{{ url_for('superadmin.resolve_bug', bug_id=bug.id) }}" method="POST" class="d-inline">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as Resolved">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                    <form action="{{ url_for('superadmin.delete_bug', bug_id=bug.id) }}" method="POST" class="d-inline ms-1" onsubmit="return confirm('Delete this bug report permanently?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="bi bi-emoji-smile fs-1 d-block mb-3 opacity-50"></i>
+                                No bugs reported yet. Great job!
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Quick Access Grid -->
     <div class="mb-4 animate-on-load" style="opacity: 0; transform: translateY(20px);">
         <h5 class="mb-3 fw-bold text-muted text-uppercase small letter-spacing-1">Quick Access</h5>

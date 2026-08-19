@@ -820,3 +820,34 @@ class RoomBooking(db.Model):
             'division': self.division,
             'course': self.course
         }
+
+class BugReport(db.Model):
+    """BugReport model for tracking issues reported by users."""
+    __tablename__ = 'bug_reports'
+    
+    STATUS_OPEN = 'open'
+    STATUS_RESOLVED = 'resolved'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    file_path = db.Column(db.String(255), nullable=True)
+    status = db.Column(db.String(20), default=STATUS_OPEN, nullable=False)
+    
+    # Optional metadata about who reported it
+    reporter_id = db.Column(db.Integer, nullable=True)
+    reporter_type = db.Column(db.String(50), nullable=True)  # 'user', 'professional', 'superadmin', 'guest'
+    
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'description': self.description,
+            'file_path': self.file_path,
+            'status': self.status,
+            'reporter_id': self.reporter_id,
+            'reporter_type': self.reporter_type,
+            'created_at': self.created_at.isoformat() + 'Z' if self.created_at else None
+        }

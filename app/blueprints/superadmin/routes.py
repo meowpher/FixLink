@@ -67,16 +67,39 @@ def logout():
 @super_admin_required
 def dashboard():
     """Developer dashboard - manage admins and professionals."""
+    from ...models import BugReport
     admin_count = User.query.filter_by(is_admin=True, role=User.ROLE_ADMIN).count()
     faculty_count = User.query.filter_by(role=User.ROLE_FACULTY).count()
     professional_count = Professional.query.filter_by(is_active=True).count()
     user_count = User.query.count()
+    bugs = BugReport.query.order_by(BugReport.created_at.desc()).all()
     
     return render_template('superadmin/dashboard.html',
                          admin_count=admin_count,
                          faculty_count=faculty_count,
                          professional_count=professional_count,
-                         user_count=user_count)
+                         user_count=user_count,
+                         bugs=bugs)
+
+@superadmin_bp.route('/developer/bugs/<int:bug_id>/resolve', methods=['POST'])
+@super_admin_required
+def resolve_bug(bug_id):
+    from ...models import BugReport
+    bug = BugReport.query.get_or_404(bug_id)
+    bug.status = BugReport.STATUS_RESOLVED
+    db.session.commit()
+    flash('Bug marked as resolved!', 'success')
+    return redirect(url_for('superadmin.dashboard'))
+
+@superadmin_bp.route('/developer/bugs/<int:bug_id>/delete', methods=['POST'])
+@super_admin_required
+def delete_bug(bug_id):
+    from ...models import BugReport
+    bug = BugReport.query.get_or_404(bug_id)
+    db.session.delete(bug)
+    db.session.commit()
+    flash('Bug deleted.', 'info')
+    return redirect(url_for('superadmin.dashboard'))
 
 
 @superadmin_bp.route('/developer/users')

@@ -4,9 +4,9 @@
 
 {% block content %}
 <div class="container-fluid py-5 d-flex justify-content-center">
-    <div class="card bg-card border-0 shadow-lg" style="max-width: 600px; width: 100%; border-radius: 16px;">
+    <div class="card bg-card shadow-lg" style="max-width: 600px; width: 100%; border-radius: 16px;">
         <div class="card-body p-4 p-md-5">
-            <h2 class="fw-bold mb-2 text-white">Report a Bug</h2>
+            <h2 class="fw-bold mb-2 text-adaptive">Report a Bug</h2>
             <p class="text-muted small mb-4">Help us improve the platform by describing the issue you encountered.</p>
 
             <form method="POST" enctype="multipart/form-data" action="{{ url_for('main.report_bug') }}">
@@ -15,17 +15,17 @@
                 
                 <div class="mb-4">
                     <label for="title" class="form-label text-muted small fw-semibold">Issue Title</label>
-                    <input type="text" class="form-control bg-transparent text-white border-secondary" id="title" name="title" placeholder="e.g., App crashes when clicking the submit button" required>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="e.g., App crashes when clicking the submit button" required>
                 </div>
 
                 <div class="mb-4">
                     <label for="description" class="form-label text-muted small fw-semibold">Steps to Reproduce</label>
-                    <textarea class="form-control bg-transparent text-white border-secondary" id="description" name="description" rows="5" placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..." required></textarea>
+                    <textarea class="form-control" id="description" name="description" rows="5" placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..." required></textarea>
                 </div>
 
                 <div class="mb-4">
                     <label for="file" class="form-label text-muted small fw-semibold">Attach Screenshot or Video (Optional)</label>
-                    <input class="form-control bg-transparent text-white border-secondary" type="file" id="file" name="file" accept="image/*,video/mp4">
+                    <input class="form-control" type="file" id="file" name="file" accept="image/*,video/mp4">
                     <div class="form-text text-muted small">PNG, JPG, GIF, MP4 up to 10MB</div>
                 </div>
 
@@ -39,10 +39,26 @@
 </div>
 
 <style>
-    .bg-card { background-color: var(--card, #161618) !important; }
+    .bg-card { 
+        background-color: var(--bg-card, #ffffff) !important; 
+        border: 1px solid var(--border-color, #e5e7eb) !important;
+    }
+    .text-adaptive {
+        color: var(--text-main, #111827) !important;
+    }
+    .form-control {
+        background-color: var(--bg-body, #f9fafb);
+        color: var(--text-main, #111827);
+        border-color: var(--border-color, #d1d5db);
+    }
     .form-control:focus {
+        background-color: var(--bg-body, #f9fafb);
+        color: var(--text-main, #111827);
         border-color: var(--mitwpu-blue, #0d6efd);
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    .form-control::placeholder {
+        color: var(--text-muted, #9ca3af);
     }
 </style>
 {% endblock %}

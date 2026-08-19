@@ -1028,7 +1028,7 @@ body {
     background: var(--bg-card, #1a1a2e);
     border: 1.5px solid var(--border-color, rgba(255,255,255,0.12));
     border-radius: 999px;
-    color: var(--text-primary, #e2e8f0);
+    color: var(--text-main, #1e293b);
     font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
@@ -1097,7 +1097,7 @@ body {
     border-radius: 8px;
     font-size: 0.85rem;
     font-weight: 500;
-    color: var(--text-primary, #e2e8f0);
+    color: var(--text-main, #1e293b);
     cursor: pointer;
     transition: background 0.13s, color 0.13s;
     user-select: none;
@@ -5828,9 +5828,7 @@ html[data-theme="dark"] {
 }
 
 /* Fix 2 (Map Legend): Strict removal of any colors for dots and indicators */
-[data-theme="dark"] .dot,
-[data-theme="dark"] .legend-color,
-[data-theme="dark"] .legend-box {
+[data-theme="dark"] .dot {
     background-color: var(--surface) !important;
     border: 2px solid var(--ice-hint) !important;
     box-shadow: none !important;

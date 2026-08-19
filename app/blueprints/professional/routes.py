@@ -389,6 +389,12 @@ def get_chat_history():
          (ChatMessage.receiver_id == professional.id))
     ).order_by(ChatMessage.timestamp.asc()).all()
     
+    # Mark messages from admin as read
+    for msg in messages:
+        if msg.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL and msg.receiver_id == professional.id:
+            msg.is_read = True
+    db.session.commit()
+    
     return jsonify({
         'success': True,
         'messages': [msg.to_dict() for msg in messages]

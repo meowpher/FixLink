@@ -124,7 +124,7 @@
                     <a class="msb-item {% if request.endpoint == 'admin.chat' %}msb-active{% endif %}" href="{{ url_for('admin.chat') }}">
                         <i class="bi bi-chat-dots"></i>
                         <span>Chat</span>
-                        <span class="msb-badge d-none" id="msbChatBadge">0</span>
+                        <span class="msb-badge d-none global-chat-badge bg-danger text-white">0</span>
                         {% if request.endpoint == 'admin.chat' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
@@ -142,6 +142,7 @@
                     <a class="msb-item {% if request.endpoint == 'professional.chat' %}msb-active{% endif %}" href="{{ url_for('professional.chat') }}">
                         <i class="bi bi-chat-dots"></i>
                         <span>Chat</span>
+                        <span class="msb-badge d-none global-chat-badge bg-danger text-white">0</span>
                         {% if request.endpoint == 'professional.chat' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
@@ -299,12 +300,12 @@
                         </li>
 
                         <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" href="{{ url_for('admin.analytics') }}"><i class="bi bi-graph-up"></i> Insights</a></li>
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.chat' %}active{% endif %}" href="{{ url_for('admin.chat') }}"><i class="bi bi-chat-dots"></i> Chat</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.chat' %}active{% endif %}" href="{{ url_for('admin.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
                     {% endif %}
 
                     {% if session.get('professional_id') %}
                         <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.dashboard' %}active{% endif %}" href="{{ url_for('professional.dashboard') }}"><i class="bi bi-tools"></i> My Tasks</a></li>
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.chat' %}active{% endif %}" href="{{ url_for('professional.chat') }}"><i class="bi bi-chat-dots"></i> Chat</a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.chat' %}active{% endif %}" href="{{ url_for('professional.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
                     {% endif %}
 
                     {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
@@ -853,6 +854,87 @@
     })();
     </script>
 
-</body>
+    <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+    <script>
+    // Global Chat Notification Logic
+    (function() {
+        // Fetch unread count on page load
+        function updateGlobalChatBadges(count) {
+            const badges = document.querySelectorAll('.global-chat-badge');
+            badges.forEach(badge => {
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
+                }
+            });
+        }
+        
+        // Only run if logged in
+        if ({{ 'true' if session.get('user_id') or session.get('professional_id') else 'false' }}) {
+            
+            window.refreshGlobalChatBadges = function() {
+                fetch('/api/chat/unread_total')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.success) {
+                            updateGlobalChatBadges(data.unread_count);
+                        }
+                    })
+                    .catch(e => console.error('Failed to fetch unread chat count:', e));
+            };
+            
+            // Initial fetch
+            window.refreshGlobalChatBadges();
+                
+            // Setup global Pusher for live chat pings
+            if ('{{ config["PUSHER_KEY"] }}' && '{{ config["PUSHER_KEY"] }}' !== 'dummy-key') {
+                try {
+                    Pusher.logToConsole = false;
+                    const pusher = new Pusher('{{ config["PUSHER_KEY"] }}', {
+                        cluster: '{{ config["PUSHER_CLUSTER"] }}',
+                        authEndpoint: '/pusher/auth',
+                        auth: {
+                            headers: {
+                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            }
+                        }
+                    });
+                    
+                    let channelName = null;
+                    {% if session.get('is_admin') %}
+                    channelName = 'private-admins';
+                    {% elif session.get('professional_id') %}
+                    channelName = 'private-professional-{{ session.get("professional_id") }}';
+                    {% endif %}
+                    
+                    if (channelName) {
+                        const channel = pusher.subscribe(channelName);
+                        channel.bind('new_chat_message', function(data) {
+                            // If we are on the chat page, let the chat page logic handle read state.
+                            // Otherwise, increment the global badge immediately.
+                            if (!window.location.pathname.includes('/chat')) {
+                                const badges = document.querySelectorAll('.global-chat-badge');
+                                let currentCount = parseInt(badges[0]?.textContent || '0') || 0;
+                                updateGlobalChatBadges(currentCount + 1);
+                                
+                                // Optional: play a subtle notification sound
+                                try {
+                                    const audio = new Audio('/static/sounds/notification.mp3');
+                                    audio.volume = 0.5;
+                                    audio.play().catch(e => {}); // Ignore autoplay errors
+                                } catch (e) {}
+                            }
+                        });
+                    }
+                } catch (e) {
+                    console.error('Global Pusher init error:', e);
+                }
+            }
+        }
+    })();
+    </script>
 
+    </body>
 </html>

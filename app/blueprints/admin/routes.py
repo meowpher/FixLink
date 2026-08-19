@@ -1359,12 +1359,24 @@ def get_professionals_for_chat():
             is_read=False
         ).count()
         
+        # Get the latest message for sorting
+        last_message = ChatMessage.query.filter(
+            ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.sender_id == prof.id) & (ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_ADMIN)) |
+            ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_ADMIN) & (ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_id == prof.id))
+        ).order_by(ChatMessage.timestamp.desc()).first()
+        
+        last_msg_time = last_message.timestamp.timestamp() if last_message else 0
+        
         result.append({
             'id': prof.id,
             'name': prof.name,
             'category': prof.category,
-            'unread_count': unread_count
+            'unread_count': unread_count,
+            'last_message_time': last_msg_time
         })
+        
+    # Sort professionals so recent chats are at the top
+    result.sort(key=lambda x: x['last_message_time'], reverse=True)
     
     return jsonify({
         'success': True,

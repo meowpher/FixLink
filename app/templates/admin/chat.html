@@ -527,6 +527,7 @@
                     });
                 }
                 scrollToBottom();
+                if (window.refreshGlobalChatBadges) window.refreshGlobalChatBadges();
             }
         } catch (error) {
             console.error('Error loading history:', error);
@@ -574,6 +575,8 @@
                     msgEl.dataset.isPending = 'false';
                     msgEl.classList.remove('opacity-50');
                 }
+                // Refresh list so this active chat jumps to the top
+                loadProfessionals();
             } else {
                 const msgEl = document.querySelector(`[data-id="${tempId}"]`);
                 if (msgEl) msgEl.remove();

@@ -311,6 +311,7 @@
                         data.messages.forEach(msg => addMessageToChat(msg));
                     }
                     scrollToBottom();
+                    if (window.refreshGlobalChatBadges) window.refreshGlobalChatBadges();
                 }
             })
             .catch(err => {

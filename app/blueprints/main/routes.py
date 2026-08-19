@@ -389,3 +389,34 @@ def report_bug():
         return redirect(request.form.get('origin', url_for('main.index')))
         
     return render_template('report_bug.html')
+
+@main_bp.route('/api/chat/unread_total')
+@handle_api_errors
+def get_unread_chat_total():
+    from ...models import ChatMessage
+    
+    if not session.get('user_id') and not session.get('professional_id'):
+        return jsonify({'success': True, 'unread_count': 0})
+        
+    unread_count = 0
+    if session.get('is_admin'):
+        # For Admin, get all unread messages sent by professionals to admin
+        unread_count = ChatMessage.query.filter_by(
+            sender_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
+            receiver_type=ChatMessage.SENDER_TYPE_ADMIN,
+            is_read=False
+        ).count()
+    elif session.get('professional_id'):
+        # For Professional, get all unread messages sent by admin to professional
+        prof_id = session.get('professional_id')
+        unread_count = ChatMessage.query.filter_by(
+            sender_type=ChatMessage.SENDER_TYPE_ADMIN,
+            receiver_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
+            receiver_id=prof_id,
+            is_read=False
+        ).count()
+        
+    return jsonify({
+        'success': True,
+        'unread_count': unread_count
+    })

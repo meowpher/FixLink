@@ -192,45 +192,47 @@
                     {% for ticket in assigned_tickets %}
                     <div class="col-md-12">
                         <div class="card ticket-card border-0 shadow-sm hover-shadow transition-normal {% if ticket.is_overdue %}border-status-overdue{% elif ticket.status == 'in-progress' %}border-status-in-progress{% else %}border-status-assigned{% endif %}" style="border-radius: var(--border-radius-lg);">
-                            <div class="card-body p-4">
-                                <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
                                     <div>
                                         <div class="d-flex align-items-center gap-2 mb-1">
-                                            <h4 class="mb-0 fw-bold">Room {{ ticket.room.number }}</h4>
-                                            <span class="badge rounded-pill {% if ticket.role == 'Primary' %}bg-dark{% else %}bg-info-subtle text-info-emphasis border border-info{% endif %}" style="font-size: 0.75rem;">
+                                            <h5 class="mb-0 fw-bold">Room {{ ticket.room.number }}</h5>
+                                            <span class="badge rounded-pill {% if ticket.role == 'Primary' %}bg-dark{% else %}bg-info-subtle text-info-emphasis border border-info{% endif %}" style="font-size: 0.7rem;">
                                                 <i class="bi bi-person{% if ticket.role != 'Primary' %}-plus{% endif %} me-1"></i>{{ ticket.role }}
                                             </span>
                                         </div>
-                                        <div class="text-primary fw-semibold" style="font-size: 0.9rem;">
+                                        <div class="text-primary fw-semibold" style="font-size: 0.85rem;">
                                             <i class="bi bi-tag me-1"></i>{{ ticket.issue_type.replace('_', ' ').title() }}
                                         </div>
                                     </div>
                                     <div class="text-end">
-                                        <div class="badge rounded-pill {% if ticket.status == 'assigned' %}bg-primary-subtle text-primary border border-primary{% elif ticket.status == 'in-progress' %}bg-warning-subtle text-warning border border-warning{% else %}bg-secondary-subtle text-secondary border border-secondary{% endif %} px-3 py-2" style="text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.5px;">
+                                        <div class="badge rounded-pill {% if ticket.status == 'assigned' %}bg-primary-subtle text-primary border border-primary{% elif ticket.status == 'in-progress' %}bg-warning-subtle text-warning border border-warning{% else %}bg-secondary-subtle text-secondary border border-secondary{% endif %} px-2 py-1" style="text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.5px;">
                                             {{ ticket.status.replace('-', ' ') }}
                                         </div>
-                                        <div class="mt-2 fw-bold text-muted" style="font-size: 0.8rem;">#{{ ticket.id }}</div>
+                                        <div class="mt-1 fw-bold text-muted" style="font-size: 0.75rem;">#{{ ticket.id }}</div>
                                     </div>
                                 </div>
                                 
-                                <p class="text-muted mb-4 fs-6">{{ ticket.description }}</p>
+                                <p class="text-muted mb-3" style="font-size: 0.9rem;">{{ ticket.description }}</p>
                                 
-                                <div class="row g-3 mb-4">
+                                <div class="row g-2 mb-3">
                                     <div class="col-sm-6">
-                                        <div class="p-3 bg-light rounded-3" style="height: 100%;">
-                                            <div class="small text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 700;">Deadline & Status</div>
-                                            <div class="fw-bold" style="font-size: 0.9rem;">{{ ticket.deadline_datetime.strftime('%b %d, %H:%M') if ticket.deadline_datetime else 'No deadline' }}</div>
-                                            {% if ticket.time_remaining %}
-                                                <div class="{% if ticket.is_overdue %}text-danger{% else %}text-success{% endif %} small mt-1">
-                                                    <i class="bi bi-hourglass-split me-1"></i>{{ ticket.time_remaining }} remaining
-                                                </div>
-                                            {% endif %}
+                                        <div class="p-2 px-3 bg-light rounded-3" style="height: 100%;">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="small text-muted text-uppercase" style="font-size: 0.65rem; font-weight: 700;">Deadline & Status</div>
+                                                {% if ticket.time_remaining %}
+                                                    <div class="{% if ticket.is_overdue %}text-danger{% else %}text-success{% endif %}" style="font-size: 0.75rem; font-weight: 600;">
+                                                        <i class="bi bi-hourglass-split me-1"></i>{{ ticket.time_remaining }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="fw-bold mt-1" style="font-size: 0.85rem;">{{ ticket.deadline_datetime.strftime('%b %d, %H:%M') if ticket.deadline_datetime else 'No deadline' }}</div>
                                         </div>
                                     </div>
                                     <div class="col-sm-6">
-                                        <div class="p-3 bg-light rounded-3" style="height: 100%;">
+                                        <div class="p-2 px-3 bg-light rounded-3" style="height: 100%;">
                                             <div class="small text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 700;">Complexity Level</div>
-                                            <select class="form-select form-select-sm border-0 bg-transparent fw-bold p-0" style="font-size: 0.9rem; color: inherit; box-shadow: none;" onchange="setComplexity({{ ticket.id }}, this.value)">
+                                            <select class="form-select form-select-sm border-0 bg-transparent fw-bold p-0" style="font-size: 0.85rem; color: inherit; box-shadow: none;" onchange="setComplexity({{ ticket.id }}, this.value)">
                                                 <option value="">Set Complexity</option>
                                                 {% for complexity in complexity_choices %}
                                                 <option value="{{ complexity }}" {% if ticket.complexity == complexity %}selected{% endif %}>
@@ -243,25 +245,25 @@
                                 </div>
                                 
                                 <!-- Action Buttons -->
-                                <div class="d-flex gap-3 pt-2">
+                                <div class="d-flex flex-wrap gap-2 pt-3 border-top mt-auto">
                                     {% if ticket.status == 'assigned' %}
-                                    <button class="btn btn-success rounded-pill px-4 flex-grow-1 shadow-sm" onclick="startJob({{ ticket.id }})">
-                                        <i class="bi bi-play-circle-fill me-2"></i>Start Task
+                                    <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm" onclick="startJob({{ ticket.id }})">
+                                        <i class="bi bi-play-circle-fill me-1"></i>Start Task
                                     </button>
                                     {% endif %}
                                     
                                     {% if ticket.status == 'in-progress' %}
-                                    <button class="btn btn-primary rounded-pill px-4 flex-grow-1 shadow-sm" data-bs-toggle="modal" data-bs-target="#completeModal{{ ticket.id }}">
-                                        <i class="bi bi-check-circle-fill me-2"></i>Mark as Done
+                                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#completeModal{{ ticket.id }}">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Mark as Done
                                     </button>
                                     
-                                    <button class="btn btn-outline-info rounded-pill px-3 shadow-sm" onclick="requestHelp({{ ticket.id }})">
-                                        <i class="bi bi-people-fill me-2"></i>Request Help
+                                    <button class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-sm" onclick="requestHelp({{ ticket.id }})">
+                                        <i class="bi bi-people-fill me-1"></i>Request Help
                                     </button>
                                     {% endif %}
                                     
                                     {% if ticket.status in ['assigned', 'in-progress'] %}
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#cancelModal{{ ticket.id }}">
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm ms-auto" data-bs-toggle="modal" data-bs-target="#cancelModal{{ ticket.id }}">
                                         <i class="bi bi-x-circle me-1"></i>Cancel
                                     </button>
                                     {% endif %}

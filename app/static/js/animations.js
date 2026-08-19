@@ -1,5 +1,5 @@
 // specific syntax for Motion One
-import { animate, stagger, inView } from "https://cdn.skypack.dev/motion";
+import { animate, stagger, inView } from "https://esm.sh/motion";
 
 document.addEventListener("DOMContentLoaded", () => {
     // Animate main content on load

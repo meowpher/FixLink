@@ -173,6 +173,7 @@
         <div class="col-12 mt-4">
             <div class="analytics-card p-4">
                 <h5 class="mb-4 fw-bold">Service Category Distribution</h5>
+                <div class="desktop-table-container">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle">
                         <thead class="table-light">
@@ -190,8 +191,8 @@
                                 <td>{{ count }}</td>
                                 <td>
                                     <div class="progress" style="height: 8px; width: 100px;">
-                                        <div class="progress-bar" role="progressbar" 
-                                             style="width: {{ (count / total_tickets * 100)|round|int if total_tickets > 0 else 0 }}%"></div>
+                                        <div class="progress-bar set-width" role="progressbar" 
+                                             data-width="{{ (count / total_tickets * 100)|round|int if total_tickets > 0 else 0 }}%"></div>
                                     </div>
                                     <small class="text-muted">{{ (count / total_tickets * 100)|round(1) if total_tickets > 0 else 0 }}%</small>
                                 </td>
@@ -200,8 +201,44 @@
                                 </td>
                             </tr>
                             {% endfor %}
-                        </tbody>
+                    </tbody>
                     </table>
+                </div>
+                </div>
+
+                <!-- Mobile Card Layout -->
+                <div class="mobile-card-list">
+                    {% for cat, count in category_data.items() %}
+                    <div class="mc-card">
+                        <div class="mc-top">
+                            <div class="mc-id-title">
+                                <span class="mc-title fw-semibold">{{ cat|title }}</span>
+                            </div>
+                            <div class="mc-status">
+                                <span class="badge bg-success-subtle text-success">Stable</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mc-person-row bg-transparent p-0 mt-2">
+                            <div class="mc-person-left w-100">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="mc-meta">{{ count }} Tickets</span>
+                                        <span class="mc-meta fw-bold">{{ (count / total_tickets * 100)|round(1) if total_tickets > 0 else 0 }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 8px; width: 100%;">
+                                        <div class="progress-bar set-width" role="progressbar" 
+                                             data-width="{{ (count / total_tickets * 100)|round|int if total_tickets > 0 else 0 }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <p class="mb-0">No data available.</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -213,8 +250,24 @@
 <!-- Chart.js CDN -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- Data for charts injected safely -->
+<script type="application/json" id="trend-data">
+    {{ monthly_trend|tojson|safe }}
+</script>
+<script type="application/json" id="cat-labels">
+    {{ category_data.keys()|list|tojson|safe }}
+</script>
+<script type="application/json" id="cat-values">
+    {{ category_data.values()|list|tojson|safe }}
+</script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Apply progress bar widths
+        document.querySelectorAll('.progress-bar.set-width').forEach(el => {
+            el.style.width = el.getAttribute('data-width');
+        });
+
         // Theme-aware colors
         const isDark = document.body.getAttribute('data-theme') === 'dark';
         const primaryColor = isDark ? '#C8D8E8' : '#003399';
@@ -233,7 +286,7 @@
         const lightPieColors = ['#003399', '#ffcc00', '#28a745', '#dc3545', '#17a2b8', '#6610f2', '#fd7e14'];
 
         // 1. Trend Chart
-        const trendData = {{ monthly_trend|tojson }};
+        const trendData = JSON.parse(document.getElementById('trend-data').textContent);
         const trendCtx = document.getElementById('trendChart').getContext('2d');
         
         new Chart(trendCtx, {
@@ -274,8 +327,8 @@
         });
 
         // 2. Category Pie Chart
-        const catLabels = {{ category_data.keys()|list|tojson }};
-        const catValues = {{ category_data.values()|list|tojson }};
+        const catLabels = JSON.parse(document.getElementById('cat-labels').textContent);
+        const catValues = JSON.parse(document.getElementById('cat-values').textContent);
         const categoryCtx = document.getElementById('categoryChart').getContext('2d');
 
         new Chart(categoryCtx, {

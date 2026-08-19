@@ -253,7 +253,7 @@
                                         style="font-size: 0.65rem; font-weight: 700;">Complexity Level</div>
                                     <select class="form-select form-select-sm border-0 bg-transparent fw-bold p-0"
                                         style="font-size: 0.85rem; color: inherit; box-shadow: none;"
-                                        onchange="setComplexity({{ ticket.id }}, this.value)">
+                                        data-id="{{ ticket.id }}" onchange="setComplexity(this.dataset.id, this.value)">
                                         <option value="">Set Complexity</option>
                                         {% for complexity in complexity_choices %}
                                         <option value="{{ complexity }}" {% if ticket.complexity==complexity
@@ -270,7 +270,7 @@
                         <div class="d-flex flex-wrap gap-2 pt-3 border-top mt-auto">
                             {% if ticket.status == 'assigned' %}
                             <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm"
-                                onclick="startJob({{ ticket.id }})">
+                                data-id="{{ ticket.id }}" onclick="startJob(this.dataset.id)">
                                 <i class="bi bi-play-circle-fill me-1"></i>Start Task
                             </button>
                             {% endif %}
@@ -282,7 +282,7 @@
                             </button>
 
                             <button class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-sm"
-                                onclick="requestHelp({{ ticket.id }})">
+                                data-id="{{ ticket.id }}" onclick="requestHelp(this.dataset.id)">
                                 <i class="bi bi-people-fill me-1"></i>Request Help
                             </button>
                             {% endif %}
@@ -413,7 +413,7 @@
                     </div>
                 </form>
                 <button type="button" class="btn btn-primary w-100 rounded-pill py-2"
-                    onclick="completeJob({{ ticket.id }})">Submit Completion</button>
+                    data-id="{{ ticket.id }}" onclick="completeJob(this.dataset.id)">Submit Completion</button>
             </div>
         </div>
     </div>
@@ -437,7 +437,7 @@
                         placeholder="Describe the reason (e.g., missing tools, wrong expertise)..." required></textarea>
                 </div>
                 <button type="button" class="btn btn-danger w-100 rounded-pill py-2"
-                    onclick="cancelJob({{ ticket.id }})">Confirm Cancellation</button>
+                    data-id="{{ ticket.id }}" onclick="cancelJob(this.dataset.id)">Confirm Cancellation</button>
             </div>
         </div>
     </div>
@@ -484,14 +484,15 @@
     });
 
     function initPusher() {
-        if (!'{{ PUSHER_KEY }}') {
+        const pusherKey = '{{ PUSHER_KEY }}';
+        if (!pusherKey || pusherKey === 'None' || pusherKey === 'dummy-key') {
             console.warn('Pusher key missing from configuration.');
             return;
         }
 
         try {
-            Pusher.logToConsole = false;
-            pusher = new Pusher('{{ PUSHER_KEY }}', {
+            // Configure Pusher for private channels
+            pusher = new Pusher(pusherKey, {
                 cluster: '{{ PUSHER_CLUSTER }}',
                 authEndpoint: '/pusher/auth',
                 auth: {

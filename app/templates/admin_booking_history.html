@@ -37,8 +37,9 @@
                 </span>
             </div>
 
-            <div class="table-responsive">
-                <table class="table table-hover tickets-table mb-0">
+            <div class="desktop-table-container">
+                <div class="table-responsive">
+                    <table class="table table-hover tickets-table mb-0">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -99,6 +100,54 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                </div>
+            </div>
+
+            <!-- Mobile Card Layout -->
+            <div class="mobile-card-list">
+                {% for booking in bookings %}
+                <div class="mc-card">
+                    <div class="mc-top">
+                        <div class="mc-id-title">
+                            <span class="mc-id">#{{ booking.id }}</span>
+                            <span class="mc-title">{{ booking.subject }}</span>
+                        </div>
+                        <div class="mc-status">
+                            {% if booking.status == 'active' %}
+                            <span class="badge bg-success">Active</span>
+                            {% else %}
+                            <span class="badge bg-danger">Cancelled</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mc-person-row">
+                        <div class="mc-person-left">
+                            <div class="mc-avatar">{{ booking.faculty.name[0]|upper }}</div>
+                            <div class="mc-person-info">
+                                <span class="mc-name">{{ booking.faculty.name }}</span>
+                                <span class="mc-meta">{{ booking.faculty.email }}</span>
+                            </div>
+                        </div>
+                        <span class="mc-pill">Room {{ booking.room.number }}</span>
+                    </div>
+
+                    <div class="mc-bottom">
+                        <div class="mc-date">
+                            <i class="bi bi-calendar"></i>
+                            {{ booking.date.strftime('%d %b %Y') }} at {{ booking.slot_start.strftime('%I:%M %p') }}
+                        </div>
+                        <div class="mc-actions">
+                            <span class="mc-pill">Div: {{ booking.division or '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-calendar-x fs-1 mb-2 d-block"></i>
+                    <p class="mb-0">No bookings found.</p>
+                </div>
+                {% endfor %}
             </div>
 
             <!-- Pagination Controls -->

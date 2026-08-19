@@ -368,14 +368,15 @@
     });
 
     function initPusher() {
-        if (!'{{ PUSHER_KEY }}') {
+        const pusherKey = '{{ PUSHER_KEY }}';
+        if (!pusherKey || pusherKey === 'None' || pusherKey === 'dummy-key') {
             console.warn('Pusher key missing from configuration.');
             return;
         }
 
         try {
-            Pusher.logToConsole = false;
-            pusher = new Pusher('{{ PUSHER_KEY }}', {
+            // Configure Pusher for private channels
+            pusher = new Pusher(pusherKey, {
                 cluster: '{{ PUSHER_CLUSTER }}',
                 authEndpoint: '/pusher/auth',
                 auth: {
@@ -432,7 +433,7 @@
             const response = await fetch('/admin/api/chat/professionals');
             const result = await response.json();
             if (result.success) {
-                professionals = result.professionals;
+                professionals = result.professionals || [];
                 renderProfessionals();
                 
                 // If a professional was pre-selected, just update the sidebar highlighting

@@ -1910,7 +1910,7 @@
             // Pusher Real-time integration
             const pusherAppKey = "{{ config['PUSHER_KEY'] }}";
             const pusherCluster = "{{ config['PUSHER_CLUSTER'] }}";
-            if (pusherAppKey && pusherAppKey !== 'dummy-key') {
+            if (pusherAppKey && pusherAppKey !== 'dummy-key' && pusherAppKey !== 'None') {
                 const pusher = new Pusher(pusherAppKey, { cluster: pusherCluster });
                 const channel = pusher.subscribe('public-room-updates');
                 channel.bind('room_occupancy_changed', function(data) {

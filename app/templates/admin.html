@@ -395,14 +395,15 @@
     });
 
     function initPusher() {
-        if (!'{{ PUSHER_KEY }}') {
+        const pusherKey = '{{ PUSHER_KEY }}';
+        if (!pusherKey || pusherKey === 'None' || pusherKey === 'dummy-key') {
             console.warn('Pusher key missing from configuration.');
             return;
         }
 
         try {
-            Pusher.logToConsole = false;
-            pusher = new Pusher('{{ PUSHER_KEY }}', {
+            // Configure Pusher for private channels
+            pusher = new Pusher(pusherKey, {
                 cluster: '{{ PUSHER_CLUSTER }}',
                 authEndpoint: '/pusher/auth',
                 auth: {

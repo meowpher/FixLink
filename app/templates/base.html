@@ -25,11 +25,8 @@
     <link href="{{ url_for('static', filename='css/style.css') }}?v=5.8" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Vercel Speed Insights -->
-    <script>
-        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/speed-insights/script.js"></script>
+    <!-- Manifest -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 
     <!-- Advanced UI Animations CSS -->
     <link href="{{ url_for('static', filename='css/page_transitions.css') }}" rel="stylesheet">
@@ -884,6 +881,8 @@
     })();
     </script>
 
+    <meta name="user-logged-in" content="{{ 'true' if session.get('user_id') or session.get('professional_id') else 'false' }}">
+    <meta name="chat-channel" content="{% if session.get('is_admin') %}private-admins{% elif session.get('professional_id') %}private-professional-{{ session.get('professional_id') }}{% endif %}">
     <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
     <script>
     // Global Chat Notification Logic
@@ -902,7 +901,7 @@
         }
         
         // Only run if logged in
-        if ({{ 'true' if session.get('user_id') or session.get('professional_id') else 'false' }}) {
+        if (document.querySelector('meta[name="user-logged-in"]').content === 'true') {
             
             window.refreshGlobalChatBadges = function() {
                 fetch('/api/chat/unread_total')
@@ -919,7 +918,8 @@
             window.refreshGlobalChatBadges();
                 
             // Setup global Pusher for live chat pings
-            if ('{{ config["PUSHER_KEY"] }}' && '{{ config["PUSHER_KEY"] }}' !== 'dummy-key') {
+            const pKey = '{{ config["PUSHER_KEY"] }}';
+            if (pKey && pKey !== 'dummy-key' && pKey !== 'None') {
                 try {
                     Pusher.logToConsole = false;
                     const pusher = new Pusher('{{ config["PUSHER_KEY"] }}', {
@@ -932,12 +932,7 @@
                         }
                     });
                     
-                    let channelName = null;
-                    {% if session.get('is_admin') %}
-                    channelName = 'private-admins';
-                    {% elif session.get('professional_id') %}
-                    channelName = 'private-professional-{{ session.get("professional_id") }}';
-                    {% endif %}
+                    let channelName = document.querySelector('meta[name="chat-channel"]').content;
                     
                     if (channelName) {
                         const channel = pusher.subscribe(channelName);

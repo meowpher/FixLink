@@ -1,0 +1,2221 @@
+<html><head><meta charset='utf-8'><style>body{font-family: sans-serif; line-height: 1.6; padding: 2em;} table{border-collapse: collapse; width: 100%; margin-bottom: 1em;} th, td{border: 1px solid #ddd; padding: 8px; text-align: left;} th{background-color: #f2f2f2;} code{background-color: #f4f4f4; padding: 2px 4px; border-radius: 4px;} pre{background-color: #f4f4f4; padding: 1em; overflow-x: auto;}</style></head><body><h1>FixLink — Comprehensive Technical Documentation</h1>
+<blockquote>
+<p><strong>Version</strong>: V1<br />
+<strong>Repository</strong>: <a href="https://github.com/meowpher/FixLink-V1">github.com/meowpher/FixLink-V1</a><br />
+<strong>Last Updated</strong>: August 2026</p>
+</blockquote>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#1-project-overview">Project Overview</a></li>
+<li><a href="#2-technology-stack">Technology Stack</a></li>
+<li><a href="#3-architecture-overview">Architecture Overview</a></li>
+<li><a href="#4-project-structure">Project Structure</a></li>
+<li><a href="#5-database-schema">Database Schema</a></li>
+<li><a href="#6-authentication--authorization">Authentication &amp; Authorization</a></li>
+<li><a href="#7-blueprints--routes">Blueprints &amp; Routes</a></li>
+<li><a href="#8-api-integrations">API Integrations</a></li>
+<li><a href="#9-real-time-features-pusher">Real-Time Features (Pusher)</a></li>
+<li><a href="#10-caching-strategy">Caching Strategy</a></li>
+<li><a href="#11-background-scheduler">Background Scheduler</a></li>
+<li><a href="#12-analytics-engine">Analytics Engine</a></li>
+<li><a href="#13-frontend-architecture">Frontend Architecture</a></li>
+<li><a href="#14-deployment">Deployment</a></li>
+<li><a href="#15-environment-variables">Environment Variables</a></li>
+<li><a href="#16-testing">Testing</a></li>
+<li><a href="#17-qr-code-system">QR Code System</a></li>
+</ol>
+<hr />
+<h2>1. Project Overview</h2>
+<p><strong>FixLink</strong> is a full-stack <strong>Smart-Room Maintenance Tracker</strong> built for <strong>MIT-WPU's Vyas Building</strong>. It enables students and faculty to report infrastructure issues (broken ACs, plumbing leaks, electrical faults, etc.) for specific rooms, and provides administrators a real-time dashboard to manage, assign, and track maintenance tickets through their entire lifecycle.</p>
+<h3>Key Features</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Maintenance Ticketing</strong></td>
+<td>Students/faculty submit issues via a visual room-map interface. Tickets track status from <code>open</code> → <code>assigned</code> → <code>in-progress</code> → <code>fixed</code>.</td>
+</tr>
+<tr>
+<td><strong>Interactive Floor Maps</strong></td>
+<td>SVG-based room maps with color-coded statuses (red = issue, yellow = in-progress, blue = assigned, green = normal).</td>
+</tr>
+<tr>
+<td><strong>Professional Management</strong></td>
+<td>Certified maintenance workers (electricians, plumbers, IT technicians, carpenters) receive assignments, start/complete jobs, and upload proof-of-fix photos.</td>
+</tr>
+<tr>
+<td><strong>Real-Time Notifications</strong></td>
+<td>Pusher-powered live updates push ticket changes, chat messages, and help requests to admin and professional dashboards instantly.</td>
+</tr>
+<tr>
+<td><strong>Faculty Room Scheduling</strong></td>
+<td>Faculty members can view timetables, book vacant rooms on-the-fly, and track room occupancy in real time.</td>
+</tr>
+<tr>
+<td><strong>Analytics &amp; Predictive Maintenance</strong></td>
+<td>Asset health scoring (0–100), technician efficiency metrics (MTTR, completion rate), and ticket volume trends.</td>
+</tr>
+<tr>
+<td><strong>QR Code Entry</strong></td>
+<td>Each room has a printable QR code linking directly to its report page (<code>/report?room=VY404</code>).</td>
+</tr>
+<tr>
+<td><strong>Email Notifications</strong></td>
+<td>Automated emails via EmailJS for ticket creation, status updates, account verification, and password resets.</td>
+</tr>
+<tr>
+<td><strong>Web Push Notifications</strong></td>
+<td>Native browser push notifications via the Web Push API and VAPID keys for urgent alerts.</td>
+</tr>
+<tr>
+<td><strong>Super Admin Panel</strong></td>
+<td>A developer-level dashboard for managing admin accounts, faculty, and professionals.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2. Technology Stack</h2>
+<h3>Backend</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Framework</td>
+<td>Flask</td>
+<td>≥3.0.0, &lt;3.2.0</td>
+</tr>
+<tr>
+<td>ORM</td>
+<td>Flask-SQLAlchemy</td>
+<td>≥3.1.0</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>PostgreSQL (Supabase)</td>
+<td>—</td>
+</tr>
+<tr>
+<td>DB Driver</td>
+<td>psycopg2-binary</td>
+<td>≥2.9.0</td>
+</tr>
+<tr>
+<td>Caching</td>
+<td>Flask-Caching (FileSystemCache)</td>
+<td>≥2.1.0</td>
+</tr>
+<tr>
+<td>CSRF Protection</td>
+<td>Flask-WTF</td>
+<td>≥1.2.0</td>
+</tr>
+<tr>
+<td>Real-Time</td>
+<td>Pusher (server-side SDK)</td>
+<td>≥3.3.0</td>
+</tr>
+<tr>
+<td>Web Push</td>
+<td>pywebpush</td>
+<td>≥2.0.0</td>
+</tr>
+<tr>
+<td>Cryptography</td>
+<td>cryptography</td>
+<td>≥42.0.0</td>
+</tr>
+<tr>
+<td>QR Codes</td>
+<td>qrcode</td>
+<td>≥7.4.0</td>
+</tr>
+<tr>
+<td>PDF Export</td>
+<td>fpdf2</td>
+<td>≥2.7.0</td>
+</tr>
+<tr>
+<td>Environment</td>
+<td>python-dotenv</td>
+<td>≥1.0.0</td>
+</tr>
+<tr>
+<td>HTTP Client</td>
+<td>requests</td>
+<td>≥2.31.0</td>
+</tr>
+</tbody>
+</table>
+<h3>Frontend</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Templates</td>
+<td>Jinja2 (Flask's built-in)</td>
+</tr>
+<tr>
+<td>CSS Framework</td>
+<td>Bootstrap 5.3.2</td>
+</tr>
+<tr>
+<td>Icons</td>
+<td>Bootstrap Icons 1.11.1</td>
+</tr>
+<tr>
+<td>JavaScript</td>
+<td>Vanilla JS (modular)</td>
+</tr>
+<tr>
+<td>Real-Time Client</td>
+<td>Pusher JS SDK</td>
+</tr>
+<tr>
+<td>Charts</td>
+<td>Chart.js (admin analytics)</td>
+</tr>
+</tbody>
+</table>
+<h3>Infrastructure</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Technology</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hosting</td>
+<td>Vercel (Serverless Python)</td>
+</tr>
+<tr>
+<td>Database</td>
+<td>Supabase PostgreSQL</td>
+</tr>
+<tr>
+<td>Container</td>
+<td>Docker + Docker Compose</td>
+</tr>
+<tr>
+<td>Version Control</td>
+<td>Git / GitHub</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3. Architecture Overview</h2>
+<p>FixLink follows the <strong>Flask Application Factory Pattern</strong> with a modular <strong>Blueprint</strong> architecture.</p>
+<p><code>┌──────────────────────────────────────────────────────────────┐
+│                        VERCEL EDGE                           │
+│  ┌─────────────────────────────────────────────────────────┐ │
+│  │  api/index.py  →  create_app()  →  Flask WSGI App       │ │
+│  └──────────────────────┬──────────────────────────────────┘ │
+└─────────────────────────┼────────────────────────────────────┘
+                          │
+          ┌───────────────┼───────────────┐
+          ▼               ▼               ▼
+   ┌─────────────┐ ┌──────────┐  ┌──────────────┐
+   │  Blueprints │ │  Cache   │  │   Database   │
+   │ (6 modules) │ │ /tmp/    │  │  (Supabase)  │
+   └─────────────┘ └──────────┘  └──────────────┘
+          │
+   ┌──────┴───────────────────────────────┐
+   │                                      │
+   ▼                   ▼                  ▼
+┌────────┐    ┌──────────────┐    ┌────────────┐
+│ EmailJS│    │  Pusher      │    │  Web Push  │
+│  REST  │    │  WebSocket   │    │  (VAPID)   │
+└────────┘    └──────────────┘    └────────────┘</code></p>
+<h3>Application Factory (<code>app/__init__.py</code>)</h3>
+<p>The <code>create_app()</code> function:
+1. Loads environment variables and configures secrets
+2. Sets up Vercel-specific session security (secure cookies, proxy headers)
+3. Configures the PostgreSQL connection with <code>NullPool</code> on Vercel (prevents stale connections)
+4. Initializes extensions: SQLAlchemy, Flask-Migrate, Flask-Caching, CSRF, Rate Limiter
+5. Runs database initialization via <code>init_db(app)</code>
+6. Registers all 6 blueprints
+7. Starts the background scheduler (disabled on Vercel)
+8. Registers Jinja2 filters (IST timezone formatter)</p>
+<hr />
+<h2>4. Project Structure</h2>
+<p><code>FixLink/
+├── api/
+│   └── index.py                 # Vercel serverless entry point
+├── app/
+│   ├── __init__.py              # Application factory (create_app)
+│   ├── models.py                # SQLAlchemy models (12 tables)
+│   ├── database.py              # DB initialization &amp; seeding
+│   ├── cache.py                 # Flask-Caching setup &amp; helpers
+│   ├── realtime.py              # Pusher integration &amp; notification functions
+│   ├── scheduler.py             # Background alert scheduler
+│   ├── analytics.py             # Predictive maintenance &amp; metrics
+│   ├── utils.py                 # EmailJS, Web Push, file utilities
+│   ├── decorators.py            # Auth decorators (6 types)
+│   ├── api_utils.py             # Standardized JSON response helpers
+│   ├── blueprints/
+│   │   ├── main/                # Student portal &amp; public API
+│   │   ├── auth/                # Authentication (login, signup, verify)
+│   │   ├── admin/               # Admin dashboard &amp; ticket management
+│   │   ├── professional/        # Worker dashboard &amp; job lifecycle
+│   │   ├── faculty/             # Room scheduling &amp; timetables
+│   │   └── superadmin/          # Developer panel (manage admins)
+│   ├── templates/               # Jinja2 HTML templates (21 files)
+│   │   ├── base.html            # Master layout (navbar, footer, JS)
+│   │   ├── login.html           # Unified login page
+│   │   ├── report.html          # Student issue report form
+│   │   ├── status_map.html      # Public room status map
+│   │   ├── admin/               # Admin sub-templates
+│   │   ├── professional/        # Professional sub-templates
+│   │   ├── faculty/             # Faculty sub-templates
+│   │   └── superadmin/          # Super admin sub-templates
+│   └── static/
+│       ├── css/                 # Stylesheets (5 files)
+│       ├── js/                  # JavaScript modules (9 files)
+│       └── images/              # Logos and assets
+├── migrations/                  # Alembic database migrations
+├── scripts/
+│   ├── init_data.py             # Vyas building seed data
+│   ├── generate_qr.py          # QR code generator for rooms
+│   ├── generate_vapid.py       # VAPID key pair generator
+│   └── tools/                   # One-off admin scripts
+├── tests/                       # Automated test suite
+├── qr_codes/                    # Generated QR code PNGs
+├── vercel.json                  # Vercel deployment configuration
+├── Dockerfile                   # Docker build definition
+├── docker-compose.yml           # Docker Compose orchestration
+├── requirements.txt             # Python dependencies
+├── run.py                       # Local development entry point
+└── .env.example                 # Environment variable template</code></p>
+<hr />
+<h2>5. Database Schema</h2>
+<p>FixLink uses <strong>PostgreSQL</strong> hosted on <strong>Supabase</strong>. The ORM is <strong>Flask-SQLAlchemy</strong>. All models are defined in <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/models.py">app/models.py</a>.</p>
+<h3>Entity Relationship Diagram</h3>
+<p>```mermaid
+erDiagram
+    USERS ||--o{ TICKETS : reports
+    USERS ||--o{ NOTIFICATIONS : receives
+    USERS ||--o{ PUSH_SUBSCRIPTIONS : subscribes
+    USERS ||--o{ SCHEDULES : teaches
+    USERS ||--o{ TIMETABLES : "primary faculty"
+    USERS ||--o{ TIMETABLES : "collaborator"
+    USERS ||--o{ ADHOC_BOOKINGS : books
+    USERS ||--o{ ROOM_BOOKINGS : books</p>
+<pre><code>BUILDINGS ||--o{ FLOORS : contains
+FLOORS ||--o{ ROOMS : contains
+
+ROOMS ||--o{ ASSETS : houses
+ROOMS ||--o{ TICKETS : "reported for"
+ROOMS ||--o{ SCHEDULES : "scheduled in"
+ROOMS ||--o{ TIMETABLES : "taught in"
+ROOMS ||--o{ ADHOC_BOOKINGS : "booked in"
+ROOMS ||--o{ ROOM_BOOKINGS : "reserved in"
+
+ASSETS ||--o{ TICKETS : "linked to"
+
+PROFESSIONALS ||--o{ TICKETS : "assigned to"
+PROFESSIONALS ||--o{ HELP_REQUESTS : requests
+PROFESSIONALS ||--o{ HELP_REQUESTS : helps
+PROFESSIONALS ||--o{ PUSH_SUBSCRIPTIONS : subscribes
+
+TICKETS ||--o{ HELP_REQUESTS : "needs help"
+
+CHAT_MESSAGES }|--|| PROFESSIONALS : "involves"
+</code></pre>
+<p>```</p>
+<h3>Table Definitions</h3>
+<h4><code>users</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Constraints</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK, Auto</td>
+<td>Primary key</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>String(100)</td>
+<td>NOT NULL</td>
+<td>Full name</td>
+</tr>
+<tr>
+<td><code>prn</code></td>
+<td>String(20)</td>
+<td>Nullable</td>
+<td>Student PRN (enrollment number)</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>String(120)</td>
+<td>NOT NULL, UNIQUE</td>
+<td>MIT-WPU email</td>
+</tr>
+<tr>
+<td><code>password_hash</code></td>
+<td>String(255)</td>
+<td>Nullable</td>
+<td>Werkzeug hashed password</td>
+</tr>
+<tr>
+<td><code>role</code></td>
+<td>String(20)</td>
+<td>NOT NULL, Default: <code>student</code></td>
+<td>One of: <code>student</code>, <code>faculty</code>, <code>admin</code></td>
+</tr>
+<tr>
+<td><code>is_admin</code></td>
+<td>Boolean</td>
+<td>Default: False</td>
+<td>Admin flag</td>
+</tr>
+<tr>
+<td><code>is_verified</code></td>
+<td>Boolean</td>
+<td>Default: False</td>
+<td>Email verification status</td>
+</tr>
+<tr>
+<td><code>verification_token</code></td>
+<td>String(100)</td>
+<td>Nullable</td>
+<td>Token for email verification</td>
+</tr>
+<tr>
+<td><code>profile_photo</code></td>
+<td>String(255)</td>
+<td>Nullable</td>
+<td>Uploaded avatar filename</td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>DateTime</td>
+<td>Default: UTC now</td>
+<td>Registration timestamp</td>
+</tr>
+</tbody>
+</table>
+<h4><code>buildings</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>String(100)</td>
+<td>UNIQUE. Currently only "Vyas"</td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>Text</td>
+<td>Optional description</td>
+</tr>
+</tbody>
+</table>
+<h4><code>floors</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>building_id</code></td>
+<td>FK → <code>buildings.id</code></td>
+<td>Parent building</td>
+</tr>
+<tr>
+<td><code>level</code></td>
+<td>Integer</td>
+<td>Floor number (0=Ground, 1–7)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>String(50)</td>
+<td>Display name (e.g., "4th Floor")</td>
+</tr>
+</tbody>
+</table>
+<h4><code>rooms</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>floor_id</code></td>
+<td>FK → <code>floors.id</code></td>
+<td>Parent floor</td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td>String(20)</td>
+<td>Room code (e.g., <code>VY401</code>)</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>String(100)</td>
+<td>Descriptive name</td>
+</tr>
+<tr>
+<td><code>room_type</code></td>
+<td>String(20)</td>
+<td>One of: <code>class</code>, <code>lab</code>, <code>washroom</code>, <code>storage</code>, <code>other</code></td>
+</tr>
+<tr>
+<td><code>map_coords</code></td>
+<td>String(255)</td>
+<td>SVG coordinates for map rendering</td>
+</tr>
+<tr>
+<td><code>svg_id</code></td>
+<td>String(50)</td>
+<td>Element ID in the SVG floor plan</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Computed Properties</strong> (Python <code>@property</code>, not DB columns):
+- <code>status</code> → <code>'issue'</code> / <code>'in-progress'</code> / <code>'assigned'</code> / <code>'normal'</code>
+- <code>current_occupancy_status</code> → Dict with occupancy info from timetables/bookings
+- <code>time_until_next_lecture</code> → Time string or "Free for rest of day"</p>
+<h4><code>assets</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>room_id</code></td>
+<td>FK → <code>rooms.id</code></td>
+<td>Parent room</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>String(100)</td>
+<td>Asset name (e.g., "Projector A")</td>
+</tr>
+<tr>
+<td><code>asset_type</code></td>
+<td>String(50)</td>
+<td>Category: <code>projector</code>, <code>ac</code>, <code>computer</code>, etc.</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>String(20)</td>
+<td><code>working</code>, <code>broken</code>, or <code>maintenance</code></td>
+</tr>
+<tr>
+<td><code>installation_date</code></td>
+<td>DateTime</td>
+<td>When the asset was installed</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DB Index</strong>: <code>idx_asset_room_status(room_id, status)</code> — optimizes room status queries.</p>
+<h4><code>tickets</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>room_id</code></td>
+<td>FK → <code>rooms.id</code></td>
+<td>Which room</td>
+</tr>
+<tr>
+<td><code>asset_id</code></td>
+<td>FK → <code>assets.id</code></td>
+<td>Nullable — which asset</td>
+</tr>
+<tr>
+<td><code>assigned_professional_id</code></td>
+<td>FK → <code>professionals.id</code></td>
+<td>Nullable — assigned worker</td>
+</tr>
+<tr>
+<td><code>issue_type</code></td>
+<td>String(50)</td>
+<td>e.g., <code>electrical</code>, <code>plumbing</code>, <code>furniture</code></td>
+</tr>
+<tr>
+<td><code>description</code></td>
+<td>Text</td>
+<td>Detailed issue description</td>
+</tr>
+<tr>
+<td><code>image_filename</code></td>
+<td>String(255)</td>
+<td>Uploaded issue photo</td>
+</tr>
+<tr>
+<td><code>complexity</code></td>
+<td>String(20)</td>
+<td><code>low</code>, <code>medium</code>, <code>high</code> (set by professional)</td>
+</tr>
+<tr>
+<td><code>time_limit_hours</code></td>
+<td>Integer</td>
+<td>Deadline duration set by admin</td>
+</tr>
+<tr>
+<td><code>deadline_datetime</code></td>
+<td>DateTime</td>
+<td>Computed deadline</td>
+</tr>
+<tr>
+<td><code>job_started_at</code></td>
+<td>DateTime</td>
+<td>When professional started</td>
+</tr>
+<tr>
+<td><code>job_completed_at</code></td>
+<td>DateTime</td>
+<td>When professional finished</td>
+</tr>
+<tr>
+<td><code>completion_photo_filename</code></td>
+<td>String(255)</td>
+<td>Proof-of-fix photo</td>
+</tr>
+<tr>
+<td><code>cancellation_reason</code></td>
+<td>Text</td>
+<td>Why job was cancelled</td>
+</tr>
+<tr>
+<td><code>cancelled_at</code></td>
+<td>DateTime</td>
+<td>Cancellation timestamp</td>
+</tr>
+<tr>
+<td><code>cancelled_by_professional_id</code></td>
+<td>FK → <code>professionals.id</code></td>
+<td>Who cancelled</td>
+</tr>
+<tr>
+<td><code>reporter_id</code></td>
+<td>FK → <code>users.id</code></td>
+<td>Who reported</td>
+</tr>
+<tr>
+<td><code>reporter_name</code></td>
+<td>String(100)</td>
+<td>Reporter's name</td>
+</tr>
+<tr>
+<td><code>prn</code></td>
+<td>String(20)</td>
+<td>Reporter's PRN</td>
+</tr>
+<tr>
+<td><code>reporter_email</code></td>
+<td>String(120)</td>
+<td>Reporter's email</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>String(20)</td>
+<td><code>open</code>, <code>assigned</code>, <code>in-progress</code>, <code>fixed</code>, <code>cancelled</code></td>
+</tr>
+<tr>
+<td><code>created_at</code></td>
+<td>DateTime</td>
+<td>Submission time</td>
+</tr>
+<tr>
+<td><code>updated_at</code></td>
+<td>DateTime</td>
+<td>Last update (auto)</td>
+</tr>
+<tr>
+<td><code>fixed_at</code></td>
+<td>DateTime</td>
+<td>Resolution time</td>
+</tr>
+<tr>
+<td><code>last_notification_sent_at</code></td>
+<td>DateTime</td>
+<td>For scheduler dedup</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DB Indexes</strong>:
+- <code>idx_ticket_status_created(status, created_at)</code>
+- <code>idx_ticket_reporter_created(reporter_id, created_at)</code>
+- <code>idx_ticket_professional_status(assigned_professional_id, status)</code></p>
+<p><strong>Ticket Lifecycle</strong>:
+<code>open → assigned → in-progress → fixed
+  ↓                    ↓
+  └→ cancelled ←───────┘</code></p>
+<h4><code>professionals</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>username</code></td>
+<td>String(50)</td>
+<td>UNIQUE login username</td>
+</tr>
+<tr>
+<td><code>name</code></td>
+<td>String(100)</td>
+<td>Full name</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>String(120)</td>
+<td>UNIQUE, optional</td>
+</tr>
+<tr>
+<td><code>phone</code></td>
+<td>String(20)</td>
+<td>UNIQUE, optional</td>
+</tr>
+<tr>
+<td><code>password_hash</code></td>
+<td>String(255)</td>
+<td>Hashed password</td>
+</tr>
+<tr>
+<td><code>category</code></td>
+<td>String(50)</td>
+<td><code>it_technician</code>, <code>electrician</code>, <code>plumber</code>, <code>carpenter</code>, <code>other</code></td>
+</tr>
+<tr>
+<td><code>is_active</code></td>
+<td>Boolean</td>
+<td>Deactivation flag</td>
+</tr>
+</tbody>
+</table>
+<h4><code>help_requests</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>ticket_id</code></td>
+<td>FK → <code>tickets.id</code></td>
+<td>Related ticket</td>
+</tr>
+<tr>
+<td><code>requester_professional_id</code></td>
+<td>FK → <code>professionals.id</code></td>
+<td>Who needs help</td>
+</tr>
+<tr>
+<td><code>helper_professional_id</code></td>
+<td>FK → <code>professionals.id</code></td>
+<td>Assigned helper</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>String(20)</td>
+<td><code>pending</code>, <code>approved</code>, <code>rejected</code></td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>Text</td>
+<td>Help request message</td>
+</tr>
+<tr>
+<td><code>admin_id</code></td>
+<td>FK → <code>users.id</code></td>
+<td>Admin who approved/rejected</td>
+</tr>
+</tbody>
+</table>
+<h4><code>chat_messages</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>sender_type</code></td>
+<td>String(20)</td>
+<td><code>admin</code> or <code>professional</code></td>
+</tr>
+<tr>
+<td><code>sender_id</code></td>
+<td>Integer</td>
+<td>ID of sender</td>
+</tr>
+<tr>
+<td><code>receiver_type</code></td>
+<td>String(20)</td>
+<td><code>admin</code> or <code>professional</code></td>
+</tr>
+<tr>
+<td><code>receiver_id</code></td>
+<td>Integer</td>
+<td>ID of receiver</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>Text</td>
+<td>Message content</td>
+</tr>
+<tr>
+<td><code>is_read</code></td>
+<td>Boolean</td>
+<td>Read status</td>
+</tr>
+</tbody>
+</table>
+<h4><code>notifications</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>FK → <code>users.id</code></td>
+<td>Recipient admin</td>
+</tr>
+<tr>
+<td><code>title</code></td>
+<td>String(100)</td>
+<td>Notification title</td>
+</tr>
+<tr>
+<td><code>message</code></td>
+<td>Text</td>
+<td>Notification body</td>
+</tr>
+<tr>
+<td><code>type</code></td>
+<td>String(50)</td>
+<td><code>cancellation</code>, <code>assignment</code>, <code>help</code>, <code>chat</code>, <code>system</code></td>
+</tr>
+<tr>
+<td><code>link</code></td>
+<td>String(255)</td>
+<td>Clickable URL</td>
+</tr>
+<tr>
+<td><code>is_read</code></td>
+<td>Boolean</td>
+<td>Read status</td>
+</tr>
+</tbody>
+</table>
+<h4><code>push_subscriptions</code></h4>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>id</code></td>
+<td>Integer</td>
+<td>PK</td>
+</tr>
+<tr>
+<td><code>user_id</code></td>
+<td>FK → <code>users.id</code></td>
+<td>Nullable</td>
+</tr>
+<tr>
+<td><code>professional_id</code></td>
+<td>FK → <code>professionals.id</code></td>
+<td>Nullable</td>
+</tr>
+<tr>
+<td><code>endpoint</code></td>
+<td>String(500)</td>
+<td>UNIQUE, push endpoint URL</td>
+</tr>
+<tr>
+<td><code>p256dh</code></td>
+<td>String(255)</td>
+<td>Public key</td>
+</tr>
+<tr>
+<td><code>auth</code></td>
+<td>String(255)</td>
+<td>Auth secret</td>
+</tr>
+</tbody>
+</table>
+<h4><code>schedules</code></h4>
+<p>Legacy schedule model for classroom utilization mapping.</p>
+<h4><code>timetables</code></h4>
+<p>Weekly recurring faculty schedule in 1-hour blocks. Supports primary faculty and collaborator.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>faculty_id</code></td>
+<td>FK → <code>users.id</code></td>
+<td>Primary faculty</td>
+</tr>
+<tr>
+<td><code>collaborator_id</code></td>
+<td>FK → <code>users.id</code></td>
+<td>Optional co-teacher</td>
+</tr>
+<tr>
+<td><code>room_id</code></td>
+<td>FK → <code>rooms.id</code></td>
+<td>Classroom</td>
+</tr>
+<tr>
+<td><code>day_of_week</code></td>
+<td>Integer</td>
+<td>0=Monday … 6=Sunday</td>
+</tr>
+<tr>
+<td><code>start_time</code></td>
+<td>Time</td>
+<td>e.g., 10:00</td>
+</tr>
+<tr>
+<td><code>end_time</code></td>
+<td>Time</td>
+<td>e.g., 12:00</td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td>String(100)</td>
+<td>Course name</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DB Index</strong>: <code>idx_timetable_day_start(day_of_week, start_time)</code></p>
+<h4><code>room_bookings</code></h4>
+<p>Specific 1-hour slot bookings for faculty ad-hoc room usage.</p>
+<table>
+<thead>
+<tr>
+<th>Column</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>room_id</code></td>
+<td>FK → <code>rooms.id</code></td>
+<td>Room</td>
+</tr>
+<tr>
+<td><code>faculty_id</code></td>
+<td>FK → <code>users.id</code></td>
+<td>Booking faculty</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>Date</td>
+<td>Booking date</td>
+</tr>
+<tr>
+<td><code>slot_start</code></td>
+<td>DateTime</td>
+<td>Slot timestamp</td>
+</tr>
+<tr>
+<td><code>status</code></td>
+<td>String(20)</td>
+<td><code>active</code> or <code>cancelled</code></td>
+</tr>
+<tr>
+<td><code>subject</code></td>
+<td>String(100)</td>
+<td>Course</td>
+</tr>
+<tr>
+<td><code>division</code></td>
+<td>String(50)</td>
+<td>Student division</td>
+</tr>
+<tr>
+<td><code>course</code></td>
+<td>String(100)</td>
+<td>Degree course</td>
+</tr>
+</tbody>
+</table>
+<p><strong>DB Index</strong>: <code>idx_booking_status_slot(status, slot_start)</code></p>
+<h4><code>adhoc_bookings</code></h4>
+<p>Instant room claims by faculty for vacant rooms (legacy model, now superseded by <code>room_bookings</code>).</p>
+<hr />
+<h2>6. Authentication &amp; Authorization</h2>
+<h3>Authentication Flow</h3>
+<p>FixLink uses a <strong>unified login page</strong> (<code>/login</code>) that supports three types of users:</p>
+<ol>
+<li><strong>Students/Faculty</strong> — Login with MIT-WPU email + password</li>
+<li><strong>Professionals</strong> — Login with username, phone number, or email + password</li>
+<li><strong>Super Admin</strong> — Login at <code>/developer/login</code> with environment-configured credentials</li>
+</ol>
+<h3>Session Management</h3>
+<ul>
+<li>Sessions are stored in <strong>cryptographically signed Flask cookies</strong> using <code>SECRET_KEY</code></li>
+<li>On Vercel, cookies are configured with <code>Secure</code>, <code>HttpOnly</code>, <code>SameSite=Lax</code></li>
+<li>Session lifetime: 1 hour (<code>PERMANENT_SESSION_LIFETIME=3600</code>)</li>
+<li><strong>No per-request DB validation</strong> — sessions are trusted after login (optimized for serverless latency)</li>
+</ul>
+<h3>Authorization Decorators (<a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/decorators.py">decorators.py</a>)</h3>
+<table>
+<thead>
+<tr>
+<th>Decorator</th>
+<th>Required Session Key</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>@login_required</code></td>
+<td><code>user_id</code> OR <code>professional_id</code></td>
+<td>Any authenticated user</td>
+</tr>
+<tr>
+<td><code>@user_login_required</code></td>
+<td><code>user_id</code></td>
+<td>Students, faculty, or admins</td>
+</tr>
+<tr>
+<td><code>@admin_required</code></td>
+<td><code>user_id</code> + <code>is_admin=True</code></td>
+<td>Admin-only routes</td>
+</tr>
+<tr>
+<td><code>@faculty_login_required</code></td>
+<td><code>user_id</code> + role=<code>faculty</code> (or admin)</td>
+<td>Faculty dashboard</td>
+</tr>
+<tr>
+<td><code>@professional_login_required</code></td>
+<td><code>professional_id</code></td>
+<td>Professional dashboard</td>
+</tr>
+<tr>
+<td><code>@super_admin_required</code></td>
+<td><code>is_super_admin=True</code></td>
+<td>Developer panel</td>
+</tr>
+</tbody>
+</table>
+<p>All decorators support AJAX requests by returning <code>401 JSON</code> instead of redirecting when the request has <code>X-Requested-With: XMLHttpRequest</code>.</p>
+<h3>Email Verification Flow</h3>
+<ol>
+<li>User signs up → account created with <code>is_verified=False</code></li>
+<li>Verification email sent via EmailJS with a time-limited token</li>
+<li>User clicks link → <code>confirm_verification_token()</code> validates the token</li>
+<li>User is directed to set their password → <code>is_verified=True</code></li>
+</ol>
+<h3>Password Reset Flow</h3>
+<ol>
+<li>User requests reset → <code>send_password_reset_email()</code> sends link via EmailJS</li>
+<li>Token generated with <code>itsdangerous.URLSafeTimedSerializer</code> (1-hour expiry)</li>
+<li>User clicks link → sets new password</li>
+</ol>
+<hr />
+<h2>7. Blueprints &amp; Routes</h2>
+<h3>Main Blueprint (<code>/</code>)</h3>
+<p><strong>File</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/blueprints/main/routes.py">app/blueprints/main/routes.py</a><br />
+<strong>Prefix</strong>: None (root)</p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Method</th>
+<th>Auth</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/</code></td>
+<td>GET</td>
+<td>—</td>
+<td>Redirects to <code>/login</code></td>
+</tr>
+<tr>
+<td><code>/report</code></td>
+<td>GET</td>
+<td><code>@user_login_required</code></td>
+<td>Report form with interactive room map</td>
+</tr>
+<tr>
+<td><code>/report</code></td>
+<td>POST</td>
+<td><code>@user_login_required</code></td>
+<td>Submit new maintenance ticket</td>
+</tr>
+<tr>
+<td><code>/report-bug</code></td>
+<td>GET/POST</td>
+<td>—</td>
+<td>Bug report form for the app itself</td>
+</tr>
+<tr>
+<td><code>/api/floors/&lt;id&gt;/rooms</code></td>
+<td>GET</td>
+<td><code>@user_login_required</code></td>
+<td>JSON API: rooms for a floor (cached)</td>
+</tr>
+<tr>
+<td><code>/api/rooms/&lt;id&gt;/assets</code></td>
+<td>GET</td>
+<td><code>@user_login_required</code></td>
+<td>JSON API: assets in a room</td>
+</tr>
+<tr>
+<td><code>/status-map</code></td>
+<td>GET</td>
+<td>—</td>
+<td>Public room status visualization</td>
+</tr>
+<tr>
+<td><code>/api/status-map/floor/&lt;id&gt;</code></td>
+<td>GET</td>
+<td>—</td>
+<td>JSON API: floor data for status map</td>
+</tr>
+<tr>
+<td><code>/api/subscribe-push</code></td>
+<td>POST</td>
+<td><code>@login_required</code></td>
+<td>Register Web Push subscription</td>
+</tr>
+<tr>
+<td><code>/api/my-tickets</code></td>
+<td>GET</td>
+<td><code>@user_login_required</code></td>
+<td>JSON API: current user's tickets</td>
+</tr>
+</tbody>
+</table>
+<h3>Auth Blueprint</h3>
+<p><strong>File</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/blueprints/auth/routes.py">app/blueprints/auth/routes.py</a></p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/login</code></td>
+<td>GET/POST</td>
+<td>Unified login (email, phone, username)</td>
+</tr>
+<tr>
+<td><code>/logout</code></td>
+<td>GET</td>
+<td>Clear session</td>
+</tr>
+<tr>
+<td><code>/signup</code></td>
+<td>GET/POST</td>
+<td>Student/faculty registration</td>
+</tr>
+<tr>
+<td><code>/verify/&lt;token&gt;</code></td>
+<td>GET</td>
+<td>Email verification</td>
+</tr>
+<tr>
+<td><code>/setup-password/&lt;token&gt;</code></td>
+<td>GET/POST</td>
+<td>Set password after verification</td>
+</tr>
+<tr>
+<td><code>/forgot-password</code></td>
+<td>GET/POST</td>
+<td>Request password reset</td>
+</tr>
+<tr>
+<td><code>/reset-password/&lt;token&gt;</code></td>
+<td>GET/POST</td>
+<td>Reset password with token</td>
+</tr>
+<tr>
+<td><code>/pusher/auth</code></td>
+<td>POST</td>
+<td>Pusher private channel authentication</td>
+</tr>
+<tr>
+<td><code>/api/profile/photo</code></td>
+<td>POST</td>
+<td>Upload profile photo</td>
+</tr>
+</tbody>
+</table>
+<h3>Admin Blueprint (<code>/admin</code>)</h3>
+<p><strong>File</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/blueprints/admin/routes.py">app/blueprints/admin/routes.py</a></p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/admin/</code></td>
+<td>GET</td>
+<td>Dashboard with ticket list + stats</td>
+</tr>
+<tr>
+<td><code>/admin/api/tickets/&lt;id&gt;/assign</code></td>
+<td>POST</td>
+<td>Assign ticket to professional</td>
+</tr>
+<tr>
+<td><code>/admin/api/tickets/&lt;id&gt;/status</code></td>
+<td>PATCH</td>
+<td>Update ticket status</td>
+</tr>
+<tr>
+<td><code>/admin/analytics</code></td>
+<td>GET</td>
+<td>Analytics dashboard</td>
+</tr>
+<tr>
+<td><code>/admin/api/analytics</code></td>
+<td>GET</td>
+<td>JSON analytics data</td>
+</tr>
+<tr>
+<td><code>/admin/professionals</code></td>
+<td>GET</td>
+<td>Professional directory</td>
+</tr>
+<tr>
+<td><code>/admin/api/professionals</code></td>
+<td>POST</td>
+<td>Add new professional</td>
+</tr>
+<tr>
+<td><code>/admin/help-requests</code></td>
+<td>GET</td>
+<td>View help requests</td>
+</tr>
+<tr>
+<td><code>/admin/api/help-requests/&lt;id&gt;</code></td>
+<td>PATCH</td>
+<td>Approve/reject help request</td>
+</tr>
+<tr>
+<td><code>/admin/chat</code></td>
+<td>GET</td>
+<td>Chat interface</td>
+</tr>
+<tr>
+<td><code>/admin/api/chat/send</code></td>
+<td>POST</td>
+<td>Send chat message</td>
+</tr>
+<tr>
+<td><code>/admin/api/chat/history/&lt;id&gt;</code></td>
+<td>GET</td>
+<td>Chat history with professional</td>
+</tr>
+<tr>
+<td><code>/admin/api/notifications</code></td>
+<td>GET</td>
+<td>Notification list</td>
+</tr>
+<tr>
+<td><code>/admin/api/notifications/mark-read</code></td>
+<td>POST</td>
+<td>Mark notifications as read</td>
+</tr>
+<tr>
+<td><code>/admin/api/floor/&lt;id&gt;/rooms</code></td>
+<td>GET</td>
+<td>Admin floor map data</td>
+</tr>
+<tr>
+<td><code>/admin/api/timetable/*</code></td>
+<td>Various</td>
+<td>Timetable CRUD operations</td>
+</tr>
+<tr>
+<td><code>/admin/api/room-booking/*</code></td>
+<td>Various</td>
+<td>Room booking management</td>
+</tr>
+<tr>
+<td><code>/admin/users</code></td>
+<td>GET</td>
+<td>User management page</td>
+</tr>
+<tr>
+<td><code>/admin/history</code></td>
+<td>GET</td>
+<td>Ticket history</td>
+</tr>
+<tr>
+<td><code>/admin/booking-history</code></td>
+<td>GET</td>
+<td>Booking history</td>
+</tr>
+</tbody>
+</table>
+<h3>Professional Blueprint (<code>/professional</code>)</h3>
+<p><strong>File</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/blueprints/professional/routes.py">app/blueprints/professional/routes.py</a></p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/professional/dashboard</code></td>
+<td>GET</td>
+<td>Worker dashboard with assigned tickets</td>
+</tr>
+<tr>
+<td><code>/professional/api/ticket/&lt;id&gt;/start</code></td>
+<td>POST</td>
+<td>Start a job</td>
+</tr>
+<tr>
+<td><code>/professional/api/ticket/&lt;id&gt;/complete</code></td>
+<td>POST</td>
+<td>Complete job + upload photo</td>
+</tr>
+<tr>
+<td><code>/professional/api/ticket/&lt;id&gt;/cancel</code></td>
+<td>POST</td>
+<td>Cancel job with reason</td>
+</tr>
+<tr>
+<td><code>/professional/api/ticket/&lt;id&gt;/complexity</code></td>
+<td>PATCH</td>
+<td>Set job complexity</td>
+</tr>
+<tr>
+<td><code>/professional/api/request-help</code></td>
+<td>POST</td>
+<td>Request help from another worker</td>
+</tr>
+<tr>
+<td><code>/professional/api/chat/send</code></td>
+<td>POST</td>
+<td>Send chat message to admin</td>
+</tr>
+<tr>
+<td><code>/professional/api/chat/history</code></td>
+<td>GET</td>
+<td>Chat history</td>
+</tr>
+<tr>
+<td><code>/professional/history</code></td>
+<td>GET</td>
+<td>Completed job history</td>
+</tr>
+</tbody>
+</table>
+<h3>Faculty Blueprint (<code>/faculty</code>)</h3>
+<p><strong>File</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/blueprints/faculty/routes.py">app/blueprints/faculty/routes.py</a></p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/faculty/dashboard</code></td>
+<td>GET</td>
+<td>Combined schedule + room tracker</td>
+</tr>
+<tr>
+<td><code>/faculty/api/book-room</code></td>
+<td>POST</td>
+<td>Book a vacant room slot</td>
+</tr>
+<tr>
+<td><code>/faculty/api/cancel-booking/&lt;id&gt;</code></td>
+<td>POST</td>
+<td>Cancel a booking</td>
+</tr>
+<tr>
+<td><code>/faculty/api/claim-room</code></td>
+<td>POST</td>
+<td>Instant ad-hoc room claim</td>
+</tr>
+<tr>
+<td><code>/faculty/api/room-status/&lt;id&gt;</code></td>
+<td>GET</td>
+<td>Check room occupancy</td>
+</tr>
+</tbody>
+</table>
+<h3>Super Admin Blueprint (<code>/developer</code>)</h3>
+<p><strong>File</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/blueprints/superadmin/routes.py">app/blueprints/superadmin/routes.py</a></p>
+<table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Method</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/developer/login</code></td>
+<td>GET/POST</td>
+<td>Developer login</td>
+</tr>
+<tr>
+<td><code>/developer/logout</code></td>
+<td>GET</td>
+<td>Developer logout</td>
+</tr>
+<tr>
+<td><code>/developer</code></td>
+<td>GET</td>
+<td>Developer dashboard</td>
+</tr>
+<tr>
+<td><code>/developer/admins</code></td>
+<td>GET</td>
+<td>List all admins</td>
+</tr>
+<tr>
+<td><code>/developer/api/admins</code></td>
+<td>POST</td>
+<td>Add admin user</td>
+</tr>
+<tr>
+<td><code>/developer/api/admins/&lt;id&gt;</code></td>
+<td>DELETE</td>
+<td>Remove admin</td>
+</tr>
+<tr>
+<td><code>/developer/professionals</code></td>
+<td>GET</td>
+<td>List all professionals</td>
+</tr>
+<tr>
+<td><code>/developer/api/professionals</code></td>
+<td>POST</td>
+<td>Add professional</td>
+</tr>
+<tr>
+<td><code>/developer/api/professionals/&lt;id&gt;</code></td>
+<td>DELETE/PATCH</td>
+<td>Manage professional</td>
+</tr>
+<tr>
+<td><code>/developer/users</code></td>
+<td>GET</td>
+<td>List all users</td>
+</tr>
+<tr>
+<td><code>/developer/api/users</code></td>
+<td>POST</td>
+<td>Add user</td>
+</tr>
+<tr>
+<td><code>/developer/api/users/&lt;id&gt;</code></td>
+<td>DELETE</td>
+<td>Remove user</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8. API Integrations</h2>
+<h3>8.1 EmailJS (Transactional Email)</h3>
+<p><strong>Module</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/utils.py">app/utils.py</a><br />
+<strong>API Endpoint</strong>: <code>https://api.emailjs.com/api/v1.0/email/send</code><br />
+<strong>Authentication</strong>: Service ID + Public Key + Private Key (via <code>accessToken</code>)</p>
+<p>EmailJS is used as a serverless-friendly email delivery mechanism (no SMTP server needed).</p>
+<p><strong>Functions</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Trigger</th>
+<th>Email Content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>send_ticket_email(ticket, action)</code></td>
+<td>Ticket created, in-progress, or fixed</td>
+<td>Status update to reporter</td>
+</tr>
+<tr>
+<td><code>send_verification_email(email, name, link)</code></td>
+<td>User signup</td>
+<td>Account verification link</td>
+</tr>
+<tr>
+<td><code>send_password_reset_email(email, name, link)</code></td>
+<td>Forgot password</td>
+<td>Password reset link</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Payload Format</strong>:
+<code>json
+{
+  "service_id": "service_xxxxx",
+  "template_id": "template_xxxxx",
+  "user_id": "public_key",
+  "accessToken": "private_key",
+  "template_params": {
+    "to_email": "user@mitwpu.edu.in",
+    "to_name": "Student Name",
+    "subject": "FixLink Ticket #42 Received",
+    "message": "Your maintenance request has been received..."
+  }
+}</code></p>
+<p><strong>Graceful Degradation</strong>: If any EmailJS env vars are missing, the functions log a warning and return <code>False</code> without crashing.</p>
+<hr />
+<h3>8.2 Pusher (Real-Time WebSockets)</h3>
+<p><strong>Module</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/realtime.py">app/realtime.py</a><br />
+<strong>Authentication</strong>: App ID + Key + Secret + Cluster</p>
+<p>Pusher replaces traditional SocketIO for Vercel compatibility (serverless functions cannot maintain persistent WebSocket connections).</p>
+<p><strong>Channels</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Type</th>
+<th>Subscribers</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>private-admins</code></td>
+<td>Private</td>
+<td>All admin users</td>
+</tr>
+<tr>
+<td><code>private-professional-{id}</code></td>
+<td>Private</td>
+<td>Specific professional</td>
+</tr>
+<tr>
+<td><code>public-room-updates</code></td>
+<td>Public</td>
+<td>All clients (status map)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Events</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Channel</th>
+<th>Trigger</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>new_assignment</code></td>
+<td><code>private-professional-{id}</code></td>
+<td>Admin assigns ticket</td>
+</tr>
+<tr>
+<td><code>job_started</code></td>
+<td><code>private-admins</code></td>
+<td>Professional starts job</td>
+</tr>
+<tr>
+<td><code>job_completed</code></td>
+<td><code>private-admins</code></td>
+<td>Professional completes job</td>
+</tr>
+<tr>
+<td><code>job_cancelled</code></td>
+<td><code>private-admins</code></td>
+<td>Professional cancels job</td>
+</tr>
+<tr>
+<td><code>help_requested</code></td>
+<td><code>private-admins</code></td>
+<td>Professional requests help</td>
+</tr>
+<tr>
+<td><code>help_approved</code></td>
+<td><code>private-professional-{id}</code></td>
+<td>Admin approves help</td>
+</tr>
+<tr>
+<td><code>assigned_as_helper</code></td>
+<td><code>private-professional-{id}</code></td>
+<td>Professional assigned as helper</td>
+</tr>
+<tr>
+<td><code>new_chat_message</code></td>
+<td>Both admin &amp; professional</td>
+<td>Chat message sent</td>
+</tr>
+<tr>
+<td><code>room_occupancy_changed</code></td>
+<td><code>public-room-updates</code></td>
+<td>Room booking/release</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Private Channel Authentication</strong>: The <code>/pusher/auth</code> endpoint validates session ownership before allowing subscription.</p>
+<hr />
+<h3>8.3 Web Push API (VAPID)</h3>
+<p><strong>Module</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/utils.py">app/utils.py</a> → <code>send_web_push()</code><br />
+<strong>Library</strong>: <code>pywebpush</code></p>
+<p>Native browser push notifications for urgent alerts (overdue tickets, unassigned tickets, asset health).</p>
+<p><strong>Setup</strong>:
+1. Generate VAPID keys: <code>python scripts/generate_vapid.py</code>
+2. Store <code>VAPID_PRIVATE_KEY</code> and <code>VAPID_SUBJECT</code> in environment
+3. Frontend registers a Service Worker (<code>app/static/js/sw.js</code>) that subscribes to push
+4. Subscription saved to <code>push_subscriptions</code> table via <code>/api/subscribe-push</code></p>
+<p><strong>Push Payload</strong>:
+<code>json
+{
+  "title": "Overdue Ticket Alert",
+  "body": "Ticket #42 (Room VY404) is past its deadline!",
+  "url": "/admin/?ticket_id=42"
+}</code></p>
+<hr />
+<h3>8.4 Supabase PostgreSQL</h3>
+<p><strong>Connection</strong>: Standard PostgreSQL connection string<br />
+<strong>Driver</strong>: <code>psycopg2-binary</code></p>
+<p><strong>Connection Pooling</strong>:
+- <strong>Vercel</strong>: Uses <code>NullPool</code> — each request opens and closes its own connection (prevents stale connections across cold starts)
+- <strong>Local/Docker</strong>: Uses connection pool with <code>pool_size=5</code>, <code>pool_recycle=300</code>, <code>pool_pre_ping=True</code></p>
+<p><strong>SSL</strong>: Auto-appends <code>sslmode=require</code> on Vercel if not present.</p>
+<hr />
+<h2>9. Real-Time Features (Pusher)</h2>
+<h3>Architecture</h3>
+<p><code>Admin Browser ←→ Pusher Cloud ←→ Flask Server ←→ Professional Browser
+       ↑                                                ↑
+  private-admins                           private-professional-{id}</code></p>
+<h3>Notification Functions (<a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/realtime.py">realtime.py</a>)</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>notify_professional_assigned()</code></td>
+<td>Push new assignment to worker + Web Push</td>
+</tr>
+<tr>
+<td><code>notify_admin_job_started()</code></td>
+<td>Alert admins + create persistent notification</td>
+</tr>
+<tr>
+<td><code>notify_admin_job_completed()</code></td>
+<td>Alert admins + persistent notification</td>
+</tr>
+<tr>
+<td><code>notify_admin_job_cancelled()</code></td>
+<td>Alert admins with cancellation reason</td>
+</tr>
+<tr>
+<td><code>notify_admin_help_requested()</code></td>
+<td>Alert admins of help request</td>
+</tr>
+<tr>
+<td><code>notify_help_request_approved()</code></td>
+<td>Notify both requester and assigned helper</td>
+</tr>
+<tr>
+<td><code>emit_chat_message()</code></td>
+<td>Broadcast chat to relevant parties</td>
+</tr>
+<tr>
+<td><code>emit_room_status_change()</code></td>
+<td>Broadcast occupancy changes to all clients</td>
+</tr>
+</tbody>
+</table>
+<p>Each notification function also creates a persistent <code>Notification</code> record in the database for admins who may not be online.</p>
+<hr />
+<h2>10. Caching Strategy</h2>
+<p><strong>Module</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/cache.py">app/cache.py</a><br />
+<strong>Backend</strong>: <code>FileSystemCache</code> (Vercel: <code>/tmp/fixlink_cache</code>, Local: <code>app/.cache</code>)</p>
+<h3>Why FileSystemCache?</h3>
+<p>Vercel serverless functions run in isolated instances. In-memory caches (<code>SimpleCache</code>) are lost on every cold start and are not shared between instances. The <code>/tmp/</code> directory on Vercel persists across warm function invocations and is shared more reliably.</p>
+<h3>Cached Data</h3>
+<table>
+<thead>
+<tr>
+<th>Cache Key Pattern</th>
+<th>TTL</th>
+<th>Data</th>
+<th>Used By</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>map_floor_{floor_id}</code></td>
+<td>1 hour</td>
+<td>Room list with status, occupancy, tickets</td>
+<td>Report form, Status map</td>
+</tr>
+<tr>
+<td><code>admin_floor_{floor_id}</code></td>
+<td>1 hour</td>
+<td>Admin-specific floor data</td>
+<td>Admin map view</td>
+</tr>
+</tbody>
+</table>
+<h3>Cache Invalidation</h3>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>When Called</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>invalidate_floor_cache(floor_id)</code></td>
+<td>Ticket created/updated, asset status changed</td>
+</tr>
+<tr>
+<td><code>invalidate_all_map_cache()</code></td>
+<td>Nuclear option — clears everything</td>
+</tr>
+</tbody>
+</table>
+<h3>Eager Loading</h3>
+<p>The <code>get_cached_floor_data(floor_id)</code> function uses SQLAlchemy <code>joinedload</code> to prevent N+1 queries:
+<code>python
+rooms = Room.query.options(
+    joinedload(Room.tickets),
+    joinedload(Room.assets),
+    joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
+    joinedload(Room.timetables).joinedload(Timetable.faculty)
+).filter_by(floor_id=floor_id).all()</code></p>
+<hr />
+<h2>11. Background Scheduler</h2>
+<p><strong>Module</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/scheduler.py">app/scheduler.py</a><br />
+<strong>Runs</strong>: Every 30 minutes in a daemon thread<br />
+<strong>Disabled on</strong>: Vercel (serverless cannot maintain background threads)</p>
+<h3>Alert Types</h3>
+<table>
+<thead>
+<tr>
+<th>Alert</th>
+<th>Condition</th>
+<th>Recipient</th>
+<th>Cooldown</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unassigned Ticket</strong></td>
+<td><code>open</code> or <code>cancelled</code> for &gt;24 hours</td>
+<td>All admins</td>
+<td>24 hours</td>
+</tr>
+<tr>
+<td><strong>Overdue Ticket</strong></td>
+<td>Past <code>deadline_datetime</code>, not fixed/cancelled</td>
+<td>All admins</td>
+<td>12 hours</td>
+</tr>
+<tr>
+<td><strong>Professional Inactivity</strong></td>
+<td><code>in-progress</code> for &gt;4 hours</td>
+<td>Assigned professional</td>
+<td>4 hours</td>
+</tr>
+<tr>
+<td><strong>Critical Asset Health</strong></td>
+<td>Health score &lt;30%</td>
+<td>All admins</td>
+<td>Per run</td>
+</tr>
+</tbody>
+</table>
+<p>Each alert is sent as a <strong>Web Push notification</strong> and uses <code>last_notification_sent_at</code> on the ticket to prevent duplicate alerts.</p>
+<hr />
+<h2>12. Analytics Engine</h2>
+<p><strong>Module</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/app/analytics.py">app/analytics.py</a></p>
+<h3>Asset Health Score (0–100)</h3>
+<p>Formula:
+<code>Score = 100
+  - (Age in years × 5)          [Lifecycle depreciation]
+  - (50 if broken, 20 if maintenance)  [Current status]
+  - (Recent tickets × 10)       [Repair frequency, last 60 days]
+  - (10 per high-complexity ticket, 5 per medium)  [Complexity penalty]</code></p>
+<h3>Technician Efficiency Metrics</h3>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Calculation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MTTR</strong> (Mean Time to Repair)</td>
+<td>Average <code>(fixed_at - job_started_at)</code> in hours</td>
+</tr>
+<tr>
+<td><strong>Completion Count</strong></td>
+<td>Total tickets with <code>status=fixed</code></td>
+</tr>
+<tr>
+<td><strong>Active Load</strong></td>
+<td>Current <code>assigned</code> or <code>in-progress</code> tickets</td>
+</tr>
+</tbody>
+</table>
+<h3>System Trends</h3>
+<p>Ticket volume over the last N days, returned as <code>{labels: [...dates], values: [...counts]}</code> for Chart.js rendering.</p>
+<h3>Critical Assets</h3>
+<p>Batch-processes all assets with optimized queries (no N+1), returns the top N lowest-scoring assets.</p>
+<hr />
+<h2>13. Frontend Architecture</h2>
+<h3>Template Hierarchy</h3>
+<p><code>base.html (Master Layout)
+├── login.html
+├── signup.html / signup_success.html
+├── report.html (Student Portal)
+├── status_map.html (Public)
+├── admin.html → admin/analytics.html, admin/chat.html, etc.
+├── professional/dashboard.html, professional/history.html
+├── faculty/dashboard.html
+└── superadmin/dashboard.html, superadmin/login.html</code></p>
+<h3>CSS Architecture</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>style.css</code></td>
+<td>Global dark theme, component styles</td>
+</tr>
+<tr>
+<td><code>skeleton.css</code></td>
+<td>Skeleton loading animations</td>
+</tr>
+<tr>
+<td><code>page_transitions.css</code></td>
+<td>Smooth page entry/exit animations</td>
+</tr>
+<tr>
+<td><code>dashboard_stats.css</code></td>
+<td>Admin dashboard statistics cards</td>
+</tr>
+<tr>
+<td><code>carousels.css</code></td>
+<td>Image carousel components</td>
+</tr>
+</tbody>
+</table>
+<h3>JavaScript Modules</h3>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>modules/main.js</code></td>
+<td>Core initialization, event listeners</td>
+</tr>
+<tr>
+<td><code>modules/api.js</code></td>
+<td>AJAX helpers for API calls</td>
+</tr>
+<tr>
+<td><code>modules/render.js</code></td>
+<td>DOM rendering functions</td>
+</tr>
+<tr>
+<td><code>modules/ui.js</code></td>
+<td>UI interactions, modals</td>
+</tr>
+<tr>
+<td><code>modules/admin_map.js</code></td>
+<td>Admin floor map management</td>
+</tr>
+<tr>
+<td><code>skeleton_loader.js</code></td>
+<td>Skeleton loading placeholders</td>
+</tr>
+<tr>
+<td><code>page_transitions.js</code></td>
+<td>Page transition animations</td>
+</tr>
+<tr>
+<td><code>animations.js</code></td>
+<td>Micro-animations</td>
+</tr>
+<tr>
+<td><code>dashboard_stats.js</code></td>
+<td>Dashboard statistics rendering</td>
+</tr>
+<tr>
+<td><code>carousels.js</code></td>
+<td>Image carousel logic</td>
+</tr>
+<tr>
+<td><code>sw.js</code></td>
+<td>Service Worker for Web Push</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>14. Deployment</h2>
+<h3>Vercel (Production)</h3>
+<p><strong>Entry Point</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/api/index.py">api/index.py</a> → Exports a WSGI <code>app</code> object.</p>
+<p><strong>Configuration</strong> (<a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/vercel.json">vercel.json</a>):
+<code>json
+{
+  "builds": [{
+    "src": "api/index.py",
+    "use": "@vercel/python",
+    "config": { "maxDuration": 30 }
+  }],
+  "headers": [{
+    "source": "/static/(.*)",
+    "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+  }],
+  "routes": [{ "src": "/(.*)", "dest": "/api/index.py" }]
+}</code></p>
+<p><strong>Key Vercel Behaviors</strong>:
+- All routes funnel through the single Python serverless function
+- Static assets (<code>/static/*</code>) are cached for 1 year at the Edge CDN
+- <code>NullPool</code> is used for database connections (no persistent pool)
+- Background scheduler is <strong>disabled</strong> (serverless cannot maintain threads)
+- File uploads are <strong>skipped</strong> (read-only filesystem; would need Supabase Storage)
+- Database initialization/seeding is <strong>skipped</strong> (assumed pre-migrated)</p>
+<h3>Docker (Self-Hosted)</h3>
+<p>```dockerfile
+FROM python:3.11-slim</p>
+<h1>Installs system deps (gcc, libffi, libpq), pip deps, gunicorn + eventlet</h1>
+<h1>CMD: flask db upgrade &amp;&amp; gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:5000 run:app</h1>
+<p>```</p>
+<p>```yaml</p>
+<h1>docker-compose.yml</h1>
+<p>services:
+  web:
+    build: .
+    ports: ["5000:5000"]
+    env_file: .env
+```</p>
+<h3>Local Development</h3>
+<p>```bash</p>
+<h1>1. Clone and setup</h1>
+<p>git clone https://github.com/meowpher/FixLink-V1.git
+cd FixLink-V1</p>
+<h1>2. Create virtual environment</h1>
+<p>python -m venv venv
+source venv/bin/activate  # or venv\Scripts\activate on Windows</p>
+<h1>3. Install dependencies</h1>
+<p>pip install -r requirements.txt</p>
+<h1>4. Configure environment</h1>
+<p>cp .env.example .env</p>
+<h1>Edit .env with your Supabase URL, SECRET_KEY, etc.</h1>
+<h1>5. Run</h1>
+<p>python run.py</p>
+<h1>→ Serves at http://localhost:5000</h1>
+<p>```</p>
+<hr />
+<h2>15. Environment Variables</h2>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Required</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SECRET_KEY</code></td>
+<td><strong>Yes</strong> (prod)</td>
+<td>Flask session signing key. Auto-generated for dev.</td>
+</tr>
+<tr>
+<td><code>DATABASE_URL</code></td>
+<td><strong>Yes</strong></td>
+<td>PostgreSQL connection string (Supabase)</td>
+</tr>
+<tr>
+<td><code>SUPABASE_URL</code></td>
+<td>Optional</td>
+<td>Supabase project URL</td>
+</tr>
+<tr>
+<td><code>SUPABASE_KEY</code></td>
+<td>Optional</td>
+<td>Supabase publishable key</td>
+</tr>
+<tr>
+<td><code>ADMIN_EMAIL</code></td>
+<td>Recommended</td>
+<td>Default admin account email</td>
+</tr>
+<tr>
+<td><code>ADMIN_PASSWORD</code></td>
+<td>Recommended</td>
+<td>Default admin account password</td>
+</tr>
+<tr>
+<td><code>EMAILJS_SERVICE_ID</code></td>
+<td>Optional</td>
+<td>EmailJS service identifier</td>
+</tr>
+<tr>
+<td><code>EMAILJS_TEMPLATE_ID</code></td>
+<td>Optional</td>
+<td>EmailJS email template</td>
+</tr>
+<tr>
+<td><code>EMAILJS_PUBLIC_KEY</code></td>
+<td>Optional</td>
+<td>EmailJS public/user key</td>
+</tr>
+<tr>
+<td><code>EMAILJS_PRIVATE_KEY</code></td>
+<td>Optional</td>
+<td>EmailJS access token</td>
+</tr>
+<tr>
+<td><code>PUSHER_APP_ID</code></td>
+<td>Optional</td>
+<td>Pusher application ID</td>
+</tr>
+<tr>
+<td><code>PUSHER_KEY</code></td>
+<td>Optional</td>
+<td>Pusher public key</td>
+</tr>
+<tr>
+<td><code>PUSHER_SECRET</code></td>
+<td>Optional</td>
+<td>Pusher server secret</td>
+</tr>
+<tr>
+<td><code>PUSHER_CLUSTER</code></td>
+<td>Optional</td>
+<td>Pusher cluster (e.g., <code>ap2</code>)</td>
+</tr>
+<tr>
+<td><code>VAPID_PRIVATE_KEY</code></td>
+<td>Optional</td>
+<td>Web Push VAPID private key</td>
+</tr>
+<tr>
+<td><code>VAPID_SUBJECT</code></td>
+<td>Optional</td>
+<td>VAPID subject (e.g., <code>mailto:admin@fixlink.edu</code>)</td>
+</tr>
+<tr>
+<td><code>SUPER_ADMIN_EMAIL</code></td>
+<td>Optional</td>
+<td>Developer login email</td>
+</tr>
+<tr>
+<td><code>SUPER_ADMIN_PASSWORD</code></td>
+<td>Optional</td>
+<td>Developer login password</td>
+</tr>
+<tr>
+<td><code>PORT</code></td>
+<td>Optional</td>
+<td>Server port (default: 5000)</td>
+</tr>
+<tr>
+<td><code>FLASK_DEBUG</code></td>
+<td>Optional</td>
+<td>Enable debug mode (<code>True</code>/<code>False</code>)</td>
+</tr>
+<tr>
+<td><code>VERCEL</code></td>
+<td>Auto-set</td>
+<td>Vercel sets this automatically</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>16. Testing</h2>
+<p><strong>Framework</strong>: Python <code>unittest</code> / <code>pytest</code><br />
+<strong>Location</strong>: <code>tests/</code></p>
+<table>
+<thead>
+<tr>
+<th>Test File</th>
+<th>Coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/tests/conftest.py">conftest.py</a></td>
+<td>Fixtures: in-memory SQLite, mocked EmailJS/WebPush/SocketIO</td>
+</tr>
+<tr>
+<td><a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/tests/test_auth.py">test_auth.py</a></td>
+<td>Login, signup, verification, password reset</td>
+</tr>
+<tr>
+<td><a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/tests/test_ticket_lifecycle.py">test_ticket_lifecycle.py</a></td>
+<td>Ticket creation → assignment → completion</td>
+</tr>
+<tr>
+<td><a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/tests/test_analytics.py">test_analytics.py</a></td>
+<td>Asset health scores, technician efficiency</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Test Database</strong>: Uses <code>sqlite:///:memory:</code> (configured when <code>TESTING=True</code>).</p>
+<p><strong>Run Tests</strong>:
+<code>bash
+python -m pytest tests/ -v</code></p>
+<hr />
+<h2>17. QR Code System</h2>
+<p><strong>Generator</strong>: <a href="file:///c:/Users/Taha%20Mustafa/Desktop/Fixlink/scripts/generate_qr.py">scripts/generate_qr.py</a><br />
+<strong>Output</strong>: <code>qr_codes/</code> directory with PNG files named <code>{Building}_{RoomNumber}_QR.png</code></p>
+<p>Each QR code encodes a URL like:
+<code>https://your-domain.vercel.app/report?room=VY404</code></p>
+<p>When a student scans the QR code in a room, the report form auto-selects that room, floor, and building — enabling one-tap issue reporting.</p>
+<hr />
+<blockquote>
+<p><strong>Document generated from source code analysis of FixLink-V1.</strong></p>
+</blockquote></body></html>

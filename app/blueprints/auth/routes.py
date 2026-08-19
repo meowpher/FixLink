@@ -127,9 +127,12 @@ def login():
             session['user_name'] = user.name
             session['user_email'] = user.email
             session['is_admin'] = user.is_admin
+            session['user_role'] = user.role
             
             if user.is_admin:
                 return redirect(url_for('admin.dashboard'))
+            elif user.role == 'faculty':
+                return redirect(url_for('faculty.dashboard'))
             else:
                 return redirect(url_for('main.report_form'))
         

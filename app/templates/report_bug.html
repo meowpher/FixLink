@@ -10,6 +10,7 @@
             <p class="text-muted small mb-4">Help us improve the platform by describing the issue you encountered.</p>
 
             <form method="POST" enctype="multipart/form-data" action="{{ url_for('main.report_bug') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="origin" value="{{ request.args.get('origin', '/') }}">
                 
                 <div class="mb-4">

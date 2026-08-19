@@ -461,7 +461,7 @@
 <!-- Mobile-only custom top bar -->
 <div class="mobile-topbar" style="display:none;">
     <div class="topbar-left">
-        <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo">
+        <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo">
         <div class="topbar-divider"></div>
         <div class="topbar-text">
             <span class="topbar-brand">Fix Link</span>
@@ -475,7 +475,7 @@
 
 
 <div class="glass-login-card {% if show_phone_hint %}pro-card{% else %}user-card{% endif %}">
-    <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
+    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
     <h3>{% if show_phone_hint %}Technician Portal{% else %}Welcome Back{% endif %}</h3>
     <p class="subtext">{% if show_phone_hint %}Sign in to access your jobs{% else %}Sign in to your account{% endif %}</p>
     
@@ -585,13 +585,13 @@ function togglePwd() {
                 document.documentElement.setAttribute('data-bs-theme', 'light');
                 localStorage.setItem('theme', 'light');
                 const logos = document.querySelectorAll('.mitwpu-logo');
-                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-lm.webp') }}");
             } else {
                 document.body.setAttribute('data-theme', 'dark');
                 document.documentElement.setAttribute('data-bs-theme', 'dark');
                 localStorage.setItem('theme', 'dark');
                 const logos = document.querySelectorAll('.mitwpu-logo');
-                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
+                logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-dm.webp') }}");
             }
         }
         syncMobileIcon();

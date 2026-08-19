@@ -766,7 +766,7 @@
 <!-- Mobile-only custom top bar -->
 <div class="mobile-topbar" style="display:none;">
     <div class="topbar-left">
-        <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo"
+        <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo"
              class="topbar-logo mitwpu-logo" loading="lazy">
         <div class="topbar-divider"></div>
         <div class="topbar-text">
@@ -1201,13 +1201,13 @@
                     document.documentElement.setAttribute('data-bs-theme', 'light');
                     localStorage.setItem('theme', 'light');
                     const logos = document.querySelectorAll('.mitwpu-logo');
-                    logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+                    logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-lm.webp') }}");
                 } else {
                     document.body.setAttribute('data-theme', 'dark');
                     document.documentElement.setAttribute('data-bs-theme', 'dark');
                     localStorage.setItem('theme', 'dark');
                     const logos = document.querySelectorAll('.mitwpu-logo');
-                    logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
+                    logos.forEach(l => l.src = "{{ url_for('static', filename='images/logo-dm.webp') }}");
                 }
             }
             syncMobileIcon();

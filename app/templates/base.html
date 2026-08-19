@@ -5,12 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MIT-WPU Vyas Tracker{% endblock %}</title>
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FLOGOCLR.png') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FLOGOCLR.webp') }}">
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
+    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        @font-face {
+            font-family: "bootstrap-icons";
+            src: url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/fonts/bootstrap-icons.woff2?856008caa5eb66df68595e734e59580d") format("woff2"),
+                 url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/fonts/bootstrap-icons.woff?856008caa5eb66df68595e734e59580d") format("woff");
+            font-display: swap;
+        }
+    </style>
 
     <!-- Custom CSS -->
     <link href="{{ url_for('static', filename='css/style.css') }}?v=5.8" rel="stylesheet">
@@ -22,11 +31,18 @@
     </script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
 
-    <!-- Advanced UI Animations CSS -->
-    <link href="{{ url_for('static', filename='css/page_transitions.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/dashboard_stats.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/skeleton.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/carousels.css') }}" rel="stylesheet">
+    <!-- Advanced UI Animations CSS (Deferred) -->
+    <link rel="preload" href="{{ url_for('static', filename='css/page_transitions.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/page_transitions.css') }}"></noscript>
+    
+    <link rel="preload" href="{{ url_for('static', filename='css/dashboard_stats.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_stats.css') }}"></noscript>
+    
+    <link rel="preload" href="{{ url_for('static', filename='css/skeleton.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}"></noscript>
+    
+    <link rel="preload" href="{{ url_for('static', filename='css/carousels.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/carousels.css') }}"></noscript>
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -54,7 +70,7 @@
 
         <!-- Sidebar header -->
         <div class="msb-header">
-            <img src="{{ url_for('static', filename='images/logo-lm.png') }}"
+            <img src="{{ url_for('static', filename='images/logo-lm.webp') }}"
                  alt="MIT-WPU"
                  class="mitwpu-logo msb-logo"
                  id="msbLogoImg"
@@ -274,7 +290,7 @@
         <div class="nav-capsule pointer-events-auto">
             <!-- Brand -->
             <a class="d-flex align-items-center me-3 text-decoration-none" href="{{ url_for('main.index') }}">
-                <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="Logo" class="mitwpu-logo me-2" style="height: 28px;" loading="eager" fetchpriority="high" decoding="sync">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="Logo" class="mitwpu-logo me-2" style="height: 28px;" loading="eager" fetchpriority="high" decoding="sync">
                 <span class="brand-text-capsule">FixLink</span>
             </a>
 
@@ -397,20 +413,20 @@
 
 
     <!-- Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- GSAP for Smooth Animations -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <!-- Custom JS -->
     <script type="module" src="{{ url_for('static', filename='js/animations.js') }}" crossorigin></script>
-    <script src="{{ url_for('static', filename='js/page_transitions.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/skeleton_loader.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/dashboard_stats.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/carousels.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/page_transitions.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/skeleton_loader.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/dashboard_stats.js') }}"></script>
+    <script defer src="{{ url_for('static', filename='js/carousels.js') }}"></script>
 
     {% block extra_js %}{% endblock %}
 
@@ -435,7 +451,7 @@
                     iconGuest.classList.add('bi-sun-fill');
                 }
                 const logos = document.querySelectorAll('.mitwpu-logo');
-                logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-dm.png') }}");
+                logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-dm.webp') }}");
             } else {
                 document.body.removeAttribute('data-theme');
                 document.documentElement.setAttribute('data-bs-theme', 'light');
@@ -451,7 +467,7 @@
                     iconGuest.classList.add('bi-moon-fill');
                 }
                 const logos = document.querySelectorAll('.mitwpu-logo');
-                logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-lm.png') }}");
+                logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-lm.webp') }}");
             }
         };
 

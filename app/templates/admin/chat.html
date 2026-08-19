@@ -609,7 +609,7 @@
             const response = await fetch('/admin/api/chat/professionals');
             const result = await response.json();
             if (result.success) {
-                professionals = result.professionals || [];
+                professionals = (result.data && result.data.professionals) || [];
                 renderProfessionals();
                 
                 // If a professional was pre-selected, just update the sidebar highlighting

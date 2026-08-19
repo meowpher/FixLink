@@ -44,7 +44,7 @@ def dashboard():
         
     # Eager load rooms for efficiency
     all_rooms = Room.query.options(
-        joinedload(Room.schedules),
+        joinedload(Room.timetables),
         joinedload(Room.adhoc_bookings).joinedload(AdHocBooking.faculty)
     ).all()
     

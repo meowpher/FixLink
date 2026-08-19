@@ -27,7 +27,7 @@ def pusher_authentication():
     # Since 'csrf' is initialized in app factory, we use the decorator if available.
     p = get_pusher()
     if not p:
-        return jsonify({"error": "Pusher not configured"}), 500
+        return api_response(success=False, error="Pusher not configured", status=500)
 
     channel_name = request.form.get('channel_name')
     socket_id = request.form.get('socket_id')
@@ -51,7 +51,7 @@ def pusher_authentication():
             )
             return jsonify(auth)
 
-    return jsonify({"error": "Forbidden"}), 403
+    return api_response(success=False, error="Forbidden", status=403)
 
 def generate_verification_token(email):
     serializer = URLSafeTimedSerializer(current_app.config['SECRET_KEY'])
@@ -65,7 +65,9 @@ def confirm_verification_token(token, expiration=3600):
             salt='email-verification-salt',
             max_age=expiration
         )
-    except:
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).warning(f'Token verification failed: {e}')
         return False
     return email
 
@@ -263,6 +265,17 @@ def setup_password():
         if len(password) < 8:
             flash('Password must be at least 8 characters long.', 'error')
             return render_template('setup_password.html')
+        
+        import re
+        if not re.search(r'[A-Z]', password):
+            flash('Password must contain at least one uppercase letter.', 'error')
+            return render_template('setup_password.html')
+        if not re.search(r'[0-9]', password):
+            flash('Password must contain at least one digit.', 'error')
+            return render_template('setup_password.html')
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            flash('Password must contain at least one special character.', 'error')
+            return render_template('setup_password.html')
             
         user = User.query.filter_by(email=email).first()
         user.set_password(password)
@@ -350,8 +363,7 @@ def forgot_password():
             return render_template(
                 'forgot_password_sent.html',
                 email=email,
-                email_sent=email_sent,
-                reset_link=reset_link
+                email_sent=email_sent
             )
         else:
             # No account or unverified — show a generic sent page anyway
@@ -388,6 +400,17 @@ def reset_password(token):
 
         if len(password) < 8:
             flash('Password must be at least 8 characters.', 'error')
+            return render_template('reset_password.html', token=token)
+        
+        import re
+        if not re.search(r'[A-Z]', password):
+            flash('Password must contain at least one uppercase letter.', 'error')
+            return render_template('reset_password.html', token=token)
+        if not re.search(r'[0-9]', password):
+            flash('Password must contain at least one digit.', 'error')
+            return render_template('reset_password.html', token=token)
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            flash('Password must contain at least one special character.', 'error')
             return render_template('reset_password.html', token=token)
 
         user.set_password(password)

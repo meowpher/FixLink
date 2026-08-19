@@ -329,19 +329,31 @@ def analytics():
     
     # 5. Average Resolution Time (Filtered)
     avg_res_time = 0
-    fixed_tickets_q = query.filter(
-        Ticket.status == Ticket.STATUS_FIXED,
-        Ticket.job_completed_at.isnot(None)
-    ).all()
-    
-    if fixed_tickets_q:
-        durations = [
-            (t.job_completed_at - t.created_at).total_seconds() 
-            for t in fixed_tickets_q 
-            if t.job_completed_at and t.created_at
-        ]
-        if durations:
-            avg_res_time = round(sum(durations) / (3600 * len(durations)), 1) # in hours
+    try:
+        # Fast SQL Aggregation (PostgreSQL)
+        avg_res_seconds = query.filter(
+            Ticket.status == Ticket.STATUS_FIXED,
+            Ticket.job_completed_at.isnot(None)
+        ).with_entities(
+            func.avg(func.extract('epoch', Ticket.job_completed_at) - func.extract('epoch', Ticket.created_at))
+        ).scalar()
+        if avg_res_seconds:
+            avg_res_time = round(float(avg_res_seconds) / 3600, 1)
+    except Exception:
+        # Fallback for SQLite / Testing
+        fixed_tickets_q = query.filter(
+            Ticket.status == Ticket.STATUS_FIXED,
+            Ticket.job_completed_at.isnot(None)
+        ).all()
+        
+        if fixed_tickets_q:
+            durations = [
+                (t.job_completed_at - t.created_at).total_seconds() 
+                for t in fixed_tickets_q 
+                if t.job_completed_at and t.created_at
+            ]
+            if durations:
+                avg_res_time = round(sum(durations) / (3600 * len(durations)), 1) # in hours
 
     # 6. Trend Grouping Based on Period (Fallback gracefully on SQLite in testing)
     trend_data = []
@@ -367,9 +379,7 @@ def analytics():
     critical_assets = get_critical_assets(5)
 
     if request.path.endswith('/api/analytics') or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({
-            'success': True,
-            'total_tickets': total_tickets,
+        return api_response(success=True, data={'total_tickets': total_tickets,
             'completed_tickets': fixed_tickets_count,
             'open_tickets': total_tickets - fixed_tickets_count,
             'category_data': consolidated_data,
@@ -377,8 +387,7 @@ def analytics():
             'success_rate': success_rate,
             'monthly_trend': trend_data,
             'period': period,
-            'critical_assets': critical_assets
-        })
+            'critical_assets': critical_assets})
 
     return render_template('admin_analytics.html',
                           total_tickets=total_tickets,
@@ -402,13 +411,21 @@ def edit_user(user_id):
     data = request.get_json()
     
     email = data.get('email', '').strip().lower()
+    name = data.get('name', '').strip()
+    prn = data.get('prn', '').strip()
+    
+    if not name:
+        return api_response(success=False, error="Name cannot be empty.", status=400)
+    if not email:
+        return api_response(success=False, error="Email cannot be empty.", status=400)
+    
     if email != user.email:
         if User.query.filter_by(email=email).first():
             return api_response(success=False, error="Email already registered.", status=400)
             
-    user.name = data.get('name', '').strip()
+    user.name = name
     user.email = email
-    user.prn = data.get('prn', '').strip()
+    user.prn = prn
     user.is_admin = data.get('role') == 'admin'
     
     password = data.get('password')
@@ -416,10 +433,7 @@ def edit_user(user_id):
         user.set_password(password)
         
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': "User updated successfully"
-    })
+    return api_response(success=True, message="User updated successfully")
 
 
 @admin_bp.route('/users/<int:user_id>/delete', methods=['POST'])
@@ -433,10 +447,7 @@ def delete_user(user_id):
     user = User.query.get_or_404(user_id)
     db.session.delete(user)
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': "User deleted successfully"
-    })
+    return api_response(success=True, message="User deleted successfully")
 
 
 @admin_bp.route('/users/<int:user_id>/verify', methods=['POST'])
@@ -448,10 +459,7 @@ def verify_user_manual(user_id):
     user.is_verified = True
     user.verification_token = None
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': "User verified successfully"
-    })
+    return api_response(success=True, message="User verified successfully")
 
 
 @admin_bp.route('/tickets/<int:ticket_id>/update-status', methods=['POST'])
@@ -489,12 +497,14 @@ def update_ticket_status(ticket_id):
     # Trigger EmailJS notification for ticket update
     send_ticket_email(ticket, action=new_status)
     
-    return jsonify({
-        'success': True,
-        'message': f"Ticket #{ticket.id} marked as {new_status}",
-        'ticket_id': ticket.id,
-        'status': ticket.status
-    })
+    return api_response(
+        success=True,
+        message=f"Ticket #{ticket.id} marked as {new_status}",
+        data={
+            'ticket_id': ticket.id,
+            'status': ticket.status
+        }
+    )
 
 
 @admin_bp.route('/ticket/<int:ticket_id>')
@@ -503,7 +513,7 @@ def update_ticket_status(ticket_id):
 def get_ticket_detail(ticket_id):
     """Get ticket details for modal (AJAX)."""
     ticket = Ticket.query.get_or_404(ticket_id)
-    return jsonify({'success': True, 'ticket': ticket.to_dict()})
+    return api_response(success=True, data={'ticket': ticket.to_dict()})
 
 
 @admin_bp.route('/floor-data/<int:floor_id>')
@@ -516,10 +526,7 @@ def get_floor_data(floor_id):
     cache_key = f'admin_floor_{floor_id}'
     cached = cache.get(cache_key)
     if cached:
-        return jsonify({
-            'success': True,
-            **cached
-        })
+        return api_response(success=True, data={**cached})
     
     floor = Floor.query.get_or_404(floor_id)
     
@@ -538,10 +545,7 @@ def get_floor_data(floor_id):
     }
     
     cache.set(cache_key, result, timeout=3600)  # 60 minutes
-    return jsonify({
-        'success': True,
-        **result
-    })
+    return api_response(success=True, data={**result})
 
 
 @admin_bp.route('/api/room-status/<room_number>')
@@ -577,13 +581,10 @@ def api_room_status(room_number):
             'name': p.name
         })
     
-    return jsonify({
-        'success': True,
-        'room': room.to_dict(),
+    return api_response(success=True, data={'room': room.to_dict(),
         'status': room.status,
         'active_ticket': active_ticket.to_dict() if active_ticket else None,
-        'professionals': profs_by_category
-    })
+        'professionals': profs_by_category})
 
 
 @admin_bp.route('/api/ticket/<int:ticket_id>/assign', methods=['POST'])
@@ -627,10 +628,7 @@ def api_assign_ticket(ticket_id):
     if ticket.room_id:
         invalidate_floor_cache(ticket.room.floor_id)
         
-    return jsonify({
-        'success': True,
-        'message': "Technician assigned successfully"
-    })
+    return api_response(success=True, message="Technician assigned successfully")
 
 
 @admin_bp.route('/tickets/<int:ticket_id>/delete', methods=['POST'])
@@ -650,10 +648,7 @@ def delete_ticket(ticket_id):
     db.session.delete(ticket)
     db.session.commit()
     
-    return jsonify({
-        'success': True,
-        'message': f"Ticket #{ticket.id} deleted successfully"
-    })
+    return api_response(success=True, message=f"Ticket #{ticket.id} deleted successfully")
 
 
 # ==================== PROFESSIONAL MANAGEMENT ====================
@@ -814,10 +809,7 @@ def edit_professional(professional_id):
     email = data.get('email', '').strip().lower()
     if email != professional.email:
         if Professional.query.filter_by(email=email).first():
-            return jsonify({
-                'success': False,
-                'error': "Email already registered."
-            }), 400
+            return api_response(success=False, data={'error': "Email already registered."}), 400
     
     professional.name = data.get('name', '').strip()
     professional.email = email
@@ -834,10 +826,7 @@ def edit_professional(professional_id):
         professional.set_password(password)
     
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': "Professional updated successfully"
-    })
+    return api_response(success=True, message="Professional updated successfully")
 
 
 @admin_bp.route('/professionals/<int:professional_id>/delete', methods=['POST'])
@@ -862,10 +851,7 @@ def delete_professional(professional_id):
     
     db.session.delete(professional)
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': "Professional deleted successfully"
-    })
+    return api_response(success=True, message="Professional deleted successfully")
 
 
 # ==================== TICKET ASSIGNMENT ====================
@@ -997,26 +983,17 @@ def respond_to_help_request(help_request_id):
     helper_professional_id = data.get('helper_professional_id')
     
     if action not in ['approve', 'reject']:
-        return jsonify({
-            'success': False,
-            'error': "Invalid action"
-        }), 400
+        return api_response(success=False, data={'error': "Invalid action"}), 400
     
     if action == 'approve' and not helper_professional_id:
-        return jsonify({
-            'success': False,
-            'error': "Helper professional required for approval"
-        }), 400
+        return api_response(success=False, data={'error': "Helper professional required for approval"}), 400
     
     admin = User.query.get(session['user_id'])
     
     if action == 'approve':
         helper = Professional.query.get(helper_professional_id)
         if not helper or not helper.is_active:
-            return jsonify({
-                'success': False,
-                'error': "Helper professional not available"
-            }), 400
+            return api_response(success=False, data={'error': "Helper professional not available"}), 400
         
         help_request.status = HelpRequest.STATUS_APPROVED
         help_request.helper_professional_id = helper_professional_id
@@ -1035,10 +1012,7 @@ def respond_to_help_request(help_request_id):
         notify_help_request_rejected(help_request)
     
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': f"Help request {action}d successfully"
-    })
+    return api_response(success=True, message=f"Help request {action}d successfully")
 
 
 # ==================== ANALYTICS & REPORTS ====================
@@ -1347,41 +1321,61 @@ def chat():
 @handle_api_errors
 def get_professionals_for_chat():
     """Get list of professionals for admin to chat with."""
-    from ...models import ChatMessage
-    professionals = Professional.query.filter_by(is_active=True).all()
+    from sqlalchemy import func, or_, case
+    from ...models import ChatMessage, Professional
+    
+    # 1. Unread Counts Subquery
+    unread_subquery = db.session.query(
+        ChatMessage.sender_id.label('prof_id'),
+        func.count(ChatMessage.id).label('unread_count')
+    ).filter(
+        ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL,
+        ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_ADMIN,
+        ChatMessage.is_read == False
+    ).group_by(ChatMessage.sender_id).subquery()
+    
+    # 2. Last Message Time Subquery
+    # A professional is involved if they are sender OR receiver
+    prof_id_col = case(
+        (ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL, ChatMessage.sender_id),
+        else_=ChatMessage.receiver_id
+    )
+    
+    last_msg_subquery = db.session.query(
+        prof_id_col.label('prof_id'),
+        func.max(ChatMessage.timestamp).label('last_msg_time')
+    ).filter(
+        or_(
+            (ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_ADMIN),
+            (ChatMessage.sender_type == ChatMessage.SENDER_TYPE_ADMIN) & (ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL)
+        )
+    ).group_by(prof_id_col).subquery()
+    
+    # 3. Main Query joining Professional with Subqueries
+    professionals_data = db.session.query(
+        Professional,
+        func.coalesce(unread_subquery.c.unread_count, 0).label('unread'),
+        last_msg_subquery.c.last_msg_time.label('last_time')
+    ).outerjoin(
+        unread_subquery, Professional.id == unread_subquery.c.prof_id
+    ).outerjoin(
+        last_msg_subquery, Professional.id == last_msg_subquery.c.prof_id
+    ).filter(Professional.is_active == True).all()
     
     result = []
-    for prof in professionals:
-        unread_count = ChatMessage.query.filter_by(
-            sender_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
-            sender_id=prof.id,
-            receiver_type=ChatMessage.SENDER_TYPE_ADMIN,
-            is_read=False
-        ).count()
-        
-        # Get the latest message for sorting
-        last_message = ChatMessage.query.filter(
-            ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.sender_id == prof.id) & (ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_ADMIN)) |
-            ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_ADMIN) & (ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_id == prof.id))
-        ).order_by(ChatMessage.timestamp.desc()).first()
-        
-        last_msg_time = last_message.timestamp.timestamp() if last_message else 0
-        
+    for prof, unread, last_time in professionals_data:
         result.append({
             'id': prof.id,
             'name': prof.name,
             'category': prof.category,
-            'unread_count': unread_count,
-            'last_message_time': last_msg_time
+            'unread_count': unread,
+            'last_message_time': last_time.timestamp() if last_time else 0
         })
         
     # Sort professionals so recent chats are at the top
     result.sort(key=lambda x: x['last_message_time'], reverse=True)
     
-    return jsonify({
-        'success': True,
-        'professionals': result
-    })
+    return api_response(success=True, data={'professionals': result})
 
 
 @admin_bp.route('/api/chat/history/<int:professional_id>')
@@ -1410,11 +1404,8 @@ def get_chat_history_with_professional(professional_id):
             msg.is_read = True
     db.session.commit()
     
-    return jsonify({
-        'success': True,
-        'messages': [msg.to_dict() for msg in messages],
-        'professional': professional.to_dict()
-    })
+    return api_response(success=True, data={'messages': [msg.to_dict() for msg in messages],
+        'professional': professional.to_dict()})
 
 
 @admin_bp.route('/api/chat/send', methods=['POST'])
@@ -1449,11 +1440,7 @@ def admin_send_chat_message():
     from ...realtime import emit_chat_message
     emit_chat_message(chat_message)
     
-    return jsonify({
-        'success': True,
-        'message': 'Message sent successfully',
-        'chat_message': chat_message.to_dict()
-    })
+    return api_response(success=True, message='Message sent successfully', data={'chat_message': chat_message.to_dict()})
 
 
 @admin_bp.route('/api/chat/reset/<int:prof_id>', methods=['POST'])
@@ -1467,8 +1454,5 @@ def reset_professional_chat(prof_id):
         ((ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_id == prof_id))
     ).delete(synchronize_session=False)
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': "Chat history reset successfully"
-    })
+    return api_response(success=True, message="Chat history reset successfully")
 

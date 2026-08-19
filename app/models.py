@@ -131,10 +131,14 @@ class Room(db.Model):
     svg_id = db.Column(db.String(50), nullable=True)      # ID of path/rect in SVG file
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    __table_args__ = (
+        db.Index('idx_room_floor', 'floor_id'),
+    )
+    
     # Relationships
     assets = db.relationship('Asset', backref='room', lazy=True, cascade='all, delete-orphan')
     tickets = db.relationship('Ticket', backref='room', lazy=True)
-    schedules = db.relationship('Schedule', backref='room', lazy=True, cascade='all, delete-orphan')
+
     adhoc_bookings = db.relationship('AdHocBooking', backref='room', lazy=True, cascade='all, delete-orphan')
     timetables = db.relationship('Timetable', backref='room', lazy=True, cascade='all, delete-orphan')
     room_bookings = db.relationship('RoomBooking', backref='room', lazy=True, cascade='all, delete-orphan')
@@ -270,19 +274,13 @@ class Room(db.Model):
     @property
     def status(self):
         """
-        Return room maintenance status:
-        - 'issue': Has OPEN tickets (Red)
+        Return room maintenance status using eager loaded collections to avoid N+1 queries.
+        - 'issue': Has OPEN tickets or broken assets (Red)
         - 'in-progress': Has IN_PROGRESS tickets (Yellow)
         - 'assigned': Has ASSIGNED tickets but NO open/in-progress (Blue)
         - 'normal': No open, in-progress or assigned tickets (Green)
         """
-        if self.has_open_tickets or self.has_broken_assets:
-            return 'issue'
-        elif self.has_in_progress_tickets:
-            return 'in-progress'
-        elif self.has_assigned_tickets:
-            return 'assigned'
-        return 'normal'
+        return self.compute_status_from_loaded()[0]
 
     def compute_status_from_loaded(self):
         """
@@ -532,9 +530,7 @@ class Professional(db.Model):
         try:
             return check_password_hash(self.password_hash, password)
         except ValueError:
-            # Fallback in case of manually inserted plain-text passwords
-            if self.password_hash == password:
-                return True
+            # Hash is malformed/unsupported — deny access rather than fall back to plain-text
             return False
     
     @property
@@ -618,6 +614,11 @@ class ChatMessage(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     is_read = db.Column(db.Boolean, default=False)
     
+    __table_args__ = (
+        db.Index('idx_chat_sender_read', 'sender_type', 'sender_id', 'is_read'),
+        db.Index('idx_chat_receiver_read', 'receiver_type', 'receiver_id', 'is_read'),
+    )
+    
     def __repr__(self):
         return f'<ChatMessage #{self.id}>'
     
@@ -651,6 +652,10 @@ class Notification(db.Model):
     link = db.Column(db.String(255), nullable=True) # URL or route to follow
     is_read = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    __table_args__ = (
+        db.Index('idx_notif_user_read', 'user_id', 'is_read'),
+    )
     
     # Relationship
     user = db.relationship('User', backref=db.backref('notifications', lazy=True, cascade='all, delete-orphan'))
@@ -693,33 +698,6 @@ class PushSubscription(db.Model):
             }
         }
 
-
-class Schedule(db.Model):
-    """Schedule model - Timetable for classroom utilization mapping faculty and subjects."""
-    __tablename__ = 'schedules'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'), nullable=False)
-    faculty_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    subject = db.Column(db.String(100), nullable=False)
-    day_of_week = db.Column(db.Integer, nullable=False) # 0=Mon, ..., 6=Sun
-    start_time = db.Column(db.Time, nullable=False) # Stored without timezone, interpreted as local IST
-    end_time = db.Column(db.Time, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    faculty = db.relationship('User', backref='schedules', lazy=True)
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'room_id': self.room_id,
-            'faculty_id': self.faculty_id,
-            'faculty_name': self.faculty.name if self.faculty else 'Unknown',
-            'subject': self.subject,
-            'day_of_week': self.day_of_week,
-            'start_time': self.start_time.strftime('%H:%M:%S'),
-            'end_time': self.end_time.strftime('%H:%M:%S')
-        }
 
 class AdHocBooking(db.Model):
     """AdHocBooking model - Instant claims for vacant rooms by faculty."""

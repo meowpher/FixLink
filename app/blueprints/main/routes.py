@@ -121,7 +121,7 @@ def submit_report():
     
     if errors:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'success': False, 'errors': errors}), 400
+            return api_response(success=False, error='; '.join(errors), status=400)
         return render_template('report.html', errors=errors), 400
     
     # Handle image upload
@@ -147,7 +147,7 @@ def submit_report():
         
         if errors:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return jsonify({'success': False, 'errors': errors}), 400
+                return api_response(success=False, error='; '.join(errors), status=400)
             user = User.query.get(session['user_id'])
             building = Building.query.filter_by(name='Vyas').first()
             return render_template('report.html', user=user, building=building, errors=errors), 400
@@ -183,11 +183,11 @@ def submit_report():
         
         # Return JSON for AJAX, redirect for form submission
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({
-                'success': True,
-                'ticket_id': ticket.id,
-                'message': 'Ticket submitted successfully'
-            })
+            return api_response(
+                success=True,
+                message='Ticket submitted successfully',
+                data={'ticket_id': ticket.id}
+            )
         
         return render_template('report.html', 
                              success=True, 
@@ -200,7 +200,7 @@ def submit_report():
         error_msg = str(e)
         current_app.logger.error(f"Error submitting report: {error_msg}")
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return jsonify({'success': False, 'errors': [error_msg]}), 500
+            return api_response(success=False, error=error_msg, status=500)
         user = User.query.get(session['user_id'])
         building = Building.query.filter_by(name='Vyas').first()
         return render_template('report.html', user=user, building=building, errors=[error_msg]), 500
@@ -392,7 +392,12 @@ def report_bug():
             
         file_path = None
         if file and file.filename:
-            file_path = save_webapp_file(file)
+            filename = secure_filename(file.filename)
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            safe_filename = f"bug_{timestamp}_{filename}"
+            full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], safe_filename)
+            save_webapp_file(file, full_path)
+            file_path = safe_filename
             
         # Determine reporter if logged in
         reporter_id = None
@@ -418,6 +423,9 @@ def report_bug():
         db.session.commit()
         
         flash('Bug report submitted successfully! Thank you for your feedback.', 'success')
+        # Validate origin to prevent open redirect attacks
+        if origin and not origin.startswith('/'):
+            origin = url_for('main.index')
         return redirect(origin if origin else url_for('main.index'))
         
     return render_template('report_bug.html')
@@ -428,7 +436,7 @@ def get_unread_chat_total():
     from ...models import ChatMessage
     
     if not session.get('user_id') and not session.get('professional_id'):
-        return jsonify({'success': True, 'unread_count': 0})
+        return api_response(success=True, data={'unread_count': 0})
         
     unread_count = 0
     if session.get('is_admin'):
@@ -448,7 +456,7 @@ def get_unread_chat_total():
             is_read=False
         ).count()
         
-    return jsonify({
-        'success': True,
-        'unread_count': unread_count
-    })
+    return api_response(
+        success=True,
+        data={'unread_count': unread_count}
+    )

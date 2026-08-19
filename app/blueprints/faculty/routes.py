@@ -6,7 +6,7 @@ from flask import Blueprint, render_template, request, jsonify, session
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 from ... import db
-from ...models import User, Building, Floor, Room, Schedule, AdHocBooking, Timetable, RoomBooking
+from ...models import User, Building, Floor, Room, AdHocBooking, Timetable, RoomBooking
 from ...decorators import faculty_login_required
 from ...api_utils import handle_api_errors, api_response
 from ...realtime import emit_room_status_change

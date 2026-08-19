@@ -31,15 +31,13 @@
     </script>
     <script defer src="/_vercel/speed-insights/script.js"></script>
 
-    <!-- Advanced UI Animations CSS (Deferred) -->
-    <link rel="preload" href="{{ url_for('static', filename='css/page_transitions.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/page_transitions.css') }}"></noscript>
+    <!-- Advanced UI Animations CSS -->
+    <link href="{{ url_for('static', filename='css/page_transitions.css') }}" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/skeleton.css') }}" rel="stylesheet">
     
+    <!-- Deferred Non-Critical CSS -->
     <link rel="preload" href="{{ url_for('static', filename='css/dashboard_stats.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_stats.css') }}"></noscript>
-    
-    <link rel="preload" href="{{ url_for('static', filename='css/skeleton.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}"></noscript>
     
     <link rel="preload" href="{{ url_for('static', filename='css/carousels.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/carousels.css') }}"></noscript>

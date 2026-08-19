@@ -212,11 +212,7 @@ def start_task(ticket_id):
     except Exception as e:
         current_app.logger.error(f"Email failed: {str(e)}")
     
-    return jsonify({
-        'success': True,
-        'message': 'Job started successfully',
-        'job_started_at': ticket.job_started_at.isoformat()
-    })
+    return api_response(success=True, message='Job started successfully', data={'job_started_at': ticket.job_started_at.isoformat()})
 
 
 @professional_bp.route('/api/task/<int:ticket_id>/complete', methods=['POST'])
@@ -266,11 +262,7 @@ def complete_task(ticket_id):
     from ...utils import send_ticket_email
     send_ticket_email(ticket, action='fixed')
     
-    return jsonify({
-        'success': True,
-        'message': 'Job completed successfully',
-        'job_completed_at': ticket.job_completed_at.isoformat()
-    })
+    return api_response(success=True, message='Job completed successfully', data={'job_completed_at': ticket.job_completed_at.isoformat()})
 
 
 @professional_bp.route('/api/task/<int:ticket_id>/cancel', methods=['POST'])
@@ -305,11 +297,7 @@ def cancel_task(ticket_id):
     from ...realtime import notify_admin_job_cancelled
     notify_admin_job_cancelled(ticket, professional, reason)
     
-    return jsonify({
-        'success': True,
-        'message': "Job cancelled successfully. Admin will reassign.",
-        'cancelled_at': ticket.cancelled_at.isoformat()
-    })
+    return api_response(success=True, message="Job cancelled successfully. Admin will reassign.", data={'cancelled_at': ticket.cancelled_at.isoformat()})
 
 
 @professional_bp.route('/api/task/<int:ticket_id>/complexity', methods=['POST'])
@@ -331,10 +319,7 @@ def set_complexity(ticket_id):
     
     ticket.complexity = complexity
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': f"Complexity set to {complexity}"
-    })
+    return api_response(success=True, message=f"Complexity set to {complexity}")
 
 
 # Help Request Endpoints
@@ -368,11 +353,7 @@ def request_help(ticket_id):
     from ...realtime import notify_admin_help_requested
     notify_admin_help_requested(help_request, professional, ticket)
     
-    return jsonify({
-        'success': True,
-        'message': "Help request submitted for admin approval",
-        'help_request_id': help_request.id
-    })
+    return api_response(success=True, message="Help request submitted for admin approval", data={'help_request_id': help_request.id})
 
 
 # Chat Endpoints
@@ -397,10 +378,7 @@ def get_chat_history():
             msg.is_read = True
     db.session.commit()
     
-    return jsonify({
-        'success': True,
-        'messages': [msg.to_dict() for msg in messages]
-    })
+    return api_response(success=True, data={'messages': [msg.to_dict() for msg in messages]})
 
 
 @professional_bp.route('/api/chat/send', methods=['POST'])
@@ -413,13 +391,13 @@ def send_chat_message():
     message_text = data.get('message', '').strip()
     
     if not message_text:
-        return jsonify({'success': False, 'error': 'Message cannot be empty'}), 400
+        return api_response(success=False, error='Message cannot be empty', status=400)
     
     try:
         # Find an admin to send to (first available admin)
         admin = User.query.filter_by(is_admin=True).first()
         if not admin:
-            return jsonify({'success': False, 'error': 'No admin available'}), 400
+            return api_response(success=False, error='No admin available', status=400)
         
         chat_message = ChatMessage(
             sender_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
@@ -435,14 +413,14 @@ def send_chat_message():
         from ...realtime import emit_chat_message
         emit_chat_message(chat_message)
         
-        return jsonify({
-            'success': True,
-            'message': 'Message sent successfully',
-            'chat_message': chat_message.to_dict()
-        })
+        return api_response(
+            success=True,
+            message='Message sent successfully',
+            data={'chat_message': chat_message.to_dict()}
+        )
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return api_response(success=False, error=str(e), status=500)
 
 
 @professional_bp.route('/api/task/<int:ticket_id>')
@@ -454,14 +432,8 @@ def get_task_detail_api(ticket_id):
     ticket = Ticket.query.get_or_404(ticket_id)
     
     if ticket.assigned_professional_id != professional.id:
-        return jsonify({
-            'success': False,
-            'error': "Not authorized"
-        }), 403
-    return jsonify({
-        'success': True,
-        'ticket': ticket.to_dict()
-    })
+        return api_response(success=False, data={'error': "Not authorized"}), 403
+    return api_response(success=True, data={'ticket': ticket.to_dict()})
 
 
 @professional_bp.route('/api/chat/reset', methods=['POST'])
@@ -475,7 +447,4 @@ def reset_chat_history():
         ((ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_id == prof_id))
     ).delete(synchronize_session=False)
     db.session.commit()
-    return jsonify({
-        'success': True,
-        'message': "Chat history reset successfully"
-    })
+    return api_response(success=True, message="Chat history reset successfully")

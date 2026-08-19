@@ -14,14 +14,16 @@
 <li class="nav-item dropdown ms-2">
     <a class="nav-link p-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
         <div class="nav-avatar">
-            <span class="nav-avatar-initials">{{ professional.name[0] }}{{ professional.name.split()[-1][0] if professional.name.split()|length > 1 else '' }}</span>
+            <span class="nav-avatar-initials">{{ professional.name[0] }}{{ professional.name.split()[-1][0] if
+                professional.name.split()|length > 1 else '' }}</span>
         </div>
     </a>
     <ul class="dropdown-menu dropdown-menu-end profile-dropdown">
         <li class="dropdown-header-item px-3 py-2">
             <div class="d-flex align-items-center gap-3 mb-2">
                 <div class="nav-avatar nav-avatar-sm">
-                    <span class="nav-avatar-initials">{{ professional.name[0] }}{{ professional.name.split()[-1][0] if professional.name.split()|length > 1 else '' }}</span>
+                    <span class="nav-avatar-initials">{{ professional.name[0] }}{{ professional.name.split()[-1][0] if
+                        professional.name.split()|length > 1 else '' }}</span>
                 </div>
                 <div class="fw-semibold" style="font-size:0.9rem;">{{ professional.name }}</div>
             </div>
@@ -34,7 +36,9 @@
                 <span class="profile-info-value">{{ professional.email or 'N/A' }}</span>
             </div>
         </li>
-        <li><hr class="dropdown-divider"></li>
+        <li>
+            <hr class="dropdown-divider">
+        </li>
         <li>
             <a class="dropdown-item" href="{{ url_for('professional.logout') }}">
                 <i class="bi bi-box-arrow-right me-2"></i>Logout
@@ -43,6 +47,7 @@
     </ul>
 </li>
 {% endblock %}
+
 
 {% block content %}
 <!-- Professional Header -->
@@ -110,302 +115,333 @@
     </div>
 </section>
 
-    <div class="row g-4">
-        <!-- Sidebar Tasks / Info -->
-        <div class="col-lg-4 order-lg-2 slide-up" style="animation-delay: 0.4s;">
-            <!-- Profile Info Cord -->
-            <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--border-radius-lg); overflow: hidden;">
-                {% set category_icons = {
-                    'Electrician': 'bi-lightning-charge',
-                    'Plumber': 'bi-droplet',
-                    'Carpenter': 'bi-hammer',
-                    'IT Technician': 'bi-cpu',
-                    'A/C Technician': 'bi-snow',
-                    'Cleaner': 'bi-brush'
-                } %}
-                {% set cat_icon = category_icons.get(category_name, 'bi-tools') %}
-                <div class="card-header bg-white py-3 border-0">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2"></i>My Profile</h5>
-                </div>
-                <div class="card-body pt-0">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="nav-avatar nav-avatar-lg" style="width: 60px; height: 60px; font-size: 1.5rem; background: var(--mitwpu-blue-light);">
-                            <i class="bi {{ cat_icon }} text-white"></i>
-                        </div>
-                        <div>
-                            <h6 class="mb-0 fw-bold">{{ professional.name }}</h6>
-                            <small class="badge bg-light text-primary border">{{ category_name }}</small>
-                        </div>
-                    </div>
-                    <div class="small text-muted mb-2">
-                        <i class="bi bi-envelope me-2"></i>{{ professional.email }}
-                    </div>
-                    {% if professional.phone %}
-                    <div class="small text-muted mb-3">
-                        <i class="bi bi-telephone me-2"></i>{{ professional.phone }}
-                    </div>
-                    {% endif %}
-                    <a href="{{ url_for('professional.chat') }}" class="btn btn-primary w-100 rounded-pill">
-                        <i class="bi bi-chat-fill me-2"></i>Open Chat Support
-                    </a>
-                </div>
+<div class="row g-4">
+    <!-- Sidebar Tasks / Info -->
+    <div class="col-lg-4 order-lg-2 slide-up" style="animation-delay: 0.4s;">
+        <!-- Profile Info Cord -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--border-radius-lg); overflow: hidden;">
+            {% set category_icons = {
+            'Electrician': 'bi-lightning-charge',
+            'Plumber': 'bi-droplet',
+            'Carpenter': 'bi-hammer',
+            'IT Technician': 'bi-cpu',
+            'A/C Technician': 'bi-snow',
+            'Cleaner': 'bi-brush'
+            } %}
+            {% set cat_icon = category_icons.get(category_name, 'bi-tools') %}
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2"></i>My Profile</h5>
             </div>
-
-            <!-- Help Requests Card -->
-            <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--border-radius-lg); overflow: hidden;">
-                <div class="card-header bg-white py-3 border-0">
-                    <h5 class="mb-0 fw-bold text-warning"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</h5>
-                </div>
-                <div class="card-body p-0">
-                    <div class="list-group list-group-flush border-0">
-                        {% for req in help_requests %}
-                        <div class="list-group-item border-0 py-3 px-4 hover-bg-light transition-normal">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="fw-bold">Ticket #{{ req.ticket_id }}</span>
-                                <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning" style="font-size: 0.7rem;">Pending</span>
-                            </div>
-                            <small class="text-muted d-block">{{ req.message|truncate(60) }}</small>
-                            <div class="mt-2" style="font-size: 0.75rem;">
-                                <i class="bi bi-clock me-1"></i>{{ req.requested_at.strftime('%H:%M %d/%m') }}
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="p-5 text-center text-muted">
-                            <i class="bi bi-check-circle fs-1 opacity-25 d-block mb-3"></i>
-                            <small>No pending help requests</small>
-                        </div>
-                        {% endfor %}
+            <div class="card-body pt-0">
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="nav-avatar nav-avatar-lg"
+                        style="width: 60px; height: 60px; font-size: 1.5rem; background: var(--mitwpu-blue-light);">
+                        <i class="bi {{ cat_icon }} text-white"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-0 fw-bold">{{ professional.name }}</h6>
+                        <small class="badge bg-light text-primary border">{{ category_name }}</small>
                     </div>
                 </div>
+                <div class="small text-muted mb-2">
+                    <i class="bi bi-envelope me-2"></i>{{ professional.email }}
+                </div>
+                {% if professional.phone %}
+                <div class="small text-muted mb-3">
+                    <i class="bi bi-telephone me-2"></i>{{ professional.phone }}
+                </div>
+                {% endif %}
+                <a href="{{ url_for('professional.chat') }}" class="btn btn-primary w-100 rounded-pill">
+                    <i class="bi bi-chat-fill me-2"></i>Open Chat Support
+                </a>
             </div>
         </div>
 
-        <!-- Main Task Area -->
-        <div class="col-lg-8 order-lg-1 slide-up" style="animation-delay: 0.3s;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="fw-bold mb-0">My Assigned Tasks</h2>
-                <div class="badge rounded-pill bg-primary px-3 py-2">{{ assigned_tickets|length }} Active</div>
+        <!-- Help Requests Card -->
+        <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--border-radius-lg); overflow: hidden;">
+            <div class="card-header bg-white py-3 border-0">
+                <h5 class="mb-0 fw-bold text-warning"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</h5>
             </div>
-            
-            {% if assigned_tickets %}
-                <div class="row g-4">
-                    {% for ticket in assigned_tickets %}
-                    <div class="col-md-12">
-                        <div class="card ticket-card border-0 shadow-sm hover-shadow transition-normal {% if ticket.is_overdue %}border-status-overdue{% elif ticket.status == 'in-progress' %}border-status-in-progress{% else %}border-status-assigned{% endif %}" style="border-radius: var(--border-radius-lg);">
-                            <div class="card-body p-3">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <div class="d-flex align-items-center gap-2 mb-1">
-                                            <h5 class="mb-0 fw-bold">Room {{ ticket.room.number }}</h5>
-                                            <span class="badge rounded-pill {% if ticket.role == 'Primary' %}bg-dark{% else %}bg-info-subtle text-info-emphasis border border-info{% endif %}" style="font-size: 0.7rem;">
-                                                <i class="bi bi-person{% if ticket.role != 'Primary' %}-plus{% endif %} me-1"></i>{{ ticket.role }}
-                                            </span>
-                                        </div>
-                                        <div class="text-primary fw-semibold" style="font-size: 0.85rem;">
-                                            <i class="bi bi-tag me-1"></i>{{ ticket.issue_type.replace('_', ' ').title() }}
-                                        </div>
-                                    </div>
-                                    <div class="text-end">
-                                        <div class="badge rounded-pill {% if ticket.status == 'assigned' %}bg-primary-subtle text-primary border border-primary{% elif ticket.status == 'in-progress' %}bg-warning-subtle text-warning border border-warning{% else %}bg-secondary-subtle text-secondary border border-secondary{% endif %} px-2 py-1" style="text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.5px;">
-                                            {{ ticket.status.replace('-', ' ') }}
-                                        </div>
-                                        <div class="mt-1 fw-bold text-muted" style="font-size: 0.75rem;">#{{ ticket.id }}</div>
-                                    </div>
-                                </div>
-                                
-                                <p class="text-muted mb-3" style="font-size: 0.9rem;">{{ ticket.description }}</p>
-                                
-                                <div class="row g-2 mb-3">
-                                    <div class="col-sm-6">
-                                        <div class="p-2 px-3 bg-light rounded-3" style="height: 100%;">
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <div class="small text-muted text-uppercase" style="font-size: 0.65rem; font-weight: 700;">Deadline & Status</div>
-                                                {% if ticket.time_remaining %}
-                                                    <div class="{% if ticket.is_overdue %}text-danger{% else %}text-success{% endif %}" style="font-size: 0.75rem; font-weight: 600;">
-                                                        <i class="bi bi-hourglass-split me-1"></i>{{ ticket.time_remaining }}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                            <div class="fw-bold mt-1" style="font-size: 0.85rem;">{{ ticket.deadline_datetime.strftime('%b %d, %H:%M') if ticket.deadline_datetime else 'No deadline' }}</div>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6">
-                                        <div class="p-2 px-3 bg-light rounded-3" style="height: 100%;">
-                                            <div class="small text-muted text-uppercase mb-1" style="font-size: 0.65rem; font-weight: 700;">Complexity Level</div>
-                                            <select class="form-select form-select-sm border-0 bg-transparent fw-bold p-0" style="font-size: 0.85rem; color: inherit; box-shadow: none;" onchange="setComplexity({{ ticket.id }}, this.value)">
-                                                <option value="">Set Complexity</option>
-                                                {% for complexity in complexity_choices %}
-                                                <option value="{{ complexity }}" {% if ticket.complexity == complexity %}selected{% endif %}>
-                                                    {{ complexity.title() }}
-                                                </option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Action Buttons -->
-                                <div class="d-flex flex-wrap gap-2 pt-3 border-top mt-auto">
-                                    {% if ticket.status == 'assigned' %}
-                                    <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm" onclick="startJob({{ ticket.id }})">
-                                        <i class="bi bi-play-circle-fill me-1"></i>Start Task
-                                    </button>
-                                    {% endif %}
-                                    
-                                    {% if ticket.status == 'in-progress' %}
-                                    <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#completeModal{{ ticket.id }}">
-                                        <i class="bi bi-check-circle-fill me-1"></i>Mark as Done
-                                    </button>
-                                    
-                                    <button class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-sm" onclick="requestHelp({{ ticket.id }})">
-                                        <i class="bi bi-people-fill me-1"></i>Request Help
-                                    </button>
-                                    {% endif %}
-                                    
-                                    {% if ticket.status in ['assigned', 'in-progress'] %}
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm ms-auto" data-bs-toggle="modal" data-bs-target="#cancelModal{{ ticket.id }}">
-                                        <i class="bi bi-x-circle me-1"></i>Cancel
-                                    </button>
-                                    {% endif %}
-                                </div>
-                            </div>
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush border-0">
+                    {% for req in help_requests %}
+                    <div class="list-group-item border-0 py-3 px-4 hover-bg-light transition-normal">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">Ticket #{{ req.ticket_id }}</span>
+                            <span
+                                class="badge rounded-pill bg-warning-subtle text-warning-emphasis border border-warning"
+                                style="font-size: 0.7rem;">Pending</span>
                         </div>
+                        <small class="text-muted d-block">{{ req.message|truncate(60) }}</small>
+                        <div class="mt-2" style="font-size: 0.75rem;">
+                            <i class="bi bi-clock me-1"></i>{{ req.requested_at.strftime('%H:%M %d/%m') }}
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="p-5 text-center text-muted">
+                        <i class="bi bi-check-circle fs-1 opacity-25 d-block mb-3"></i>
+                        <small>No pending help requests</small>
                     </div>
                     {% endfor %}
                 </div>
-            {% else %}
-                <div class="card border-0 shadow-sm p-5 text-center" style="border-radius: var(--border-radius-lg);">
-                    <div class="mb-3">
-                        <i class="bi bi-clipboard2-check fs-1 text-primary opacity-25"></i>
-                    </div>
-                    <h4 class="fw-bold">All clear!</h4>
-                    <p class="text-muted">You don't have any active tasks assigned right now.</p>
-                </div>
-            {% endif %}
-            
-            <!-- Completed Tasks -->
-            {% if completed_tickets %}
-            <div class="mt-5 mb-4 d-flex justify-content-between align-items-center">
-                <h3 class="fw-bold mb-0">Recently Completed</h3>
-                <a href="{{ url_for('professional.history') }}" class="btn btn-link link-primary p-0 text-decoration-none">View All <i class="bi bi-arrow-right small"></i></a>
             </div>
-            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: var(--border-radius-lg);">
-                <!-- Desktop Table -->
-                <div class="desktop-table-container d-none d-md-block">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light">
-                                <tr>
-                                    <th class="border-0 px-4 py-3">Task</th>
-                                    <th class="border-0 py-3 text-center">Room</th>
-                                    <th class="border-0 py-3">Issue</th>
-                                    <th class="border-0 py-3">Completed</th>
-                                    <th class="border-0 px-4 py-3 text-end">Photo</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for ticket in completed_tickets %}
-                                <tr>
-                                    <td class="px-4 py-3 fw-bold text-muted">#{{ ticket.id }}</td>
-                                    <td class="py-3 text-center"><span class="badge bg-light text-dark border">{{ ticket.room.number }}</span></td>
-                                    <td class="py-3">{{ ticket.issue_type.replace('_', ' ').title() }}</td>
-                                    <td class="py-3 small text-muted">{{ ticket.job_completed_at.strftime('%b %d, %H:%M') if ticket.job_completed_at else 'N/A' }}</td>
-                                    <td class="px-4 py-3 text-end">
-                                        {% if ticket.completion_photo_filename %}
-                                        <a href="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}" target="_blank" class="text-primary"><i class="bi bi-image fs-5"></i></a>
-                                        {% else %}
-                                        <span class="text-muted small">None</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        </div>
+    </div>
 
-                <!-- Mobile Cards -->
-                <div class="mobile-card-list d-md-none p-3">
-                    {% for ticket in completed_tickets %}
-                    <div class="mc-card">
-                        <div class="mc-top">
-                            <div class="mc-id-title">
-                                <span class="mc-id">#{{ ticket.id }}</span>
-                                <span class="mc-title">{{ ticket.issue_type.replace('_', ' ').title() }}</span>
-                            </div>
-                            <div class="mc-status">
-                                <span class="badge bg-success-subtle text-success">Done</span>
-                            </div>
-                        </div>
-                        <div class="mc-person-row">
-                            <div class="mc-person-left">
-                                <div class="mc-avatar bg-success"><i class="bi bi-check2"></i></div>
-                                <div class="mc-person-info">
-                                    <span class="mc-name">Room {{ ticket.room.number }}</span>
-                                    <span class="mc-meta">{{ ticket.job_completed_at.strftime('%b %d, %H:%M') if ticket.job_completed_at else 'N/A' }}</span>
+    <!-- Main Task Area -->
+    <div class="col-lg-8 order-lg-1 slide-up" style="animation-delay: 0.3s;">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold mb-0">My Assigned Tasks</h2>
+            <div class="badge rounded-pill bg-primary px-3 py-2">{{ assigned_tickets|length }} Active</div>
+        </div>
+
+        {% if assigned_tickets %}
+        <div class="row g-4">
+            {% for ticket in assigned_tickets %}
+            <div class="col-md-12">
+                <div class="card ticket-card border-0 shadow-sm hover-shadow transition-normal {% if ticket.is_overdue %}border-status-overdue{% elif ticket.status == 'in-progress' %}border-status-in-progress{% else %}border-status-assigned{% endif %}"
+                    style="border-radius: var(--border-radius-lg);">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h5 class="mb-0 fw-bold">Room {{ ticket.room.number }}</h5>
+                                    <span
+                                        class="badge rounded-pill {% if ticket.role == 'Primary' %}bg-dark{% else %}bg-info-subtle text-info-emphasis border border-info{% endif %}"
+                                        style="font-size: 0.7rem;">
+                                        <i
+                                            class="bi bi-person{% if ticket.role != 'Primary' %}-plus{% endif %} me-1"></i>{{
+                                        ticket.role }}
+                                    </span>
+                                </div>
+                                <div class="text-primary fw-semibold" style="font-size: 0.85rem;">
+                                    <i class="bi bi-tag me-1"></i>{{ ticket.issue_type.replace('_', ' ').title() }}
                                 </div>
                             </div>
-                            {% if ticket.completion_photo_filename %}
-                            <a href="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}" target="_blank" class="text-primary"><i class="bi bi-image fs-5"></i></a>
+                            <div class="text-end">
+                                <div class="badge rounded-pill {% if ticket.status == 'assigned' %}bg-primary-subtle text-primary border border-primary{% elif ticket.status == 'in-progress' %}bg-warning-subtle text-warning border border-warning{% else %}bg-secondary-subtle text-secondary border border-secondary{% endif %} px-2 py-1"
+                                    style="text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.5px;">
+                                    {{ ticket.status.replace('-', ' ') }}
+                                </div>
+                                <div class="mt-1 fw-bold text-muted" style="font-size: 0.75rem;">#{{ ticket.id }}</div>
+                            </div>
+                        </div>
+
+                        <p class="text-muted mb-3" style="font-size: 0.9rem;">{{ ticket.description }}</p>
+
+                        <div class="row g-2 mb-3">
+                            <div class="col-sm-6">
+                                <div class="p-2 px-3 bg-light rounded-3" style="height: 100%;">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="small text-muted text-uppercase"
+                                            style="font-size: 0.65rem; font-weight: 700;">Deadline & Status</div>
+                                        {% if ticket.time_remaining %}
+                                        <div class="{% if ticket.is_overdue %}text-danger{% else %}text-success{% endif %}"
+                                            style="font-size: 0.75rem; font-weight: 600;">
+                                            <i class="bi bi-hourglass-split me-1"></i>{{ ticket.time_remaining }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="fw-bold mt-1" style="font-size: 0.85rem;">{{
+                                        ticket.deadline_datetime.strftime('%b %d, %H:%M') if ticket.deadline_datetime
+                                        else 'No deadline' }}</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-2 px-3 bg-light rounded-3" style="height: 100%;">
+                                    <div class="small text-muted text-uppercase mb-1"
+                                        style="font-size: 0.65rem; font-weight: 700;">Complexity Level</div>
+                                    <select class="form-select form-select-sm border-0 bg-transparent fw-bold p-0"
+                                        style="font-size: 0.85rem; color: inherit; box-shadow: none;"
+                                        onchange="setComplexity({{ ticket.id }}, this.value)">
+                                        <option value="">Set Complexity</option>
+                                        {% for complexity in complexity_choices %}
+                                        <option value="{{ complexity }}" {% if ticket.complexity==complexity
+                                            %}selected{% endif %}>
+                                            {{ complexity.title() }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex flex-wrap gap-2 pt-3 border-top mt-auto">
+                            {% if ticket.status == 'assigned' %}
+                            <button class="btn btn-success btn-sm rounded-pill px-3 shadow-sm"
+                                onclick="startJob({{ ticket.id }})">
+                                <i class="bi bi-play-circle-fill me-1"></i>Start Task
+                            </button>
+                            {% endif %}
+
+                            {% if ticket.status == 'in-progress' %}
+                            <button class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm" data-bs-toggle="modal"
+                                data-bs-target="#completeModal{{ ticket.id }}">
+                                <i class="bi bi-check-circle-fill me-1"></i>Mark as Done
+                            </button>
+
+                            <button class="btn btn-outline-info btn-sm rounded-pill px-3 shadow-sm"
+                                onclick="requestHelp({{ ticket.id }})">
+                                <i class="bi bi-people-fill me-1"></i>Request Help
+                            </button>
+                            {% endif %}
+
+                            {% if ticket.status in ['assigned', 'in-progress'] %}
+                            <button class="btn btn-outline-danger btn-sm rounded-pill px-3 shadow-sm ms-auto"
+                                data-bs-toggle="modal" data-bs-target="#cancelModal{{ ticket.id }}">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </button>
                             {% endif %}
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
             </div>
-            {% endif %}
+            {% endfor %}
         </div>
+        {% else %}
+        <div class="card border-0 shadow-sm p-5 text-center" style="border-radius: var(--border-radius-lg);">
+            <div class="mb-3">
+                <i class="bi bi-clipboard2-check fs-1 text-primary opacity-25"></i>
+            </div>
+            <h4 class="fw-bold">All clear!</h4>
+            <p class="text-muted">You don't have any active tasks assigned right now.</p>
+        </div>
+        {% endif %}
+
+        <!-- Completed Tasks -->
+        {% if completed_tickets %}
+        <div class="mt-5 mb-4 d-flex justify-content-between align-items-center">
+            <h3 class="fw-bold mb-0">Recently Completed</h3>
+            <a href="{{ url_for('professional.history') }}"
+                class="btn btn-link link-primary p-0 text-decoration-none">View All <i
+                    class="bi bi-arrow-right small"></i></a>
+        </div>
+        <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: var(--border-radius-lg);">
+            <!-- Desktop Table -->
+            <div class="desktop-table-container d-none d-md-block">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="border-0 px-4 py-3">Task</th>
+                                <th class="border-0 py-3 text-center">Room</th>
+                                <th class="border-0 py-3">Issue</th>
+                                <th class="border-0 py-3">Completed</th>
+                                <th class="border-0 px-4 py-3 text-end">Photo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in completed_tickets %}
+                            <tr>
+                                <td class="px-4 py-3 fw-bold text-muted">#{{ ticket.id }}</td>
+                                <td class="py-3 text-center"><span class="badge bg-light text-dark border">{{
+                                        ticket.room.number }}</span></td>
+                                <td class="py-3">{{ ticket.issue_type.replace('_', ' ').title() }}</td>
+                                <td class="py-3 small text-muted">{{ ticket.job_completed_at.strftime('%b %d, %H:%M') if
+                                    ticket.job_completed_at else 'N/A' }}</td>
+                                <td class="px-4 py-3 text-end">
+                                    {% if ticket.completion_photo_filename %}
+                                    <a href="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}"
+                                        target="_blank" class="text-primary"><i class="bi bi-image fs-5"></i></a>
+                                    {% else %}
+                                    <span class="text-muted small">None</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Mobile Cards -->
+            <div class="mobile-card-list d-md-none p-3">
+                {% for ticket in completed_tickets %}
+                <div class="mc-card">
+                    <div class="mc-top">
+                        <div class="mc-id-title">
+                            <span class="mc-id">#{{ ticket.id }}</span>
+                            <span class="mc-title">{{ ticket.issue_type.replace('_', ' ').title() }}</span>
+                        </div>
+                        <div class="mc-status">
+                            <span class="badge bg-success-subtle text-success">Done</span>
+                        </div>
+                    </div>
+                    <div class="mc-person-row">
+                        <div class="mc-person-left">
+                            <div class="mc-avatar bg-success"><i class="bi bi-check2"></i></div>
+                            <div class="mc-person-info">
+                                <span class="mc-name">Room {{ ticket.room.number }}</span>
+                                <span class="mc-meta">{{ ticket.job_completed_at.strftime('%b %d, %H:%M') if
+                                    ticket.job_completed_at else 'N/A' }}</span>
+                            </div>
+                        </div>
+                        {% if ticket.completion_photo_filename %}
+                        <a href="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}"
+                            target="_blank" class="text-primary"><i class="bi bi-image fs-5"></i></a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
     </div>
+</div>
 </div>
 
 <!-- Modal Container (Outside transform context) -->
 {% for ticket in assigned_tickets %}
-    <!-- Complete Job Modal -->
-    <div class="modal fade" id="completeModal{{ ticket.id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: var(--border-radius-lg);">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Complete Task #{{ ticket.id }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+<!-- Complete Job Modal -->
+<div class="modal fade" id="completeModal{{ ticket.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--border-radius-lg);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Complete Task #{{ ticket.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-4">
+                    <i class="bi bi-camera-fill display-4 text-primary opacity-50"></i>
+                    <h4 class="mt-2">Proof of Completion</h4>
                 </div>
-                <div class="modal-body p-4 text-center">
-                    <div class="mb-4">
-                        <i class="bi bi-camera-fill display-4 text-primary opacity-50"></i>
-                        <h4 class="mt-2">Proof of Completion</h4>
+                <form id="completeForm{{ ticket.id }}" enctype="multipart/form-data">
+                    <div class="upload-area p-4 border-dashed rounded-3 bg-light mb-3">
+                        <input type="file" class="form-control" name="completion_photo" accept="image/*" required>
+                        <p class="text-muted small mt-2">Upload a photo of the fixed asset/room.</p>
                     </div>
-                    <form id="completeForm{{ ticket.id }}" enctype="multipart/form-data">
-                        <div class="upload-area p-4 border-dashed rounded-3 bg-light mb-3">
-                            <input type="file" class="form-control" name="completion_photo" accept="image/*" required>
-                            <p class="text-muted small mt-2">Upload a photo of the fixed asset/room.</p>
-                        </div>
-                    </form>
-                    <button type="button" class="btn btn-primary w-100 rounded-pill py-2" onclick="completeJob({{ ticket.id }})">Submit Completion</button>
-                </div>
+                </form>
+                <button type="button" class="btn btn-primary w-100 rounded-pill py-2"
+                    onclick="completeJob({{ ticket.id }})">Submit Completion</button>
             </div>
         </div>
     </div>
-    
-    <!-- Cancel Job Modal -->
-    <div class="modal fade" id="cancelModal{{ ticket.id }}" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg" style="border-radius: var(--border-radius-lg);">
-                <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold text-danger">Cancel Task #{{ ticket.id }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+
+<!-- Cancel Job Modal -->
+<div class="modal fade" id="cancelModal{{ ticket.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: var(--border-radius-lg);">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-danger">Cancel Task #{{ ticket.id }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="alert alert-warning border-0 rounded-3 small">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Admin will be notified of this cancellation.
                 </div>
-                <div class="modal-body p-4">
-                    <div class="alert alert-warning border-0 rounded-3 small">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>Admin will be notified of this cancellation.
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Why are you cancelling?</label>
-                        <textarea class="form-control" id="cancelReason{{ ticket.id }}" rows="3" placeholder="Describe the reason (e.g., missing tools, wrong expertise)..." required></textarea>
-                    </div>
-                    <button type="button" class="btn btn-danger w-100 rounded-pill py-2" onclick="cancelJob({{ ticket.id }})">Confirm Cancellation</button>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Why are you cancelling?</label>
+                    <textarea class="form-control" id="cancelReason{{ ticket.id }}" rows="3"
+                        placeholder="Describe the reason (e.g., missing tools, wrong expertise)..." required></textarea>
                 </div>
+                <button type="button" class="btn btn-danger w-100 rounded-pill py-2"
+                    onclick="cancelJob({{ ticket.id }})">Confirm Cancellation</button>
             </div>
         </div>
     </div>
+</div>
 {% endfor %}
 
 <!-- Help Request Modal -->
@@ -420,9 +456,11 @@
                 <input type="hidden" id="help-ticket-id">
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Note to Admin</label>
-                    <textarea class="form-control" id="help-message" rows="3" placeholder="Briefly explain what assistance or special tools you need..." required></textarea>
+                    <textarea class="form-control" id="help-message" rows="3"
+                        placeholder="Briefly explain what assistance or special tools you need..." required></textarea>
                 </div>
-                <button type="button" class="btn btn-primary w-100 rounded-pill py-2" onclick="submitHelpRequest()">Send Request</button>
+                <button type="button" class="btn btn-primary w-100 rounded-pill py-2" onclick="submitHelpRequest()">Send
+                    Request</button>
             </div>
         </div>
     </div>
@@ -436,8 +474,8 @@
     let pusher;
     let channel;
     let helpRequestModal;
-    
-    document.addEventListener('DOMContentLoaded', function() {
+
+    document.addEventListener('DOMContentLoaded', function () {
         initPusher();
 
         // Initialize modals
@@ -466,31 +504,31 @@
             // Subscribe to unique professional channel
             const professionalId = '{{ session.professional_id }}';
             channel = pusher.subscribe(`private-professional-${professionalId}`);
-            
+
             // Listen for new assignments
-            channel.bind('new_assignment', function(data) {
+            channel.bind('new_assignment', function (data) {
                 showToast(`New task assigned! Ticket #${data.ticket_id}`, 'info');
                 setTimeout(() => location.reload(), 2000);
             });
-            
+
             // Listen for help approvals
-            channel.bind('help_approved', function(data) {
+            channel.bind('help_approved', function (data) {
                 showToast(`Help request approved! ${data.helper_name} will assist you.`, 'success');
                 setTimeout(() => location.reload(), 2000);
             });
-            
+
             // Listen for help rejections
-            channel.bind('help_rejected', function(data) {
+            channel.bind('help_rejected', function (data) {
                 showToast('Help request was rejected.', 'warning');
                 setTimeout(() => location.reload(), 2000);
             });
 
             // Listen for being assigned as a helper
-            channel.bind('assigned_as_helper', function(data) {
+            channel.bind('assigned_as_helper', function (data) {
                 showToast(`You have been assigned as a helper for Ticket #${data.ticket_id} (Room ${data.ticket_number})!`, 'info');
                 setTimeout(() => location.reload(), 2000);
             });
-            
+
         } catch (e) {
             console.error('Pusher init failed:', e);
         }
@@ -498,7 +536,7 @@
 
     // --- Web Push Subscription Logic ---
     const vapidPublicKey = '{{ vapid_public_key }}';
-    
+
     function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding)
@@ -514,42 +552,42 @@
 
     if ('serviceWorker' in navigator && 'PushManager' in window && vapidPublicKey) {
         navigator.serviceWorker.register('/static/js/sw.js')
-        .then(function(swReg) {
-            console.log('Service Worker is registered', swReg);
-            
-            // Ask permission immediately on load (or could be triggered by click)
-            Notification.requestPermission().then(function(permission) {
-                if (permission === 'granted') {
-                    console.log('Notification permission granted.');
-                    
-                    swReg.pushManager.getSubscription()
-                    .then(function(subscription) {
-                        if (subscription === null) {
-                            // Needs to subscribe
-                            const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-                            swReg.pushManager.subscribe({
-                                userVisibleOnly: true,
-                                applicationServerKey: convertedVapidKey
-                            })
-                            .then(function(newSubscription) {
-                                console.log('User is subscribed.');
-                                // Send to server
-                                sendSubscriptionToServer(newSubscription);
-                            })
-                            .catch(function(err) {
-                                console.log('Failed to subscribe the user: ', err);
+            .then(function (swReg) {
+                console.log('Service Worker is registered', swReg);
+
+                // Ask permission immediately on load (or could be triggered by click)
+                Notification.requestPermission().then(function (permission) {
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted.');
+
+                        swReg.pushManager.getSubscription()
+                            .then(function (subscription) {
+                                if (subscription === null) {
+                                    // Needs to subscribe
+                                    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+                                    swReg.pushManager.subscribe({
+                                        userVisibleOnly: true,
+                                        applicationServerKey: convertedVapidKey
+                                    })
+                                        .then(function (newSubscription) {
+                                            console.log('User is subscribed.');
+                                            // Send to server
+                                            sendSubscriptionToServer(newSubscription);
+                                        })
+                                        .catch(function (err) {
+                                            console.log('Failed to subscribe the user: ', err);
+                                        });
+                                } else {
+                                    // Already subscribed, just make sure server has latest
+                                    sendSubscriptionToServer(subscription);
+                                }
                             });
-                        } else {
-                            // Already subscribed, just make sure server has latest
-                            sendSubscriptionToServer(subscription);
-                        }
-                    });
-                }
+                    }
+                });
+            })
+            .catch(function (error) {
+                console.error('Service Worker Error', error);
             });
-        })
-        .catch(function(error) {
-            console.error('Service Worker Error', error);
-        });
     }
 
     function sendSubscriptionToServer(subscription) {
@@ -558,36 +596,36 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(subscription)
         })
-        .then(response => response.json())
-        .then(res => console.log('Push subscription verified by server.'))
-        .catch(err => console.error('Failed to post subscription:', err));
+            .then(response => response.json())
+            .then(res => console.log('Push subscription verified by server.'))
+            .catch(err => console.error('Failed to post subscription:', err));
     }
-    
+
     function setComplexity(ticketId, complexity) {
         if (!complexity) return;
-        
+
         fetch(`/professional/api/task/${ticketId}/complexity`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({complexity: complexity})
+            body: JSON.stringify({ complexity: complexity })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Complexity set successfully', 'success');
-            } else {
-                showToast(data.error || 'Failed to set complexity', 'danger');
-            }
-        })
-        .catch(err => showToast('Network error', 'danger'));
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast('Complexity set successfully', 'success');
+                } else {
+                    showToast(data.error || 'Failed to set complexity', 'danger');
+                }
+            })
+            .catch(err => showToast('Network error', 'danger'));
     }
-    
+
     function startJob(ticketId) {
         if (!confirm('Are you at the location and ready to start the job?')) return;
-        
+
         fetch(`/professional/api/task/${ticketId}/start`, {
             method: 'POST',
             headers: {
@@ -595,27 +633,27 @@
                 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             }
         })
-        .then(async response => {
-            const data = await response.json();
-            if (data.success) {
-                showToast('Job started! Admin has been notified.', 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                showToast(data.error || 'Failed to start job', 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Network error. Please try again.', 'danger');
-        });
+            .then(async response => {
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Job started! Admin has been notified.', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(data.error || 'Failed to start job', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Network error. Please try again.', 'danger');
+            });
     }
-    
+
     function completeJob(ticketId) {
         const form = document.getElementById(`completeForm${ticketId}`);
         if (!form) return;
-        
+
         const formData = new FormData(form);
-        
+
         fetch(`/professional/api/task/${ticketId}/complete`, {
             method: 'POST',
             headers: {
@@ -623,97 +661,97 @@
             },
             body: formData
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const modalEl = document.getElementById(`completeModal${ticketId}`);
-                if (modalEl) {
-                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                    modal.hide();
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const modalEl = document.getElementById(`completeModal${ticketId}`);
+                    if (modalEl) {
+                        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modal.hide();
+                    }
+                    showToast('Job completed! Admin has been notified.', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(data.error || 'Failed to complete job', 'danger');
                 }
-                showToast('Job completed! Admin has been notified.', 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                showToast(data.error || 'Failed to complete job', 'danger');
-            }
-        })
-        .catch(err => showToast('Network error', 'danger'));
+            })
+            .catch(err => showToast('Network error', 'danger'));
     }
-    
+
     function cancelJob(ticketId) {
         const reasonEl = document.getElementById(`cancelReason${ticketId}`);
         const reason = reasonEl ? reasonEl.value : '';
-        
+
         if (!reason.trim()) {
             alert('Please provide a reason for cancellation');
             return;
         }
-        
+
         fetch(`/professional/api/task/${ticketId}/cancel`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({reason: reason})
+            body: JSON.stringify({ reason: reason })
         })
-        .then(async response => {
-            const data = await response.json();
-            if (data.success) {
-                const modalEl = document.getElementById(`cancelModal${ticketId}`);
-                if (modalEl) {
-                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                    modal.hide();
+            .then(async response => {
+                const data = await response.json();
+                if (data.success) {
+                    const modalEl = document.getElementById(`cancelModal${ticketId}`);
+                    if (modalEl) {
+                        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                        modal.hide();
+                    }
+                    showToast('Job cancelled. Admin will reassign.', 'info');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast(data.error || 'Failed to cancel job', 'danger');
                 }
-                showToast('Job cancelled. Admin will reassign.', 'info');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                showToast(data.error || 'Failed to cancel job', 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            showToast('Network error. Please try again.', 'danger');
-        });
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showToast('Network error. Please try again.', 'danger');
+            });
     }
-    
+
     function requestHelp(ticketId) {
         const helpIdInput = document.getElementById('help-ticket-id');
         if (helpIdInput) helpIdInput.value = ticketId;
         if (helpRequestModal) helpRequestModal.show();
     }
-    
+
     function submitHelpRequest() {
         const ticketId = document.getElementById('help-ticket-id').value;
         const message = document.getElementById('help-message').value;
-        
+
         fetch(`/professional/api/task/${ticketId}/request-help`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({message: message})
+            body: JSON.stringify({ message: message })
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                if (helpRequestModal) helpRequestModal.hide();
-                showToast('Help request sent to admin!', 'success');
-            } else {
-                showToast(data.error || 'Failed to request help', 'danger');
-            }
-        })
-        .catch(err => showToast('Network error', 'danger'));
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (helpRequestModal) helpRequestModal.hide();
+                    showToast('Help request sent to admin!', 'success');
+                } else {
+                    showToast(data.error || 'Failed to request help', 'danger');
+                }
+            })
+            .catch(err => showToast('Network error', 'danger'));
     }
-    
+
     function showToast(message, type) {
         // Simple toast notification - type mapping to bootstrap alert classes
         const alertType = type === 'error' ? 'danger' : type;
         const toast = document.createElement('div');
         toast.className = `alert alert-${alertType} position-fixed shadow-lg`;
         toast.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 300px; border-radius: 12px;';
-        
+
         const content = document.createElement('div');
         content.className = 'd-flex justify-content-between align-items-center';
         content.innerHTML = `
@@ -723,10 +761,10 @@
             </div>
             <button type="button" class="btn-close ms-2" style="font-size: 0.75rem;" onclick="this.parentElement.parentElement.remove()"></button>
         `;
-        
+
         toast.appendChild(content);
         document.body.appendChild(toast);
-        
+
         setTimeout(() => {
             if (toast.parentElement) {
                 toast.style.opacity = '0';

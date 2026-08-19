@@ -2,24 +2,37 @@
 Super Admin Routes - Developer Dashboard for managing admins and professionals.
 Accessible with environment-configured credentials.
 """
+import os
+import hmac
+import logging
 from functools import wraps
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from ... import db
+from ...api_utils import api_response
 from ...models import User, Professional
 from ...decorators import super_admin_required
 
 superadmin_bp = Blueprint('superadmin', __name__)
+logger = logging.getLogger(__name__)
 
-import os
+# Super admin credentials from environment (NO hardcoded defaults)
+SUPER_ADMIN_EMAIL = os.environ.get('SUPER_ADMIN_EMAIL', '')
+SUPER_ADMIN_PASSWORD = os.environ.get('SUPER_ADMIN_PASSWORD', '')
 
-# Super admin credentials from environment
-SUPER_ADMIN_EMAIL = os.environ.get('SUPER_ADMIN_EMAIL', 'taha.piplodwala@mitwpu.edu.in')
-SUPER_ADMIN_PASSWORD = os.environ.get('SUPER_ADMIN_PASSWORD', 'Taha10vesgono!')
+if not SUPER_ADMIN_EMAIL or not SUPER_ADMIN_PASSWORD:
+    logger.warning(
+        'SUPER_ADMIN_EMAIL and/or SUPER_ADMIN_PASSWORD are not set in environment variables. '
+        'SuperAdmin login will be disabled until they are configured.'
+    )
 
 def check_super_admin(email, password):
-    """Check if provided credentials match super admin."""
-    return email == SUPER_ADMIN_EMAIL and password == SUPER_ADMIN_PASSWORD
+    """Check if provided credentials match super admin using timing-safe comparison."""
+    if not SUPER_ADMIN_EMAIL or not SUPER_ADMIN_PASSWORD:
+        return False
+    email_match = hmac.compare_digest(email.encode('utf-8'), SUPER_ADMIN_EMAIL.encode('utf-8'))
+    password_match = hmac.compare_digest(password.encode('utf-8'), SUPER_ADMIN_PASSWORD.encode('utf-8'))
+    return email_match and password_match
 
 
 @superadmin_bp.route('/developer/login', methods=['GET', 'POST'])
@@ -285,15 +298,15 @@ def delete_admin(admin_id):
     admin = User.query.get_or_404(admin_id)
     
     if admin.email == SUPER_ADMIN_EMAIL:
-        return jsonify({'success': False, 'error': 'Cannot delete the super admin'}), 403
+        return api_response(success=False, error='Cannot delete the super admin', status=403)
     
     try:
         db.session.delete(admin)
         db.session.commit()
-        return jsonify({'success': True})
+        return api_response(success=True)
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return api_response(success=False, error=str(e), status=500)
 
 
 @superadmin_bp.route('/developer/api/professional/<int:prof_id>/delete', methods=['POST'])
@@ -311,18 +324,15 @@ def delete_professional(prof_id):
     ).count()
     
     if assigned_tickets > 0:
-        return jsonify({
-            'success': False, 
-            'error': f'Cannot delete professional with {assigned_tickets} active tasks'
-        }), 400
+        return api_response(success=False, error=f'Cannot delete professional with {assigned_tickets} active tasks', status=400)
     
     try:
         db.session.delete(professional)
         db.session.commit()
-        return jsonify({'success': True})
+        return api_response(success=True)
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return api_response(success=False, error=str(e), status=500)
 
 
 @superadmin_bp.route('/developer/api/professional/<int:prof_id>/toggle-status', methods=['POST'])
@@ -340,7 +350,7 @@ def toggle_professional_status(prof_id):
         })
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return api_response(success=False, error=str(e), status=500)
 
 
 @superadmin_bp.route('/developer/api/professional/<int:prof_id>/edit', methods=['POST'])
@@ -386,7 +396,7 @@ def edit_professional(prof_id):
             errors.append('Email already registered')
     
     if errors:
-        return jsonify({'success': False, 'error': '; '.join(errors)}), 400
+        return api_response(success=False, error='; '.join(errors), status=400)
     
     try:
         # Update fields
@@ -408,7 +418,7 @@ def edit_professional(prof_id):
         })
     except Exception as e:
         db.session.rollback()
-        return jsonify({'success': False, 'error': str(e)}), 500
+        return api_response(success=False, error=str(e), status=500)
 @superadmin_bp.route('/developer/api/user/<int:user_id>/delete', methods=['POST'])
 @super_admin_required
 def delete_user(user_id):

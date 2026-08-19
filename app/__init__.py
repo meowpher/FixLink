@@ -48,13 +48,17 @@ def create_app(config_name=None):
         )
     app.config['SECRET_KEY'] = secret_key
 
+    # Session security (applied to ALL environments)
+    app.config.update(
+        SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax',
+        PERMANENT_SESSION_LIFETIME=3600,  # 1 hour
+    )
+
     # Vercel-specific session security
     if os.environ.get('VERCEL'):
         app.config.update(
             SESSION_COOKIE_SECURE=True,
-            SESSION_COOKIE_HTTPONLY=True,
-            SESSION_COOKIE_SAMESITE='Lax',
-            PERMANENT_SESSION_LIFETIME=3600,  # 1 hour
             WTF_CSRF_SSL_STRICT=False,       # Let Vercel handle SSL termination
             WTF_CSRF_TIME_LIMIT=None,        # No timeout for serverless cold starts
             WTF_CSRF_ENABLED=True,           # Explicitly enabled

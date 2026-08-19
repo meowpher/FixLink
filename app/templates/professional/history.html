@@ -145,7 +145,7 @@
                             <td class="text-end">
                                 {% if ticket.completion_photo_filename %}
                                 <a href="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}" target="_blank">
-                                    <img src="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}" class="photo-preview" alt="Proof">
+                                    <img src="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}" class="photo-preview" alt="Proof" loading="lazy">
                                 </a>
                                 {% else %}
                                 <span class="text-muted small">No photo</span>
@@ -194,7 +194,7 @@
                     </div>
                     {% if ticket.completion_photo_filename %}
                     <a href="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}" target="_blank">
-                        <img src="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}" style="width:28px;height:28px;object-fit:cover;border-radius:6px;" alt="Proof">
+                        <img src="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}" style="width:28px;height:28px;object-fit:cover;border-radius:6px;" alt="Proof" loading="lazy">
                     </a>
                     {% endif %}
                 </div>

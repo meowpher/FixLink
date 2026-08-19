@@ -44,7 +44,7 @@
                                     <div class="d-flex align-items-center">
                                         <div class="nav-avatar nav-avatar-sm me-3" style="width: 38px; height: 38px; font-size: 0.8rem;">
                                             {% if user.profile_photo %}
-                                                <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_photo) }}" alt="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                                                <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_photo) }}" alt="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" loading="lazy">
                                             {% else %}
                                                 <span>{{ user.name[:1] }}{{ user.name.split()[-1][0] if ' ' in user.name else '' }}</span>
                                             {% endif %}
@@ -118,7 +118,7 @@
                         <div class="mc-person-left">
                             <div class="mc-avatar">
                                 {% if user.profile_photo %}
-                                <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_photo) }}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">
+                                <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_photo) }}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" loading="lazy">
                                 {% else %}
                                 {{ user.name[:1] }}{{ user.name.split()[-1][0] if ' ' in user.name else '' }}
                                 {% endif %}

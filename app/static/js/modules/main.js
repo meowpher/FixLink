@@ -2,15 +2,20 @@
  * Map Main Module - Application entry point and coordination.
  */
 
-import { fetchRoomsByFloor } from './api.js';
-import { renderFloorMap } from './render.js';
-import { resetRoomSelection, initializeIssueDropdown } from './ui.js';
+let api, render, ui;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Dynamically lazy-load modules
+    [api, render, ui] = await Promise.all([
+        import('./api.js'),
+        import('./render.js'),
+        import('./ui.js')
+    ]);
+
     initializeFloorMap();
     initializeReportForm();
     initializeValidation();
-    initializeIssueDropdown();
+    ui.initializeIssueDropdown();
 });
 
 /**
@@ -33,13 +38,13 @@ function initializeFloorMap() {
         }
 
         try {
-            if (!hasLoadedInitialData && window.initialRoomsData && floorId == window.preSelectedFloor) {
+                if (!hasLoadedInitialData && window.initialRoomsData && floorId == window.preSelectedFloor) {
                 hasLoadedInitialData = true;
-                renderFloorMap(floorMapContainer, window.initialRoomsData, option.dataset.level, false, true);
+                render.renderFloorMap(floorMapContainer, window.initialRoomsData, option.dataset.level, false, true);
             } else {
                 renderLoading(floorMapContainer);
-                const rooms = await fetchRoomsByFloor(floorId);
-                renderFloorMap(floorMapContainer, rooms, option.dataset.level, false, true);
+                const rooms = await api.fetchRoomsByFloor(floorId);
+                render.renderFloorMap(floorMapContainer, rooms, option.dataset.level, false, true);
             }
         } catch (error) {
             renderError(floorMapContainer, error.message);
@@ -85,7 +90,7 @@ function initializeReportForm() {
             if (data.success) {
                 if (window.showSuccessModal) window.showSuccessModal(data.ticket_id);
                 reportForm.reset();
-                resetRoomSelection();
+                ui.resetRoomSelection();
             } else {
                 if (window.showErrors) window.showErrors(data.errors || [data.error]);
             }

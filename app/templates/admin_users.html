@@ -102,7 +102,7 @@
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="user-table-avatar">
                                             {% if user.profile_photo %}
-                                            <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}" alt="{{ user.name }}" class="nav-avatar-img">
+                                            <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}" alt="{{ user.name }}" class="nav-avatar-img" loading="lazy">
                                             {% else %}
                                             {{ (user.name.split()[0][0] + user.name.split()[-1][0]).upper() if user.name and ' ' in user.name else user.name[0].upper() if user.name else '?' }}
                                             {% endif %}
@@ -189,7 +189,7 @@
                         <div class="mc-person-left">
                             <div class="mc-avatar">
                                 {% if user.profile_photo %}
-                                <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                                <img src="{{ url_for('static', filename='uploads/' + user.profile_photo) }}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:50%;" loading="lazy">
                                 {% else %}
                                 {{ (user.name.split()[0][0] + user.name.split()[-1][0]).upper() if user.name and ' ' in user.name else user.name[0].upper() if user.name else '?' }}
                                 {% endif %}

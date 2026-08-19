@@ -47,7 +47,8 @@ def dashboard():
     professional = Professional.query.get(session['professional_id'])
     
     # Get all assigned tickets for this professional where they are the primary appointee
-    primary_tickets = Ticket.query.filter_by(
+    from sqlalchemy.orm import joinedload
+    primary_tickets = Ticket.query.options(joinedload(Ticket.room)).filter_by(
         assigned_professional_id=professional.id
     ).filter(
         Ticket.status.in_([Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])
@@ -72,7 +73,7 @@ def dashboard():
     assigned_tickets = sorted(primary_tickets + helper_tickets, key=lambda x: x.created_at, reverse=True)
     
     # Get completed tickets (for history)
-    completed_tickets = Ticket.query.filter_by(
+    completed_tickets = Ticket.query.options(joinedload(Ticket.room)).filter_by(
         assigned_professional_id=professional.id,
         status=Ticket.STATUS_FIXED
     ).order_by(Ticket.job_completed_at.desc()).limit(10).all()
@@ -128,7 +129,8 @@ def history():
     professional = Professional.query.get(session['professional_id'])
     
     # Get all completed tickets for this professional
-    completed_tickets = Ticket.query.filter_by(
+    from sqlalchemy.orm import joinedload
+    completed_tickets = Ticket.query.options(joinedload(Ticket.room)).filter_by(
         assigned_professional_id=professional.id,
         status=Ticket.STATUS_FIXED
     ).order_by(Ticket.job_completed_at.desc()).all()

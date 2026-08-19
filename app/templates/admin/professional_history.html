@@ -200,6 +200,7 @@
                                 <div class="position-relative d-inline-block">
                                     <img src="{{ url_for('static', filename='uploads/' + job.completion_photo_filename) }}" 
                                          alt="Completion Photo" class="rounded border shadow-sm" style="height: 42px; width: 42px; object-fit: cover; cursor: pointer;"
+                                         loading="lazy"
                                          onclick="window.showPhoto('{{ url_for('static', filename='uploads/' + job.completion_photo_filename) }}')">
                                     <div class="position-absolute bottom-0 end-0 bg-white rounded-circle shadow-sm p-1" style="transform: translate(30%, 30%);">
                                         <i class="bi bi-zoom-in text-primary" style="font-size: 0.6rem;"></i>
@@ -382,7 +383,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0 text-center bg-black">
-                <img id="modalPhoto" src="" class="img-fluid" style="max-height: 80vh;">
+                <img id="modalPhoto" src="" class="img-fluid" style="max-height: 80vh;" loading="lazy">
             </div>
         </div>
     </div>
@@ -461,14 +462,14 @@
                     html += `
                         <div class="mt-4">
                             <h6 class="fw-bold mb-2 small text-uppercase text-muted">Completion Evidence</h6>
-                            <img src="/static/uploads/${t.completion_photo_filename}" class="img-fluid rounded border shadow-lg w-100" style="max-height: 400px; object-fit: contain; background: #e2e8f0;">
+                            <img src="/static/uploads/${t.completion_photo_filename}" class="img-fluid rounded border shadow-lg w-100" style="max-height: 400px; object-fit: contain; background: #e2e8f0;" loading="lazy">
                         </div>
                     `;
                 } else if (t.image_filename) {
                      html += `
                         <div class="mt-4">
                             <h6 class="fw-bold mb-2 small text-uppercase text-muted">Initial Report Photo</h6>
-                            <img src="/static/uploads/${t.image_filename}" class="img-fluid rounded border shadow-lg w-100" style="max-height: 400px; object-fit: contain; background: #e2e8f0;">
+                            <img src="/static/uploads/${t.image_filename}" class="img-fluid rounded border shadow-lg w-100" style="max-height: 400px; object-fit: contain; background: #e2e8f0;" loading="lazy">
                         </div>
                     `;
                 }

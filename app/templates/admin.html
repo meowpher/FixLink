@@ -547,7 +547,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const ticket = data.ticket;
+                const ticket = (data.data && data.data.ticket) || data.ticket;
                 const modalBody = document.getElementById('ticketModalBody');
                 
                 let imageHtml = '';
@@ -653,7 +653,7 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const ticket = data.ticket;
+                const ticket = (data.data && data.data.ticket) || data.ticket;
                 const modalBody = document.getElementById('cancellationModalBody');
                 modalBody.innerHTML = `
                     <div class="text-center mb-4">

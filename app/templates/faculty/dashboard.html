@@ -3,6 +3,7 @@
 {% block title %}Faculty Dashboard - MIT-WPU Vyas Tracker{% endblock %}
 
 {% block extra_css %}
+<meta name="current-user-id" content="{{ current_user_id | tojson }}">
 <style>
     .faculty-dashboard {
         animation: fadeIn 0.5s ease-in-out;
@@ -94,7 +95,7 @@
 
     /* Faculty Portal Premium Design - Sidebar Layout */
     .faculty-hero {
-        background: linear-gradient(135deg, var(--mitwpu-blue) 0%, #00d2ff 100%);
+        background: var(--mitwpu-blue);
         border-radius: 24px;
         padding: 2rem 1.5rem; /* Reduced vertical padding */
         color: white;
@@ -265,6 +266,7 @@
         letter-spacing: 0.5px;
         opacity: 0.9;
         margin-bottom: 2px;
+        color: rgba(255, 255, 255, 0.7);
     }
 
     .stat-value {
@@ -616,7 +618,7 @@
     }
     /* Compact Light-Themed Synchronizer -> Adaptive Theme */
     .glass-modal .modal-content {
-        background: var(--bg-surface) !important;
+        background: var(--card-bg) !important;
         color: var(--text-color) !important;
         border-radius: 24px !important;
         box-shadow: var(--shadow-lg) !important;
@@ -625,7 +627,7 @@
     }
     
     .glass-modal .modal-header {
-        background: var(--bg-light) !important;
+        background: var(--card-bg) !important;
         border-bottom: 1px solid var(--border-color) !important;
         padding: 1rem 1.5rem !important;
     }
@@ -1000,17 +1002,17 @@
                                         {% if found %}
                                             {% set match = found[0] %}
                                             <td colspan="{{ match.duration }}" class="timetable-cell occupied" 
-                                                onclick="locateRoom('{{ match.room.number }}', {{ match.room.id }}, {{ match.room.floor.level }})">
+                                                onclick="locateRoom('{{ match.room.number }}', '{{ match.room.id }}', '{{ match.room.floor.level }}')">
                                                 <div class="cell-content">
                                                     {% if not match.is_booking %}
                                                         {% if faculty.id %} {# We use JS to delete, ensure faculty matches #}
-                                                        <button class="btn-delete-class" onclick="deleteClass(event, {{ match.id }})">
+                                                        <button class="btn-delete-class" onclick="deleteClass(event, '{{ match.id }}')">
                                                             <i class="bi bi-trash3-fill"></i>
                                                         </button>
                                                         {% endif %}
                                                     {% else %}
                                                         <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-1 p-1" style="font-size: 0.5rem;">Ad-Hoc</span>
-                                                        <button class="btn-delete-class" onclick="deleteBooking(event, {{ match.id }})">
+                                                        <button class="btn-delete-class" onclick="deleteBooking(event, '{{ match.id }}')">
                                                             <i class="bi bi-trash3-fill"></i>
                                                         </button>
                                                     {% endif %}
@@ -1170,17 +1172,17 @@
 <div class="modal fade glass-modal" id="timetableModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content overflow-hidden border-0 shadow-2xl" style="border-radius: 28px;">
-            <div class="modal-header border-0 bg-dark p-4">
-                <h5 class="modal-title fw-bold fs-4 d-flex align-items-center">
+            <div class="modal-header border-0 bg-white p-4 pb-0">
+                <h5 class="modal-title fw-bold fs-4 d-flex align-items-center text-dark">
                     <i class="bi bi-calendar2-week-fill me-3 text-info"></i>
                     Neural Schedule Synchronizer
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-0">
                 <div class="row g-0 h-100">
                     <!-- Left Column: Form -->
-                    <div class="col-lg-7 p-4">
+                    <div class="col-lg-7 p-4 bg-white">
                         <div class="tt-form-container h-100">
                             <div class="row">
                                 <div class="col-md-6">
@@ -1432,8 +1434,8 @@
         import { renderFloorMap } from "{{ url_for('static', filename='js/modules/render.js') }}";
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Current logged-in user ID (used for client-side is_owner check to avoid cache poisoning)
-            const currentUserId = {{ current_user_id | tojson }};
+            // Current logged-in user ID (read from meta tag to keep Jinja out of JS module scope)
+            const currentUserId = JSON.parse(document.querySelector('meta[name="current-user-id"]').content);
 
             // Live Clock for Hero
             function updateClock() {

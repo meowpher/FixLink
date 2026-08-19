@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Login - MIT-WPU FixLink{% endblock %}
+{% block title %}{% if show_phone_hint %}Professional Login - MIT-WPU FixLink{% else %}Login - MIT-WPU FixLink{% endif %}{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -15,9 +15,13 @@
         display: none !important;
     }
     
-    /* Hide Login/Signup links in the navbar, leaving only the theme toggle */
+    /* Hide Login/Signup/Report links in the navbar, leaving only the theme toggle */
     .vyas-navbar .nav-item a[href*="/login"],
-    .vyas-navbar .nav-item a[href*="/signup"] {
+    .vyas-navbar .nav-item a[href*="/signup"],
+    .vyas-navbar .nav-item a[href*="/report"],
+    .nav-capsule .nav-item a[href*="/login"],
+    .nav-capsule .nav-item a[href*="/signup"],
+    .nav-capsule .nav-item a[href*="/report"] {
         display: none !important;
     }
     
@@ -175,6 +179,45 @@
     .glass-login-card .pro-link { color: #0b4d8c; font-weight: 600; text-decoration: none; }
     
     .glass-login-card .alert { font-size: 14px; border-radius: 8px; margin-bottom: 20px; }
+    
+    /* Professional Portal Styles Override */
+    .glass-login-card.pro-card {
+        border-top: 5px solid #198754 !important;
+    }
+    .glass-login-card.pro-card .btn-primary {
+        background: #198754 !important;
+        border-color: #198754 !important;
+    }
+    .glass-login-card.pro-card .btn-primary:hover {
+        background: #157347 !important;
+        border-color: #157347 !important;
+    }
+    
+    /* Student/Admin Portal Styles Override */
+    .glass-login-card.user-card {
+        border-top: 5px solid #0b4d8c !important;
+    }
+
+    /* Target Portal Link Highlights (Green for Professional, Blue for Student/Admin) */
+    .glass-login-card.user-card .pro-highlight,
+    .glass-login-card.user-card .pro-link {
+        color: #198754 !important;
+        font-weight: 700;
+    }
+    body[data-theme="dark"] .glass-login-card.user-card .pro-highlight,
+    body[data-theme="dark"] .glass-login-card.user-card .pro-link {
+        color: #22c55e !important;
+    }
+    
+    .glass-login-card.pro-card .pro-highlight,
+    .glass-login-card.pro-card .pro-link {
+        color: #0b4d8c !important;
+        font-weight: 700;
+    }
+    body[data-theme="dark"] .glass-login-card.pro-card .pro-highlight,
+    body[data-theme="dark"] .glass-login-card.pro-card .pro-link {
+        color: #60a5fa !important;
+    }
 
     /* Hide the extra container from base.html to prevent spacing issues */
     .main-content > .container.mt-3 {
@@ -431,10 +474,10 @@
 </div>
 
 
-<div class="glass-login-card">
+<div class="glass-login-card {% if show_phone_hint %}pro-card{% else %}user-card{% endif %}">
     <img src="{{ url_for('static', filename='images/logo-lm.png') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
-    <h3>Welcome Back</h3>
-    <p class="subtext">Sign in to your account</p>
+    <h3>{% if show_phone_hint %}Technician Portal{% else %}Welcome Back{% endif %}</h3>
+    <p class="subtext">{% if show_phone_hint %}Sign in to access your jobs{% else %}Sign in to your account{% endif %}</p>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -483,14 +526,21 @@
         <button type="submit" class="btn btn-primary">Login</button>
     </form>
     
+    {% if not show_phone_hint %}
     <div class="footer-links">
         <span class="footer-text">Don't have an account?</span> 
         <a href="{{ url_for('auth.signup') }}" class="footer-link">Sign Up</a>
     </div>
+    {% endif %}
     
-    <div class="pro-link-group">
-        <span class="pro-text">Are you a <span class="pro-highlight">Job Certified Professional</span>?</span> 
-        <a href="?pro=1" class="pro-link">Click here</a>
+    <div class="pro-link-group" {% if show_phone_hint %}style="border-top: 1px solid rgba(255,255,255,0.1);"{% endif %}>
+        {% if show_phone_hint %}
+            <span class="pro-text">Are you a <span class="pro-highlight">Student or Admin</span>?</span> 
+            <a href="{{ url_for('auth.login') }}" class="pro-link">Click here</a>
+        {% else %}
+            <span class="pro-text">Are you a <span class="pro-highlight">Job Certified Professional</span>?</span> 
+            <a href="?pro=1" class="pro-link">Click here</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

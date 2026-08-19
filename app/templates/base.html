@@ -313,7 +313,9 @@
                     {% endif %}
                 {% endif %}
 
-                <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
+                {% if request.endpoint != 'auth.login' %}
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
+                {% endif %}
             </ul>
 
             <!-- Utils (Right Side) -->

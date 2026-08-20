@@ -50,7 +50,7 @@
             </div>
             <div class="col-md-6 text-md-end">
                 <div class="admin-actions">
-                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light me-2">
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light me-2 d-none d-md-inline-block">
                         <i class="bi bi-speedometer2 me-1"></i>Dashboard
                     </a>
                     <a href="{{ url_for('admin.export_report', fmt='pdf', start_date=start_date, end_date=end_date) }}" class="btn btn-outline-light">

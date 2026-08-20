@@ -100,9 +100,11 @@ function renderRoomDetails(container, data) {
 
         <div class="px-3">
             <div class="action-bar d-flex flex-column gap-2 mb-4">
-                <button onclick="toggleAssignForm()" class="btn btn-primary w-100 fw-bold py-2" title="Assign Technician">
-                    <i class="bi bi-person-plus-fill me-2"></i>Assign Technician
-                </button>
+                ${status === 'issue' ? `
+                    <button onclick="toggleAssignForm()" class="btn btn-primary w-100 fw-bold py-2" title="Assign Technician">
+                        <i class="bi bi-person-plus-fill me-2"></i>Assign Technician
+                    </button>
+                ` : ''}
                 ${active_ticket ? `
                     <button onclick="completeTicket(${active_ticket.id})" class="btn btn-success w-100 fw-bold py-2" title="Mark as Fixed">
                         <i class="bi bi-check-lg me-2"></i>Resolve Issue

@@ -13,7 +13,7 @@
                 </h1>
                 <p class="status-map-subtitle">Real-time view of room status across Vyas Building</p>
             </div>
-            <div class="col-md-6 text-md-end">
+            <div class="col-md-6 text-md-end d-none d-md-block">
                 <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light">
                     <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
                 </a>
@@ -26,37 +26,41 @@
 <section class="status-legend-section">
     <div class="container">
         <div class="legend-bar">
-            <span class="legend-title">Status:</span>
-            <span class="legend-item">
-                <span class="legend-dot normal"></span>
-                <span>Normal</span>
-            </span>
-            <span class="legend-item">
-                <span class="legend-dot issue"></span>
-                <span>Issue Reported</span>
-            </span>
-            <span class="legend-item">
-                <span class="legend-dot" style="background-color: #ffc107;"></span>
-                <span>Issue In Progress</span>
-            </span>
-            <span class="legend-item">
-                <span class="legend-dot" style="background-color: #0d6efd;"></span>
-                <span>Assigned</span>
-            </span>
+            <div class="legend-group">
+                <span class="legend-title">Status:</span>
+                <span class="legend-item">
+                    <span class="legend-dot normal"></span>
+                    <span>Normal</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot issue"></span>
+                    <span>Issue Reported</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot" style="background-color: #ffc107;"></span>
+                    <span>Issue In Progress</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-dot" style="background-color: #0d6efd;"></span>
+                    <span>Assigned</span>
+                </span>
+            </div>
             <span class="legend-divider"></span>
-            <span class="legend-title">Room Types:</span>
-            <span class="legend-item">
-                <span class="legend-box class"></span>
-                <span>Classroom</span>
-            </span>
-            <span class="legend-item">
-                <span class="legend-box lab"></span>
-                <span>Lab</span>
-            </span>
-            <span class="legend-item">
-                <span class="legend-box washroom"></span>
-                <span>Washroom</span>
-            </span>
+            <div class="legend-group">
+                <span class="legend-title">Room Types:</span>
+                <span class="legend-item">
+                    <span class="legend-box class"></span>
+                    <span>Classroom</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-box lab"></span>
+                    <span>Lab</span>
+                </span>
+                <span class="legend-item">
+                    <span class="legend-box washroom"></span>
+                    <span>Washroom</span>
+                </span>
+            </div>
         </div>
     </div>
 </section>
@@ -85,7 +89,7 @@
                 <div class="d-flex align-items-center gap-3">
                     <span class="room-count">{{ rooms|length }} rooms</span>
                     <!-- Legend -->
-                    <div class="small text-muted">
+                    <div class="small text-muted d-none d-md-block">
                         <span class="me-2"><i class="bi bi-circle-fill text-danger small"></i> Issue</span>
                         <span class="me-2"><i class="bi bi-circle-fill text-primary small"></i> Assigned</span>
                         <span class="me-2"><i class="bi bi-circle-fill text-warning small"></i> In Progress</span>
@@ -251,6 +255,12 @@
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid var(--border-color);
+        color: var(--text-main, #333333) !important;
+    }
+    
+    .panel-header h5 {
+        color: var(--text-main, #333333) !important;
+        margin: 0;
     }
     
     .x-small { font-size: 0.7rem; }

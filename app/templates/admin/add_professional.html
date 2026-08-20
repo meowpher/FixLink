@@ -6,9 +6,9 @@
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
                 <h2>Add New Professional</h2>
-                <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary">Back to List</a>
+                <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary w-100 w-md-auto">Back to List</a>
             </div>
             
             {% with messages = get_flashed_messages(with_categories=true) %}
@@ -22,34 +22,34 @@
                 {% endif %}
             {% endwith %}
             
-            <div class="card">
+            <div class="card shadow-sm" style="border-radius: 16px; border: 1px solid var(--border-color);">
                 <div class="card-body">
                     <form method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="name" class="form-label">Full Name *</label>
-                                <input type="text" class="form-control" id="name" name="name" required 
+                            <div class="col-md-6 mb-2">
+                                <label for="name" class="form-label x-small-label">Full Name *</label>
+                                <input type="text" class="form-control compact-input" id="name" name="name" required 
                                        value="{{ form_data.name if form_data else '' }}">
                             </div>
                             
-                            <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">Email Address *</label>
-                                <input type="email" class="form-control" id="email" name="email" required
+                            <div class="col-md-6 mb-2">
+                                <label for="email" class="form-label x-small-label">Email Address *</label>
+                                <input type="email" class="form-control compact-input" id="email" name="email" required
                                        value="{{ form_data.email if form_data else '' }}">
                             </div>
                         </div>
                         
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="phone" class="form-label">Phone Number</label>
-                                <input type="tel" class="form-control" id="phone" name="phone"
+                            <div class="col-md-6 mb-2">
+                                <label for="phone" class="form-label x-small-label">Phone Number</label>
+                                <input type="tel" class="form-control compact-input" id="phone" name="phone"
                                        value="{{ form_data.phone if form_data else '' }}">
                             </div>
                             
-                            <div class="col-md-6 mb-3">
-                                <label for="category" class="form-label">Category *</label>
-                                <select class="form-select" id="category" name="category" required>
+                            <div class="col-md-6 mb-2">
+                                <label for="category" class="form-label x-small-label">Category *</label>
+                                <select class="form-select compact-input" id="category" name="category" required>
                                     <option value="">Select Category</option>
                                     {% for cat in categories %}
                                     <option value="{{ cat }}" {% if form_data and form_data.category == cat %}selected{% endif %}>
@@ -61,52 +61,52 @@
                         </div>
                         
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password *</label>
-                            <input type="password" class="form-control" id="password" name="password" required minlength="8">
-                            <div class="form-text">Password must be at least 8 characters long.</div>
+                            <label for="password" class="form-label x-small-label">Password *</label>
+                            <input type="password" class="form-control compact-input" id="password" name="password" required minlength="8">
+                            <div class="form-text" style="font-size: 0.72rem;">Password must be at least 8 characters long.</div>
                         </div>
                         
                         <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                            <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary">Cancel</a>
-                            <button type="submit" class="btn btn-primary">Add Professional</button>
+                            <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary w-100 w-md-auto" style="border-radius: 8px;">Cancel</a>
+                            <button type="submit" class="btn btn-primary w-100 w-md-auto" style="border-radius: 8px;">Add Professional</button>
                         </div>
                     </form>
                 </div>
             </div>
             
-            <div class="card mt-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0">Category Guide</h5>
+            <div class="card mt-4 shadow-sm" style="border-radius: 16px; border: 1px solid var(--border-color); overflow: hidden;">
+                <div class="card-header bg-light border-0 py-3">
+                    <h5 class="mb-0 fw-bold text-dark">Category Guide</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <ul class="list-group list-group-flush">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>IT Technician</strong>
-                                <p class="mb-0 text-muted">Handles computer, projector, network, and AV equipment issues</p>
+                        <li class="list-group-item border-0 py-3 px-4">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1.5">
+                                <h6 class="fw-bold mb-0">IT Technician</h6>
+                                <span class="badge badge-it-technician" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: 600;">IT</span>
                             </div>
-                            <span class="badge bg-primary rounded-pill">IT</span>
+                            <p class="mb-0 text-muted small">Handles computer, projector, network, and AV equipment issues</p>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>Electrician</strong>
-                                <p class="mb-0 text-muted">Handles electrical, lighting, wiring, and AC-related issues</p>
+                        <li class="list-group-item border-0 py-3 px-4" style="border-top: 1px solid var(--border-color) !important;">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1.5">
+                                <h6 class="fw-bold mb-0">Electrician</h6>
+                                <span class="badge badge-electrician" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: 600;">Electrical</span>
                             </div>
-                            <span class="badge bg-warning text-dark rounded-pill">Electrical</span>
+                            <p class="mb-0 text-muted small">Handles electrical, lighting, wiring, and AC-related issues</p>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>Plumber</strong>
-                                <p class="mb-0 text-muted">Handles plumbing, water supply, drainage, and washroom issues</p>
+                        <li class="list-group-item border-0 py-3 px-4" style="border-top: 1px solid var(--border-color) !important;">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1.5">
+                                <h6 class="fw-bold mb-0">Plumber</h6>
+                                <span class="badge badge-plumber" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: 600;">Plumbing</span>
                             </div>
-                            <span class="badge bg-info rounded-pill">Plumbing</span>
+                            <p class="mb-0 text-muted small">Handles plumbing, water supply, drainage, and washroom issues</p>
                         </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>Carpenter</strong>
-                                <p class="mb-0 text-muted">Handles furniture, benches, doors, windows, and woodwork issues</p>
+                        <li class="list-group-item border-0 py-3 px-4" style="border-top: 1px solid var(--border-color) !important;">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-1.5">
+                                <h6 class="fw-bold mb-0">Carpenter</h6>
+                                <span class="badge badge-carpenter" style="font-size: 0.7rem; padding: 4px 8px; border-radius: 6px; font-weight: 600;">Carpentry</span>
                             </div>
-                            <span class="badge bg-secondary rounded-pill">Carpentry</span>
+                            <p class="mb-0 text-muted small">Handles furniture, benches, doors, windows, and woodwork issues</p>
                         </li>
                     </ul>
                 </div>

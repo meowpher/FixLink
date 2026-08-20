@@ -5,24 +5,24 @@
 {% block content %}
 <div class="container-fluid py-4">
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
         <div>
             <h2 class="fw-bold mb-1">Professional Management</h2>
             <p class="text-muted mb-0">Manage maintenance staff, categories, and account status</p>
         </div>
-        <div class="d-flex gap-2">
-            <a href="{{ url_for('admin.professional_analytics') }}" class="btn btn-outline-primary shadow-sm d-flex align-items-center px-4" style="border-radius: 12px; height: 48px;">
+        <div class="d-flex gap-2 w-100 w-md-auto flex-wrap">
+            <a href="{{ url_for('admin.professional_analytics') }}" class="btn btn-outline-primary shadow-sm d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0 px-3" style="border-radius: 12px; height: 48px; min-width: 140px;">
                 <i class="bi bi-bar-chart-line-fill me-2"></i> View Analytics
             </a>
-            <a href="{{ url_for('admin.add_professional') }}" class="btn btn-primary shadow-sm d-flex align-items-center px-4" style="border-radius: 12px; height: 48px;">
+            <a href="{{ url_for('admin.add_professional') }}" class="btn btn-primary shadow-sm d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0 px-3" style="border-radius: 12px; height: 48px; min-width: 140px;">
                 <i class="bi bi-person-plus-fill me-2"></i> Add Professional
             </a>
         </div>
     </div>
 
     <!-- Quick Stats -->
-    <div class="row g-4 mb-4 align-items-stretch">
-        <div class="col-md-3">
+    <div class="row g-3 g-md-4 mb-4 align-items-stretch">
+        <div class="col-6 col-md-3">
             <div class="stat-card total prof-stats-card h-100">
                 <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
                 <div class="stat-content">
@@ -31,7 +31,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="stat-card fixed prof-stats-card h-100">
                 <div class="stat-icon"><i class="bi bi-check-circle-fill"></i></div>
                 <div class="stat-content">
@@ -40,7 +40,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="stat-card assigned prof-stats-card h-100">
                 <div class="stat-icon"><i class="bi bi-tools"></i></div>
                 <div class="stat-content">
@@ -49,7 +49,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-6 col-md-3">
             <div class="stat-card open prof-stats-card h-100">
                 <div class="stat-icon"><i class="bi bi-person-x-fill"></i></div>
                 <div class="stat-content">
@@ -64,7 +64,7 @@
     <div class="filter-card mb-4 border-0">
         <form method="GET" class="row g-3 align-items-center">
             <div class="col-md-4">
-                <div class="input-group" style="height: 48px;">
+                <div class="input-group flex-nowrap" style="height: 48px;">
                     <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 10px 0 0 10px;"><i class="bi bi-search"></i></span>
                     <input type="text" name="q" class="form-control border-start-0 ps-0 h-100" placeholder="Search name, email, phone..." value="{{ search_query }}" style="border-radius: 0 10px 10px 0;">
                 </div>
@@ -240,7 +240,7 @@
         </div>
         
         <!-- Pagination & Footer -->
-        <div class="card-footer bg-white border-0 py-3 d-flex justify-content-between align-items-center">
+        <div class="d-flex justify-content-between align-items-center py-3 px-3 pb-4" style="background-color: var(--bg-card); border-top: 1px solid var(--border-color);">
             <div class="small text-muted">
                 Showing {{ professionals|length }} of {{ total }} professionals
             </div>
@@ -282,33 +282,44 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="edit-id">
-                <div class="mb-3">
-                    <label class="form-label">Name</label>
-                    <input type="text" class="form-control" id="edit-name" required>
+                
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label x-small-label">Name</label>
+                        <input type="text" class="form-control compact-input" id="edit-name" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label x-small-label">Phone</label>
+                        <input type="text" class="form-control compact-input" id="edit-phone">
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" id="edit-email" required>
+                
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <label class="form-label x-small-label">Email</label>
+                        <input type="email" class="form-control compact-input" id="edit-email" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label x-small-label">Category</label>
+                        <select class="form-select compact-input" id="edit-category">
+                            {% for cat in categories %}
+                            <option value="{{ cat }}">{{ category_names.get(cat, cat) }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Phone</label>
-                    <input type="text" class="form-control" id="edit-phone">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Category</label>
-                    <select class="form-select" id="edit-category">
-                        {% for cat in categories %}
-                        <option value="{{ cat }}">{{ category_names.get(cat, cat) }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">New Password (leave blank to keep current)</label>
-                    <input type="password" class="form-control" id="edit-password">
-                </div>
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="edit-active">
-                    <label class="form-check-label">Active</label>
+                
+                <div class="row g-2 mb-2 align-items-end">
+                    <div class="col-8">
+                        <label class="form-label x-small-label">New Password (leave blank to keep current)</label>
+                        <input type="password" class="form-control compact-input" id="edit-password">
+                    </div>
+                    <div class="col-4 pb-2 text-center">
+                        <div class="form-check d-inline-block text-start">
+                            <input type="checkbox" class="form-check-input" id="edit-active">
+                            <label class="form-check-label x-small-label mb-0" for="edit-active">Active</label>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

@@ -55,6 +55,16 @@
                         <div class="mb-4">
                             <label class="form-label">Choose Professional Category</label>
                             
+                            {% if suggested_professional_id %}
+                            <div class="alert alert-info py-3 mb-4 shadow-sm border-0 d-flex align-items-center">
+                                <i class="bi bi-robot fs-4 me-3 text-primary"></i>
+                                <div>
+                                    <h6 class="mb-1 fw-bold">AI Suggestion</h6>
+                                    <p class="mb-0 small">We've pre-selected the best matching professional based on issue category and highest rating.</p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
                             {% if not professionals_by_category %}
                             <div class="alert alert-warning">
                                 No active professionals available. Please add professionals first.
@@ -76,20 +86,25 @@
                                             <div class="list-group">
                                                 {% for prof in cat_data.professionals %}
                                                 {% set is_busy = prof.id in busy_professional_ids %}
-                                                <label class="list-group-item list-group-item-action {% if is_busy %}bg-busy-prof text-muted opacity-75{% endif %}">
+                                                {% set is_suggested = prof.id == suggested_professional_id %}
+                                                <label class="list-group-item list-group-item-action {% if is_busy %}bg-busy-prof text-muted opacity-75{% endif %} {% if is_suggested %}border-primary bg-primary bg-opacity-10{% endif %}">
                                                     <div class="d-flex w-100 justify-content-between align-items-center">
                                                         <div>
                                                             <input class="form-check-input me-2 professional-radio" type="radio" 
                                                                    name="professional_id" value="{{ prof.id }}" required
-                                                                   {% if is_busy %}disabled{% endif %}>
+                                                                   {% if is_busy %}disabled{% endif %}
+                                                                   {% if is_suggested %}checked{% endif %}>
                                                             <strong class="{% if is_busy %}text-decoration-line-through{% endif %}">{{ prof.name }}</strong>
                                                             {% if is_busy %}
                                                             <span class="badge bg-danger ms-2"><i class="bi bi-clock-history me-1"></i> BUSY</span>
                                                             {% endif %}
-                                                            <p class="mb-0 text-muted small">{{ prof.email }}</p>
-                                                            {% if prof.phone %}
-                                                            <p class="mb-0 text-muted small">{{ prof.phone }}</p>
+                                                            {% if is_suggested %}
+                                                            <span class="badge bg-primary ms-2"><i class="bi bi-star-fill me-1"></i> RECOMMENDED</span>
                                                             {% endif %}
+                                                            {% if prof.overall_rating > 0 %}
+                                                            <span class="text-warning small ms-2 fw-bold"><i class="bi bi-star-fill me-1"></i>{{ "%.1f"|format(prof.overall_rating) }}</span>
+                                                            {% endif %}
+                                                            <p class="mb-0 text-muted small mt-1">{{ prof.email }}</p>
                                                         </div>
                                                         <span class="badge {% if is_busy %}bg-secondary{% else %}bg-primary{% endif %}">{{ category_names.get(prof.category, prof.category) }}</span>
                                                     </div>

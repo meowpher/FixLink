@@ -427,6 +427,10 @@ class Ticket(db.Model):
     fixed_at = db.Column(db.DateTime, nullable=True)
     last_notification_sent_at = db.Column(db.DateTime, nullable=True)
     
+    # Rating tracking
+    rating = db.Column(db.Integer, nullable=True)
+    rating_comment = db.Column(db.Text, nullable=True)
+    
     __table_args__ = (
         db.Index('idx_ticket_status_created', 'status', 'created_at'),
         db.Index('idx_ticket_reporter_created', 'reporter_id', 'created_at'),
@@ -489,7 +493,9 @@ class Ticket(db.Model):
             'updated_at': self.updated_at.isoformat() + 'Z' if self.updated_at else None,
             'fixed_at': self.fixed_at.isoformat() + 'Z' if self.fixed_at else None,
             'is_overdue': self.is_overdue,
-            'time_remaining': self.time_remaining
+            'time_remaining': self.time_remaining,
+            'rating': self.rating,
+            'rating_comment': self.rating_comment
         }
 
 
@@ -536,6 +542,43 @@ class Professional(db.Model):
     @property
     def is_job_certified_professional(self):
         return True  # All professionals are job certified
+        
+    @property
+    def overall_rating(self):
+        """Calculate average rating from all rated tickets."""
+        rated_tickets = [t for t in self.assigned_tickets if t.rating is not None]
+        if not rated_tickets:
+            return 0.0
+        return sum(t.rating for t in rated_tickets) / len(rated_tickets)
+        
+    @property
+    def jobs_completed(self):
+        """Count of tickets fixed by this professional."""
+        from . import Ticket
+        return len([t for t in self.assigned_tickets if t.status == Ticket.STATUS_FIXED])
+        
+    @property
+    def jobs_cancelled(self):
+        """Count of tickets cancelled by this professional."""
+        return len(self.cancelled_tickets)
+        
+    @property
+    def avg_resolution_time_str(self):
+        """Average resolution time formatted as a string."""
+        from . import Ticket
+        fixed_tickets = [t for t in self.assigned_tickets if t.status == Ticket.STATUS_FIXED and t.job_started_at and t.fixed_at]
+        if not fixed_tickets:
+            return "N/A"
+            
+        total_seconds = sum((t.fixed_at - t.job_started_at).total_seconds() for t in fixed_tickets)
+        avg_seconds = total_seconds / len(fixed_tickets)
+        
+        hours = int(avg_seconds // 3600)
+        minutes = int((avg_seconds % 3600) // 60)
+        
+        if hours > 0:
+            return f"{hours}h {minutes}m"
+        return f"{minutes}m"
     
     def __repr__(self):
         return f'<Professional {self.name} ({self.category})>'
@@ -549,6 +592,10 @@ class Professional(db.Model):
             'phone': self.phone,
             'category': self.category,
             'is_active': self.is_active,
+            'overall_rating': round(self.overall_rating, 1),
+            'jobs_completed': self.jobs_completed,
+            'jobs_cancelled': self.jobs_cancelled,
+            'avg_resolution_time': self.avg_resolution_time_str,
             'created_at': self.created_at.isoformat() + 'Z' if self.created_at else None
         }
 

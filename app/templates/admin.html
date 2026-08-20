@@ -478,6 +478,50 @@
         document.body.appendChild(container);
         return container;
     }
+    
+    // Rating UI functions
+    function setRating(rating) {
+        document.getElementById('currentRating').value = rating;
+        for (let i = 1; i <= 5; i++) {
+            const star = document.getElementById('star' + i);
+            if (i <= rating) {
+                star.classList.replace('bi-star', 'bi-star-fill');
+            } else {
+                star.classList.replace('bi-star-fill', 'bi-star');
+            }
+        }
+    }
+    
+    function submitRating(ticketId) {
+        const rating = parseInt(document.getElementById('currentRating').value);
+        const comment = document.getElementById('ratingComment').value;
+        
+        if (rating === 0) {
+            alert('Please select a star rating first.');
+            return;
+        }
+        
+        fetch(`/admin/tickets/${ticketId}/rate`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rating: rating, comment: comment })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast(data.message, 'success');
+                setTimeout(() => location.reload(), 1500);
+            } else {
+                showToast(data.error || 'Failed to submit rating', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showToast('Failed to submit rating', 'danger');
+        });
+    }
 
     // Update ticket status via AJAX
     function updateStatus(ticketId, newStatus) {
@@ -612,6 +656,30 @@
                         <p class="ticket-description">${ticket.description}</p>
                     </div>
                     ${imageHtml}
+                    
+                    ${(ticket.status === 'fixed' && !ticket.rating && ticket.assigned_professional_id) ? `
+                        <div class="w-100 mt-4 p-4 bg-light rounded border text-center" id="ratingSection">
+                            <h6 class="fw-bold mb-2">Rate ${ticket.assigned_professional_name || 'Professional'}'s Work</h6>
+                            <div class="mb-3">
+                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(1)"><i class="bi bi-star" id="star1"></i></span>
+                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(2)"><i class="bi bi-star" id="star2"></i></span>
+                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(3)"><i class="bi bi-star" id="star3"></i></span>
+                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(4)"><i class="bi bi-star" id="star4"></i></span>
+                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(5)"><i class="bi bi-star" id="star5"></i></span>
+                            </div>
+                            <input type="hidden" id="currentRating" value="0">
+                            <textarea class="form-control mb-3" id="ratingComment" placeholder="Optional comment about the work..." rows="2"></textarea>
+                            <button class="btn btn-warning px-4" onclick="submitRating(${ticket.id})">Submit Rating</button>
+                        </div>
+                    ` : (ticket.status === 'fixed' && ticket.rating) ? `
+                        <div class="w-100 mt-4 p-4 bg-light rounded border text-center">
+                            <h6 class="fw-bold mb-2 text-muted">Job Rating</h6>
+                            <div class="text-warning fs-4 mb-2">
+                                ${'<i class="bi bi-star-fill mx-1"></i>'.repeat(ticket.rating)}${'<i class="bi bi-star mx-1"></i>'.repeat(5 - ticket.rating)}
+                            </div>
+                            ${ticket.rating_comment ? `<p class="fst-italic text-muted mb-0">"${ticket.rating_comment}"</p>` : ''}
+                        </div>
+                    ` : ''}
 
                     <div class="modal-actions-container mt-4 pt-4 border-top">
                         <div class="d-flex flex-wrap gap-2 justify-content-center">

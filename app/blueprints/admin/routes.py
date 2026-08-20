@@ -15,6 +15,25 @@ from ...api_utils import handle_api_errors, api_response
 admin_bp = Blueprint('admin', __name__)
 
 
+def map_issue_to_category(issue_type, description=""):
+    """Map issue_type and description to Professional category."""
+    text = f"{issue_type} {description}".lower()
+    
+    if any(k in text for k in ['electric', 'light', 'bulb', 'switch', 'power', 'fan', 'ac', 'air_conditioner', 'plug', 'socket', 'short', 'wiring', 'wire', 'tube', 'lift']):
+        return Professional.CATEGORY_ELECTRICIAN
+        
+    if any(k in text for k in ['plumb', 'water', 'leak', 'pipe', 'tap', 'sink', 'flush', 'drain', 'toilet', 'washroom', 'faucet']):
+        return Professional.CATEGORY_PLUMBER
+        
+    if any(k in text for k in ['furniture', 'carpenter', 'carpentry', 'door', 'window', 'chair', 'table', 'desk', 'lock', 'bench', 'wood', 'handle']):
+        return Professional.CATEGORY_CARPENTER
+        
+    if any(k in text for k in ['projector', 'computer', 'network', 'wifi', 'internet', 'pc', 'monitor', 'screen', 'display', 'speaker', 'mic', 'audio', 'video', 'lan', 'it']):
+        return Professional.CATEGORY_IT
+        
+    return None
+
+
 @admin_bp.route('/')
 @admin_required
 def dashboard():
@@ -575,13 +594,7 @@ def api_room_status(room_number):
     best_professional_id = None
     if active_ticket:
         best_rating = -1
-        # Attempt to map issue_type to Professional category
-        issue_lower = active_ticket.issue_type.lower()
-        target_cat = None
-        if 'electric' in issue_lower: target_cat = Professional.CATEGORY_ELECTRICIAN
-        elif 'plumb' in issue_lower or 'water' in issue_lower: target_cat = Professional.CATEGORY_PLUMBER
-        elif 'furniture' in issue_lower or 'carpentry' in issue_lower: target_cat = Professional.CATEGORY_CARPENTER
-        elif 'projector' in issue_lower or 'computer' in issue_lower or 'network' in issue_lower: target_cat = Professional.CATEGORY_IT
+        target_cat = map_issue_to_category(active_ticket.issue_type, active_ticket.description)
         
         matching_profs = [p for p in all_profs if p.category == target_cat] if target_cat else all_profs
         if not matching_profs:
@@ -1016,12 +1029,7 @@ def assign_ticket(ticket_id):
     
     suggested_professional_id = None
     best_rating = -1
-    issue_lower = ticket.issue_type.lower()
-    target_cat = None
-    if 'electric' in issue_lower: target_cat = Professional.CATEGORY_ELECTRICIAN
-    elif 'plumb' in issue_lower or 'water' in issue_lower: target_cat = Professional.CATEGORY_PLUMBER
-    elif 'furniture' in issue_lower or 'carpentry' in issue_lower: target_cat = Professional.CATEGORY_CARPENTER
-    elif 'projector' in issue_lower or 'computer' in issue_lower or 'network' in issue_lower: target_cat = Professional.CATEGORY_IT
+    target_cat = map_issue_to_category(ticket.issue_type, ticket.description)
     
     matching_profs = [p for p in professionals if p.category == target_cat] if target_cat else professionals
     if not matching_profs: matching_profs = professionals

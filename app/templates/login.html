@@ -47,7 +47,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: calc(100vh - 52px);
+        min-height: calc(100vh - 110px);
         position: relative;
         z-index: 1;
         padding: 20px;
@@ -355,6 +355,10 @@
         filter: invert(1) grayscale(100%) brightness(200%);
     }
 
+    body {
+        overflow: hidden !important;
+    }
+
     /* ── Mobile Responsive (must be last) ── */
     @media (max-width: 575px) {
         /* Hide vyas-navbar on mobile — custom topbar used instead */
@@ -426,30 +430,32 @@
         body[data-theme="dark"] .mobile-topbar .topbar-theme-btn { color: rgba(255,255,255,0.7); }
 
         .main-content {
+            display: flex !important;
             flex-direction: column !important;
             justify-content: center !important;
             align-items: center !important;
-            padding: 80px 16px 16px !important;
+            padding: 16px !important;
+            min-height: calc(100vh - 150px) !important;
         }
 
         .glass-login-card {
             width: 100% !important;
-            max-width: 420px !important;
+            max-width: 400px !important;
             border-radius: 12px !important;
-            padding: 24px 20px 28px !important;
+            padding: 20px 20px 20px !important;
         }
-        .glass-login-card .form-logo { max-width: 120px !important; margin-bottom: 14px !important; }
-        .glass-login-card h3 { font-size: 20px !important; margin-bottom: 4px !important; }
-        .glass-login-card .subtext { font-size: 12px !important; margin-bottom: 16px !important; }
-        .glass-login-card .form-control { height: 42px !important; font-size: 13px !important; }
-        .glass-login-card .form-label { font-size: 12px !important; }
-        .glass-login-card .field-group { margin-bottom: 12px !important; }
-        .glass-login-card .forgot-pwd { font-size: 11px !important; margin-bottom: 14px !important; }
-        .glass-login-card .btn-primary { height: 42px !important; font-size: 14px !important; }
-        .glass-login-card .footer-links { font-size: 12px !important; margin-top: 14px !important; }
-        .glass-login-card .pro-link-group { font-size: 11px !important; padding-top: 12px !important; margin-top: 10px !important; }
+        .glass-login-card .form-logo { max-width: 80px !important; margin-bottom: 10px !important; }
+        .glass-login-card h3 { font-size: 18px !important; margin-bottom: 2px !important; }
+        .glass-login-card .subtext { font-size: 12px !important; margin-bottom: 10px !important; }
+        .glass-login-card .form-control { height: 40px !important; font-size: 13px !important; }
+        .glass-login-card .form-label { font-size: 11px !important; margin-bottom: 4px !important; }
+        .glass-login-card .field-group { margin-bottom: 8px !important; }
+        .glass-login-card .forgot-pwd { font-size: 11px !important; margin-bottom: 10px !important; margin-top: 4px !important; }
+        .glass-login-card .btn-primary { height: 40px !important; font-size: 14px !important; }
+        .glass-login-card .footer-links { font-size: 12px !important; margin-top: 10px !important; }
+        .glass-login-card .pro-link-group { font-size: 11px !important; padding-top: 8px !important; margin-top: 8px !important; }
 
-        body, html { overflow-x: hidden !important; }
+        body, html { overflow-y: hidden !important; }
     }
 </style>
 {% endblock %}

@@ -609,52 +609,56 @@
                 }
                 
                 modalBody.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Ticket ID:</label>
-                                <p>#${ticket.id}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Reporter:</label>
-                                <p>${ticket.reporter_name} (PRN: ${ticket.prn})</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Email:</label>
-                                <p>${ticket.reporter_email}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Room:</label>
-                                <p>${ticket.room_number} - ${ticket.floor_name}</p>
-                            </div>
+                    <div class="ticket-info-grid mb-3">
+                        <div class="info-item">
+                            <span class="info-label">Ticket ID</span>
+                            <span class="info-value">#${ticket.id}</span>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Issue Type:</label>
-                                <p>${ticket.issue_type}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Status:</label>
+                        <div class="info-item">
+                            <span class="info-label">Status</span>
+                            <span class="info-value">
                                 <span class="status-badge status-${ticket.status}">
                                     ${ticket.status === 'cancelled' ? '<i class="bi bi-exclamation-triangle-fill me-1"></i> CANCELLED' : ticket.status}
                                 </span>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Created:</label>
-                                <p>${new Date(ticket.created_at).toLocaleString()}</p>
-                            </div>
-                            ${ticket.fixed_at ? `
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Fixed:</label>
-                                <p>${new Date(ticket.fixed_at).toLocaleString()}</p>
-                            </div>
-                            ` : ''}
+                            </span>
                         </div>
+                        <div class="info-item">
+                            <span class="info-label">Reporter</span>
+                            <span class="info-value text-truncate">${ticket.reporter_name}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">PRN</span>
+                            <span class="info-value">${ticket.prn}</span>
+                        </div>
+                        <div class="info-item col-span-2">
+                            <span class="info-label">Email</span>
+                            <span class="info-value text-truncate">${ticket.reporter_email}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Location</span>
+                            <span class="info-value text-truncate">${ticket.room_number} - ${ticket.floor_name}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Issue Type</span>
+                            <span class="info-value">${ticket.issue_type}</span>
+                        </div>
+                        <div class="info-item ${ticket.fixed_at ? '' : 'col-span-2'}">
+                            <span class="info-label">Created At</span>
+                            <span class="info-value">${new Date(ticket.created_at).toLocaleString()}</span>
+                        </div>
+                        ${ticket.fixed_at ? `
+                        <div class="info-item">
+                            <span class="info-label">Fixed At</span>
+                            <span class="info-value">${new Date(ticket.fixed_at).toLocaleString()}</span>
+                        </div>
+                        ` : ''}
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Description:</label>
-                        <p class="ticket-description">${ticket.description}</p>
+                    
+                    <div class="description-section mb-3">
+                        <span class="info-label">Description</span>
+                        <p class="description-text">${ticket.description || 'No description provided.'}</p>
                     </div>
+                    
                     ${imageHtml}
                     
                     ${(ticket.status === 'fixed' && !ticket.rating && ticket.assigned_professional_id) ? `
@@ -681,28 +685,26 @@
                         </div>
                     ` : ''}
 
-                    <div class="modal-actions-container mt-4 pt-4 border-top">
-                        <div class="d-flex flex-wrap gap-2 justify-content-center">
-                            ${(!ticket.assigned_professional_id && ['open', 'cancelled'].includes(ticket.status)) ? `
-                                <a href="/admin/ticket/${ticket.id}/assign" class="btn btn-dark px-3 py-2 rounded-3 shadow-sm border-0 transition-all">
-                                    <i class="bi bi-person-plus-fill me-2"></i>Assign Technician
-                                </a>
-                            ` : ''}
-                            
-                            ${(ticket.status !== 'fixed') ? `
-                                <button onclick="updateStatus(${ticket.id}, 'fixed')" class="btn btn-success px-3 py-2 rounded-3 shadow-sm border-0 transition-all">
-                                    <i class="bi bi-check-lg me-2"></i>Mark Resolved
-                                </button>
-                            ` : ''}
-                            
-                            <a href="/admin/map?floor=${ticket.room_floor_id}&room=${ticket.room_number}" class="btn btn-primary px-3 py-2 rounded-3 shadow-sm border-0 transition-all">
-                                <i class="bi bi-geo-alt-fill me-2"></i>View in Map
-                            </a>
-                            
-                            <button onclick="deleteTicket(${ticket.id})" class="btn btn-danger px-3 py-2 rounded-3 shadow-sm border-0 transition-all">
-                                <i class="bi bi-trash-fill me-2"></i>Delete
-                            </button>
-                        </div>
+                    <div class="modal-actions-grid mt-4 pt-3 border-top">
+                        <a href="/admin/ticket/${ticket.id}/assign" 
+                           class="action-btn btn-assign ${(!ticket.assigned_professional_id && ['open', 'cancelled'].includes(ticket.status)) ? '' : 'disabled'}">
+                            <i class="bi bi-person-plus-fill"></i> Assign Tech
+                        </a>
+                        
+                        <button onclick="updateStatus(${ticket.id}, 'fixed')" 
+                                class="action-btn btn-resolve ${(ticket.status !== 'fixed') ? '' : 'disabled'}">
+                            <i class="bi bi-check-lg"></i> Resolve
+                        </button>
+                        
+                        <a href="/admin/map?floor=${ticket.room_floor_id}&room=${ticket.room_number}" 
+                           class="action-btn btn-map">
+                            <i class="bi bi-geo-alt-fill"></i> View Map
+                        </a>
+                        
+                        <button onclick="deleteTicket(${ticket.id})" 
+                                class="action-btn btn-delete">
+                            <i class="bi bi-trash-fill"></i> Delete
+                        </button>
                     </div>
                 `;
                 

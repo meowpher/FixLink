@@ -335,24 +335,9 @@
             display: none !important;
         }
 
-        /* Ensure mobileMenuBtn is visible and styled for the topbar */
+        /* Hide mobileMenuBtn since sidebar is disabled */
         #mobileMenuBtn {
-            display: flex !important;
-            top: 13px !important;
-            left: 12px !important;
-            z-index: 1060 !important;
-            background: transparent !important;
-            border: none !important;
-            box-shadow: none !important;
-        }
-
-        body[data-theme="dark"] #mobileMenuBtn .ham-bar {
-            background: #fff !important;
-        }
-
-        #mobileMenuBtn .ham-bar {
-            background: #111 !important;
-            width: 20px !important;
+            display: none !important;
         }
 
         /* Custom mobile top bar */
@@ -439,8 +424,12 @@
             color: rgba(255, 255, 255, 0.7);
         }
 
+        .main-content {
+            padding-top: 0px !important;
+        }
+
         .report-section {
-            padding: 80px 12px 24px !important;
+            padding: 12px 12px 24px !important;
         }
 
         .map-panel,

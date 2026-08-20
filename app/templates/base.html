@@ -50,12 +50,22 @@
          MOBILE TOP BAR & BOTTOM NAV (App-style)
     ══════════════════════════════════════════════════════ -->
     <div id="mobile-top-bar" class="d-md-none">
-        <button class="top-bar-btn" onclick="history.back()">
-            <i class="bi bi-chevron-left"></i> Back
-        </button>
-        <div class="top-bar-brand">
-            <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="Logo">
-            <span>FixLink</span>
+        <div class="top-bar-left">
+            {% if not (request.endpoint and (
+                request.endpoint.endswith('.login') or 
+                request.endpoint == 'admin.dashboard' or 
+                request.endpoint == 'admin.status_map' or 
+                request.endpoint == 'admin.analytics' or
+                request.endpoint in ['admin.chat', 'professional.chat', 'main.report_form', 'main.index']
+            )) %}
+            <button class="top-bar-btn" id="mobile-topbar-back-btn" onclick="handleTopbarBack()">
+                <i class="bi bi-chevron-left"></i> Back
+            </button>
+            {% endif %}
+            <div class="top-bar-brand">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="Logo">
+                <span>FixLink</span>
+            </div>
         </div>
         <div class="top-bar-actions">
             <!-- Theme Toggle -->
@@ -116,7 +126,7 @@
             </a>
             <a href="{{ url_for('admin.status_map') }}" class="bottom-nav-item {% if request.endpoint == 'admin.status_map' %}active{% endif %}">
                 <i class="bi bi-map"></i>
-                <span>Status Map</span>
+                <span>Map</span>
             </a>
             <!-- Manage triggers an offcanvas sheet -->
             <button class="bottom-nav-item border-0 bg-transparent {% if request.endpoint in ['admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history'] %}active{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#manageOffcanvas" aria-controls="manageOffcanvas">
@@ -124,11 +134,11 @@
                 <span>Manage</span>
             </button>
             <a href="{{ url_for('admin.analytics') }}" class="bottom-nav-item {% if request.endpoint == 'admin.analytics' %}active{% endif %}">
-                <i class="bi bi-graph-up"></i>
-                <span>Insights</span>
+                <i class="bi bi-bar-chart-line"></i>
+                <span>Analytics</span>
             </a>
             <a href="{{ url_for('admin.chat') }}" class="bottom-nav-item {% if request.endpoint == 'admin.chat' %}active{% endif %}">
-                <i class="bi bi-chat-dots"></i>
+                <i class="bi bi-chat"></i>
                 <span>Chat</span>
             </a>
         {% elif session.get('professional_id') %}
@@ -158,10 +168,12 @@
                 <i class="bi bi-house"></i>
                 <span>Home</span>
             </a>
+            {% if not (request.endpoint and request.endpoint.endswith('.login')) %}
             <a href="{{ url_for('main.report_form') }}" class="bottom-nav-item {% if request.endpoint == 'main.report_form' %}active{% endif %}">
                 <i class="bi bi-plus-circle"></i>
                 <span>Report</span>
             </a>
+            {% endif %}
             <a href="{{ url_for('auth.login') }}" class="bottom-nav-item {% if request.endpoint == 'auth.login' %}active{% endif %}">
                 <i class="bi bi-box-arrow-in-right"></i>
                 <span>Login</span>
@@ -209,7 +221,7 @@
     </div>
     {% endif %}
     
-    {% if session.get('is_admin') %}
+    {% if session.get('is_admin') and request.endpoint != 'main.report_form' %}
     <a href="{{ url_for('main.report_form') }}" id="mobile-fab" class="d-md-none">
         <i class="bi bi-plus"></i>
     </a>
@@ -550,22 +562,29 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        <div class="container mt-3">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show shadow-sm" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                    {% endfor %}
-                {% endif %}
-            {% endwith %}
-        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show shadow-sm" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </main>
 
     <!-- Footer -->
+    {% if not (request.endpoint and (
+        request.endpoint.endswith('.login') or 
+        request.endpoint == 'admin.dashboard' or 
+        request.endpoint == 'admin.status_map' or 
+        request.endpoint == 'admin.analytics' or
+        request.endpoint in ['admin.chat', 'professional.chat']
+    )) %}
     <footer class="mt-auto py-4 border-top" style="border-color: var(--border-color, #333) !important; background-color: var(--bg-main, #121212);">
         <div class="container-fluid d-flex flex-column flex-sm-row justify-content-between align-items-center text-muted small px-4">
             <div class="mb-2 mb-sm-0">&copy; <script>document.write(new Date().getFullYear())</script> Fixlink. All rights reserved.</div>
@@ -576,6 +595,7 @@
             </div>
         </div>
     </footer>
+    {% endif %}
 
 
     <!-- Bootstrap 5 JS -->
@@ -598,6 +618,14 @@
 
 
     <script>
+    function handleTopbarBack() {
+        if (typeof window.closeMobileChat === 'function') {
+            window.closeMobileChat();
+        } else {
+            history.back();
+        }
+    }
+
     // Theme Toggle Logic
     (function() {
         // Function to perform the DOM attributes swap

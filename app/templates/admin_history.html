@@ -34,7 +34,7 @@
             <div class="row g-3 align-items-end">
                 <div class="col-md-10">
                     <label for="search" class="form-label">Search by Name, PRN, or Email</label>
-                    <div class="input-group">
+                    <div class="input-group flex-nowrap">
                         <span class="input-group-text bg-white border-end-0">
                             <i class="bi bi-search text-muted"></i>
                         </span>
@@ -256,80 +256,95 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const ticket = data.ticket;
+                const ticket = data.data.ticket;
                 const modalBody = document.getElementById('ticketModalBody');
                 
                 let imageHtml = '';
                 if (ticket.image_filename) {
                     imageHtml = `
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Attached Image:</label>
-                            <div class="ticket-image-container">
+                        <div class="mb-2">
+                            <label class="form-label x-small-label mb-0.5">Attached Image</label>
+                            <div class="ticket-image-container text-center">
                                 <img src="/static/uploads/${ticket.image_filename}" loading="lazy"
-                                     alt="Ticket Image" class="img-fluid rounded" 
-                                     style="max-height: 300px;">
+                                     alt="Ticket Image" class="img-fluid rounded-3" 
+                                     style="max-height: 140px; object-fit: contain; border: 1px solid var(--border-subtle);">
                             </div>
                         </div>
                     `;
                 }
                 
                 modalBody.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Ticket ID:</label>
-                                <p>#${ticket.id}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Reporter:</label>
-                                <p>${ticket.reporter_name} (PRN: ${ticket.prn})</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Email:</label>
-                                <p>${ticket.reporter_email}</p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Room:</label>
-                                <p>${ticket.room_number} - ${ticket.floor_name}</p>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <label class="form-label x-small-label mb-0.5">Ticket ID</label>
+                                <div class="fw-bold text-dark" style="font-size: 0.9rem;">#${ticket.id}</div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Issue Type:</label>
-                                <p>${ticket.issue_type}</p>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <label class="form-label x-small-label mb-0.5">Room</label>
+                                <div class="fw-semibold text-dark" style="font-size: 0.9rem;">${ticket.room_number} (${ticket.floor_name})</div>
                             </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Status:</label>
-                                <p><span class="badge bg-success">${ticket.status.toUpperCase()}</span></p>
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Dates:</label>
-                                <p class="mb-0 text-muted"><small>Created: ${new Date(ticket.created_at).toLocaleString()}</small></p>
-                                <p class="mb-0 text-muted"><small>Fixed: ${ticket.fixed_at ? new Date(ticket.fixed_at).toLocaleString() : 'N/A'}</small></p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Description:</label>
-                                <div class="p-3 bg-light rounded border">
-                                    ${ticket.description}
-                                </div>
-                            </div>
-                            ${imageHtml}
                         </div>
                     </div>
                     
-                    <div class="modal-actions-container mt-4 pt-4 border-top">
-                        <div class="d-flex flex-wrap gap-2 justify-content-center">
-                            <a href="/admin/map?floor=${ticket.room_floor_id}&room=${ticket.room_number}" class="btn btn-primary px-3 py-2 rounded-3 shadow-sm border-0 transition-all">
-                                <i class="bi bi-geo-alt-fill me-2"></i>View in Map
-                            </a>
-                            <button onclick="deleteTicket(${ticket.id})" class="btn btn-danger px-3 py-2 rounded-3 shadow-sm border-0 transition-all">
-                                <i class="bi bi-trash-fill me-2"></i>Delete Forever
-                            </button>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <label class="form-label x-small-label mb-0.5">Issue Type</label>
+                                <div class="fw-semibold text-dark text-capitalize" style="font-size: 0.9rem;">${ticket.issue_type}</div>
+                            </div>
                         </div>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <label class="form-label x-small-label mb-0.5">Status</label>
+                                <div><span class="badge ${ticket.status === 'fixed' ? 'bg-success-subtle text-success' : (ticket.status === 'cancelled' ? 'bg-danger-subtle text-danger' : 'bg-warning-subtle text-warning')}" style="font-size: 0.72rem; padding: 4px 8px; border-radius: 6px; font-weight: 600;">${ticket.status.toUpperCase()}</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <div class="mb-2 p-2 bg-light rounded-3 border">
+                                <label class="form-label x-small-label mb-0.5">Reporter</label>
+                                <div class="fw-semibold text-dark" style="font-size: 0.85rem;">${ticket.reporter_name}</div>
+                                <div class="text-muted small" style="font-size: 0.78rem;">PRN: ${ticket.prn} | ${ticket.reporter_email}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <label class="form-label x-small-label mb-0.5">Created Date</label>
+                                <div class="text-muted small" style="font-size: 0.78rem;">${new Date(ticket.created_at).toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'})}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-2">
+                                <label class="form-label x-small-label mb-0.5">Fixed Date</label>
+                                <div class="text-muted small" style="font-size: 0.78rem;">${ticket.fixed_at ? new Date(ticket.fixed_at).toLocaleString([], {dateStyle: 'medium', timeStyle: 'short'}) : 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <label class="form-label x-small-label mb-0.5">Description</label>
+                        <div class="p-2.5 bg-light rounded-3 border small text-secondary" style="line-height: 1.4; font-size: 0.82rem; max-height: 80px; overflow-y: auto;">
+                            ${ticket.description}
+                        </div>
+                    </div>
+                    
+                    ${imageHtml}
+                    
+                    <div class="d-flex gap-2 mt-3 pt-3 border-top">
+                        <a href="/admin/map?floor=${ticket.room_floor_id}&room=${ticket.room_number}" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-1.5" style="border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
+                            <i class="bi bi-geo-alt-fill"></i> Map
+                        </a>
+                        <button onclick="deleteTicket(${ticket.id})" class="btn btn-danger w-100 py-2 d-flex align-items-center justify-content-center gap-1.5" style="border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
+                            <i class="bi bi-trash-fill"></i> Delete
+                        </button>
                     </div>
                 `;
                 

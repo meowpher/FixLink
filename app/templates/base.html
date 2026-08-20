@@ -711,7 +711,7 @@
 
     // Profile Avatar — load user info and wire up photo upload
     (function () {
-        if (!document.getElementById('navAvatar')) return; // not logged in
+        if (!document.getElementById('navAvatar') && !document.getElementById('mobileNavAvatar')) return; // not logged in
 
         function getInitials(name) {
             if (!name || typeof name !== 'string' || name.trim() === '') return '?';

@@ -24,7 +24,7 @@ export async function initializeAdminMap(floorId, initialData = null, floorLevel
                 const el = document.querySelector(`g[data-room="${target}"]`);
                 if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    window.selectRoom(target, null, null);
+                    window.selectRoom(null, target, null);
                     el.classList.add('pulse-focus');
                     setTimeout(() => el.classList.remove('pulse-focus'), 2000);
                 }

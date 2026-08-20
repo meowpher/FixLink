@@ -6426,33 +6426,33 @@ select.compact-input {
         border-bottom-left-radius: 12px !important;
     }
 
-    /* Compact Edit Professional Modal overrides */
-    #editModal .modal-dialog {
+    /* Compact Edit Professional & Ticket Details Modal overrides */
+    #editModal .modal-dialog, #ticketModal .modal-dialog {
         max-width: 360px !important;
         margin: 1.5rem auto !important;
     }
     
-    #editModal .modal-content {
+    #editModal .modal-content, #ticketModal .modal-content {
         border-radius: 14px !important;
     }
     
-    #editModal .modal-header {
+    #editModal .modal-header, #ticketModal .modal-header {
         padding: 10px 16px !important;
     }
     
-    #editModal .modal-header .modal-title {
+    #editModal .modal-header .modal-title, #ticketModal .modal-header .modal-title {
         font-size: 1.05rem !important;
     }
     
-    #editModal .modal-body {
+    #editModal .modal-body, #ticketModal .modal-body {
         padding: 12px 16px !important;
     }
     
-    #editModal .modal-footer {
+    #editModal .modal-footer, #ticketModal .modal-footer {
         padding: 10px 16px !important;
     }
     
-    #editModal .modal-footer .btn {
+    #editModal .modal-footer .btn, #ticketModal .modal-footer .btn {
         padding: 6px 16px !important;
         font-size: 0.85rem !important;
         border-radius: 8px !important;

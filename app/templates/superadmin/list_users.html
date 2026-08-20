@@ -197,9 +197,10 @@
 {% block extra_js %}
 <script>
     const csrfToken = "{{ csrf_token() }}";
-    const editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    let editModal;
 
     document.addEventListener('DOMContentLoaded', () => {
+        editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
         // Wire up edit buttons
         document.querySelectorAll('.btn-edit-user').forEach(btn => {
             btn.addEventListener('click', () => {

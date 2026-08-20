@@ -2340,7 +2340,7 @@ body {
    ============================================ */
 @media (max-width: 991px) {
     .report-section .row {
-        flex-direction: column-reverse;
+        flex-direction: column;
     }
 
     .map-panel {
@@ -6082,9 +6082,18 @@ html[data-theme="dark"] {
     /* Form Inputs */
     .form-control, .form-select {
         border-radius: 12px !important;
-        background-color: var(--bg-overlay, #1E2535) !important;
-        border: 1px solid var(--border-subtle, #1E293B) !important;
-        color: var(--text-primary, #F1F5F9) !important;
+        background-color: var(--input-bg) !important;
+        border: 1px solid var(--input-border) !important;
+        color: var(--input-text) !important;
+    }
+    
+    .form-control::placeholder {
+        color: var(--text-muted) !important;
+        opacity: 0.6 !important;
+    }
+    .form-control::-webkit-input-placeholder {
+        color: var(--text-muted) !important;
+        opacity: 0.6 !important;
     }
 
     /* Floating Action Button (FAB) */

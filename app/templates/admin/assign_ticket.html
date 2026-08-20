@@ -55,12 +55,12 @@
                         <div class="mb-4">
                             <label class="form-label">Choose Professional Category</label>
                             
-                            {% if suggested_professional_id %}
+                            {% if suggested_professional %}
                             <div class="alert alert-info py-3 mb-4 shadow-sm border-0 d-flex align-items-center">
                                 <i class="bi bi-robot fs-4 me-3 text-primary"></i>
                                 <div>
                                     <h6 class="mb-1 fw-bold">AI Suggestion</h6>
-                                    <p class="mb-0 small">We've pre-selected the best matching professional based on issue category and highest rating.</p>
+                                    <p class="mb-0 small">We recommend assigning this ticket to <strong>{{ suggested_professional.name }}</strong> (Rating: {{ "%.1f"|format(suggested_professional.overall_rating) if suggested_professional.overall_rating > 0 else 'No ratings yet' }}). They have been pre-selected below.</p>
                                 </div>
                             </div>
                             {% endif %}
@@ -86,7 +86,7 @@
                                             <div class="list-group">
                                                 {% for prof in cat_data.professionals %}
                                                 {% set is_busy = prof.id in busy_professional_ids %}
-                                                {% set is_suggested = prof.id == suggested_professional_id %}
+                                                {% set is_suggested = suggested_professional and prof.id == suggested_professional.id %}
                                                 <label class="list-group-item list-group-item-action {% if is_busy %}bg-busy-prof text-muted opacity-75{% endif %} {% if is_suggested %}border-primary bg-primary bg-opacity-10{% endif %}">
                                                     <div class="d-flex w-100 justify-content-between align-items-center">
                                                         <div>

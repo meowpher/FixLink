@@ -1031,12 +1031,14 @@ def assign_ticket(ticket_id):
             best_rating = p.overall_rating
             suggested_professional_id = p.id
             
+    suggested_professional = Professional.query.get(suggested_professional_id) if suggested_professional_id else None
+            
     return render_template('admin/assign_ticket.html',
                          ticket=ticket,
                          professionals_by_category=professionals_by_category,
                          category_names=category_names,
                          busy_professional_ids=busy_professional_ids,
-                         suggested_professional_id=suggested_professional_id)
+                         suggested_professional=suggested_professional)
 
 
 

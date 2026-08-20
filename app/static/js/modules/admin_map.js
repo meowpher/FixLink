@@ -131,14 +131,25 @@ function renderRoomDetails(container, data) {
             <div id="assignmentFormContainer" class="assignment-card bg-light rounded p-3 border mb-3" style="display:none;">
                 <h6 class="small text-uppercase fw-bold text-muted mb-3">Assign Technician</h6>
                 
-                ${suggested_professional_id ? `
-                <div class="alert alert-info py-2 px-3 mb-3 small d-flex align-items-center border-0 shadow-sm">
-                    <i class="bi bi-robot fs-5 me-2 text-primary"></i>
-                    <div>
-                        <strong>AI Suggestion:</strong> We've pre-selected the best matching professional for this issue type with the highest rating.
+                ${suggested_professional_id ? (() => {
+                    let recommendedName = 'Professional';
+                    let recommendedRating = 'No ratings';
+                    Object.values(professionals).forEach(profs => {
+                        const found = profs.find(p => p.id === suggested_professional_id);
+                        if (found) {
+                            recommendedName = found.name;
+                            recommendedRating = found.rating > 0 ? `${found.rating} ★` : 'No ratings';
+                        }
+                    });
+                    return `
+                    <div class="alert alert-info py-2 px-3 mb-3 small d-flex align-items-center border-0 shadow-sm">
+                        <i class="bi bi-robot fs-5 me-2 text-primary"></i>
+                        <div>
+                            <strong>AI Suggestion:</strong> We recommend <strong>${recommendedName}</strong> (${recommendedRating}).
+                        </div>
                     </div>
-                </div>
-                ` : ''}
+                    `;
+                })() : ''}
 
                 <div class="mb-2">
                     <label class="form-label x-small text-muted mb-1 uppercase fw-bold">Professional</label>

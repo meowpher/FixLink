@@ -554,7 +554,6 @@ class Professional(db.Model):
     @property
     def jobs_completed(self):
         """Count of tickets fixed by this professional."""
-        from . import Ticket
         return len([t for t in self.assigned_tickets if t.status == Ticket.STATUS_FIXED])
         
     @property
@@ -565,7 +564,6 @@ class Professional(db.Model):
     @property
     def avg_resolution_time_str(self):
         """Average resolution time formatted as a string."""
-        from . import Ticket
         fixed_tickets = [t for t in self.assigned_tickets if t.status == Ticket.STATUS_FIXED and t.job_started_at and t.fixed_at]
         if not fixed_tickets:
             return "N/A"

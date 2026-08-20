@@ -391,6 +391,7 @@ def report_bug():
             return redirect(url_for('main.report_bug', origin=origin))
             
         file_path = None
+        file_data_base64 = None
         if file and file.filename:
             filename = secure_filename(file.filename)
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -398,6 +399,14 @@ def report_bug():
             full_path = os.path.join(current_app.config['UPLOAD_FOLDER'], safe_filename)
             save_webapp_file(file, full_path)
             file_path = safe_filename
+            
+            # Read and encode file data as base64 to store in database (works on Vercel)
+            try:
+                file.seek(0)
+                import base64
+                file_data_base64 = base64.b64encode(file.read()).decode('utf-8')
+            except Exception as e:
+                current_app.logger.error(f"Failed to read file for base64 storage: {str(e)}")
             
         # Determine reporter if logged in
         reporter_id = None
@@ -416,6 +425,7 @@ def report_bug():
             title=title,
             description=description,
             file_path=file_path,
+            file_data=file_data_base64,
             reporter_id=reporter_id,
             reporter_type=reporter_type
         )

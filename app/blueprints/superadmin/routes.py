@@ -115,6 +115,37 @@ def delete_bug(bug_id):
     return redirect(url_for('superadmin.dashboard'))
 
 
+@superadmin_bp.route('/developer/bugs/<int:bug_id>/attachment', methods=['GET'])
+@super_admin_required
+def view_bug_attachment(bug_id):
+    from ...models import BugReport
+    import base64
+    import mimetypes
+    import os
+    from flask import Response, send_file, current_app
+    
+    bug = BugReport.query.get_or_404(bug_id)
+    
+    # 1. Try to serve from database (works on Vercel)
+    if bug.file_data:
+        try:
+            file_bytes = base64.b64decode(bug.file_data)
+            mime_type, _ = mimetypes.guess_type(bug.file_path or 'image.png')
+            if not mime_type:
+                mime_type = 'application/octet-stream'
+            return Response(file_bytes, mimetype=mime_type)
+        except Exception as e:
+            current_app.logger.error(f"Error decoding base64 bug attachment: {str(e)}")
+            
+    # 2. Fallback to local file system if database column is empty (local dev or older bugs)
+    if bug.file_path:
+        local_path = os.path.join(current_app.config['UPLOAD_FOLDER'], bug.file_path)
+        if os.path.exists(local_path):
+            return send_file(local_path)
+            
+    return "Attachment not found", 404
+
+
 @superadmin_bp.route('/developer/users')
 @super_admin_required
 def list_users():

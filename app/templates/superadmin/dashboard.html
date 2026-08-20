@@ -386,7 +386,7 @@
                             <td class="py-3 text-end pe-4">
                                 <div class="btn-group">
                                     {% if bug.file_path %}
-                                    <a href="{{ url_for('static', filename='uploads/' ~ bug.file_path) }}" target="_blank" class="btn btn-sm btn-outline-info" title="View Attachment">
+                                    <a href="{{ url_for('superadmin.view_bug_attachment', bug_id=bug.id) }}" target="_blank" class="btn btn-sm btn-outline-info" title="View Attachment">
                                         <i class="bi bi-paperclip"></i>
                                     </a>
                                     {% endif %}

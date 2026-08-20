@@ -810,6 +810,7 @@ class BugReport(db.Model):
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
     file_path = db.Column(db.String(255), nullable=True)
+    file_data = db.Column(db.Text, nullable=True) # base64 file data for serverless (Vercel) persistence
     status = db.Column(db.String(20), default=STATUS_OPEN, nullable=False)
     
     # Optional metadata about who reported it
@@ -824,6 +825,7 @@ class BugReport(db.Model):
             'title': self.title,
             'description': self.description,
             'file_path': self.file_path,
+            'file_data': self.file_data,
             'status': self.status,
             'reporter_id': self.reporter_id,
             'reporter_type': self.reporter_type,

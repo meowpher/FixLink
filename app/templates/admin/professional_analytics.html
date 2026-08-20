@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
         isLoading = true;
         spinner.style.display = 'block';
         
-        fetch(\`/admin/professionals/analytics?category=\${currentCategory}&page=\${currentPage}\`, {
+        fetch(`/admin/professionals/analytics?category=${currentCategory}&page=${currentPage}`, {
             headers: {
                 'X-Requested-With': 'XMLHttpRequest'
             }

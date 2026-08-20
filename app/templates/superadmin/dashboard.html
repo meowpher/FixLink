@@ -355,7 +355,7 @@
                             <th class="border-bottom-0 py-3 fw-semibold">Title & Description</th>
                             <th class="border-bottom-0 py-3 fw-semibold">Reporter</th>
                             <th class="border-bottom-0 py-3 fw-semibold">Date</th>
-                            <th class="border-bottom-0 py-3 fw-semibold text-end pe-4">Actions</th>
+                            <th class="border-bottom-0 py-3 fw-semibold text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -383,7 +383,7 @@
                             <td class="py-3 text-muted small">
                                 {{ bug.created_at.strftime('%b %d, %Y %H:%M') }}
                             </td>
-                            <td class="py-3 text-end pe-4">
+                            <td class="py-3 text-center">
                                 <div class="btn-group">
                                     {% if bug.file_path %}
                                     <a href="{{ url_for('superadmin.view_bug_attachment', bug_id=bug.id) }}" target="_blank" class="btn btn-sm btn-outline-info" title="View Attachment">

@@ -90,7 +90,7 @@
                                 <th class="py-3" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; font-weight:700;">Status</th>
                                 <th class="py-3" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; font-weight:700;">Tickets</th>
                                 <th class="py-3" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; font-weight:700;">Joined</th>
-                                <th class="py-3 text-end pe-4" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; font-weight:700;">Actions</th>
+                                <th class="py-3 text-center" style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em; color:#64748b; font-weight:700;">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -133,8 +133,8 @@
                                     <span class="text-muted small">ticket{{ 's' if user.tickets|length != 1 }}</span>
                                 </td>
                                 <td class="text-muted small">{{ user.created_at.strftime('%d %b %Y') if user.created_at else '—' }}</td>
-                                <td class="text-end pe-4">
-                                    <div class="d-flex gap-2 justify-content-end">
+                                <td class="text-center">
+                                    <div class="d-flex gap-2 justify-content-center">
                                         <button class="btn btn-sm btn-outline-primary edit-user-btn"
                                                 data-id="{{ user.id }}"
                                                 data-name="{{ user.name | e }}"

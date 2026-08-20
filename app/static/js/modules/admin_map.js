@@ -44,7 +44,8 @@ export async function initializeAdminMap(floorId, initialData = null, floorLevel
         const result = await response.json();
 
         if (result.success) {
-            renderData(result.rooms, result.floor.level);
+            const data = result.data || result;
+            renderData(data.rooms, data.floor.level);
         } else {
             renderError(container, result.error || 'Failed to load floor data');
         }
@@ -69,11 +70,11 @@ export function showRoomDetails(roomNumber, roomId) {
 
     fetch(`/admin/api/room-status/${roomNumber}`)
         .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                renderRoomDetails(panelBody, data);
+        .then(responseObj => {
+            if (responseObj.success) {
+                renderRoomDetails(panelBody, responseObj.data || responseObj);
             } else {
-                panelBody.innerHTML = `<div class="alert alert-danger m-3 x-small">Error: ${data.error}</div>`;
+                panelBody.innerHTML = `<div class="alert alert-danger m-3 x-small">Error: ${responseObj.error}</div>`;
             }
         })
         .catch(err => {

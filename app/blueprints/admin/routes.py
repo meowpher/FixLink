@@ -572,19 +572,42 @@ def api_room_status(room_number):
         Professional.CATEGORY_CARPENTER: 'Carpenter'
     }
     
+    best_professional_id = None
+    if active_ticket:
+        best_rating = -1
+        # Attempt to map issue_type to Professional category
+        issue_lower = active_ticket.issue_type.lower()
+        target_cat = None
+        if 'electric' in issue_lower: target_cat = Professional.CATEGORY_ELECTRICIAN
+        elif 'plumb' in issue_lower or 'water' in issue_lower: target_cat = Professional.CATEGORY_PLUMBER
+        elif 'furniture' in issue_lower or 'carpentry' in issue_lower: target_cat = Professional.CATEGORY_CARPENTER
+        elif 'projector' in issue_lower or 'computer' in issue_lower or 'network' in issue_lower: target_cat = Professional.CATEGORY_IT
+        
+        matching_profs = [p for p in all_profs if p.category == target_cat] if target_cat else all_profs
+        if not matching_profs:
+            matching_profs = all_profs
+            
+        for p in matching_profs:
+            is_busy = any(t.status in [Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS] for t in p.assigned_tickets)
+            if not is_busy and p.overall_rating >= best_rating:
+                best_rating = p.overall_rating
+                best_professional_id = p.id
+
     for p in all_profs:
         cat_name = category_names.get(p.category, p.category.title())
         if cat_name not in profs_by_category:
             profs_by_category[cat_name] = []
         profs_by_category[cat_name].append({
             'id': p.id,
-            'name': p.name
+            'name': p.name,
+            'rating': round(p.overall_rating, 1)
         })
     
     return api_response(success=True, data={'room': room.to_dict(),
         'status': room.status,
         'active_ticket': active_ticket.to_dict() if active_ticket else None,
-        'professionals': profs_by_category})
+        'professionals': profs_by_category,
+        'suggested_professional_id': best_professional_id})
 
 
 @admin_bp.route('/api/ticket/<int:ticket_id>/assign', methods=['POST'])
@@ -651,6 +674,28 @@ def delete_ticket(ticket_id):
     return api_response(success=True, message=f"Ticket #{ticket.id} deleted successfully")
 
 
+@admin_bp.route('/tickets/<int:ticket_id>/rate', methods=['POST'])
+@admin_required
+@handle_api_errors
+def rate_ticket(ticket_id):
+    """Rate a professional for a completed job."""
+    ticket = Ticket.query.get_or_404(ticket_id)
+    
+    if ticket.status != Ticket.STATUS_FIXED:
+        return api_response(success=False, error="Only fixed tickets can be rated.", status=400)
+        
+    data = request.get_json()
+    rating = data.get('rating')
+    comment = data.get('comment')
+    
+    if not rating or not isinstance(rating, (int, float)) or rating < 1 or rating > 5:
+        return api_response(success=False, error="Rating must be between 1 and 5.", status=400)
+        
+    ticket.rating = int(rating)
+    ticket.rating_comment = comment
+    db.session.commit()
+    
+    return api_response(success=True, message="Rating submitted successfully!")
 # ==================== PROFESSIONAL MANAGEMENT ====================
 
 @admin_bp.route('/professionals')
@@ -708,6 +753,42 @@ def professionals():
                          category_names=category_names)
 
 
+@admin_bp.route('/professionals/analytics')
+@admin_required
+def professional_analytics():
+    """Professional Analytics page (Lazy loaded/Paginated)."""
+    category_filter = request.args.get('category', 'all')
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
+    
+    query = Professional.query
+    if category_filter != 'all' and category_filter in Professional.CATEGORIES:
+        query = query.filter_by(category=category_filter)
+        
+    query = query.order_by(Professional.name.asc())
+    professionals_paginated = query.paginate(page=page, per_page=per_page, error_out=False)
+    
+    category_names = {
+        Professional.CATEGORY_IT: 'IT Technician',
+        Professional.CATEGORY_ELECTRICIAN: 'Electrician',
+        Professional.CATEGORY_PLUMBER: 'Plumber',
+        Professional.CATEGORY_CARPENTER: 'Carpenter',
+        Professional.CATEGORY_OTHER: 'Other'
+    }
+    
+    # Check if this is an AJAX request for lazy loading
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return jsonify({
+            'success': True,
+            'data': [p.to_dict() for p in professionals_paginated.items],
+            'has_next': professionals_paginated.has_next,
+            'page': page
+        })
+        
+    return render_template('admin/professional_analytics.html',
+                         categories=Professional.CATEGORIES,
+                         category_names=category_names,
+                         category_filter=category_filter)
 @admin_bp.route('/professionals/<int:prof_id>/history')
 @admin_required
 def professional_history(prof_id):
@@ -933,11 +1014,29 @@ def assign_ticket(ticket_id):
             }
         professionals_by_category[cat]['professionals'].append(prof)
     
+    suggested_professional_id = None
+    best_rating = -1
+    issue_lower = ticket.issue_type.lower()
+    target_cat = None
+    if 'electric' in issue_lower: target_cat = Professional.CATEGORY_ELECTRICIAN
+    elif 'plumb' in issue_lower or 'water' in issue_lower: target_cat = Professional.CATEGORY_PLUMBER
+    elif 'furniture' in issue_lower or 'carpentry' in issue_lower: target_cat = Professional.CATEGORY_CARPENTER
+    elif 'projector' in issue_lower or 'computer' in issue_lower or 'network' in issue_lower: target_cat = Professional.CATEGORY_IT
+    
+    matching_profs = [p for p in professionals if p.category == target_cat] if target_cat else professionals
+    if not matching_profs: matching_profs = professionals
+    
+    for p in matching_profs:
+        if p.id not in busy_professional_ids and p.overall_rating >= best_rating:
+            best_rating = p.overall_rating
+            suggested_professional_id = p.id
+            
     return render_template('admin/assign_ticket.html',
                          ticket=ticket,
                          professionals_by_category=professionals_by_category,
                          category_names=category_names,
-                         busy_professional_ids=busy_professional_ids)
+                         busy_professional_ids=busy_professional_ids,
+                         suggested_professional_id=suggested_professional_id)
 
 
 

@@ -378,7 +378,8 @@
             .then(data => {
                 if (data.success) {
                     container.innerHTML = '';
-                    if (data.messages.length === 0) {
+                    const messages = (data.data && data.data.messages) || data.messages || [];
+                    if (messages.length === 0) {
                         container.innerHTML = `
                             <div class="text-center py-5 mt-4">
                                 <div class="mb-3 text-muted opacity-50"><i class="bi bi-chat-left-text fs-1"></i></div>
@@ -387,7 +388,7 @@
                             </div>
                         `;
                     } else {
-                        data.messages.forEach(msg => addMessageToChat(msg));
+                        messages.forEach(msg => addMessageToChat(msg));
                     }
                     scrollToBottom();
                     if (window.refreshGlobalChatBadges) window.refreshGlobalChatBadges();
@@ -432,7 +433,8 @@
                 // Replace temp message with server message if needed, or just remove pending state
                 const msgEl = document.querySelector(`[data-id="${tempId}"]`);
                 if (msgEl) {
-                    msgEl.dataset.id = data.chat_message.id;
+                    const chatMessage = (data.data && data.data.chat_message) || data.chat_message;
+                    msgEl.dataset.id = chatMessage.id;
                     msgEl.dataset.isPending = 'false';
                     msgEl.classList.remove('opacity-50');
                 }

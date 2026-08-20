@@ -698,10 +698,11 @@
             const result = await response.json();
             if (result.success) {
                 container.innerHTML = '';
-                if (result.messages.length === 0) {
+                const messages = (result.data && result.data.messages) || result.messages || [];
+                if (messages.length === 0) {
                     container.innerHTML = '<div class="text-center text-muted py-5">No messages yet. Say hello!</div>';
                 } else {
-                    result.messages.forEach(msg => {
+                    messages.forEach(msg => {
                         const isSentByMe = msg.sender_type === 'admin';
                         addMessageToView(msg, isSentByMe);
                     });
@@ -751,7 +752,8 @@
             if (result.success) {
                 const msgEl = document.querySelector(`[data-id="${tempId}"]`);
                 if (msgEl) {
-                    msgEl.dataset.id = result.chat_message.id;
+                    const chatMessage = (result.data && result.data.chat_message) || result.chat_message;
+                    msgEl.dataset.id = chatMessage.id;
                     msgEl.dataset.isPending = 'false';
                     msgEl.classList.remove('opacity-50');
                 }

@@ -214,8 +214,8 @@ function handleAutoSelect(container) {
         const roomEl = container.querySelector(`[data-room-id="${preSelectedRoom}"]`);
         if (roomEl) {
             if (roomEl.tagName === 'g') {
-                const onclick = roomEl.getAttribute('onclick');
-                if (onclick) eval(onclick);
+                // Safely trigger click event instead of eval() to prevent XSS
+                roomEl.dispatchEvent(new MouseEvent('click', { bubbles: true }));
             } else {
                 roomEl.click();
             }

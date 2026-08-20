@@ -344,10 +344,7 @@ def toggle_professional_status(prof_id):
     try:
         professional.is_active = not professional.is_active
         db.session.commit()
-        return jsonify({
-            'success': True, 
-            'is_active': professional.is_active
-        })
+        return api_response(success=True, data={'is_active': professional.is_active})
     except Exception as e:
         db.session.rollback()
         return api_response(success=False, error=str(e), status=500)
@@ -411,11 +408,11 @@ def edit_professional(prof_id):
             professional.set_password(password)
         
         db.session.commit()
-        return jsonify({
-            'success': True,
-            'message': 'Professional updated successfully',
-            'professional': professional.to_dict()
-        })
+        return api_response(
+            success=True,
+            message='Professional updated successfully',
+            data={'professional': professional.to_dict()}
+        )
     except Exception as e:
         db.session.rollback()
         return api_response(success=False, error=str(e), status=500)
@@ -487,3 +484,134 @@ def edit_user_details(user_id):
     except Exception as e:
         db.session.rollback()
         return api_response(success=False, error=str(e), status=500)
+
+
+@superadmin_bp.route('/developer/bulk-upload', methods=['POST'])
+@super_admin_required
+def bulk_upload_users():
+    """Bulk import users from a CSV file."""
+    import csv
+    from io import TextIOWrapper
+    
+    if 'csv_file' not in request.files:
+        flash('No file uploaded', 'error')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    file = request.files['csv_file']
+    if file.filename == '':
+        flash('No selected file', 'error')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    if not file.filename.endswith('.csv'):
+        flash('Invalid file format. Please upload a CSV file.', 'error')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    try:
+        # Wrap file stream to read it as text
+        csv_file = TextIOWrapper(file.stream, encoding='utf-8')
+        reader = csv.DictReader(csv_file)
+        
+        # Check required columns
+        required_headers = {'name', 'email', 'role'}
+        headers = set(reader.fieldnames or [])
+        if not required_headers.issubset(headers):
+            missing = required_headers - headers
+            flash(f"CSV is missing required columns: {', '.join(missing)}", 'error')
+            return redirect(url_for('superadmin.dashboard'))
+            
+        success_count = 0
+        duplicate_count = 0
+        error_count = 0
+        errors = []
+        
+        # Track emails and PRNs seen within this CSV upload to catch internal duplicates
+        seen_emails = set()
+        seen_prns = set()
+        
+        for idx, row in enumerate(reader, start=1):
+            name = row.get('name', '').strip()
+            email = row.get('email', '').strip().lower()
+            role = row.get('role', '').strip().lower()
+            prn = row.get('prn', '').strip() or None
+            password = row.get('password', '').strip()
+            
+            if not name or not email or not role:
+                errors.append(f"Row {idx}: Name, email, and role are required.")
+                error_count += 1
+                continue
+                
+            if role not in User.ROLES:
+                errors.append(f"Row {idx}: Invalid role '{role}'. Must be one of {list(User.ROLES)}.")
+                error_count += 1
+                continue
+                
+            # Check duplicate email within CSV
+            if email in seen_emails:
+                errors.append(f"Row {idx}: Duplicate email '{email}' within CSV.")
+                error_count += 1
+                continue
+                
+            # Check duplicate PRN within CSV
+            if prn and prn in seen_prns:
+                errors.append(f"Row {idx}: Duplicate PRN '{prn}' within CSV.")
+                error_count += 1
+                continue
+                
+            # Check if email already exists in database
+            if User.query.filter_by(email=email).first():
+                duplicate_count += 1
+                continue
+                
+            # Check if PRN already exists in database
+            if prn and User.query.filter_by(prn=prn).first():
+                errors.append(f"Row {idx}: PRN '{prn}' already exists in database.")
+                error_count += 1
+                continue
+                
+            # Mark as seen
+            seen_emails.add(email)
+            if prn:
+                seen_prns.add(prn)
+                
+            # Generate random password if not provided
+            if not password:
+                import secrets
+                password = secrets.token_urlsafe(8)
+                
+            try:
+                user = User(
+                    name=name,
+                    email=email,
+                    role=role,
+                    prn=prn,
+                    is_admin=(role == User.ROLE_ADMIN),
+                    is_verified=True
+                )
+                user.set_password(password)
+                db.session.add(user)
+                success_count += 1
+            except Exception as e:
+                db.session.rollback()
+                errors.append(f"Row {idx}: {str(e)}")
+                error_count += 1
+                
+        if success_count > 0:
+            db.session.commit()
+            
+        summary_msg = f"Bulk upload completed: {success_count} user(s) added successfully."
+        if duplicate_count > 0:
+            summary_msg += f" {duplicate_count} duplicate email(s) skipped."
+        if error_count > 0:
+            summary_msg += f" {error_count} row(s) failed."
+            
+        flash(summary_msg, 'success' if error_count == 0 else 'warning')
+        for err in errors[:5]:  # Flash first 5 errors to avoid flooding
+            flash(err, 'error')
+            
+        if len(errors) > 5:
+            flash(f"And {len(errors) - 5} more error(s)...", 'error')
+            
+    except Exception as e:
+        flash(f"Error parsing CSV: {str(e)}", 'error')
+        
+    return redirect(url_for('superadmin.dashboard'))

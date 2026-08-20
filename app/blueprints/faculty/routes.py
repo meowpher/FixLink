@@ -101,7 +101,7 @@ def claim_room():
         return api_response(success=False, error="Invalid duration.", status=400)
     
     room = Room.query.options(
-        joinedload(Room.schedules),
+        joinedload(Room.timetables),
         joinedload(Room.adhoc_bookings)
     ).filter_by(id=room_id).first_or_404()
     
@@ -119,7 +119,7 @@ def claim_room():
     current_day = current_dt.weekday()
     end_dt_ist = end_utc + timedelta(hours=5, minutes=30)
     
-    for sched in room.schedules:
+    for sched in room.timetables:
         if sched.day_of_week == current_day:
             sched_start = datetime.combine(current_dt.date(), sched.start_time)
             # If the scheduled lesson starts within our selected duration

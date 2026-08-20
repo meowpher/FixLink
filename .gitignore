@@ -9,3 +9,5 @@ venv/
 .env
 app/static/uploads/
 server.log
+app/.cache/
+.env/*

@@ -53,8 +53,9 @@ def faculty_login_required(f):
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
             return redirect(url_for('auth.login'))
             
-        user = User.query.get(session['user_id'])
-        if not user or (user.role != User.ROLE_FACULTY and not user.is_admin):
+        role = session.get('user_role')
+        is_admin = session.get('is_admin')
+        if role != User.ROLE_FACULTY and not is_admin:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return api_response(success=False, error='Faculty access required.', status=403)
             flash('Faculty access required.', 'error')

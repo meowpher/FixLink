@@ -280,42 +280,61 @@
 
     <!-- Main Actions -->
     <div class="row g-4 mb-5">
-        <div class="col-md-4 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+        <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
             <div class="dev-action-card">
                 <div class="action-icon-large text-primary">
                     <i class="bi bi-person-plus-fill"></i>
                 </div>
                 <h3>Enroll Administrator</h3>
                 <p>Grant full dashboard privileges to a new administrative staff member.</p>
-                <a href="{{ url_for('superadmin.add_user', role='admin') }}" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                <a href="{{ url_for('superadmin.add_user', role='admin') }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow mt-auto">
                     <i class="bi bi-plus-lg me-2"></i>Add Admin
                 </a>
             </div>
         </div>
 
-        <div class="col-md-4 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+        <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
             <div class="dev-action-card">
                 <div class="action-icon-large text-warning">
                     <i class="bi bi-mortarboard-fill"></i>
                 </div>
                 <h3>Enroll Faculty</h3>
                 <p>Register a new faculty member with classroom booking and portal access.</p>
-                <a href="{{ url_for('superadmin.add_user', role='faculty') }}" class="btn btn-warning btn-lg rounded-pill px-5 shadow">
+                <a href="{{ url_for('superadmin.add_user', role='faculty') }}" class="btn btn-warning btn-sm rounded-pill px-4 shadow mt-auto">
                     <i class="bi bi-plus-lg me-2"></i>Add Faculty
                 </a>
             </div>
         </div>
 
-        <div class="col-md-4 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+        <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
             <div class="dev-action-card">
                 <div class="action-icon-large text-success">
                     <i class="bi bi-wrench-adjustable-circle-fill"></i>
                 </div>
                 <h3>Enroll Professional</h3>
                 <p>Initialize a new Job Certified Professional for field maintenance tasks.</p>
-                <a href="{{ url_for('superadmin.add_professional') }}" class="btn btn-success btn-lg rounded-pill px-5 shadow">
+                <a href="{{ url_for('superadmin.add_professional') }}" class="btn btn-success btn-sm rounded-pill px-4 shadow mt-auto">
                     <i class="bi bi-plus-lg me-2"></i>Add Professional
                 </a>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+            <div class="dev-action-card">
+                <div class="action-icon-large text-info">
+                    <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                </div>
+                <h3>Bulk Import Users</h3>
+                <p>Upload a CSV file containing: <code>name, email, role, prn, password</code>.</p>
+                <form action="{{ url_for('superadmin.bulk_upload_users') }}" method="POST" enctype="multipart/form-data" class="w-100 d-flex flex-column align-items-center mt-auto">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3 w-100">
+                        <input class="form-control form-control-sm rounded-pill" type="file" name="csv_file" accept=".csv" required>
+                    </div>
+                    <button type="submit" class="btn btn-info btn-sm rounded-pill w-100 px-4 text-dark shadow">
+                        <i class="bi bi-upload me-2"></i>Upload CSV
+                    </button>
+                </form>
             </div>
         </div>
     </div>

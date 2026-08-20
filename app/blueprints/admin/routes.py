@@ -307,7 +307,7 @@ def analytics():
     # 3. Tickets by Category (Respecting filters)
     raw_category_counts = db.session.query(
         Ticket.issue_type, func.count(Ticket.id)
-    ).filter(Ticket.id.in_(db.session.query(Ticket.id).filter(Ticket.created_at >= start_date))).group_by(Ticket.issue_type).all()
+    ).filter(Ticket.created_at >= start_date).group_by(Ticket.issue_type).all()
     
     # Re-use your consolidated grouping logic
     category_map = {
@@ -368,7 +368,7 @@ def analytics():
         trend_query = db.session.query(
             func.to_char(Ticket.created_at, fmt).label('label'),
             func.count(Ticket.id)
-        ).filter(Ticket.id.in_(db.session.query(Ticket.id).filter(Ticket.created_at >= start_date))).group_by('label').order_by('label').all()
+        ).filter(Ticket.created_at >= start_date).group_by('label').order_by('label').all()
         
         trend_data = [list(row) for row in trend_query]
     except Exception:

@@ -64,9 +64,14 @@ def get_technician_efficiency():
     professionals = Professional.query.all()
     stats = []
     
-    # Bulk fetch fixed tickets and active status
-    all_fixed = Ticket.query.filter(Ticket.status == Ticket.STATUS_FIXED).all()
-    all_active = Ticket.query.filter(Ticket.status.in_([Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])).all()
+    # Bulk fetch fixed tickets and active status (Optimized using with_entities to avoid full ORM instantiation)
+    all_fixed = Ticket.query.with_entities(
+        Ticket.assigned_professional_id, Ticket.job_started_at, Ticket.fixed_at
+    ).filter(Ticket.status == Ticket.STATUS_FIXED).all()
+    
+    all_active = Ticket.query.with_entities(
+        Ticket.assigned_professional_id
+    ).filter(Ticket.status.in_([Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])).all()
     
     fixed_by_pro = {}
     for t in all_fixed:

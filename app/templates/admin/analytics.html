@@ -32,7 +32,7 @@
         <!-- System Trends Chart -->
         <div class="col-lg-8">
             <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-white py-3">
+                <div class="card-header py-3 border-bottom-0">
                     <h5 class="mb-0 font-weight-bold">Ticket Volume Trends (Last 7 Days)</h5>
                 </div>
                 <div class="card-body">
@@ -44,7 +44,7 @@
         <!-- Critical Assets -->
         <div class="col-lg-4">
             <div class="card h-100 shadow-sm border-0">
-                <div class="card-header bg-white py-3">
+                <div class="card-header py-3 border-bottom-0">
                     <h5 class="mb-0 font-weight-bold">Predictive: Critical Assets</h5>
                 </div>
                 <div class="card-body p-0">
@@ -87,7 +87,7 @@
         <!-- Technician Efficiency -->
         <div class="col-12">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3">
+                <div class="card-header py-3 border-bottom-0">
                     <h5 class="mb-0 font-weight-bold">Professional Performance Metrics (Efficiency)</h5>
                 </div>
                 <div class="card-body p-0">
@@ -192,6 +192,10 @@
                     legend: { display: false }
                 }
             }
+        });
+
+        window.addEventListener('themeChanged', function() {
+            location.reload();
         });
     });
 </script>

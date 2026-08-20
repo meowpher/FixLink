@@ -460,6 +460,24 @@
 
     /* Back button hidden on desktop */
     .mob-back-btn { display: none; }
+
+    /* Dark Mode Overrides for Chat */
+    [data-theme="dark"] .prof-avatar {
+        background: var(--raised) !important;
+        color: var(--ice-hint) !important;
+        border: 1px solid var(--border-color) !important;
+        box-shadow: none !important;
+    }
+    
+    [data-theme="dark"] .message.sent .message-content {
+        background: var(--mitwpu-blue) !important; /* evaluates to ice-hint (light blue) */
+        color: var(--void) !important; /* dark text for contrast */
+    }
+    
+    [data-theme="dark"] .send-btn {
+        background: var(--mitwpu-blue) !important;
+        color: var(--void) !important;
+    }
 </style>
 {% endblock %}
 

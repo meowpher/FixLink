@@ -22,7 +22,7 @@
     </style>
 
     <!-- Custom CSS -->
-    <link href="{{ url_for('static', filename='css/style.css') }}?v=5.8" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}?v=6.4" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Manifest -->
@@ -43,6 +43,16 @@
 </head>
 
 <body>
+    {% set display_name = session.get('user_name') or session.get('professional_name') or '?' %}
+    {% set display_initials = '?' %}
+    {% if display_name != '?' %}
+        {% set name_parts = display_name.strip().split() %}
+        {% if name_parts|length == 1 %}
+            {% set display_initials = name_parts[0][0]|upper %}
+        {% else %}
+            {% set display_initials = (name_parts[0][0] + name_parts[-1][0])|upper %}
+        {% endif %}
+    {% endif %}
     <!-- Advanced UI Curtain -->
     <div id="page-transition-curtain" class="page-curtain"></div>
 
@@ -96,14 +106,14 @@
             <div class="dropdown">
                 <a href="#" class="top-bar-icon-btn p-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                     <div id="mobileNavAvatar" style="width:32px;height:32px;border-radius:50%;background:var(--mitwpu-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;">
-                        <span id="mobileAvatarInitials">?</span>
+                        <span id="mobileAvatarInitials">{{ display_initials }}</span>
                         <img class="d-none w-100 h-100 object-fit-cover rounded-circle" id="mobileAvatarImg" src="" alt="Profile" loading="lazy">
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2">
                     <li class="px-3 py-3 border-bottom">
-                        <div class="fw-bold" id="mobileProfileName">Loading…</div>
-                        <div class="text-muted small" id="mobileProfileEmail">—</div>
+                        <div class="fw-bold" id="mobileProfileName">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
+                        <div class="text-muted small" id="mobileProfileEmail">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
                     </li>
                     <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                 </ul>
@@ -385,10 +395,10 @@
         <!-- Bottom utility bar -->
         <div class="msb-bottom">
             <div class="msb-user">
-                <div class="msb-avatar" id="msbAvatar">?</div>
+                <div class="msb-avatar" id="msbAvatar">{{ display_initials }}</div>
                 <div class="msb-user-info">
-                    <div class="msb-user-name" id="msbUserName">Loading…</div>
-                    <div class="msb-user-email" id="msbUserEmail">—</div>
+                    <div class="msb-user-name" id="msbUserName">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
+                    <div class="msb-user-email" id="msbUserEmail">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
                 </div>
             </div>
             <div class="msb-utils">
@@ -543,14 +553,14 @@
                     <div class="dropdown">
                         <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown">
                             <div class="nav-avatar m-0" id="navAvatar" style="width: 35px; height: 35px; border-radius: 50%; background: var(--mitwpu-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600;">
-                                <span class="nav-avatar-initials" id="navAvatarInitials">?</span>
+                                <span class="nav-avatar-initials" id="navAvatarInitials">{{ display_initials }}</span>
                                 <img class="nav-avatar-img d-none w-100 h-100 object-fit-cover rounded-circle" id="navAvatarImg" src="" alt="Profile" loading="lazy" decoding="async">
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2">
                             <li class="px-3 py-3 border-bottom">
-                                <div class="fw-bold" id="profileName">Loading…</div>
-                                <div class="text-muted small" id="profileEmail">—</div>
+                                <div class="fw-bold" id="profileName">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
+                                <div class="text-muted small" id="profileEmail">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
                             </li>
                             <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
@@ -651,6 +661,7 @@
                 }
                 const logos = document.querySelectorAll('.mitwpu-logo');
                 logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-dm.webp') }}");
+                window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: true } }));
             } else {
                 document.body.removeAttribute('data-theme');
                 document.documentElement.setAttribute('data-bs-theme', 'light');
@@ -672,8 +683,10 @@
                 }
                 const logos = document.querySelectorAll('.mitwpu-logo');
                 logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-lm.webp') }}");
+                window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: false } }));
             }
         };
+
 
         // Initialize theme on load (instantly, no animation)
         const savedTheme = localStorage.getItem('theme');

@@ -9,7 +9,8 @@
         border-radius: 15px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         transition: transform 0.3s ease;
-        background: #fff;
+        background: var(--bg-card); /* Theme aware */
+        color: var(--text-main); /* Theme aware */
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -18,15 +19,18 @@
         transform: translateY(-5px);
     }
     .stat-value {
-        font-size: 2.5rem;
+        font-size: 2rem; /* Reduced from 2.5rem as requested */
         font-weight: 700;
         color: var(--mitwpu-blue);
     }
     .stat-label {
         font-size: 0.9rem;
-        color: #6c757d;
+        color: var(--text-muted); /* Theme aware */
         text-transform: uppercase;
         letter-spacing: 1px;
+    }
+    [data-theme="dark"] .stat-value {
+        color: var(--ice-hint) !important;
     }
     .chart-container {
         position: relative;
@@ -270,19 +274,12 @@
 
         // Theme-aware colors
         const isDark = document.body.getAttribute('data-theme') === 'dark';
-        const primaryColor = isDark ? '#C8D8E8' : '#003399';
+        const primaryColor = isDark ? '#5B8FF9' : '#003399';
         const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
         const textColor = isDark ? '#EDEDF0' : '#1e293b';
         
-        // Strict pie chart palette using only ice-hint opacities
-        const darkPieColors = [
-            'rgba(200, 216, 232, 1)',
-            'rgba(200, 216, 232, 0.8)',
-            'rgba(200, 216, 232, 0.6)',
-            'rgba(200, 216, 232, 0.4)',
-            'rgba(200, 216, 232, 0.2)',
-            'rgba(200, 216, 232, 0.1)'
-        ];
+        // Vibrant pie chart palette for dark mode
+        const darkPieColors = ['#5B8FF9', '#ffd43b', '#10b981', '#ff6b6b', '#38bdf8', '#a78bfa', '#fb923c'];
         const lightPieColors = ['#003399', '#ffcc00', '#28a745', '#dc3545', '#17a2b8', '#6610f2', '#fd7e14'];
 
         // 1. Trend Chart
@@ -358,6 +355,11 @@
                 },
                 cutout: '70%'
             }
+        });
+
+        // Redraw charts on theme toggle
+        window.addEventListener('themeChanged', function() {
+            location.reload();
         });
     });
 </script>

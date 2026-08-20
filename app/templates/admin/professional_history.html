@@ -88,6 +88,35 @@
         padding: 8px;
         border-radius: 8px;
     }
+    .stats-card p,
+    .stats-card .small,
+    .stats-card small {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    @media (max-width: 767px) {
+        .stats-card {
+            min-height: 95px !important;
+            padding: 0.85rem !important;
+        }
+        .stats-card h6 {
+            font-size: 0.65rem !important;
+            margin-bottom: 2px !important;
+        }
+        .stats-card h2 {
+            font-size: 1.5rem !important;
+        }
+        .stats-card p {
+            font-size: 0.62rem !important;
+            margin-top: 2px !important;
+            line-height: 1.2 !important;
+        }
+        .stats-icon {
+            font-size: 1.5rem !important;
+            right: 0.75rem !important;
+            bottom: 0.5rem !important;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -135,8 +164,8 @@
     </div>
 
     <!-- Stats Summary Cards -->
-    <div class="row g-4 mb-5">
-        <div class="col-md-6">
+    <div class="row g-3 g-md-4 mb-4">
+        <div class="col-6">
             <div class="card stats-card completed p-4">
                 <div class="card-body p-0 d-flex flex-column justify-content-center">
                     <h6 class="text-white-50 text-uppercase fw-bold mb-1">Jobs Completed Successfully</h6>
@@ -146,7 +175,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6">
+        <div class="col-6">
             <div class="card stats-card cancelled p-4">
                 <div class="card-body p-0 d-flex flex-column justify-content-center">
                     <h6 class="text-white-50 text-uppercase fw-bold mb-1">Jobs Cancelled / Failed</h6>

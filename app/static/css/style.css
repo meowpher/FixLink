@@ -5345,10 +5345,10 @@ img {
     --accent-primary-active: var(--text-primary) !important;
     --accent-primary-focus: var(--ice-hint) !important;
     
-    --success-color: var(--ice-hint) !important;
-    --warning-color: var(--ice-hint) !important;
-    --danger-color: var(--ice-hint) !important;
-    --info-color: var(--ice-hint) !important;
+    --success-color: #10b981 !important;
+    --warning-color: #ffd43b !important;
+    --danger-color: #ff6b6b !important;
+    --info-color: #38bdf8 !important;
     
     --mitwpu-red: var(--muted) !important;
     --mitwpu-red-dark: var(--muted) !important;
@@ -6477,4 +6477,31 @@ select.compact-input {
         padding: 8px 16px !important;
         font-size: 0.85rem !important;
     }
+}
+
+/* Universal Dark Mode Fixes for Hardcoded Classes */
+[data-theme="dark"] .bg-white {
+    background-color: var(--bg-card) !important;
+}
+
+[data-theme="dark"] .text-dark {
+    color: var(--text-main) !important;
+}
+
+[data-theme="dark"] .border-secondary {
+    border-color: var(--border-color) !important;
+}
+
+[data-theme="dark"] #mobileNavAvatar,
+[data-theme="dark"] #navAvatar {
+    background: var(--raised) !important;
+    background-color: var(--raised) !important;
+    color: var(--ice-hint) !important;
+    border: 1px solid var(--border) !important;
+}
+
+[data-theme="dark"] #mobile-fab {
+    background-color: var(--ice-hint) !important;
+    color: var(--void) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }

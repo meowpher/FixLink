@@ -10,9 +10,14 @@
             <h2 class="fw-bold mb-1">Professional Management</h2>
             <p class="text-muted mb-0">Manage maintenance staff, categories, and account status</p>
         </div>
-        <a href="{{ url_for('admin.add_professional') }}" class="btn btn-primary shadow-sm d-flex align-items-center px-4" style="border-radius: 12px; height: 48px;">
-            <i class="bi bi-person-plus-fill me-2"></i> Add Professional
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin.professional_analytics') }}" class="btn btn-outline-primary shadow-sm d-flex align-items-center px-4" style="border-radius: 12px; height: 48px;">
+                <i class="bi bi-bar-chart-line-fill me-2"></i> View Analytics
+            </a>
+            <a href="{{ url_for('admin.add_professional') }}" class="btn btn-primary shadow-sm d-flex align-items-center px-4" style="border-radius: 12px; height: 48px;">
+                <i class="bi bi-person-plus-fill me-2"></i> Add Professional
+            </a>
+        </div>
     </div>
 
     <!-- Quick Stats -->

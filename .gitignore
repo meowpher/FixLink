@@ -10,4 +10,6 @@ venv/
 app/static/uploads/
 server.log
 app/.cache/
+.env.*
+.env
 .env/*

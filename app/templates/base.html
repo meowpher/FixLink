@@ -47,21 +47,92 @@
     <div id="page-transition-curtain" class="page-curtain"></div>
 
     <!-- ═══════════════════════════════════════════════════
-         MOBILE SLIDE-IN SIDEBAR  (hidden on ≥768px)
+         MOBILE TOP BAR & BOTTOM NAV (App-style)
+    ══════════════════════════════════════════════════════ -->
+    <div id="mobile-top-bar" class="d-md-none">
+        <button class="top-bar-btn" onclick="history.back()">
+            <i class="bi bi-chevron-left"></i> Back
+        </button>
+        <div class="top-bar-brand">
+            <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="Logo">
+            <span>FixLink</span>
+        </div>
+        <div class="top-bar-actions">
+            {% if session.get('user_id') or session.get('professional_id') %}
+            <div class="nav-avatar nav-avatar-sm" style="width:28px;height:28px;">?</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <nav id="mobile-bottom-nav" class="d-md-none">
+        {% if session.get('is_admin') %}
+            <a href="{{ url_for('admin.dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('admin.status_map') }}" class="bottom-nav-item {% if request.endpoint == 'admin.status_map' %}active{% endif %}">
+                <i class="bi bi-map"></i>
+                <span>Status Map</span>
+            </a>
+            <a href="{{ url_for('admin.professionals') }}" class="bottom-nav-item {% if request.endpoint in ['admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history'] %}active{% endif %}">
+                <i class="bi bi-gear"></i>
+                <span>Manage</span>
+            </a>
+            <a href="{{ url_for('admin.analytics') }}" class="bottom-nav-item {% if request.endpoint == 'admin.analytics' %}active{% endif %}">
+                <i class="bi bi-graph-up"></i>
+                <span>Insights</span>
+            </a>
+            <a href="{{ url_for('admin.chat') }}" class="bottom-nav-item {% if request.endpoint == 'admin.chat' %}active{% endif %}">
+                <i class="bi bi-chat-dots"></i>
+                <span>Chat</span>
+            </a>
+        {% elif session.get('professional_id') %}
+            <a href="{{ url_for('professional.dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'professional.dashboard' %}active{% endif %}">
+                <i class="bi bi-tools"></i>
+                <span>Tasks</span>
+            </a>
+            <a href="{{ url_for('professional.chat') }}" class="bottom-nav-item {% if request.endpoint == 'professional.chat' %}active{% endif %}">
+                <i class="bi bi-chat-dots"></i>
+                <span>Chat</span>
+            </a>
+        {% else %}
+            <a href="{{ url_for('main.index') }}" class="bottom-nav-item {% if request.endpoint == 'main.index' %}active{% endif %}">
+                <i class="bi bi-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('main.report_form') }}" class="bottom-nav-item {% if request.endpoint == 'main.report_form' %}active{% endif %}">
+                <i class="bi bi-plus-circle"></i>
+                <span>Report</span>
+            </a>
+            <a href="{{ url_for('auth.login') }}" class="bottom-nav-item {% if request.endpoint == 'auth.login' %}active{% endif %}">
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span>Login</span>
+            </a>
+        {% endif %}
+    </nav>
+    
+    {% if session.get('is_admin') %}
+    <a href="{{ url_for('main.report_form') }}" id="mobile-fab" class="d-md-none">
+        <i class="bi bi-plus"></i>
+    </a>
+    {% endif %}
+
+    <!-- ═══════════════════════════════════════════════════
+         MOBILE SLIDE-IN SIDEBAR  (Hidden completely now)
     ══════════════════════════════════════════════════════ -->
 
     <!-- Fixed hamburger trigger -->
-    <button id="mobileMenuBtn" class="mobile-hamburger" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileSidebar">
+    <button id="mobileMenuBtn" class="mobile-hamburger d-none" aria-label="Open navigation" aria-expanded="false" aria-controls="mobileSidebar">
         <span class="ham-bar"></span>
         <span class="ham-bar"></span>
         <span class="ham-bar"></span>
     </button>
 
     <!-- Backdrop overlay -->
-    <div id="mobileBackdrop" class="mobile-backdrop" aria-hidden="true"></div>
+    <div id="mobileBackdrop" class="mobile-backdrop d-none" aria-hidden="true"></div>
 
     <!-- Sidebar panel -->
-    <nav id="mobileSidebar" class="mobile-sidebar" role="navigation" aria-label="Main navigation">
+    <nav id="mobileSidebar" class="mobile-sidebar d-none" role="navigation" aria-label="Main navigation">
 
         <!-- Sidebar header -->
         <div class="msb-header">

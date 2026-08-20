@@ -89,6 +89,16 @@ export function selectRoom(event, roomNumber, roomId, roomName, roomType) {
 
     // Load dynamic fields
     updateIssueTypes(roomType || 'unknown');
+
+    // Scroll to the report form on mobile devices (<= 767px)
+    if (window.innerWidth <= 767) {
+        const reportForm = document.getElementById('reportForm');
+        if (reportForm) {
+            const yOffset = -70; // Adjust for the fixed mobile header
+            const y = reportForm.getBoundingClientRect().top + window.scrollY + yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+    }
 }
 
 let isIssueDropdownInitialized = false;

@@ -5957,6 +5957,25 @@ html[data-theme="dark"] {
         width: auto;
     }
 
+    .top-bar-icon-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted, #94A3B8);
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+        gap: 0;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .top-bar-icon-btn:hover, .top-bar-icon-btn:active {
+        color: var(--accent-primary, #5B8FF9);
+    }
+
     /* Bottom Nav */
     #mobile-bottom-nav {
         position: fixed;

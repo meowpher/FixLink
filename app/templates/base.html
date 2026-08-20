@@ -58,8 +58,52 @@
             <span>FixLink</span>
         </div>
         <div class="top-bar-actions">
+            <!-- Theme Toggle -->
+            <button id="mobileThemeToggleBtn" class="top-bar-icon-btn" aria-label="Toggle theme">
+                <i class="bi bi-moon-fill" id="mobileThemeToggleIcon"></i>
+            </button>
+
             {% if session.get('user_id') or session.get('professional_id') %}
-            <div class="nav-avatar nav-avatar-sm" style="width:28px;height:28px;">?</div>
+
+            <!-- Admin Notifications Bell -->
+            {% if session.get('is_admin') %}
+            <div class="dropdown">
+                <button class="top-bar-icon-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
+                    <i class="bi bi-bell-fill"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="mobileNotifBadge" style="font-size:0.55rem;"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0" style="width:300px;">
+                    <li class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+                        <span class="fw-bold">Notifications</span>
+                        <button class="btn btn-sm btn-link p-0 text-decoration-none" id="mobileMarkAllReadBtn" style="font-size:0.75rem;">Mark all as read</button>
+                    </li>
+                    <div id="mobileNotificationList" style="max-height:300px;overflow-y:auto;"></div>
+                </ul>
+            </div>
+            {% endif %}
+
+            <!-- Avatar / Profile Dropdown -->
+            <div class="dropdown">
+                <a href="#" class="top-bar-icon-btn p-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <div id="mobileNavAvatar" style="width:32px;height:32px;border-radius:50%;background:var(--mitwpu-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;">
+                        <span id="mobileAvatarInitials">?</span>
+                        <img class="d-none w-100 h-100 object-fit-cover rounded-circle" id="mobileAvatarImg" src="" alt="Profile" loading="lazy">
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2">
+                    <li class="px-3 py-3 border-bottom">
+                        <div class="fw-bold" id="mobileProfileName">Loading…</div>
+                        <div class="text-muted small" id="mobileProfileEmail">—</div>
+                    </li>
+                    <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                </ul>
+            </div>
+
+            {% else %}
+            <!-- Guest Login Link -->
+            <a href="{{ url_for('auth.login') }}" class="top-bar-icon-btn" aria-label="Login">
+                <i class="bi bi-box-arrow-in-right"></i>
+            </a>
             {% endif %}
         </div>
     </div>
@@ -74,10 +118,11 @@
                 <i class="bi bi-map"></i>
                 <span>Status Map</span>
             </a>
-            <a href="{{ url_for('admin.professionals') }}" class="bottom-nav-item {% if request.endpoint in ['admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history'] %}active{% endif %}">
-                <i class="bi bi-gear"></i>
+            <!-- Manage triggers an offcanvas sheet -->
+            <button class="bottom-nav-item border-0 bg-transparent {% if request.endpoint in ['admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history'] %}active{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#manageOffcanvas" aria-controls="manageOffcanvas">
+                <i class="bi bi-grid"></i>
                 <span>Manage</span>
-            </a>
+            </button>
             <a href="{{ url_for('admin.analytics') }}" class="bottom-nav-item {% if request.endpoint == 'admin.analytics' %}active{% endif %}">
                 <i class="bi bi-graph-up"></i>
                 <span>Insights</span>
@@ -95,6 +140,19 @@
                 <i class="bi bi-chat-dots"></i>
                 <span>Chat</span>
             </a>
+        {% elif session.get('user_role') == 'faculty' %}
+            <a href="{{ url_for('main.index') }}" class="bottom-nav-item {% if request.endpoint == 'main.index' %}active{% endif %}">
+                <i class="bi bi-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('faculty.dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'faculty.dashboard' %}active{% endif %}">
+                <i class="bi bi-calendar-check"></i>
+                <span>Faculty</span>
+            </a>
+            <a href="{{ url_for('main.report_form') }}" class="bottom-nav-item {% if request.endpoint == 'main.report_form' %}active{% endif %}">
+                <i class="bi bi-plus-circle"></i>
+                <span>Report</span>
+            </a>
         {% else %}
             <a href="{{ url_for('main.index') }}" class="bottom-nav-item {% if request.endpoint == 'main.index' %}active{% endif %}">
                 <i class="bi bi-house"></i>
@@ -110,6 +168,42 @@
             </a>
         {% endif %}
     </nav>
+
+    <!-- Manage Offcanvas (Admin only) -->
+    {% if session.get('is_admin') %}
+    <div class="offcanvas offcanvas-bottom d-md-none" tabindex="-1" id="manageOffcanvas" aria-labelledby="manageOffcanvasLabel" style="height:auto;border-radius:20px 20px 0 0;">
+        <div class="offcanvas-header border-bottom pb-3">
+            <h6 class="offcanvas-title fw-bold" id="manageOffcanvasLabel"><i class="bi bi-grid me-2"></i>Manage</h6>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body px-3 pb-4">
+            <div class="d-grid gap-2">
+                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.professionals') }}">
+                    <i class="bi bi-people fs-5"></i>
+                    <div><div class="fw-semibold">Professionals</div><div class="text-muted small">View & manage staff</div></div>
+                </a>
+                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.help_requests') }}">
+                    <i class="bi bi-hand-thumbs-up fs-5"></i>
+                    <div><div class="fw-semibold">Help Requests</div><div class="text-muted small">Pending assistance requests</div></div>
+                </a>
+                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.history') }}">
+                    <i class="bi bi-clock-history fs-5"></i>
+                    <div><div class="fw-semibold">Full History</div><div class="text-muted small">All resolved tickets</div></div>
+                </a>
+                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.booking_history') }}">
+                    <i class="bi bi-calendar3-range fs-5"></i>
+                    <div><div class="fw-semibold">Booking History</div><div class="text-muted small">Room booking records</div></div>
+                </a>
+                {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
+                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('faculty.dashboard') }}">
+                    <i class="bi bi-calendar-check fs-5"></i>
+                    <div><div class="fw-semibold">Faculty Portal</div><div class="text-muted small">Room bookings & schedules</div></div>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
     
     {% if session.get('is_admin') %}
     <a href="{{ url_for('main.report_form') }}" id="mobile-fab" class="d-md-none">
@@ -516,6 +610,11 @@
                     iconGuest.classList.remove('bi-moon-fill');
                     iconGuest.classList.add('bi-sun-fill');
                 }
+                const iconMobile = document.getElementById('mobileThemeToggleIcon');
+                if (iconMobile) {
+                    iconMobile.classList.remove('bi-moon-fill');
+                    iconMobile.classList.add('bi-sun-fill');
+                }
                 const logos = document.querySelectorAll('.mitwpu-logo');
                 logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-dm.webp') }}");
             } else {
@@ -531,6 +630,11 @@
                 if (iconGuest) {
                     iconGuest.classList.remove('bi-sun-fill');
                     iconGuest.classList.add('bi-moon-fill');
+                }
+                const iconMobile = document.getElementById('mobileThemeToggleIcon');
+                if (iconMobile) {
+                    iconMobile.classList.remove('bi-sun-fill');
+                    iconMobile.classList.add('bi-moon-fill');
                 }
                 const logos = document.querySelectorAll('.mitwpu-logo');
                 logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-lm.webp') }}");
@@ -566,6 +670,9 @@
         
         const btnGuest = document.getElementById('themeToggleBtnGuest');
         if (btnGuest) btnGuest.addEventListener('click', handleToggle);
+
+        const btnMobile = document.getElementById('mobileThemeToggleBtn');
+        if (btnMobile) btnMobile.addEventListener('click', handleToggle);
     })();
 
     // Profile Avatar — load user info and wire up photo upload
@@ -583,7 +690,8 @@
             const initials = getInitials(name || '?');
             [
                 { ini: 'navAvatarInitials',        img: 'navAvatarImg' },
-                { ini: 'navAvatarInitialsDropdown', img: 'navAvatarImgDropdown' }
+                { ini: 'navAvatarInitialsDropdown', img: 'navAvatarImgDropdown' },
+                { ini: 'mobileAvatarInitials',      img: 'mobileAvatarImg' }
             ].forEach(({ ini, img }) => {
                 const iniEl = document.getElementById(ini);
                 const imgEl = document.getElementById(img);
@@ -599,6 +707,9 @@
                 }
             });
             const nameEl = document.getElementById('profileName');
+            const mobileNameEl = document.getElementById('mobileProfileName');
+            const mobileEmailEl = document.getElementById('mobileProfileEmail');
+            if (mobileNameEl) mobileNameEl.textContent = name || '—';
             if (document.getElementById('removePhotoBtn'))
                 document.getElementById('removePhotoBtn').classList.toggle('d-none', !photoUrl);
             if (nameEl) nameEl.textContent = name;
@@ -614,6 +725,8 @@
                 const prnEl = document.getElementById('profilePRN');
                 if (emailEl) emailEl.textContent = data.email;
                 if (prnEl) prnEl.textContent = data.prn || '—';
+                const mobileEmailEl = document.getElementById('mobileProfileEmail');
+                if (mobileEmailEl) mobileEmailEl.textContent = data.email || '—';
                 setAvatar(data.name, data.photo_url);
             })
             .catch(() => {});

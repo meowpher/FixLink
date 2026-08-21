@@ -5,6 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MIT-WPU Vyas Tracker{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}MIT-WPU FixLink — Smart Room Maintenance Tracker for MIT World Peace University, Pune. Report issues, track resolutions, and manage maintenance requests.{% endblock %}">
+    <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
+    <link rel="canonical" href="{{ request.url }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FLOGOCLR.webp') }}">
     <!-- Preload Critical CSS (self-hosted for zero CDN latency) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
@@ -612,7 +615,7 @@
     </div>
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main class="main-content" id="main-content" role="main">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             <div class="container mt-3">

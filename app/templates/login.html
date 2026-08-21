@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% if show_phone_hint %}Professional Login - MIT-WPU FixLink{% else %}Login - MIT-WPU FixLink{% endif %}{% endblock %}
+{% block meta_description %}{% if show_phone_hint %}Technician login portal for MIT-WPU FixLink. Access your assigned maintenance jobs and task history.{% else %}Sign in to MIT-WPU FixLink to report and track smart room maintenance issues at MIT World Peace University.{% endif %}{% endblock %}
+{% block meta_robots %}noindex, nofollow{% endblock %}
 
 {% block extra_css %}
 <!-- Preload LCP image (logo) -->
@@ -74,7 +76,7 @@
         margin: 0 auto 24px auto;
         display: block;
     }
-    .glass-login-card h3 {
+    .glass-login-card .login-heading {
         font-size: 26px;
         font-weight: 700;
         color: #212529;
@@ -303,7 +305,7 @@
         box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
     }
     body[data-theme="dark"] .glass-login-card .form-logo { opacity: 0.85; }
-    body[data-theme="dark"] .glass-login-card h3 { color: #ffffff; }
+    body[data-theme="dark"] .glass-login-card .login-heading { color: #ffffff; }
     body[data-theme="dark"] .glass-login-card .subtext { color: rgba(255,255,255,0.4); }
     body[data-theme="dark"] .glass-login-card .form-label { color: rgba(255,255,255,0.6); }
     body[data-theme="dark"] .glass-login-card .text-danger { color: rgba(255,100,100,0.8) !important; }
@@ -447,7 +449,7 @@
             padding: 20px 20px 20px !important;
         }
         .glass-login-card .form-logo { max-width: 80px !important; margin-bottom: 10px !important; }
-        .glass-login-card h3 { font-size: 18px !important; margin-bottom: 2px !important; }
+        .glass-login-card .login-heading { font-size: 18px !important; margin-bottom: 2px !important; }
         .glass-login-card .subtext { font-size: 12px !important; margin-bottom: 10px !important; }
         .glass-login-card .form-control { height: 40px !important; font-size: 13px !important; }
         .glass-login-card .form-label { font-size: 11px !important; margin-bottom: 4px !important; }
@@ -484,7 +486,7 @@
 
 <div class="glass-login-card {% if show_phone_hint %}pro-card{% else %}user-card{% endif %}">
     <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo" loading="eager" fetchpriority="high" width="200" height="57">
-    <h3>{% if show_phone_hint %}Technician Portal{% else %}Welcome Back{% endif %}</h3>
+    <h1 class="login-heading">{% if show_phone_hint %}Technician Portal{% else %}Welcome Back{% endif %}</h1>
     <p class="subtext">{% if show_phone_hint %}Sign in to access your jobs{% else %}Sign in to your account{% endif %}</p>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -498,19 +500,20 @@
         {% endif %}
     {% endwith %}
     
-    <form method="POST" action="{{ url_for('auth.login') }}{% if show_phone_hint %}?pro=1{% endif %}">
+    <form method="POST" action="{{ url_for('auth.login') }}{% if show_phone_hint %}?pro=1{% endif %}" aria-label="Sign in form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <div class="field-group">
-            <label class="form-label" id="loginLabel">
+            <label class="form-label" for="loginInput">
                 {% if show_phone_hint %}
                     Email, Username, or Phone
                 {% else %}
                     Email Address
                 {% endif %}
             </label>
-            <input type="text" name="email" id="loginInput" class="form-control" required autocomplete="off"
-                   placeholder="{% if show_phone_hint %}name@mitwpu.edu.in or username or 9876543210{% else %}name@mitwpu.edu.in{% endif %}">
+            <input type="text" name="email" id="loginInput" class="form-control" required autocomplete="username"
+                   placeholder="{% if show_phone_hint %}name@mitwpu.edu.in or username or 9876543210{% else %}name@mitwpu.edu.in{% endif %}"
+                   aria-required="true" aria-label="{% if show_phone_hint %}Email, Username, or Phone{% else %}Email Address{% endif %}">
             {% if show_phone_hint %}
             <div class="form-text mt-2 mb-0" style="color: rgba(255,255,255,0.4); font-size: 12px;">
                 <i class="bi bi-info-circle me-1"></i>
@@ -520,18 +523,18 @@
         </div>
         
         <div class="field-group" style="margin-bottom: 0;">
-            <label class="form-label">Password<span class="text-danger">*</span></label>
+            <label class="form-label" for="loginPassword">Password<span class="text-danger" aria-hidden="true">*</span></label>
             <div class="pwd-wrapper">
-                <input type="password" name="password" id="loginPassword" class="form-control" required autocomplete="new-password">
-                <button type="button" class="btn-eye" onclick="togglePwd()" tabindex="-1">
-                    <i class="bi bi-eye" id="loginEyeIcon"></i>
+                <input type="password" name="password" id="loginPassword" class="form-control" required autocomplete="current-password" aria-required="true">
+                <button type="button" class="btn-eye" onclick="togglePwd()" tabindex="-1" aria-label="Toggle password visibility">
+                    <i class="bi bi-eye" id="loginEyeIcon" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
         
         <a href="{{ url_for('auth.forgot_password') }}" class="forgot-pwd">Forgot password?</a>
         
-        <button type="submit" class="btn btn-primary">Login</button>
+        <button type="submit" class="btn btn-primary" aria-label="Sign in to your account">Login</button>
     </form>
     
     {% if not show_phone_hint %}

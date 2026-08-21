@@ -78,12 +78,6 @@ export function renderGroundFloor(container, rooms, isAdmin = false, isReport = 
 
     const svgContent = `
         <svg viewBox="0 0 530 980" width="100%" height="100%" class="interactive-map">
-            <defs>
-                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-            </defs>
             ${SVG_OUTLINE}
             ${renderGroundFloorGrid(renderRoomRect)}
         </svg>
@@ -140,12 +134,6 @@ export function renderDetailedLayout(container, rooms, floorLevel, isAdmin = fal
 
     const svgContent = `
         <svg viewBox="0 0 530 980" width="100%" height="100%" class="interactive-map">
-            <defs>
-                <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                    <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                    <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-            </defs>
             ${SVG_OUTLINE}
             ${renderStandardFloorGrid(renderRoomRect)}
         </svg>

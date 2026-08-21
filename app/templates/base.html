@@ -6,12 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MIT-WPU Vyas Tracker{% endblock %}</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FLOGOCLR.webp') }}">
+    <!-- Preload Critical CSS -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=6.4" as="style">
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Bootstrap Icons -->
-    <link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"></noscript>
     <style>
         @font-face {
             font-family: "bootstrap-icons";
@@ -22,15 +26,18 @@
     </style>
 
     <!-- Custom CSS -->
-    <link href="{{ url_for('static', filename='css/style.css') }}?v=6.4" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.min.css') }}?v=6.4" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 
     <!-- Advanced UI Animations CSS -->
-    <link href="{{ url_for('static', filename='css/page_transitions.css') }}" rel="stylesheet">
-    <link href="{{ url_for('static', filename='css/skeleton.css') }}" rel="stylesheet">
+    <link rel="preload" href="{{ url_for('static', filename='css/page_transitions.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/page_transitions.css') }}"></noscript>
+    
+    <link rel="preload" href="{{ url_for('static', filename='css/skeleton.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}"></noscript>
     
     <!-- Deferred Non-Critical CSS -->
     <link rel="preload" href="{{ url_for('static', filename='css/dashboard_stats.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -66,7 +73,7 @@
                 request.endpoint == 'admin.dashboard' or 
                 request.endpoint == 'admin.status_map' or 
                 request.endpoint == 'admin.analytics' or
-                request.endpoint in ['admin.chat', 'professional.chat', 'main.report_form', 'main.index', 'admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history', 'admin.add_professional', 'admin.professional_history', 'admin.professional_analytics']
+                request.endpoint in ['admin.chat', 'professional.chat', 'main.report_form', 'main.index', 'admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history', 'admin.add_professional', 'admin.professional_history', 'admin.professional_analytics', 'main.report_bug']
             )) %}
             <button class="top-bar-btn" id="mobile-topbar-back-btn" onclick="handleTopbarBack()">
                 <i class="bi bi-chevron-left"></i> Back
@@ -83,7 +90,7 @@
                 <i class="bi bi-moon-fill" id="mobileThemeToggleIcon"></i>
             </button>
 
-            {% if session.get('user_id') or session.get('professional_id') %}
+            {% if (session.get('user_id') or session.get('professional_id')) and request.endpoint != 'main.report_bug' %}
 
             <!-- Admin Notifications Bell -->
             {% if session.get('is_admin') %}
@@ -179,15 +186,37 @@
                 <span>Home</span>
             </a>
             {% if not (request.endpoint and request.endpoint.endswith('.login')) %}
-            <a href="{{ url_for('main.report_form') }}" class="bottom-nav-item {% if request.endpoint == 'main.report_form' %}active{% endif %}">
-                <i class="bi bi-plus-circle"></i>
-                <span>Report</span>
+            <a href="{{ url_for('main.report_bug') }}" class="bottom-nav-item {% if request.endpoint == 'main.report_bug' %}active{% endif %}">
+                <i class="bi bi-bug"></i>
+                <span>Report Bug</span>
             </a>
             {% endif %}
+            {% if session.get('user_id') or session.get('professional_id') %}
+            <!-- Student/User Profile Dropup -->
+            <button class="bottom-nav-item border-0 bg-transparent dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    data-bs-auto-close="true"
+                    aria-expanded="false"
+                    style="padding: 0; margin: 0; outline: none; box-shadow: none; height: 100%; font-family: inherit; line-height: inherit;">
+                <div id="mobileNavAvatarBottom" style="width:22px;height:22px;border-radius:50%;background:var(--mitwpu-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;margin-bottom:2px;">
+                    <span id="mobileAvatarInitialsBottom">{{ display_initials }}</span>
+                    <img class="d-none w-100 h-100 object-fit-cover rounded-circle" id="mobileAvatarImgBottom" src="" alt="Profile" loading="lazy">
+                </div>
+                <span>Profile</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mb-2" style="z-index: 1060; min-width: 200px;">
+                <li class="px-3 py-3 border-bottom">
+                    <div class="fw-bold" id="mobileProfileNameBottom">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
+                    <div class="text-muted small" id="mobileProfileEmailBottom">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
+                </li>
+                <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+            </ul>
+            {% else %}
             <a href="{{ url_for('auth.login') }}" class="bottom-nav-item {% if request.endpoint == 'auth.login' %}active{% endif %}">
                 <i class="bi bi-box-arrow-in-right"></i>
                 <span>Login</span>
             </a>
+            {% endif %}
         {% endif %}
     </nav>
 
@@ -557,7 +586,7 @@
                                 <img class="nav-avatar-img d-none w-100 h-100 object-fit-cover rounded-circle" id="navAvatarImg" src="" alt="Profile" loading="lazy" decoding="async">
                             </div>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2">
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2" style="max-height: 80vh; overflow-y: auto;">
                             <li class="px-3 py-3 border-bottom">
                                 <div class="fw-bold" id="profileName">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
                                 <div class="text-muted small" id="profileEmail">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
@@ -596,13 +625,6 @@
         request.endpoint in ['admin.chat', 'professional.chat']
     )) %}
     <footer class="mt-auto py-4 border-top" style="border-color: var(--border-color, #333) !important; background-color: var(--bg-main, #121212);">
-        <div class="container-fluid d-flex flex-column flex-sm-row justify-content-between align-items-center text-muted small px-4">
-            <div class="mb-2 mb-sm-0">&copy; <script>document.write(new Date().getFullYear())</script> Fixlink. All rights reserved.</div>
-            <div>
-                <a href="{{ url_for('main.report_bug', origin=request.path) }}" class="text-decoration-none d-flex align-items-center gap-1" style="color: var(--text-secondary, #8A8A96); transition: color 0.2s;" onmouseover="this.style.color='#ffffff'" onmouseout="this.style.color='var(--text-secondary, #8A8A96)'">
-                    <i class="bi bi-bug"></i> Report Bug
-                </a>
-            </div>
         </div>
     </footer>
     {% endif %}
@@ -611,6 +633,7 @@
     <!-- Bootstrap 5 JS -->
     <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
+    {% if request.endpoint not in ['main.report_form', 'main.report_bug', 'auth.login'] %}
     <!-- GSAP for Smooth Animations -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
@@ -623,6 +646,7 @@
     <script defer src="{{ url_for('static', filename='js/skeleton_loader.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/dashboard_stats.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/carousels.js') }}"></script>
+    {% endif %}
 
     {% block extra_js %}{% endblock %}
 
@@ -724,7 +748,7 @@
 
     // Profile Avatar — load user info and wire up photo upload
     (function () {
-        if (!document.getElementById('navAvatar') && !document.getElementById('mobileNavAvatar')) return; // not logged in
+        if (!document.getElementById('navAvatar') && !document.getElementById('mobileNavAvatar') && !document.getElementById('mobileNavAvatarReport') && !document.getElementById('mobileNavAvatarBottom')) return; // not logged in
 
         function getInitials(name) {
             if (!name || typeof name !== 'string' || name.trim() === '') return '?';
@@ -738,7 +762,9 @@
             [
                 { ini: 'navAvatarInitials',        img: 'navAvatarImg' },
                 { ini: 'navAvatarInitialsDropdown', img: 'navAvatarImgDropdown' },
-                { ini: 'mobileAvatarInitials',      img: 'mobileAvatarImg' }
+                { ini: 'mobileAvatarInitials',      img: 'mobileAvatarImg' },
+                { ini: 'mobileAvatarInitialsReport', img: 'mobileAvatarImgReport' },
+                { ini: 'mobileAvatarInitialsBottom', img: 'mobileAvatarImgBottom' }
             ].forEach(({ ini, img }) => {
                 const iniEl = document.getElementById(ini);
                 const imgEl = document.getElementById(img);
@@ -756,7 +782,13 @@
             const nameEl = document.getElementById('profileName');
             const mobileNameEl = document.getElementById('mobileProfileName');
             const mobileEmailEl = document.getElementById('mobileProfileEmail');
+            const mobileNameElReport = document.getElementById('mobileProfileNameReport');
+            const mobileEmailElReport = document.getElementById('mobileProfileEmailReport');
+            const mobileNameElBottom = document.getElementById('mobileProfileNameBottom');
+            const mobileEmailElBottom = document.getElementById('mobileProfileEmailBottom');
             if (mobileNameEl) mobileNameEl.textContent = name || '—';
+            if (mobileNameElReport) mobileNameElReport.textContent = name || '—';
+            if (mobileNameElBottom) mobileNameElBottom.textContent = name || '—';
             if (document.getElementById('removePhotoBtn'))
                 document.getElementById('removePhotoBtn').classList.toggle('d-none', !photoUrl);
             if (nameEl) nameEl.textContent = name;
@@ -774,6 +806,10 @@
                 if (prnEl) prnEl.textContent = data.prn || '—';
                 const mobileEmailEl = document.getElementById('mobileProfileEmail');
                 if (mobileEmailEl) mobileEmailEl.textContent = data.email || '—';
+                const mobileEmailElReport = document.getElementById('mobileProfileEmailReport');
+                if (mobileEmailElReport) mobileEmailElReport.textContent = data.email || '—';
+                const mobileEmailElBottom = document.getElementById('mobileProfileEmailBottom');
+                if (mobileEmailElBottom) mobileEmailElBottom.textContent = data.email || '—';
                 setAvatar(data.name, data.photo_url);
             })
             .catch(() => {});

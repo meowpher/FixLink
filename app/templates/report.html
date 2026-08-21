@@ -350,8 +350,7 @@
             left: 0;
             right: 0;
             height: 64px;
-            padding: 0 14px 0 54px;
-            /* Added left padding for hamburger */
+            padding: 0 14px;
             z-index: 1050;
             background: var(--bg-main);
             border-bottom: 1px solid var(--border-color);
@@ -763,7 +762,7 @@
             <span class="topbar-sub">Smart Room Maintenance</span>
         </div>
     </div>
-    <button class="topbar-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme">
+    <button class="topbar-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme" style="background: transparent; border: none; font-size: 18px; color: var(--text-main); cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center;">
         <i class="bi bi-moon-fill" id="mobileThemeIcon"></i>
     </button>
 </div>

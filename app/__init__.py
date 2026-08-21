@@ -103,8 +103,10 @@ def create_app(config_name=None):
         else:
             app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
                 'pool_size': 5,
-                'pool_recycle': 300,
-                'pool_pre_ping': True,
+                'max_overflow': 10,
+                'pool_recycle': 120,      # Recycle connections every 2 min
+                'pool_timeout': 30,       # Wait up to 30s for a connection
+                'pool_pre_ping': True,    # Test connection health before use
             }
     
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')

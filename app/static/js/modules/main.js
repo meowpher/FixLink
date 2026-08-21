@@ -2,20 +2,25 @@
  * Map Main Module - Application entry point and coordination.
  */
 
-let api, render, ui;
+import * as api from './api.js';
+import * as render from './render.js';
+import * as ui from './ui.js';
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // Dynamically lazy-load modules
-    [api, render, ui] = await Promise.all([
-        import('./api.js'),
-        import('./render.js'),
-        import('./ui.js')
-    ]);
+document.addEventListener('DOMContentLoaded', () => {
 
-    initializeFloorMap();
-    initializeReportForm();
-    initializeValidation();
-    ui.initializeIssueDropdown();
+    // Defer heavy DOM manipulation (like SVG rendering) to avoid blocking initial paint and causing forced reflows
+    const runHeavyInit = () => {
+        initializeFloorMap();
+        initializeReportForm();
+        initializeValidation();
+        ui.initializeIssueDropdown();
+    };
+
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(runHeavyInit, { timeout: 1000 });
+    } else {
+        setTimeout(runHeavyInit, 100);
+    }
 });
 
 /**

@@ -6072,6 +6072,11 @@ select.compact-input {
         color: var(--accent-primary, #5B8FF9);
     }
 
+    /* Hide dropdown caret on bottom nav profile button */
+    #mobile-bottom-nav .bottom-nav-item.dropdown-toggle::after {
+        display: none !important;
+    }
+
     /* Body padding adjustments */
     body {
         padding-top: 70px !important; /* Top bar + some margin */

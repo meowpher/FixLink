@@ -18,8 +18,8 @@
     </button>
 </div>
 
-<div class="container-fluid d-flex justify-content-center align-items-center px-3" style="min-height: calc(100vh - 120px);">
-    <div class="card bg-card shadow-lg" style="max-width: 330px; width: 100%; border-radius: 14px;">
+<div class="container-fluid d-flex justify-content-center align-items-center px-3 py-4" style="min-height: calc(100vh - 56px);">
+    <div class="card bg-card shadow-lg" style="max-width: 330px; width: 100%; border-radius: 14px; margin: auto;">
         <div class="card-body p-2 px-3">
             <h5 class="fw-bold mb-1 text-adaptive">Report a Bug</h5>
             <p class="text-muted mb-2" style="font-size: 0.78rem;">Help us improve the platform by describing the issue you encountered.</p>
@@ -46,7 +46,7 @@
 
                 <div class="d-grid gap-1 mt-2">
                     <button type="submit" class="btn btn-primary btn-sm py-1 rounded-3 fw-semibold" style="font-size: 0.82rem;">Submit Bug Report</button>
-                    <a href="{{ request.args.get('origin', '/') }}" class="btn btn-link text-muted text-decoration-none" style="font-size: 0.72rem;">Cancel and return</a>
+                    <a href="{{ request.args.get('origin', '/') }}" class="text-muted text-decoration-none text-center mt-2 d-block" style="font-size: 0.72rem; font-weight: 500;">Cancel and return</a>
                 </div>
             </form>
         </div>
@@ -56,13 +56,14 @@
 <style>
     html, body {
         height: 100%;
-        overflow: hidden;
+        overflow-y: auto;
         margin: 0;
     }
-    /* Hide default base.html navbars */
+    /* Hide default base.html navbars and floating capsule navbar */
     #mobile-top-bar { display: none !important; }
     .navbar { display: none !important; }
     #mobile-bottom-nav { display: none !important; }
+    .fixed-top { display: none !important; }
 
     /* Custom topbar — identical to login page */
     .bug-topbar {

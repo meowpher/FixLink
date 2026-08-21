@@ -774,13 +774,15 @@ class Timetable(db.Model):
     __tablename__ = 'timetables'
     
     id = db.Column(db.Integer, primary_key=True)
-    faculty_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    faculty_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     collaborator_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'), nullable=False)
     day_of_week = db.Column(db.Integer, nullable=False) # 0=Mon, ..., 6=Sun
     start_time = db.Column(db.Time, nullable=False) # e.g., 10:00
     end_time = db.Column(db.Time, nullable=False)   # e.g., 12:00
     subject = db.Column(db.String(100), nullable=False)
+    course = db.Column(db.String(100), nullable=True)
+    division = db.Column(db.String(50), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     __table_args__ = (
@@ -802,7 +804,9 @@ class Timetable(db.Model):
             'day_of_week': self.day_of_week,
             'start_time': self.start_time.strftime('%H:%M'),
             'end_time': self.end_time.strftime('%H:%M'),
-            'subject': self.subject
+            'subject': self.subject,
+            'course': self.course,
+            'division': self.division
         }
 
 class RoomBooking(db.Model):

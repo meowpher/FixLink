@@ -30,7 +30,9 @@
                 <p class="admin-subtitle">Vyas Building Maintenance Management</p>
             </div>
             <div class="col-md-6 text-md-end">
-                <!-- Actions moved to primary navbar -->
+                <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#importTimetableModal">
+                    <i class="bi bi-file-earmark-spreadsheet me-1"></i> Import Timetable
+                </button>
             </div>
         </div>
     </div>
@@ -377,6 +379,63 @@
             </div>
             <div class="modal-footer border-0 justify-content-center pb-4">
                 <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Timetable Import Modal -->
+<div class="modal fade" id="importTimetableModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 bg-primary text-white py-3" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title d-flex align-items-center">
+                    <i class="bi bi-file-earmark-spreadsheet me-2"></i>Import Timetable (CSV)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="importTimetableForm">
+                    <div class="mb-3">
+                        <label for="csvFile" class="form-label fw-bold">Select CSV File</label>
+                        <input class="form-control" type="file" id="csvFile" accept=".csv" required>
+                        <div class="form-text">Headers should be on Row 0 or 1. Required columns: "Room No", "Time", "Mon", "Tue"...</div>
+                    </div>
+                    
+                    <div id="importResults" class="d-none mt-4">
+                        <h6 class="fw-bold border-bottom pb-2">Import Summary</h6>
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded border border-primary">
+                                    <h3 id="recordsParsed" class="text-primary mb-0">0</h3>
+                                    <small class="text-muted">Records Parsed</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded border border-danger">
+                                    <h3 id="errorCount" class="text-danger mb-0">0</h3>
+                                    <small class="text-muted">Errors</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="errorDetails" class="alert alert-danger d-none" style="max-height: 200px; overflow-y: auto;">
+                            <strong>Errors found:</strong>
+                            <ul id="errorList" class="mb-0 small"></ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 justify-content-between pb-4 px-4 bg-light" style="border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
+                <div>
+                    <button type="button" class="btn btn-outline-primary px-4 me-2" id="btnPreviewImport" style="border-radius: 10px;">
+                        <span class="spinner-border spinner-border-sm d-none me-1" role="status" aria-hidden="true"></span>
+                        <i class="bi bi-eye me-1 btn-icon"></i> Preview Dry-Run
+                    </button>
+                    <button type="button" class="btn btn-primary px-4" id="btnCommitImport" disabled style="border-radius: 10px;">
+                        <span class="spinner-border spinner-border-sm d-none me-1" role="status" aria-hidden="true"></span>
+                        <i class="bi bi-cloud-arrow-up me-1 btn-icon"></i> Confirm & Commit
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -769,6 +828,89 @@
             viewTicket(parseInt(ticketId));
         }
     });
+
+    // Timetable Import Logic
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('csvFile');
+        const btnPreview = document.getElementById('btnPreviewImport');
+        const btnCommit = document.getElementById('btnCommitImport');
+        const importResults = document.getElementById('importResults');
+        const errorDetails = document.getElementById('errorDetails');
+        const errorList = document.getElementById('errorList');
+        
+        function handleImport(isDryRun) {
+            if (!fileInput.files.length) {
+                alert('Please select a CSV file first.');
+                return;
+            }
+            
+            const btn = isDryRun ? btnPreview : btnCommit;
+            const originalHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.querySelector('.spinner-border').classList.remove('d-none');
+            btn.querySelector('.btn-icon').classList.add('d-none');
+            
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('dry_run', isDryRun ? 'true' : 'false');
+            
+            fetch('/admin/api/timetable/import', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const summary = data.data;
+                    document.getElementById('recordsParsed').textContent = summary.records_parsed;
+                    document.getElementById('errorCount').textContent = summary.error_count;
+                    
+                    importResults.classList.remove('d-none');
+                    
+                    if (summary.error_count > 0) {
+                        errorDetails.classList.remove('d-none');
+                        errorList.innerHTML = summary.errors.map(err => `<li>${err}</li>`).join('');
+                        document.getElementById('errorCount').classList.replace('text-success', 'text-danger');
+                        if (isDryRun) btnCommit.disabled = true;
+                    } else {
+                        errorDetails.classList.add('d-none');
+                        document.getElementById('errorCount').classList.replace('text-danger', 'text-success');
+                        if (isDryRun) btnCommit.disabled = false;
+                    }
+                    
+                    if (!isDryRun) {
+                        alert(summary.message || 'Import successful!');
+                        location.reload();
+                    }
+                } else {
+                    alert('Import Error: ' + (data.error || 'Unknown error occurred.'));
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('A network error occurred during import.');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.querySelector('.spinner-border').classList.add('d-none');
+                btn.querySelector('.btn-icon').classList.remove('d-none');
+            });
+        }
+        
+        if(btnPreview) btnPreview.addEventListener('click', () => handleImport(true));
+        if(btnCommit) btnCommit.addEventListener('click', () => handleImport(false));
+        
+        if(fileInput) {
+            fileInput.addEventListener('change', () => {
+                btnCommit.disabled = true;
+                importResults.classList.add('d-none');
+            });
+        }
+    });
+
 
 </script>
 {% endblock %}

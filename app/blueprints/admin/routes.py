@@ -1565,3 +1565,178 @@ def reset_professional_chat(prof_id):
     db.session.commit()
     return api_response(success=True, message="Chat history reset successfully")
 
+
+# ==================== TIMETABLE IMPORT ====================
+
+@admin_bp.route('/api/timetable/import', methods=['POST'])
+@admin_required
+@handle_api_errors
+def import_timetable():
+    """Import timetable from CSV file (Pandas processing)."""
+    import pandas as pd
+    import io
+    import re
+    from datetime import datetime, time
+    from werkzeug.utils import secure_filename
+    from ...models import Room, Timetable
+
+    if 'file' not in request.files:
+        return api_response(success=False, error="No file part", status=400)
+    
+    file = request.files['file']
+    if file.filename == '':
+        return api_response(success=False, error="No selected file", status=400)
+    
+    dry_run = request.form.get('dry_run', 'true').lower() == 'true'
+    
+    try:
+        content = file.read().decode('utf-8', errors='replace')
+        df = pd.read_csv(io.StringIO(content))
+        
+        # 1. Normalize headers
+        def has_required_cols(columns):
+            cols = [str(c).strip().lower() for c in columns]
+            has_room = any('room' in c for c in cols)
+            has_time = any('time' in c for c in cols)
+            return has_room and has_time
+            
+        if not has_required_cols(df.columns):
+            # Try first 3 rows
+            for i in range(min(3, len(df))):
+                row_vals = df.iloc[i].values
+                if has_required_cols(row_vals):
+                    df.columns = row_vals
+                    df = df.iloc[i+1:].reset_index(drop=True)
+                    break
+                    
+        df.columns = [str(col).strip().lower() for col in df.columns]
+        
+        # Find room column
+        room_col = next((col for col in df.columns if 'room' in col), None)
+        time_col = next((col for col in df.columns if 'time' in col), None)
+        
+        if not room_col or not time_col:
+            return api_response(success=False, error="CSV must contain 'Room No' and 'Time' columns", status=400)
+            
+        # 2. Forward fill room column (merged cells)
+        df[room_col] = df[room_col].ffill()
+        
+        # 3. Clean and map rooms
+        def clean_room(val):
+            if pd.isna(val): return None
+            match = re.search(r'VY\s*\d+', str(val), re.IGNORECASE)
+            return match.group().replace(' ', '').upper() if match else None
+            
+        df['clean_room'] = df[room_col].apply(clean_room)
+        
+        # Get all rooms in DB to map string to ID
+        rooms = Room.query.all()
+        room_map = {r.number.upper(): r.id for r in rooms}
+        
+        # 4. Clean time column
+        def parse_time_range(time_str):
+            if pd.isna(time_str): return None, None
+            time_str = str(time_str).upper().replace('.', ':').replace(' ', '')
+            matches = re.findall(r'(\d{1,2}:\d{2})(AM|PM)?', time_str)
+            if len(matches) >= 2:
+                try:
+                    start_str, start_am_pm = matches[0]
+                    end_str, end_am_pm = matches[1]
+                    
+                    def to_time_obj(t_str, am_pm, is_end=False):
+                        h, m = map(int, t_str.split(':'))
+                        if h < 12 and (am_pm == 'PM' or (not am_pm and ((h < 8) or is_end))):
+                            h += 12
+                        elif h == 12 and am_pm == 'AM':
+                            h = 0
+                        return time(h, m)
+                    
+                    start_t = to_time_obj(start_str, start_am_pm, False)
+                    end_t = to_time_obj(end_str, end_am_pm, True)
+                    
+                    if end_t <= start_t and end_t.hour < 12:
+                        end_t = time(end_t.hour + 12, end_t.minute)
+                        
+                    return start_t, end_t
+                except Exception:
+                    return None, None
+            return None, None
+            
+        # 5. Melt the dataframe to extract days
+        days = ['mon', 'tue', 'wed', 'thu', 'fri']
+        available_days = [day for day in days if day in df.columns]
+        day_map = {'mon': 0, 'tue': 1, 'wed': 2, 'thu': 3, 'fri': 4}
+        
+        results = []
+        errors = []
+        records_to_insert = []
+        
+        for index, row in df.iterrows():
+            room_num = row.get('clean_room')
+            if not room_num or room_num not in room_map:
+                if room_num:
+                    errors.append(f"Row {index+2}: Room '{room_num}' not found in database.")
+                continue
+                
+            room_id = room_map[room_num]
+            
+            start_t, end_t = parse_time_range(row[time_col])
+            if not start_t or not end_t:
+                continue
+                
+            for day_name in available_days:
+                cell_val = row.get(day_name)
+                if pd.isna(cell_val):
+                    continue
+                    
+                cell_val = str(cell_val).strip()
+                if not cell_val:
+                    continue
+                    
+                # Parse Course, Division, Subject
+                parts = [p.strip() for p in cell_val.split('\n') if p.strip()]
+                if not parts:
+                    continue
+                    
+                course = parts[0]
+                division = None
+                subject = "Scheduled Class"
+                
+                div_match = re.search(r'DIV[- ]?([A-Z])', course, re.IGNORECASE)
+                if div_match:
+                    division = div_match.group(0).upper()
+                    
+                if len(parts) > 1:
+                    subject = parts[1]
+                
+                tt = Timetable(
+                    room_id=room_id,
+                    day_of_week=day_map[day_name],
+                    start_time=start_t,
+                    end_time=end_t,
+                    subject=subject[:100],
+                    course=course[:100],
+                    division=division[:50] if division else None
+                )
+                records_to_insert.append(tt)
+                
+        summary = {
+            'records_parsed': len(records_to_insert),
+            'errors': errors[:50],  # Return max 50 errors
+            'error_count': len(errors)
+        }
+        
+        if dry_run:
+            return api_response(success=True, data=summary)
+            
+        try:
+            db.session.bulk_save_objects(records_to_insert)
+            db.session.commit()
+            summary['message'] = "Import completed successfully."
+            return api_response(success=True, data=summary)
+        except Exception as e:
+            db.session.rollback()
+            return api_response(success=False, error=f"Database error during commit: {str(e)}", status=500)
+            
+    except Exception as e:
+        return api_response(success=False, error=f"Error processing CSV: {str(e)}", status=500)

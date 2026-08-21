@@ -140,9 +140,73 @@
         border: 1px solid var(--border-color, #e5e5e5) !important;
     }
     .text-adaptive { color: var(--text-main, #111827) !important; }
-    .form-control { background-color: var(--bg-body, #f9fafb); color: var(--text-main, #111827); border-color: var(--border-color, #d1d5db); }
-    .form-control:focus { background-color: var(--bg-body, #f9fafb); color: var(--text-main, #111827); border-color: var(--mitwpu-blue, #0d6efd); box-shadow: 0 0 0 0.25rem rgba(13,110,253,0.25); }
-    .form-control::placeholder { color: var(--text-muted, #9ca3af); }
+    /* Form controls styling */
+    .form-control {
+        border-radius: 8px !important;
+        background-color: var(--bg-body, #f9fafb) !important;
+        color: var(--text-main, #111827) !important;
+        border: 1px solid var(--border-color, #d1d5db) !important;
+        transition: all 0.2s ease-in-out;
+        font-size: 0.82rem !important;
+        padding: 0.4rem 0.6rem !important;
+    }
+    .form-control:focus {
+        background-color: var(--bg-body, #f9fafb) !important;
+        border-color: var(--mitwpu-blue, #0d6efd) !important;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
+    }
+    .form-control::placeholder {
+        color: var(--text-muted, #9ca3af) !important;
+        opacity: 0.8;
+    }
+
+    /* Dark mode form controls styling */
+    body[data-theme="dark"] .form-control {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+    }
+    body[data-theme="dark"] .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
+    }
+    body[data-theme="dark"] .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    /* File selector button styling */
+    .form-control[type="file"] {
+        padding: 0 !important;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+    }
+    .form-control::file-selector-button {
+        background-color: #f3f4f6 !important;
+        color: #374151 !important;
+        border: none !important;
+        border-inline-end: 1px solid var(--border-color, #d1d5db) !important;
+        padding: 0.4rem 0.75rem !important;
+        margin-right: 0.75rem !important;
+        font-weight: 500;
+        font-size: 0.78rem !important;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+    .form-control::file-selector-button:hover {
+        background-color: #e5e7eb !important;
+    }
+
+    /* Dark mode file selector button styling */
+    body[data-theme="dark"] .form-control::file-selector-button {
+        background-color: rgba(255, 255, 255, 0.06) !important;
+        color: rgba(255, 255, 255, 0.8) !important;
+        border-inline-end: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    body[data-theme="dark"] .form-control::file-selector-button:hover {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+    }
 </style>
 
 <script>

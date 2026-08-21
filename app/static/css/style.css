@@ -6510,3 +6510,10 @@ select.compact-input {
     color: var(--void) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
 }
+
+/* Responsive width utilities */
+@media (min-width: 768px) {
+    .w-md-auto {
+        width: auto !important;
+    }
+}

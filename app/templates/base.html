@@ -10,14 +10,34 @@
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
     <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=6.6" as="style">
 
-    <!-- Bootstrap 5 CSS (self-hosted) -->
-    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Critical inline CSS: box-model resets so page doesn't FOUC while Bootstrap loads async -->
+    <style>
+        *,::after,::before{box-sizing:border-box}
+        html{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:1rem;line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4}
+        body{margin:0;line-height:inherit}
+        img,svg{vertical-align:middle;max-width:100%}
+        button,input,select,textarea{font-family:inherit;font-size:inherit;line-height:inherit;margin:0}
+        a{color:inherit;text-decoration:underline}
+        h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}
+        p{margin-top:0;margin-bottom:1rem}
+        .d-none{display:none!important}
+        .d-flex{display:flex!important}
+        .d-block{display:block!important}
+        .d-lg-flex{display:none}
+        @media(min-width:992px){.d-lg-flex{display:flex!important}.d-none{display:none!important}}
+        .fixed-top{position:fixed;top:0;right:0;left:0;z-index:1030}
+        .container-fluid{width:100%;padding-right:.75rem;padding-left:.75rem;margin-right:auto;margin-left:auto}
+    </style>
+
+    <!-- Bootstrap 5 CSS (deferred, non-render-blocking) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"></noscript>
 
     <!-- Bootstrap Icons (self-hosted, deferred as non-critical) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}"></noscript>
 
-    <!-- Custom CSS -->
+    <!-- Custom CSS (critical, load synchronously) -->
     <link href="{{ url_for('static', filename='css/style.min.css') }}?v=6.6" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 

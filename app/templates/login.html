@@ -2,6 +2,8 @@
 {% block title %}{% if show_phone_hint %}Professional Login - MIT-WPU FixLink{% else %}Login - MIT-WPU FixLink{% endif %}{% endblock %}
 
 {% block extra_css %}
+<!-- Preload LCP image (logo) -->
+<link rel="preload" href="{{ url_for('static', filename='images/logo-lm.webp') }}" as="image" fetchpriority="high">
 <style>
     /* Auth Page Navbar Customizations */
     .vyas-navbar {
@@ -467,7 +469,7 @@
 <!-- Mobile-only custom top bar -->
 <div class="mobile-topbar" style="display:none;">
     <div class="topbar-left">
-        <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo">
+        <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo" loading="eager" fetchpriority="high" width="120" height="34">
         <div class="topbar-divider"></div>
         <div class="topbar-text">
             <span class="topbar-brand">Fix Link</span>
@@ -481,7 +483,7 @@
 
 
 <div class="glass-login-card {% if show_phone_hint %}pro-card{% else %}user-card{% endif %}">
-    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
+    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo" loading="eager" fetchpriority="high" width="200" height="57">
     <h3>{% if show_phone_hint %}Technician Portal{% else %}Welcome Back{% endif %}</h3>
     <p class="subtext">{% if show_phone_hint %}Sign in to access your jobs{% else %}Sign in to your account{% endif %}</p>
     

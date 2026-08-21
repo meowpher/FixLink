@@ -1955,23 +1955,33 @@ body {
 
 /* Professional Category Badges */
 .badge-it, .badge-it-technician {
-    background-color: #4e73df;
-    color: white;
+    background-color: #4e73df !important;
+    color: white !important;
+    border-color: transparent !important;
 }
 
 .badge-electrician {
-    background-color: #f6c23e;
-    color: #3a3b45;
+    background-color: #f6c23e !important;
+    color: #3a3b45 !important;
+    border-color: transparent !important;
 }
 
 .badge-plumber {
-    background-color: #36b9cc;
-    color: white;
+    background-color: #36b9cc !important;
+    color: white !important;
+    border-color: transparent !important;
 }
 
 .badge-carpenter {
-    background-color: #e74a3b;
-    color: white;
+    background-color: #e74a3b !important;
+    color: white !important;
+    border-color: transparent !important;
+}
+
+.badge-other, .badge-others {
+    background-color: #6c757d !important;
+    color: white !important;
+    border-color: transparent !important;
 }
 
 .prof-id {
@@ -2640,23 +2650,33 @@ body[data-theme="dark"] .stat-label {
 }
 
 [data-theme="dark"] .badge-it, [data-theme="dark"] .badge-it-technician {
-    background-color: rgba(78, 115, 223, 0.2);
-    color: #a5b4fc;
+    background-color: rgba(78, 115, 223, 0.2) !important;
+    color: #a5b4fc !important;
+    border: 1px solid rgba(78, 115, 223, 0.35) !important;
 }
 
 [data-theme="dark"] .badge-electrician {
-    background-color: rgba(246, 194, 62, 0.2);
-    color: #fde68a;
+    background-color: rgba(246, 194, 62, 0.2) !important;
+    color: #fde68a !important;
+    border: 1px solid rgba(246, 194, 62, 0.35) !important;
 }
 
 [data-theme="dark"] .badge-plumber {
-    background-color: rgba(54, 185, 204, 0.2);
-    color: #67e8f9;
+    background-color: rgba(54, 185, 204, 0.2) !important;
+    color: #67e8f9 !important;
+    border: 1px solid rgba(54, 185, 204, 0.35) !important;
 }
 
 [data-theme="dark"] .badge-carpenter {
-    background-color: rgba(231, 74, 59, 0.2);
-    color: #fca5a5;
+    background-color: rgba(231, 74, 59, 0.2) !important;
+    color: #fca5a5 !important;
+    border: 1px solid rgba(231, 74, 59, 0.35) !important;
+}
+
+[data-theme="dark"] .badge-other, [data-theme="dark"] .badge-others {
+    background-color: rgba(108, 117, 125, 0.2) !important;
+    color: #d1d5db !important;
+    border: 1px solid rgba(108, 117, 125, 0.35) !important;
 }
 
 

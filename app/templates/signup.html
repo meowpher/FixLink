@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Sign Up - MIT-WPU FixLink{% endblock %}
+{% block meta_description %}Create an account to report smart room maintenance issues at MIT-WPU. Join FixLink to track resolutions and manage your requests.{% endblock %}
+{% block meta_robots %}noindex, nofollow{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -102,7 +104,7 @@
             padding: 24px 20px 28px !important;
         }
         .glass-signup-card .form-logo { max-width: 120px !important; margin-bottom: 14px !important; }
-        .glass-signup-card h3 { font-size: 20px !important; margin-bottom: 4px !important; }
+        .glass-signup-card .login-heading { font-size: 20px !important; margin-bottom: 4px !important; }
         .glass-signup-card .subtext { font-size: 12px !important; margin-bottom: 16px !important; }
         .glass-signup-card .form-control { height: 42px !important; font-size: 13px !important; }
         .glass-signup-card .form-label { font-size: 12px !important; }
@@ -144,7 +146,7 @@
         margin: 0 auto 24px auto;
         display: block;
     }
-    .glass-signup-card h3 {
+    .glass-signup-card .login-heading {
         font-size: 26px;
         font-weight: 700;
         color: #212529;
@@ -221,7 +223,7 @@
         -webkit-backdrop-filter: blur(24px) saturate(140%);
         box-shadow: 0 0 0 1px rgba(255,255,255,0.05);
     }
-    body[data-theme="dark"] .glass-signup-card h3 { color: #ffffff; }
+    body[data-theme="dark"] .glass-signup-card .login-heading { color: #ffffff; }
     body[data-theme="dark"] .glass-signup-card .subtext { color: rgba(255,255,255,0.4); }
     body[data-theme="dark"] .glass-signup-card .form-label { color: rgba(255,255,255,0.6); }
     body[data-theme="dark"] .glass-signup-card .form-control {
@@ -258,7 +260,7 @@
 <!-- Mobile-only custom top bar -->
 <div class="mobile-topbar" style="display:none;">
     <div class="topbar-left">
-        <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo">
+        <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="topbar-logo mitwpu-logo" loading="eager" fetchpriority="high" width="120" height="34">
         <div class="topbar-divider"></div>
         <div class="topbar-text">
             <span class="topbar-brand">Fix Link</span>
@@ -266,16 +268,16 @@
         </div>
     </div>
     <button class="topbar-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme">
-        <i class="bi bi-moon-fill" id="mobileThemeIcon"></i>
+        <i class="bi bi-moon-fill" id="mobileThemeIcon" aria-hidden="true"></i>
     </button>
 </div>
 
 <div class="glass-signup-card">
-    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo">
-    <h3>Student Sign Up</h3>
+    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo" loading="eager" fetchpriority="high" width="200" height="57">
+    <h1 class="login-heading">Student Sign Up</h1>
     <p class="subtext">Create an account to report issues</p>
 
-    <form method="POST" action="{{ url_for('auth.signup') }}">
+    <form method="POST" action="{{ url_for('auth.signup') }}" aria-label="Sign up form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="mb-3">
             <label class="form-label">Full Name</label>

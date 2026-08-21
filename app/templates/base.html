@@ -7,7 +7,7 @@
     <title>{% block title %}MIT-WPU Vyas Tracker{% endblock %}</title>
     <meta name="description" content="{% block meta_description %}MIT-WPU FixLink — Smart Room Maintenance Tracker for MIT World Peace University, Pune. Report issues, track resolutions, and manage maintenance requests.{% endblock %}">
     <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
-    <link rel="canonical" href="{{ request.url }}">
+    <link rel="canonical" href="{{ request.base_url }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FLOGOCLR.webp') }}">
     <!-- Preload Critical CSS (self-hosted for zero CDN latency) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
@@ -95,14 +95,14 @@
             </button>
             {% endif %}
             <div class="top-bar-brand">
-                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="Logo">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU Logo" width="100" height="28" loading="eager">
                 <span>FixLink</span>
             </div>
         </div>
         <div class="top-bar-actions">
             <!-- Theme Toggle -->
             <button id="mobileThemeToggleBtn" class="top-bar-icon-btn" aria-label="Toggle theme">
-                <i class="bi bi-moon-fill" id="mobileThemeToggleIcon"></i>
+                <i class="bi bi-moon-fill" id="mobileThemeToggleIcon" aria-hidden="true"></i>
             </button>
 
             {% if (session.get('user_id') or session.get('professional_id')) and request.endpoint != 'main.report_bug' %}
@@ -111,8 +111,8 @@
             {% if session.get('is_admin') %}
             <div class="dropdown">
                 <button class="top-bar-icon-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                    <i class="bi bi-bell-fill"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="mobileNotifBadge" style="font-size:0.55rem;"></span>
+                    <i class="bi bi-bell-fill" aria-hidden="true"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="mobileNotifBadge" style="font-size:0.55rem;" aria-label="Unread notifications"></span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0" style="width:300px;">
                     <li class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
@@ -126,7 +126,7 @@
 
             <!-- Avatar / Profile Dropdown -->
             <div class="dropdown">
-                <a href="#" class="top-bar-icon-btn p-0" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a href="#" class="top-bar-icon-btn p-0" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open profile menu">
                     <div id="mobileNavAvatar" style="width:32px;height:32px;border-radius:50%;background:var(--mitwpu-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;">
                         <span id="mobileAvatarInitials">{{ display_initials }}</span>
                         <img class="d-none w-100 h-100 object-fit-cover rounded-circle" id="mobileAvatarImg" src="" alt="Profile" loading="lazy">
@@ -144,13 +144,13 @@
             {% else %}
             <!-- Guest Login Link -->
             <a href="{{ url_for('auth.login') }}" class="top-bar-icon-btn" aria-label="Login">
-                <i class="bi bi-box-arrow-in-right"></i>
+                <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
             </a>
             {% endif %}
         </div>
     </div>
 
-    <nav id="mobile-bottom-nav" class="d-md-none">
+    <nav id="mobile-bottom-nav" class="d-md-none" aria-label="Mobile navigation">
         {% if session.get('is_admin') %}
             <a href="{{ url_for('admin.dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
                 <i class="bi bi-speedometer2"></i>
@@ -276,8 +276,8 @@
     {% endif %}
     
     {% if session.get('is_admin') and request.endpoint != 'main.report_form' and request.endpoint != 'admin.add_professional' and request.endpoint != 'admin.professional_history' and request.endpoint != 'admin.professional_analytics' and request.endpoint != 'admin.professionals' %}
-    <a href="{{ url_for('main.report_form') }}" id="mobile-fab" class="d-md-none">
-        <i class="bi bi-plus"></i>
+    <a href="{{ url_for('main.report_form') }}" id="mobile-fab" class="d-md-none" aria-label="Report a new issue">
+        <i class="bi bi-plus" aria-hidden="true"></i>
     </a>
     {% endif %}
 
@@ -573,16 +573,16 @@
                     <a class="nav-link d-flex align-items-center me-2 text-decoration-none text-muted" href="{{ url_for('auth.login') }}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
                 {% endif %}
                 
-                <button id="themeToggleBtn" class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 35px; height: 35px; border: 1px solid var(--border-color);">
-                    <i class="bi bi-moon-fill" id="themeToggleIcon"></i>
+                <button id="themeToggleBtn" class="btn btn-sm btn-light rounded-circle d-flex align-items-center justify-content-center me-2 shadow-sm" style="width: 35px; height: 35px; border: 1px solid var(--border-color);" aria-label="Toggle dark mode">
+                    <i class="bi bi-moon-fill" id="themeToggleIcon" aria-hidden="true"></i>
                 </button>
 
                 {% if session.get('user_id') or session.get('professional_id') %}
                     <!-- Notifications -->
                     {% if session.get('is_admin') %}
-                        <a class="nav-link position-relative d-flex align-items-center justify-content-center me-2" href="#" role="button" data-bs-toggle="dropdown" id="notificationsDropdown">
-                            <i class="bi bi-bell-fill fs-5 text-muted"></i>
-                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge" style="font-size: 0.6rem;">0</span>
+                        <a class="nav-link position-relative d-flex align-items-center justify-content-center me-2" href="#" role="button" data-bs-toggle="dropdown" id="notificationsDropdown" aria-label="Notifications" aria-expanded="false">
+                            <i class="bi bi-bell-fill fs-5 text-muted" aria-hidden="true"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge" style="font-size: 0.6rem;" aria-label="Unread notifications">0</span>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0" aria-labelledby="notificationsDropdown" style="width: 320px;">
                             <li class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom">
@@ -595,7 +595,7 @@
 
                     <!-- Profile Dropdown -->
                     <div class="dropdown">
-                        <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown">
+                        <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" aria-label="Open profile menu" aria-expanded="false">
                             <div class="nav-avatar m-0" id="navAvatar" style="width: 35px; height: 35px; border-radius: 50%; background: var(--mitwpu-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600;">
                                 <span class="nav-avatar-initials" id="navAvatarInitials">{{ display_initials }}</span>
                                 <img class="nav-avatar-img d-none w-100 h-100 object-fit-cover rounded-circle" id="navAvatarImg" src="" alt="Profile" loading="lazy" decoding="async">

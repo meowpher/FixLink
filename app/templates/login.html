@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{% if show_phone_hint %}Professional Login - MIT-WPU FixLink{% else %}Login - MIT-WPU FixLink{% endif %}{% endblock %}
 {% block meta_description %}{% if show_phone_hint %}Technician login portal for MIT-WPU FixLink. Access your assigned maintenance jobs and task history.{% else %}Sign in to MIT-WPU FixLink to report and track smart room maintenance issues at MIT World Peace University.{% endif %}{% endblock %}
-{% block meta_robots %}noindex, nofollow{% endblock %}
+
 
 {% block extra_css %}
 <!-- Preload LCP image (logo) -->
@@ -479,7 +479,7 @@
         </div>
     </div>
     <button class="topbar-theme-btn" id="mobileThemeToggle" aria-label="Toggle theme">
-        <i class="bi bi-moon-fill" id="mobileThemeIcon"></i>
+        <i class="bi bi-moon-fill" id="mobileThemeIcon" aria-hidden="true"></i>
     </button>
 </div>
 

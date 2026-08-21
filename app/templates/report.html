@@ -3,6 +3,8 @@
 {% block title %}Report Issue - MIT-WPU Vyas Tracker{% endblock %}
 
 {% block extra_css %}
+<!-- Preload LCP image (logo) -->
+<link rel="preload" href="{{ url_for('static', filename='images/logo-lm.webp') }}" as="image" fetchpriority="high">
 <style>
     /* ── Report Page Glassmorphism ── */
     /* ── Background Orbs ── */
@@ -755,7 +757,7 @@
 <div class="mobile-topbar" style="display:none;">
     <div class="topbar-left">
         <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo"
-             class="topbar-logo mitwpu-logo" loading="lazy">
+             class="topbar-logo mitwpu-logo" loading="eager" fetchpriority="high" width="120" height="34">
         <div class="topbar-divider"></div>
         <div class="topbar-text">
             <span class="topbar-brand">Fix Link</span>

@@ -19,34 +19,53 @@
 </div>
 
 <div class="container-fluid d-flex justify-content-center align-items-center px-3 py-4" style="min-height: calc(100vh - 56px);">
-    <div class="card bg-card shadow-lg" style="max-width: 330px; width: 100%; border-radius: 14px; margin: auto;">
-        <div class="card-body p-2 px-3">
-            <h5 class="fw-bold mb-1 text-adaptive">Report a Bug</h5>
-            <p class="text-muted mb-2" style="font-size: 0.78rem;">Help us improve the platform by describing the issue you encountered.</p>
+    <div class="card bg-card shadow-lg" style="max-width: 380px; width: 100%; border-radius: 20px; margin: auto; border: none;">
+        <div class="card-body p-3 px-4">
+            <h3 class="fw-bold mb-1">Report a Bug</h3>
+            <p class="text-muted mb-3">Help us improve the platform by describing the issue you encountered.</p>
 
             <form method="POST" enctype="multipart/form-data" action="{{ url_for('main.report_bug') }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="origin" value="{{ request.args.get('origin', '/') }}">
                 
-                <div class="mb-2">
-                    <label for="title" class="form-label text-muted fw-semibold mb-1" style="font-size: 0.78rem;">Issue Title</label>
-                    <input type="text" class="form-control form-control-sm" id="title" name="title" placeholder="e.g., App crashes when clicking submit" required style="font-size: 0.82rem;">
+                <div class="form-group-block mb-3">
+                    <label for="title" class="mb-1">Issue Title</label>
+                    <input type="text" class="form-control" id="title" name="title" placeholder="e.g., App crashes when clicking submit" required>
                 </div>
 
-                <div class="mb-2">
-                    <label for="description" class="form-label text-muted fw-semibold mb-1" style="font-size: 0.78rem;">Steps to Reproduce</label>
-                    <textarea class="form-control form-control-sm" id="description" name="description" rows="2" placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..." required style="font-size: 0.82rem;"></textarea>
+                <div class="form-group-block mb-3">
+                    <label for="description" class="mb-1">Steps to Reproduce</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="1. Go to...&#10;2. Click on...&#10;3. See error..." required></textarea>
                 </div>
 
-                <div class="mb-2">
-                    <label for="file" class="form-label text-muted fw-semibold mb-1" style="font-size: 0.78rem;">Attach Screenshot or Video (Optional)</label>
-                    <input class="form-control form-control-sm" type="file" id="file" name="file" accept="image/*,video/mp4" style="font-size: 0.82rem;">
-                    <div class="form-text text-muted" style="font-size: 0.72rem;">PNG, JPG, GIF, MP4 up to 10MB</div>
+                <div class="form-group-block mb-3">
+                    <label class="mb-2">Attach Screenshot or Video (Optional)</label>
+                    <input type="file" id="file" name="file" accept="image/*,video/mp4" style="display: none;">
+                    
+                    <div class="attachment-row d-flex gap-2 align-items-center overflow-x-auto py-1">
+                        <button type="button" class="attachment-box" id="addScreenshotBtn">
+                            <i class="bi bi-plus fs-4"></i>
+                            <span>Add Screenshot</span>
+                        </button>
+                        <button type="button" class="attachment-box" id="addVideoBtn">
+                            <i class="bi bi-plus fs-4"></i>
+                            <span>Add Video</span>
+                        </button>
+                        
+                        <!-- Preview Box -->
+                        <div class="preview-box d-none" id="filePreviewBox">
+                            <img src="" alt="Preview" class="preview-img d-none" id="previewImg">
+                            <video class="preview-video d-none" id="previewVideo" muted loop autoplay></video>
+                            <button type="button" class="remove-preview-btn" id="removePreviewBtn" aria-label="Remove file">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="d-grid gap-1 mt-2">
-                    <button type="submit" class="btn btn-primary btn-sm py-1 rounded-3 fw-semibold" style="font-size: 0.82rem;">Submit Bug Report</button>
-                    <a href="{{ request.args.get('origin', '/') }}" class="text-muted text-decoration-none text-center mt-2 d-block" style="font-size: 0.72rem; font-weight: 500;">Cancel and return</a>
+                <div class="d-grid gap-2 mt-3 pt-1">
+                    <button type="submit" class="btn btn-submit-premium">Submit Bug Report</button>
+                    <a href="{{ request.args.get('origin', '/') }}" class="btn-cancel-link text-center mt-2 d-block">Cancel and return</a>
                 </div>
             </form>
         </div>
@@ -135,77 +154,219 @@
     /* Push content below topbar */
     .main-content { padding-top: 56px !important; }
 
+    /* Main container styling */
     .bg-card {
         background-color: var(--bg-card, #ffffff) !important;
         border: 1px solid var(--border-color, #e5e5e5) !important;
     }
-    .text-adaptive { color: var(--text-main, #111827) !important; }
-    /* Form controls styling */
-    .form-control {
-        border-radius: 8px !important;
-        background-color: var(--bg-body, #f9fafb) !important;
-        color: var(--text-main, #111827) !important;
-        border: 1px solid var(--border-color, #d1d5db) !important;
-        transition: all 0.2s ease-in-out;
-        font-size: 0.82rem !important;
-        padding: 0.4rem 0.6rem !important;
+    body[data-theme="dark"] .bg-card {
+        background-color: #18181b !important;
+        border: 1px solid #27272a !important;
     }
-    .form-control:focus {
-        background-color: var(--bg-body, #f9fafb) !important;
+    body[data-theme="dark"] {
+        background-color: #09090b !important;
+    }
+
+    /* Headings */
+    .card-body h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: var(--text-main, #111827);
+    }
+    body[data-theme="dark"] .card-body h3 {
+        color: #ffffff;
+    }
+    .card-body .text-muted {
+        font-size: 0.78rem;
+        color: var(--text-muted, #71717a) !important;
+    }
+    body[data-theme="dark"] .card-body .text-muted {
+        color: #a1a1aa !important;
+    }
+
+    /* Block styling */
+    .form-group-block {
+        background-color: #f4f4f5;
+        border-radius: 12px;
+        padding: 12px;
+        border: 1px solid #e4e4e7;
+    }
+    body[data-theme="dark"] .form-group-block {
+        background-color: #202023;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .form-group-block label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-main, #111827);
+        margin-bottom: 8px;
+        display: block;
+    }
+    body[data-theme="dark"] .form-group-block label {
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    /* Premium inputs nested inside blocks */
+    .form-group-block .form-control {
+        border-radius: 8px !important;
+        background-color: #ffffff !important;
+        color: #111827 !important;
+        border: 1.5px solid #d4d4d8 !important;
+        padding: 8px 12px !important;
+        font-size: 0.82rem !important;
+        box-shadow: none !important;
+        transition: all 0.2s ease-in-out;
+    }
+    body[data-theme="dark"] .form-group-block .form-control {
+        background-color: #09090b !important;
+        color: #ffffff !important;
+        border: 1.5px solid #3f3f46 !important;
+    }
+    .form-group-block .form-control:focus {
         border-color: var(--mitwpu-blue, #0d6efd) !important;
         box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15) !important;
     }
-    .form-control::placeholder {
-        color: var(--text-muted, #9ca3af) !important;
-        opacity: 0.8;
-    }
-
-    /* Dark mode form controls styling */
-    body[data-theme="dark"] .form-control {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        color: #ffffff !important;
-    }
-    body[data-theme="dark"] .form-control:focus {
-        background-color: rgba(255, 255, 255, 0.08) !important;
-        border-color: rgba(255, 255, 255, 0.2) !important;
+    body[data-theme="dark"] .form-group-block .form-control:focus {
+        border-color: rgba(255, 255, 255, 0.25) !important;
         box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08) !important;
     }
-    body[data-theme="dark"] .form-control::placeholder {
-        color: rgba(255, 255, 255, 0.3) !important;
+
+    /* Custom attachments UI */
+    .attachment-row {
+        scrollbar-width: none;
+    }
+    .attachment-row::-webkit-scrollbar {
+        display: none;
+    }
+    .attachment-box {
+        width: 70px;
+        height: 70px;
+        border-radius: 10px;
+        border: 1px dashed #d4d4d8;
+        background-color: #ffffff;
+        color: #71717a;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 4px;
+        transition: all 0.2s ease;
+    }
+    body[data-theme="dark"] .attachment-box {
+        border: 1px dashed #3f3f46;
+        background-color: #09090b;
+        color: #a1a1aa;
+    }
+    .attachment-box:hover {
+        background-color: #f4f4f5;
+        border-color: #a1a1aa;
+    }
+    body[data-theme="dark"] .attachment-box:hover {
+        background-color: #18181b;
+        border-color: #71717a;
+    }
+    .attachment-box span {
+        font-size: 0.62rem;
+        line-height: 1.2;
+        text-align: center;
+        font-weight: 500;
+        margin-top: 2px;
+    }
+    .attachment-box i {
+        line-height: 1;
+        margin-bottom: 2px;
     }
 
-    /* File selector button styling */
-    .form-control[type="file"] {
-        padding: 0 !important;
+    /* Preview box styling */
+    .preview-box {
+        width: 70px;
+        height: 70px;
+        border-radius: 10px;
+        position: relative;
         overflow: hidden;
+        border: 1px solid #d4d4d8;
+        background-color: #000000;
         display: flex;
         align-items: center;
+        justify-content: center;
     }
-    .form-control::file-selector-button {
-        background-color: #f3f4f6 !important;
-        color: #374151 !important;
-        border: none !important;
-        border-inline-end: 1px solid var(--border-color, #d1d5db) !important;
-        padding: 0.4rem 0.75rem !important;
-        margin-right: 0.75rem !important;
-        font-weight: 500;
-        font-size: 0.78rem !important;
+    body[data-theme="dark"] .preview-box {
+        border: 1px solid #3f3f46;
+    }
+    .preview-img, .preview-video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .remove-preview-btn {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        background: transparent;
+        border: none;
+        color: #ef4444;
+        font-size: 0.9rem;
         cursor: pointer;
-        transition: background-color 0.2s ease;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+        transition: transform 0.2s ease;
     }
-    .form-control::file-selector-button:hover {
-        background-color: #e5e7eb !important;
+    .remove-preview-btn:hover {
+        transform: scale(1.1);
+        color: #f87171;
     }
 
-    /* Dark mode file selector button styling */
-    body[data-theme="dark"] .form-control::file-selector-button {
-        background-color: rgba(255, 255, 255, 0.06) !important;
-        color: rgba(255, 255, 255, 0.8) !important;
-        border-inline-end: 1px solid rgba(255, 255, 255, 0.08) !important;
+    /* Submit Button styling */
+    .btn-submit-premium {
+        border-radius: 12px !important;
+        background-color: #0f172a !important;
+        border: 1px solid #0f172a !important;
+        color: #ffffff !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        padding: 10px !important;
+        transition: all 0.2s ease-in-out;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
     }
-    body[data-theme="dark"] .form-control::file-selector-button:hover {
-        background-color: rgba(255, 255, 255, 0.1) !important;
+    .btn-submit-premium:hover {
+        background-color: #1e293b !important;
+        border-color: #1e293b !important;
+        transform: translateY(-1px);
+    }
+    body[data-theme="dark"] .btn-submit-premium {
+        background-color: #cbd5e1 !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05) !important;
+    }
+    body[data-theme="dark"] .btn-submit-premium:hover {
+        background-color: #b8c1ec !important;
+        border-color: #b8c1ec !important;
+        transform: translateY(-1px);
+    }
+
+    /* Cancel link styling */
+    .btn-cancel-link {
+        color: var(--text-muted, #71717a) !important;
+        font-size: 0.78rem;
+        font-weight: 500;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+    .btn-cancel-link:hover {
+        color: var(--text-main, #111827) !important;
+    }
+    body[data-theme="dark"] .btn-cancel-link {
+        color: #a1a1aa !important;
+    }
+    body[data-theme="dark"] .btn-cancel-link:hover {
+        color: #ffffff !important;
     }
 </style>
 
@@ -214,7 +375,7 @@
     document.getElementById('bugThemeToggle')?.addEventListener('click', function() {
         const isDark = document.body.getAttribute('data-theme') === 'dark';
         const btn = document.getElementById('themeToggleBtn');
-        if (btn) btn.click(); // trigger the existing theme toggle logic
+        if (btn) btn.click();
         else {
             const mobileBtn = document.getElementById('mobileThemeToggleBtn');
             if (mobileBtn) mobileBtn.click();
@@ -231,10 +392,70 @@
             }
         }
     });
+
     // Sync icon on load
     if (document.body.getAttribute('data-theme') === 'dark' || localStorage.getItem('theme') === 'dark') {
         const icon = document.getElementById('bugThemeIcon');
         if (icon) { icon.classList.remove('bi-moon-fill'); icon.classList.add('bi-sun-fill'); }
+    }
+
+    // Attachment Custom UI Handling
+    const fileInput = document.getElementById('file');
+    const addScreenshotBtn = document.getElementById('addScreenshotBtn');
+    const addVideoBtn = document.getElementById('addVideoBtn');
+    const filePreviewBox = document.getElementById('filePreviewBox');
+    const previewImg = document.getElementById('previewImg');
+    const previewVideo = document.getElementById('previewVideo');
+    const removePreviewBtn = document.getElementById('removePreviewBtn');
+
+    if (fileInput && addScreenshotBtn && addVideoBtn && filePreviewBox && previewImg && previewVideo && removePreviewBtn) {
+        addScreenshotBtn.addEventListener('click', () => {
+            fileInput.accept = 'image/*';
+            fileInput.click();
+        });
+
+        addVideoBtn.addEventListener('click', () => {
+            fileInput.accept = 'video/mp4';
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const fileUrl = URL.createObjectURL(file);
+                const fileType = file.type;
+
+                if (fileType.startsWith('image/')) {
+                    previewImg.src = fileUrl;
+                    previewImg.classList.remove('d-none');
+                    previewVideo.classList.add('d-none');
+                    previewVideo.src = '';
+                } else if (fileType.startsWith('video/')) {
+                    previewVideo.src = fileUrl;
+                    previewVideo.classList.remove('d-none');
+                    previewImg.classList.add('d-none');
+                    previewImg.src = '';
+                }
+
+                filePreviewBox.classList.remove('d-none');
+            } else {
+                resetPreview();
+            }
+        });
+
+        removePreviewBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetPreview();
+        });
+
+        function resetPreview() {
+            fileInput.value = '';
+            previewImg.src = '';
+            previewImg.classList.add('d-none');
+            previewVideo.src = '';
+            previewVideo.classList.add('d-none');
+            filePreviewBox.classList.add('d-none');
+        }
     }
 </script>
 {% endblock %}

@@ -39,8 +39,7 @@ def dashboard():
     vyas = Building.query.filter_by(name='Vyas').first()
     floors = []
     if vyas:
-        # Load up to level 7, skip level 6 maybe? Based on other parts of code
-        floors = Floor.query.filter(Floor.building_id == vyas.id, Floor.level != 6).order_by(Floor.level).all()
+        floors = Floor.query.filter(Floor.building_id == vyas.id).order_by(Floor.level).all()
         
     # Eager load rooms for efficiency
     all_rooms = Room.query.options(

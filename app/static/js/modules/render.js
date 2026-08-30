@@ -1,286 +1,203 @@
 /**
- * Map Rendering Module - Handles all SVG and grid-based floor plan generation.
+ * Map Rendering Module - Handles all SVG floor plan generation and interactivity.
  */
 
 import { selectRoom } from './ui.js';
 
-// Attach to window so SVG onclick works
+// Attach to window so SVG onclick and global callers work
 window.selectRoom = selectRoom;
 
-const SVG_OUTLINE = `
-    <path d="M50 10 L480 350 L480 950 L50 950 Z" 
-          class="building-outline" />
-`;
-
-/**
- * Main rendering entry point.
- * @param {HTMLElement} container 
- * @param {Array} rooms 
- * @param {string} floorLevel 
- * @param {boolean} isAdmin
- * @param {boolean} isReport
- */
 export function renderFloorMap(container, rooms, floorLevel, isAdmin = false, isReport = false) {
-    const detailedFloors = ['1', '2', '3', '4', '5', '7'];
-
-    if (floorLevel === '0') {
-        renderGroundFloor(container, rooms, isAdmin, isReport);
-    } else if (detailedFloors.includes(floorLevel) && rooms.length >= 10) {
-        renderDetailedLayout(container, rooms, floorLevel, isAdmin, isReport);
-    } else {
-        renderGenericFloor(container, rooms, isAdmin, isReport);
-    }
+    const svgUrl = `/static/images/floors/VY${floorLevel}.svg`;
+    renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAdmin, isReport);
 }
 
 /**
- * Ground floor (Vyas V1) specific layout.
+ * Dynamic SVG Layout
+ * Fetches the raw SVG file and makes room elements interactive based on IDs
  */
-export function renderGroundFloor(container, rooms, isAdmin = false, isReport = false) {
-    const findRoom = (num) => rooms.find(r => r.number === num);
+export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAdmin = false, isReport = false) {
+    container.innerHTML = `<div class="vyas-floor-map svg-container" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
 
-    const renderRoomRect = (roomNum, x, y, w, h, labelText, typeOverride) => {
-        const room = findRoom(roomNum);
-        const roomId = room ? room.id : '';
-        const type = typeOverride || (room ? room.room_type : 'unknown');
-        const isIssue = room && room.status === 'issue';
-        const isInProgress = room && room.status === 'in-progress';
-        const isAssigned = room && room.status === 'assigned';
-        const roomName = (room ? (room.name || roomNum) : roomNum).replace(/'/g, "\\'");
+    fetch(svgUrl)
+        .then(response => {
+            if (!response.ok) throw new Error("SVG not found");
+            return response.text();
+        })
+        .then(svgContent => {
+            container.innerHTML = `<div class="vyas-floor-map svg-container interactive-map-wrapper">${svgContent}</div>`;
+            const svgDoc = container.querySelector('svg');
+            if (!svgDoc) return;
 
-        let className = 'room-poly';
-        if (type === 'class') className += ' fill-blue';
-        else if (type === 'lab' || type === 'breakout') className += ' fill-red';
-        else if (type === 'faculty') className += ' fill-orange';
-        else if (type === 'washroom') className += ' fill-red';
-        else if (type === 'lift') className += ' fill-pink';
-        else if (type === 'management') className += ' fill-silver';
+            svgDoc.classList.add('interactive-map');
+            svgDoc.style.width = '100%';
+            svgDoc.style.height = '100%';
+            
+            // Add Glow Filter if not exists
+            if (!svgDoc.querySelector('defs filter#glow')) {
+                const defs = svgDoc.querySelector('defs') || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                if (!svgDoc.querySelector('defs')) svgDoc.prepend(defs);
+                defs.innerHTML += `
+                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                    </filter>
+                `;
+            }
 
-        if (isAdmin) {
-            if (isIssue) className += ' has-issue';
-            else if (isInProgress) className += ' in-progress';
-            else if (isAssigned) className += ' assigned';
-        }
+            // Disable pointer-events on background & decorative outline paths so clicks are not intercepted
+            svgDoc.querySelectorAll('#Background, #Map_Outlines, #Interior_outlines, #Design, g[id^="Map_"], g[id^="Interior_"]').forEach(el => {
+                el.style.pointerEvents = 'none';
+            });
 
-        const isInteractable = room && (isAdmin || isReport || !['washroom', 'lift', 'stairs', 'mgmt'].includes(type));
-        const groupClass = isInteractable ? "room-group" : "room-group room-disabled";
-        const clickAttr = isInteractable ? `data-room="${roomNum}" data-room-id="${roomId}" onclick="selectRoom(event, '${roomNum}', '${roomId}', '${roomName}', '${type}')"` : '';
+            // Disable pointer-events on text labels inside rooms so clicks hit the room container
+            svgDoc.querySelectorAll('[id$="_label"], [id$="_label_container"], [id*="_label"], text, tspan').forEach(el => {
+                el.style.pointerEvents = 'none';
+            });
 
-        let circleHtml = isAdmin ? renderAdminIndicators(x, y, w, isIssue, isInProgress, isAssigned) : '';
+            // Process Rooms from database
+            rooms.forEach(room => {
+                const roomNum = room.number;
+                const roomId = room.id;
+                const type = room.room_type || 'class';
+                const isIssue = room.status === 'issue';
+                const isInProgress = room.status === 'in-progress';
+                const isAssigned = room.status === 'assigned';
+                const roomName = (room.name || roomNum).replace(/'/g, "\\'");
 
-        return `
-            <g class="${groupClass}" ${clickAttr}>
-                <rect x="${x}" y="${y}" width="${w}" height="${h}" class="${className}" rx="4" />
-                <text x="${x + w / 2}" y="${y + h / 2}" class="room-text" text-anchor="middle" dominant-baseline="middle" fill="white">${labelText || roomNum}</text>
-                ${circleHtml}
-            </g>
-        `;
-    };
+                // Locate container or shape element in SVG
+                let containerEl = svgDoc.querySelector(`[id="${roomNum}_container"]`) ||
+                                  svgDoc.querySelector(`[id="${roomNum}"]`)?.closest('g[id$="_container"]');
+                let shapeEl = svgDoc.querySelector(`[id="${roomNum}"]`);
 
-    const svgContent = `
-        <svg viewBox="0 0 530 980" width="100%" height="100%" class="interactive-map">
-            ${SVG_OUTLINE}
-            ${renderGroundFloorGrid(renderRoomRect)}
-        </svg>
-    `;
+                // Fallback for lifts (e.g., VY0Lift1 -> lift_1_container / lift_1)
+                if (!containerEl && !shapeEl && (type === 'lift' || roomNum.toLowerCase().includes('lift'))) {
+                    const liftMatch = roomNum.match(/Lift(\d+)/i);
+                    if (liftMatch) {
+                        const num = liftMatch[1];
+                        containerEl = svgDoc.querySelector(`[id="lift_${num}_container"]`);
+                        shapeEl = svgDoc.querySelector(`[id="lift_${num}"]`) || containerEl?.querySelector('rect, path');
+                    }
+                }
 
-    container.innerHTML = `<div class="vyas-floor-map svg-container">${svgContent}</div>`;
-    handleAutoSelect(container);
-}
+                // If only shape exists without a container, use its parent group or use shape directly
+                if (!containerEl && shapeEl) {
+                    if (shapeEl.tagName.toLowerCase() === 'g') {
+                        containerEl = shapeEl;
+                    } else if (shapeEl.parentElement && shapeEl.parentElement.tagName.toLowerCase() === 'g' && shapeEl.parentElement !== svgDoc && !shapeEl.parentElement.id.startsWith('VY')) {
+                        containerEl = shapeEl.parentElement;
+                    } else {
+                        containerEl = shapeEl;
+                    }
+                }
 
-/**
- * Detailed layout for standard floors (1, 2, 3, 4, 5, 7).
- */
-export function renderDetailedLayout(container, rooms, floorLevel, isAdmin = false, isReport = false) {
-    const findRoom = (num) => rooms.find(r => r.number === num);
-    const getRoomNum = (suffix) => `VY${floorLevel}${suffix}`;
+                if (!shapeEl && containerEl) {
+                    shapeEl = containerEl.querySelector('rect, path:not([id*="_label"])') || containerEl;
+                }
 
-    const renderRoomRect = (suffix, x, y, w, h, labelText, typeOverride) => {
-        const roomNum = getRoomNum(suffix);
-        const room = findRoom(roomNum);
-        const roomId = room ? room.id : '';
-        const type = typeOverride || (room ? room.room_type : 'unknown');
-        const isIssue = room && room.status === 'issue';
-        const isInProgress = room && room.status === 'in-progress';
-        const isAssigned = room && room.status === 'assigned';
-        const roomName = (room ? (room.name || roomNum) : roomNum).replace(/'/g, "\\'");
+                if (containerEl) {
+                    // Set classes and attributes on container
+                    containerEl.classList.add('room-group');
+                    containerEl.setAttribute('data-room', roomNum);
+                    containerEl.setAttribute('data-room-id', roomId);
+                    containerEl.style.pointerEvents = 'all';
 
-        let className = 'room-poly';
-        if (type === 'class') className += ' fill-blue';
-        else if (type === 'lab') className += ' fill-teal';
-        else if (type === 'washroom') className += ' fill-red';
-        else if (type === 'faculty') className += ' fill-orange';
-        else if (type === 'lift') className += ' fill-pink';
+                    if (shapeEl && shapeEl !== containerEl) {
+                        shapeEl.classList.add('room-poly', 'svg-room-interactive');
+                        shapeEl.setAttribute('data-room', roomNum);
+                        shapeEl.setAttribute('data-room-id', roomId);
+                        shapeEl.style.pointerEvents = 'all';
+                    } else {
+                        containerEl.classList.add('room-poly', 'svg-room-interactive');
+                    }
 
-        if (isAdmin) {
-            if (isIssue) className += ' has-issue';
-            else if (isInProgress) className += ' in-progress';
-            else if (isAssigned) className += ' assigned';
-        }
+                    // Apply type fill classes
+                    const targetForFill = (shapeEl && shapeEl !== containerEl) ? shapeEl : containerEl;
+                    if (type === 'class') targetForFill.classList.add('fill-blue');
+                    else if (type === 'lab') targetForFill.classList.add('fill-teal');
+                    else if (type === 'washroom') targetForFill.classList.add('fill-red');
+                    else if (type === 'faculty') targetForFill.classList.add('fill-orange');
+                    else if (type === 'lift') targetForFill.classList.add('fill-pink');
+                    else if (type === 'kitchen') targetForFill.classList.add('fill-orange');
+                    else if (type === 'meeting' || type === 'meeting_room' || type === 'conference' || type === 'conference_room') {
+                        targetForFill.classList.add('fill-purple');
+                    }
 
-        const isInteractable = room && (isAdmin || isReport || !['washroom', 'lift', 'stairs', 'mgmt'].includes(type));
-        const groupClass = isInteractable ? "room-group" : "room-group room-disabled";
-        const clickAttr = isInteractable ? `data-room="${roomNum}" data-room-id="${roomId}" onclick="selectRoom(event, '${roomNum}', '${roomId}', '${roomName}', '${type}')"` : '';
+                    if (isAdmin) {
+                        if (isIssue) targetForFill.classList.add('has-issue');
+                        else if (isInProgress) targetForFill.classList.add('in-progress');
+                        else if (isAssigned) targetForFill.classList.add('assigned');
+                    }
 
-        let circleHtml = isAdmin ? renderAdminIndicators(x, y, w, isIssue, isInProgress, isAssigned) : '';
+                    // Check interactivity:
+                    // In reporting mode (isReport), all rooms can be reported
+                    // In admin mode, all rooms are interactable
+                    // In faculty mode, non-bookable types (washroom, lift) are disabled
+                    const isInteractable = isAdmin || isReport || !['washroom', 'lift', 'stairs'].includes(type);
 
-        return `
-            <g class="${groupClass}" ${clickAttr}>
-                <rect x="${x}" y="${y}" width="${w}" height="${h}" class="${className}" rx="4" />
-                <text x="${x + w / 2}" y="${y + h / 2}" class="room-text" text-anchor="middle" dominant-baseline="middle" fill="white" font-size="11">${labelText || roomNum}</text>
-                ${circleHtml}
-            </g>
-        `;
-    };
+                    if (isInteractable) {
+                        containerEl.classList.add('interactive');
+                        containerEl.classList.remove('room-disabled');
+                        containerEl.style.cursor = 'pointer';
+                        if (shapeEl) shapeEl.style.cursor = 'pointer';
 
-    const svgContent = `
-        <svg viewBox="0 0 530 980" width="100%" height="100%" class="interactive-map">
-            ${SVG_OUTLINE}
-            ${renderStandardFloorGrid(renderRoomRect)}
-        </svg>
-    `;
+                        // Attach event listener to container
+                        containerEl.onclick = (e) => {
+                            if (e) {
+                                e.stopPropagation();
+                            }
+                            if (typeof window.selectRoom === 'function') {
+                                window.selectRoom(e, roomNum, roomId, roomName, type);
+                            }
+                        };
+                    } else {
+                        containerEl.classList.add('room-disabled');
+                        containerEl.classList.remove('interactive');
+                        containerEl.style.cursor = 'default';
+                        if (shapeEl) shapeEl.style.cursor = 'default';
+                    }
 
-    container.innerHTML = `<div class="vyas-floor-map svg-container">${svgContent}</div>`;
-    handleAutoSelect(container);
-}
+                    // Add Admin Indicator Dots if needed
+                    if (isAdmin && (isIssue || isInProgress || isAssigned)) {
+                        try {
+                            const bbox = (shapeEl || containerEl).getBBox();
+                            const radius = 6;
+                            const cx = bbox.x + bbox.width - radius - 3;
+                            const cy = bbox.y + radius + 3;
+                            let circleFill = isIssue ? '#dc3545' : (isInProgress ? '#ffc107' : '#0d6efd');
+                            
+                            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            circle.setAttribute('cx', cx);
+                            circle.setAttribute('cy', cy);
+                            circle.setAttribute('r', radius);
+                            circle.setAttribute('fill', circleFill);
+                            circle.setAttribute('stroke', 'white');
+                            circle.setAttribute('stroke-width', '1.5');
+                            circle.style.pointerEvents = 'none';
+                            
+                            if (containerEl.parentNode) {
+                                containerEl.parentNode.insertBefore(circle, containerEl.nextSibling);
+                            }
+                        } catch (e) {
+                            console.warn('Could not add admin indicator to', roomNum, e);
+                        }
+                    }
+                }
+            });
 
-/**
- * Generic grid layout for non-standardized floors (e.g. 6th).
- */
-export function renderGenericFloor(container, rooms, isAdmin = false, isReport = false) {
-    const roomsHtml = rooms.map(room => {
-        let roomClass = 'room-block';
-        if (room.room_type === 'class') roomClass += ' classroom';
-        else if (room.room_type === 'lab') roomClass += ' lab';
-        else if (room.room_type === 'washroom') roomClass += ' washroom';
-
-        if (isAdmin) {
-            if (room.status === 'issue') roomClass += ' has-issue';
-            else if (room.status === 'in-progress') roomClass += ' in-progress';
-            else if (room.status === 'assigned') roomClass += ' assigned';
-        }
-
-        const roomName = (room.name || room.number).replace(/'/g, "\\'");
-        
-        let indicatorHtml = '';
-        if (isAdmin) {
-            const isIssue = room.status === 'issue';
-            const isInProgress = room.status === 'in-progress';
-            const isAssigned = room.status === 'assigned';
-            const color = isIssue ? '#dc3545' : (isInProgress ? '#ffc107' : (isAssigned ? '#0d6efd' : '#28a745'));
-            indicatorHtml = `<span class="admin-indicator" style="background-color: ${color}; width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-left: 5px; border: 1px solid white;"></span>`;
-        }
-
-        return `
-            <div class="${roomClass}" 
-                 data-room="${room.number}" 
-                 data-room-id="${room.id}"
-                 onclick="selectRoom(event, '${room.number}', '${room.id}', '${roomName}', '${room.room_type}')">
-                <span class="room-label">${room.number}${indicatorHtml}</span>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = `
-        <div class="vyas-floor-map"><div class="floor-layout generic"><div class="generic-grid">${roomsHtml}</div></div></div>
-    `;
-    handleAutoSelect(container);
-}
-
-// Helpers
-
-function renderAdminIndicators(x, y, w, isIssue, isInProgress, isAssigned) {
-    const radius = 6;
-    const padding = 4;
-    const cx = x + w - radius - padding;
-    const cy = y + radius + padding;
-    let circleFill = isIssue ? '#dc3545' : (isInProgress ? '#ffc107' : (isAssigned ? '#0d6efd' : '#28a745'));
-    return `<circle cx="${cx}" cy="${cy}" r="${radius}" fill="${circleFill}" stroke="white" stroke-width="1.5" />`;
+            handleAutoSelect(container);
+        })
+        .catch(err => {
+            console.error('Error loading SVG map:', err);
+            container.innerHTML = `<div class="alert alert-danger">Failed to load floor map: ${err.message}</div>`;
+        });
 }
 
 function handleAutoSelect(container) {
     if (typeof preSelectedRoom !== 'undefined' && preSelectedRoom) {
         const roomEl = container.querySelector(`[data-room-id="${preSelectedRoom}"]`);
         if (roomEl) {
-            if (roomEl.tagName === 'g') {
-                // Safely trigger click event instead of eval() to prevent XSS
-                roomEl.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-            } else {
-                roomEl.click();
-            }
+            roomEl.dispatchEvent(new MouseEvent('click', { bubbles: true }));
         }
     }
-}
-
-/**
- * Internal Grid Definitions to declutter main render functions.
- */
-function renderGroundFloorGrid(renderRoomRect) {
-    return `
-        <!-- LEFT COLUMN -->
-        ${renderRoomRect('VY0Lift1', 60, 50, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('VY0Lift2', 60, 80, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('VY0Lift3', 60, 110, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('VY001', 60, 150, 100, 120, 'VY001', 'class')}
-        ${renderRoomRect('VY002', 60, 280, 100, 120, null, 'class')}
-        ${renderRoomRect('VY0Lift4', 60, 410, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('VY0Lift5', 60, 440, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('VY003', 60, 500, 100, 140, null, 'class')}
-        ${renderRoomRect('VY004', 60, 650, 100, 140, null, 'class')}
-        ${renderRoomRect('VY0Lift6', 60, 800, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('VY0Lift7', 60, 830, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('VY0Lift8', 60, 860, 30, 25, 'L', 'lift')}
-
-        <!-- CENTER COLUMN -->
-        ${renderRoomRect('VY024', 170, 190, 100, 160, 'VY024', 'class')}
-        ${renderRoomRect('VY026', 280, 290, 80, 100, 'VY026', 'faculty')} 
-        ${renderRoomRect('VY027', 170, 500, 180, 65, 'VY027', 'lab')}
-        ${renderRoomRect('VY028', 170, 575, 180, 65, 'VY028', 'lab')}
-        ${renderRoomRect('VY029', 170, 650, 180, 65, 'VY029', 'lab')}
-        ${renderRoomRect('VY030', 170, 725, 180, 65, 'VY030', 'lab')}
-
-        <!-- RIGHT COLUMN -->
-        ${renderRoomRect('WR1', 380, 370, 90, 22, '', 'washroom')}
-        ${renderRoomRect('WR2', 380, 400, 90, 22, '', 'washroom')}
-        ${renderRoomRect('WR3', 380, 430, 90, 22, '', 'washroom')}
-        ${renderRoomRect('WR4', 380, 460, 90, 22, '', 'washroom')}
-        ${renderRoomRect('VY016', 380, 500, 90, 140, null, 'class')}
-        ${renderRoomRect('VY015', 380, 650, 90, 140, null, 'class')}
-        ${renderRoomRect('VY007', 380, 800, 90, 55, 'Rest', 'breakout')}
-    `;
-}
-
-function renderStandardFloorGrid(renderRoomRect) {
-    return `
-        <!-- LEFT COLUMN -->
-        ${renderRoomRect('Lift1', 60, 50, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('Lift2', 60, 80, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('Lift3', 60, 110, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('01', 60, 150, 100, 120)}
-        ${renderRoomRect('02', 60, 280, 100, 120)}
-        ${renderRoomRect('Lift4', 60, 410, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('Lift5', 60, 440, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('03', 60, 500, 100, 140)}
-        ${renderRoomRect('04', 60, 650, 100, 140)}
-        ${renderRoomRect('Lift6', 60, 800, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('Lift7', 60, 830, 30, 25, 'L', 'lift')}
-        ${renderRoomRect('Lift8', 60, 860, 30, 25, 'L', 'lift')}
-
-        <!-- CENTER COLUMN -->
-        ${renderRoomRect('24', 170, 190, 100, 160)}
-        ${renderRoomRect('22', 280, 290, 80, 100, null, 'lab')} 
-        ${renderRoomRect('26', 170, 500, 180, 65, undefined, 'lab')}
-        ${renderRoomRect('27', 170, 575, 180, 65, undefined, 'lab')}
-        ${renderRoomRect('28', 170, 650, 180, 65, undefined, 'lab')}
-        ${renderRoomRect('29', 170, 725, 180, 65, undefined, 'lab')}
-
-        <!-- RIGHT COLUMN -->
-        ${renderRoomRect('18', 380, 370, 90, 22, null, 'washroom')}
-        ${renderRoomRect('17', 380, 400, 90, 22, null, 'washroom')}
-        ${renderRoomRect('16', 380, 430, 90, 22, null, 'washroom')}
-        ${renderRoomRect('15', 380, 460, 90, 22, null, 'washroom')}
-        ${renderRoomRect('14', 380, 500, 90, 140)}
-        ${renderRoomRect('13', 380, 650, 90, 140)}
-        ${renderRoomRect('08', 380, 800, 90, 25, null, 'washroom')}
-        ${renderRoomRect('07', 380, 830, 90, 25, null, 'washroom')}
-    `;
 }

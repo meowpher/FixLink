@@ -832,12 +832,10 @@
                             <select id="floorSelect" style="display:none;">
                                 <option value="">Select Floor</option>
                                 {% for floor in floors %}
-                                {% if floor.level != 6 %}
                                 <option value="{{ floor.id }}" data-level="{{ floor.level }}" {% if
                                     selected_floor==floor.id %}selected{% endif %}>
                                     {{ floor.name }}
                                 </option>
-                                {% endif %}
                                 {% endfor %}
                             </select>
 
@@ -856,10 +854,8 @@
                                         <div class="cfd-item" data-value="" data-level="" role="option">Select Floor
                                         </div>
                                         {% for floor in floors %}
-                                        {% if floor.level != 6 %}
                                         <div class="cfd-item" data-value="{{ floor.id }}" data-level="{{ floor.level }}"
                                             role="option">{{ floor.name }}</div>
-                                        {% endif %}
                                         {% endfor %}
                                     </div>
                                 </div>

@@ -17,8 +17,7 @@ import random
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app import create_app, db
-from app.models import Building, Floor, Room, Asset
-
+from app.models import Building, Floor, Room, Asset, Ticket
 
 def create_vyas_data(app=None):
     """Create Vyas building with floors and rooms."""
@@ -33,14 +32,15 @@ def create_vyas_data(app=None):
         # Check if data already exists
         existing = Building.query.filter_by(name='Vyas').first()
         if existing:
-            print(f"\n️  Vyas building already exists.")
+            print(f"\n  Vyas building already exists.")
             response = input("Do you want to reset and recreate all data? (y/N): ")
             if response.lower() != 'y':
                 print("Operation cancelled.")
                 return
             
             # Clear existing data
-            print("\n️  Clearing existing data...")
+            print("\n  Clearing existing data...")
+            Ticket.query.delete()
             Asset.query.delete()
             Room.query.delete()
             Floor.query.delete()
@@ -89,12 +89,68 @@ def create_vyas_data(app=None):
         print("\n Creating Rooms...")
         
         # Define floors that should have the detailed layout
-        detailed_floors = [1, 2, 3, 4, 5, 7]
+        detailed_floors = [1, 2, 4, 5]
         
         for floor in floors:
             print(f"\n   Creating rooms for {floor.name}...")
             
-            if floor.level in detailed_floors:
+            if floor.level == 3:
+                # 3RD FLOOR (Pilot SVG Layout)
+                third_floor_rooms = [
+                    # Classrooms (Blue)
+                    {'suffix': '16', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 316'},
+                    {'suffix': '01', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 301'},
+                    {'suffix': '25', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 325'},
+                    {'suffix': '03', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 303'},
+                    {'suffix': '04', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 304'},
+                    {'suffix': '15', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 315'},
+                    {'suffix': '02', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 302'},
+                    
+                    # Labs (Teal)
+                    {'suffix': '26', 'type': Room.ROOM_TYPE_LAB, 'name': 'Computer Lab 326'},
+                    {'suffix': '30', 'type': Room.ROOM_TYPE_LAB, 'name': 'Computer Lab 330'},
+                    {'suffix': '29', 'type': Room.ROOM_TYPE_LAB, 'name': 'Computer Lab 329'},
+                    {'suffix': '28', 'type': Room.ROOM_TYPE_LAB, 'name': 'Computer Lab 328'},
+                    {'suffix': '27', 'type': Room.ROOM_TYPE_LAB, 'name': 'Computer Lab 327'},
+                    {'suffix': '14', 'type': Room.ROOM_TYPE_LAB, 'name': 'Computer Lab 314'},
+                    
+                    # Washrooms (Red)
+                    {'suffix': '12', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 312'},
+                    {'suffix': '18', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 318'},
+                    {'suffix': '20', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 320'},
+                    {'suffix': '19', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 319'},
+                    {'suffix': '17', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 317'},
+                    {'suffix': '21', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 321'},
+                    {'suffix': '11', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 311'},
+                    
+                    # Faculty (Yellow)
+                    {'suffix': '07', 'type': 'faculty', 'name': 'Faculty Area 307'},
+                    
+                    # Lifts
+                    {'suffix': 'Lift1', 'type': 'lift', 'name': 'Lift 1'},
+                    {'suffix': 'Lift2', 'type': 'lift', 'name': 'Lift 2'},
+                    {'suffix': 'Lift3', 'type': 'lift', 'name': 'Lift 3'},
+                    {'suffix': 'Lift4', 'type': 'lift', 'name': 'Lift 4'},
+                    {'suffix': 'Lift5', 'type': 'lift', 'name': 'Lift 5'},
+                    {'suffix': 'Lift6', 'type': 'lift', 'name': 'Lift 6'},
+                    {'suffix': 'Lift7', 'type': 'lift', 'name': 'Lift 7'},
+                    {'suffix': 'Lift8', 'type': 'lift', 'name': 'Lift 8'},
+                ]
+                
+                for tmpl in third_floor_rooms:
+                    room_number = f"VY3{tmpl['suffix']}" if tmpl['type'] != 'lift' else f"VY3{tmpl['suffix']}"
+                    # Keep Lift names like VY3Lift1 to match existing convention
+                    
+                    room = Room(
+                        floor_id=floor.id,
+                        number=room_number,
+                        name=tmpl['name'],
+                        room_type=tmpl['type']
+                    )
+                    db.session.add(room)
+                    print(f"     Created: {room_number} - {tmpl['name']}")
+                    
+            elif floor.level in detailed_floors:
                 # DETAILED LAYOUT (Same as 4th Floor)
                 level_digit = str(floor.level)
                 
@@ -168,10 +224,10 @@ def create_vyas_data(app=None):
                 
                 gf_rooms = [
                     # Left
-                    {'suffix': '01', 'type': 'management', 'name': 'Management Office 001'},
-                    {'suffix': '02', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 002'},
+                    {'suffix': '01', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 001'},
+                    {'suffix': '02', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 002'},
                     {'suffix': '03', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 003'},
-                    {'suffix': '04', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 004'},
+                    {'suffix': '04', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 004'},
                     
                     # Top Center
                     {'suffix': '24', 'type': 'management', 'name': 'Management Office 024'},
@@ -184,8 +240,8 @@ def create_vyas_data(app=None):
                     {'suffix': '30', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 030'},
                     
                     # Right Column
-                    {'suffix': '16', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 016'},
-                    {'suffix': '15', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 015'},
+                    {'suffix': '16', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 016'},
+                    {'suffix': '15', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 015'},
                     {'suffix': '14', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 014'},
                     
                     # Bottom Right
@@ -213,24 +269,59 @@ def create_vyas_data(app=None):
                     db.session.add(room)
                     print(f"     Created: {room_number} - {config['name']}")
 
+            elif floor.level == 6:
+                # 6TH FLOOR (Meeting & Conference Rooms)
+                room_configs = [
+                    {'number': 'VY613', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 613'},
+                    {'number': 'VY610', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 610'},
+                    {'number': 'VY602', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 602'},
+                    {'number': 'MR4', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 4'},
+                    {'number': 'MR5', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 5'},
+                    {'number': 'MR6', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 6'},
+                    {'number': 'MR7', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 7'},
+                    {'number': 'MR8', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 8'},
+                    {'number': 'MR11', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 11'},
+                    {'number': 'MR12', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 12'},
+                    {'number': 'MR13', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 13'},
+                    {'number': 'MR14', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 14'},
+                    {'number': 'MR15', 'type': Room.ROOM_TYPE_MEETING, 'name': 'Meeting Room 15'},
+                    {'number': 'VY609', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 609'},
+                    {'number': 'VY615', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 615'},
+                    {'number': 'VY614', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 614'},
+                    {'number': 'VY616', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 616'},
+                ]
+                for config in room_configs:
+                    room = Room(floor_id=floor.id, number=config['number'], name=config['name'], room_type=config['type'])
+                    db.session.add(room)
+                    print(f"     Created: {config['number']} - {config['name']}")
+                    
+            elif floor.level == 7:
+                # 7TH FLOOR (Kitchens & Labs)
+                room_configs = [
+                    {'number': 'VY706', 'type': Room.ROOM_TYPE_KITCHEN, 'name': 'Main Kitchen 706'},
+                    {'number': 'VY715', 'type': Room.ROOM_TYPE_KITCHEN, 'name': 'Prep Kitchen 715'},
+                    {'number': 'VY712', 'type': Room.ROOM_TYPE_KITCHEN, 'name': 'Pastry Kitchen 712'},
+                    {'number': 'VY714', 'type': Room.ROOM_TYPE_KITCHEN, 'name': 'Kitchen 714'},
+                    {'number': 'VY713', 'type': Room.ROOM_TYPE_KITCHEN, 'name': 'Kitchen 713'},
+                    {'number': 'VY726', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 726'},
+                    {'number': 'VY707', 'type': 'faculty', 'name': 'Faculty Room 707'},
+                ]
+                for config in room_configs:
+                    room = Room(floor_id=floor.id, number=config['number'], name=config['name'], room_type=config['type'])
+                    db.session.add(room)
+                    print(f"     Created: {config['number']} - {config['name']}")
+                    
             else:
-                # GENERIC LAYOUT (6th)
+                # GENERIC LAYOUT
                 floor_prefix = f"VY{floor.level}"
-                
                 room_configs = [
                     {'suffix': '01', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': f'Classroom {floor.level}01'},
                     {'suffix': '02', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': f'Classroom {floor.level}02'},
                     {'suffix': '05', 'type': Room.ROOM_TYPE_LAB, 'name': f'Lab {floor.level}05'},
                     {'suffix': '10', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom'},
                 ]
-                
                 for config in room_configs:
-                    room = Room(
-                        floor_id=floor.id,
-                        number=f"{floor_prefix}{config['suffix']}",
-                        name=config['name'],
-                        room_type=config['type']
-                    )
+                    room = Room(floor_id=floor.id, number=f"{floor_prefix}{config['suffix']}", name=config['name'], room_type=config['type'])
                     db.session.add(room)
                     print(f"     Created: {floor_prefix}{config['suffix']}")
             
@@ -256,6 +347,22 @@ def create_vyas_data(app=None):
                     {'name': 'AC Unit', 'type': 'ac'},
                     {'name': 'Ceiling Lights', 'type': 'light'},
                     {'name': 'Computer Workstations', 'type': 'computer'},
+                ]
+            elif room.room_type == Room.ROOM_TYPE_KITCHEN:
+                assets = [
+                    {'name': 'Commercial Stove', 'type': 'stove'},
+                    {'name': 'Industrial Exhaust System', 'type': 'exhaust'},
+                    {'name': 'Walk-in Refrigerator', 'type': 'fridge'},
+                    {'name': 'Prep Stations', 'type': 'prep_station'},
+                    {'name': 'Industrial Oven', 'type': 'oven'},
+                    {'name': 'Fire Extinguisher', 'type': 'safety'},
+                ]
+            elif room.room_type in [Room.ROOM_TYPE_CONFERENCE, Room.ROOM_TYPE_MEETING]:
+                assets = [
+                    {'name': 'Conference Table', 'type': 'table'},
+                    {'name': 'Presentation Display', 'type': 'display'},
+                    {'name': 'Video Conferencing Kit', 'type': 'camera'},
+                    {'name': 'AC Unit', 'type': 'ac'},
                 ]
             else:
                 assets = [

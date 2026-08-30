@@ -80,12 +80,12 @@ export function selectRoom(event, roomNumber, roomId, roomName, roomType) {
 
     // Highlight on map
     document.querySelectorAll('.room-group, .room-poly').forEach(el => el.classList.remove('selected'));
-    const roomGroup = document.querySelector(`g[data-room="${roomNumber}"]`);
-    if (roomGroup) {
-        roomGroup.classList.add('selected');
-        const poly = roomGroup.querySelector('.room-poly');
+    const roomElements = document.querySelectorAll(`[data-room="${roomNumber}"], [data-room-id="${roomId}"]`);
+    roomElements.forEach(el => {
+        el.classList.add('selected');
+        const poly = el.querySelector('.room-poly');
         if (poly) poly.classList.add('selected');
-    }
+    });
 
     // Load dynamic fields
     updateIssueTypes(roomType || 'unknown');

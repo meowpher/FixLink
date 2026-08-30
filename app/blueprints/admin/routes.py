@@ -157,7 +157,7 @@ def status_map():
     rooms = []
     
     if vyas:
-        floors = Floor.query.filter(Floor.building_id == vyas.id, Floor.level != 6).order_by(Floor.level).all()
+        floors = Floor.query.filter(Floor.building_id == vyas.id).order_by(Floor.level).all()
         
         if floor_id:
             selected_floor = Floor.query.get(floor_id)

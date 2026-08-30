@@ -118,9 +118,12 @@ class Room(db.Model):
     ROOM_TYPE_LAB = 'lab'
     ROOM_TYPE_WASHROOM = 'washroom'
     ROOM_TYPE_STORAGE = 'storage'
+    ROOM_TYPE_KITCHEN = 'kitchen'
+    ROOM_TYPE_CONFERENCE = 'conference_room'
+    ROOM_TYPE_MEETING = 'meeting_room'
     ROOM_TYPE_OTHER = 'other'
     
-    ROOM_TYPES = [ROOM_TYPE_CLASSROOM, ROOM_TYPE_LAB, ROOM_TYPE_WASHROOM, ROOM_TYPE_STORAGE, ROOM_TYPE_OTHER]
+    ROOM_TYPES = [ROOM_TYPE_CLASSROOM, ROOM_TYPE_LAB, ROOM_TYPE_WASHROOM, ROOM_TYPE_STORAGE, ROOM_TYPE_KITCHEN, ROOM_TYPE_CONFERENCE, ROOM_TYPE_MEETING, ROOM_TYPE_OTHER]
     
     id = db.Column(db.Integer, primary_key=True)
     floor_id = db.Column(db.Integer, db.ForeignKey('floors.id'), nullable=False)
@@ -185,16 +188,14 @@ class Room(db.Model):
     def current_occupancy_status(self):
         """Returns complex dict with Room status based on timetable and bookings."""
         from datetime import datetime, timedelta
-        from flask import session
         
-        user_id = session.get('user_id')
         now_utc = datetime.utcnow()
         current_hour_start = now_utc.replace(minute=0, second=0, microsecond=0)
         
         # 1. Check active RoomBooking (Specific slot)
         active_booking = None
         for booking in self.room_bookings:
-            if booking.status == 'active' and booking.slot_start == current_hour_start:
+            if booking.status == 'active' and booking.slot_start <= current_hour_start < booking.slot_end:
                 active_booking = booking
                 break
                 
@@ -209,7 +210,7 @@ class Room(db.Model):
                 # NOTE: is_owner is intentionally omitted here.
                 # It is session-dependent and must be computed client-side
                 # to prevent cache poisoning across users.
-                'end_time': (active_booking.slot_start + timedelta(hours=6, minutes=30)).strftime('%I:%M %p') # +1h from start, +5:30 for IST
+                'end_time': (active_booking.slot_end + timedelta(hours=5, minutes=30)).strftime('%I:%M %p') # +5:30 for IST
             }
             
         # 2. Check Timetable (Recurring schedule)
@@ -802,15 +803,15 @@ class Timetable(db.Model):
             'room_id': self.room_id,
             'room_number': self.room.number if self.room else None,
             'day_of_week': self.day_of_week,
-            'start_time': self.start_time.strftime('%H:%M'),
-            'end_time': self.end_time.strftime('%H:%M'),
+            'start_time': self.start_time.strftime('%H:%M') if self.start_time else None,
+            'end_time': self.end_time.strftime('%H:%M') if self.end_time else None,
             'subject': self.subject,
             'course': self.course,
             'division': self.division
         }
 
 class RoomBooking(db.Model):
-    """RoomBooking model - Specific 1-hour slot bookings for faculty."""
+    """RoomBooking model - Specific 1 or 2 hour slot bookings for faculty."""
     __tablename__ = 'room_bookings'
     
     STATUS_ACTIVE = 'active'
@@ -832,6 +833,11 @@ class RoomBooking(db.Model):
     )
     
     faculty = db.relationship('User', backref=db.backref('room_bookings', lazy=True))
+
+    @property
+    def slot_end(self):
+        """Returns slot end time (1 hour after slot_start)."""
+        return self.slot_start + timedelta(hours=1) if self.slot_start else None
     
     def to_dict(self):
         return {
@@ -840,8 +846,9 @@ class RoomBooking(db.Model):
             'room_number': self.room.number if self.room else None,
             'faculty_id': self.faculty_id,
             'faculty_name': self.faculty.name if self.faculty else 'Unknown',
-            'date': self.date.isoformat(),
-            'slot_start': self.slot_start.isoformat() + 'Z',
+            'date': self.date.isoformat() if self.date else None,
+            'slot_start': self.slot_start.isoformat() + 'Z' if self.slot_start else None,
+            'slot_end': self.slot_end.isoformat() + 'Z' if self.slot_end else None,
             'status': self.status,
             'subject': self.subject,
             'division': self.division,

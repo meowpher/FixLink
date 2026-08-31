@@ -261,58 +261,64 @@ def create_vyas_data(app=None):
                     print(f"     Created: {room_number} - {room_name}")
 
             elif floor.level == 0:
-                # GROUND FLOOR (Detailed Layout)
-                # Left Column: VY001-VY004
-                # Center: VY024, VY026, VY027-VY030
-                # Right: VY016-VY014
-                # Breakout: VY007
-                
+                # GROUND FLOOR (Exact Layout from VY0.svg)
                 gf_rooms = [
-                    # Left
-                    {'suffix': '01', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 001'},
-                    {'suffix': '02', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 002'},
-                    {'suffix': '03', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 003'},
-                    {'suffix': '04', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 004'},
-                    
-                    # Top Center
-                    {'suffix': '24', 'type': 'management', 'name': 'Management Office 024'},
-                    {'suffix': '26', 'type': 'faculty', 'name': 'Faculty Area 026'},
-                    
-                    # Center Block
-                    {'suffix': '27', 'type': 'management', 'name': 'Management Office 027'},
-                    {'suffix': '28', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 028'},
-                    {'suffix': '29', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 029'},
-                    {'suffix': '30', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 030'},
-                    
-                    # Right Column
-                    {'suffix': '16', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 016'},
-                    {'suffix': '15', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 015'},
-                    {'suffix': '14', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 014'},
-                    
-                    # Bottom Right
-                    {'suffix': '07', 'type': 'breakout', 'name': 'Breakout Area 007'},
-                    
+                    # Classrooms (Blue)
+                    {'number': 'VY002', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 002'},
+                    {'number': 'VY003', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 003'},
+                    {'number': 'VY004', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 004'},
+                    {'number': 'VY015', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 015'},
+                    {'number': 'VY016', 'type': Room.ROOM_TYPE_CLASSROOM, 'name': 'Classroom 016'},
+
+                    # Labs (Teal)
+                    {'number': 'VY007', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 007'},
+                    {'number': 'VY014', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 014'},
+                    {'number': 'VY027', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 027'},
+                    {'number': 'VY028', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 028'},
+                    {'number': 'VY029', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 029'},
+                    {'number': 'VY030', 'type': Room.ROOM_TYPE_LAB, 'name': 'Lab 030'},
+
+                    # Faculty Areas (Orange/Yellow)
+                    {'number': 'VY025A', 'type': 'faculty', 'name': 'Faculty Area 025A'},
+                    {'number': 'VY025B', 'type': 'faculty', 'name': 'Faculty Area 025B'},
+                    {'number': 'VY025C', 'type': 'faculty', 'name': 'Faculty Area 025C'},
+
+                    # Conference Rooms (Purple)
+                    {'number': 'VY001', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 001'},
+                    {'number': 'VY025D', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 025D'},
+                    {'number': 'VY025E', 'type': Room.ROOM_TYPE_CONFERENCE, 'name': 'Conference Room 025E'},
+
+                    # Washrooms (Red)
+                    {'number': 'VY008', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 008'},
+                    {'number': 'VY009', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 009'},
+                    {'number': 'VY010', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 010'},
+                    {'number': 'VY011', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 011'},
+                    {'number': 'VY017', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 017'},
+                    {'number': 'VY018', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 018'},
+                    {'number': 'VY019', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 019'},
+                    {'number': 'VY020', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 020'},
+                    {'number': 'VY021', 'type': Room.ROOM_TYPE_WASHROOM, 'name': 'Washroom 021'},
+
                     # Lifts (8)
-                    {'suffix': 'Lift1', 'type': 'lift', 'name': 'Lift 1'},
-                    {'suffix': 'Lift2', 'type': 'lift', 'name': 'Lift 2'},
-                    {'suffix': 'Lift3', 'type': 'lift', 'name': 'Lift 3'},
-                    {'suffix': 'Lift4', 'type': 'lift', 'name': 'Lift 4'},
-                    {'suffix': 'Lift5', 'type': 'lift', 'name': 'Lift 5'},
-                    {'suffix': 'Lift6', 'type': 'lift', 'name': 'Lift 6'},
-                    {'suffix': 'Lift7', 'type': 'lift', 'name': 'Lift 7'},
-                    {'suffix': 'Lift8', 'type': 'lift', 'name': 'Lift 8'},
+                    {'number': 'VY0Lift1', 'type': 'lift', 'name': 'Lift 1'},
+                    {'number': 'VY0Lift2', 'type': 'lift', 'name': 'Lift 2'},
+                    {'number': 'VY0Lift3', 'type': 'lift', 'name': 'Lift 3'},
+                    {'number': 'VY0Lift4', 'type': 'lift', 'name': 'Lift 4'},
+                    {'number': 'VY0Lift5', 'type': 'lift', 'name': 'Lift 5'},
+                    {'number': 'VY0Lift6', 'type': 'lift', 'name': 'Lift 6'},
+                    {'number': 'VY0Lift7', 'type': 'lift', 'name': 'Lift 7'},
+                    {'number': 'VY0Lift8', 'type': 'lift', 'name': 'Lift 8'},
                 ]
                 
                 for config in gf_rooms:
-                    room_number = f"VY0{config['suffix']}"
                     room = Room(
                         floor_id=floor.id,
-                        number=room_number,
+                        number=config['number'],
                         name=config['name'],
                         room_type=config['type']
                     )
                     db.session.add(room)
-                    print(f"     Created: {room_number} - {config['name']}")
+                    print(f"     Created: {config['number']} - {config['name']}")
 
             elif floor.level == 6:
                 # 6TH FLOOR (Meeting & Conference Rooms)

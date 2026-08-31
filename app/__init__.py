@@ -48,20 +48,20 @@ def create_app(config_name=None):
         )
     app.config['SECRET_KEY'] = secret_key
 
-    # Session security (applied to ALL environments)
+    # Session security & CSRF configuration (applied to ALL environments)
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE='Lax',
-        PERMANENT_SESSION_LIFETIME=3600,  # 1 hour
+        PERMANENT_SESSION_LIFETIME=86400,    # 24 hours
+        WTF_CSRF_TIME_LIMIT=None,            # No timeout to prevent stale form issues
+        WTF_CSRF_SSL_STRICT=False,           # Disable strict referer checking for local/proxy environments
+        WTF_CSRF_ENABLED=True,               # Explicitly enabled
     )
 
     # Vercel-specific session security
     if os.environ.get('VERCEL'):
         app.config.update(
             SESSION_COOKIE_SECURE=True,
-            WTF_CSRF_SSL_STRICT=False,       # Let Vercel handle SSL termination
-            WTF_CSRF_TIME_LIMIT=None,        # No timeout for serverless cold starts
-            WTF_CSRF_ENABLED=True,           # Explicitly enabled
         )
         # Trust Vercel's proxy headers (Vercel uses multiple layers of proxy)
         from werkzeug.middleware.proxy_fix import ProxyFix
@@ -194,5 +194,16 @@ def create_app(config_name=None):
         # UTC to IST is +5:30
         ist_time = value + timedelta(hours=5, minutes=30)
         return ist_time.strftime(format)
+    
+    # Graceful CSRF Error Handler
+    from flask_wtf.csrf import CSRFError
+    from flask import request, jsonify, redirect, url_for, flash
+    @app.errorhandler(CSRFError)
+    def handle_csrf_error(e):
+        logger.warning(f"CSRF validation failed: {e.description} for {request.path}")
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({'success': False, 'error': 'Session or security token expired. Please refresh the page.'}), 400
+        flash('Your session expired or security token was invalid. Please try again.', 'warning')
+        return redirect(request.referrer or url_for('auth.login'))
     
     return app

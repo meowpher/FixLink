@@ -299,7 +299,7 @@ body {
 
 .main-content {
     flex: 1;
-    padding-top: 84px;
+    padding-top: 70px;
 }
 
 /* ============================================
@@ -1770,7 +1770,7 @@ body {
 .vyas-admin-header {
     background: linear-gradient(135deg, var(--mitwpu-blue) 0%, var(--mitwpu-blue-dark) 100%);
     color: var(--mitwpu-white);
-    padding: 1.1rem 0 1.5rem;
+    padding: 0.6rem 0 1.25rem;
 }
 
 .admin-title {

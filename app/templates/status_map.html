@@ -1,6 +1,85 @@
 {% extends "base.html" %}
 
 {% block title %}Status Map - MIT-WPU Vyas Tracker{% endblock %}
+{% block extra_css %}
+<style>
+@media (max-width: 767px) {
+    /* ── Legend: split into two clean pill rows ── */
+    .status-legend-section {
+        padding: 0.6rem 0;
+    }
+    .legend-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    .legend-divider {
+        display: none;
+    }
+    .legend-group {
+        gap: 0.55rem;
+        flex-wrap: wrap;
+    }
+    .legend-title {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        opacity: 0.6;
+        min-width: 75px;
+    }
+    .legend-item {
+        font-size: 0.78rem;
+        gap: 0.3rem;
+        background: var(--bg-card, rgba(255,255,255,0.06));
+        border: 1px solid var(--border-color, rgba(255,255,255,0.08));
+        border-radius: 20px;
+        padding: 2px 8px;
+    }
+    .legend-dot {
+        width: 9px;
+        height: 9px;
+        flex-shrink: 0;
+    }
+    .legend-box {
+        width: 13px;
+        height: 13px;
+        border-radius: 3px;
+        flex-shrink: 0;
+    }
+
+    /* ── Floor map header: stack name+badge above zoom controls ── */
+    .floor-map-header {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.6rem !important;
+    }
+    .floor-map-header > div:first-child {
+        gap: 0.6rem !important;
+    }
+    .floor-map-header h4 {
+        font-size: 1.1rem !important;
+    }
+    .room-count {
+        font-size: 0.72rem !important;
+        padding: 3px 10px !important;
+    }
+    /* Make zoom toolbar smaller and full-width */
+    .map-zoom-toolbar {
+        width: 100%;
+        justify-content: flex-end;
+        gap: 0.25rem !important;
+    }
+    .map-zoom-toolbar .btn {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.8rem !important;
+    }
+    #mapZoomLevelBadge {
+        font-size: 0.68rem !important;
+        min-width: 38px !important;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
 <!-- Status Map Header -->

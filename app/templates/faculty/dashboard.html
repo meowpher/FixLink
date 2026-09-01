@@ -1089,6 +1089,9 @@
                         <button class="btn btn-info rounded-pill px-3 py-2 px-md-4 shadow-sm text-white flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#advancedBookingModal" style="font-size: 0.85rem;">
                             <i class="bi bi-calendar-plus me-1 me-md-2"></i>Book a Class
                         </button>
+                        <button class="btn btn-outline-success rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="font-size: 0.85rem;">
+                            <i class="bi bi-file-earmark-spreadsheet me-1 me-md-2"></i>Import Timetable
+                        </button>
                     </div>
                 </div>
 
@@ -1333,6 +1336,63 @@
                 </div>
                 <div id="popAlertContent">
                     Room is currently vacant. Energy levels optimal.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Timetable Import Modal -->
+<div class="modal fade" id="importTimetableModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 bg-success text-white py-3" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title d-flex align-items-center">
+                    <i class="bi bi-file-earmark-spreadsheet me-2"></i>Import Timetable (CSV)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="importTimetableForm">
+                    <div class="mb-3">
+                        <label for="csvFile" class="form-label fw-bold">Select CSV File</label>
+                        <input class="form-control" type="file" id="csvFile" accept=".csv" required>
+                        <div class="form-text">Headers should be on Row 0 or 1. Required columns: "Room No", "Time", "Mon", "Tue"...</div>
+                    </div>
+                    <div id="importResults" class="d-none mt-4">
+                        <h6 class="fw-bold border-bottom pb-2">Import Summary</h6>
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded border border-primary">
+                                    <h3 id="recordsParsed" class="text-primary mb-0">0</h3>
+                                    <small class="text-muted">Records Parsed</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-3 bg-light rounded border border-danger">
+                                    <h3 id="errorCount" class="text-danger mb-0">0</h3>
+                                    <small class="text-muted">Errors</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="errorDetails" class="alert alert-danger d-none" style="max-height: 200px; overflow-y: auto;">
+                            <strong>Errors found:</strong>
+                            <ul id="errorList" class="mb-0 small"></ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 justify-content-between pb-4 px-4" style="border-radius: 0 0 16px 16px;">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
+                <div>
+                    <button type="button" class="btn btn-outline-success px-4 me-2" id="btnPreviewImport" style="border-radius: 10px;">
+                        <span class="spinner-border spinner-border-sm d-none me-1" role="status" aria-hidden="true"></span>
+                        <i class="bi bi-eye me-1 btn-icon"></i> Preview Dry-Run
+                    </button>
+                    <button type="button" class="btn btn-success px-4" id="btnCommitImport" disabled style="border-radius: 10px;">
+                        <span class="spinner-border spinner-border-sm d-none me-1" role="status" aria-hidden="true"></span>
+                        <i class="bi bi-cloud-arrow-up me-1 btn-icon"></i> Confirm & Commit
+                    </button>
                 </div>
             </div>
         </div>

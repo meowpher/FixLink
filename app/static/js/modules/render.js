@@ -228,6 +228,9 @@ function setupMapZoomAndPan(container, svgDoc) {
     let startX = 0;
     let startY = 0;
 
+    svgDoc.style.transformOrigin = 'center center';
+    svgDoc.style.transition = 'transform 0.05s ease-out';
+
     const badge = document.getElementById('mapZoomLevelBadge');
 
     function applyTransform() {
@@ -242,14 +245,14 @@ function setupMapZoomAndPan(container, svgDoc) {
     if (btnIn) {
         btnIn.onclick = (e) => {
             e.preventDefault();
-            scale = Math.min(scale + 0.25, 3.5);
+            scale = Math.min(scale + 0.25, 4.0);
             applyTransform();
         };
     }
     if (btnOut) {
         btnOut.onclick = (e) => {
             e.preventDefault();
-            scale = Math.max(scale - 0.25, 0.75);
+            scale = Math.max(scale - 0.25, 0.6);
             if (scale <= 1.0) { panX = 0; panY = 0; }
             applyTransform();
         };
@@ -264,21 +267,21 @@ function setupMapZoomAndPan(container, svgDoc) {
         };
     }
 
-    // Ctrl + Scroll Zoom
+    // Ctrl + Scroll Zoom / Trackpad pinch
     container.addEventListener('wheel', (e) => {
         if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
             if (e.deltaY < 0) {
-                scale = Math.min(scale + 0.15, 3.5);
+                scale = Math.min(scale + 0.15, 4.0);
             } else {
-                scale = Math.max(scale - 0.15, 0.75);
+                scale = Math.max(scale - 0.15, 0.6);
                 if (scale <= 1.0) { panX = 0; panY = 0; }
             }
             applyTransform();
         }
     }, { passive: false });
 
-    // Drag to Pan when zoomed in
+    // Desktop Mouse Drag to Pan when zoomed
     container.addEventListener('mousedown', (e) => {
         if (e.target.closest('.room-group') || scale <= 1.0) return;
         isDragging = true;
@@ -299,6 +302,100 @@ function setupMapZoomAndPan(container, svgDoc) {
             isDragging = false;
             container.style.cursor = '';
         }
+    });
+
+    // ── Mobile Touch Support: Pinch to Zoom & Finger Pan ──
+    let initialPinchDist = 0;
+    let initialScale = 1.0;
+    let touchMidX = 0;
+    let touchMidY = 0;
+    let touchPanStartX = 0;
+    let touchPanStartY = 0;
+    let isTouchPanning = false;
+    let touchStartPanX = 0;
+    let touchStartPanY = 0;
+    let lastTapTime = 0;
+
+    const calcDist = (t1, t2) => Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+    const calcMid = (t1, t2) => ({
+        x: (t1.clientX + t2.clientX) / 2,
+        y: (t1.clientY + t2.clientY) / 2
+    });
+
+    container.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 2) {
+            // Two fingers: Pinch Zoom
+            e.preventDefault();
+            initialPinchDist = calcDist(e.touches[0], e.touches[1]);
+            initialScale = scale;
+            const mid = calcMid(e.touches[0], e.touches[1]);
+            touchMidX = mid.x;
+            touchMidY = mid.y;
+            touchStartPanX = panX;
+            touchStartPanY = panY;
+        } else if (e.touches.length === 1) {
+            const now = Date.now();
+            if (now - lastTapTime < 300) {
+                // Double-tap: Zoom in or reset
+                e.preventDefault();
+                if (scale > 1.2) {
+                    scale = 1.0;
+                    panX = 0;
+                    panY = 0;
+                } else {
+                    scale = 2.0;
+                }
+                applyTransform();
+                lastTapTime = 0;
+                return;
+            }
+            lastTapTime = now;
+
+            if (scale > 1.05 && !e.target.closest('.room-group')) {
+                // Single finger drag to pan when already zoomed in
+                isTouchPanning = true;
+                touchPanStartX = e.touches[0].clientX - panX;
+                touchPanStartY = e.touches[0].clientY - panY;
+            }
+        }
+    }, { passive: false });
+
+    container.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 2 && initialPinchDist > 0) {
+            e.preventDefault();
+            const currentDist = calcDist(e.touches[0], e.touches[1]);
+            const zoomRatio = currentDist / initialPinchDist;
+            scale = Math.min(Math.max(initialScale * zoomRatio, 0.6), 4.5);
+
+            const mid = calcMid(e.touches[0], e.touches[1]);
+            panX = touchStartPanX + (mid.x - touchMidX);
+            panY = touchStartPanY + (mid.y - touchMidY);
+
+            if (scale <= 0.85) {
+                panX = 0;
+                panY = 0;
+            }
+            applyTransform();
+        } else if (e.touches.length === 1 && isTouchPanning && scale > 1.05) {
+            e.preventDefault();
+            panX = e.touches[0].clientX - touchPanStartX;
+            panY = e.touches[0].clientY - touchPanStartY;
+            applyTransform();
+        }
+    }, { passive: false });
+
+    container.addEventListener('touchend', (e) => {
+        if (e.touches.length < 2) {
+            initialPinchDist = 0;
+        }
+        if (e.touches.length === 0) {
+            isTouchPanning = false;
+        }
+    });
+
+    container.addEventListener('touchcancel', () => {
+        initialPinchDist = 0;
+        isTouchPanning = false;
     });
 }
 

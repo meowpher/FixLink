@@ -47,13 +47,12 @@
         flex-shrink: 0;
     }
 
-    /* ── Floor map header: stack name+badge above zoom controls ── */
+    /* ── Floor map header ── */
     .floor-map-header {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 0.6rem !important;
-    }
-    .floor-map-header > div:first-child {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
         gap: 0.6rem !important;
     }
     .floor-map-header h4 {
@@ -62,20 +61,6 @@
     .room-count {
         font-size: 0.72rem !important;
         padding: 3px 10px !important;
-    }
-    /* Make zoom toolbar smaller and full-width */
-    .map-zoom-toolbar {
-        width: 100%;
-        justify-content: flex-end;
-        gap: 0.25rem !important;
-    }
-    .map-zoom-toolbar .btn {
-        padding: 0.25rem 0.5rem !important;
-        font-size: 0.8rem !important;
-    }
-    #mapZoomLevelBadge {
-        font-size: 0.68rem !important;
-        min-width: 38px !important;
     }
 }
 </style>
@@ -174,19 +159,6 @@
                         <div class="d-flex align-items-center gap-3">
                             <h4 class="mb-0 fw-bold">{{ selected_floor.name }}</h4>
                             <span class="room-count">{{ rooms|length }} rooms</span>
-                        </div>
-                        <!-- Sleek Map Zoom Toolbar -->
-                        <div class="map-zoom-toolbar d-flex align-items-center gap-1">
-                            <button type="button" class="btn rounded-pill" id="btnMapZoomOut" title="Zoom Out (-)">
-                                <i class="bi bi-dash-lg"></i>
-                            </button>
-                            <span class="badge bg-secondary-subtle text-secondary-emphasis px-2 py-1" id="mapZoomLevelBadge" style="min-width: 46px; font-size: 0.75rem; font-weight: 600;">100%</span>
-                            <button type="button" class="btn rounded-pill" id="btnMapZoomIn" title="Zoom In (+)">
-                                <i class="bi bi-plus-lg"></i>
-                            </button>
-                            <button type="button" class="btn rounded-pill" id="btnMapZoomReset" title="Reset View (100%)">
-                                <i class="bi bi-arrow-counterclockwise"></i>
-                            </button>
                         </div>
                     </div>
 

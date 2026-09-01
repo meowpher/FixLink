@@ -93,9 +93,15 @@ function initializeReportForm() {
             const data = await response.json();
 
             if (data.success) {
-                if (window.showSuccessModal) window.showSuccessModal(data.ticket_id);
+                const ticketId = (data.data && data.data.ticket_id)
+                              || data.ticket_id
+                              || (data.data && data.data.id)
+                              || data.id;
+                if (window.showSuccessModal) window.showSuccessModal(ticketId);
                 reportForm.reset();
-                ui.resetRoomSelection();
+                if (ui && ui.resetRoomSelection) {
+                    ui.resetRoomSelection();
+                }
             } else {
                 if (window.showErrors) window.showErrors(data.errors || [data.error]);
             }

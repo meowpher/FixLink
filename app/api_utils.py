@@ -9,7 +9,7 @@ from flask import jsonify, request
 
 logger = logging.getLogger(__name__)
 
-def api_response(success=True, data=None, error=None, message=None, status=200):
+def api_response(success=True, data=None, error=None, message=None, status=200, **kwargs):
     """
     Returns a standardized JSON response format.
     Format:
@@ -17,7 +17,8 @@ def api_response(success=True, data=None, error=None, message=None, status=200):
         "success": bool,
         "data": mixed|null,
         "error": str|null,
-        "message": str|null
+        "message": str|null,
+        ...kwargs
     }
     """
     response = {'success': success}
@@ -27,6 +28,7 @@ def api_response(success=True, data=None, error=None, message=None, status=200):
         response['error'] = error
     if message is not None:
         response['message'] = message
+    response.update(kwargs)
     return jsonify(response), status
 
 def handle_api_errors(f):

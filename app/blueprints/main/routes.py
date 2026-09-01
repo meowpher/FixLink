@@ -186,7 +186,8 @@ def submit_report():
             return api_response(
                 success=True,
                 message='Ticket submitted successfully',
-                data={'ticket_id': ticket.id}
+                data={'ticket_id': ticket.id},
+                ticket_id=ticket.id
             )
         
         return render_template('report.html', 

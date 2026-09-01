@@ -182,6 +182,44 @@
         border-color: #86b7fe !important;
         box-shadow: 0 0 0 0.2rem rgba(13,110,253,.2) !important;
     }
+    .password-input-wrapper {
+        position: relative;
+        width: 100%;
+        display: flex;
+        align-items: center;
+    }
+    .password-input-wrapper .form-control {
+        width: 100% !important;
+        padding-right: 42px !important;
+    }
+    .password-toggle-btn {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 42px;
+        height: 100%;
+        background: transparent !important;
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 0;
+        z-index: 5;
+    }
+    .password-toggle-btn:hover {
+        color: #212529;
+    }
+    body[data-theme="dark"] .password-toggle-btn {
+        color: rgba(255, 255, 255, 0.45);
+    }
+    body[data-theme="dark"] .password-toggle-btn:hover {
+        color: rgba(255, 255, 255, 0.9);
+    }
     .glass-signup-card .form-text { font-size: 11px; color: #6c757d; margin-top: 2px; }
     .glass-signup-card .mb-3, .glass-signup-card .mb-4 { margin-bottom: 9px !important; }
     .glass-signup-card .btn-primary {
@@ -296,9 +334,9 @@
         </div>
         <div class="mb-4">
             <label class="form-label">Create Password</label>
-            <div class="input-group">
+            <div class="password-input-wrapper">
                 <input type="password" name="password" id="signupPassword" class="form-control" required placeholder="Create a password" minlength="6">
-                <button type="button" class="btn btn-outline-secondary" id="toggleSignupPassword" aria-label="Toggle password visibility" tabindex="-1">
+                <button type="button" class="password-toggle-btn" id="toggleSignupPassword" aria-label="Toggle password visibility" tabindex="-1">
                     <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
                 </button>
             </div>

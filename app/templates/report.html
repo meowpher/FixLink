@@ -1076,7 +1076,13 @@
     // Success, Dismiss, and Copy Handlers
     window.showSuccessModal = function (ticketId) {
         const ticketIdEl = document.getElementById('successTicketId');
-        if (ticketIdEl) ticketIdEl.textContent = '#' + ticketId;
+        let cleanId = ticketId;
+        if (cleanId === undefined || cleanId === null || cleanId === 'undefined' || cleanId === '') {
+            cleanId = '';
+        }
+        if (ticketIdEl) {
+            ticketIdEl.textContent = cleanId ? '#' + cleanId : '#----';
+        }
         const modalEl = document.getElementById('successModal');
         if (modalEl) {
             const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
@@ -1211,6 +1217,15 @@
             display.style.display = 'none';
         }
     });
+    {% if success and ticket_id %}
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function() {
+            if (typeof window.showSuccessModal === 'function') {
+                window.showSuccessModal('{{ ticket_id }}');
+            }
+        }, 150);
+    });
+    {% endif %}
 </script>
 <script type="module" src="{{ url_for('static', filename='js/modules/main.js') }}"></script>
 {% endblock %}

@@ -285,6 +285,35 @@ def users():
                            sort=sort_filter)
 
 
+def generate_sparkline_svg(data_points, width=100, height=30, padding=4):
+    """Generate SVG path string (d attribute) from a series of data points."""
+    if not data_points or len(data_points) < 2:
+        return f"M0,{height - padding} L{width},{height - padding}"
+    
+    max_val = max(data_points)
+    min_val = min(data_points)
+    val_range = max_val - min_val
+    if val_range == 0:
+        val_range = 1
+        
+    usable_h = height - (padding * 2)
+    step_x = width / (len(data_points) - 1)
+    
+    coords = []
+    for i, v in enumerate(data_points):
+        x = round(i * step_x, 1)
+        y = round(height - padding - ((v - min_val) / val_range * usable_h), 1)
+        coords.append((x, y))
+        
+    path = f"M{coords[0][0]},{coords[0][1]}"
+    for i in range(1, len(coords)):
+        prev_x, prev_y = coords[i - 1]
+        curr_x, curr_y = coords[i]
+        mid_x = round((prev_x + curr_x) / 2, 1)
+        path += f" C{mid_x},{prev_y} {mid_x},{curr_y} {curr_x},{curr_y}"
+    return path
+
+
 @admin_bp.route('/analytics')
 @admin_bp.route('/api/analytics', endpoint='api_analytics')
 @admin_required
@@ -305,23 +334,47 @@ def analytics():
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
             end_date = datetime.strptime(end_date_str, '%Y-%m-%d') + timedelta(days=1)
             query = query.filter(Ticket.created_at.between(start_date, end_date))
+            window_len = end_date - start_date
         except ValueError:
             start_date = now - timedelta(days=180)
+            end_date = now
+            window_len = timedelta(days=180)
     elif period == 'daily':
         # Default to last 14 days for daily
         start_date = now - timedelta(days=14)
+        end_date = now
+        window_len = timedelta(days=14)
         query = query.filter(Ticket.created_at >= start_date)
     elif period == 'weekly':
         # Default to last 12 weeks
         start_date = now - timedelta(weeks=12)
+        end_date = now
+        window_len = timedelta(weeks=12)
         query = query.filter(Ticket.created_at >= start_date)
     else: # Default monthly
         start_date = now - timedelta(days=180)
+        end_date = now
+        window_len = timedelta(days=180)
         query = query.filter(Ticket.created_at >= start_date)
 
     # 2. Total/Fixed Stats (Respecting filters)
     total_tickets = query.count()
     fixed_tickets_count = query.filter(Ticket.status == Ticket.STATUS_FIXED).count()
+    
+    # Prior Window Calculation for Actual Comparative Trends
+    prior_end = start_date
+    prior_start = start_date - window_len
+    prior_query = Ticket.query.filter(Ticket.created_at >= prior_start, Ticket.created_at < prior_end)
+    prior_total = prior_query.count()
+    prior_fixed = prior_query.filter(Ticket.status == Ticket.STATUS_FIXED).count()
+    
+    prior_success_rate = round((prior_fixed / prior_total * 100), 1) if prior_total > 0 else 0
+    prior_fixed_tickets = prior_query.filter(Ticket.status == Ticket.STATUS_FIXED, Ticket.job_completed_at.isnot(None)).all()
+    prior_avg_time = 0
+    if prior_fixed_tickets:
+        p_durations = [(t.job_completed_at - t.created_at).total_seconds() for t in prior_fixed_tickets if t.job_completed_at and t.created_at]
+        if p_durations:
+            prior_avg_time = round(sum(p_durations) / (3600 * len(p_durations)), 1)
     
     # 3. Tickets by Category (Respecting filters)
     raw_category_counts = db.session.query(
@@ -374,25 +427,120 @@ def analytics():
             if durations:
                 avg_res_time = round(sum(durations) / (3600 * len(durations)), 1) # in hours
 
-    # 6. Trend Grouping Based on Period (Fallback gracefully on SQLite in testing)
+    # 6. Trend Grouping Based on Period (Works seamlessly on SQLite & PostgreSQL)
     trend_data = []
+    is_sqlite = db.engine.dialect.name == 'sqlite'
+    if is_sqlite:
+        date_fmt = '%Y-%m-%d' if period == 'daily' else ('%Y-%W' if period == 'weekly' else '%Y-%m')
+        label_expr = func.strftime(date_fmt, Ticket.created_at)
+    else:
+        date_fmt = 'YYYY-MM-DD' if period == 'daily' else ('IYYY-"W"IW' if period == 'weekly' else 'YYYY-MM')
+        label_expr = func.to_char(Ticket.created_at, date_fmt)
+
     try:
-        if period == 'daily':
-            fmt = 'YYYY-MM-DD'
-        elif period == 'weekly':
-            fmt = 'IYYY-"W"IW'
-        else:
-            fmt = 'YYYY-MM'
-            
         trend_query = db.session.query(
-            func.to_char(Ticket.created_at, fmt).label('label'),
+            label_expr.label('label'),
             func.count(Ticket.id)
         ).filter(Ticket.created_at >= start_date).group_by('label').order_by('label').all()
-        
         trend_data = [list(row) for row in trend_query]
+    except Exception as e:
+        current_app.logger.warning(f"Trend query fallback: {e}")
+
+    # 7. Compute Real Sparklines & Actual Trend Deltas
+    vol_points = [row[1] for row in trend_data] if trend_data else []
+    vol_sparkline = generate_sparkline_svg(vol_points)
+    
+    # Resolved time series
+    try:
+        res_trend_query = db.session.query(
+            label_expr.label('label'),
+            func.count(Ticket.id)
+        ).filter(Ticket.created_at >= start_date, Ticket.status == Ticket.STATUS_FIXED).group_by('label').order_by('label').all()
+        res_dict = dict(res_trend_query)
+        res_points = [res_dict.get(row[0], 0) for row in trend_data]
     except Exception:
-        # Graceful fallback for SQLite / testing where func.to_char is unavailable
-        pass
+        res_points = []
+    res_sparkline = generate_sparkline_svg(res_points)
+    
+    # Success rate points
+    sr_points = []
+    if trend_data and res_points:
+        for i, row in enumerate(trend_data):
+            tot = row[1]
+            fix = res_points[i] if i < len(res_points) else 0
+            sr_points.append(round((fix / tot * 100), 1) if tot > 0 else 0)
+    sr_sparkline = generate_sparkline_svg(sr_points)
+    
+    time_sparkline = generate_sparkline_svg([avg_res_time, avg_res_time] if avg_res_time > 0 else [])
+
+    # Real percentage changes vs prior window
+    if prior_total > 0:
+        vol_diff = round(((total_tickets - prior_total) / prior_total) * 100)
+        vol_trend = f"{'+' if vol_diff > 0 else ''}{vol_diff}%"
+    elif total_tickets > 0:
+        vol_trend = "+100%"
+    else:
+        vol_trend = "0%"
+
+    if prior_fixed > 0:
+        res_diff = round(((fixed_tickets_count - prior_fixed) / prior_fixed) * 100)
+        res_trend = f"{'+' if res_diff > 0 else ''}{res_diff}%"
+    elif fixed_tickets_count > 0:
+        res_trend = "+100%"
+    else:
+        res_trend = "0%"
+
+    sr_diff = round(success_rate - prior_success_rate, 1)
+    sr_trend = f"{'+' if sr_diff > 0 else ''}{sr_diff}%" if sr_diff != 0 else "0%"
+
+    if avg_res_time > 0 and prior_avg_time > 0:
+        time_diff = round(avg_res_time - prior_avg_time, 1)
+        time_trend = f"{'+' if time_diff > 0 else ''}{time_diff}h"
+    elif avg_res_time > 0:
+        time_trend = f"{avg_res_time}h"
+    else:
+        time_trend = "0h"
+
+    advanced_stats = [
+        {
+            'label': 'Total Volume',
+            'value': total_tickets,
+            'trend': vol_trend,
+            'desc': 'Tickets in selected window',
+            'color': 'primary',
+            'svg_path': vol_sparkline,
+            'link': url_for('admin.history')
+        },
+        {
+            'label': 'Resolved',
+            'value': fixed_tickets_count,
+            'trend': res_trend,
+            'desc': 'Fixed in selected window',
+            'color': 'success',
+            'svg_path': res_sparkline,
+            'link': url_for('admin.history', status='fixed')
+        },
+        {
+            'label': 'Success Rate',
+            'value': success_rate,
+            'is_percent': True,
+            'trend': sr_trend,
+            'desc': 'Window resolution efficiency',
+            'color': 'info',
+            'svg_path': sr_sparkline,
+            'link': url_for('admin.history')
+        },
+        {
+            'label': 'Avg. Fix Time',
+            'value': avg_res_time,
+            'is_hour': True,
+            'trend': time_trend,
+            'desc': 'Mean TTR for this window',
+            'color': 'warning',
+            'svg_path': time_sparkline,
+            'link': '#trendChartBox'
+        }
+    ]
 
     # Current Risks (Always current)
     critical_assets = get_critical_assets(5)
@@ -406,6 +554,7 @@ def analytics():
             'success_rate': success_rate,
             'monthly_trend': trend_data,
             'period': period,
+            'advanced_stats': advanced_stats,
             'critical_assets': critical_assets})
 
     return render_template('admin_analytics.html',
@@ -418,6 +567,7 @@ def analytics():
                           period=period,
                           start_date=start_date_str,
                           end_date=end_date_str,
+                          advanced_stats=advanced_stats,
                           critical_assets=critical_assets)
 
 

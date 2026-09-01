@@ -2000,8 +2000,10 @@ body {
 }
 
 /* Professional Category Badges */
-.badge.badge-it, .badge.badge-it-technician,
-.badge-it, .badge-it-technician {
+.badge.badge-it,
+.badge.badge-it-technician,
+.badge-it,
+.badge-it-technician {
     background-color: #4e73df !important;
     color: white !important;
     border-color: transparent !important;
@@ -2025,7 +2027,8 @@ body {
     border-color: transparent !important;
 }
 
-.badge.badge-other, .badge.badge-others {
+.badge.badge-other,
+.badge.badge-others {
     background-color: #6c757d !important;
     color: white !important;
     border-color: transparent !important;
@@ -2700,8 +2703,10 @@ body[data-theme="dark"] .stat-label {
     box-shadow: var(--shadow-sm);
 }
 
-[data-theme="dark"] .badge.badge-it, [data-theme="dark"] .badge.badge-it-technician,
-[data-theme="dark"] .badge-it, [data-theme="dark"] .badge-it-technician {
+[data-theme="dark"] .badge.badge-it,
+[data-theme="dark"] .badge.badge-it-technician,
+[data-theme="dark"] .badge-it,
+[data-theme="dark"] .badge-it-technician {
     background-color: rgba(78, 115, 223, 0.2) !important;
     color: #a5b4fc !important;
     border: 1px solid rgba(78, 115, 223, 0.35) !important;
@@ -2725,7 +2730,8 @@ body[data-theme="dark"] .stat-label {
     border: 1px solid rgba(231, 74, 59, 0.35) !important;
 }
 
-[data-theme="dark"] .badge.badge-other, [data-theme="dark"] .badge.badge-others {
+[data-theme="dark"] .badge.badge-other,
+[data-theme="dark"] .badge.badge-others {
     background-color: rgba(108, 117, 125, 0.2) !important;
     color: #d1d5db !important;
     border: 1px solid rgba(108, 117, 125, 0.35) !important;
@@ -6786,4 +6792,3 @@ select.compact-input {
     opacity: 0.45;
     cursor: default !important;
 }
->>>>>>> 8cb5267 (feat: Integrate interactive SVG maps, fix room clickability, enable 6th floor, and add faculty booking system)

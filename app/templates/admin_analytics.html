@@ -9,29 +9,38 @@
         border-radius: 15px;
         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         transition: transform 0.3s ease;
-        background: var(--bg-card); /* Theme aware */
-        color: var(--text-main); /* Theme aware */
+        background: var(--bg-card);
+        /* Theme aware */
+        color: var(--text-main);
+        /* Theme aware */
         height: 100%;
         display: flex;
         flex-direction: column;
     }
+
     .analytics-card:hover {
         transform: translateY(-5px);
     }
+
     .stat-value {
-        font-size: 2rem; /* Reduced from 2.5rem as requested */
+        font-size: 2rem;
+        /* Reduced from 2.5rem as requested */
         font-weight: 700;
         color: var(--mitwpu-blue);
     }
+
     .stat-label {
         font-size: 0.9rem;
-        color: var(--text-muted); /* Theme aware */
+        color: var(--text-muted);
+        /* Theme aware */
         text-transform: uppercase;
         letter-spacing: 1px;
     }
+
     [data-theme="dark"] .stat-value {
         color: var(--ice-hint) !important;
     }
+
     .chart-container {
         position: relative;
         height: 300px;
@@ -54,10 +63,8 @@
             </div>
             <div class="col-md-6 text-md-end">
                 <div class="admin-actions">
-                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light me-2 d-none d-md-inline-block">
-                        <i class="bi bi-speedometer2 me-1"></i>Dashboard
-                    </a>
-                    <a href="{{ url_for('admin.export_report', fmt='pdf', start_date=start_date, end_date=end_date) }}" class="btn btn-outline-light">
+                    <a href="{{ url_for('admin.export_report', fmt='pdf', start_date=start_date, end_date=end_date) }}"
+                        class="btn btn-outline-light">
                         <i class="bi bi-printer me-1"></i>Export PDF
                     </a>
                 </div>
@@ -69,40 +76,40 @@
 <div class="container py-4">
     <!-- Summary Stats with Advanced UI -->
     <div class="row g-4 mb-5 advanced-stats-row">
-        {% set advanced_stats = [
-            {'label': 'Total Volume', 'value': total_tickets, 'trend': '+12%', 'desc': 'Tickets in selected window', 'color': 'primary'},
-            {'label': 'Resolved', 'value': fixed_count, 'trend': '+8%', 'desc': 'Fixed in selected window', 'color': 'success'},
-            {'label': 'Success Rate', 'value': success_rate, 'is_percent': true, 'trend': '+2%', 'desc': 'Window resolution efficiency', 'color': 'info'},
-            {'label': 'Avg. Fix Time', 'value': avg_res_time, 'is_hour': true, 'trend': '-1.5h', 'desc': 'Mean TTR for this window', 'color': 'warning'}
-        ] %}
-        
         {% for stat in advanced_stats %}
         <div class="col-md-3">
-            <div class="analytics-card advanced-stat-card p-4 text-center position-relative overflow-hidden" data-target-value="{{ stat.value }}">
-                <!-- Skeleton Overlay -->
-                <div class="skeleton-overlay skeleton-shimmer"></div>
-                
-                <div class="stat-content">
-                    <div class="stat-label mb-2 d-flex justify-content-between align-items-center">
-                        <span>{{ stat.label }}</span>
-                        <span class="text-{{ stat.color }} small fw-bold">{{ stat.trend }}</span>
+            <a href="{{ stat.link }}" class="text-decoration-none d-block h-100" title="View {{ stat.label }} details">
+                <div class="analytics-card advanced-stat-card p-4 text-center position-relative overflow-hidden"
+                    data-target-value="{{ stat.value }}" style="cursor: pointer;">
+                    <!-- Skeleton Overlay -->
+                    <div class="skeleton-overlay skeleton-shimmer"></div>
+
+                    <div class="stat-content">
+                        <div class="stat-label mb-2 d-flex justify-content-between align-items-center">
+                            <span class="text-secondary fw-semibold">{{ stat.label }}</span>
+                            <span
+                                class="badge {% if '-' in stat.trend and stat.color != 'warning' %}bg-danger-subtle text-danger{% elif '+' in stat.trend or (stat.color == 'warning' and '-' in stat.trend) %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %} fw-bold px-2 py-1"
+                                style="font-size: 0.72rem; border-radius: 6px;">{{ stat.trend }}</span>
+                        </div>
+                        <div class="stat-value-container mb-1 justify-content-center">
+                            <span class="stat-value animated-counter">{{ stat.value }}</span>
+                            {% if stat.is_percent %}<span class="stat-value-unit">%</span>{% endif %}
+                            {% if stat.is_hour %}<span class="stat-value-unit">h</span>{% endif %}
+                        </div>
+
+                        <!-- SVG Trend Line -->
+                        <div class="trend-line-container">
+                            <svg class="trend-svg text-{{ stat.color }}" viewBox="0 0 100 30"
+                                preserveAspectRatio="none">
+                                <path class="trend-path" d="{{ stat.svg_path }}" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round"></path>
+                            </svg>
+                        </div>
+
+                        <div class="mt-2 small text-muted text-center">{{ stat.desc }}</div>
                     </div>
-                    <div class="stat-value-container mb-1 justify-content-center">
-                        <span class="stat-value animated-counter">0</span>
-                        {% if stat.is_percent %}<span class="stat-value-unit">%</span>{% endif %}
-                        {% if stat.is_hour %}<span class="stat-value-unit">h</span>{% endif %}
-                    </div>
-                    
-                    <!-- SVG Trend Line -->
-                    <div class="trend-line-container">
-                        <svg class="trend-svg text-{{ stat.color }}" viewBox="0 0 100 30" preserveAspectRatio="none">
-                            <path class="trend-path" d="M0,25 C20,20 40,30 60,10 C80,-5 100,15 100,15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-                        </svg>
-                    </div>
-                    
-                    <div class="mt-2 small text-muted text-center">{{ stat.desc }}</div>
                 </div>
-            </div>
+            </a>
         </div>
         {% endfor %}
     </div>
@@ -116,9 +123,9 @@
                     <h5 class="mb-0 fw-bold">Ticket Volume Trend ({{ period|title }})</h5>
                     <span class="badge bg-primary-subtle text-primary py-2 px-3">
                         {% if start_date and end_date %}
-                            {{ start_date }} to {{ end_date }}
+                        {{ start_date }} to {{ end_date }}
                         {% else %}
-                            Live Trends
+                        Live Trends
                         {% endif %}
                     </span>
                 </div>
@@ -128,22 +135,28 @@
                     <form action="{{ url_for('admin.analytics') }}" method="GET" class="row g-2 align-items-end">
                         <div class="col-md-3">
                             <label class="form-label smallest fw-bold text-uppercase mb-1">From</label>
-                            <input type="date" name="start_date" class="form-control form-control-sm" value="{{ start_date or '' }}">
+                            <input type="date" name="start_date" class="form-control form-control-sm"
+                                value="{{ start_date or '' }}">
                         </div>
                         <div class="col-md-3">
                             <label class="form-label smallest fw-bold text-uppercase mb-1">To</label>
-                            <input type="date" name="end_date" class="form-control form-control-sm" value="{{ end_date or '' }}">
+                            <input type="date" name="end_date" class="form-control form-control-sm"
+                                value="{{ end_date or '' }}">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label smallest fw-bold text-uppercase mb-1">Period</label>
                             <div class="btn-group btn-group-sm w-100" role="group">
-                                <input type="radio" class="btn-check" name="period" id="pd_daily" value="daily" {% if period == 'daily' %}checked{% endif %} onchange="this.form.submit()">
+                                <input type="radio" class="btn-check" name="period" id="pd_daily" value="daily" {% if
+                                    period=='daily' %}checked{% endif %} onchange="this.form.submit()">
                                 <label class="btn btn-outline-primary" for="pd_daily">Daily</label>
-                                
-                                <input type="radio" class="btn-check" name="period" id="pd_weekly" value="weekly" {% if period == 'weekly' %}checked{% endif %} onchange="this.form.submit()">
+
+                                <input type="radio" class="btn-check" name="period" id="pd_weekly" value="weekly" {% if
+                                    period=='weekly' %}checked{% endif %} onchange="this.form.submit()">
                                 <label class="btn btn-outline-primary" for="pd_weekly">Weekly</label>
-                                
-                                <input type="radio" class="btn-check" name="period" id="pd_monthly" value="monthly" {% if period == 'monthly' or not period %}checked{% endif %} onchange="this.form.submit()">
+
+                                <input type="radio" class="btn-check" name="period" id="pd_monthly" value="monthly" {%
+                                    if period=='monthly' or not period %}checked{% endif %}
+                                    onchange="this.form.submit()">
                                 <label class="btn btn-outline-primary" for="pd_monthly">Monthly</label>
                             </div>
                         </div>
@@ -159,7 +172,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Category Distribution -->
         <div class="col-lg-4">
             <div class="analytics-card p-4">
@@ -178,36 +191,38 @@
             <div class="analytics-card p-4">
                 <h5 class="mb-4 fw-bold">Service Category Distribution</h5>
                 <div class="desktop-table-container">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Category</th>
-                                <th>Ticket Count</th>
-                                <th>Percentage</th>
-                                <th>Trend State</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for cat, count in category_data.items() %}
-                            <tr>
-                                <td class="fw-semibold">{{ cat|title }}</td>
-                                <td>{{ count }}</td>
-                                <td>
-                                    <div class="progress" style="height: 8px; width: 100px;">
-                                        <div class="progress-bar set-width" role="progressbar" 
-                                             data-width="{{ (count / total_tickets * 100)|round|int if total_tickets > 0 else 0 }}%"></div>
-                                    </div>
-                                    <small class="text-muted">{{ (count / total_tickets * 100)|round(1) if total_tickets > 0 else 0 }}%</small>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success-subtle text-success">Stable</span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                    </tbody>
-                    </table>
-                </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Category</th>
+                                    <th>Ticket Count</th>
+                                    <th>Percentage</th>
+                                    <th>Trend State</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cat, count in category_data.items() %}
+                                <tr>
+                                    <td class="fw-semibold">{{ cat|title }}</td>
+                                    <td>{{ count }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 8px; width: 100px;">
+                                            <div class="progress-bar set-width" role="progressbar"
+                                                data-width="{{ (count / total_tickets * 100)|round|int if total_tickets > 0 else 0 }}%">
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ (count / total_tickets * 100)|round(1) if
+                                            total_tickets > 0 else 0 }}%</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success-subtle text-success">Stable</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- Mobile Card Layout -->
@@ -222,17 +237,19 @@
                                 <span class="badge bg-success-subtle text-success">Stable</span>
                             </div>
                         </div>
-                        
+
                         <div class="mc-person-row bg-transparent p-0 mt-2">
                             <div class="mc-person-left w-100">
                                 <div class="flex-grow-1">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <span class="mc-meta">{{ count }} Tickets</span>
-                                        <span class="mc-meta fw-bold">{{ (count / total_tickets * 100)|round(1) if total_tickets > 0 else 0 }}%</span>
+                                        <span class="mc-meta fw-bold">{{ (count / total_tickets * 100)|round(1) if
+                                            total_tickets > 0 else 0 }}%</span>
                                     </div>
                                     <div class="progress" style="height: 8px; width: 100%;">
-                                        <div class="progress-bar set-width" role="progressbar" 
-                                             data-width="{{ (count / total_tickets * 100)|round|int if total_tickets > 0 else 0 }}%"></div>
+                                        <div class="progress-bar set-width" role="progressbar"
+                                            data-width="{{ (count / total_tickets * 100)|round|int if total_tickets > 0 else 0 }}%">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -266,7 +283,7 @@
 </script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         // Apply progress bar widths
         document.querySelectorAll('.progress-bar.set-width').forEach(el => {
             el.style.width = el.getAttribute('data-width');
@@ -277,7 +294,7 @@
         const primaryColor = isDark ? '#5B8FF9' : '#003399';
         const gridColor = isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.05)';
         const textColor = isDark ? '#EDEDF0' : '#1e293b';
-        
+
         // Vibrant pie chart palette for dark mode
         const darkPieColors = ['#5B8FF9', '#ffd43b', '#10b981', '#ff6b6b', '#38bdf8', '#a78bfa', '#fb923c'];
         const lightPieColors = ['#003399', '#ffcc00', '#28a745', '#dc3545', '#17a2b8', '#6610f2', '#fd7e14'];
@@ -285,7 +302,7 @@
         // 1. Trend Chart
         const trendData = JSON.parse(document.getElementById('trend-data').textContent);
         const trendCtx = document.getElementById('trendChart').getContext('2d');
-        
+
         new Chart(trendCtx, {
             type: 'line',
             data: {
@@ -310,12 +327,12 @@
                     tooltip: { mode: 'index', intersect: false }
                 },
                 scales: {
-                    y: { 
+                    y: {
                         beginAtZero: true,
                         grid: { color: gridColor },
                         ticks: { color: textColor }
                     },
-                    x: { 
+                    x: {
                         grid: { display: false },
                         ticks: { color: textColor }
                     }
@@ -358,7 +375,7 @@
         });
 
         // Redraw charts on theme toggle
-        window.addEventListener('themeChanged', function() {
+        window.addEventListener('themeChanged', function () {
             location.reload();
         });
     });

@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const targetValueStr = card.getAttribute('data-target-value') || "0";
         const isFloat = targetValueStr.includes('.');
         const targetValue = parseFloat(targetValueStr);
-        
+
         if (counterEl && !isNaN(targetValue)) {
             let obj = { val: 0 };
             gsap.to(obj, {

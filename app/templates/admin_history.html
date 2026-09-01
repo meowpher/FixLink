@@ -334,7 +334,7 @@
 
             <!-- Pagination Controls -->
             {% if pagination and pagination.pages > 1 %}
-            <div class="card-footer bg-white border-top-0 py-3">
+            <div class="card-footer border-top-0 py-3">
                 <nav aria-label="History pagination">
                     <ul class="pagination justify-content-center mb-0">
                         <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
@@ -422,13 +422,13 @@
                         <div class="col-6">
                             <div class="mb-2">
                                 <label class="form-label x-small-label mb-0.5">Ticket ID</label>
-                                <div class="fw-bold text-dark" style="font-size: 0.9rem;">#${ticket.id}</div>
+                                <div class="fw-bold text-body" style="font-size: 0.9rem;">#${ticket.id}</div>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="mb-2">
                                 <label class="form-label x-small-label mb-0.5">Room</label>
-                                <div class="fw-semibold text-dark" style="font-size: 0.9rem;">${ticket.room_number} (${ticket.floor_name})</div>
+                                <div class="fw-semibold text-body" style="font-size: 0.9rem;">${ticket.room_number} (${ticket.floor_name})</div>
                             </div>
                         </div>
                     </div>
@@ -437,7 +437,7 @@
                         <div class="col-6">
                             <div class="mb-2">
                                 <label class="form-label x-small-label mb-0.5">Issue Type</label>
-                                <div class="fw-semibold text-dark text-capitalize" style="font-size: 0.9rem;">${ticket.issue_type}</div>
+                                <div class="fw-semibold text-body text-capitalize" style="font-size: 0.9rem;">${ticket.issue_type}</div>
                             </div>
                         </div>
                         <div class="col-6">
@@ -450,9 +450,9 @@
                     
                     <div class="row g-2">
                         <div class="col-12">
-                            <div class="mb-2 p-2 bg-light rounded-3 border">
+                            <div class="mb-2 p-2 bg-body-tertiary rounded-3 border">
                                 <label class="form-label x-small-label mb-0.5">Reporter</label>
-                                <div class="fw-semibold text-dark" style="font-size: 0.85rem;">${ticket.reporter_name}</div>
+                                <div class="fw-semibold text-body" style="font-size: 0.85rem;">${ticket.reporter_name}</div>
                                 <div class="text-muted small" style="font-size: 0.78rem;">PRN: ${ticket.prn} | ${ticket.reporter_email}</div>
                             </div>
                         </div>

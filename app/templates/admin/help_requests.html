@@ -227,7 +227,7 @@
                                 .forEach(prof => {
                                     const item = document.createElement('button');
                                     item.className = 'list-group-item list-group-item-action py-2 border-0 ps-4';
-                                    item.innerHTML = `<div class="fw-medium font-sm mb-0 text-dark">${prof.name}</div>`;
+                                    item.innerHTML = `<div class="fw-medium font-sm mb-0 text-body">${prof.name}</div>`;
                                     item.onclick = function() {
                                         selectedHelperId = prof.id;
                                         document.querySelectorAll('#helper-list .list-group-item').forEach(el => el.classList.remove('active', 'bg-primary-subtle', 'text-primary'));

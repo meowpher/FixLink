@@ -41,7 +41,7 @@
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}"></noscript>
 
     <!-- Custom CSS (critical, load synchronously) -->
-    <link href="{{ url_for('static', filename='css/style.min.css') }}?v=6.6" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.min.css') }}?v=7.1" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Manifest -->
@@ -587,7 +587,7 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0" aria-labelledby="notificationsDropdown" style="width: 320px;">
                             <li class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom">
-                                <span class="fw-bold text-dark">Notifications</span>
+                                <span class="fw-bold text-body">Notifications</span>
                                 <button class="btn btn-sm btn-link p-0 text-decoration-none" id="markAllReadBtn" style="font-size: 0.75rem;">Mark all as read</button>
                             </li>
                             <div id="notificationList" style="max-height: 350px; overflow-y: auto;"></div>
@@ -1019,7 +1019,7 @@
                     <div class="notification-icon-wrapper mb-3">
                         <i class="bi bi-info-circle text-primary display-4"></i>
                     </div>
-                    <p class="lead mb-0 text-dark fw-medium" id="notificationModalBody"></p>
+                    <p class="lead mb-0 text-body fw-medium" id="notificationModalBody"></p>
                 </div>
                 <div class="modal-footer border-0 justify-content-center pb-4">
                     <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500;">Close</button>

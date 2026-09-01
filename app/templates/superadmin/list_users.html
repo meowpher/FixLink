@@ -50,12 +50,12 @@
                                             {% endif %}
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-dark">{{ user.name }}</div>
+                                            <div class="fw-bold text-body">{{ user.name }}</div>
                                             <div class="text-muted small">{{ user.email }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="badge bg-light text-dark border">{{ user.prn or 'N/A' }}</span></td>
+                                <td><span class="badge bg-body-tertiary text-body border">{{ user.prn or 'N/A' }}</span></td>
                                 <td>
                                     <select class="form-select form-select-sm border-0 bg-light role-select" 
                                             style="width: 130px; font-weight: 500;" 
@@ -106,7 +106,7 @@
                 <div class="mc-card" id="user-mc-{{ user.id }}">
                     <div class="mc-top">
                         <div class="mc-id-title">
-                            <span class="mc-id"><span class="badge bg-light text-dark border">{{ user.prn or 'N/A' }}</span></span>
+                            <span class="mc-id"><span class="badge bg-body-tertiary text-body border">{{ user.prn or 'N/A' }}</span></span>
                             <span class="mc-title">{{ user.name }}</span>
                         </div>
                         <div class="mc-status">

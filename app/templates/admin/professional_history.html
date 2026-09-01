@@ -212,16 +212,16 @@
                         <tr>
                             <td class="ps-4 fw-medium text-primary">#{{ job.id }}</td>
                             <td>
-                                <div class="fw-bold text-dark">{{ job.room.number }}</div>
+                                <div class="fw-bold text-body">{{ job.room.number }}</div>
                                 <div class="text-muted small">Academic Block</div>
                             </td>
                             <td>
                                 <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-1">
-                                    {{ job.issue_type|title }}
+                                     {{ job.issue_type|title }}
                                 </span>
                             </td>
                             <td>
-                                <div class="text-dark">{{ job.job_completed_at|ist('%d %b %Y') }}</div>
+                                <div class="text-body">{{ job.job_completed_at|ist('%d %b %Y') }}</div>
                                 <div class="text-muted small">{{ job.job_completed_at|ist('%I:%M %p') }}</div>
                             </td>
                             <td>
@@ -231,7 +231,7 @@
                                          alt="Completion Photo" class="rounded border shadow-sm" style="height: 42px; width: 42px; object-fit: cover; cursor: pointer;"
                                          loading="lazy"
                                          onclick="window.showPhoto('{{ url_for('static', filename='uploads/' + job.completion_photo_filename) }}')">
-                                    <div class="position-absolute bottom-0 end-0 bg-white rounded-circle shadow-sm p-1" style="transform: translate(30%, 30%);">
+                                    <div class="position-absolute bottom-0 end-0 bg-body-tertiary rounded-circle shadow-sm p-1" style="transform: translate(30%, 30%);">
                                         <i class="bi bi-zoom-in text-primary" style="font-size: 0.6rem;"></i>
                                     </div>
                                 </div>
@@ -324,7 +324,7 @@
                         <tr>
                             <td class="ps-4 fw-medium text-danger">#{{ job.id }}</td>
                             <td>
-                                <div class="fw-bold text-dark">{{ job.room.number }}</div>
+                                <div class="fw-bold text-body">{{ job.room.number }}</div>
                                 <div class="text-muted small">Academic Block</div>
                             </td>
                             <td>
@@ -333,11 +333,11 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="text-dark">{{ job.cancelled_at|ist('%d %b %Y') }}</div>
+                                <div class="text-body">{{ job.cancelled_at|ist('%d %b %Y') }}</div>
                                 <div class="text-muted small">{{ job.cancelled_at|ist('%I:%M %p') }}</div>
                             </td>
                             <td>
-                                <div class="text-dark small text-truncate" style="max-width: 280px;" title="{{ job.cancellation_reason }}">
+                                <div class="text-body small text-truncate" style="max-width: 280px;" title="{{ job.cancellation_reason }}">
                                     "{{ job.cancellation_reason }}"
                                 </div>
                             </td>
@@ -483,7 +483,7 @@
                     </div>
                     <div class="mt-4">
                         <h6 class="fw-bold mb-2 small text-uppercase text-muted">Description</h6>
-                        <p class="p-3 bg-white border rounded shadow-sm mb-0">${t.description}</p>
+                        <p class="p-3 bg-body-tertiary border rounded shadow-sm mb-0">${t.description}</p>
                     </div>
                 `;
                 

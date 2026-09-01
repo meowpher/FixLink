@@ -368,9 +368,9 @@
                                 {% if ticket.status == 'cancelled' %}
                                 <span class="badge bg-danger">Cancelled</span>
                                 {% elif ticket.status == 'open' %}
-                                <span class="badge bg-warning text-dark">Open</span>
+                                <span class="badge bg-warning">Open</span>
                                 {% elif ticket.status == 'assigned' %}
-                                <span class="badge bg-info text-dark">Assigned</span>
+                                <span class="badge bg-info">Assigned</span>
                                 {% elif ticket.status == 'in-progress' %}
                                 <span class="badge bg-primary">In Progress</span>
                                 {% else %}
@@ -452,10 +452,10 @@
                 <!-- IN-PROGRESS TICKETS BOX -->
                 <div class="tickets-card">
                     <div class="tickets-header bg-warning bg-opacity-10 border-bottom border-warning">
-                        <h5 class="mb-0 text-warning text-dark">
+                        <h5 class="mb-0 text-warning">
                             <i class="bi bi-arrow-repeat me-2"></i>In-Progress Tickets
                         </h5>
-                        <span class="badge bg-warning text-dark">{{ in_progress_tickets | length }}</span>
+                        <span class="badge bg-warning">{{ in_progress_tickets | length }}</span>
                     </div>
                     {{ ticket_table_from(in_progress_tickets) }}
                 </div>
@@ -916,14 +916,14 @@
                         <p class="text-muted">Ticket #${ticket.id}</p>
                     </div>
                     <div class="report-details">
-                        <div class="mb-3 p-3 bg-light rounded-3 border">
-                            <label class="form-label fw-bold text-dark d-block">Cancelled By:</label>
+                        <div class="mb-3 p-3 bg-body-tertiary rounded-3 border">
+                            <label class="form-label fw-bold text-body d-block">Cancelled By:</label>
                             <span class="text-danger fw-bold">${ticket.cancelled_by_professional_name || ticket.assigned_professional_name || 'N/A'}</span>
                             <div class="small text-muted">${ticket.cancelled_by_professional_category || ticket.assigned_professional_category || ''}</div>
                         </div>
-                        <div class="mb-3 p-3 bg-light rounded-3 border border-danger shadow-sm" style="background-color: #fff8f8 !important;">
+                        <div class="mb-3 p-3 bg-danger-subtle rounded-3 border border-danger shadow-sm">
                             <label class="form-label fw-bold text-danger d-block">Reason for Cancellation:</label>
-                            <p class="mb-0 text-dark" style="font-size: 1.1rem; line-height: 1.5;">
+                            <p class="mb-0 text-body" style="font-size: 1.1rem; line-height: 1.5;">
                                 "${ticket.cancellation_reason || 'No reason provided.'}"
                             </p>
                         </div>

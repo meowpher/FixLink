@@ -113,7 +113,7 @@
                         <div class="mc-person-left">
                             <div class="mc-avatar">{{ prof.name[0]|upper }}</div>
                             <div class="mc-person-info">
-                                <span class="mc-name"><span class="badge bg-info text-dark">{{ category_names.get(prof.category, prof.category) }}</span></span>
+                                <span class="mc-name"><span class="badge bg-info">{{ category_names.get(prof.category, prof.category) }}</span></span>
                                 <span class="mc-meta">Joined: {{ prof.created_at.strftime('%d %b %Y') if prof.created_at else '-' }}</span>
                             </div>
                         </div>

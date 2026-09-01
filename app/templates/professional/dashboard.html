@@ -129,7 +129,7 @@
             'Cleaner': 'bi-brush'
             } %}
             {% set cat_icon = category_icons.get(category_name, 'bi-tools') %}
-            <div class="card-header bg-white py-3 border-0">
+            <div class="card-header py-3 border-0">
                 <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2"></i>My Profile</h5>
             </div>
             <div class="card-body pt-0">
@@ -140,7 +140,7 @@
                     </div>
                     <div>
                         <h6 class="mb-0 fw-bold">{{ professional.name }}</h6>
-                        <small class="badge bg-light text-primary border">{{ category_name }}</small>
+                        <small class="badge bg-primary-subtle text-primary border">{{ category_name }}</small>
                     </div>
                 </div>
                 <div class="small text-muted mb-2">
@@ -159,7 +159,7 @@
 
         <!-- Help Requests Card -->
         <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--border-radius-lg); overflow: hidden;">
-            <div class="card-header bg-white py-3 border-0">
+            <div class="card-header py-3 border-0">
                 <h5 class="mb-0 fw-bold text-warning"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</h5>
             </div>
             <div class="card-body p-0">
@@ -335,7 +335,7 @@
                             {% for ticket in completed_tickets %}
                             <tr>
                                 <td class="px-4 py-3 fw-bold text-muted">#{{ ticket.id }}</td>
-                                <td class="py-3 text-center"><span class="badge bg-light text-dark border">{{
+                                <td class="py-3 text-center"><span class="badge bg-body-tertiary text-body border">{{
                                         ticket.room.number }}</span></td>
                                 <td class="py-3">{{ ticket.issue_type.replace('_', ' ').title() }}</td>
                                 <td class="py-3 small text-muted">{{ ticket.job_completed_at.strftime('%b %d, %H:%M') if

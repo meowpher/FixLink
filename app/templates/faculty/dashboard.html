@@ -1182,7 +1182,7 @@
                                                         </button>
                                                         {% endif %}
                                                     {% else %}
-                                                        <span class="badge bg-warning text-dark position-absolute top-0 start-0 m-1 p-1" style="font-size: 0.5rem;">Ad-Hoc</span>
+                                                        <span class="badge bg-warning position-absolute top-0 start-0 m-1 p-1" style="font-size: 0.5rem;">Ad-Hoc</span>
                                                         <button class="btn-delete-class" onclick="deleteBooking(event, '{{ match.id }}')">
                                                             <i class="bi bi-trash3-fill"></i>
                                                         </button>
@@ -1353,7 +1353,7 @@
             <div class="modal-body p-0">
                 <div class="row g-0 h-100">
                     <!-- Left Column: Form -->
-                    <div class="col-lg-7 p-4 bg-white">
+                    <div class="col-lg-7 p-4 bg-card">
                         <div class="tt-form-container h-100">
                             <div class="row">
                                 <div class="col-md-6">
@@ -1383,7 +1383,7 @@
                             <div class="selector-group">
                                 <label class="selector-label">2. Select Classroom</label>
                                 <div class="mb-2">
-                                    <input type="text" class="form-control bg-white border-secondary text-dark mb-2" id="smartRoomSearch" placeholder="Search room number...">
+                                    <input type="text" class="form-control mb-2" id="smartRoomSearch" placeholder="Search room number...">
                                     <div class="d-flex flex-wrap gap-2 mb-3" id="floorFilters">
                                         <span class="floor-pill active" data-floor="all">All Floors</span>
                                         {% for floor in floors %}
@@ -1569,7 +1569,7 @@
                             {% for floor in floors %}
                             <div class="form-check">
                                 <input class="form-check-input adv-floor-checkbox" type="checkbox" value="{{ floor.id }}" id="advFloor{{ floor.id }}" checked>
-                                <label class="form-check-label text-dark fw-medium" for="advFloor{{ floor.id }}">{{ floor.name }}</label>
+                                <label class="form-check-label text-body fw-medium" for="advFloor{{ floor.id }}">{{ floor.name }}</label>
                             </div>
                             {% endfor %}
                         </div>

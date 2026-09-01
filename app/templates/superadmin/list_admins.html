@@ -42,7 +42,7 @@
                                     {% if admin.is_verified %}
                                     <span class="badge bg-success">Yes</span>
                                     {% else %}
-                                    <span class="badge bg-warning text-dark">No</span>
+                                    <span class="badge bg-warning">No</span>
                                     {% endif %}
                                 </td>
                                 <td>{{ admin.created_at.strftime('%Y-%m-%d') if admin.created_at else '-' }}</td>

@@ -331,7 +331,7 @@
                     <div class="mb-3 w-100">
                         <input class="form-control form-control-sm rounded-pill" type="file" name="csv_file" accept=".csv" required>
                     </div>
-                    <button type="submit" class="btn btn-info btn-sm rounded-pill w-100 px-4 text-dark shadow">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 px-4 shadow">
                         <i class="bi bi-upload me-2"></i>Upload CSV
                     </button>
                 </form>
@@ -349,7 +349,7 @@
         <div class="card bg-card border shadow-sm" style="border-radius: 16px; overflow: hidden; border-color: var(--border-color) !important;">
             <div class="table-responsive">
                 <table class="table table-hover mb-0 align-middle">
-                    <thead class="table-light text-muted">
+                    <thead class="bg-body-secondary text-muted">
                         <tr>
                             <th class="ps-4 border-bottom-0 py-3 fw-semibold">Status</th>
                             <th class="border-bottom-0 py-3 fw-semibold">Title & Description</th>
@@ -376,7 +376,7 @@
                                 {% if bug.reporter_type == 'guest' %}
                                     <span class="badge bg-secondary">Guest</span>
                                 {% else %}
-                                    <span class="badge bg-info text-dark text-capitalize">{{ bug.reporter_type }}</span>
+                                    <span class="badge bg-info text-capitalize">{{ bug.reporter_type }}</span>
                                     <div class="small text-muted mt-1">ID: {{ bug.reporter_id }}</div>
                                 {% endif %}
                             </td>

@@ -105,7 +105,19 @@
                 <i class="bi bi-moon-fill" id="mobileThemeToggleIcon" aria-hidden="true"></i>
             </button>
 
-            {% if (session.get('user_id') or session.get('professional_id')) and request.endpoint != 'main.report_bug' %}
+            <!-- Report Bug (icon only, opens modal) -->
+            {% if not (request.endpoint and request.endpoint.endswith('.login')) %}
+            <button type="button"
+                    class="top-bar-icon-btn"
+                    data-bs-toggle="modal"
+                    data-bs-target="#globalBugReportModal"
+                    aria-label="Report a bug"
+                    style="color: #ef4444;">
+                <i class="bi bi-bug-fill" aria-hidden="true"></i>
+            </button>
+            {% endif %}
+
+            {% if session.get('user_id') or session.get('professional_id') %}
 
             <!-- Admin Notifications Bell -->
             {% if session.get('is_admin') %}

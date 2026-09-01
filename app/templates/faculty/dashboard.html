@@ -119,7 +119,6 @@
     .nav-pills-premium {
         position: relative;
         z-index: 10;
-        backdrop-filter: blur(10px);
         display: flex;
         flex-direction: column;
         width: 100%;
@@ -379,12 +378,10 @@
     }
 
     .glass-card {
-        background: var(--glass-bg);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid var(--glass-border);
+        background: var(--bg-surface, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 16px;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
     }
 
     .map-container {
@@ -598,56 +595,123 @@
         background: rgba(46, 213, 115, 0.05);
         border-left-color: #2ed573;
     }
-    .glass-modal .modal-content {
-        background: rgba(15, 22, 36, 0.85);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: white;
+    /* Timetable Synchronizer Modal - Clean Solid Professional Style (No Glassmorphism) */
+    .glass-modal .modal-content,
+    #timetableModal .modal-content {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        border-radius: 16px !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+        border: 1px solid #e2e8f0 !important;
+        overflow: hidden !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
 
-    .glass-modal .modal-header { border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .glass-modal .form-control, .glass-modal .form-select {
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: white;
+    .glass-modal .modal-header,
+    #timetableModal .modal-header {
+        background: #ffffff !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+        padding: 1.25rem 1.5rem !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
     }
-    .glass-modal .form-control:focus {
-        background: rgba(255,255,255,0.1);
-        border-color: var(--cyber-blue);
-        box-shadow: 0 0 0 0.25rem rgba(0, 242, 255, 0.25);
+
+    .glass-modal .modal-title,
+    #timetableModal .modal-title {
+        color: #0f172a !important;
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
     }
-    /* Compact Light-Themed Synchronizer -> Adaptive Theme */
-    .glass-modal .modal-content {
-        background: var(--card-bg) !important;
-        color: var(--text-color) !important;
-        border-radius: 24px !important;
-        box-shadow: var(--shadow-lg) !important;
-        border: none !important;
-        overflow: hidden !important;
+
+    .glass-modal .form-control,
+    .glass-modal .form-select,
+    #timetableModal .form-control,
+    #timetableModal .form-select {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #0f172a !important;
+        border-radius: 8px !important;
     }
-    
-    .glass-modal .modal-header {
-        background: var(--card-bg) !important;
-        border-bottom: 1px solid var(--border-color) !important;
-        padding: 1rem 1.5rem !important;
+
+    .glass-modal .form-control:focus,
+    .glass-modal .form-select:focus,
+    #timetableModal .form-control:focus,
+    #timetableModal .form-select:focus {
+        border-color: #0b4d8c !important;
+        box-shadow: 0 0 0 2px rgba(11, 77, 140, 0.15) !important;
+        background-color: #ffffff !important;
     }
-    
-    .glass-modal .modal-title { color: var(--text-color) !important; font-size: 1.25rem !important; }
-    
-    /* Ensure the close button is visible in dark mode */
-    [data-theme="dark"] .glass-modal .btn-close { filter: invert(1) !important; }
+
+    .tt-form-container {
+        background: #ffffff !important;
+        padding: 1.5rem !important;
+        height: 100% !important;
+    }
+
+    .tt-builder-box {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 12px !important;
+    }
+
+    /* Dark mode support for Timetable Synchronizer */
+    [data-theme="dark"] .glass-modal .modal-content,
+    [data-theme="dark"] #timetableModal .modal-content {
+        background: #1e293b !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        color: #f1f5f9 !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    [data-theme="dark"] .glass-modal .modal-header,
+    [data-theme="dark"] #timetableModal .modal-header {
+        background: #1e293b !important;
+        border-bottom-color: rgba(255, 255, 255, 0.1) !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+    }
+
+    [data-theme="dark"] .glass-modal .modal-title,
+    [data-theme="dark"] #timetableModal .modal-title {
+        color: #f1f5f9 !important;
+    }
+
+    [data-theme="dark"] .glass-modal .btn-close,
+    [data-theme="dark"] #timetableModal .btn-close {
+        filter: invert(1) !important;
+    }
+
+    [data-theme="dark"] .glass-modal .form-control,
+    [data-theme="dark"] .glass-modal .form-select,
+    [data-theme="dark"] #timetableModal .form-control,
+    [data-theme="dark"] #timetableModal .form-select {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #f1f5f9 !important;
+    }
+
+    [data-theme="dark"] .tt-form-container {
+        background: #1e293b !important;
+    }
+
+    [data-theme="dark"] .tt-builder-box {
+        background: rgba(15, 23, 42, 0.6) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
 
     .selector-group {
-        background: var(--card-bg) !important;
-        border: 1px solid var(--border-color) !important;
-        border-radius: 16px !important;
-        padding: 1.25rem !important;
+        background: var(--bg-surface, #f8fafc) !important;
+        border: 1px solid var(--border-color, #e2e8f0) !important;
+        border-radius: 12px !important;
+        padding: 1.1rem !important;
         margin-bottom: 1rem !important;
-        box-shadow: var(--shadow-sm) !important;
+        box-shadow: none !important;
     }
 
     .selector-label { 
-        color: var(--text-muted) !important; 
+        color: var(--text-muted, #64748b) !important; 
         font-size: 0.75rem !important; 
         margin-bottom: 8px !important;
         text-transform: uppercase !important;
@@ -655,21 +719,21 @@
         font-weight: 700 !important;
     }
 
-    .form-control, .form-select { color: var(--text-color) !important; background-color: var(--bg-surface) !important; border-color: var(--border-color) !important; }
+    .form-control, .form-select { color: var(--text-color) !important; background-color: var(--bg-surface, #ffffff) !important; border-color: var(--border-color, #cbd5e1) !important; }
     
     /* Only style placeholders for non-floating forms so we don't break Bootstrap form-floating */
-    :not(.form-floating) > .form-control::placeholder { color: var(--text-muted); }
+    :not(.form-floating) > .form-control::placeholder { color: var(--text-muted, #94a3b8); }
 
     .tt-form-container {
-        background: var(--bg-light) !important;
+        background: var(--bg-card, #ffffff) !important;
         padding: 1.5rem !important;
         height: 100% !important;
     }
 
     .smart-grid {
         max-height: 180px !important;
-        background: var(--card-bg) !important;
-        border: 1px solid var(--border-color) !important;
+        background: var(--bg-card, #ffffff) !important;
+        border: 1px solid var(--border-color, #e2e8f0) !important;
     }
     
     .room-btn {
@@ -725,8 +789,8 @@
     .floor-pill.active { background: var(--mitwpu-blue) !important; color: white !important; border-color: #1e293b !important; }
 
     .tt-entry-row {
-        background: var(--card-bg) !important;
-        border: 1px solid var(--border-color) !important;
+        background: var(--bg-card, #ffffff) !important;
+        border: 1px solid var(--border-color, #e2e8f0) !important;
         color: var(--text-color) !important;
         padding: 0.85rem !important;
         margin-bottom: 0.85rem !important;
@@ -1276,12 +1340,12 @@
 </div>
 
 <!-- Timetable Sync Modal -->
-<div class="modal fade glass-modal" id="timetableModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="timetableModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content overflow-hidden border-0 shadow-2xl" style="border-radius: 28px;">
-            <div class="modal-header border-0 bg-white p-4 pb-0">
-                <h5 class="modal-title fw-bold fs-4 d-flex align-items-center text-dark">
-                    <i class="bi bi-calendar2-week-fill me-3 text-info"></i>
+        <div class="modal-content overflow-hidden border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-bottom p-3 px-4">
+                <h5 class="modal-title fw-bold fs-5 d-flex align-items-center">
+                    <i class="bi bi-calendar2-week-fill me-2 text-primary"></i>
                     Neural Schedule Synchronizer
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -1387,8 +1451,8 @@
                     </div>
 
                     <!-- Right Column: Staging Area -->
-                    <div class="col-lg-5 p-4 bg-light">
-                        <h6 class="text-info fw-bold text-uppercase small letter-spacing-1 mb-3">Synchronization Staging</h6>
+                    <div class="col-lg-5 p-4 border-start" style="background-color: var(--bg-surface, #f8fafc);">
+                        <h6 class="text-primary fw-bold text-uppercase small letter-spacing-1 mb-3">Synchronization Staging</h6>
                         <div class="tt-builder-box" id="ttBuilderQueue">
                             <div class="text-center py-5" id="ttEmptyMsg">
                                 <div class="mb-3">

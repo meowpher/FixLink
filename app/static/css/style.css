@@ -188,6 +188,12 @@
     fill: #c084fc;
 }
 
+/* Dark Green / Canteen */
+[data-theme="dark"] .room-poly.fill-darkgreen,
+[data-theme="dark"] .room-poly.fill-green {
+    fill: #023F24;
+}
+
 /* Purple */
 
 [data-theme="dark"] .building-outline {
@@ -1306,6 +1312,13 @@ body {
 /* Meeting & Conference */
 .room-poly.fill-purple {
     fill: #6f42c1;
+    color: white;
+}
+
+/* Canteen / Encave - Dark Green */
+.room-poly.fill-darkgreen,
+.room-poly.fill-green {
+    fill: #023F24;
     color: white;
 }
 
@@ -5740,6 +5753,14 @@ html[data-theme="dark"],
 [data-bs-theme="dark"] .room-poly.fill-silver {
     fill: #334155 !important;
     stroke: #64748b !important;
+}
+
+[data-theme="dark"] .room-poly.fill-darkgreen,
+[data-bs-theme="dark"] .room-poly.fill-darkgreen,
+[data-theme="dark"] .room-poly.fill-green,
+[data-bs-theme="dark"] .room-poly.fill-green {
+    fill: #023F24 !important;
+    stroke: #059669 !important;
 }
 
 [data-theme="dark"] .room-poly.has-issue,

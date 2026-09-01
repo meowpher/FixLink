@@ -129,7 +129,7 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
                     else if (type === 'faculty') targetForFill.classList.add('fill-orange');
                     else if (type === 'lift') targetForFill.classList.add('fill-pink');
                     else if (type === 'kitchen') targetForFill.classList.add('fill-orange');
-                    else if (type === 'canteen') targetForFill.classList.add('fill-teal');
+                    else if (type === 'canteen' || roomNum.toLowerCase() === 'encave') targetForFill.classList.add('fill-darkgreen');
                     else if (type === 'meeting' || type === 'meeting_room' || type === 'conference' || type === 'conference_room') {
                         targetForFill.classList.add('fill-purple');
                     } else if (type === 'unavailable') {

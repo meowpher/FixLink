@@ -178,9 +178,10 @@ def create_app(config_name=None):
     # Global Template Context
     @app.context_processor
     def inject_globals():
-        from .blueprints.superadmin.routes import SUPER_ADMIN_EMAIL
+        from .blueprints.superadmin.routes import SUPER_ADMIN_EMAIL, get_super_admin_emails
         return dict(
             SUPER_ADMIN_EMAIL=SUPER_ADMIN_EMAIL,
+            SUPER_ADMIN_EMAILS=list(get_super_admin_emails()),
             PUSHER_KEY=os.environ.get('PUSHER_KEY'),
             PUSHER_CLUSTER=os.environ.get('PUSHER_CLUSTER')
         )

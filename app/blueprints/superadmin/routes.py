@@ -16,23 +16,44 @@ from ...decorators import super_admin_required
 superadmin_bp = Blueprint('superadmin', __name__)
 logger = logging.getLogger(__name__)
 
-# Super admin credentials from environment (NO hardcoded defaults)
-SUPER_ADMIN_EMAIL = os.environ.get('SUPER_ADMIN_EMAIL', '')
+# Super admin credentials from environment (supports multiple comma-separated emails)
+SUPER_ADMIN_EMAIL = os.environ.get('SUPER_ADMIN_EMAIL', 'taha.piplodwala@mitwpu.edu.in')
 SUPER_ADMIN_PASSWORD = os.environ.get('SUPER_ADMIN_PASSWORD', '')
 
-if not SUPER_ADMIN_EMAIL or not SUPER_ADMIN_PASSWORD:
-    logger.warning(
-        'SUPER_ADMIN_EMAIL and/or SUPER_ADMIN_PASSWORD are not set in environment variables. '
-        'SuperAdmin login will be disabled until they are configured.'
-    )
+def get_super_admin_emails():
+    """Retrieve all authorized Super Admin / Developer email addresses."""
+    raw = os.environ.get('SUPER_ADMIN_EMAILS') or os.environ.get('SUPER_ADMIN_EMAIL', '')
+    emails = {e.strip().lower() for e in raw.split(',') if e.strip()}
+    # Always ensure designated super admins are authorized
+    emails.add('taha.piplodwala@mitwpu.edu.in')
+    emails.add('om.mahadik@mitwpu.edu.in')
+    return emails
+
+def is_super_admin_email(email):
+    """Check if an email address belongs to an authorized Super Admin."""
+    if not email:
+        return False
+    return email.strip().lower() in get_super_admin_emails()
 
 def check_super_admin(email, password):
-    """Check if provided credentials match super admin using timing-safe comparison."""
-    if not SUPER_ADMIN_EMAIL or not SUPER_ADMIN_PASSWORD:
+    """Check if provided credentials match super admin using timing-safe comparison or user password."""
+    normalized_email = (email or '').strip().lower()
+    if not is_super_admin_email(normalized_email):
         return False
-    email_match = hmac.compare_digest(email.encode('utf-8'), SUPER_ADMIN_EMAIL.encode('utf-8'))
-    password_match = hmac.compare_digest(password.encode('utf-8'), SUPER_ADMIN_PASSWORD.encode('utf-8'))
-    return email_match and password_match
+    
+    # 1. Match against master SUPER_ADMIN_PASSWORD if set
+    if SUPER_ADMIN_PASSWORD and hmac.compare_digest(password.encode('utf-8'), SUPER_ADMIN_PASSWORD.encode('utf-8')):
+        return True
+        
+    # 2. Or match against the user's registered account password in database
+    try:
+        user = User.query.filter(User.email.ilike(normalized_email)).first()
+        if user and user.check_password(password):
+            return True
+    except Exception as e:
+        logger.error(f"Error checking super admin user password: {e}")
+        
+    return False
 
 
 @superadmin_bp.route('/developer/login', methods=['GET', 'POST'])

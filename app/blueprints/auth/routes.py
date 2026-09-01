@@ -131,6 +131,15 @@ def login():
             session['is_admin'] = user.is_admin
             session['user_role'] = user.role
             
+            # Automatically grant super admin privileges if email is authorized
+            try:
+                from app.blueprints.superadmin.routes import is_super_admin_email
+                if is_super_admin_email(user.email):
+                    session['is_super_admin'] = True
+                    session['super_admin_email'] = user.email
+            except Exception as err:
+                current_app.logger.warning(f"Failed to check superadmin status on login: {err}")
+            
             if user.is_admin:
                 return redirect(url_for('admin.dashboard'))
             elif user.role == 'faculty':

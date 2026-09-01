@@ -287,10 +287,20 @@
             <label class="form-label">PRN</label>
             <input type="text" name="prn" class="form-control" required value="{{ prn|default('') }}">
         </div>
-        <div class="mb-4">
+        <div class="mb-3">
             <label class="form-label">Email Address</label>
             <input type="email" name="email" class="form-control" required placeholder="name@mitwpu.edu.in" value="{{ email|default('') }}">
             <div class="form-text">Must be a valid @mitwpu.edu.in email.</div>
+        </div>
+        <div class="mb-4">
+            <label class="form-label">Create Password</label>
+            <div class="input-group" style="position: relative;">
+                <input type="password" name="password" id="signupPassword" class="form-control pe-5" required placeholder="Create a password" minlength="6">
+                <button type="button" class="btn btn-password-toggle" id="toggleSignupPassword" aria-label="Toggle password visibility" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: none; border: none; z-index: 10; padding: 4px 8px; color: inherit; opacity: 0.65;">
+                    <i class="bi bi-eye-slash" id="togglePasswordIcon"></i>
+                </button>
+            </div>
+            <div class="form-text">Must be at least 6 characters.</div>
         </div>
         <button type="submit" class="btn btn-primary">Sign Up</button>
     </form>
@@ -340,6 +350,21 @@
         }
         syncMobileIcon();
     });
+})();
+
+// Password visibility toggle
+(function() {
+    const toggleBtn = document.getElementById('toggleSignupPassword');
+    const passInput = document.getElementById('signupPassword');
+    const passIcon = document.getElementById('togglePasswordIcon');
+    if (toggleBtn && passInput && passIcon) {
+        toggleBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const isPass = passInput.type === 'password';
+            passInput.type = isPass ? 'text' : 'password';
+            passIcon.className = isPass ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+    }
 })();
 </script>
 {% endblock %}

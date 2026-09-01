@@ -168,67 +168,51 @@ def logout():
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
-    """Student signup form demanding @mitwpu.edu.in email."""
+    """Student signup form demanding @mitwpu.edu.in email and password."""
     if request.method == 'POST':
         name = request.form.get('name', '').strip()
         prn = request.form.get('prn', '').strip()
         email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '').strip()
         
         if not email.endswith('@mitwpu.edu.in'):
             flash('You must use a valid @mitwpu.edu.in email address.', 'error')
             return render_template('signup.html', name=name, prn=prn, email=email)
             
+        if not password or len(password) < 6:
+            flash('Password must be at least 6 characters long.', 'error')
+            return render_template('signup.html', name=name, prn=prn, email=email)
+            
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
-            if existing_user.is_verified:
-                flash('This email is already registered and verified. Please log in.', 'warning')
-                return render_template('signup.html', name=name, prn=prn, email=email)
+            if existing_user.password_hash:
+                flash('This email is already registered. Please log in with your password.', 'info')
+                return redirect(url_for('auth.login'))
             else:
-                # Account exists but not verified — refresh token and resend
-                token = generate_verification_token(email)
-                existing_user.verification_token = token
+                # Account existed without password — establish password and verify
+                existing_user.name = name
+                existing_user.prn = prn
+                existing_user.set_password(password)
+                existing_user.is_verified = True
                 db.session.commit()
-                verification_link = url_for('auth.verify_email', token=token, _external=True)
-                email_sent = False
-                try:
-                    email_sent = send_verification_email(email, existing_user.name, verification_link)
-                except Exception as e:
-                    print(f"ERROR: Failed to send verification email: {e}")
-                # SECURITY: Do NOT pass verification_link to the template.
-                # It must only be delivered via email to the registered address.
-                return render_template(
-                    'signup_success.html',
-                    email=email,
-                    email_sent=email_sent
-                )
+                flash('Password established successfully! You can now log in.', 'success')
+                return redirect(url_for('auth.login'))
 
-        # Create new unverified user
+        # Create new verified user with password
         token = generate_verification_token(email)
         user = User(
             name=name,
             prn=prn,
             email=email,
-            is_verified=False,
+            is_verified=True,
             verification_token=token
         )
+        user.set_password(password)
         db.session.add(user)
         db.session.commit()
 
-        # Send verification email — proceed to success page regardless of email outcome
-        verification_link = url_for('auth.verify_email', token=token, _external=True)
-        email_sent = False
-        try:
-            email_sent = send_verification_email(email, name, verification_link)
-        except Exception as e:
-            print(f"ERROR: Failed to send verification email: {e}")
-
-        # SECURITY: Do NOT pass verification_link to the template.
-        # It must only be delivered via email to the registered address.
-        return render_template(
-            'signup_success.html',
-            email=email,
-            email_sent=email_sent
-        )
+        flash('Account created successfully! Please log in with your new password.', 'success')
+        return redirect(url_for('auth.login'))
         
     return render_template('signup.html')
 

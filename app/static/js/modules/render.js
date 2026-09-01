@@ -65,18 +65,28 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
                 const isAssigned = room.status === 'assigned';
                 const roomName = (room.name || roomNum).replace(/'/g, "\\'");
 
-                // Locate container or shape element in SVG
+                // Locate container or shape element in SVG (supports exact, lower, and upper case)
                 let containerEl = svgDoc.querySelector(`[id="${roomNum}_container"]`) ||
-                                  svgDoc.querySelector(`[id="${roomNum}"]`)?.closest('g[id$="_container"]');
-                let shapeEl = svgDoc.querySelector(`[id="${roomNum}"]`);
+                                  svgDoc.querySelector(`[id="${roomNum.toLowerCase()}_container"]`) ||
+                                  svgDoc.querySelector(`[id="${roomNum.toUpperCase()}_container"]`) ||
+                                  svgDoc.querySelector(`[id="${roomNum}"]`)?.closest('g[id$="_container"]') ||
+                                  svgDoc.querySelector(`[id="${roomNum.toLowerCase()}"]`)?.closest('g[id$="_container"]') ||
+                                  svgDoc.querySelector(`[id="${roomNum.toUpperCase()}"]`)?.closest('g[id$="_container"]');
+                let shapeEl = svgDoc.querySelector(`[id="${roomNum}"]`) ||
+                              svgDoc.querySelector(`[id="${roomNum.toLowerCase()}"]`) ||
+                              svgDoc.querySelector(`[id="${roomNum.toUpperCase()}"]`);
 
                 // Fallback for lifts (e.g., VY0Lift1 -> lift_1_container / lift_1)
                 if (!containerEl && !shapeEl && (type === 'lift' || roomNum.toLowerCase().includes('lift'))) {
                     const liftMatch = roomNum.match(/Lift(\d+)/i);
                     if (liftMatch) {
                         const num = liftMatch[1];
-                        containerEl = svgDoc.querySelector(`[id="lift_${num}_container"]`);
-                        shapeEl = svgDoc.querySelector(`[id="lift_${num}"]`) || containerEl?.querySelector('rect, path');
+                        containerEl = svgDoc.querySelector(`[id="lift_${num}_container"]`) ||
+                                      svgDoc.querySelector(`[id="Lift_${num}_container"]`) ||
+                                      svgDoc.querySelector(`[id="lift_${num}"]`)?.closest('g');
+                        shapeEl = svgDoc.querySelector(`[id="lift_${num}"]`) || 
+                                  svgDoc.querySelector(`[id="Lift_${num}"]`) || 
+                                  containerEl?.querySelector('rect, path');
                     }
                 }
 
@@ -119,8 +129,11 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
                     else if (type === 'faculty') targetForFill.classList.add('fill-orange');
                     else if (type === 'lift') targetForFill.classList.add('fill-pink');
                     else if (type === 'kitchen') targetForFill.classList.add('fill-orange');
+                    else if (type === 'canteen') targetForFill.classList.add('fill-teal');
                     else if (type === 'meeting' || type === 'meeting_room' || type === 'conference' || type === 'conference_room') {
                         targetForFill.classList.add('fill-purple');
+                    } else if (type === 'unavailable') {
+                        targetForFill.style.opacity = '0.5';
                     }
 
                     if (isAdmin) {

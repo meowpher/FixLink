@@ -50,6 +50,9 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
                 `;
             }
 
+            // Rule 2: Root SVG container receives pointer-events: none to prevent phantom bounding box clicks
+            svgDoc.style.pointerEvents = 'none';
+
             // Disable pointer-events on background & decorative outline paths so clicks are not intercepted
             svgDoc.querySelectorAll('#Background, #Map_Outlines, #Interior_outlines, #Design, g[id^="Map_"], g[id^="Interior_"]').forEach(el => {
                 el.style.pointerEvents = 'none';
@@ -111,40 +114,59 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
                 }
 
                 if (containerEl) {
-                    // Set classes and attributes on container
-                    containerEl.classList.add('room-group');
+                    // Set classes and attributes on container (Rule 2: Base .interactive-room + pointer-events: auto)
+                    containerEl.classList.add('room-group', 'interactive-room');
                     containerEl.setAttribute('data-room', roomNum);
                     containerEl.setAttribute('data-room-id', roomId);
-                    containerEl.style.pointerEvents = 'all';
+                    containerEl.style.pointerEvents = 'auto';
 
                     if (shapeEl && shapeEl !== containerEl) {
-                        shapeEl.classList.add('room-poly', 'svg-room-interactive');
+                        shapeEl.classList.add('room-poly', 'svg-room-interactive', 'interactive-room');
                         shapeEl.setAttribute('data-room', roomNum);
                         shapeEl.setAttribute('data-room-id', roomId);
-                        shapeEl.style.pointerEvents = 'all';
+                        shapeEl.style.pointerEvents = 'auto';
                     } else {
                         containerEl.classList.add('room-poly', 'svg-room-interactive');
                     }
 
-                    // Apply type fill classes
+                    // Rule 2: Strip hardcoded inline fill & stroke from SVG imports (unless special branding)
+                    if (shapeEl && roomNum.toLowerCase() !== 'encave') {
+                        shapeEl.removeAttribute('fill');
+                        shapeEl.removeAttribute('stroke');
+                    }
+
+                    // Apply semantic class category (Rule 2)
                     const targetForFill = (shapeEl && shapeEl !== containerEl) ? shapeEl : containerEl;
-                    if (type === 'class') targetForFill.classList.add('fill-blue');
-                    else if (type === 'lab') targetForFill.classList.add('fill-teal');
-                    else if (type === 'washroom') targetForFill.classList.add('fill-red');
-                    else if (type === 'faculty') targetForFill.classList.add('fill-orange');
-                    else if (type === 'lift') targetForFill.classList.add('fill-pink');
-                    else if (type === 'kitchen') targetForFill.classList.add('fill-orange');
-                    else if (type === 'canteen' || roomNum.toLowerCase() === 'encave') {
-                        targetForFill.classList.add('fill-darkgreen');
+                    if (type === 'class') {
+                        targetForFill.classList.add('fill-blue', 'classroom');
+                        containerEl.classList.add('classroom');
+                    } else if (type === 'lab') {
+                        targetForFill.classList.add('fill-teal', 'lab');
+                        containerEl.classList.add('lab');
+                    } else if (type === 'washroom') {
+                        targetForFill.classList.add('fill-red', 'washroom');
+                        containerEl.classList.add('washroom');
+                    } else if (type === 'faculty') {
+                        targetForFill.classList.add('fill-orange', 'faculty-room');
+                        containerEl.classList.add('faculty-room');
+                    } else if (type === 'lift') {
+                        targetForFill.classList.add('fill-pink', 'lift');
+                        containerEl.classList.add('lift');
+                    } else if (type === 'kitchen') {
+                        targetForFill.classList.add('fill-orange', 'kitchen');
+                        containerEl.classList.add('kitchen');
+                    } else if (type === 'canteen' || roomNum.toLowerCase() === 'encave') {
+                        targetForFill.classList.add('fill-darkgreen', 'canteen');
+                        containerEl.classList.add('canteen');
                         targetForFill.style.setProperty('fill', '#023F24', 'important');
                         if (shapeEl) shapeEl.style.setProperty('fill', '#023F24', 'important');
                         if (containerEl) {
                             const label = containerEl.querySelector('[id$="_label"], text, path:not(#encave)');
                             if (label) label.style.setProperty('fill', '#ffffff', 'important');
                         }
-                    }
-                    else if (type === 'meeting' || type === 'meeting_room' || type === 'conference' || type === 'conference_room') {
-                        targetForFill.classList.add('fill-purple');
+                    } else if (type === 'meeting' || type === 'meeting_room' || type === 'conference' || type === 'conference_room') {
+                        targetForFill.classList.add('fill-purple', 'conference-room');
+                        containerEl.classList.add('conference-room');
                     } else if (type === 'unavailable') {
                         targetForFill.style.opacity = '0.5';
                     }

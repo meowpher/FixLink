@@ -10,56 +10,68 @@ logger = logging.getLogger(__name__)
 
 def init_db(app):
     """
-    Perform database initialization tasks:
-    1. Create all tables.
-    2. Handle custom "migrations" (column checks for existing DBs).
-    3. Create default admin user if configured.
+    Perform database initialization tasks safely adhering to Rule 4 of Rules.md:
+    1. Check table existence using sqlalchemy.inspect(db.engine).has_table.
+    2. Auto-create missing tables and trigger auto-seeding via init_data.py.
+    3. Ensure admin users exist.
     """
     with app.app_context():
-        # Skip setup logic on Vercel or in Testing mode (Assume DB is already migrated or managed by test runner)
+        # Skip setup logic on Vercel or in Testing mode (DB managed externally)
         if os.environ.get('VERCEL') or app.config.get('TESTING') or os.environ.get('TESTING') == 'True':
             logger.info('Skipping database setup on Vercel / Testing environment.')
             return
 
-        # 0. Import models to ensure they are registered with SQLAlchemy
+        # 0. Ensure models are registered with SQLAlchemy
         from . import models
-        
-        # 1. Create all tables
-        db.create_all()
-        
-        # 2. Default admin user from environment variables
+        import sqlalchemy
+
+        # 1. Inspect database schema safely before issuing queries
+        try:
+            inspector = sqlalchemy.inspect(db.engine)
+            has_buildings = inspector.has_table('buildings')
+            has_users = inspector.has_table('users')
+        except Exception as e:
+            logger.warning(f"Database inspector check failed: {e}. Running db.create_all().")
+            has_buildings = False
+            has_users = False
+
+        if not has_buildings or not has_users:
+            logger.info("Database tables missing. Executing db.create_all() inside app_context()...")
+            db.create_all()
+            try:
+                from scripts.init_data import create_vyas_data
+                logger.info("Auto-seeding Vyas architecture, 8 floors, and rooms...")
+                create_vyas_data(app)
+            except Exception as e:
+                logger.error(f"Auto-seeding Vyas data failed: {str(e)}")
+        else:
+            # Tables exist: check if Vyas building is populated
+            from .models import Building
+            try:
+                if not Building.query.filter_by(name='Vyas').first():
+                    from scripts.init_data import create_vyas_data
+                    logger.info("Vyas building record missing. Auto-seeding...")
+                    create_vyas_data(app)
+            except Exception as e:
+                logger.error(f"Building query check failed: {str(e)}")
+
+        # 2. Verify default admin user
         from .models import User
         admin_email = os.environ.get('ADMIN_EMAIL')
         admin_password = os.environ.get('ADMIN_PASSWORD')
         if admin_email and admin_password:
-            if not User.query.filter_by(email=admin_email).first():
-                admin_user = User(
-                    name='Admin',
-                    email=admin_email,
-                    role=User.ROLE_ADMIN,
-                    is_admin=True,
-                    is_verified=True
-                )
-                admin_user.set_password(admin_password)
-                db.session.add(admin_user)
-                db.session.commit()
-                logger.info(f'Default admin user created: {admin_email}')
-        elif not admin_email or not admin_password:
-             logger.warning('ADMIN_EMAIL or ADMIN_PASSWORD not set. Skipping default admin creation.')
-
-        # 3. Auto-seed Vyas Building and Floors if missing
-        from .models import Building
-        if not Building.query.filter_by(name='Vyas').first():
             try:
-                from scripts.init_data import create_vyas_data
-                logger.info("Vyas building missing. Auto-seeding database...")
-                create_vyas_data(app)
+                if not User.query.filter_by(email=admin_email).first():
+                    admin_user = User(
+                        name='Admin',
+                        email=admin_email,
+                        role=User.ROLE_ADMIN,
+                        is_admin=True,
+                        is_verified=True
+                    )
+                    admin_user.set_password(admin_password)
+                    db.session.add(admin_user)
+                    db.session.commit()
+                    logger.info(f'Default admin user created: {admin_email}')
             except Exception as e:
-                logger.error(f"Auto-seeding Vyas data failed: {str(e)}")
-
-        # Temporary Reset Hook for Om Mahadik
-        om_user = User.query.filter_by(email='om.mahadik@mitwpu.edu.in').first()
-        if om_user:
-            om_user.set_password('omni123')
-            db.session.commit()
-            logger.info('Temporary password reset applied for om.mahadik@mitwpu.edu.in')
+                logger.error(f"Admin user creation check failed: {str(e)}")

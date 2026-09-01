@@ -14,6 +14,11 @@
 ## 2. Chronological Log of Pushed Updates
 
 ### Release v1.4.2 (2026-09-02)
+- `[Pending Commit]`: **feat(compliance): implement Rules.md directives across backend, SVG twin, and dark mode styling**
+  - **Rule 4 (DB Lifecycle)**: Added `sqlalchemy.inspect(db.engine).has_table(...)` guards to `app/database.py` before querying, preventing cold-start crashes, and added auto-seeding fallbacks for missing tables.
+  - **Rule 2 (Digital Twin Architecture)**: Set `svgDoc.style.pointerEvents = 'none'` on root SVG container, dynamically stripped hardcoded inline `fill`/`stroke` attributes, and assigned base `.interactive-room` plus semantic classes (`.classroom`, `.lab`, `.washroom`, etc.) with `pointer-events: auto`.
+  - **Rule 3 (UI/UX & Dark Mode Glow)**: Implemented 15% opacity fills with 2px solid strokes and 35% hover fills in dark mode for SVGs; added 5% translucent background with 10% faint borders for card depth (`.metadata-card`, `.stat-card`, `.card-depth`).
+  - **Rule 1 & Rule 5 (Lighthouse & Semantic HTML)**: Wrapped room details panel in semantic `<aside>`, added descriptive `aria-label` to buttons, and purged legacy dead code.
 - `02fee82`: **fix(lsp): resolve template JS syntax errors in status_map.html and pyright SQLAlchemy call issues in scripts**
   - Converted raw Jinja inline bindings inside `<script>` into clean `application/json` data islands with `JSON.parse()`.
   - Added Pyright type suppression directives to `init_data.py` and `fix_user.py` to eliminate false-positive SQLAlchemy model constructor warnings.

@@ -5802,86 +5802,173 @@ html[data-theme="dark"],
     stroke-width: 2px !important;
 }
 
+/* Rule 3: Dark Mode SVG Glow Aesthetic - Low opacity fills (15%) with 2px stroke */
 [data-theme="dark"] .room-poly,
-[data-bs-theme="dark"] .room-poly {
-    stroke: #475569;
-    stroke-width: 1.5px;
+[data-bs-theme="dark"] .room-poly,
+[data-theme="dark"] .interactive-room,
+[data-bs-theme="dark"] .interactive-room {
+    stroke-width: 2px !important;
+    transition: fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
 }
 
 [data-theme="dark"] .room-poly.fill-blue,
-[data-bs-theme="dark"] .room-poly.fill-blue {
-    fill: #1e3a8a !important;
+[data-bs-theme="dark"] .room-poly.fill-blue,
+[data-theme="dark"] .interactive-room.classroom,
+[data-bs-theme="dark"] .interactive-room.classroom {
+    fill: rgba(59, 130, 246, 0.15) !important;
     stroke: #3b82f6 !important;
 }
 
 [data-theme="dark"] .room-poly.fill-teal,
-[data-bs-theme="dark"] .room-poly.fill-teal {
-    fill: #064e3b !important;
+[data-bs-theme="dark"] .room-poly.fill-teal,
+[data-theme="dark"] .interactive-room.lab,
+[data-bs-theme="dark"] .interactive-room.lab {
+    fill: rgba(16, 185, 129, 0.15) !important;
     stroke: #10b981 !important;
 }
 
 [data-theme="dark"] .room-poly.fill-red,
-[data-bs-theme="dark"] .room-poly.fill-red {
-    fill: #7f1d1d !important;
+[data-bs-theme="dark"] .room-poly.fill-red,
+[data-theme="dark"] .interactive-room.washroom,
+[data-bs-theme="dark"] .interactive-room.washroom {
+    fill: rgba(239, 68, 68, 0.15) !important;
     stroke: #ef4444 !important;
 }
 
 [data-theme="dark"] .room-poly.fill-orange,
-[data-bs-theme="dark"] .room-poly.fill-orange {
-    fill: #7c2d12 !important;
+[data-bs-theme="dark"] .room-poly.fill-orange,
+[data-theme="dark"] .interactive-room.faculty-room,
+[data-bs-theme="dark"] .interactive-room.faculty-room {
+    fill: rgba(249, 115, 22, 0.15) !important;
     stroke: #f97316 !important;
 }
 
 [data-theme="dark"] .room-poly.fill-pink,
-[data-bs-theme="dark"] .room-poly.fill-pink {
-    fill: #701a75 !important;
+[data-bs-theme="dark"] .room-poly.fill-pink,
+[data-theme="dark"] .interactive-room.lift,
+[data-bs-theme="dark"] .interactive-room.lift {
+    fill: rgba(236, 72, 153, 0.15) !important;
     stroke: #ec4899 !important;
 }
 
 [data-theme="dark"] .room-poly.fill-silver,
 [data-bs-theme="dark"] .room-poly.fill-silver {
-    fill: #334155 !important;
+    fill: rgba(148, 163, 184, 0.15) !important;
     stroke: #64748b !important;
+}
+
+[data-theme="dark"] .room-poly.fill-purple,
+[data-bs-theme="dark"] .room-poly.fill-purple,
+[data-theme="dark"] .interactive-room.conference-room,
+[data-bs-theme="dark"] .interactive-room.conference-room {
+    fill: rgba(192, 132, 252, 0.15) !important;
+    stroke: #c084fc !important;
 }
 
 [data-theme="dark"] .room-poly.fill-darkgreen,
 [data-bs-theme="dark"] .room-poly.fill-darkgreen,
 [data-theme="dark"] .room-poly.fill-green,
-[data-bs-theme="dark"] .room-poly.fill-green {
-    fill: #023F24 !important;
+[data-bs-theme="dark"] .room-poly.fill-green,
+[data-theme="dark"] .interactive-room.canteen,
+[data-bs-theme="dark"] .interactive-room.canteen {
+    fill: rgba(5, 150, 105, 0.15) !important;
     stroke: #059669 !important;
 }
 
 [data-theme="dark"] .room-poly.has-issue,
 [data-bs-theme="dark"] .room-poly.has-issue {
-    fill: #dc2626 !important;
+    fill: rgba(220, 38, 38, 0.20) !important;
     stroke: #f87171 !important;
 }
 
 [data-theme="dark"] .room-poly.in-progress,
 [data-bs-theme="dark"] .room-poly.in-progress {
-    fill: #d97706 !important;
+    fill: rgba(217, 119, 6, 0.20) !important;
     stroke: #fbbf24 !important;
 }
 
 [data-theme="dark"] .room-poly.assigned,
 [data-bs-theme="dark"] .room-poly.assigned {
-    fill: #2563eb !important;
+    fill: rgba(37, 99, 235, 0.20) !important;
     stroke: #60a5fa !important;
 }
 
-[data-theme="dark"] .room-group:hover .room-poly,
-[data-bs-theme="dark"] .room-group:hover .room-poly {
-    filter: brightness(1.3) !important;
-    stroke: #ffffff !important;
-    stroke-width: 2px !important;
+/* Rule 3: Dark Mode Hover States - Increase fill opacity to 35% without altering stroke */
+[data-theme="dark"] .room-group:hover .room-poly.fill-blue,
+[data-bs-theme="dark"] .room-group:hover .room-poly.fill-blue,
+[data-theme="dark"] .room-group:hover .interactive-room.classroom,
+[data-bs-theme="dark"] .room-group:hover .interactive-room.classroom {
+    fill: rgba(59, 130, 246, 0.35) !important;
+}
+
+[data-theme="dark"] .room-group:hover .room-poly.fill-teal,
+[data-bs-theme="dark"] .room-group:hover .room-poly.fill-teal,
+[data-theme="dark"] .room-group:hover .interactive-room.lab,
+[data-bs-theme="dark"] .room-group:hover .interactive-room.lab {
+    fill: rgba(16, 185, 129, 0.35) !important;
+}
+
+[data-theme="dark"] .room-group:hover .room-poly.fill-red,
+[data-bs-theme="dark"] .room-group:hover .room-poly.fill-red,
+[data-theme="dark"] .room-group:hover .interactive-room.washroom,
+[data-bs-theme="dark"] .room-group:hover .interactive-room.washroom {
+    fill: rgba(239, 68, 68, 0.35) !important;
+}
+
+[data-theme="dark"] .room-group:hover .room-poly.fill-orange,
+[data-bs-theme="dark"] .room-group:hover .room-poly.fill-orange,
+[data-theme="dark"] .room-group:hover .interactive-room.faculty-room,
+[data-bs-theme="dark"] .room-group:hover .interactive-room.faculty-room {
+    fill: rgba(249, 115, 22, 0.35) !important;
+}
+
+[data-theme="dark"] .room-group:hover .room-poly.fill-pink,
+[data-bs-theme="dark"] .room-group:hover .room-poly.fill-pink,
+[data-theme="dark"] .room-group:hover .interactive-room.lift,
+[data-bs-theme="dark"] .room-group:hover .interactive-room.lift {
+    fill: rgba(236, 72, 153, 0.35) !important;
+}
+
+[data-theme="dark"] .room-group:hover .room-poly.fill-purple,
+[data-bs-theme="dark"] .room-group:hover .room-poly.fill-purple,
+[data-theme="dark"] .room-group:hover .interactive-room.conference-room,
+[data-bs-theme="dark"] .room-group:hover .interactive-room.conference-room {
+    fill: rgba(192, 132, 252, 0.35) !important;
+}
+
+[data-theme="dark"] .room-group:hover .room-poly.fill-darkgreen,
+[data-bs-theme="dark"] .room-group:hover .room-poly.fill-darkgreen,
+[data-theme="dark"] .room-group:hover .room-poly.fill-green,
+[data-bs-theme="dark"] .room-group:hover .room-poly.fill-green,
+[data-theme="dark"] .room-group:hover .interactive-room.canteen,
+[data-bs-theme="dark"] .room-group:hover .interactive-room.canteen {
+    fill: rgba(5, 150, 105, 0.35) !important;
+}
+
+[data-theme="dark"] .room-group:hover .room-poly.has-issue,
+[data-bs-theme="dark"] .room-group:hover .room-poly.has-issue {
+    fill: rgba(220, 38, 38, 0.35) !important;
 }
 
 [data-theme="dark"] .room-group.selected .room-poly,
 [data-bs-theme="dark"] .room-group.selected .room-poly {
-    fill: #15803d !important;
+    fill: rgba(34, 197, 94, 0.40) !important;
     stroke: #86efac !important;
-    filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.7)) !important;
+    stroke-width: 2.5px !important;
+    filter: drop-shadow(0 0 10px rgba(34, 197, 94, 0.6)) !important;
+}
+
+/* Rule 3: Card Depth - Translucent background (5%) and faint border (10%) */
+[data-theme="dark"] .metadata-card,
+[data-bs-theme="dark"] .metadata-card,
+[data-theme="dark"] .stat-card,
+[data-bs-theme="dark"] .stat-card,
+[data-theme="dark"] .card-depth,
+[data-bs-theme="dark"] .card-depth {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.10) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
 [data-theme="dark"] .room-text,

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# pyright: reportCallIssue=false, reportGeneralTypeIssues=false
 """
 MIT-WPU Vyas Smart-Room Maintenance Tracker
 Database Initialization Script

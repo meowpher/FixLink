@@ -1,5 +1,7 @@
+# pyright: reportCallIssue=false, reportGeneralTypeIssues=false
+import os
 import sys
-sys.path.insert(0, '/home/taha-mustafa/Desktop/FixLink-F')
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from app import create_app, db
 from app.models import User
 app = create_app()

@@ -425,14 +425,17 @@
 {% endblock %}
 
 {% block extra_js %}
+<script id="currentFloorIdJson" type="application/json">{{ (selected_floor.id if selected_floor else None)|tojson }}</script>
+<script id="currentFloorLevelJson" type="application/json">{{ (selected_floor.level if selected_floor else '')|tojson }}</script>
+<script id="initialRoomsDataJson" type="application/json">{{ (rooms_data if rooms_data else None)|tojson }}</script>
 <script type="module">
     document.addEventListener('DOMContentLoaded', async () => {
         const { initializeAdminMap, highlightRoom, showRoomDetails } = await import("{{ url_for('static', filename='js/modules/admin_map.js') }}");
         
-        // Global floor data from server
-        const currentFloorId = {{ selected_floor.id if selected_floor else 'null' }};
-        const currentFloorLevel = '{{ selected_floor.level if selected_floor else "" }}';
-        const initialRoomsData = {{ rooms_data | tojson | safe if rooms_data else 'null' }};
+        // Global floor data from server parsed from JSON blocks
+        const currentFloorId = JSON.parse(document.getElementById('currentFloorIdJson').textContent);
+        const currentFloorLevel = JSON.parse(document.getElementById('currentFloorLevelJson').textContent);
+        const initialRoomsData = JSON.parse(document.getElementById('initialRoomsDataJson').textContent);
         
         // Auto-initialize if floor is selected
         if (currentFloorId) {

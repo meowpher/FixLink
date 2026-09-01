@@ -189,6 +189,54 @@
         backdrop-filter: blur(10px);
         border-color: rgba(255, 255, 255, 0.08);
     }
+
+    /* ── Restore vivid status badge colours in dark mode ── */
+    [data-theme="dark"] .badge.bg-danger {
+        background-color: #dc2626 !important;
+        color: #fff !important;
+    }
+    [data-theme="dark"] .badge.bg-success {
+        background-color: #16a34a !important;
+        color: #fff !important;
+    }
+    [data-theme="dark"] .badge.bg-info {
+        background-color: #0891b2 !important;
+        color: #fff !important;
+    }
+    [data-theme="dark"] .badge.bg-secondary {
+        background-color: #475569 !important;
+        color: #e2e8f0 !important;
+    }
+    [data-theme="dark"] .badge.bg-primary {
+        background-color: #2563eb !important;
+        color: #fff !important;
+    }
+    [data-theme="dark"] .badge.bg-warning {
+        background-color: #d97706 !important;
+        color: #fff !important;
+    }
+    /* Action buttons in dark mode — keep subtle outlines readable */
+    [data-theme="dark"] .btn-outline-success {
+        color: #4ade80 !important;
+        border-color: #4ade80 !important;
+    }
+    [data-theme="dark"] .btn-outline-success:hover {
+        background-color: rgba(74, 222, 128, 0.15) !important;
+    }
+    [data-theme="dark"] .btn-outline-danger {
+        color: #f87171 !important;
+        border-color: #f87171 !important;
+    }
+    [data-theme="dark"] .btn-outline-danger:hover {
+        background-color: rgba(248, 113, 113, 0.15) !important;
+    }
+    [data-theme="dark"] .btn-outline-info {
+        color: #38bdf8 !important;
+        border-color: #38bdf8 !important;
+    }
+    [data-theme="dark"] .btn-outline-info:hover {
+        background-color: rgba(56, 189, 248, 0.15) !important;
+    }
 </style>
 {% endblock %}
 

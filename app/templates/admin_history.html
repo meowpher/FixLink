@@ -3,6 +3,139 @@
 {% block title %}Fixed Tickets History - Admin Dashboard{% endblock %}
 
 {% block content %}
+<style>
+    /* Filter Sidebar Panel */
+    .filter-sidebar-panel {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: var(--border-radius-lg, 16px);
+        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+        padding: 1.25rem 1.1rem;
+        position: sticky;
+        top: 90px;
+        transition: all 0.25s ease;
+    }
+
+    .filter-sidebar-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        color: var(--text-muted, #64748b);
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        margin-bottom: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filter-sidebar-panel .form-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-main, #334155);
+        margin-bottom: 0.4rem;
+    }
+
+    .filter-sidebar-panel .form-control {
+        border-radius: 8px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        font-size: 0.9rem;
+        height: 42px;
+        padding: 0.5rem 0.85rem;
+        background-color: var(--bg-input, #f8fafc);
+        color: var(--text-main, #0f172a);
+        transition: border-color 0.15s ease;
+    }
+
+    .filter-sidebar-panel .form-control:focus {
+        border-color: var(--mitwpu-blue, #0b4d8c);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(11, 77, 140, 0.15);
+        background-color: #ffffff;
+    }
+
+    .filter-sidebar-panel .btn-apply-filters {
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #0b4d8c;
+        border-color: #0b4d8c;
+        box-shadow: none !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .filter-sidebar-panel .btn-apply-filters:hover {
+        background-color: #083866;
+        border-color: #083866;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Dark Mode Support for Filter Sidebar */
+    [data-theme="dark"] .filter-sidebar-panel,
+    [data-bs-theme="dark"] .filter-sidebar-panel {
+        background: var(--bg-surface, #1e293b);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .filter-sidebar-title,
+    [data-bs-theme="dark"] .filter-sidebar-title {
+        color: var(--text-muted, #94a3b8);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-label,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-label {
+        color: var(--text-body, #cbd5e1);
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-control,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-control {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .input-group-text,
+    [data-bs-theme="dark"] .filter-sidebar-panel .input-group-text {
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-control:focus,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        background-color: #0f172a;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .btn-apply-filters,
+    [data-bs-theme="dark"] .filter-sidebar-panel .btn-apply-filters {
+        background-color: #1d4ed8;
+        border-color: #2563eb;
+        color: #ffffff;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .btn-apply-filters:hover,
+    [data-bs-theme="dark"] .filter-sidebar-panel .btn-apply-filters:hover {
+        background-color: #1e40af;
+        border-color: #1d4ed8;
+    }
+
+    @media (max-width: 767px) {
+        .filter-sidebar-panel {
+            position: static;
+            margin-bottom: 1.25rem;
+            padding: 1rem;
+        }
+    }
+</style>
 <!-- Admin Header -->
 <section class="admin-header vyas-admin-header">
     <div class="container">
@@ -27,38 +160,47 @@
     </div>
 </section>
 
-<!-- Filters -->
-<section class="filters-section">
-    <div class="container">
-        <form action="{{ url_for('admin.history') }}" method="GET" class="filter-card">
-            <div class="row g-3 align-items-end">
-                <div class="col-md-10">
-                    <label for="search" class="form-label">Search by Name, PRN, or Email</label>
-                    <div class="input-group flex-nowrap">
-                        <span class="input-group-text bg-white border-end-0">
-                            <i class="bi bi-search text-muted"></i>
-                        </span>
-                        <input type="text" name="search" class="form-control border-start-0 ps-0" id="search" 
-                               value="{{ search_query }}" placeholder="Search historical records...">
+<!-- Main Content: Left Search/Filter Sidebar + Right Tickets Table -->
+<section class="tickets-section py-4">
+    <div class="container-fluid px-lg-4 px-3">
+        <div class="row g-4">
+            <!-- Left Side: Filter Sidebar Panel -->
+            <div class="col-xl-3 col-lg-4 col-md-4">
+                <aside class="filter-sidebar-panel">
+                    <div class="filter-sidebar-title">
+                        <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
+                        {% if search_query %}
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
+                        {% endif %}
                     </div>
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-filter me-1"></i>Search
-                    </button>
-                    {% if search_query %}
-                    <a href="{{ url_for('admin.history') }}" class="btn btn-link btn-sm w-100 text-decoration-none mt-1">Clear</a>
-                    {% endif %}
-                </div>
+                    <form action="{{ url_for('admin.history') }}" method="GET" class="filter-sidebar-form">
+                        <div class="mb-3">
+                            <label for="search" class="form-label">Search</label>
+                            <div class="input-group flex-nowrap">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control border-start-0 ps-0" id="search" 
+                                       value="{{ search_query }}" placeholder="Name, PRN, or Email..." style="border-radius: 0 8px 8px 0; height: 42px;">
+                            </div>
+                        </div>
+                        <div class="pt-1 d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-apply-filters">
+                                <i class="bi bi-search me-1"></i>Search Records
+                            </button>
+                            {% if search_query %}
+                            <a href="{{ url_for('admin.history') }}" class="btn btn-outline-secondary btn-sm text-decoration-none" style="border-radius: 8px;">
+                                <i class="bi bi-x-circle me-1"></i>Clear Search
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </aside>
             </div>
-        </form>
-    </div>
-</section>
 
-<!-- Tickets Table -->
-<section class="tickets-section">
-    <div class="container">
-        <div class="tickets-card">
+            <!-- Right Side: Tickets Section -->
+            <div class="col-xl-9 col-lg-8 col-md-8">
+                <div class="tickets-card">
             <div class="tickets-header bg-success bg-opacity-10 border-bottom border-success">
                 <h5 class="mb-0 text-success">
                     <i class="bi bi-check-circle me-2"></i>Fixed Tickets
@@ -223,6 +365,8 @@
                 </div>
             </div>
             {% endif %}
+                </div>
+            </div>
         </div>
     </div>
 </section>

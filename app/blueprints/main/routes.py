@@ -381,14 +381,22 @@ def report_bug():
     if request.method == 'POST':
         from ...models import BugReport
         
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json
+        
         title = request.form.get('title', '').strip()
         description = request.form.get('description', '').strip()
         file = request.files.get('file')
         origin = request.form.get('origin', '/')
+        page_url = request.form.get('page_url', '').strip()
         
         if not title or not description:
+            if is_ajax:
+                return jsonify({'success': False, 'error': 'Title and description are required.'}), 400
             flash('Title and description are required.', 'error')
             return redirect(url_for('main.report_bug', origin=origin))
+            
+        if page_url:
+            description = f"{description}\n\n[Context URL: {page_url}]"
             
         file_path = None
         file_data_base64 = None
@@ -432,6 +440,12 @@ def report_bug():
         db.session.add(bug)
         db.session.commit()
         
+        if is_ajax:
+            return jsonify({
+                'success': True,
+                'message': 'Bug report submitted successfully! Thank you for helping us improve FixLink.'
+            })
+            
         flash('Bug report submitted successfully! Thank you for your feedback.', 'success')
         # Validate origin to prevent open redirect attacks
         if origin and not origin.startswith('/'):

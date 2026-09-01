@@ -1244,5 +1244,259 @@
     })();
     </script>
 
+    <!-- Global Floating Report Bug Button -->
+    <style>
+        .floating-bug-trigger {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1045;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #0f172a;
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 9px 16px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+        .floating-bug-trigger:hover {
+            background: #1e293b;
+            color: #ffffff;
+        }
+        .floating-bug-trigger i {
+            color: #ef4444;
+            font-size: 1rem;
+        }
+        @media (max-width: 767px) {
+            .floating-bug-trigger {
+                bottom: 76px;
+                right: 16px;
+                padding: 8px 13px;
+                font-size: 0.78rem;
+            }
+        }
+        /* Dark Mode for Bug Button & Modal */
+        [data-theme="dark"] .floating-bug-trigger,
+        [data-bs-theme="dark"] .floating-bug-trigger {
+            background: #1e293b;
+            border-color: rgba(255, 255, 255, 0.18);
+            color: #f1f5f9;
+        }
+        [data-theme="dark"] .floating-bug-trigger:hover,
+        [data-bs-theme="dark"] .floating-bug-trigger:hover {
+            background: #334155;
+        }
+        [data-theme="dark"] #globalBugReportModal .modal-content,
+        [data-bs-theme="dark"] #globalBugReportModal .modal-content {
+            background: #1e293b !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #f1f5f9 !important;
+        }
+        [data-theme="dark"] #globalBugReportModal .modal-header,
+        [data-theme="dark"] #globalBugReportModal .modal-body,
+        [data-bs-theme="dark"] #globalBugReportModal .modal-header,
+        [data-bs-theme="dark"] #globalBugReportModal .modal-body {
+            background: #1e293b !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        [data-theme="dark"] #globalBugReportModal .modal-footer,
+        [data-bs-theme="dark"] #globalBugReportModal .modal-footer {
+            background: #0f172a !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        [data-theme="dark"] #globalBugReportModal .modal-title,
+        [data-bs-theme="dark"] #globalBugReportModal .modal-title {
+            color: #f1f5f9 !important;
+        }
+        [data-theme="dark"] #globalBugReportModal .form-control,
+        [data-bs-theme="dark"] #globalBugReportModal .form-control {
+            background-color: rgba(15, 23, 42, 0.6) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+            color: #f1f5f9 !important;
+        }
+        [data-theme="dark"] #globalBugReportModal .btn-close,
+        [data-bs-theme="dark"] #globalBugReportModal .btn-close {
+            filter: invert(1) !important;
+        }
+    </style>
+
+    <button type="button" 
+            class="floating-bug-trigger" 
+            id="floatingBugTrigger" 
+            data-bs-toggle="modal" 
+            data-bs-target="#globalBugReportModal" 
+            aria-label="Report a bug" 
+            title="Report a bug">
+        <i class="bi bi-bug-fill"></i>
+        <span>Report Bug</span>
+    </button>
+
+    <!-- Global Bug Report Modal -->
+    <div class="modal fade" id="globalBugReportModal" tabindex="-1" aria-labelledby="globalBugReportModalLabel" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden; background: var(--bg-card, #ffffff);">
+                <div class="modal-header border-bottom py-3 px-4" style="border-color: var(--border-color, #e2e8f0); background: var(--bg-card, #ffffff);">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+                            <i class="bi bi-bug-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold mb-0" id="globalBugReportModalLabel" style="font-size: 1.1rem; color: var(--text-main, #0f172a);">Report a Bug</h5>
+                            <small class="text-muted" style="font-size: 0.78rem;">Sends directly to the Developer Dashboard</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                
+                <form id="globalBugReportForm" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="page_url" id="globalBugPageUrl" value="">
+                    
+                    <div class="modal-body p-4" style="background: var(--bg-card, #ffffff);">
+                        <!-- Alert Box -->
+                        <div id="globalBugAlert" class="alert d-none mb-3 py-2 px-3 small" role="alert"></div>
+
+                        <!-- Title Input -->
+                        <div class="mb-3">
+                            <label for="globalBugTitle" class="form-label small fw-bold text-muted mb-1">
+                                Issue Title <span class="text-danger">*</span>
+                            </label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="globalBugTitle" 
+                                   name="title" 
+                                   placeholder="e.g., Room map not loading on floor 3" 
+                                   required 
+                                   style="height: 42px; border-radius: 8px; font-size: 0.9rem;">
+                        </div>
+
+                        <!-- Description Textarea -->
+                        <div class="mb-3">
+                            <label for="globalBugDesc" class="form-label small fw-bold text-muted mb-1">
+                                Steps to Reproduce / Details <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" 
+                                      id="globalBugDesc" 
+                                      name="description" 
+                                      rows="3" 
+                                      placeholder="1. What were you doing?&#10;2. What went wrong?&#10;3. What did you expect?" 
+                                      required 
+                                      style="border-radius: 8px; font-size: 0.9rem; resize: vertical;"></textarea>
+                        </div>
+
+                        <!-- File Upload -->
+                        <div class="mb-2">
+                            <label for="globalBugFile" class="form-label small fw-bold text-muted mb-1">
+                                Screenshot / Video (Optional)
+                            </label>
+                            <input type="file" 
+                                   class="form-control" 
+                                   id="globalBugFile" 
+                                   name="file" 
+                                   accept="image/*,video/mp4" 
+                                   style="border-radius: 8px; font-size: 0.85rem;">
+                            <div class="form-text text-muted small" style="font-size: 0.75rem;">
+                                Images (PNG, JPG, WebP) or MP4 video up to 16MB
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between" style="border-color: var(--border-color, #e2e8f0); background: var(--bg-surface, #f8fafc);">
+                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-danger btn-sm px-4 d-inline-flex align-items-center gap-2" id="globalBugSubmitBtn" style="border-radius: 8px; font-weight: 600; box-shadow: none !important;">
+                            <i class="bi bi-send-fill"></i>
+                            <span>Send to Developer</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const modalEl = document.getElementById('globalBugReportModal');
+        const formEl = document.getElementById('globalBugReportForm');
+        const urlInput = document.getElementById('globalBugPageUrl');
+        const alertEl = document.getElementById('globalBugAlert');
+        const submitBtn = document.getElementById('globalBugSubmitBtn');
+
+        if (!modalEl || !formEl) return;
+
+        modalEl.addEventListener('show.bs.modal', function() {
+            if (urlInput) urlInput.value = window.location.href;
+            if (alertEl) {
+                alertEl.className = 'alert d-none mb-3 py-2 px-3 small';
+                alertEl.textContent = '';
+            }
+        });
+
+        formEl.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const titleVal = document.getElementById('globalBugTitle')?.value?.trim();
+            const descVal = document.getElementById('globalBugDesc')?.value?.trim();
+
+            if (!titleVal || !descVal) {
+                alertEl.className = 'alert alert-danger mb-3 py-2 px-3 small';
+                alertEl.textContent = 'Please provide both a title and description.';
+                alertEl.classList.remove('d-none');
+                return;
+            }
+
+            const origBtnHtml = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Submitting...';
+
+            try {
+                const formData = new FormData(formEl);
+                const response = await fetch("{{ url_for('main.report_bug') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                    },
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    alertEl.className = 'alert alert-success mb-3 py-2 px-3 small';
+                    alertEl.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Bug report sent! Forwarded to Developer Dashboard.';
+                    alertEl.classList.remove('d-none');
+                    formEl.reset();
+                    setTimeout(() => {
+                        const bsModal = bootstrap.Modal.getInstance(modalEl);
+                        if (bsModal) bsModal.hide();
+                        alertEl.classList.add('d-none');
+                    }, 1800);
+                } else {
+                    alertEl.className = 'alert alert-danger mb-3 py-2 px-3 small';
+                    alertEl.textContent = data.error || 'Failed to submit bug report. Please try again.';
+                    alertEl.classList.remove('d-none');
+                }
+            } catch (err) {
+                console.error('Bug report error:', err);
+                alertEl.className = 'alert alert-danger mb-3 py-2 px-3 small';
+                alertEl.textContent = 'A network error occurred. Please try again.';
+                alertEl.classList.remove('d-none');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = origBtnHtml;
+            }
+        });
+    });
+    </script>
+
     </body>
 </html>

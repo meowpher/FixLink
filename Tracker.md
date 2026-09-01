@@ -14,7 +14,7 @@
 ## 2. Chronological Log of Pushed Updates
 
 ### Release v1.4.2 (2026-09-02)
-- `[Pending Commit]`: **feat(compliance): implement Rules.md directives across backend, SVG twin, and dark mode styling**
+- `542c55c`: **feat(compliance): implement Rules.md directives across backend, SVG twin, and dark mode styling**
   - **Rule 4 (DB Lifecycle)**: Added `sqlalchemy.inspect(db.engine).has_table(...)` guards to `app/database.py` before querying, preventing cold-start crashes, and added auto-seeding fallbacks for missing tables.
   - **Rule 2 (Digital Twin Architecture)**: Set `svgDoc.style.pointerEvents = 'none'` on root SVG container, dynamically stripped hardcoded inline `fill`/`stroke` attributes, and assigned base `.interactive-room` plus semantic classes (`.classroom`, `.lab`, `.washroom`, etc.) with `pointer-events: auto`.
   - **Rule 3 (UI/UX & Dark Mode Glow)**: Implemented 15% opacity fills with 2px solid strokes and 35% hover fills in dark mode for SVGs; added 5% translucent background with 10% faint borders for card depth (`.metadata-card`, `.stat-card`, `.card-depth`).

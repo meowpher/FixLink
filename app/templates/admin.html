@@ -19,6 +19,117 @@
     body[data-theme="dark"] .stat-label {
         color: #94a3b8 !important;
     }
+
+    /* Filter Sidebar Panel */
+    .filter-sidebar-panel {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: var(--border-radius-lg, 16px);
+        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+        padding: 1.25rem 1.1rem;
+        position: sticky;
+        top: 90px;
+        transition: all 0.25s ease;
+    }
+
+    .filter-sidebar-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        color: var(--text-muted, #64748b);
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        margin-bottom: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filter-sidebar-panel .form-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-main, #334155);
+        margin-bottom: 0.4rem;
+    }
+
+    .filter-sidebar-panel .form-select {
+        border-radius: 10px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        font-size: 0.9rem;
+        height: 44px;
+        padding: 0.5rem 0.85rem;
+        background-color: var(--bg-input, #f8fafc);
+        color: var(--text-main, #0f172a);
+        transition: all 0.2s ease;
+    }
+
+    .filter-sidebar-panel .form-select:focus {
+        border-color: var(--mitwpu-blue, #0b4d8c);
+        box-shadow: 0 0 0 3px rgba(11, 77, 140, 0.15);
+        background-color: #ffffff;
+    }
+
+    .filter-sidebar-panel .btn-apply-filters {
+        height: 44px;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.92rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #0b4d8c;
+        border-color: #0b4d8c;
+        box-shadow: 0 4px 12px rgba(11, 77, 140, 0.2);
+        transition: all 0.2s ease;
+    }
+
+    .filter-sidebar-panel .btn-apply-filters:hover {
+        background-color: #083866;
+        border-color: #083866;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(11, 77, 140, 0.28);
+    }
+
+    /* Dark Mode Support for Filter Sidebar */
+    [data-theme="dark"] .filter-sidebar-panel,
+    [data-bs-theme="dark"] .filter-sidebar-panel {
+        background: var(--bg-surface, #1e293b);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .filter-sidebar-title,
+    [data-bs-theme="dark"] .filter-sidebar-title {
+        color: var(--text-muted, #94a3b8);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-label,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-label {
+        color: var(--text-body, #cbd5e1);
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-select,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-select {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-select:focus,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        background-color: #0f172a;
+    }
+
+    @media (max-width: 767px) {
+        .filter-sidebar-panel {
+            position: static;
+            margin-bottom: 1.25rem;
+            padding: 1rem;
+        }
+    }
 </style>
 <section class="admin-header vyas-admin-header">
     <div class="container">
@@ -101,57 +212,68 @@
     </div>
 </section>
 
-<!-- Filters -->
-<section class="filters-section">
-    <div class="container">
-        <div class="filter-card">
-            <form method="GET" action="{{ url_for('admin.dashboard') }}" class="row g-3 align-items-end">
-                <div class="col-md-3">
-                    <label for="status" class="form-label">Status</label>
-                    <select class="form-select" id="status" name="status" style="height: 48px;">
-                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
-                        <option value="open" {% if status_filter == 'open' %}selected{% endif %}>Open / Cancelled</option>
-                        <option value="assigned" {% if status_filter == 'assigned' %}selected{% endif %}>Assigned</option>
-                        <option value="in-progress" {% if status_filter == 'in-progress' %}selected{% endif %}>In Progress</option>
-                        <option value="fixed" {% if status_filter == 'fixed' %}selected{% endif %}>Fixed</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="floor" class="form-label">Floor</label>
-                    <select class="form-select" id="floor" name="floor" style="height: 48px;">
-                        <option value="all" {% if floor_filter == 'all' %}selected{% endif %}>All Floors</option>
-                        {% for floor in floors %}
-                        <option value="{{ floor.id }}" {% if floor_filter == floor.id|string %}selected{% endif %}>
-                            {{ floor.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label for="category" class="form-label">Category</label>
-                    <select class="form-select" id="category" name="category" style="height: 48px;">
-                        <option value="all" {% if category_filter == 'all' %}selected{% endif %}>All Categories</option>
-                        {% for cat in categories %}
-                        <option value="{{ cat.id }}" {% if category_filter == cat.id %}selected{% endif %}>
-                            {{ cat.name }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-primary w-100" style="height: 48px;">
-                        <i class="bi bi-funnel me-1"></i>Apply Filters
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</section>
+<!-- Main Dashboard Content (Filters Sidebar + Tickets) -->
+<section class="tickets-section py-4">
+    <div class="container-fluid px-lg-4 px-3">
+        <div class="row g-4">
+            <!-- Left Side: Filter Sidebar Panel -->
+            <div class="col-xl-3 col-lg-4 col-md-4">
+                <aside class="filter-sidebar-panel">
+                    <div class="filter-sidebar-title">
+                        <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
+                        {% if (status_filter and status_filter != 'all') or (floor_filter and floor_filter != 'all') or (category_filter and category_filter != 'all') %}
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
+                        {% endif %}
+                    </div>
+                    <form method="GET" action="{{ url_for('admin.dashboard') }}" class="filter-sidebar-form">
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                                <option value="open" {% if status_filter == 'open' %}selected{% endif %}>Open / Cancelled</option>
+                                <option value="assigned" {% if status_filter == 'assigned' %}selected{% endif %}>Assigned</option>
+                                <option value="in-progress" {% if status_filter == 'in-progress' %}selected{% endif %}>In Progress</option>
+                                <option value="fixed" {% if status_filter == 'fixed' %}selected{% endif %}>Fixed</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="floor" class="form-label">Floor</label>
+                            <select class="form-select" id="floor" name="floor">
+                                <option value="all" {% if floor_filter == 'all' %}selected{% endif %}>All Floors</option>
+                                {% for floor in floors %}
+                                <option value="{{ floor.id }}" {% if floor_filter == floor.id|string %}selected{% endif %}>
+                                    {{ floor.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" name="category">
+                                <option value="all" {% if category_filter == 'all' %}selected{% endif %}>All Categories</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if category_filter == cat.id %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="pt-1 d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-apply-filters">
+                                <i class="bi bi-funnel me-1"></i>Apply Filters
+                            </button>
+                            {% if (status_filter and status_filter != 'all') or (floor_filter and floor_filter != 'all') or (category_filter and category_filter != 'all') %}
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm text-decoration-none" style="border-radius: 10px;">
+                                <i class="bi bi-x-circle me-1"></i>Clear Filters
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+                </aside>
+            </div>
 
-<!-- Tickets Table -->
-<section class="tickets-section">
-    <div class="container">
-        <div class="tickets-card">
+            <!-- Right Side: Tickets Section -->
+            <div class="col-xl-9 col-lg-8 col-md-8">
 
 
             <!-- Tabs Content -->
@@ -338,8 +460,9 @@
                     {{ ticket_table_from(in_progress_tickets) }}
                 </div>
 
-
+                </div>
             </div>
+        </div>
     </div>
 </section>
 

@@ -1790,19 +1790,18 @@ body {
 }
 
 .btn-accent {
-    background: #00d2ff;
-    background: -webkit-linear-gradient(to right, #3a7bd5, #00d2ff);
-    background: linear-gradient(to right, #3a7bd5, #00d2ff);
-    border: none;
+    background: var(--mitwpu-blue, #0b4d8c);
+    border: 1px solid var(--mitwpu-blue, #0b4d8c);
     color: white;
     font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0, 210, 255, 0.3);
-    transition: all 0.3s ease;
+    box-shadow: none;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn-accent:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 210, 255, 0.4);
+    background: #083866;
+    border-color: #083866;
+    box-shadow: none;
     color: white;
 }
 
@@ -2232,7 +2231,7 @@ body {
     color: #ffffff !important;
     font-weight: 600;
     border-color: #0b4d8c !important;
-    box-shadow: 0 2px 8px rgba(11, 77, 140, 0.3);
+    box-shadow: none !important;
 }
 
 .tab-badge {
@@ -2298,10 +2297,10 @@ body {
 
 [data-theme="dark"] .floor-tab.active,
 [data-bs-theme="dark"] .floor-tab.active {
-    background: #2563eb !important;
+    background: #1d4ed8 !important;
     color: #ffffff !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45);
+    border-color: #2563eb !important;
+    box-shadow: none !important;
 }
 
 [data-theme="dark"] .floor-tab.active .tab-badge,

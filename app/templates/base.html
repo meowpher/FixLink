@@ -41,7 +41,7 @@
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}"></noscript>
 
     <!-- Custom CSS (critical, load synchronously) -->
-    <link href="{{ url_for('static', filename='css/style.min.css') }}?v=7.4" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.min.css') }}?v=7.5" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Manifest -->
@@ -1244,7 +1244,7 @@
     })();
     </script>
 
-    <!-- Global Floating Report Bug Button -->
+    <!-- Global Floating Report Bug Button & Modern Modal -->
     <style>
         .floating-bug-trigger {
             position: fixed;
@@ -1253,77 +1253,333 @@
             z-index: 1045;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            background: #0f172a;
-            color: #ffffff;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 9px 16px;
+            gap: 9px;
+            background: #ffffff;
+            color: #0f172a;
+            border: 1px solid #e2e8f0;
+            padding: 9px 18px;
             border-radius: 9999px;
-            font-size: 0.85rem;
+            font-size: 0.86rem;
             font-weight: 600;
-            text-decoration: none;
             cursor: pointer;
-            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
-            transition: background-color 0.15s ease, transform 0.15s ease;
+            box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.12), 0 2px 6px -1px rgba(15, 23, 42, 0.06);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .floating-bug-trigger:hover {
-            background: #1e293b;
-            color: #ffffff;
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: #0f172a;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.16);
         }
-        .floating-bug-trigger i {
+        .floating-bug-trigger .bug-icon-bubble {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.12);
             color: #ef4444;
-            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            transition: transform 0.2s ease;
+        }
+        .floating-bug-trigger:hover .bug-icon-bubble {
+            transform: rotate(15deg) scale(1.1);
         }
         @media (max-width: 767px) {
             .floating-bug-trigger {
                 bottom: 76px;
                 right: 16px;
-                padding: 8px 13px;
-                font-size: 0.78rem;
+                padding: 8px 14px;
+                font-size: 0.8rem;
             }
         }
-        /* Dark Mode for Bug Button & Modal */
+
+        /* ── Modern Non-Boxy Bug Modal ── */
+        .bug-modal-dialog {
+            max-width: 480px;
+            margin: 1.5rem auto;
+        }
+        .bug-modal-card {
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border-radius: 22px !important;
+            box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.18) !important;
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+        .bug-modal-header {
+            background: #ffffff !important;
+            border-bottom: 1px solid #f1f5f9 !important;
+            padding: 1.1rem 1.4rem;
+        }
+        .bug-modal-body {
+            background: #ffffff !important;
+            padding: 1.35rem 1.4rem 0.8rem !important;
+        }
+        .bug-modal-footer {
+            background: #f8fafc !important;
+            border-top: 1px solid #f1f5f9 !important;
+            padding: 1rem 1.4rem;
+        }
+
+        /* Dynamic Input Blocks */
+        .bug-field-block {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            transition: all 0.2s ease;
+        }
+        .bug-field-block:focus-within {
+            background: #ffffff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3.5px rgba(59, 130, 246, 0.12);
+        }
+        .bug-field-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+        .bug-field-label i {
+            font-size: 0.85rem;
+            color: #ef4444;
+        }
+        .bug-input-control {
+            width: 100%;
+            background: transparent !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            padding: 2px 0;
+            font-size: 0.92rem;
+            color: #0f172a;
+        }
+        .bug-input-control::placeholder {
+            color: #94a3b8;
+            font-size: 0.88rem;
+        }
+
+        /* Interactive File Dropzone */
+        .bug-dropzone {
+            background: #f8fafc;
+            border: 1.5px dashed #cbd5e1;
+            border-radius: 14px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .bug-dropzone:hover,
+        .bug-dropzone.dragover {
+            background: #f1f5f9;
+            border-color: #3b82f6;
+            transform: scale(1.005);
+        }
+        .bug-dropzone-icon {
+            font-size: 1.6rem;
+            color: #64748b;
+            line-height: 1;
+            margin-bottom: 4px;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        .bug-dropzone:hover .bug-dropzone-icon {
+            color: #3b82f6;
+            transform: translateY(-2px);
+        }
+        .bug-dropzone-text {
+            font-size: 0.84rem;
+            color: #334155;
+        }
+        .bug-dropzone-hint {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* File Preview Chip */
+        .bug-file-preview-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-top: 4px;
+        }
+        .bug-file-remove-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .bug-file-remove-btn:hover {
+            background: #ef4444;
+            color: #ffffff;
+        }
+
+        /* Modal Action Buttons */
+        .btn-bug-cancel {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 8px 18px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: all 0.15s ease;
+        }
+        .btn-bug-cancel:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+        .btn-bug-submit {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 8px 22px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.28);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+        .btn-bug-submit:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.38);
+        }
+        .btn-bug-submit:active {
+            transform: translateY(0);
+        }
+
+        /* ══════════════════════════════════════════════
+           DARK MODE: PURE SHADE OF BLACK (NO BLUE/SLATE)
+           ══════════════════════════════════════════════ */
         [data-theme="dark"] .floating-bug-trigger,
         [data-bs-theme="dark"] .floating-bug-trigger {
-            background: #1e293b;
-            border-color: rgba(255, 255, 255, 0.18);
-            color: #f1f5f9;
+            background: #0b0e14 !important;
+            border: 1px solid rgba(255, 255, 255, 0.14) !important;
+            color: #f8fafc !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
         }
         [data-theme="dark"] .floating-bug-trigger:hover,
         [data-bs-theme="dark"] .floating-bug-trigger:hover {
-            background: #334155;
+            background: #141822 !important;
+            border-color: rgba(255, 255, 255, 0.24) !important;
+            color: #ffffff !important;
         }
-        [data-theme="dark"] #globalBugReportModal .modal-content,
-        [data-bs-theme="dark"] #globalBugReportModal .modal-content {
-            background: #1e293b !important;
+        [data-theme="dark"] .bug-modal-card,
+        [data-bs-theme="dark"] .bug-modal-card {
+            background: #0b0e14 !important;
+            border: 1px solid rgba(255, 255, 255, 0.09) !important;
+            box-shadow: 0 28px 70px -15px rgba(0, 0, 0, 0.88) !important;
+        }
+        [data-theme="dark"] .bug-modal-header,
+        [data-bs-theme="dark"] .bug-modal-header {
+            background: #0b0e14 !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+        [data-theme="dark"] .bug-modal-body,
+        [data-bs-theme="dark"] .bug-modal-body {
+            background: #0b0e14 !important;
+        }
+        [data-theme="dark"] .bug-modal-footer,
+        [data-bs-theme="dark"] .bug-modal-footer {
+            background: #07090f !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+        [data-theme="dark"] .bug-field-block,
+        [data-bs-theme="dark"] .bug-field-block {
+            background: #121622 !important;
+            border: 1px solid rgba(255, 255, 255, 0.09) !important;
+        }
+        [data-theme="dark"] .bug-field-block:focus-within,
+        [data-bs-theme="dark"] .bug-field-block:focus-within {
+            background: #151a28 !important;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 0.2) !important;
+        }
+        [data-theme="dark"] .bug-field-label,
+        [data-bs-theme="dark"] .bug-field-label {
+            color: #94a3b8 !important;
+        }
+        [data-theme="dark"] .bug-input-control,
+        [data-bs-theme="dark"] .bug-input-control {
+            color: #f8fafc !important;
+        }
+        [data-theme="dark"] .bug-input-control::placeholder,
+        [data-bs-theme="dark"] .bug-input-control::placeholder {
+            color: #64748b !important;
+        }
+        [data-theme="dark"] .bug-dropzone,
+        [data-bs-theme="dark"] .bug-dropzone {
+            background: #121622 !important;
+            border: 1.5px dashed rgba(255, 255, 255, 0.14) !important;
+        }
+        [data-theme="dark"] .bug-dropzone:hover,
+        [data-theme="dark"] .bug-dropzone.dragover,
+        [data-bs-theme="dark"] .bug-dropzone:hover,
+        [data-bs-theme="dark"] .bug-dropzone.dragover {
+            background: #171c2b !important;
+            border-color: #ef4444 !important;
+        }
+        [data-theme="dark"] .bug-dropzone-icon,
+        [data-bs-theme="dark"] .bug-dropzone-icon {
+            color: #94a3b8 !important;
+        }
+        [data-theme="dark"] .bug-dropzone:hover .bug-dropzone-icon,
+        [data-bs-theme="dark"] .bug-dropzone:hover .bug-dropzone-icon {
+            color: #ef4444 !important;
+        }
+        [data-theme="dark"] .bug-dropzone-text,
+        [data-bs-theme="dark"] .bug-dropzone-text {
+            color: #cbd5e1 !important;
+        }
+        [data-theme="dark"] .bug-dropzone-hint,
+        [data-bs-theme="dark"] .bug-dropzone-hint {
+            color: #64748b !important;
+        }
+        [data-theme="dark"] .bug-file-preview-card,
+        [data-bs-theme="dark"] .bug-file-preview-card {
+            background: #171c2a !important;
             border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: #f1f5f9 !important;
+            color: #f8fafc !important;
         }
-        [data-theme="dark"] #globalBugReportModal .modal-header,
-        [data-theme="dark"] #globalBugReportModal .modal-body,
-        [data-bs-theme="dark"] #globalBugReportModal .modal-header,
-        [data-bs-theme="dark"] #globalBugReportModal .modal-body {
-            background: #1e293b !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
+        [data-theme="dark"] .btn-bug-cancel,
+        [data-bs-theme="dark"] .btn-bug-cancel {
+            background: #131722 !important;
+            color: #cbd5e1 !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
         }
-        [data-theme="dark"] #globalBugReportModal .modal-footer,
-        [data-bs-theme="dark"] #globalBugReportModal .modal-footer {
-            background: #0f172a !important;
-            border-color: rgba(255, 255, 255, 0.1) !important;
-        }
-        [data-theme="dark"] #globalBugReportModal .modal-title,
-        [data-bs-theme="dark"] #globalBugReportModal .modal-title {
-            color: #f1f5f9 !important;
-        }
-        [data-theme="dark"] #globalBugReportModal .form-control,
-        [data-bs-theme="dark"] #globalBugReportModal .form-control {
-            background-color: rgba(15, 23, 42, 0.6) !important;
-            border-color: rgba(255, 255, 255, 0.15) !important;
-            color: #f1f5f9 !important;
+        [data-theme="dark"] .btn-bug-cancel:hover,
+        [data-bs-theme="dark"] .btn-bug-cancel:hover {
+            background: #19202f !important;
+            color: #ffffff !important;
         }
         [data-theme="dark"] #globalBugReportModal .btn-close,
         [data-bs-theme="dark"] #globalBugReportModal .btn-close {
-            filter: invert(1) !important;
+            filter: invert(1) grayscale(1) brightness(1.2) !important;
         }
     </style>
 
@@ -1334,22 +1590,28 @@
             data-bs-target="#globalBugReportModal" 
             aria-label="Report a bug" 
             title="Report a bug">
-        <i class="bi bi-bug-fill"></i>
+        <span class="bug-icon-bubble">
+            <i class="bi bi-bug-fill"></i>
+        </span>
         <span>Report Bug</span>
     </button>
 
     <!-- Global Bug Report Modal -->
     <div class="modal fade" id="globalBugReportModal" tabindex="-1" aria-labelledby="globalBugReportModalLabel" aria-hidden="true" style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content shadow-lg border-0" style="border-radius: 16px; overflow: hidden; background: var(--bg-card, #ffffff);">
-                <div class="modal-header border-bottom py-3 px-4" style="border-color: var(--border-color, #e2e8f0); background: var(--bg-card, #ffffff);">
-                    <div class="d-flex align-items-center gap-2">
-                        <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(239, 68, 68, 0.1); color: #ef4444; display: flex; align-items: center; justify-content: center; font-size: 1.1rem;">
+        <div class="modal-dialog modal-dialog-centered bug-modal-dialog">
+            <div class="modal-content bug-modal-card">
+                <!-- Modal Header -->
+                <div class="modal-header bug-modal-header d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.22); display: flex; align-items: center; justify-content: center; font-size: 1.15rem;">
                             <i class="bi bi-bug-fill"></i>
                         </div>
                         <div>
-                            <h5 class="modal-title fw-bold mb-0" id="globalBugReportModalLabel" style="font-size: 1.1rem; color: var(--text-main, #0f172a);">Report a Bug</h5>
-                            <small class="text-muted" style="font-size: 0.78rem;">Sends directly to the Developer Dashboard</small>
+                            <div class="d-flex align-items-center gap-2">
+                                <h5 class="modal-title fw-bold mb-0" id="globalBugReportModalLabel" style="font-size: 1.05rem;">Report a Bug</h5>
+                                <span class="badge rounded-pill bg-danger-subtle text-danger px-2 py-0" style="font-size: 0.68rem; font-weight: 600;">Dev Channel</span>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.76rem;">Direct log to Developer Dashboard</small>
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1359,60 +1621,79 @@
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="page_url" id="globalBugPageUrl" value="">
                     
-                    <div class="modal-body p-4" style="background: var(--bg-card, #ffffff);">
+                    <div class="modal-body bug-modal-body">
                         <!-- Alert Box -->
                         <div id="globalBugAlert" class="alert d-none mb-3 py-2 px-3 small" role="alert"></div>
 
-                        <!-- Title Input -->
-                        <div class="mb-3">
-                            <label for="globalBugTitle" class="form-label small fw-bold text-muted mb-1">
-                                Issue Title <span class="text-danger">*</span>
+                        <!-- Title Input Block -->
+                        <div class="bug-field-block">
+                            <label for="globalBugTitle" class="bug-field-label">
+                                <i class="bi bi-chat-left-dots-fill"></i> Issue Title <span class="text-danger">*</span>
                             </label>
                             <input type="text" 
-                                   class="form-control" 
+                                   class="bug-input-control" 
                                    id="globalBugTitle" 
                                    name="title" 
                                    placeholder="e.g., Room map not loading on floor 3" 
                                    required 
-                                   style="height: 42px; border-radius: 8px; font-size: 0.9rem;">
+                                   autocomplete="off">
                         </div>
 
-                        <!-- Description Textarea -->
-                        <div class="mb-3">
-                            <label for="globalBugDesc" class="form-label small fw-bold text-muted mb-1">
-                                Steps to Reproduce / Details <span class="text-danger">*</span>
+                        <!-- Description Block -->
+                        <div class="bug-field-block">
+                            <label for="globalBugDesc" class="bug-field-label">
+                                <i class="bi bi-list-task"></i> Steps to Reproduce / Details <span class="text-danger">*</span>
                             </label>
-                            <textarea class="form-control" 
+                            <textarea class="bug-input-control" 
                                       id="globalBugDesc" 
                                       name="description" 
                                       rows="3" 
                                       placeholder="1. What were you doing?&#10;2. What went wrong?&#10;3. What did you expect?" 
                                       required 
-                                      style="border-radius: 8px; font-size: 0.9rem; resize: vertical;"></textarea>
+                                      style="resize: vertical; min-height: 80px;"></textarea>
                         </div>
 
-                        <!-- File Upload -->
+                        <!-- Dynamic File Upload Dropzone -->
                         <div class="mb-2">
-                            <label for="globalBugFile" class="form-label small fw-bold text-muted mb-1">
-                                Screenshot / Video (Optional)
-                            </label>
-                            <input type="file" 
-                                   class="form-control" 
-                                   id="globalBugFile" 
-                                   name="file" 
-                                   accept="image/*,video/mp4" 
-                                   style="border-radius: 8px; font-size: 0.85rem;">
-                            <div class="form-text text-muted small" style="font-size: 0.75rem;">
-                                Images (PNG, JPG, WebP) or MP4 video up to 16MB
+                            <div class="bug-dropzone" id="bugDropzone" tabindex="0" role="button" aria-label="Upload screenshot or video">
+                                <input type="file" 
+                                       id="globalBugFile" 
+                                       name="file" 
+                                       accept="image/png,image/jpeg,image/webp,video/mp4" 
+                                       class="d-none">
+                                
+                                <div id="bugDropzoneIdle">
+                                    <div class="bug-dropzone-icon">
+                                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                                    </div>
+                                    <div class="bug-dropzone-text">
+                                        <span class="fw-semibold">Click to upload</span> or drag and drop
+                                    </div>
+                                    <div class="bug-dropzone-hint">Screenshot or screen recording (max 16MB)</div>
+                                </div>
+
+                                <div id="bugDropzoneSelected" class="d-none">
+                                    <div class="bug-file-preview-card">
+                                        <i class="bi bi-file-earmark-image-fill fs-4 text-danger" id="bugFileIcon"></i>
+                                        <div class="text-truncate flex-grow-1 text-start">
+                                            <div class="fw-semibold small text-truncate" id="bugFileName">file.png</div>
+                                            <div class="text-muted" style="font-size: 0.72rem;" id="bugFileSize">0 KB</div>
+                                        </div>
+                                        <button type="button" class="bug-file-remove-btn" id="btnRemoveBugFile" title="Remove file">
+                                            <i class="bi bi-x-lg" style="font-size: 0.75rem;"></i>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="modal-footer border-top px-4 py-3 d-flex justify-content-between" style="border-color: var(--border-color, #e2e8f0); background: var(--bg-surface, #f8fafc);">
-                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" data-bs-dismiss="modal" style="border-radius: 8px; font-weight: 500;">
+                    <!-- Modal Footer -->
+                    <div class="modal-footer bug-modal-footer d-flex justify-content-between">
+                        <button type="button" class="btn btn-bug-cancel" data-bs-dismiss="modal">
                             Cancel
                         </button>
-                        <button type="submit" class="btn btn-danger btn-sm px-4 d-inline-flex align-items-center gap-2" id="globalBugSubmitBtn" style="border-radius: 8px; font-weight: 600; box-shadow: none !important;">
+                        <button type="submit" class="btn btn-bug-submit" id="globalBugSubmitBtn">
                             <i class="bi bi-send-fill"></i>
                             <span>Send to Developer</span>
                         </button>
@@ -1429,8 +1710,108 @@
         const urlInput = document.getElementById('globalBugPageUrl');
         const alertEl = document.getElementById('globalBugAlert');
         const submitBtn = document.getElementById('globalBugSubmitBtn');
+        const fileInput = document.getElementById('globalBugFile');
+        const dropzone = document.getElementById('bugDropzone');
+        const dropzoneIdle = document.getElementById('bugDropzoneIdle');
+        const dropzoneSelected = document.getElementById('bugDropzoneSelected');
+        const fileNameEl = document.getElementById('bugFileName');
+        const fileSizeEl = document.getElementById('bugFileSize');
+        const fileIconEl = document.getElementById('bugFileIcon');
+        const btnRemoveFile = document.getElementById('btnRemoveBugFile');
 
         if (!modalEl || !formEl) return;
+
+        function resetDropzone() {
+            if (fileInput) fileInput.value = '';
+            if (dropzoneIdle) dropzoneIdle.classList.remove('d-none');
+            if (dropzoneSelected) dropzoneSelected.classList.add('d-none');
+            if (dropzone) dropzone.classList.remove('dragover');
+        }
+
+        function handleFileSelection(file) {
+            if (!file) {
+                resetDropzone();
+                return;
+            }
+            if (dropzoneIdle) dropzoneIdle.classList.add('d-none');
+            if (dropzoneSelected) dropzoneSelected.classList.remove('d-none');
+            if (fileNameEl) fileNameEl.textContent = file.name;
+            
+            // Format size
+            let sizeStr = '';
+            if (file.size < 1024 * 1024) {
+                sizeStr = (file.size / 1024).toFixed(1) + ' KB';
+            } else {
+                sizeStr = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+            }
+            if (fileSizeEl) fileSizeEl.textContent = sizeStr;
+
+            // Icon by type
+            if (fileIconEl) {
+                if (file.type.startsWith('video/')) {
+                    fileIconEl.className = 'bi bi-file-earmark-play-fill fs-4 text-primary';
+                } else {
+                    fileIconEl.className = 'bi bi-file-earmark-image-fill fs-4 text-danger';
+                }
+            }
+        }
+
+        if (dropzone && fileInput) {
+            // Click to upload
+            dropzone.addEventListener('click', function(e) {
+                if (e.target.closest('#btnRemoveBugFile')) return;
+                fileInput.click();
+            });
+
+            // Keyboard accessibility
+            dropzone.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    fileInput.click();
+                }
+            });
+
+            // Drag & drop
+            ['dragenter', 'dragover'].forEach(eventName => {
+                dropzone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add('dragover');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                dropzone.addEventListener(eventName, function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('dragover');
+                });
+            });
+
+            dropzone.addEventListener('drop', function(e) {
+                const dt = e.dataTransfer;
+                if (dt && dt.files && dt.files.length > 0) {
+                    fileInput.files = dt.files;
+                    handleFileSelection(dt.files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    handleFileSelection(this.files[0]);
+                } else {
+                    resetDropzone();
+                }
+            });
+
+            if (btnRemoveFile) {
+                btnRemoveFile.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    resetDropzone();
+                });
+            }
+        }
 
         modalEl.addEventListener('show.bs.modal', function() {
             if (urlInput) urlInput.value = window.location.href;
@@ -1438,6 +1819,10 @@
                 alertEl.className = 'alert d-none mb-3 py-2 px-3 small';
                 alertEl.textContent = '';
             }
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', function() {
+            resetDropzone();
         });
 
         formEl.addEventListener('submit', async function(e) {
@@ -1475,6 +1860,7 @@
                     alertEl.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> Bug report sent! Forwarded to Developer Dashboard.';
                     alertEl.classList.remove('d-none');
                     formEl.reset();
+                    resetDropzone();
                     setTimeout(() => {
                         const bsModal = bootstrap.Modal.getInstance(modalEl);
                         if (bsModal) bsModal.hide();

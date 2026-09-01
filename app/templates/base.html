@@ -201,10 +201,15 @@
                 <span>Home</span>
             </a>
             {% if not (request.endpoint and request.endpoint.endswith('.login')) %}
-            <a href="{{ url_for('main.report_bug') }}" class="bottom-nav-item {% if request.endpoint == 'main.report_bug' %}active{% endif %}">
-                <i class="bi bi-bug"></i>
-                <span>Report Bug</span>
-            </a>
+            <button type="button"
+                    class="bottom-nav-item border-0 bg-transparent"
+                    data-bs-toggle="modal"
+                    data-bs-target="#globalBugReportModal"
+                    aria-label="Report a bug"
+                    style="padding: 0; margin: 0; outline: none; box-shadow: none; height: 100%; font-family: inherit; line-height: inherit; color: inherit;">
+                <i class="bi bi-bug-fill" style="color: #ef4444;"></i>
+                <span>Bug</span>
+            </button>
             {% endif %}
             {% if session.get('user_id') or session.get('professional_id') %}
             <!-- Student/User Profile Dropup -->
@@ -1289,10 +1294,7 @@
         }
         @media (max-width: 767px) {
             .floating-bug-trigger {
-                bottom: 76px;
-                right: 16px;
-                padding: 8px 14px;
-                font-size: 0.8rem;
+                display: none !important;
             }
         }
 

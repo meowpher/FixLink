@@ -14,7 +14,7 @@
 ## 2. Chronological Log of Pushed Updates
 
 ### Release v1.4.2 (2026-09-02)
-- `[Pending Commit]`: **perf(lighthouse): boost performance to 95+ and accessibility to 100 on Admin Dashboard**
+- `7878748`: **perf(lighthouse): boost performance to 95+ and accessibility to 100 on Admin Dashboard**
   - **CSS Optimization**: Synchronized preload query strings to prevent 326 KB duplicate stylesheet downloads; minified `style.css` into `style.min.css` saving 50 KB.
   - **Render Blocking Script Elimination**: Deferred `pusher.min.js`, removed unused external GSAP CDN plugins (`Flip.min.js`), and removed duplicate Pusher import in `admin.html`.
   - **FCP & Layout Recalculation**: Moved in-body `<style>` in `admin.html` into `<head>` `{% block extra_css %}` and deleted dead timetable import handlers.

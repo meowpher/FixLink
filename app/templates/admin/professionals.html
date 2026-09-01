@@ -3,6 +3,145 @@
 {% block title %}Professional Management - FixLink Admin{% endblock %}
 
 {% block content %}
+<style>
+    /* Filter Sidebar Panel */
+    .filter-sidebar-panel {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: var(--border-radius-lg, 16px);
+        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+        padding: 1.25rem 1.1rem;
+        position: sticky;
+        top: 90px;
+        transition: all 0.25s ease;
+    }
+
+    .filter-sidebar-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        color: var(--text-muted, #64748b);
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        margin-bottom: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filter-sidebar-panel .form-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-main, #334155);
+        margin-bottom: 0.4rem;
+    }
+
+    .filter-sidebar-panel .form-control,
+    .filter-sidebar-panel .form-select {
+        border-radius: 8px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        font-size: 0.9rem;
+        height: 42px;
+        padding: 0.5rem 0.85rem;
+        background-color: var(--bg-input, #f8fafc);
+        color: var(--text-main, #0f172a);
+        transition: border-color 0.15s ease;
+    }
+
+    .filter-sidebar-panel .form-control:focus,
+    .filter-sidebar-panel .form-select:focus {
+        border-color: var(--mitwpu-blue, #0b4d8c);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(11, 77, 140, 0.15);
+        background-color: #ffffff;
+    }
+
+    .filter-sidebar-panel .btn-apply-filters {
+        height: 42px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #0b4d8c;
+        border-color: #0b4d8c;
+        box-shadow: none !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .filter-sidebar-panel .btn-apply-filters:hover {
+        background-color: #083866;
+        border-color: #083866;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    /* Dark Mode Support for Filter Sidebar */
+    [data-theme="dark"] .filter-sidebar-panel,
+    [data-bs-theme="dark"] .filter-sidebar-panel {
+        background: var(--bg-surface, #1e293b);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .filter-sidebar-title,
+    [data-bs-theme="dark"] .filter-sidebar-title {
+        color: var(--text-muted, #94a3b8);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-label,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-label {
+        color: var(--text-body, #cbd5e1);
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-control,
+    [data-theme="dark"] .filter-sidebar-panel .form-select,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-control,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-select {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .input-group-text,
+    [data-bs-theme="dark"] .filter-sidebar-panel .input-group-text {
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-control:focus,
+    [data-theme="dark"] .filter-sidebar-panel .form-select:focus,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-control:focus,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-select:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+        background-color: #0f172a;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .btn-apply-filters,
+    [data-bs-theme="dark"] .filter-sidebar-panel .btn-apply-filters {
+        background-color: #1d4ed8;
+        border-color: #2563eb;
+        color: #ffffff;
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .btn-apply-filters:hover,
+    [data-bs-theme="dark"] .filter-sidebar-panel .btn-apply-filters:hover {
+        background-color: #1e40af;
+        border-color: #1d4ed8;
+    }
+
+    @media (max-width: 767px) {
+        .filter-sidebar-panel {
+            position: static;
+            margin-bottom: 1.25rem;
+            padding: 1rem;
+        }
+    }
+</style>
 <div class="container-fluid py-4">
     <!-- Header -->
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
@@ -60,42 +199,63 @@
         </div>
     </div>
     
-    <!-- Filters -->
-    <div class="filter-card mb-4 border-0">
-        <form method="GET" class="row g-3 align-items-center">
-            <div class="col-md-4">
-                <div class="input-group flex-nowrap" style="height: 48px;">
-                    <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 10px 0 0 10px;"><i class="bi bi-search"></i></span>
-                    <input type="text" name="q" class="form-control border-start-0 ps-0 h-100" placeholder="Search name, email, phone..." value="{{ search_query }}" style="border-radius: 0 10px 10px 0;">
+    <!-- Main Content: Left Filter Sidebar + Right Table -->
+    <div class="row g-4">
+        <!-- Left Side: Filter Sidebar Panel -->
+        <div class="col-xl-3 col-lg-4 col-md-4">
+            <aside class="filter-sidebar-panel">
+                <div class="filter-sidebar-title">
+                    <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
+                    {% if search_query or (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') %}
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
+                    {% endif %}
                 </div>
-            </div>
-            <div class="col-md-3">
-                <select name="category" class="form-select border-0 shadow-sm px-3 h-100" style="background-color: var(--bg-main); height: 48px; border-radius: 10px;">
-                    <option value="all">All Categories</option>
-                    {% for cat in categories %}
-                    <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>
-                        {{ category_names.get(cat, cat) }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-3">
-                <select name="status" class="form-select border-0 shadow-sm px-3 h-100" style="background-color: var(--bg-main); height: 48px; border-radius: 10px;">
-                    <option value="all">All Status</option>
-                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
-                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
-                </select>
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-dark w-100 shadow-sm h-100" style="border-radius: 10px; height: 48px;">
-                    <i class="bi bi-funnel me-1"></i> Filter
-                </button>
-            </div>
-        </form>
-    </div>
-    
-    <!-- Professionals List -->
-    <div class="tickets-card border-0">
+                <form method="GET" action="{{ url_for('admin.professionals') }}" class="filter-sidebar-form">
+                    <div class="mb-3">
+                        <label for="searchQuery" class="form-label">Search</label>
+                        <div class="input-group flex-nowrap">
+                            <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" id="searchQuery" name="q" class="form-control border-start-0 ps-0" placeholder="Name, email, phone..." value="{{ search_query }}" style="border-radius: 0 8px 8px 0; height: 42px;">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryFilter" class="form-label">Category</label>
+                        <select id="categoryFilter" name="category" class="form-select" style="height: 42px; border-radius: 8px;">
+                            <option value="all">All Categories</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>
+                                {{ category_names.get(cat, cat) }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select id="statusFilter" name="status" class="form-select" style="height: 42px; border-radius: 8px;">
+                            <option value="all">All Status</option>
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                    <div class="pt-1 d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-apply-filters">
+                            <i class="bi bi-funnel me-1"></i>Apply Filters
+                        </button>
+                        {% if search_query or (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') %}
+                        <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary btn-sm text-decoration-none" style="border-radius: 8px;">
+                            <i class="bi bi-x-circle me-1"></i>Clear Filters
+                        </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </aside>
+        </div>
+
+        <!-- Right Side: Professionals List Table & Cards -->
+        <div class="col-xl-9 col-lg-8 col-md-8">
+            <div class="tickets-card border-0">
         <div class="desktop-table-container d-none d-md-block">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -268,6 +428,8 @@
                 </ul>
             </nav>
             {% endif %}
+        </div>
+    </div>
         </div>
     </div>
 </div>

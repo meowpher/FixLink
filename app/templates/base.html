@@ -9,57 +9,39 @@
     <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
     <link rel="canonical" href="{{ request.base_url }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FLOGOCLR.webp') }}">
-    <!-- Preload Critical CSS (self-hosted for zero CDN latency) -->
+    <!-- Preconnect & DNS-Prefetch for external CDNs -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://js.pusher.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="https://js.pusher.com">
+
+    <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=6.6" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.0" as="style">
 
-    <!-- Critical inline CSS: box-model resets so page doesn't FOUC while Bootstrap loads async -->
-    <style>
-        *,::after,::before{box-sizing:border-box}
-        html{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:1rem;line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4}
-        body{margin:0;line-height:inherit}
-        img,svg{vertical-align:middle;max-width:100%}
-        button,input,select,textarea{font-family:inherit;font-size:inherit;line-height:inherit;margin:0}
-        a{color:inherit;text-decoration:underline}
-        h1,h2,h3,h4,h5,h6{margin-top:0;margin-bottom:.5rem;font-weight:500;line-height:1.2}
-        p{margin-top:0;margin-bottom:1rem}
-        .d-none{display:none!important}
-        .d-flex{display:flex!important}
-        .d-block{display:block!important}
-        .d-lg-flex{display:none}
-        @media(min-width:992px){.d-lg-flex{display:flex!important}.d-none{display:none!important}}
-        .fixed-top{position:fixed;top:0;right:0;left:0;z-index:1030}
-        .container-fluid{width:100%;padding-right:.75rem;padding-left:.75rem;margin-right:auto;margin-left:auto}
-    </style>
+    <!-- Critical Core Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.0">
 
-    <!-- Bootstrap 5 CSS (deferred, non-render-blocking) -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" media="print" onload="this.media='all'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"></noscript>
-
-    <!-- Bootstrap Icons (self-hosted, deferred as non-critical) -->
+    <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}"></noscript>
-
-    <!-- Custom CSS (critical, load synchronously) -->
-    <link href="{{ url_for('static', filename='css/style.min.css') }}?v=7.8" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 
-    <!-- Advanced UI Animations CSS -->
-    <link rel="preload" href="{{ url_for('static', filename='css/page_transitions.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/page_transitions.css') }}"></noscript>
-    
-    <link rel="preload" href="{{ url_for('static', filename='css/skeleton.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}"></noscript>
-    
-    <!-- Deferred Non-Critical CSS -->
-    <link rel="preload" href="{{ url_for('static', filename='css/dashboard_stats.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_stats.css') }}"></noscript>
-    
-    <link rel="preload" href="{{ url_for('static', filename='css/carousels.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/carousels.css') }}"></noscript>
+    <!-- Non-Critical UI Enhancements (Loaded asynchronously) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/page_transitions.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_stats.css') }}" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/carousels.css') }}" media="print" onload="this.media='all'">
+    <noscript>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/page_transitions.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/skeleton.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard_stats.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/carousels.css') }}">
+    </noscript>
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -667,11 +649,8 @@
     <script defer src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
     {% if request.endpoint not in ['main.report_form', 'main.report_bug', 'auth.login'] %}
-    <!-- GSAP for Smooth Animations -->
+    <!-- Core GSAP for Smooth Animations (self-contained, deferred) -->
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Draggable.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/Flip.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
 
     <!-- Custom JS -->
     <script type="module" src="{{ url_for('static', filename='js/animations.js') }}" crossorigin></script>
@@ -843,6 +822,18 @@
                 if (mobileEmailElReport) mobileEmailElReport.textContent = data.email || '—';
                 const mobileEmailElBottom = document.getElementById('mobileProfileEmailBottom');
                 if (mobileEmailElBottom) mobileEmailElBottom.textContent = data.email || '—';
+                
+                // Populate mobile sidebar elements as well to eliminate redundant fetch
+                const msbAvatar = document.getElementById('msbAvatar');
+                const msbName = document.getElementById('msbUserName');
+                const msbEmail = document.getElementById('msbUserEmail');
+                if (msbName) msbName.textContent = data.name || '—';
+                if (msbEmail) msbEmail.textContent = data.email || '—';
+                if (msbAvatar) {
+                    const initials = data.name ? (data.name.trim().split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase()) : '?';
+                    msbAvatar.textContent = initials;
+                }
+                
                 setAvatar(data.name, data.photo_url);
             })
             .catch(() => {});
@@ -1023,7 +1014,7 @@
     </script>
 
     <!-- Notification Detail Modal -->
-    <div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalTitle" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow: hidden;">
                 <div class="modal-header border-0 bg-primary text-white py-3">
@@ -1140,23 +1131,6 @@
             });
         }
 
-        /* ---- Populate user info from /api/me ---- */
-        const msbAvatar = document.getElementById('msbAvatar');
-        const msbName   = document.getElementById('msbUserName');
-        const msbEmail  = document.getElementById('msbUserEmail');
-        if (msbAvatar || msbName) {
-            fetch('/api/me').then(r => r.json()).then(res => {
-                if (!res.success) return;
-                const d = res.data;
-                if (msbName)  msbName.textContent  = d.name  || '—';
-                if (msbEmail) msbEmail.textContent = d.email || '—';
-                if (msbAvatar) {
-                    const initials = d.name ? (d.name.trim().split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase()) : '?';
-                    msbAvatar.textContent = initials;
-                }
-            }).catch(() => {});
-        }
-
         /* ---- Sync notification dot ---- */
         const msbNotifDot = document.getElementById('msbNotifDot');
         if (msbNotifDot) {
@@ -1183,10 +1157,10 @@
 
     <meta name="user-logged-in" content="{{ 'true' if session.get('user_id') or session.get('professional_id') else 'false' }}">
     <meta name="chat-channel" content="{% if session.get('is_admin') %}private-admins{% elif session.get('professional_id') %}private-professional-{{ session.get('professional_id') }}{% endif %}">
-    <script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+    <script defer src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
     <script>
-    // Global Chat Notification Logic
-    (function() {
+    // Global Chat Notification Logic (Non-blocking deferred execution)
+    window.addEventListener('load', function() {
         // Fetch unread count on page load
         function updateGlobalChatBadges(count) {
             const badges = document.querySelectorAll('.global-chat-badge');
@@ -1258,7 +1232,7 @@
                 }
             }
         }
-    })();
+    });
     </script>
 
     <!-- Global Floating Report Bug Button & Modern Modal -->

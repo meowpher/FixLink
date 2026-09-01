@@ -2,8 +2,7 @@
 
 {% block title %}Admin Dashboard - MIT-WPU Vyas Tracker{% endblock %}
 
-{% block content %}
-<!-- Admin Header -->
+{% block extra_css %}
 <style>
     .stat-content {
         opacity: 1 !important;
@@ -131,6 +130,10 @@
         }
     }
 </style>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Header -->
 <section class="admin-header vyas-admin-header">
     <div class="container">
         <div class="row align-items-center">
@@ -463,12 +466,11 @@
 </section>
 
 <!-- Ticket Detail Modal -->
-<!-- Ticket Detail Modal -->
-<div class="modal fade" id="ticketModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">
+                <h5 class="modal-title" id="ticketModalLabel">
                     <i class="bi bi-ticket-detailed me-2"></i>Ticket Details
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -484,11 +486,11 @@
 </div>
 
 <!-- Cancellation Report Modal -->
-<div class="modal fade" id="cancellationModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="cancellationModal" tabindex="-1" aria-labelledby="cancellationModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
             <div class="modal-header border-0 bg-danger text-white py-3" style="border-radius: 16px 16px 0 0;">
-                <h5 class="modal-title d-flex align-items-center">
+                <h5 class="modal-title d-flex align-items-center" id="cancellationModalLabel">
                     <i class="bi bi-file-earmark-diff me-2"></i>Cancellation Report
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -505,8 +507,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Pusher Integration -->
-<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+<!-- Pusher Integration (Library loaded once via base.html with defer) -->
 <script>
     let pusher;
     let channel;
@@ -890,89 +891,5 @@
             viewTicket(parseInt(ticketId));
         }
     });
-
-    // Timetable Import Logic
-    document.addEventListener('DOMContentLoaded', function() {
-        const fileInput = document.getElementById('csvFile');
-        const btnPreview = document.getElementById('btnPreviewImport');
-        const btnCommit = document.getElementById('btnCommitImport');
-        const importResults = document.getElementById('importResults');
-        const errorDetails = document.getElementById('errorDetails');
-        const errorList = document.getElementById('errorList');
-        
-        function handleImport(isDryRun) {
-            if (!fileInput.files.length) {
-                alert('Please select a CSV file first.');
-                return;
-            }
-            
-            const btn = isDryRun ? btnPreview : btnCommit;
-            const originalHtml = btn.innerHTML;
-            btn.disabled = true;
-            btn.querySelector('.spinner-border').classList.remove('d-none');
-            btn.querySelector('.btn-icon').classList.add('d-none');
-            
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-            formData.append('dry_run', isDryRun ? 'true' : 'false');
-            
-            fetch('/admin/api/timetable/import', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    const summary = data.data;
-                    document.getElementById('recordsParsed').textContent = summary.records_parsed;
-                    document.getElementById('errorCount').textContent = summary.error_count;
-                    
-                    importResults.classList.remove('d-none');
-                    
-                    if (summary.error_count > 0) {
-                        errorDetails.classList.remove('d-none');
-                        errorList.innerHTML = summary.errors.map(err => `<li>${err}</li>`).join('');
-                        document.getElementById('errorCount').classList.replace('text-success', 'text-danger');
-                        if (isDryRun) btnCommit.disabled = true;
-                    } else {
-                        errorDetails.classList.add('d-none');
-                        document.getElementById('errorCount').classList.replace('text-danger', 'text-success');
-                        if (isDryRun) btnCommit.disabled = false;
-                    }
-                    
-                    if (!isDryRun) {
-                        alert(summary.message || 'Import successful!');
-                        location.reload();
-                    }
-                } else {
-                    alert('Import Error: ' + (data.error || 'Unknown error occurred.'));
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                alert('A network error occurred during import.');
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.querySelector('.spinner-border').classList.add('d-none');
-                btn.querySelector('.btn-icon').classList.remove('d-none');
-            });
-        }
-        
-        if(btnPreview) btnPreview.addEventListener('click', () => handleImport(true));
-        if(btnCommit) btnCommit.addEventListener('click', () => handleImport(false));
-        
-        if(fileInput) {
-            fileInput.addEventListener('change', () => {
-                btnCommit.disabled = true;
-                importResults.classList.add('d-none');
-            });
-        }
-    });
-
-
 </script>
 {% endblock %}

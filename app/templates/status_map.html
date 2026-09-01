@@ -63,6 +63,233 @@
         padding: 3px 10px !important;
     }
 }
+
+    /* Static Side Position for Admin */
+    #roomDetailsPanel {
+        position: fixed !important;
+        top: 100px !important;
+        right: 30px !important;
+        left: auto !important;
+        transform: none !important;
+        width: 380px;
+        background: var(--bg-surface, var(--bg-card));
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        z-index: 1050;
+        overflow: hidden;
+        border: 1px solid var(--border-color);
+        display: none;
+    }
+
+    /* Static Floating Pop-up - Locked to Side */
+    #roomPopUp {
+        position: fixed !important;
+        top: 100px !important;
+        right: 30px !important;
+        left: auto !important;
+        transform: none !important;
+        z-index: 1050;
+        width: 380px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: none;
+    }
+
+    .action-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.1rem;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    .action-btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    
+    .btn-assign { background-color: #34495e; }
+    .btn-complete { background-color: #27ae60; }
+    .btn-delete { background-color: #e74c3c; }
+    .btn-map { background-color: #2980b9; }
+
+    .pulse-focus {
+        animation: pulseFocus 1s ease-in-out infinite;
+    }
+    @keyframes pulseFocus {
+        0% { filter: drop-shadow(0 0 0px #0d6efd); }
+        50% { filter: drop-shadow(0 0 15px #0d6efd); }
+        100% { filter: drop-shadow(0 0 0px #0d6efd); }
+    }
+    
+    .panel-header {
+        padding: 15px 20px;
+        background: var(--bg-main);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-main, #333333) !important;
+    }
+    
+    .panel-header h5 {
+        color: var(--text-main, #333333) !important;
+        margin: 0;
+    }
+    
+    .x-small { font-size: 0.7rem; }
+    .uppercase { text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    .room-group.selected .room-poly {
+        stroke: #0d6efd !important;
+        stroke-width: 3px !important;
+    }
+
+    @media (max-width: 767px) {
+        #roomDetailsPanel, #roomPopUp {
+            width: calc(100% - 24px) !important;
+            right: 12px !important;
+            left: 12px !important;
+            top: auto !important;
+            bottom: 20px !important;
+            max-height: 70vh !important;
+            overflow-y: auto !important;
+            z-index: 1100 !important;
+        }
+    }
+
+    /* Vertical Floor Sidebar Navigation */
+    .floor-sidebar-panel {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: var(--border-radius-lg, 16px);
+        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+        padding: 1.25rem 0.9rem;
+        position: sticky;
+        top: 90px;
+        transition: all 0.25s ease;
+    }
+
+    .floor-sidebar-title {
+        font-size: 0.82rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        color: var(--text-muted, #64748b);
+        padding: 0 0.5rem 0.75rem 0.5rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .floor-sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
+
+    .floor-sidebar-btn {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 1rem;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-main, #334155);
+        font-weight: 500;
+        font-size: 0.92rem;
+        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .floor-sidebar-btn .floor-btn-icon {
+        font-size: 0.75rem;
+        opacity: 0.45;
+        transition: opacity 0.15s ease;
+    }
+
+    .floor-sidebar-btn:hover {
+        background: rgba(11, 77, 140, 0.08);
+        color: var(--mitwpu-blue, #0b4d8c);
+        border-color: rgba(11, 77, 140, 0.18);
+    }
+
+    .floor-sidebar-btn:hover .floor-btn-icon {
+        opacity: 0.9;
+    }
+
+    .floor-sidebar-btn.active {
+        background: #0b4d8c !important;
+        color: #ffffff !important;
+        font-weight: 600;
+        border-color: #0b4d8c !important;
+        box-shadow: none !important;
+    }
+
+    .floor-sidebar-btn.active .floor-btn-icon {
+        opacity: 1;
+        color: #ffffff;
+    }
+
+    /* Dark Mode Support for Floor Sidebar */
+    [data-theme="dark"] .floor-sidebar-panel,
+    [data-bs-theme="dark"] .floor-sidebar-panel {
+        background: var(--bg-surface, #1e293b);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .floor-sidebar-title,
+    [data-bs-theme="dark"] .floor-sidebar-title {
+        color: var(--text-muted, #94a3b8);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .floor-sidebar-btn,
+    [data-bs-theme="dark"] .floor-sidebar-btn {
+        color: var(--text-body, #cbd5e1);
+    }
+
+    [data-theme="dark"] .floor-sidebar-btn:hover,
+    [data-bs-theme="dark"] .floor-sidebar-btn:hover {
+        background: rgba(255, 255, 255, 0.06);
+        color: #f8fafc;
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+
+    [data-theme="dark"] .floor-sidebar-btn.active,
+    [data-bs-theme="dark"] .floor-sidebar-btn.active {
+        background: #1d4ed8 !important;
+        color: #ffffff !important;
+        border-color: #2563eb !important;
+        box-shadow: none !important;
+    }
+
+    @media (max-width: 767px) {
+        .floor-sidebar-panel {
+            position: static;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+        }
+        .floor-sidebar-title {
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .floor-sidebar-nav {
+            flex-direction: row;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        .floor-sidebar-btn {
+            flex-shrink: 0;
+            padding: 0.5rem 0.85rem;
+        }
+        .floor-sidebar-btn .floor-btn-icon {
+            display: none;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -249,233 +476,4 @@
     
     window.focusRoom = focusRoom;
 </script>
-
-<style>
-    /* Static Side Position for Admin */
-    #roomDetailsPanel {
-        position: fixed !important;
-        top: 100px !important;
-        right: 30px !important;
-        left: auto !important;
-        transform: none !important;
-        width: 380px;
-        background: var(--bg-surface, var(--bg-card));
-        border-radius: 16px;
-        box-shadow: var(--shadow-lg);
-        z-index: 1050;
-        overflow: hidden;
-        border: 1px solid var(--border-color);
-        display: none;
-    }
-
-    /* Static Floating Pop-up - Locked to Side */
-    #roomPopUp {
-        position: fixed !important;
-        top: 100px !important;
-        right: 30px !important;
-        left: auto !important;
-        transform: none !important;
-        z-index: 1050;
-        width: 380px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: none;
-    }
-
-    .action-btn {
-        width: 38px;
-        height: 38px;
-        border-radius: 8px;
-        border: none;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.1rem;
-        transition: all 0.2s;
-        cursor: pointer;
-    }
-    .action-btn:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-    
-    .btn-assign { background-color: #34495e; }
-    .btn-complete { background-color: #27ae60; }
-    .btn-delete { background-color: #e74c3c; }
-    .btn-map { background-color: #2980b9; }
-
-    .pulse-focus {
-        animation: pulseFocus 1s ease-in-out infinite;
-    }
-    @keyframes pulseFocus {
-        0% { filter: drop-shadow(0 0 0px #0d6efd); }
-        50% { filter: drop-shadow(0 0 15px #0d6efd); }
-        100% { filter: drop-shadow(0 0 0px #0d6efd); }
-    }
-    
-    .panel-header {
-        padding: 15px 20px;
-        background: var(--bg-main);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border-bottom: 1px solid var(--border-color);
-        color: var(--text-main, #333333) !important;
-    }
-    
-    .panel-header h5 {
-        color: var(--text-main, #333333) !important;
-        margin: 0;
-    }
-    
-    .x-small { font-size: 0.7rem; }
-    .uppercase { text-transform: uppercase; letter-spacing: 0.5px; }
-    
-    .room-group.selected .room-poly {
-        stroke: #0d6efd !important;
-        stroke-width: 3px !important;
-    }
-
-        @media (max-width: 767px) {
-        #roomDetailsPanel, #roomPopUp {
-            width: calc(100% - 24px) !important;
-            right: 12px !important;
-            left: 12px !important;
-            top: auto !important;
-            bottom: 20px !important;
-            max-height: 70vh !important;
-            overflow-y: auto !important;
-            z-index: 1100 !important;
-        }
-    }
-
-    /* Vertical Floor Sidebar Navigation */
-    .floor-sidebar-panel {
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
-        border-radius: var(--border-radius-lg, 16px);
-        box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
-        padding: 1.25rem 0.9rem;
-        position: sticky;
-        top: 90px;
-        transition: all 0.25s ease;
-    }
-
-    .floor-sidebar-title {
-        font-size: 0.82rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.75px;
-        color: var(--text-muted, #64748b);
-        padding: 0 0.5rem 0.75rem 0.5rem;
-        border-bottom: 1px solid var(--border-color, #e2e8f0);
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-    }
-
-    .floor-sidebar-nav {
-        display: flex;
-        flex-direction: column;
-        gap: 0.4rem;
-    }
-
-    .floor-sidebar-btn {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.75rem 1rem;
-        background: transparent;
-        border: 1px solid transparent;
-        border-radius: 8px;
-        text-decoration: none;
-        color: var(--text-main, #334155);
-        font-weight: 500;
-        font-size: 0.92rem;
-        transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-    }
-
-    .floor-sidebar-btn .floor-btn-icon {
-        font-size: 0.75rem;
-        opacity: 0.45;
-        transition: opacity 0.15s ease;
-    }
-
-    .floor-sidebar-btn:hover {
-        background: rgba(11, 77, 140, 0.08);
-        color: var(--mitwpu-blue, #0b4d8c);
-        border-color: rgba(11, 77, 140, 0.18);
-    }
-
-    .floor-sidebar-btn:hover .floor-btn-icon {
-        opacity: 0.9;
-    }
-
-    .floor-sidebar-btn.active {
-        background: #0b4d8c !important;
-        color: #ffffff !important;
-        font-weight: 600;
-        border-color: #0b4d8c !important;
-        box-shadow: none !important;
-    }
-
-    .floor-sidebar-btn.active .floor-btn-icon {
-        opacity: 1;
-        color: #ffffff;
-    }
-
-    /* Dark Mode Support for Floor Sidebar */
-    [data-theme="dark"] .floor-sidebar-panel,
-    [data-bs-theme="dark"] .floor-sidebar-panel {
-        background: var(--bg-surface, #1e293b);
-        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
-    }
-
-    [data-theme="dark"] .floor-sidebar-title,
-    [data-bs-theme="dark"] .floor-sidebar-title {
-        color: var(--text-muted, #94a3b8);
-        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
-    }
-
-    [data-theme="dark"] .floor-sidebar-btn,
-    [data-bs-theme="dark"] .floor-sidebar-btn {
-        color: var(--text-body, #cbd5e1);
-    }
-
-    [data-theme="dark"] .floor-sidebar-btn:hover,
-    [data-bs-theme="dark"] .floor-sidebar-btn:hover {
-        background: rgba(255, 255, 255, 0.06);
-        color: #f8fafc;
-        border-color: rgba(255, 255, 255, 0.12);
-    }
-
-    [data-theme="dark"] .floor-sidebar-btn.active,
-    [data-bs-theme="dark"] .floor-sidebar-btn.active {
-        background: #1d4ed8 !important;
-        color: #ffffff !important;
-        border-color: #2563eb !important;
-        box-shadow: none !important;
-    }
-
-    @media (max-width: 767px) {
-        .floor-sidebar-panel {
-            position: static;
-            margin-bottom: 1rem;
-            padding: 0.75rem;
-        }
-        .floor-sidebar-title {
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.5rem;
-        }
-        .floor-sidebar-nav {
-            flex-direction: row;
-            overflow-x: auto;
-            padding-bottom: 4px;
-        }
-        .floor-sidebar-btn {
-            flex-shrink: 0;
-            padding: 0.5rem 0.85rem;
-        }
-        .floor-sidebar-btn .floor-btn-icon {
-            display: none;
-        }
-    }
-</style>
 {% endblock %}

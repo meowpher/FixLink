@@ -14,6 +14,9 @@
 ## 2. Chronological Log of Pushed Updates
 
 ### Release v1.4.2 (2026-09-02)
+- `[Pending Commit]`: **ci(pages): add .nojekyll and root index.html to resolve failing GitHub Pages build check**
+  - Added `.nojekyll` to bypass Jekyll engine processing and eliminate Liquid template parsing crashes on markdown/template braces.
+  - Added clean root `index.html` forwarding to the live Vercel production deployment (`https://fixlink26.vercel.app/`).
 - `7878748`: **perf(lighthouse): boost performance to 95+ and accessibility to 100 on Admin Dashboard**
   - **CSS Optimization**: Synchronized preload query strings to prevent 326 KB duplicate stylesheet downloads; minified `style.css` into `style.min.css` saving 50 KB.
   - **Render Blocking Script Elimination**: Deferred `pusher.min.js`, removed unused external GSAP CDN plugins (`Flip.min.js`), and removed duplicate Pusher import in `admin.html`.

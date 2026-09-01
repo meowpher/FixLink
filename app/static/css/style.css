@@ -1317,9 +1317,10 @@ body {
 
 /* Canteen / Encave - Dark Green */
 .room-poly.fill-darkgreen,
-.room-poly.fill-green {
-    fill: #023F24;
-    color: white;
+.room-poly.fill-green,
+.fill-darkgreen {
+    fill: #023F24 !important;
+    color: white !important;
 }
 
 .room-poly {

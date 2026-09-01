@@ -30,15 +30,14 @@ def seed_demo_data():
         for pdata in profs_data:
             existing = Professional.query.filter_by(email=pdata["email"]).first()
             if not existing:
-                prof = Professional(
-                    username=pdata["email"].split("@")[0],
-                    name=pdata["name"],
-                    email=pdata["email"],
-                    phone=pdata["phone"],
-                    category=pdata["category"],
-                    is_active=True,
-                    created_at=datetime.utcnow() - timedelta(days=60)
-                )
+                prof = Professional()
+                prof.username = pdata["email"].split("@")[0]
+                prof.name = pdata["name"]
+                prof.email = pdata["email"]
+                prof.phone = pdata["phone"]
+                prof.category = pdata["category"]
+                prof.is_active = True
+                prof.created_at = datetime.utcnow() - timedelta(days=60)
                 prof.set_password("Professional@123")
                 db.session.add(prof)
                 created_profs.append(prof)
@@ -95,21 +94,20 @@ def seed_demo_data():
             room = random.choice(rooms)
             fixed_at = (created_at + timedelta(hours=fix_hours)) if (status == "fixed" and fix_hours) else None
             
-            ticket = Ticket(
-                room_id=room.id,
-                issue_type=issue_type,
-                description=desc,
-                status=status,
-                created_at=created_at,
-                updated_at=fixed_at or created_at,
-                fixed_at=fixed_at,
-                job_completed_at=fixed_at,
-                assigned_professional_id=assigned_prof.id if assigned_prof and status != "open" else None,
-                reporter_name="Kiran Verma",
-                reporter_email="kiran@mitwpu.edu.in",
-                prn="1032210884",
-                complexity="Medium" if status == "fixed" else None
-            )
+            ticket = Ticket()
+            ticket.room_id = room.id
+            ticket.issue_type = issue_type
+            ticket.description = desc
+            ticket.status = status
+            ticket.created_at = created_at
+            ticket.updated_at = fixed_at or created_at
+            ticket.fixed_at = fixed_at
+            ticket.job_completed_at = fixed_at
+            ticket.assigned_professional_id = assigned_prof.id if assigned_prof and status != "open" else None
+            ticket.reporter_name = "Kiran Verma"
+            ticket.reporter_email = "kiran@mitwpu.edu.in"
+            ticket.prn = "1032210884"
+            ticket.complexity = "Medium" if status == "fixed" else None
             db.session.add(ticket)
             
         db.session.commit()

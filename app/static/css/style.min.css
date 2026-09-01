@@ -294,11 +294,12 @@ body {
 }
 
 /* ============================================
-   THEME ANIMATION CLASSES
+   THEME ANIMATION CLASSES & MAIN CONTENT
    ============================================ */
 
 .main-content {
     flex: 1;
+    padding-top: 104px;
 }
 
 /* ============================================

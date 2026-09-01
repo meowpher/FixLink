@@ -30,8 +30,13 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
             if (!svgDoc) return;
 
             svgDoc.classList.add('interactive-map');
-            svgDoc.style.width = '100%';
-            svgDoc.style.height = '100%';
+            svgDoc.style.width = 'auto';
+            svgDoc.style.height = '98%';
+            svgDoc.style.maxHeight = '950px';
+            svgDoc.style.display = 'block';
+            svgDoc.style.margin = '0 auto';
+            svgDoc.style.transformOrigin = 'center center';
+            svgDoc.style.transition = 'transform 0.15s ease-out';
             
             // Add Glow Filter if not exists
             if (!svgDoc.querySelector('defs filter#glow')) {
@@ -207,11 +212,94 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
             });
 
             handleAutoSelect(container);
+            setupMapZoomAndPan(container, svgDoc);
         })
         .catch(err => {
             console.error('Error loading SVG map:', err);
             container.innerHTML = `<div class="alert alert-danger">Failed to load floor map: ${err.message}</div>`;
         });
+}
+
+function setupMapZoomAndPan(container, svgDoc) {
+    let scale = 1.0;
+    let panX = 0;
+    let panY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    const badge = document.getElementById('mapZoomLevelBadge');
+
+    function applyTransform() {
+        svgDoc.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        if (badge) badge.textContent = `${Math.round(scale * 100)}%`;
+    }
+
+    const btnIn = document.getElementById('btnMapZoomIn');
+    const btnOut = document.getElementById('btnMapZoomOut');
+    const btnReset = document.getElementById('btnMapZoomReset');
+
+    if (btnIn) {
+        btnIn.onclick = (e) => {
+            e.preventDefault();
+            scale = Math.min(scale + 0.25, 3.5);
+            applyTransform();
+        };
+    }
+    if (btnOut) {
+        btnOut.onclick = (e) => {
+            e.preventDefault();
+            scale = Math.max(scale - 0.25, 0.75);
+            if (scale <= 1.0) { panX = 0; panY = 0; }
+            applyTransform();
+        };
+    }
+    if (btnReset) {
+        btnReset.onclick = (e) => {
+            e.preventDefault();
+            scale = 1.0;
+            panX = 0;
+            panY = 0;
+            applyTransform();
+        };
+    }
+
+    // Ctrl + Scroll Zoom
+    container.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            e.preventDefault();
+            if (e.deltaY < 0) {
+                scale = Math.min(scale + 0.15, 3.5);
+            } else {
+                scale = Math.max(scale - 0.15, 0.75);
+                if (scale <= 1.0) { panX = 0; panY = 0; }
+            }
+            applyTransform();
+        }
+    }, { passive: false });
+
+    // Drag to Pan when zoomed in
+    container.addEventListener('mousedown', (e) => {
+        if (e.target.closest('.room-group') || scale <= 1.0) return;
+        isDragging = true;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+        container.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+        applyTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            container.style.cursor = '';
+        }
+    });
 }
 
 function handleAutoSelect(container) {

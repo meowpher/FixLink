@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.4.8** | 2026-09-02 | **Deployed** | Added sleek `<` back button directly to the left of Admin Support Team online status dot in chat. |
 | **v1.4.7** | 2026-09-02 | **Deployed** | Removed clutter 'Remove photo' button from card; enabled intuitive avatar click action modal with hover overlay. |
 | **v1.4.6** | 2026-09-02 | **Deployed** | Neutral true black & charcoal dark mode palette (zero bluish/slate wash), dark page header gradients, synchronized minified CSS. |
 | **v1.4.5** | 2026-09-02 | **Deployed** | Removed `< Back` button from professional top nav, aligned MIT logo & FixLink brand to far left. |
@@ -17,6 +18,11 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.4.8 (2026-09-02)
+- `649befc`: **feat(chat): add sleek back button to the left of Admin Support Team online status**
+  - **Header Back Navigation**: Added circular back button (`.chat-back-btn`) with chevron icon positioned immediately to the left of the green online status dot in `chat.html`.
+  - **Smooth History Fallback**: Wires to `window.history.back()` with a graceful fallback to `/professional/dashboard`.
 
 ### Release v1.4.7 (2026-09-02)
 - `8fe212f`: **feat(professional): remove clutter remove-photo button and enable intuitive photo change on avatar click**

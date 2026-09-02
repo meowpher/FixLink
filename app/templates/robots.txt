@@ -1,6 +1,9 @@
 User-agent: *
 Allow: /
 Allow: /login
+Allow: /report
+Allow: /professional/
+Allow: /faculty/
 Allow: /sitemap.xml
 Allow: /robots.txt
 Allow: /google87abaa634db2f80b.html
@@ -8,7 +11,6 @@ Allow: /google87abaa634db2f80b.html
 # Disallow Administrative & Developer Portals
 Disallow: /admin/
 Disallow: /developer/
-Disallow: /faculty/
 
 # Disallow Internal API Endpoints
 Disallow: /api/
@@ -19,12 +21,6 @@ Disallow: /logout
 Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /verify/
-
-# Disallow Authenticated App Workflows
-Disallow: /report
-Disallow: /dashboard
-Disallow: /ticket/
-Disallow: /chat/
 
 # Sitemap Declaration
 Sitemap: {{ sitemap_url }}

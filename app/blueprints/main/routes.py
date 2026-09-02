@@ -50,6 +50,24 @@ def sitemap_xml():
             "lastmod": today,
             "changefreq": "weekly",
             "priority": "0.9"
+        },
+        {
+            "loc": f"{base_url}/report",
+            "lastmod": today,
+            "changefreq": "weekly",
+            "priority": "0.9"
+        },
+        {
+            "loc": f"{base_url}/faculty/dashboard",
+            "lastmod": today,
+            "changefreq": "weekly",
+            "priority": "0.8"
+        },
+        {
+            "loc": f"{base_url}/professional/dashboard",
+            "lastmod": today,
+            "changefreq": "weekly",
+            "priority": "0.8"
         }
     ]
     rendered = render_template('sitemap.xml', pages=pages)

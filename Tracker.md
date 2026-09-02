@@ -15,6 +15,9 @@
 ## 2. Chronological Log of Pushed Updates
 
 ### Release v1.4.3 (2026-09-02)
+- `ac7b4a8`: **fix(auth): seed Bottle Singh and enable seamless technician login**
+  - **Account Seeding**: Seeded `Bottle Singh` (`bottlesingh#pro`) into both PostgreSQL and SQLite databases, and embedded permanent auto-seeding in `init_db`.
+  - **Flexible Authentication**: Configured fallback password authentication and automatic password sync on login for technician `bottlesingh#pro`.
 - `f6bb33c`: **fix(vercel): eliminate 500 internal server error from stale sessions and missing db tables**
   - **Database Auto-Healing**: Removed blanket skip on Vercel; the app now safely inspects tables and auto-initializes missing tables via `scripts/init_data.py` non-interactively without throwing `EOFError`.
   - **Session Stale Guarding**: Protected `user_login_required`, `admin_required`, and `professional_login_required` decorators as well as `auth.login` and professional routes (`dashboard`, `chat`, `history`, `profile`) to clear orphaned session IDs and redirect to login instead of crashing with `AttributeError`.

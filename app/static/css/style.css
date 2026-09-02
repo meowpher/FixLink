@@ -129,6 +129,37 @@
     color: #ffffff !important;
 }
 
+/* Vibrant semantic text and icon colors in dark mode */
+[data-theme="dark"] .text-primary,
+[data-theme="dark"] i.text-primary,
+[data-theme="dark"] .bi.text-primary {
+    color: #3b82f6 !important;
+}
+
+[data-theme="dark"] .text-success,
+[data-theme="dark"] i.text-success,
+[data-theme="dark"] .bi.text-success {
+    color: #22c55e !important;
+}
+
+[data-theme="dark"] .text-warning,
+[data-theme="dark"] i.text-warning,
+[data-theme="dark"] .bi.text-warning {
+    color: #f59e0b !important;
+}
+
+[data-theme="dark"] .text-danger,
+[data-theme="dark"] i.text-danger,
+[data-theme="dark"] .bi.text-danger {
+    color: #ef4444 !important;
+}
+
+[data-theme="dark"] .text-info,
+[data-theme="dark"] i.text-info,
+[data-theme="dark"] .bi.text-info {
+    color: #06b6d4 !important;
+}
+
 /* Glassy Dark Mode Blocks */
 [data-theme="dark"] .stat-card,
 [data-theme="dark"] .filter-card,

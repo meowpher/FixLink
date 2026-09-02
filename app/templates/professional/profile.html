@@ -133,12 +133,17 @@
         background: var(--bg-main, #f8f9fa);
         border: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
         border-radius: 14px;
-        padding: 1rem;
+        padding: 0.85rem 0.5rem;
         text-align: center;
         transition: transform 0.2s ease, border-color 0.2s ease;
         text-decoration: none;
         color: inherit;
-        display: block;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        min-height: 88px;
     }
 
     .profile-stat-box:hover {
@@ -178,6 +183,37 @@
         background: var(--bg-main, #f8f9fa);
         color: var(--mitwpu-blue, #0b4d8c);
         transform: translateX(3px);
+    }
+
+    .action-row-btn i {
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    /* Vibrant semantic icon colors in action rows (both themes) */
+    .action-row-btn i.text-primary,
+    [data-theme="dark"] .action-row-btn i.text-primary {
+        color: #3b82f6 !important;
+    }
+
+    .action-row-btn i.text-success,
+    [data-theme="dark"] .action-row-btn i.text-success {
+        color: #22c55e !important;
+    }
+
+    .action-row-btn i.text-info,
+    [data-theme="dark"] .action-row-btn i.text-info {
+        color: #06b6d4 !important;
+    }
+
+    .action-row-btn i.text-danger,
+    [data-theme="dark"] .action-row-btn i.text-danger {
+        color: #ef4444 !important;
+    }
+
+    .action-row-btn i.text-warning,
+    [data-theme="dark"] .action-row-btn i.text-warning {
+        color: #f59e0b !important;
     }
 
     [data-theme="dark"] .action-row-btn {
@@ -289,15 +325,11 @@
                     </div>
 
                     {% if professional.phone %}
-                    <div class="d-flex align-items-center small text-muted mb-3">
+                    <div class="d-flex align-items-center small text-muted">
                         <i class="bi bi-telephone me-2 text-primary opacity-75"></i>
                         <span>{{ professional.phone }}</span>
                     </div>
                     {% endif %}
-
-                    <a href="{{ url_for('professional.chat') }}" class="btn btn-primary w-100 rounded-pill d-flex align-items-center justify-content-center gap-2 py-2">
-                        <i class="bi bi-chat-fill"></i>Open Chat Support
-                    </a>
                 </div>
             </div>
 
@@ -306,23 +338,23 @@
                 <h6 class="fw-bold mb-3 d-flex align-items-center">
                     <i class="bi bi-graph-up me-2 text-primary"></i>Work Activity
                 </h6>
-                <div class="row g-2">
-                    <div class="col-4">
-                        <a href="{{ url_for('professional.dashboard') }}" class="profile-stat-box">
-                            <div class="fw-bold fs-4 text-primary">{{ active_count }}</div>
-                            <div class="small text-muted" style="font-size: 0.75rem;">Active Tasks</div>
+                <div class="row g-2 align-items-stretch">
+                    <div class="col-4 d-flex">
+                        <a href="{{ url_for('professional.dashboard') }}" class="profile-stat-box w-100">
+                            <div class="fw-bold fs-4 text-primary lh-1 mb-1">{{ active_count }}</div>
+                            <div class="small text-muted" style="font-size: 0.75rem; line-height: 1.2;">Active Tasks</div>
                         </a>
                     </div>
-                    <div class="col-4">
-                        <a href="{{ url_for('professional.history') }}" class="profile-stat-box">
-                            <div class="fw-bold fs-4 text-success">{{ completed_count }}</div>
-                            <div class="small text-muted" style="font-size: 0.75rem;">Completed</div>
+                    <div class="col-4 d-flex">
+                        <a href="{{ url_for('professional.history') }}" class="profile-stat-box w-100">
+                            <div class="fw-bold fs-4 text-success lh-1 mb-1">{{ completed_count }}</div>
+                            <div class="small text-muted" style="font-size: 0.75rem; line-height: 1.2;">Completed</div>
                         </a>
                     </div>
-                    <div class="col-4">
-                        <div class="profile-stat-box">
-                            <div class="fw-bold fs-4 text-warning">{{ help_requests_count }}</div>
-                            <div class="small text-muted" style="font-size: 0.75rem;">Pending Help</div>
+                    <div class="col-4 d-flex">
+                        <div class="profile-stat-box w-100">
+                            <div class="fw-bold fs-4 text-warning lh-1 mb-1">{{ help_requests_count }}</div>
+                            <div class="small text-muted" style="font-size: 0.75rem; line-height: 1.2;">Pending Help</div>
                         </div>
                     </div>
                 </div>
@@ -331,33 +363,33 @@
             <!-- Quick Navigation & Actions -->
             <div class="profile-card-main p-4 mb-4">
                 <h6 class="fw-bold mb-3 d-flex align-items-center">
-                    <i class="bi bi-lightning-charge me-2 text-primary"></i>Quick Actions
+                    <i class="bi bi-lightning-charge me-2 text-warning"></i>Quick Actions
                 </h6>
                 <div class="d-flex flex-column gap-2">
                     <a href="{{ url_for('professional.dashboard') }}" class="action-row-btn">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-3">
                             <i class="bi bi-tools text-primary"></i>
                             <span>My Assigned Tasks</span>
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>
                     </a>
                     <a href="{{ url_for('professional.history') }}" class="action-row-btn">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-3">
                             <i class="bi bi-clock-history text-success"></i>
                             <span>Completed Task History</span>
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>
                     </a>
                     <a href="{{ url_for('professional.chat') }}" class="action-row-btn">
-                        <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-3">
                             <i class="bi bi-chat-dots text-info"></i>
                             <span>Admin Chat Support</span>
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>
                     </a>
                     <button type="button" class="action-row-btn w-100 text-start" data-bs-toggle="modal" data-bs-target="#globalBugReportModal">
-                        <div class="d-flex align-items-center gap-2 text-danger">
-                            <i class="bi bi-bug-fill"></i>
+                        <div class="d-flex align-items-center gap-3">
+                            <i class="bi bi-bug-fill text-danger"></i>
                             <span>Report a Problem / Bug</span>
                         </div>
                         <i class="bi bi-chevron-right text-muted small"></i>

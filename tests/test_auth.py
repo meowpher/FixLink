@@ -54,7 +54,7 @@ def test_professional_profile_access(client, professional_user):
     # Verify Profile content
     assert "My Profile" in html
     assert professional_user.name in html
-    assert "Open Chat Support" in html
+    assert "Admin Chat Support" in html
     assert "href=\"/professional/profile\"" in html
 
     # Verify top nav avatar and back button are removed for professionals

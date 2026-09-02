@@ -379,7 +379,6 @@
                         <li><a class="msb-subitem" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history"></i>Full History</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.booking_history') }}"><i class="bi bi-calendar3-range"></i>Bookings</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check"></i>Faculty Portal</a></li>
-                        <li><a class="msb-subitem" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i>Report Issue</a></li>
                     </ul>
                 </li>
                 <li>
@@ -395,6 +394,13 @@
                         <span>Chat</span>
                         <span class="msb-badge d-none global-chat-badge bg-danger text-white">0</span>
                         {% if request.endpoint == 'admin.chat' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'main.report_form' %}msb-active{% endif %}" href="{{ url_for('main.report_form') }}">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Report Issue</span>
+                        {% if request.endpoint == 'main.report_form' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
 
@@ -530,6 +536,7 @@
             display: flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
         }
         .nav-capsule .nav-link:hover {
             background: rgba(var(--mitwpu-blue-rgb), 0.1);
@@ -561,7 +568,7 @@
             </a>
 
             <!-- Nav Links -->
-            <ul class="nav nav-pills align-items-center m-0">
+            <ul class="nav nav-pills align-items-center flex-nowrap m-0">
                 {% if session.get('is_super_admin') %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin.dashboard') }}"><i class="bi bi-code-square"></i> Developer</a></li>
                 {% endif %}
@@ -580,12 +587,12 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history me-2"></i>Full History</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check me-2"></i>Faculty Portal</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle me-2"></i>Report Issue</a></li>
                         </ul>
                     </li>
 
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" href="{{ url_for('admin.analytics') }}"><i class="bi bi-graph-up"></i> Insights</a></li>
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.chat' %}active{% endif %}" href="{{ url_for('admin.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
 
                 {% elif session.get('professional_id') %}
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.dashboard' %}active{% endif %}" href="{{ url_for('professional.dashboard') }}"><i class="bi bi-tools"></i> My Tasks</a></li>

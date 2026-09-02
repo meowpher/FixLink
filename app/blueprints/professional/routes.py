@@ -140,6 +140,48 @@ def history():
                          completed_tickets=completed_tickets)
 
 
+@professional_bp.route('/profile')
+@professional_login_required
+def profile():
+    """Professional profile section."""
+    professional = Professional.query.get(session['professional_id'])
+    if not professional:
+        flash('Professional account not found.', 'error')
+        return redirect(url_for('professional.login'))
+    
+    # Category display names
+    category_names = {
+        Professional.CATEGORY_IT: 'IT Technician',
+        Professional.CATEGORY_ELECTRICIAN: 'Electrician',
+        Professional.CATEGORY_PLUMBER: 'Plumber',
+        Professional.CATEGORY_CARPENTER: 'Carpenter'
+    }
+
+    # Statistics for the professional
+    active_count = Ticket.query.filter_by(
+        assigned_professional_id=professional.id
+    ).filter(
+        Ticket.status.in_([Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])
+    ).count()
+
+    completed_count = Ticket.query.filter_by(
+        assigned_professional_id=professional.id,
+        status=Ticket.STATUS_FIXED
+    ).count()
+
+    help_requests_count = HelpRequest.query.filter_by(
+        requester_professional_id=professional.id,
+        status=HelpRequest.STATUS_PENDING
+    ).count()
+
+    return render_template('professional/profile.html',
+                         professional=professional,
+                         category_name=category_names.get(professional.category, professional.category),
+                         active_count=active_count,
+                         completed_count=completed_count,
+                         help_requests_count=help_requests_count)
+
+
 @professional_bp.route('/task/<int:ticket_id>')
 @professional_login_required
 def task_detail(ticket_id):

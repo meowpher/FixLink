@@ -115,47 +115,10 @@
     </div>
 </section>
 
-<div class="row g-4">
+<div class="container mb-5">
+    <div class="row g-4">
     <!-- Sidebar Tasks / Info -->
     <div class="col-lg-4 order-lg-2 slide-up" style="animation-delay: 0.4s;">
-        <!-- Profile Info Cord -->
-        <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--border-radius-lg); overflow: hidden;">
-            {% set category_icons = {
-            'Electrician': 'bi-lightning-charge',
-            'Plumber': 'bi-droplet',
-            'Carpenter': 'bi-hammer',
-            'IT Technician': 'bi-cpu',
-            'A/C Technician': 'bi-snow',
-            'Cleaner': 'bi-brush'
-            } %}
-            {% set cat_icon = category_icons.get(category_name, 'bi-tools') %}
-            <div class="card-header py-3 border-0">
-                <h5 class="mb-0 fw-bold"><i class="bi bi-person-badge me-2"></i>My Profile</h5>
-            </div>
-            <div class="card-body pt-0">
-                <div class="d-flex align-items-center gap-3 mb-3">
-                    <div class="nav-avatar nav-avatar-lg"
-                        style="width: 60px; height: 60px; font-size: 1.5rem; background: var(--mitwpu-blue-light);">
-                        <i class="bi {{ cat_icon }} text-white"></i>
-                    </div>
-                    <div>
-                        <h6 class="mb-0 fw-bold">{{ professional.name }}</h6>
-                        <small class="badge bg-primary-subtle text-primary border">{{ category_name }}</small>
-                    </div>
-                </div>
-                <div class="small text-muted mb-2">
-                    <i class="bi bi-envelope me-2"></i>{{ professional.email }}
-                </div>
-                {% if professional.phone %}
-                <div class="small text-muted mb-3">
-                    <i class="bi bi-telephone me-2"></i>{{ professional.phone }}
-                </div>
-                {% endif %}
-                <a href="{{ url_for('professional.chat') }}" class="btn btn-primary w-100 rounded-pill">
-                    <i class="bi bi-chat-fill me-2"></i>Open Chat Support
-                </a>
-            </div>
-        </div>
 
         <!-- Help Requests Card -->
         <div class="card border-0 shadow-sm mb-4" style="border-radius: var(--border-radius-lg); overflow: hidden;">

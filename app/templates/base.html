@@ -119,6 +119,7 @@
             {% endif %}
 
             <!-- Avatar / Profile Dropdown -->
+            {% if not session.get('professional_id') %}
             <div class="dropdown">
                 <a href="#" class="top-bar-icon-btn p-0" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open profile menu">
                     <div id="mobileNavAvatar" style="width:32px;height:32px;border-radius:50%;background:var(--mitwpu-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;">
@@ -134,6 +135,7 @@
                     <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                 </ul>
             </div>
+            {% endif %}
 
             {% else %}
             <!-- Guest Login Link -->
@@ -175,6 +177,10 @@
             <a href="{{ url_for('professional.chat') }}" class="bottom-nav-item {% if request.endpoint == 'professional.chat' %}active{% endif %}">
                 <i class="bi bi-chat-dots"></i>
                 <span>Chat</span>
+            </a>
+            <a href="{{ url_for('professional.profile') }}" class="bottom-nav-item {% if request.endpoint == 'professional.profile' %}active{% endif %}">
+                <i class="bi bi-person-badge"></i>
+                <span>Profile</span>
             </a>
         {% elif session.get('user_role') == 'faculty' %}
             <a href="{{ url_for('main.index') }}" class="bottom-nav-item {% if request.endpoint == 'main.index' %}active{% endif %}">
@@ -393,6 +399,13 @@
                         {% if request.endpoint == 'professional.chat' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'professional.profile' %}msb-active{% endif %}" href="{{ url_for('professional.profile') }}">
+                        <i class="bi bi-person-badge"></i>
+                        <span>Profile</span>
+                        {% if request.endpoint == 'professional.profile' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
                 {% endif %}
 
                 {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
@@ -555,6 +568,7 @@
                     {% if session.get('professional_id') %}
                         <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.dashboard' %}active{% endif %}" href="{{ url_for('professional.dashboard') }}"><i class="bi bi-tools"></i> My Tasks</a></li>
                         <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.chat' %}active{% endif %}" href="{{ url_for('professional.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.profile' %}active{% endif %}" href="{{ url_for('professional.profile') }}"><i class="bi bi-person-badge"></i> Profile</a></li>
                     {% endif %}
 
                     {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
@@ -594,6 +608,7 @@
                     {% endif %}
 
                     <!-- Profile Dropdown -->
+                    {% if not session.get('professional_id') %}
                     <div class="dropdown">
                         <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" aria-label="Open profile menu" aria-expanded="false">
                             <div class="nav-avatar m-0" id="navAvatar" style="width: 35px; height: 35px; border-radius: 50%; background: var(--mitwpu-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600;">
@@ -609,6 +624,7 @@
                             <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </div>
+                    {% endif %}
                 {% endif %}
             </div>
         </div>

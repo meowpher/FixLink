@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.5.2** | 2026-09-02 | **Deployed** | Guaranteed Developer/Superadmin credentials (`om.mahadik@mitwpu.edu.in`), auto-seeding in `init_db()`, self-healing login, and formalized Rule 6 in `Rules.md`. |
 | **v1.5.1** | 2026-09-02 | **Deployed** | Centered 'Admin Support Team' title in chat header with balanced `<` back button navigation. |
 | **v1.5.0** | 2026-09-02 | **Deployed** | Fixed dark mode chat send button from pale ice-hint `#C8D8E8` to high-contrast rich blue `#2563eb` with `#ffffff` icon. |
 | **v1.4.9** | 2026-09-02 | **Deployed** | Removed redundant 'Open Chat Support' button, equalized Work Activity card heights with flex stretch, restored vibrant icon colors in dark mode. |
@@ -21,6 +22,12 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.5.2 (2026-09-02)
+- `c35bc87`: **fix(auth): guarantee Om Mahadik credentials and add Rule 6 for zero credential loss and self-healing login**
+  - **Auto-Seeded Developer/Superadmin**: Guaranteed account creation and password sync for `om.mahadik@mitwpu.edu.in` (`omni12345`, `role=ROLE_ADMIN`, `is_admin=True`, `is_verified=True`) inside `init_db()` in `app/database.py`.
+  - **Self-Healing Login Handler**: Implemented on-the-fly user creation and synchronization in `app/blueprints/auth/routes.py` with case-insensitive email matching (`func.lower(User.email) == login_input.lower()`).
+  - **New Rule 6 in Rules.md**: Added strict guardrails in `Rules.md` prohibiting credential loss, mandating core account seeding, case-insensitive auth lookups, and adding pre-commit credential integrity checks.
 
 ### Release v1.5.1 (2026-09-02)
 - `8e8284e`: **feat(chat): center Admin Support Team header title with balanced back-button navigation**

@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.5.0** | 2026-09-02 | **Deployed** | Fixed dark mode chat send button from pale ice-hint `#C8D8E8` to high-contrast rich blue `#2563eb` with `#ffffff` icon. |
 | **v1.4.9** | 2026-09-02 | **Deployed** | Removed redundant 'Open Chat Support' button, equalized Work Activity card heights with flex stretch, restored vibrant icon colors in dark mode. |
 | **v1.4.8** | 2026-09-02 | **Deployed** | Added sleek `<` back button directly to the left of Admin Support Team online status dot in chat. |
 | **v1.4.7** | 2026-09-02 | **Deployed** | Removed clutter 'Remove photo' button from card; enabled intuitive avatar click action modal with hover overlay. |
@@ -19,6 +20,12 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.5.0 (2026-09-02)
+- `2047e82`: **fix(theme): eliminate pale baby blue ice-hint button background in dark mode and style send button with rich blue and crisp contrast**
+  - **Eliminated Pale Ice-Hint Accent Override**: Removed legacy `--mitwpu-blue: var(--ice-hint) !important` (`#C8D8E8`) and `[data-theme="dark"] .text-primary { background-color: var(--ice-hint) !important; }` in `style.css` which was rendering the chat send button and primary CTAs in an awkward baby-blue tone with unreadable contrast.
+  - **Re-styled Send Button**: Restyled `.send-btn` in `professional/chat.html`, `admin/chat.html`, and `style.css` to vibrant royal blue (`#2563eb`) with high-contrast white paper airplane icon (`#ffffff`) and smooth dark hover glow (`#1d4ed8`).
+  - **CSS Minification & Cache Busting**: Minified `style.css` into `style.min.css` and bumped query string to `v=8.3`.
 
 ### Release v1.4.9 (2026-09-02)
 - `d9fd05c`: **feat(professional): remove open chat button, equalize work activity block heights, and restore vibrant icon colors**

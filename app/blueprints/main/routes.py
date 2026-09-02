@@ -44,6 +44,12 @@ def sitemap_xml():
             "lastmod": today,
             "changefreq": "weekly",
             "priority": "1.0"
+        },
+        {
+            "loc": f"{base_url}/login",
+            "lastmod": today,
+            "changefreq": "weekly",
+            "priority": "0.9"
         }
     ]
     rendered = render_template('sitemap.xml', pages=pages)
@@ -54,8 +60,9 @@ def sitemap_xml():
 
 @main_bp.route('/')
 def index():
-    """Redirect to login page."""
-    return redirect(url_for('auth.login'))
+    """Render home / landing page directly (200 OK) for users and search crawlers."""
+    from ..auth.routes import login
+    return login()
 
 
 @main_bp.route('/report', methods=['GET'])

@@ -1,5 +1,9 @@
 User-agent: *
 Allow: /
+Allow: /login
+Allow: /sitemap.xml
+Allow: /robots.txt
+Allow: /google87abaa634db2f80b.html
 
 # Disallow Administrative & Developer Portals
 Disallow: /admin/
@@ -10,9 +14,7 @@ Disallow: /faculty/
 Disallow: /api/
 Disallow: /developer/api/
 
-# Disallow Authentication, Session & User Routes
-Disallow: /login
-Disallow: /signup
+# Disallow Session Mutation & Reset Actions
 Disallow: /logout
 Disallow: /forgot-password
 Disallow: /reset-password

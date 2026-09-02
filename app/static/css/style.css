@@ -55,47 +55,78 @@
 }
 
 [data-theme="dark"] {
-    /* Backgrounds (Step 1 & 3) */
-    --bg-base: #0F1117;
-    --bg-surface: #161B27;
-    --bg-overlay: #1E2535;
+    /* Backgrounds: Pure Deep Black & Dark Charcoal (Zero Navy/Blue Tint) */
+    --bg-base: #0a0a0a;
+    --bg-surface: #141414;
+    --bg-overlay: #1e1e1e;
 
     --bg-main: var(--bg-base);
     --bg-card: var(--bg-surface);
     --bg-card-hover: var(--bg-overlay);
 
-    /* Typography (Step 2) */
-    --text-primary: #F1F5F9;
-    --text-body: #CBD5E1;
-    --text-muted: #94A3B8;
-    --text-disabled: #475569;
+    /* Typography: Clean neutral tones */
+    --text-primary: #f4f4f5;
+    --text-body: #d4d4d8;
+    --text-muted: #a1a1aa;
+    --text-disabled: #52525b;
 
     --text-main: var(--text-body);
 
-    /* UI Elements */
-    --border-default: #334155;
-    --border-subtle: #1E293B;
+    /* UI Elements: Clean dark borders and surfaces */
+    --border-default: #262626;
+    --border-subtle: #1c1c1c;
     --border-color: var(--border-default);
 
-    --nav-bg: var(--bg-surface);
-    --modal-bg: var(--bg-overlay);
-    --input-bg: var(--bg-overlay);
-    --input-border: var(--border-default);
+    --nav-bg: #121212;
+    --modal-bg: #181818;
+    --input-bg: #181818;
+    --input-border: #2e2e2e;
     --input-text: var(--text-primary);
 
-    /* Accents (Step 4) */
-    --accent-primary: #5B8FF9;
-    --accent-primary-hover: #7BA6FA;
-    --accent-primary-active: #4F81E5;
-    --accent-primary-focus: #5B8FF9;
+    /* Accents: Controlled, focused, non-bleeding */
+    --accent-primary: #2563eb;
+    --accent-primary-hover: #1d4ed8;
+    --accent-primary-active: #1e40af;
+    --accent-primary-focus: #2563eb;
 
-    --mitwpu-blue: var(--accent-primary);
-    --mitwpu-blue-dark: var(--accent-primary-hover);
+    --mitwpu-blue: #2563eb;
+    --mitwpu-blue-dark: #1d4ed8;
 
-    /* Shadows (Step 3) */
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.7);
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.7);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.8);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.9);
+}
+
+/* Dark Mode Page Headers - Neutral dark gradient instead of blue wash */
+[data-theme="dark"] .profile-page-header,
+[data-theme="dark"] .history-header,
+[data-theme="dark"] .admin-header,
+[data-theme="dark"] .vyas-admin-header,
+[data-theme="dark"] .page-header {
+    background: linear-gradient(180deg, #111111 0%, #161616 100%) !important;
+    border-bottom: 1px solid #262626 !important;
+    color: #f4f4f5 !important;
+}
+
+[data-theme="dark"] .profile-page-header .text-white-50,
+[data-theme="dark"] .history-header .text-white-50,
+[data-theme="dark"] .admin-header .admin-subtitle {
+    color: #a1a1aa !important;
+}
+
+/* Primary Button in Dark Mode */
+[data-theme="dark"] .btn-primary {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .btn-primary:hover,
+[data-theme="dark"] .btn-primary:focus {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    color: #ffffff !important;
 }
 
 /* Glassy Dark Mode Blocks */

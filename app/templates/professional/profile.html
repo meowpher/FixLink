@@ -11,6 +11,16 @@
         margin-bottom: -3.5rem;
     }
 
+    [data-theme="dark"] .profile-page-header {
+        background: linear-gradient(180deg, #111111 0%, #161616 100%) !important;
+        border-bottom: 1px solid #262626;
+        color: #f4f4f5 !important;
+    }
+
+    [data-theme="dark"] .profile-page-header .text-white-50 {
+        color: #a1a1aa !important;
+    }
+
     .profile-card-main {
         background: var(--bg-card, #ffffff);
         border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
@@ -21,9 +31,9 @@
     }
 
     [data-theme="dark"] .profile-card-main {
-        background: #161B27;
-        border-color: rgba(255, 255, 255, 0.08);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        background: #141414;
+        border-color: #262626;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
     }
 
     .profile-avatar-container {
@@ -90,13 +100,13 @@
     }
 
     [data-theme="dark"] .profile-avatar-wrapper {
-        background: #1E2535;
-        color: #93c5fd;
-        border-color: rgba(147, 197, 253, 0.25);
+        background: #1c1c1c;
+        color: #f4f4f5;
+        border-color: #2e2e2e;
     }
 
     [data-theme="dark"] .avatar-edit-badge {
-        border-color: #1a2234;
+        border-color: #141414;
         background: #2563eb;
     }
 
@@ -119,8 +129,15 @@
     }
 
     [data-theme="dark"] .profile-stat-box {
-        background: #1E2535;
-        border-color: rgba(255, 255, 255, 0.06);
+        background: #181818;
+        border-color: #262626;
+        color: #f4f4f5;
+    }
+
+    [data-theme="dark"] .profile-stat-box:hover {
+        background: #202020;
+        border-color: #383838;
+        color: #ffffff;
     }
 
     .action-row-btn {
@@ -145,14 +162,33 @@
     }
 
     [data-theme="dark"] .action-row-btn {
-        background: #1E2535;
-        border-color: rgba(255, 255, 255, 0.08);
-        color: var(--text-primary, #F1F5F9);
+        background: #181818;
+        border-color: #262626;
+        color: #f4f4f5;
     }
 
     [data-theme="dark"] .action-row-btn:hover {
-        background: rgba(255, 255, 255, 0.08);
-        color: #93c5fd;
+        background: #222222;
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] .badge.bg-primary-subtle {
+        background: #222222 !important;
+        color: #60a5fa !important;
+        border-color: #333333 !important;
+    }
+
+    [data-theme="dark"] .btn-primary {
+        background-color: #2563eb !important;
+        border-color: #2563eb !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .btn-primary:hover,
+    [data-theme="dark"] .btn-primary:focus {
+        background-color: #1d4ed8 !important;
+        border-color: #1d4ed8 !important;
+        color: #ffffff !important;
     }
 
 </style>

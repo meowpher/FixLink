@@ -17,11 +17,11 @@
 
     <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.0" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.1" as="style">
 
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.1">
 
     <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">

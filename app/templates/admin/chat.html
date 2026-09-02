@@ -470,13 +470,18 @@
     }
     
     [data-theme="dark"] .message.sent .message-content {
-        background: var(--mitwpu-blue) !important; /* evaluates to ice-hint (light blue) */
-        color: var(--void) !important; /* dark text for contrast */
+        background: #2563eb !important;
+        color: #ffffff !important;
     }
     
     [data-theme="dark"] .send-btn {
-        background: var(--mitwpu-blue) !important;
-        color: var(--void) !important;
+        background: #2563eb !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .send-btn:hover:not(:disabled) {
+        background: #1d4ed8 !important;
+        color: #ffffff !important;
     }
 </style>
 {% endblock %}

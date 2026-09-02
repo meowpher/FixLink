@@ -5561,13 +5561,13 @@ img {
     --input-border: var(--border) !important;
     --input-text: var(--text-primary) !important;
 
-    --mitwpu-blue: var(--ice-hint) !important;
-    --mitwpu-blue-dark: var(--ice-hint) !important;
-    --mitwpu-blue-light: var(--ice-hint) !important;
-    --accent-primary: var(--ice-hint) !important;
-    --accent-primary-hover: var(--smoke-white) !important;
-    --accent-primary-active: var(--text-primary) !important;
-    --accent-primary-focus: var(--ice-hint) !important;
+    --mitwpu-blue: #2563eb !important;
+    --mitwpu-blue-dark: #1d4ed8 !important;
+    --mitwpu-blue-light: #3b82f6 !important;
+    --accent-primary: #2563eb !important;
+    --accent-primary-hover: #1d4ed8 !important;
+    --accent-primary-active: #1e40af !important;
+    --accent-primary-focus: #2563eb !important;
 
     --success-color: #10b981 !important;
     --warning-color: #ffd43b !important;
@@ -5681,21 +5681,31 @@ html[data-theme="dark"],
     color: var(--sub-text) !important;
 }
 
-/* Primary CTAs & Active States (Ice-Hint ONLY) */
+/* Primary CTAs & Active States */
 [data-theme="dark"] .btn-primary,
 [data-theme="dark"] .nav-link.active,
 [data-theme="dark"] .active>.page-link,
-[data-theme="dark"] .badge-primary,
-[data-theme="dark"] .text-primary {
-    background-color: var(--ice-hint) !important;
-    color: var(--void) !important;
-    border-color: var(--ice-hint) !important;
+[data-theme="dark"] .badge-primary {
+    background-color: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #2563eb !important;
 }
 
 [data-theme="dark"] .btn-primary:hover {
-    background-color: var(--text-primary) !important;
-    /* brighter on hover */
-    color: var(--void) !important;
+    background-color: #1d4ed8 !important;
+    color: #ffffff !important;
+}
+
+/* Send button in dark mode */
+[data-theme="dark"] .send-btn {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border: none !important;
+}
+
+[data-theme="dark"] .send-btn:hover {
+    background: #1d4ed8 !important;
+    color: #ffffff !important;
 }
 
 [data-theme="dark"] .btn-outline-primary {

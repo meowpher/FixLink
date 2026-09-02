@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.4.7** | 2026-09-02 | **Deployed** | Removed clutter 'Remove photo' button from card; enabled intuitive avatar click action modal with hover overlay. |
 | **v1.4.6** | 2026-09-02 | **Deployed** | Neutral true black & charcoal dark mode palette (zero bluish/slate wash), dark page header gradients, synchronized minified CSS. |
 | **v1.4.5** | 2026-09-02 | **Deployed** | Removed `< Back` button from professional top nav, aligned MIT logo & FixLink brand to far left. |
 | **v1.4.4** | 2026-09-02 | **Deployed** | Technician profile photo upload/removal, chat header UI simplification to 'Admin Support Team', keyboard viewport lock. |
@@ -16,6 +17,12 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.4.7 (2026-09-02)
+- `8fe212f`: **feat(professional): remove clutter remove-photo button and enable intuitive photo change on avatar click**
+  - **Eliminated Clutter Button**: Removed the standalone `Remove photo` button from beside the category badge on `profile.html`.
+  - **Interactive Avatar Click Flow**: Clicking directly on the profile avatar or camera badge triggers the photo change workflow (or opens a modal offering Change Photo / Remove Photo if an image is present).
+  - **Hover Overlay**: Added a smooth camera icon overlay upon hovering/tapping the profile avatar.
 
 ### Release v1.4.6 (2026-09-02)
 - `923a7d5`: **fix(theme): convert dark mode palette from bluish tint to deep black and charcoal shades**

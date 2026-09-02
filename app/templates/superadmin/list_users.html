@@ -2,153 +2,535 @@
 
 {% block title %}Manage Users - Developer Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Left-hand filter sidebar styles */
+    .user-filter-sidebar {
+        position: sticky;
+        top: 1.5rem;
+        border-radius: var(--border-radius-lg, 16px);
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-nav-item {
+        margin-bottom: 0.35rem;
+    }
+
+    .filter-nav-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.7rem 0.9rem;
+        border-radius: var(--border-radius, 12px);
+        text-decoration: none;
+        color: var(--text-muted);
+        font-weight: 500;
+        font-size: 0.92rem;
+        transition: all var(--transition-fast, 0.2s ease);
+        border: 1px solid transparent;
+    }
+
+    .filter-nav-link:hover {
+        background: var(--bg-card-hover);
+        color: var(--text-main);
+        transform: translateX(3px);
+    }
+
+    [data-theme="dark"] .filter-nav-link:hover {
+        color: var(--text-primary);
+    }
+
+    .filter-nav-link.active {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--mitwpu-blue, #2563eb);
+        font-weight: 600;
+        border-color: rgba(37, 99, 235, 0.3);
+    }
+
+    [data-theme="dark"] .filter-nav-link.active {
+        background: rgba(37, 99, 235, 0.2);
+        color: #60a5fa;
+        border-color: rgba(96, 165, 250, 0.4);
+    }
+
+    .filter-nav-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: var(--border-radius-sm, 8px);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .filter-badge {
+        font-size: 0.78rem;
+        padding: 0.25rem 0.65rem;
+        border-radius: 20px;
+        font-weight: 600;
+        background: var(--bg-card-hover);
+        color: var(--text-muted);
+        border: 1px solid var(--border-color);
+        transition: all var(--transition-fast, 0.2s ease);
+    }
+
+    .filter-nav-link.active .filter-badge {
+        background: var(--mitwpu-blue, #2563eb);
+        color: #ffffff !important;
+        border-color: var(--mitwpu-blue, #2563eb);
+    }
+
+    /* Distribution Bar */
+    .ratio-progress {
+        height: 6px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--border-color);
+        display: flex;
+    }
+
+    .ratio-progress-segment {
+        height: 100%;
+        transition: width var(--transition-normal, 0.3s ease);
+    }
+
+    /* Active filter tags */
+    .filter-tag-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.3rem 0.75rem;
+        border-radius: 30px;
+        font-size: 0.82rem;
+        font-weight: 500;
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--mitwpu-blue, #2563eb);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+        text-decoration: none;
+        transition: all var(--transition-fast, 0.2s ease);
+    }
+
+    .filter-tag-pill:hover {
+        background: rgba(37, 99, 235, 0.22);
+        color: var(--mitwpu-blue-dark, #1d4ed8);
+    }
+
+    [data-theme="dark"] .filter-tag-pill {
+        color: #93c5fd;
+        border-color: rgba(147, 197, 253, 0.25);
+    }
+
+    /* Search input styling */
+    .filter-search-box {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        color: var(--input-text);
+        font-size: 0.9rem;
+        transition: all var(--transition-fast, 0.2s ease);
+    }
+
+    .filter-search-box:focus {
+        border-color: var(--mitwpu-blue, #2563eb);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+        background: var(--input-bg);
+        color: var(--input-text);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-fluid px-3 px-xl-5 mt-4">
+    <!-- Breadcrumb & Top Action Row -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb mb-1">
-                    <li class="breadcrumb-item"><a href="{{ url_for('superadmin.dashboard') }}">Developer</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('superadmin.dashboard') }}" class="text-decoration-none">Developer</a></li>
                     <li class="breadcrumb-item active">Users</li>
                 </ol>
             </nav>
-            <h2 class="mb-0"><i class="bi bi-people-fill me-2"></i>All Users</h2>
+            <h2 class="mb-0 fw-bold d-flex align-items-center">
+                {% if current_role == 'student' %}
+                    <i class="bi bi-mortarboard-fill me-2 text-primary"></i>Students Directory
+                {% elif current_role == 'faculty' %}
+                    <i class="bi bi-person-workspace me-2 text-warning"></i>Faculty Members
+                {% elif current_role == 'admin' %}
+                    <i class="bi bi-shield-lock-fill me-2 text-danger"></i>Administrators
+                {% else %}
+                    <i class="bi bi-people-fill me-2"></i>All Users
+                {% endif %}
+            </h2>
         </div>
-        <div>
-            <a href="{{ url_for('superadmin.add_user') }}" class="btn btn-primary d-flex align-items-center">
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ url_for('superadmin.add_user') }}" class="btn btn-primary d-flex align-items-center px-3 py-2 rounded-3 shadow-sm">
                 <i class="bi bi-person-plus-fill me-2"></i>Add User
             </a>
         </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-        <div class="card-body p-0">
-            <!-- Desktop Table -->
-            <div class="desktop-table-container d-none d-md-block">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light">
-                            <tr>
-                                <th class="ps-4">User</th>
-                                <th>ID/PRN</th>
-                                <th>Current Role</th>
-                                <th>Password</th>
-                                <th>Joined</th>
-                                <th class="text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for user in users %}
-                            <tr id="user-row-{{ user.id }}">
-                                <td class="ps-4">
+    <!-- Main 2-Column Grid: Left Filter Section + Right Content Table -->
+    <div class="row g-4">
+        <!-- ═══════════════════════════════════════════════════
+             LEFT HAND FILTER SECTION
+             ══════════════════════════════════════════════════ -->
+        <div class="col-lg-3 col-md-4">
+            <div class="card border-0 user-filter-sidebar">
+                <div class="card-body p-3 p-lg-4">
+                    <!-- Sidebar Header -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fw-bold text-uppercase small text-muted d-flex align-items-center" style="letter-spacing: 0.5px;">
+                            <i class="bi bi-funnel-fill text-primary me-2"></i>Filter Users
+                        </span>
+                        {% if (current_role and current_role != 'all') or search_query %}
+                        <a href="{{ url_for('superadmin.list_users') }}" class="btn btn-link btn-sm text-decoration-none text-muted p-0 small" title="Reset all filters">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <!-- Search Input -->
+                    <form method="GET" action="{{ url_for('superadmin.list_users') }}" id="sidebarFilterForm" class="mb-4">
+                        {% if current_role and current_role != 'all' %}
+                        <input type="hidden" name="role" value="{{ current_role }}">
+                        {% endif %}
+                        <div class="position-relative">
+                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                            <input type="text" 
+                                   name="q" 
+                                   id="userLiveSearch" 
+                                   class="form-control filter-search-box ps-5 pe-4 rounded-3" 
+                                   placeholder="Search name, PRN, email…" 
+                                   value="{{ search_query or '' }}"
+                                   autocomplete="off">
+                            {% if search_query %}
+                            <a href="{{ url_for('superadmin.list_users', role=current_role if current_role != 'all' else None) }}" 
+                               class="position-absolute top-50 end-0 translate-middle-y me-3 text-muted text-decoration-none" 
+                               title="Clear search">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </form>
+
+                    <!-- Role Filters Group -->
+                    <div class="mb-4">
+                        <div class="text-uppercase text-muted fw-bold small mb-2 ps-1" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                            Roles
+                        </div>
+                        <ul class="nav flex-column list-unstyled mb-0" id="roleFilterList">
+                            <!-- All Users -->
+                            <li class="filter-nav-item">
+                                <a href="{{ url_for('superadmin.list_users', q=search_query if search_query else None) }}" 
+                                   class="filter-nav-link {% if not current_role or current_role == 'all' %}active{% endif %}"
+                                   data-filter-role="all">
                                     <div class="d-flex align-items-center">
-                                        <div class="nav-avatar nav-avatar-sm me-3" style="width: 38px; height: 38px; font-size: 0.8rem;">
-                                            {% if user.profile_photo %}
-                                                <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_photo) }}" alt="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" loading="lazy">
-                                            {% else %}
-                                                <span>{{ user.name[:1] }}{{ user.name.split()[-1][0] if ' ' in user.name else '' }}</span>
-                                            {% endif %}
+                                        <div class="filter-nav-icon bg-secondary bg-opacity-10 text-secondary me-2">
+                                            <i class="bi bi-people-fill"></i>
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-body">{{ user.name }}</div>
-                                            <div class="text-muted small">{{ user.email }}</div>
+                                            <div class="text-body fw-semibold">All Users</div>
+                                            <div class="text-muted small" style="font-size: 0.72rem;">Entire directory</div>
                                         </div>
                                     </div>
-                                </td>
-                                <td><span class="badge bg-body-tertiary text-body border">{{ user.prn or 'N/A' }}</span></td>
-                                <td>
-                                    <select class="form-select form-select-sm border-0 bg-light role-select" 
-                                            style="width: 130px; font-weight: 500;" 
-                                            data-id="{{ user.id }}">
-                                        {% for role in roles %}
-                                        <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>
-                                            {{ role.capitalize() }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </td>
-                                <td>
+                                    <span class="filter-badge" id="badge-count-all">{{ counts.all }}</span>
+                                </a>
+                            </li>
+
+                            <!-- Students Filter -->
+                            <li class="filter-nav-item">
+                                <a href="{{ url_for('superadmin.list_users', role='student', q=search_query if search_query else None) }}" 
+                                   class="filter-nav-link {% if current_role == 'student' %}active{% endif %}"
+                                   data-filter-role="student">
                                     <div class="d-flex align-items-center">
-                                        <code class="me-2 text-primary" id="pwd-{{ user.id }}" style="display: none;">{{ user.plaintext_password or 'N/A' }}</code>
-                                        <code class="me-2 text-muted" id="stars-{{ user.id }}">********</code>
-                                        <button class="btn btn-sm p-0 border-0" onclick="toggleReveal({{ user.id }})">
-                                            <i class="bi bi-eye-fill text-muted" id="icon-{{ user.id }}"></i>
-                                        </button>
+                                        <div class="filter-nav-icon bg-primary bg-opacity-10 text-primary me-2">
+                                            <i class="bi bi-mortarboard-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-body fw-semibold">Students</div>
+                                            <div class="text-muted small" style="font-size: 0.72rem;">Enrolled with PRN</div>
+                                        </div>
                                     </div>
-                                </td>
-                                <td><small class="text-muted">{{ user.created_at.strftime('%d %b %Y') }}</small></td>
-                                <td class="text-center">
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline-primary btn-edit-user" 
-                                                data-id="{{ user.id }}"
-                                                data-name="{{ user.name|escape }}"
-                                                data-email="{{ user.email|escape }}"
-                                                data-prn="{{ user.prn|escape }}">
-                                            <i class="bi bi-pencil"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger btn-delete-user"
-                                                data-id="{{ user.id }}"
-                                                data-name="{{ user.name|escape }}">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
+                                    <span class="filter-badge" id="badge-count-student">{{ counts.student }}</span>
+                                </a>
+                            </li>
+
+                            <!-- Faculty Filter -->
+                            <li class="filter-nav-item">
+                                <a href="{{ url_for('superadmin.list_users', role='faculty', q=search_query if search_query else None) }}" 
+                                   class="filter-nav-link {% if current_role == 'faculty' %}active{% endif %}"
+                                   data-filter-role="faculty">
+                                    <div class="d-flex align-items-center">
+                                        <div class="filter-nav-icon bg-warning bg-opacity-10 text-warning me-2">
+                                            <i class="bi bi-person-workspace"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-body fw-semibold">Faculty</div>
+                                            <div class="text-muted small" style="font-size: 0.72rem;">Professors & Staff</div>
+                                        </div>
                                     </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                                    <span class="filter-badge" id="badge-count-faculty">{{ counts.faculty }}</span>
+                                </a>
+                            </li>
+
+                            <!-- Admins Filter -->
+                            <li class="filter-nav-item">
+                                <a href="{{ url_for('superadmin.list_users', role='admin', q=search_query if search_query else None) }}" 
+                                   class="filter-nav-link {% if current_role == 'admin' %}active{% endif %}"
+                                   data-filter-role="admin">
+                                    <div class="d-flex align-items-center">
+                                        <div class="filter-nav-icon bg-danger bg-opacity-10 text-danger me-2">
+                                            <i class="bi bi-shield-lock-fill"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-body fw-semibold">Admins</div>
+                                            <div class="text-muted small" style="font-size: 0.72rem;">Campus management</div>
+                                        </div>
+                                    </div>
+                                    <span class="filter-badge" id="badge-count-admin">{{ counts.admin }}</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Proportion Distribution Widget -->
+                    {% if counts.all > 0 %}
+                    <div class="pt-3 border-top border-opacity-10">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-uppercase text-muted fw-bold small" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                                Distribution
+                            </span>
+                            <span class="small text-muted" style="font-size: 0.75rem;">{{ counts.all }} Total</span>
+                        </div>
+                        {% set p_student = ((counts.student / counts.all) * 100)|round|int %}
+                        {% set p_faculty = ((counts.faculty / counts.all) * 100)|round|int %}
+                        {% set p_admin = (100 - p_student - p_faculty) %}
+                        <div class="ratio-progress mb-2" id="ratioProgressBar" data-student="{{ p_student }}" data-faculty="{{ p_faculty }}" data-admin="{{ p_admin }}" title="Students: {{ p_student }}% | Faculty: {{ p_faculty }}% | Admins: {{ p_admin }}%">
+                            <div class="ratio-progress-segment bg-primary" id="segStudent"></div>
+                            <div class="ratio-progress-segment bg-warning" id="segFaculty"></div>
+                            <div class="ratio-progress-segment bg-danger" id="segAdmin"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted small" style="font-size: 0.72rem;">
+                            <span><i class="bi bi-circle-fill text-primary me-1" style="font-size: 0.5rem;"></i>{{ p_student }}% Students</span>
+                            <span><i class="bi bi-circle-fill text-warning me-1" style="font-size: 0.5rem;"></i>{{ p_faculty }}% Faculty</span>
+                            <span><i class="bi bi-circle-fill text-danger me-1" style="font-size: 0.5rem;"></i>{{ p_admin }}% Admin</span>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Quick Action in Sidebar -->
+                    <div class="mt-4 pt-2">
+                        <a href="{{ url_for('superadmin.add_user') }}" class="btn btn-outline-primary w-100 rounded-3 btn-sm py-2 d-flex align-items-center justify-content-center">
+                            <i class="bi bi-plus-circle me-1"></i> Register New User
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══════════════════════════════════════════════════
+             RIGHT HAND CONTENT SECTION: USERS LIST
+             ══════════════════════════════════════════════════ -->
+        <div class="col-lg-9 col-md-8">
+            <!-- Active Filter Chips & Summary Bar -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span class="text-muted small">
+                        Showing <strong id="visibleUsersCount" class="text-body">{{ users|length }}</strong> of {{ counts.all }} users
+                    </span>
+
+                    {% if current_role and current_role != 'all' %}
+                    <a href="{{ url_for('superadmin.list_users', q=search_query if search_query else None) }}" class="filter-tag-pill" title="Remove role filter">
+                        <span>Role: <strong>{{ current_role.capitalize() }}</strong></span>
+                        <i class="bi bi-x ms-1 fs-6"></i>
+                    </a>
+                    {% endif %}
+
+                    {% if search_query %}
+                    <a href="{{ url_for('superadmin.list_users', role=current_role if current_role != 'all' else None) }}" class="filter-tag-pill" title="Remove search keyword">
+                        <span>Search: "<strong>{{ search_query }}</strong>"</span>
+                        <i class="bi bi-x ms-1 fs-6"></i>
+                    </a>
+                    {% endif %}
+
+                    {% if (current_role and current_role != 'all') or search_query %}
+                    <a href="{{ url_for('superadmin.list_users') }}" class="btn btn-sm btn-link text-decoration-none text-muted p-0 small ms-1">
+                        Clear all
+                    </a>
+                    {% endif %}
                 </div>
             </div>
 
-            <!-- Mobile Cards -->
-            <div class="mobile-card-list d-md-none p-3">
-                {% for user in users %}
-                <div class="mc-card" id="user-mc-{{ user.id }}">
-                    <div class="mc-top">
-                        <div class="mc-id-title">
-                            <span class="mc-id"><span class="badge bg-body-tertiary text-body border">{{ user.prn or 'N/A' }}</span></span>
-                            <span class="mc-title">{{ user.name }}</span>
-                        </div>
-                        <div class="mc-status">
-                            <span class="badge bg-primary-subtle text-primary">{{ user.role.capitalize() if user.role else '—' }}</span>
+            <!-- Users Table Card -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-0">
+                    <!-- Desktop Table -->
+                    <div class="desktop-table-container d-none d-md-block">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="usersTable">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">User</th>
+                                        <th>ID/PRN</th>
+                                        <th>Current Role</th>
+                                        <th>Password</th>
+                                        <th>Joined</th>
+                                        <th class="text-center">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for user in users %}
+                                    <tr id="user-row-{{ user.id }}" 
+                                        class="user-table-row" 
+                                        data-role="{{ user.role }}" 
+                                        data-search="{{ (user.name ~ ' ' ~ user.email ~ ' ' ~ (user.prn or ''))|lower }}">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <div class="nav-avatar nav-avatar-sm me-3" style="width: 38px; height: 38px; font-size: 0.8rem;">
+                                                    {% if user.profile_photo %}
+                                                        <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_photo) }}" alt="" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" loading="lazy">
+                                                    {% else %}
+                                                        <span>{{ user.name[:1] }}{{ user.name.split()[-1][0] if ' ' in user.name else '' }}</span>
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold text-body user-name-text">{{ user.name }}</div>
+                                                    <div class="text-muted small user-email-text">{{ user.email }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-body-tertiary text-body border user-prn-text">{{ user.prn or 'N/A' }}</span>
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm border-0 bg-light role-select" 
+                                                    style="width: 130px; font-weight: 500;" 
+                                                    data-id="{{ user.id }}">
+                                                {% for role in roles %}
+                                                <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>
+                                                    {{ role.capitalize() }}
+                                                </option>
+                                                {% endfor %}
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <code class="me-2 text-primary" id="pwd-{{ user.id }}" style="display: none;">{{ user.plaintext_password or 'N/A' }}</code>
+                                                <code class="me-2 text-muted" id="stars-{{ user.id }}">********</code>
+                                                <button class="btn btn-sm p-0 border-0 btn-toggle-reveal" data-user-id="{{ user.id }}" title="Reveal password">
+                                                    <i class="bi bi-eye-fill text-muted" id="icon-{{ user.id }}"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td><small class="text-muted">{{ user.created_at.strftime('%d %b %Y') }}</small></td>
+                                        <td class="text-center">
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-primary btn-edit-user" 
+                                                        data-id="{{ user.id }}"
+                                                        data-name="{{ user.name|escape }}"
+                                                        data-email="{{ user.email|escape }}"
+                                                        data-prn="{{ user.prn|escape }}"
+                                                        title="Edit User">
+                                                    <i class="bi bi-pencil"></i>
+                                                </button>
+                                                {% if user.email.lower() == 'taha.piplodwala@mitwpu.edu.in' or user.email.lower() == 'om.mahadik@mitwpu.edu.in' %}
+                                                <span class="badge bg-dark ms-2">Super Admin</span>
+                                                {% else %}
+                                                <button class="btn btn-sm btn-outline-danger btn-delete-user" 
+                                                        data-id="{{ user.id }}"
+                                                        data-name="{{ user.name|escape }}"
+                                                        title="Delete User">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
-                    <div class="mc-desc">{{ user.email }}</div>
-                    <div class="mc-person-row">
-                        <div class="mc-person-left">
-                            <div class="mc-avatar">
-                                {% if user.profile_photo %}
-                                <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_photo) }}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" loading="lazy">
-                                {% else %}
-                                {{ user.name[:1] }}{{ user.name.split()[-1][0] if ' ' in user.name else '' }}
-                                {% endif %}
+
+                    <!-- Mobile Cards -->
+                    <div class="mobile-card-list d-md-none p-3" id="usersMobileList">
+                        {% for user in users %}
+                        <div class="mc-card user-mobile-card" 
+                             id="user-mc-{{ user.id }}" 
+                             data-role="{{ user.role }}" 
+                             data-search="{{ (user.name ~ ' ' ~ user.email ~ ' ' ~ (user.prn or ''))|lower }}">
+                            <div class="mc-top">
+                                <div class="mc-id-title">
+                                    <span class="mc-id"><span class="badge bg-body-tertiary text-body border">{{ user.prn or 'N/A' }}</span></span>
+                                    <span class="mc-title">{{ user.name }}</span>
+                                </div>
+                                <div class="mc-status">
+                                    {% if user.role == 'admin' %}
+                                    <span class="badge bg-danger-subtle text-danger">Admin</span>
+                                    {% elif user.role == 'faculty' %}
+                                    <span class="badge bg-warning-subtle text-warning">Faculty</span>
+                                    {% else %}
+                                    <span class="badge bg-primary-subtle text-primary">Student</span>
+                                    {% endif %}
+                                </div>
                             </div>
-                            <div class="mc-person-info">
-                                <span class="mc-name">Joined {{ user.created_at.strftime('%d %b %Y') }}</span>
+                            <div class="mc-desc">{{ user.email }}</div>
+                            <div class="mc-person-row">
+                                <div class="mc-person-left">
+                                    <div class="mc-avatar">
+                                        {% if user.profile_photo %}
+                                        <img src="{{ url_for('static', filename='uploads/profiles/' + user.profile_photo) }}" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" loading="lazy">
+                                        {% else %}
+                                        {{ user.name[:1] }}{{ user.name.split()[-1][0] if ' ' in user.name else '' }}
+                                        {% endif %}
+                                    </div>
+                                    <div class="mc-person-info">
+                                        <span class="mc-name">Joined {{ user.created_at.strftime('%d %b %Y') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mc-bottom">
+                                <div class="mc-date"></div>
+                                <div class="mc-actions">
+                                    <button class="btn mc-btn mc-btn-update btn-edit-user"
+                                            data-id="{{ user.id }}"
+                                            data-name="{{ user.name|escape }}"
+                                            data-email="{{ user.email|escape }}"
+                                            data-prn="{{ user.prn|escape }}"
+                                            title="Edit User">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    {% if user.email.lower() == 'taha.piplodwala@mitwpu.edu.in' or user.email.lower() == 'om.mahadik@mitwpu.edu.in' %}
+                                    <span class="badge bg-dark ms-1">Super Admin</span>
+                                    {% else %}
+                                    <button class="btn mc-btn mc-btn-delete btn-delete-user"
+                                            data-id="{{ user.id }}"
+                                            data-name="{{ user.name|escape }}"
+                                            title="Delete User">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    <div class="mc-bottom">
-                        <div class="mc-date"></div>
-                        <div class="mc-actions">
-                            <button class="btn mc-btn mc-btn-update btn-edit-user"
-                                    data-id="{{ user.id }}"
-                                    data-name="{{ user.name|escape }}"
-                                    data-email="{{ user.email|escape }}"
-                                    data-prn="{{ user.prn|escape }}"
-                                    title="Edit User">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn mc-btn mc-btn-delete btn-delete-user"
-                                    data-id="{{ user.id }}"
-                                    data-name="{{ user.name|escape }}"
-                                    title="Delete User">
-                                <i class="bi bi-trash"></i>
-                            </button>
+
+                    <!-- Empty State (Shown when 0 users match) -->
+                    <div id="noUsersFoundNotice" class="text-center py-5 px-3 {% if users|length > 0 %}d-none{% endif %}">
+                        <div class="mb-3">
+                            <i class="bi bi-person-x text-muted" style="font-size: 3.5rem;"></i>
                         </div>
+                        <h5 class="fw-bold mb-1 text-body">No Users Found</h5>
+                        <p class="text-muted small mb-3">
+                            No users match the selected role or search criteria.
+                        </p>
+                        <a href="{{ url_for('superadmin.list_users') }}" class="btn btn-outline-primary btn-sm px-3 rounded-pill">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i>Reset All Filters
+                        </a>
                     </div>
                 </div>
-                {% endfor %}
             </div>
         </div>
     </div>
@@ -201,6 +583,7 @@
 
     document.addEventListener('DOMContentLoaded', () => {
         editModal = new bootstrap.Modal(document.getElementById('editUserModal'));
+
         // Wire up edit buttons
         document.querySelectorAll('.btn-edit-user').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -212,7 +595,7 @@
                 document.getElementById('editUserId').value = id;
                 document.getElementById('editUserName').value = name;
                 document.getElementById('editUserEmail').value = email;
-                document.getElementById('editUserPRN').value = prn === 'None' ? '' : prn;
+                document.getElementById('editUserPRN').value = (prn === 'None' || prn === 'null') ? '' : prn;
                 editModal.show();
             });
         });
@@ -234,7 +617,73 @@
                 updateUserRole(id, newRole);
             });
         });
+
+        // Wire up password reveal toggle buttons
+        document.querySelectorAll('.btn-toggle-reveal').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const userId = btn.dataset.userId;
+                toggleReveal(userId);
+            });
+        });
+
+        // Initialize distribution progress bar
+        const ratioBar = document.getElementById('ratioProgressBar');
+        if (ratioBar) {
+            const segStudent = document.getElementById('segStudent');
+            const segFaculty = document.getElementById('segFaculty');
+            const segAdmin = document.getElementById('segAdmin');
+            if (segStudent) segStudent.style.width = (ratioBar.dataset.student || '0') + '%';
+            if (segFaculty) segFaculty.style.width = (ratioBar.dataset.faculty || '0') + '%';
+            if (segAdmin) segAdmin.style.width = (ratioBar.dataset.admin || '0') + '%';
+        }
+
+        // Client-side instant live search across visible records
+        const searchInput = document.getElementById('userLiveSearch');
+        if (searchInput) {
+            let debounceTimer;
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => {
+                    const query = e.target.value.toLowerCase().trim();
+                    filterRecordsLive(query);
+                }, 150);
+            });
+        }
     });
+
+    function filterRecordsLive(query) {
+        let visibleCount = 0;
+        const rows = document.querySelectorAll('.user-table-row');
+        const cards = document.querySelectorAll('.user-mobile-card');
+        const noUsersNotice = document.getElementById('noUsersFoundNotice');
+        const tableContainer = document.querySelector('.desktop-table-container');
+
+        rows.forEach(row => {
+            const searchHaystack = row.getAttribute('data-search') || '';
+            const match = !query || searchHaystack.includes(query);
+            row.style.display = match ? '' : 'none';
+            if (match) visibleCount++;
+        });
+
+        cards.forEach(card => {
+            const searchHaystack = card.getAttribute('data-search') || '';
+            const match = !query || searchHaystack.includes(query);
+            card.style.display = match ? '' : 'none';
+        });
+
+        const counterEl = document.getElementById('visibleUsersCount');
+        if (counterEl) counterEl.textContent = visibleCount;
+
+        if (noUsersNotice) {
+            if (visibleCount === 0) {
+                noUsersNotice.classList.remove('d-none');
+                if (tableContainer) tableContainer.classList.add('d-none');
+            } else {
+                noUsersNotice.classList.add('d-none');
+                if (tableContainer) tableContainer.classList.remove('d-none');
+            }
+        }
+    }
 
     async function updateUserRole(userId, newRole) {
         if (!confirm(`Are you sure you want to change this user's role to ${newRole}? This will update their administrative permissions.`)) {
@@ -253,7 +702,6 @@
             });
             const result = await res.json();
             if (result.success) {
-                // Flash success UI or reload
                 window.location.reload();
             } else {
                 alert(result.error || 'Failed to update role');
@@ -323,7 +771,17 @@
             });
             const result = await res.json();
             if (result.success) {
-                document.getElementById(`user-row-${userId}`).remove();
+                const row = document.getElementById(`user-row-${userId}`);
+                if (row) row.remove();
+                const card = document.getElementById(`user-mc-${userId}`);
+                if (card) card.remove();
+                
+                // Update visible count
+                const counterEl = document.getElementById('visibleUsersCount');
+                if (counterEl) {
+                    const current = parseInt(counterEl.textContent, 10) || 0;
+                    counterEl.textContent = Math.max(0, current - 1);
+                }
             } else {
                 alert(result.error || 'Failed to delete user');
             }

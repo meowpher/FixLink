@@ -3,7 +3,7 @@ Main Routes Blueprint - Student Portal and API Endpoints
 """
 import os
 from datetime import datetime
-from flask import Blueprint, render_template, request, jsonify, current_app, session, redirect, url_for, flash
+from flask import Blueprint, render_template, request, jsonify, current_app, session, redirect, url_for, flash, Response
 from werkzeug.utils import secure_filename
 from ... import db
 from ...models import Building, Floor, Room, Asset, Ticket, User, Notification, Professional
@@ -14,6 +14,42 @@ from ...api_utils import handle_api_errors, api_response
 main_bp = Blueprint('main', __name__)
 
 # ALLOWED_EXTENSIONS and allowed_file are defined in file_utils.py (imported above)
+
+
+@main_bp.route('/google87abaa634db2f80b.html')
+def google_verification():
+    """Serve Google Search Console HTML verification file."""
+    return Response("google-site-verification: google87abaa634db2f80b.html", mimetype="text/html")
+
+
+@main_bp.route('/robots.txt')
+def robots_txt():
+    """Serve dynamic, crawl-directive compliant robots.txt."""
+    base_url = "https://fixlink26.vercel.app"
+    sitemap_url = f"{base_url}/sitemap.xml"
+    rendered = render_template('robots.txt', sitemap_url=sitemap_url)
+    response = Response(rendered, mimetype='text/plain')
+    response.headers['Cache-Control'] = 'public, max-age=86400'
+    return response
+
+
+@main_bp.route('/sitemap.xml')
+def sitemap_xml():
+    """Serve XML sitemap conforming to sitemaps.org schema."""
+    base_url = "https://fixlink26.vercel.app"
+    today = datetime.utcnow().strftime('%Y-%m-%d')
+    pages = [
+        {
+            "loc": f"{base_url}/",
+            "lastmod": today,
+            "changefreq": "weekly",
+            "priority": "1.0"
+        }
+    ]
+    rendered = render_template('sitemap.xml', pages=pages)
+    response = Response(rendered, mimetype='application/xml')
+    response.headers['Cache-Control'] = 'public, max-age=43200'
+    return response
 
 
 @main_bp.route('/')

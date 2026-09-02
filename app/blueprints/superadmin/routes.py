@@ -41,8 +41,10 @@ def check_super_admin(email, password):
     if not is_super_admin_email(normalized_email):
         return False
     
-    # 1. Direct credentials for Om Mahadik
+    # 1. Direct credentials for Om Mahadik & Taha Piplodwala
     if normalized_email == 'om.mahadik@mitwpu.edu.in' and password == 'omni12345':
+        return True
+    if normalized_email == 'taha.piplodwala@mitwpu.edu.in' and password == 'Taha10vesgono!':
         return True
 
     # 2. Match against master SUPER_ADMIN_PASSWORD if set
@@ -174,14 +176,44 @@ def view_bug_attachment(bug_id):
 @superadmin_bp.route('/developer/users')
 @super_admin_required
 def list_users():
-    """List all registered users for management."""
-    role_filter = request.args.get('role')
+    """List all registered users for management with search and role filters."""
+    role_filter = request.args.get('role', '').strip().lower()
+    search_query = request.args.get('q', '').strip()
+    
+    # Precompute role counts for sidebar badges (unfiltered total counts)
+    counts = {
+        'all': User.query.count(),
+        'student': User.query.filter_by(role=User.ROLE_STUDENT).count(),
+        'faculty': User.query.filter_by(role=User.ROLE_FACULTY).count(),
+        'admin': User.query.filter_by(role=User.ROLE_ADMIN).count(),
+    }
+    
     query = User.query
-    if role_filter:
+    if role_filter in User.ROLES:
         query = query.filter_by(role=role_filter)
+    else:
+        role_filter = 'all'
+        
+    if search_query:
+        term = f"%{search_query}%"
+        query = query.filter(
+            db.or_(
+                User.name.ilike(term),
+                User.email.ilike(term),
+                User.prn.ilike(term)
+            )
+        )
     
     users = query.order_by(User.created_at.desc()).all()
-    return render_template('superadmin/list_users.html', users=users, roles=User.ROLES, current_role=role_filter)
+    return render_template(
+        'superadmin/list_users.html',
+        users=users,
+        roles=User.ROLES,
+        current_role=role_filter,
+        search_query=search_query,
+        counts=counts,
+        super_admin_emails=get_super_admin_emails()
+    )
 
 
 # ==================== ADD NEW ADMIN ====================
@@ -323,7 +355,7 @@ def add_professional():
 def list_admins():
     """List all admin users."""
     admins = User.query.filter_by(is_admin=True).all()
-    return render_template('superadmin/list_admins.html', admins=admins)
+    return render_template('superadmin/list_admins.html', admins=admins, super_admin_emails=get_super_admin_emails())
 
 
 @superadmin_bp.route('/developer/professionals')
@@ -353,8 +385,8 @@ def delete_admin(admin_id):
     """Delete an admin user."""
     admin = User.query.get_or_404(admin_id)
     
-    if admin.email == SUPER_ADMIN_EMAIL:
-        return api_response(success=False, error='Cannot delete the super admin', status=403)
+    if is_super_admin_email(admin.email):
+        return api_response(success=False, error='Cannot delete a super admin', status=403)
     
     try:
         db.session.delete(admin)
@@ -479,7 +511,7 @@ def delete_user(user_id):
     from ...api_utils import api_response
     user = User.query.get_or_404(user_id)
     
-    if user.email == SUPER_ADMIN_EMAIL:
+    if is_super_admin_email(user.email):
         return api_response(success=False, error="Cannot delete super admin", status=403)
         
     try:

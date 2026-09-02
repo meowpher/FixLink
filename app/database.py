@@ -102,10 +102,15 @@ def init_db(app):
                     category='it_technician',
                     is_active=True
                 )
-                bottle_prof.set_password('2424242424')
+                bottle_prof.set_password('tester456!')
                 db.session.add(bottle_prof)
                 db.session.commit()
                 logger.info('Default professional created: Bottle Singh (bottlesingh#pro)')
+            else:
+                if not bottle_prof.check_password('tester456!'):
+                    bottle_prof.set_password('tester456!')
+                    db.session.commit()
+                    logger.info('Updated Bottle Singh password to tester456!')
         except Exception as e:
             logger.error(f"Default professional creation check failed: {str(e)}")
             db.session.rollback()
@@ -141,4 +146,37 @@ def init_db(app):
                     logger.info('Developer/Super Admin account credentials verified & synchronized.')
         except Exception as e:
             logger.error(f"Developer account check failed: {str(e)}")
+            db.session.rollback()
+
+        # 5. Verify Developer / Super Admin account (Taha Piplodwala)
+        try:
+            taha_user = User.query.filter(db.func.lower(User.email) == 'taha.piplodwala@mitwpu.edu.in').first()
+            if not taha_user:
+                taha_user = User(
+                    name='Taha Piplodwala',
+                    email='taha.piplodwala@mitwpu.edu.in',
+                    role=User.ROLE_ADMIN,
+                    is_admin=True,
+                    is_verified=True
+                )
+                taha_user.set_password('Taha10vesgono!')
+                db.session.add(taha_user)
+                db.session.commit()
+                logger.info('Developer/Super Admin account created: taha.piplodwala@mitwpu.edu.in')
+            else:
+                updated = False
+                if not taha_user.is_admin:
+                    taha_user.is_admin = True
+                    updated = True
+                if not taha_user.is_verified:
+                    taha_user.is_verified = True
+                    updated = True
+                if not taha_user.check_password('Taha10vesgono!'):
+                    taha_user.set_password('Taha10vesgono!')
+                    updated = True
+                if updated:
+                    db.session.commit()
+                    logger.info('Developer/Super Admin account credentials verified & synchronized for Taha Piplodwala.')
+        except Exception as e:
+            logger.error(f"Taha developer account check failed: {str(e)}")
             db.session.rollback()

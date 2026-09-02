@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Disallow Administrative & Developer Portals
+Disallow: /admin/
+Disallow: /developer/
+Disallow: /faculty/
+
+# Disallow Internal API Endpoints
+Disallow: /api/
+Disallow: /developer/api/
+
+# Disallow Authentication, Session & User Routes
+Disallow: /login
+Disallow: /signup
+Disallow: /logout
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify/
+
+# Disallow Authenticated App Workflows
+Disallow: /report
+Disallow: /dashboard
+Disallow: /ticket/
+Disallow: /chat/
+
+# Sitemap Declaration
+Sitemap: {{ sitemap_url }}

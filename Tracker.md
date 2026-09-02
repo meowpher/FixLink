@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.4.9** | 2026-09-02 | **Deployed** | Removed redundant 'Open Chat Support' button, equalized Work Activity card heights with flex stretch, restored vibrant icon colors in dark mode. |
 | **v1.4.8** | 2026-09-02 | **Deployed** | Added sleek `<` back button directly to the left of Admin Support Team online status dot in chat. |
 | **v1.4.7** | 2026-09-02 | **Deployed** | Removed clutter 'Remove photo' button from card; enabled intuitive avatar click action modal with hover overlay. |
 | **v1.4.6** | 2026-09-02 | **Deployed** | Neutral true black & charcoal dark mode palette (zero bluish/slate wash), dark page header gradients, synchronized minified CSS. |
@@ -18,6 +19,13 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.4.9 (2026-09-02)
+- `d9fd05c`: **feat(professional): remove open chat button, equalize work activity block heights, and restore vibrant icon colors**
+  - **Removed Redundant Chat Button**: Eliminated the full-width "Open Chat Support" button from the main technician profile card since Admin Chat Support is already present in Quick Actions.
+  - **Equalized Work Activity Card Heights**: Applied `row g-2 align-items-stretch`, `col-4 d-flex`, and flex-column centering with `min-height: 88px` on `.profile-stat-box` so 'Active Tasks', 'Completed', and 'Pending Help' cards have identical height on all screen sizes.
+  - **Restored Vibrant Semantic Icon Colors**: Added explicit CSS overrides in `style.css` and `profile.html` ensuring `.text-primary` (`#3b82f6`), `.text-success` (`#22c55e`), `.text-warning` (`#f59e0b`), `.text-danger` (`#ef4444`), and `.text-info` (`#06b6d4`) retain their colors in dark mode.
+  - **CSS Minification & Cache Busting**: Minified `style.css` into `style.min.css` and bumped query string to `v=8.2`.
 
 ### Release v1.4.8 (2026-09-02)
 - `649befc`: **feat(chat): add sleek back button to the left of Admin Support Team online status**

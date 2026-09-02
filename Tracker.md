@@ -7,12 +7,19 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.4.4** | 2026-09-02 | **Deployed** | Technician profile photo upload/removal, chat header UI simplification to 'Admin Support Team', keyboard viewport lock. |
 | **v1.4.3** | 2026-09-02 | **Deployed** | Dedicated professional profile page, bottom nav link, top nav avatar removal, Rules.md compliance. |
 | **v1.4.2** | 2026-09-02 | **Deployed** | LSP zero-warning cleanup, Touch pinch-to-zoom map, Mobile bug reporting, Faculty timetable migration, #undefined ticket fix. |
 
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.4.4 (2026-09-02)
+- `25ab42b`: **feat(professional): add profile picture upload and simplify chat header to intact Admin Support Team**
+  - **Profile Picture Upload & Cropping**: Added interactive avatar circle with camera edit badge on `/professional/profile`. Images are processed and square-cropped to 320x320 on client-side canvas before uploading to `/professional/api/profile/picture`, storing directly in DB for 100% Vercel serverless persistence. Includes one-click photo removal.
+  - **Chat Header Simplification**: Stripped back button, shield button, trash reset button, and dashboard button from `/professional/chat` header. Renamed cleanly to **Admin Support Team** with live online indicator.
+  - **Keyboard Viewport Lock**: Added `interactive-widget=resizes-content` to viewport meta tag, sticky header positioning, and visualViewport scroll guards so the chat header stays firmly intact and never disappears when the mobile keyboard pops up.
 
 ### Release v1.4.3 (2026-09-02)
 - `ac7b4a8`: **fix(auth): seed Bottle Singh and enable seamless technician login**

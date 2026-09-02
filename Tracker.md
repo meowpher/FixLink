@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.4.6** | 2026-09-02 | **Deployed** | Neutral true black & charcoal dark mode palette (zero bluish/slate wash), dark page header gradients, synchronized minified CSS. |
 | **v1.4.5** | 2026-09-02 | **Deployed** | Removed `< Back` button from professional top nav, aligned MIT logo & FixLink brand to far left. |
 | **v1.4.4** | 2026-09-02 | **Deployed** | Technician profile photo upload/removal, chat header UI simplification to 'Admin Support Team', keyboard viewport lock. |
 | **v1.4.3** | 2026-09-02 | **Deployed** | Dedicated professional profile page, bottom nav link, top nav avatar removal, Rules.md compliance. |
@@ -15,6 +16,13 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.4.6 (2026-09-02)
+- `923a7d5`: **fix(theme): convert dark mode palette from bluish tint to deep black and charcoal shades**
+  - **Eliminated Blue/Navy Wash**: Removed slate-blue base/surface/overlay backgrounds (`#0F1117`, `#161B27`, `#1E2535`, `#1E293B`, `#334155`) in favor of neutral dark charcoal & true black shades (`--bg-base: #0a0a0a`, `--bg-surface: #141414`, `--bg-overlay: #1e1e1e`, `--border-default: #262626`).
+  - **Dark Page Headers**: Overrode `.profile-page-header`, `.history-header`, and `.admin-header` in dark mode from light blue gradients into sleek black gradients (`linear-gradient(180deg, #111111 0%, #161616 100%)`).
+  - **Profile & Chat Dark Redesign**: Converted technician profile cards, avatar containers, stat boxes, action rows, and chat bubbles into pure black & dark charcoal tones.
+  - **CSS Minification & Cache Busting**: Minified `style.css` into `style.min.css` and bumped query string to `v=8.1`.
 
 ### Release v1.4.5 (2026-09-02)
 - `775d42d`: **feat(nav): remove back button from professional top bar and align brand logo to the left**

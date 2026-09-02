@@ -7,11 +7,20 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.4.3** | 2026-09-02 | **Deployed** | Dedicated professional profile page, bottom nav link, top nav avatar removal, Rules.md compliance. |
 | **v1.4.2** | 2026-09-02 | **Deployed** | LSP zero-warning cleanup, Touch pinch-to-zoom map, Mobile bug reporting, Faculty timetable migration, #undefined ticket fix. |
 
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.4.3 (2026-09-02)
+- `5905248`: **feat(professional): add dedicated profile page, bottom nav link, and remove top bar avatar**
+  - **Dedicated Profile Route & View**: Created `/professional/profile` and template `app/templates/professional/profile.html` featuring technician trade icon, specialty badge, contact info, "Open Chat Support" pill button, work activity counters, and account sign-out.
+  - **Bottom Navigation**: Added the **Profile** tab (`bi-person-badge`) to `#mobile-bottom-nav` for technicians alongside Tasks and Chat.
+  - **Top Navigation Bar Cleanup**: Removed redundant top bar profile avatar dropdown for technicians across mobile `#mobile-top-bar` and desktop capsule nav.
+  - **Dashboard Cleanup**: Removed the sidebar "My Profile" card from `app/templates/professional/dashboard.html` to keep the dashboard focused on active tasks and help requests.
+  - **Rules.md Compliance**: Zero hardcoded color breaks, CSS variable mapping, dark mode compatibility, semantic structure, and 100% test pass on `tests/test_auth.py` and `tests/test_ticket_lifecycle.py`.
 
 ### Release v1.4.2 (2026-09-02)
 - `c008e5e`: **ci(pages): add .nojekyll and root index.html to resolve failing GitHub Pages build check**

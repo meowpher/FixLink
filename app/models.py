@@ -519,6 +519,7 @@ class Professional(db.Model):
     phone = db.Column(db.String(20), nullable=True, unique=True)
     password_hash = db.Column(db.String(255), nullable=False)
     category = db.Column(db.String(50), nullable=False)
+    profile_picture = db.Column(db.Text, nullable=True)
     is_active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     

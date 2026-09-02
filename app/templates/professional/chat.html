@@ -22,19 +22,24 @@
     }
 
     .chat-header {
-        padding: 1.25rem 1.75rem;
+        padding: 1.15rem 1.5rem;
         background: var(--chat-header-bg);
         color: white;
         display: flex;
-        justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        flex-shrink: 0;
     }
 
     .chat-messages {
-        flex: 1;
+        flex: 1 1 0%;
+        min-height: 0;
         padding: 2rem;
         overflow-y: auto;
+        overscroll-behavior: contain;
         display: flex;
         flex-direction: column;
         gap: 1.25rem;
@@ -99,6 +104,10 @@
         padding: 1.5rem 1.75rem;
         background: white;
         border-top: 1px solid var(--border-color);
+        position: sticky;
+        bottom: 0;
+        z-index: 100;
+        flex-shrink: 0;
     }
 
     [data-theme="dark"] .chat-input-area {
@@ -170,8 +179,9 @@
         background: #22c55e;
         border-radius: 50%;
         display: inline-block;
-        margin-right: 6px;
+        margin-right: 8px;
         box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        flex-shrink: 0;
     }
 
     /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -180,67 +190,68 @@
     @media (max-width: 767px) {
         body {
             padding-top: 56px !important;
-            padding-bottom: 64px !important;
+            padding-bottom: 0 !important;
             overflow: hidden !important;
-            height: 100dvh !important;
+            height: 100% !important;
+            position: fixed !important;
+            width: 100% !important;
+        }
+        #mobile-bottom-nav {
+            display: none !important;
         }
         .main-content {
             padding: 0 !important;
             margin: 0 !important;
             padding-top: 0 !important;
-            height: calc(100dvh - 120px) !important;
+            height: calc(100vh - 56px) !important;
+            height: calc(100dvh - 56px) !important;
             overflow: hidden !important;
-            display: flex;
-            flex-direction: column;
+            display: flex !important;
+            flex-direction: column !important;
         }
         .container.mt-4 {
             padding: 0 !important;
             margin: 0 !important;
             max-width: 100% !important;
             height: 100% !important;
+            flex: 1 1 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
         }
         .chat-container {
             height: 100% !important;
+            max-height: 100% !important;
             border-radius: 0 !important;
             border: none !important;
             box-shadow: none !important;
             margin-bottom: 0 !important;
-        }
-
-        /* Header: show back chevron, compress actions */
-        .chat-header {
-            padding: 0.7rem 1rem;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            align-items: center;
-            gap: 0.6rem;
-        }
-
-        .mob-back-link {
             display: flex !important;
-            align-items: center;
-            justify-content: center;
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            color: white;
-            background: rgba(255,255,255,0.15);
-            font-size: 1.15rem;
-            flex-shrink: 0;
-            text-decoration: none;
-            transition: background 0.2s;
+            flex-direction: column !important;
+            overflow: hidden !important;
+            position: relative !important;
         }
 
-        .mob-back-link:hover { background: rgba(255,255,255,0.25); color: white; }
-
-        /* Header action buttons – icon only on mobile */
-        .chat-header .chat-header-actions .btn-text { display: none; }
-        .chat-header .chat-header-actions .btn { padding: 6px 10px; }
+        /* Clean Admin Support Team header: sticky and intact */
+        .chat-header {
+            padding: 0.85rem 1rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 100 !important;
+            flex-shrink: 0 !important;
+        }
 
         /* Messages area */
         .chat-messages {
-            padding: 1rem 0.85rem;
-            gap: 0.75rem;
+            flex: 1 1 0% !important;
+            min-height: 0 !important;
+            padding: 1rem 0.85rem !important;
+            gap: 0.75rem !important;
+            overflow-y: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            overscroll-behavior: contain !important;
         }
 
         .message {
@@ -255,14 +266,13 @@
 
         /* Input bar */
         .chat-input-area {
-            padding: 0.75rem 0.85rem;
-            position: sticky;
-            bottom: 0;
+            padding: 0.75rem 0.85rem !important;
+            position: sticky !important;
+            bottom: 0 !important;
+            z-index: 100 !important;
+            flex-shrink: 0 !important;
         }
     }
-
-    /* Back link hidden on desktop */
-    .mob-back-link { display: none; }
 </style>
 {% endblock %}
 
@@ -270,31 +280,9 @@
 <div class="container mt-4">
     <div class="chat-container">
         <div class="chat-header shadow-sm">
-            <!-- Mobile Back Button -->
-            <a href="{{ url_for('professional.dashboard') }}" class="mob-back-link" aria-label="Back to Dashboard">
-                <i class="bi bi-chevron-left"></i>
-            </a>
-            <!-- Contact Info -->
-            <div class="d-flex align-items-center gap-3">
-                <div class="nav-avatar nav-avatar-sm" style="background: rgba(255,255,255,0.2); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.3);">
-                    <i class="bi bi-shield-lock-fill"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0 fw-bold">FixLink Support</h5>
-                    <div class="d-flex align-items-center">
-                        <span class="admin-status-dot"></span>
-                        <small class="opacity-75">Admin Support Team</small>
-                    </div>
-                </div>
-            </div>
-            <!-- Header Actions -->
-            <div class="d-flex gap-2 chat-header-actions">
-                <button onclick="resetChat()" class="btn btn-sm btn-outline-danger rounded-pill px-3">
-                    <i class="bi bi-trash-fill me-1"></i><span class="btn-text">Reset Chat</span>
-                </button>
-                <a href="{{ url_for('professional.dashboard') }}" class="btn btn-sm btn-outline-light rounded-pill px-3">
-                    <i class="bi bi-grid-fill me-1"></i><span class="btn-text">Dashboard</span>
-                </a>
+            <div class="d-flex align-items-center">
+                <span class="admin-status-dot"></span>
+                <h5 class="mb-0 fw-bold text-white">Admin Support Team</h5>
             </div>
         </div>
 
@@ -329,6 +317,28 @@
     document.addEventListener('DOMContentLoaded', function() {
         initPusher();
         loadChatHistory();
+
+        // Ensure header stays intact and page doesn't scroll offscreen on mobile keyboard open
+        const chatInput = document.getElementById('chat-input');
+        if (chatInput) {
+            chatInput.addEventListener('focus', function() {
+                window.scrollTo(0, 0);
+                setTimeout(() => {
+                    window.scrollTo(0, 0);
+                    scrollToBottom();
+                }, 80);
+            });
+        }
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', function() {
+                window.scrollTo(0, 0);
+                scrollToBottom();
+            });
+            window.visualViewport.addEventListener('scroll', function() {
+                window.scrollTo(0, 0);
+            });
+        }
     });
 
     function initPusher() {

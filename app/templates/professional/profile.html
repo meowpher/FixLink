@@ -26,9 +26,16 @@
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
     }
 
+    .profile-avatar-container {
+        position: relative;
+        width: 76px;
+        height: 76px;
+        flex-shrink: 0;
+    }
+
     .profile-avatar-wrapper {
-        width: 72px;
-        height: 72px;
+        width: 76px;
+        height: 76px;
         border-radius: 50%;
         background: rgba(11, 77, 140, 0.12);
         display: flex;
@@ -38,12 +45,59 @@
         color: var(--mitwpu-blue, #0b4d8c);
         flex-shrink: 0;
         border: 2px solid rgba(11, 77, 140, 0.2);
+        overflow: hidden;
+        cursor: pointer;
+        position: relative;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .profile-avatar-wrapper:hover {
+        border-color: var(--mitwpu-blue, #0b4d8c);
+        transform: scale(1.03);
+    }
+
+    .profile-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        border-radius: 50%;
+    }
+
+    .avatar-edit-badge {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--mitwpu-blue, #0b4d8c);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        border: 2px solid var(--bg-card, #ffffff);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+        z-index: 2;
+    }
+
+    .avatar-edit-badge:hover {
+        transform: scale(1.12);
+        background: #093d70;
     }
 
     [data-theme="dark"] .profile-avatar-wrapper {
         background: #1E2535;
         color: #93c5fd;
         border-color: rgba(147, 197, 253, 0.25);
+    }
+
+    [data-theme="dark"] .avatar-edit-badge {
+        border-color: #1a2234;
+        background: #2563eb;
     }
 
     .profile-stat-box {
@@ -149,14 +203,30 @@
                 </div>
                 <div class="card-body pt-0 px-4 pb-4">
                     <div class="d-flex align-items-center gap-3 mb-3">
-                        <div class="profile-avatar-wrapper">
-                            <i class="bi {{ cat_icon }}"></i>
+                        <div class="profile-avatar-container">
+                            <div class="profile-avatar-wrapper" id="profileAvatarWrapper" onclick="document.getElementById('avatarFileInput').click()" title="Click to upload profile photo" role="button" tabindex="0">
+                                {% if professional.profile_picture %}
+                                    <img src="{{ professional.profile_picture }}" alt="{{ professional.name }}" class="profile-avatar-img" id="profileAvatarImg">
+                                {% else %}
+                                    <i class="bi {{ cat_icon }}" id="profileAvatarIcon"></i>
+                                {% endif %}
+                            </div>
+                            <button type="button" class="avatar-edit-badge" onclick="document.getElementById('avatarFileInput').click()" title="Change photo" aria-label="Change photo">
+                                <i class="bi bi-camera-fill"></i>
+                            </button>
                         </div>
-                        <div>
+                        <input type="file" id="avatarFileInput" accept="image/*" class="d-none">
+
+                        <div class="flex-grow-1">
                             <h5 class="mb-1 fw-bold text-body">{{ professional.name }}</h5>
-                            <span class="badge bg-primary-subtle text-primary border px-2 py-1" style="font-size: 0.75rem;">
-                                {{ category_name }}
-                            </span>
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="badge bg-primary-subtle text-primary border px-2 py-1" style="font-size: 0.75rem;">
+                                    {{ category_name }}
+                                </span>
+                                <button type="button" class="btn btn-link btn-sm text-danger p-0 text-decoration-none {% if not professional.profile_picture %}d-none{% endif %}" id="removeAvatarBtn" onclick="removeAvatar()" style="font-size: 0.75rem;">
+                                    <i class="bi bi-trash me-1"></i>Remove photo
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -261,4 +331,151 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('avatarFileInput');
+    const wrapper = document.getElementById('profileAvatarWrapper');
+    const removeBtn = document.getElementById('removeAvatarBtn');
+    const catIcon = '{{ cat_icon }}';
+
+    if (!fileInput || !wrapper) return;
+
+    // Accessibility: Enter or Space triggers upload
+    wrapper.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            fileInput.click();
+        }
+    });
+
+    fileInput.addEventListener('change', async function(e) {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+
+        // Basic type check
+        if (!file.type.startsWith('image/')) {
+            showToast('Please select a valid image file.', 'danger');
+            fileInput.value = '';
+            return;
+        }
+
+        const origHtml = wrapper.innerHTML;
+        wrapper.innerHTML = '<div class="spinner-border spinner-border-sm text-primary" role="status"></div>';
+
+        try {
+            // Downscale to 320x320 square web-friendly JPEG data URL
+            const dataUrl = await processAndResizeImage(file, 320, 320);
+
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+            const response = await fetch('/professional/api/profile/picture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ avatar: dataUrl })
+            });
+
+            const res = await response.json();
+            if (res.success) {
+                wrapper.innerHTML = `<img src="${res.profile_picture}" alt="Profile Picture" class="profile-avatar-img" id="profileAvatarImg">`;
+                if (removeBtn) removeBtn.classList.remove('d-none');
+                showToast('Profile photo updated successfully!', 'success');
+            } else {
+                wrapper.innerHTML = origHtml;
+                showToast(res.error || 'Failed to update profile picture', 'danger');
+            }
+        } catch (err) {
+            console.error('Avatar upload error:', err);
+            wrapper.innerHTML = origHtml;
+            showToast('Error processing image. Please try another photo.', 'danger');
+        } finally {
+            fileInput.value = '';
+        }
+    });
+
+    function processAndResizeImage(file, maxWidth, maxHeight) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onerror = reject;
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onerror = reject;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const width = img.width;
+                    const height = img.height;
+
+                    // Center square crop
+                    const minSide = Math.min(width, height);
+                    const startX = (width - minSide) / 2;
+                    const startY = (height - minSide) / 2;
+
+                    const targetSize = Math.min(minSide, maxWidth);
+                    canvas.width = targetSize;
+                    canvas.height = targetSize;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, startX, startY, minSide, minSide, 0, 0, targetSize, targetSize);
+                    resolve(canvas.toDataURL('image/jpeg', 0.88));
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    window.removeAvatar = async function() {
+        if (!confirm('Are you sure you want to remove your profile picture?')) return;
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+        try {
+            const response = await fetch('/professional/api/profile/picture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({ action: 'remove' })
+            });
+            const res = await response.json();
+            if (res.success) {
+                wrapper.innerHTML = `<i class="bi ${catIcon}" id="profileAvatarIcon"></i>`;
+                if (removeBtn) removeBtn.classList.add('d-none');
+                showToast('Profile photo removed.', 'info');
+            } else {
+                showToast(res.error || 'Failed to remove picture', 'danger');
+            }
+        } catch (err) {
+            showToast('Network error while removing photo.', 'danger');
+        }
+    };
+
+    function showToast(message, type) {
+        const alertType = type === 'error' ? 'danger' : type;
+        const toast = document.createElement('div');
+        toast.className = `alert alert-${alertType} position-fixed shadow-lg`;
+        toast.style.cssText = 'top: 20px; right: 20px; z-index: 10000; min-width: 280px; border-radius: 12px;';
+        toast.innerHTML = `
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <span>${message}</span>
+                </div>
+                <button type="button" class="btn-close ms-2" style="font-size: 0.75rem;" onclick="this.parentElement.parentElement.remove()"></button>
+            </div>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transition = 'opacity 0.5s ease';
+                setTimeout(() => toast.remove(), 500);
+            }
+        }, 4000);
+    }
+});
+</script>
 {% endblock %}

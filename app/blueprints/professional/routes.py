@@ -197,6 +197,56 @@ def profile():
                          help_requests_count=help_requests_count)
 
 
+@professional_bp.route('/api/profile/picture', methods=['POST'])
+@professional_login_required
+def update_profile_picture():
+    """Upload or remove professional profile picture."""
+    professional = Professional.query.get(session['professional_id'])
+    if not professional:
+        return jsonify({'success': False, 'error': 'Professional account not found'}), 404
+
+    # Case 1: JSON payload with base64 data URL
+    if request.is_json:
+        data = request.get_json() or {}
+        action = data.get('action')
+        if action == 'remove':
+            professional.profile_picture = None
+            db.session.commit()
+            return jsonify({'success': True, 'profile_picture': None, 'message': 'Profile picture removed.'})
+
+        avatar_data = data.get('avatar', '').strip()
+        if not avatar_data.startswith('data:image/'):
+            return jsonify({'success': False, 'error': 'Invalid image format.'}), 400
+
+        # Enforce reasonable size limit (~2MB base64)
+        if len(avatar_data) > 2 * 1024 * 1024:
+            return jsonify({'success': False, 'error': 'Image is too large. Max size is 1.5MB.'}), 400
+
+        professional.profile_picture = avatar_data
+        db.session.commit()
+        return jsonify({'success': True, 'profile_picture': professional.profile_picture, 'message': 'Profile picture updated successfully.'})
+
+    # Case 2: Multipart form file upload
+    if 'avatar_file' in request.files:
+        file = request.files['avatar_file']
+        if not file or file.filename == '':
+            return jsonify({'success': False, 'error': 'No file selected.'}), 400
+        
+        import base64
+        content = file.read()
+        if len(content) > 1.5 * 1024 * 1024:
+            return jsonify({'success': False, 'error': 'Image exceeds 1.5MB limit.'}), 400
+
+        mime_type = file.content_type or 'image/jpeg'
+        encoded = base64.b64encode(content).decode('utf-8')
+        data_url = f"data:{mime_type};base64,{encoded}"
+        professional.profile_picture = data_url
+        db.session.commit()
+        return jsonify({'success': True, 'profile_picture': professional.profile_picture, 'message': 'Profile picture updated successfully.'})
+
+    return jsonify({'success': False, 'error': 'No image data provided.'}), 400
+
+
 @professional_bp.route('/task/<int:ticket_id>')
 @professional_login_required
 def task_detail(ticket_id):

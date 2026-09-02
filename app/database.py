@@ -55,6 +55,19 @@ def init_db(app):
             except Exception as e:
                 logger.error(f"Building query check failed: {str(e)}")
 
+        # Ensure profile_picture column exists on professionals table
+        try:
+            inspector = sqlalchemy.inspect(db.engine)
+            if inspector.has_table('professionals'):
+                columns = [c['name'] for c in inspector.get_columns('professionals')]
+                if 'profile_picture' not in columns:
+                    with db.engine.connect() as conn:
+                        conn.execute(sqlalchemy.text("ALTER TABLE professionals ADD COLUMN profile_picture TEXT;"))
+                        conn.commit()
+                    logger.info("Added profile_picture column to professionals table.")
+        except Exception as e:
+            logger.warning(f"Could not verify profile_picture column: {e}")
+
         # 2. Verify default admin user
         from .models import User
         admin_email = os.environ.get('ADMIN_EMAIL')

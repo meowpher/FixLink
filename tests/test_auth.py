@@ -94,3 +94,33 @@ def test_bottlesingh_professional_login(client, run_app_context):
     assert response.status_code == 200
     html = response.get_data(as_text=True)
     assert "Bottle Singh" in html or "Dashboard" in html or "My Tasks" in html
+
+
+def test_professional_profile_picture_upload_and_remove(client, professional_user):
+    """Test updating and removing professional profile picture via API."""
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['professional_id'] = professional_user.id
+        sess['professional_name'] = professional_user.name
+        sess['professional_category'] = professional_user.category
+
+    # 1. Upload valid data URL
+    sample_data_url = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+    res = client.post('/professional/api/profile/picture', json={'avatar': sample_data_url})
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['success'] is True
+    assert data['profile_picture'] == sample_data_url
+
+    # 2. View profile page to see image rendered
+    page_res = client.get('/professional/profile')
+    assert page_res.status_code == 200
+    page_html = page_res.get_data(as_text=True)
+    assert 'id="profileAvatarImg"' in page_html
+
+    # 3. Remove profile picture
+    remove_res = client.post('/professional/api/profile/picture', json={'action': 'remove'})
+    assert remove_res.status_code == 200
+    remove_data = remove_res.get_json()
+    assert remove_data['success'] is True
+    assert remove_data['profile_picture'] is None

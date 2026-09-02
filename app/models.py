@@ -457,6 +457,28 @@ class Ticket(db.Model):
         db.Index('idx_ticket_professional_status', 'assigned_professional_id', 'status'),
     )
     
+    def __init__(self, room_id=None, asset_id=None, issue_type=None, description=None, 
+                 image_filename=None, reporter_id=None, reporter_name=None, prn=None, 
+                 reporter_email=None, status=STATUS_OPEN, complexity=None, 
+                 time_limit_hours=None, deadline_datetime=None, assigned_professional_id=None, **kwargs):
+        super().__init__(**kwargs)
+        if room_id is not None: self.room_id = room_id
+        if asset_id is not None: self.asset_id = asset_id
+        if issue_type is not None: self.issue_type = issue_type
+        if description is not None: self.description = description
+        if image_filename is not None: self.image_filename = image_filename
+        if reporter_id is not None: self.reporter_id = reporter_id
+        if reporter_name is not None: self.reporter_name = reporter_name
+        if prn is not None: self.prn = prn
+        if reporter_email is not None: self.reporter_email = reporter_email
+        if status is not None: self.status = status
+        if complexity is not None: self.complexity = complexity
+        if time_limit_hours is not None: self.time_limit_hours = time_limit_hours
+        if deadline_datetime is not None: self.deadline_datetime = deadline_datetime
+        if assigned_professional_id is not None: self.assigned_professional_id = assigned_professional_id
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def __repr__(self):
         return f'<Ticket #{self.id} - {self.status}>'
     
@@ -777,6 +799,16 @@ class PushSubscription(db.Model):
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    def __init__(self, endpoint=None, p256dh=None, auth=None, user_id=None, professional_id=None, **kwargs):
+        super().__init__(**kwargs)
+        if endpoint is not None: self.endpoint = endpoint
+        if p256dh is not None: self.p256dh = p256dh
+        if auth is not None: self.auth = auth
+        if user_id is not None: self.user_id = user_id
+        if professional_id is not None: self.professional_id = professional_id
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def to_dict(self):
         return {
             "endpoint": self.endpoint,
@@ -917,6 +949,18 @@ class BugReport(db.Model):
     
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    def __init__(self, title=None, description=None, file_path=None, file_data=None, status=STATUS_OPEN, reporter_id=None, reporter_type=None, **kwargs):
+        super().__init__(**kwargs)
+        if title is not None: self.title = title
+        if description is not None: self.description = description
+        if file_path is not None: self.file_path = file_path
+        if file_data is not None: self.file_data = file_data
+        if status is not None: self.status = status
+        if reporter_id is not None: self.reporter_id = reporter_id
+        if reporter_type is not None: self.reporter_type = reporter_type
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def to_dict(self):
         return {
             'id': self.id,

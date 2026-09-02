@@ -29,7 +29,7 @@ def robots_txt():
     sitemap_url = f"{base_url}/sitemap.xml"
     rendered = render_template('robots.txt', sitemap_url=sitemap_url)
     response = Response(rendered, mimetype='text/plain')
-    response.headers['Cache-Control'] = 'public, max-age=86400'
+    response.headers['Cache-Control'] = 'public, max-age=300, s-maxage=300, must-revalidate'
     return response
 
 
@@ -72,7 +72,7 @@ def sitemap_xml():
     ]
     rendered = render_template('sitemap.xml', pages=pages)
     response = Response(rendered, mimetype='application/xml')
-    response.headers['Cache-Control'] = 'public, max-age=43200'
+    response.headers['Cache-Control'] = 'public, max-age=300, s-maxage=300, must-revalidate'
     return response
 
 

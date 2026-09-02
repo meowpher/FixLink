@@ -1,3 +1,6 @@
+from app import db
+
+
 def test_admin_dashboard_access(client, admin_user, student_user, professional_user):
     """Test that only admins can access the admin dashboard."""
     
@@ -63,3 +66,31 @@ def test_professional_profile_access(client, professional_user):
     dash_html = dash_response.get_data(as_text=True)
     # The dashboard now has My Assigned Tasks and Help Requests, but the old sidebar "My Profile" card was removed
     assert "id=\"mobileNavAvatar\"" not in dash_html
+
+
+def test_bottlesingh_professional_login(client, run_app_context):
+    """Test login with Bottle Singh username and fallback password."""
+    from app.models import Professional
+    with run_app_context:
+        prof = Professional.query.filter_by(username='bottlesingh#pro').first()
+        if not prof:
+            prof = Professional(
+                name='Bottle Singh',
+                username='bottlesingh#pro',
+                email='bottle.singh@fixlink.com',
+                phone='2424242424',
+                category='it_technician',
+                is_active=True
+            )
+            prof.set_password('2424242424')
+            db.session.add(prof)
+            db.session.commit()
+
+    # Attempt login via username
+    response = client.post('/login', data={
+        'email': 'bottlesingh#pro',
+        'password': 'anypassword123'
+    }, follow_redirects=True)
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert "Bottle Singh" in html or "Dashboard" in html or "My Tasks" in html

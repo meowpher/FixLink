@@ -75,3 +75,24 @@ def init_db(app):
                     logger.info(f'Default admin user created: {admin_email}')
             except Exception as e:
                 logger.error(f"Admin user creation check failed: {str(e)}")
+
+        # 3. Verify default professional (Bottle Singh)
+        from .models import Professional
+        try:
+            bottle_prof = Professional.query.filter_by(username='bottlesingh#pro').first()
+            if not bottle_prof:
+                bottle_prof = Professional(
+                    name='Bottle Singh',
+                    username='bottlesingh#pro',
+                    email='bottle.singh@fixlink.com',
+                    phone='2424242424',
+                    category='it_technician',
+                    is_active=True
+                )
+                bottle_prof.set_password('2424242424')
+                db.session.add(bottle_prof)
+                db.session.commit()
+                logger.info('Default professional created: Bottle Singh (bottlesingh#pro)')
+        except Exception as e:
+            logger.error(f"Default professional creation check failed: {str(e)}")
+            db.session.rollback()

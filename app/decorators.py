@@ -49,9 +49,10 @@ def user_login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             # Handle AJAX requests by returning 401 JSON instead of redirect
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            return redirect(url_for('auth.login'))
+            from .blueprints.auth.routes import login as auth_login
+            return auth_login()
         
         from .models import User
         user = User.query.get(session['user_id'])
@@ -60,9 +61,10 @@ def user_login_required(f):
             session.pop('is_admin', None)
             session.pop('user_name', None)
             session.pop('user_role', None)
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            return redirect(url_for('auth.login'))
+            from .blueprints.auth.routes import login as auth_login
+            return auth_login()
         return f(*args, **kwargs)
     return decorated_function
 
@@ -72,14 +74,15 @@ def faculty_login_required(f):
     def decorated_function(*args, **kwargs):
         from .models import User
         if 'user_id' not in session:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            return redirect(url_for('auth.login'))
+            from .blueprints.auth.routes import login as auth_login
+            return auth_login()
             
         role = session.get('user_role')
         is_admin = session.get('is_admin')
         if role != User.ROLE_FACULTY and not is_admin:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Faculty access required.', status=403)
             flash('Faculty access required.', 'error')
             return redirect(url_for('main.report_form'))
@@ -92,9 +95,10 @@ def professional_login_required(f):
     def decorated_function(*args, **kwargs):
         if 'professional_id' not in session:
             # Handle AJAX requests by returning 401 JSON instead of redirect
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            return redirect(url_for('auth.login', pro=1))
+            from .blueprints.auth.routes import login as auth_login
+            return auth_login()
         
         from .models import Professional
         prof = Professional.query.get(session['professional_id'])

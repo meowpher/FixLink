@@ -95,8 +95,8 @@ def login():
             session.pop('professional_name', None)
             session.pop('professional_category', None)
     
-    # Check for special query parameter to show phone login (for professionals only)
-    show_phone_hint = request.args.get('pro') == '1'
+    # Check for special query parameter or professional path to show phone login (for professionals only)
+    show_phone_hint = request.args.get('pro') == '1' or request.path.startswith('/professional')
             
     if request.method == 'POST':
         login_input = request.form.get('email', '').strip()

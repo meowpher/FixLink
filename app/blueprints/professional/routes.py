@@ -15,6 +15,7 @@ from ...api_utils import handle_api_errors, api_response
 professional_bp = Blueprint('professional', __name__, url_prefix='/professional')
 
 
+@professional_bp.route('/', methods=['GET', 'POST'])
 @professional_bp.route('/login', methods=['GET', 'POST'])
 def login():
     """Professional login page - now supports username, phone, or email."""
@@ -26,8 +27,9 @@ def login():
     if 'user_id' in session:
         return redirect(url_for('auth.login'))
     
-    # Redirect to unified login page (professionals can use ?pro=1 hint there)
-    return redirect(url_for('auth.login', pro=1))
+    # Render unified login page directly with 200 OK (showing professional mode)
+    from ..auth.routes import login as auth_login
+    return auth_login()
 
 
 @professional_bp.route('/logout')

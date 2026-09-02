@@ -27,11 +27,20 @@
         color: white;
         display: flex;
         align-items: center;
+        justify-content: space-between;
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         position: sticky;
         top: 0;
         z-index: 100;
         flex-shrink: 0;
+    }
+
+    .chat-header-title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 1 1 auto;
+        text-align: center;
     }
 
     .chat-back-btn {
@@ -47,7 +56,6 @@
         text-decoration: none;
         transition: background 0.2s ease, transform 0.15s ease;
         flex-shrink: 0;
-        margin-right: 10px;
     }
 
     .chat-back-btn:hover {
@@ -291,11 +299,19 @@
             padding: 0.85rem 1rem !important;
             display: flex !important;
             align-items: center !important;
-            justify-content: flex-start !important;
+            justify-content: space-between !important;
             position: sticky !important;
             top: 0 !important;
             z-index: 100 !important;
             flex-shrink: 0 !important;
+        }
+
+        .chat-header-title {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex: 1 1 auto !important;
+            text-align: center !important;
         }
 
         /* Messages area */
@@ -335,13 +351,14 @@
 <div class="container mt-4">
     <div class="chat-container">
         <div class="chat-header shadow-sm">
-            <div class="d-flex align-items-center">
-                <a href="{{ url_for('professional.dashboard') }}" class="chat-back-btn" aria-label="Go Back" title="Back" onclick="if(window.history.length > 1){event.preventDefault(); window.history.back();}">
-                    <i class="bi bi-chevron-left"></i>
-                </a>
+            <a href="{{ url_for('professional.dashboard') }}" class="chat-back-btn" aria-label="Go Back" title="Back" onclick="if(window.history.length > 1){event.preventDefault(); window.history.back();}">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <div class="chat-header-title">
                 <span class="admin-status-dot"></span>
                 <h5 class="mb-0 fw-bold text-white">Admin Support Team</h5>
             </div>
+            <div class="chat-header-spacer" style="width: 32px; height: 32px;" aria-hidden="true"></div>
         </div>
 
         <div class="chat-messages" id="chat-messages">

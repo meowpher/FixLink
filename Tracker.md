@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.5.1** | 2026-09-02 | **Deployed** | Centered 'Admin Support Team' title in chat header with balanced `<` back button navigation. |
 | **v1.5.0** | 2026-09-02 | **Deployed** | Fixed dark mode chat send button from pale ice-hint `#C8D8E8` to high-contrast rich blue `#2563eb` with `#ffffff` icon. |
 | **v1.4.9** | 2026-09-02 | **Deployed** | Removed redundant 'Open Chat Support' button, equalized Work Activity card heights with flex stretch, restored vibrant icon colors in dark mode. |
 | **v1.4.8** | 2026-09-02 | **Deployed** | Added sleek `<` back button directly to the left of Admin Support Team online status dot in chat. |
@@ -20,6 +21,11 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.5.1 (2026-09-02)
+- `8e8284e`: **feat(chat): center Admin Support Team header title with balanced back-button navigation**
+  - **Centered Header Alignment**: Arranged `.chat-header` with flex space-between and a balanced spacer element, centering the title (`.chat-header-title` with online status indicator) in the chat header on both desktop and mobile viewports.
+  - **Maintained Back Button Placement**: Preserved the circular `<` back button anchored on the far left.
 
 ### Release v1.5.0 (2026-09-02)
 - `2047e82`: **fix(theme): eliminate pale baby blue ice-hint button background in dark mode and style send button with rich blue and crisp contrast**

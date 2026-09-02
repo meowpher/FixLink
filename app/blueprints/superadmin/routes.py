@@ -77,6 +77,11 @@ def login():
             session['super_admin_email'] = email
             session['user_email'] = email
             
+            # Clear any professional credentials to prevent technician items on developer portal
+            session.pop('professional_id', None)
+            session.pop('professional_name', None)
+            session.pop('professional_category', None)
+            
             # Also sign in as regular user if they exist in DB (to avoid confusion in navbar/decorators)
             user = User.query.filter_by(email=email).first()
             if user:

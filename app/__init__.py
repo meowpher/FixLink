@@ -5,7 +5,7 @@ Flask Application Factory
 import os
 import secrets
 import logging
-from flask import Flask
+from flask import Flask, session
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
@@ -169,11 +169,14 @@ def create_app(config_name=None):
     else:
         logger.info("Running on Vercel: Background scheduler disabled.")
     
-    # Global Session Refresh Hook
-    # NOTE: The database queries in @app.before_request were removed to optimize 
-    # Vercel serverless latency. We now fully trust the cryptographically signed 
-    # Flask session cookies for user roles and emails, which avoids opening a 
-    # costly PostgreSQL connection on every single request.
+    # Global Session Sanitizer Hook (Zero DB queries, purely in-memory)
+    @app.before_request
+    def sanitize_conflicting_session():
+        # Prevent technician keys from polluting admin/user sessions
+        if session.get('user_id') and session.get('professional_id'):
+            session.pop('professional_id', None)
+            session.pop('professional_name', None)
+            session.pop('professional_category', None)
     
     # Global Template Context
     @app.context_processor

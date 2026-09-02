@@ -51,8 +51,7 @@ def user_login_required(f):
             # Handle AJAX requests by returning 401 JSON instead of redirect
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            from .blueprints.auth.routes import login as auth_login
-            return auth_login()
+            return redirect(url_for('auth.login'))
         
         from .models import User
         user = User.query.get(session['user_id'])
@@ -63,8 +62,7 @@ def user_login_required(f):
             session.pop('user_role', None)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            from .blueprints.auth.routes import login as auth_login
-            return auth_login()
+            return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -76,8 +74,7 @@ def faculty_login_required(f):
         if 'user_id' not in session:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            from .blueprints.auth.routes import login as auth_login
-            return auth_login()
+            return redirect(url_for('auth.login'))
             
         role = session.get('user_role')
         is_admin = session.get('is_admin')
@@ -97,8 +94,7 @@ def professional_login_required(f):
             # Handle AJAX requests by returning 401 JSON instead of redirect
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            from .blueprints.auth.routes import login as auth_login
-            return auth_login()
+            return redirect(url_for('auth.login', pro=1))
         
         from .models import Professional
         prof = Professional.query.get(session['professional_id'])
@@ -122,5 +118,12 @@ def super_admin_required(f):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return api_response(success=False, error='SuperAdmin access required.', status=401)
             return redirect(url_for('superadmin.login'))
+        
+        # Clean up any lingering professional session keys on developer's site
+        if 'professional_id' in session:
+            session.pop('professional_id', None)
+            session.pop('professional_name', None)
+            session.pop('professional_category', None)
+            
         return f(*args, **kwargs)
     return decorated_function

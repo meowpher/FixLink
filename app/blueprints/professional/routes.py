@@ -27,9 +27,8 @@ def login():
     if 'user_id' in session:
         return redirect(url_for('auth.login'))
     
-    # Render unified login page directly with 200 OK (showing professional mode)
-    from ..auth.routes import login as auth_login
-    return auth_login()
+    # Redirect to unified login page (professionals can use ?pro=1 hint there)
+    return redirect(url_for('auth.login', pro=1))
 
 
 @professional_bp.route('/logout')

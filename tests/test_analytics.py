@@ -71,15 +71,16 @@ def test_analytics_computation(client, admin_user, professional_user, run_app_co
     
     data = response.get_json()
     assert data['success'] is True
-    assert data['total_tickets'] == 3
-    assert data['completed_tickets'] == 2
-    assert data['open_tickets'] == 1
+    stats = data.get('data', data)
+    assert stats['total_tickets'] == 3
+    assert stats['completed_tickets'] == 2
+    assert stats['open_tickets'] == 1
     
     # Check that average resolution time is calculated properly without NoneType error
     # Because there are two resolved tickets (24h + 48h = 72h / 2 = 36h)
     # The value might not be exactly 36.00 due to tiny execution time differences, but it shouldn't crash.
-    assert data['avg_resolution_time'] is not None
-    assert type(data['avg_resolution_time']) in [float, int]
+    assert stats['avg_resolution_time'] is not None
+    assert type(stats['avg_resolution_time']) in [float, int]
 
 
 def test_export_csv(client, admin_user, run_app_context):

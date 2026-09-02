@@ -168,6 +168,15 @@ def login():
                     pass
 
             if valid_pro:
+                # Clear previous user/admin/superadmin credentials
+                session.pop('user_id', None)
+                session.pop('user_name', None)
+                session.pop('user_email', None)
+                session.pop('is_admin', None)
+                session.pop('is_super_admin', None)
+                session.pop('super_admin_email', None)
+                session.pop('user_role', None)
+                
                 session['professional_id'] = professional.id
                 session['professional_name'] = professional.name
                 session['professional_category'] = professional.category
@@ -199,6 +208,11 @@ def login():
                     pass
 
         if user and valid_password:
+            # Clear previous professional credentials
+            session.pop('professional_id', None)
+            session.pop('professional_name', None)
+            session.pop('professional_category', None)
+
             # Always ensure verified for super admins
             if user.email.lower() in ['om.mahadik@mitwpu.edu.in', 'taha.piplodwala@mitwpu.edu.in']:
                 user.is_verified = True

@@ -176,3 +176,73 @@ def test_om_mahadik_credential_guarantee_and_login(client, app):
         assert sess.get('user_email') == 'om.mahadik@mitwpu.edu.in'
         assert sess.get('is_admin') is True
 
+
+def test_developer_site_no_my_tasks(client, professional_user):
+    """Test that 'My Tasks' is strictly absent from the developer site and developer sessions."""
+    # 1. Developer session: 'My Tasks' must not appear in Developer Center or any developer view
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['is_super_admin'] = True
+        sess['super_admin_email'] = 'om.mahadik@mitwpu.edu.in'
+        sess['user_email'] = 'om.mahadik@mitwpu.edu.in'
+        sess['is_admin'] = True
+
+    res = client.get('/developer')
+    assert res.status_code == 200
+    html = res.get_data(as_text=True)
+    assert "My Tasks" not in html
+    assert "Developer Center" in html
+
+    # 2. Even if professional_id was in session, accessing developer site strips it and excludes 'My Tasks'
+    with client.session_transaction() as sess:
+        sess['professional_id'] = professional_user.id
+
+    res2 = client.get('/developer')
+    assert res2.status_code == 200
+    html2 = res2.get_data(as_text=True)
+    assert "My Tasks" not in html2
+
+    with client.session_transaction() as sess:
+        assert 'professional_id' not in sess
+
+
+def test_root_redirects_to_login_and_profile_button_present(client, admin_user, professional_user):
+    """Test that root URL redirects to /login and profile avatar button is present for all roles."""
+    # 1. Root URL redirects to login
+    res_root = client.get('/')
+    assert res_root.status_code == 302
+    assert res_root.headers['Location'].endswith('/login')
+
+    # 2. Unauthenticated protected routes redirect to login
+    res_report = client.get('/report')
+    assert res_report.status_code == 302
+    assert res_report.headers['Location'].endswith('/login')
+
+    # 3. Admin session has profile button and no technician clutter
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['user_id'] = admin_user.id
+        sess['is_admin'] = True
+        sess['user_name'] = admin_user.name
+        sess['user_email'] = admin_user.email
+        # Simulate stale professional cookie in browser
+        sess['professional_id'] = professional_user.id
+
+    res_admin = client.get('/admin/')
+    assert res_admin.status_code == 200
+    html_admin = res_admin.get_data(as_text=True)
+
+    # Profile button must be present
+    assert 'id="navAvatar"' in html_admin
+    assert 'id="profileName"' in html_admin
+    assert '/logout' in html_admin
+
+    # Technician elements must not be present
+    assert 'My Tasks' not in html_admin
+
+    # Residual professional_id was cleaned up by sanitizer hook
+    with client.session_transaction() as sess:
+        assert 'professional_id' not in sess
+
+
+

@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.5.3** | 2026-09-03 | **Deployed** | Removed 'My Tasks' and technician nav items from the developer site and developer sessions. |
 | **v1.5.2** | 2026-09-02 | **Deployed** | Guaranteed Developer/Superadmin credentials (`om.mahadik@mitwpu.edu.in`), auto-seeding in `init_db()`, self-healing login, and formalized Rule 6 in `Rules.md`. |
 | **v1.5.1** | 2026-09-02 | **Deployed** | Centered 'Admin Support Team' title in chat header with balanced `<` back button navigation. |
 | **v1.5.0** | 2026-09-02 | **Deployed** | Fixed dark mode chat send button from pale ice-hint `#C8D8E8` to high-contrast rich blue `#2563eb` with `#ffffff` icon. |
@@ -22,6 +23,14 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.5.3 (2026-09-03)
+- `fix(navigation)`: **restore profile button, eliminate navbar bloat, and restore login redirects**
+  - **Permanently Visible Profile Button**: Removed the conditional hiding of the profile avatar dropdown button in [base.html](file:///d:/FixLink-V1/app/templates/base.html) (`navAvatar`). It is now always visible on the desktop navbar for all authenticated sessions, complete with user initials/avatar, display name, email, and one-click Logout.
+  - **Clean, Single-Line Capsule Navigation**: Replaced overlapping role `{% if %}` checks in [base.html](file:///d:/FixLink-V1/app/templates/base.html) with mutually-exclusive blocks (`if is_admin` vs `elif professional_id` vs `elif user_role == 'faculty'` vs `else`). Removed technician items (`My Tasks`, duplicate `Chat`, and `Profile`) from Admin and Developer views, moving Admin access to Faculty Portal and Report Issue into the `Manage` dropdown to prevent capsule overflow and multi-line wrapping.
+  - **Restored `/login` Redirections**: Restored proper HTTP 302 redirects to `/login` in [main/routes.py](file:///d:/FixLink-V1/app/blueprints/main/routes.py) (`@main_bp.route('/')`), [professional/routes.py](file:///d:/FixLink-V1/app/blueprints/professional/routes.py), and throughout [decorators.py](file:///d:/FixLink-V1/app/decorators.py) (`user_login_required`, `faculty_login_required`, `professional_login_required`). Users navigating to `fixlink26.vercel.app` or accessing protected pages unauthenticated are immediately redirected to `/login`.
+  - **In-Memory Session Sanitizer Hook**: Added `@app.before_request` hook in [__init__.py](file:///d:/FixLink-V1/app/__init__.py) that instantly and non-blockingly (zero DB queries) cleanses stale `professional_id` cookies whenever a `user_id` session is active.
+  - **Automated Verification**: Added comprehensive test coverage in [test_auth.py](file:///d:/FixLink-V1/tests/test_auth.py) validating redirect behavior, profile button presence, and role isolation. All 7 test cases passing.
 
 ### Release v1.5.2 (2026-09-02)
 - `c35bc87`: **fix(auth): guarantee Om Mahadik credentials and add Rule 6 for zero credential loss and self-healing login**

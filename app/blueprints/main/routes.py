@@ -78,9 +78,8 @@ def sitemap_xml():
 
 @main_bp.route('/')
 def index():
-    """Render home / landing page directly (200 OK) for users and search crawlers."""
-    from ..auth.routes import login
-    return login()
+    """Redirect to login page."""
+    return redirect(url_for('auth.login'))
 
 
 @main_bp.route('/report', methods=['GET'])

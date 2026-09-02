@@ -65,8 +65,9 @@
     ══════════════════════════════════════════════════════ -->
     <div id="mobile-top-bar" class="d-md-none">
         <div class="top-bar-left">
-            {% if not (session.get('professional_id') or (request.endpoint and (
+            {% if not (session.get('professional_id') or session.get('is_super_admin') or request.blueprint == 'superadmin' or (request.endpoint and (
                 request.endpoint.startswith('professional.') or
+                request.endpoint.startswith('superadmin.') or
                 request.endpoint.endswith('.login') or 
                 request.endpoint == 'admin.dashboard' or 
                 request.endpoint == 'admin.status_map' or 
@@ -77,7 +78,12 @@
                 <i class="bi bi-chevron-left"></i> Back
             </button>
             {% endif %}
-            {% if session.get('professional_id') %}
+            {% if session.get('is_super_admin') %}
+            <a href="{{ url_for('superadmin.dashboard') }}" class="top-bar-brand text-decoration-none">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU Logo" width="100" height="28" loading="eager">
+                <span>FixLink</span>
+            </a>
+            {% elif session.get('professional_id') and not (request.blueprint == 'superadmin') %}
             <a href="{{ url_for('professional.dashboard') }}" class="top-bar-brand text-decoration-none">
                 <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU Logo" width="100" height="28" loading="eager">
                 <span>FixLink</span>
@@ -177,7 +183,7 @@
                 <i class="bi bi-chat"></i>
                 <span>Chat</span>
             </a>
-        {% elif session.get('professional_id') %}
+        {% elif session.get('professional_id') and not session.get('is_super_admin') and not (request.blueprint == 'superadmin') %}
             <a href="{{ url_for('professional.dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'professional.dashboard' %}active{% endif %}">
                 <i class="bi bi-tools"></i>
                 <span>Tasks</span>
@@ -372,6 +378,8 @@
                         <li><a class="msb-subitem" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up"></i>Help Requests</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history"></i>Full History</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.booking_history') }}"><i class="bi bi-calendar3-range"></i>Bookings</a></li>
+                        <li><a class="msb-subitem" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check"></i>Faculty Portal</a></li>
+                        <li><a class="msb-subitem" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i>Report Issue</a></li>
                     </ul>
                 </li>
                 <li>
@@ -389,9 +397,8 @@
                         {% if request.endpoint == 'admin.chat' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
-                {% endif %}
 
-                {% if session.get('professional_id') %}
+                {% elif session.get('professional_id') %}
                 <li>
                     <a class="msb-item {% if request.endpoint == 'professional.dashboard' %}msb-active{% endif %}" href="{{ url_for('professional.dashboard') }}">
                         <i class="bi bi-tools"></i>
@@ -414,9 +421,8 @@
                         {% if request.endpoint == 'professional.profile' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
-                {% endif %}
 
-                {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
+                {% elif session.get('user_role') == 'faculty' %}
                 <li>
                     <a class="msb-item {% if request.endpoint == 'faculty.dashboard' %}msb-active{% endif %}" href="{{ url_for('faculty.dashboard') }}">
                         <i class="bi bi-calendar-check"></i>
@@ -424,8 +430,6 @@
                         {% if request.endpoint == 'faculty.dashboard' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
-                {% endif %}
-
                 <li>
                     <a class="msb-item {% if request.endpoint == 'main.report_form' %}msb-active{% endif %}" href="{{ url_for('main.report_form') }}">
                         <i class="bi bi-plus-circle"></i>
@@ -433,6 +437,16 @@
                         {% if request.endpoint == 'main.report_form' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
+
+                {% else %}
+                <li>
+                    <a class="msb-item {% if request.endpoint == 'main.report_form' %}msb-active{% endif %}" href="{{ url_for('main.report_form') }}">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Report Issue</span>
+                        {% if request.endpoint == 'main.report_form' %}<span class="msb-dot"></span>{% endif %}
+                    </a>
+                </li>
+                {% endif %}
 
             {% else %}
             <li>
@@ -541,7 +555,7 @@
     <div class="fixed-top mt-4 d-none d-lg-flex justify-content-center pointer-events-none" style="z-index: 1040;">
         <div class="nav-capsule pointer-events-auto">
             <!-- Brand -->
-            <a class="d-flex align-items-center me-3 text-decoration-none" href="{% if session.get('professional_id') %}{{ url_for('professional.dashboard') }}{% else %}{{ url_for('main.index') }}{% endif %}">
+            <a class="d-flex align-items-center me-3 text-decoration-none" href="{% if session.get('is_super_admin') %}{{ url_for('superadmin.dashboard') }}{% elif session.get('professional_id') and not (request.blueprint == 'superadmin') %}{{ url_for('professional.dashboard') }}{% else %}{{ url_for('main.index') }}{% endif %}">
                 <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="Logo" class="mitwpu-logo me-2" style="height: 28px; width: auto;" width="100" height="28" loading="eager" fetchpriority="high" decoding="sync">
                 <span class="brand-text-capsule">FixLink</span>
             </a>
@@ -552,40 +566,40 @@
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('superadmin.dashboard') }}"><i class="bi bi-code-square"></i> Developer</a></li>
                 {% endif %}
 
-                {% if session.get('user_id') or session.get('professional_id') %}
-                    {% if session.get('is_admin') %}
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.status_map' %}active{% endif %}" href="{{ url_for('admin.status_map') }}"><i class="bi bi-map"></i> Status Map</a></li>
-                        
-                        <!-- Manage Dropdown -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
-                            <ul class="dropdown-menu shadow rounded-4 border-0">
-                                <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('admin.professional_analytics') }}"><i class="bi bi-bar-chart-line me-2"></i>Staff Analytics</a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history me-2"></i>Full History</a></li>
-                            </ul>
-                        </li>
+                {% if session.get('is_admin') %}
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.status_map' %}active{% endif %}" href="{{ url_for('admin.status_map') }}"><i class="bi bi-map"></i> Status Map</a></li>
+                    
+                    <!-- Manage Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
+                        <ul class="dropdown-menu shadow rounded-4 border-0">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.professional_analytics') }}"><i class="bi bi-bar-chart-line me-2"></i>Staff Analytics</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history me-2"></i>Full History</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check me-2"></i>Faculty Portal</a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle me-2"></i>Report Issue</a></li>
+                        </ul>
+                    </li>
 
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" href="{{ url_for('admin.analytics') }}"><i class="bi bi-graph-up"></i> Insights</a></li>
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.chat' %}active{% endif %}" href="{{ url_for('admin.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
-                    {% endif %}
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" href="{{ url_for('admin.analytics') }}"><i class="bi bi-graph-up"></i> Insights</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.chat' %}active{% endif %}" href="{{ url_for('admin.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
 
-                    {% if session.get('professional_id') %}
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.dashboard' %}active{% endif %}" href="{{ url_for('professional.dashboard') }}"><i class="bi bi-tools"></i> My Tasks</a></li>
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.chat' %}active{% endif %}" href="{{ url_for('professional.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.profile' %}active{% endif %}" href="{{ url_for('professional.profile') }}"><i class="bi bi-person-badge"></i> Profile</a></li>
-                    {% endif %}
+                {% elif session.get('professional_id') %}
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.dashboard' %}active{% endif %}" href="{{ url_for('professional.dashboard') }}"><i class="bi bi-tools"></i> My Tasks</a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.chat' %}active{% endif %}" href="{{ url_for('professional.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.profile' %}active{% endif %}" href="{{ url_for('professional.profile') }}"><i class="bi bi-person-badge"></i> Profile</a></li>
 
-                    {% if session.get('user_role') == 'faculty' or session.get('is_admin') %}
-                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'faculty.dashboard' %}active{% endif %}" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check"></i> Faculty Portal</a></li>
-                    {% endif %}
-                {% endif %}
-
-                {% if request.endpoint != 'auth.login' %}
+                {% elif session.get('user_role') == 'faculty' %}
+                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'faculty.dashboard' %}active{% endif %}" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check"></i> Faculty Portal</a></li>
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
+
+                {% else %}
+                    {% if request.endpoint != 'auth.login' %}
+                        <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
+                    {% endif %}
                 {% endif %}
             </ul>
 
@@ -615,8 +629,7 @@
                         </ul>
                     {% endif %}
 
-                    <!-- Profile Dropdown -->
-                    {% if not session.get('professional_id') %}
+                    <!-- Profile Dropdown (Always visible for all authenticated sessions) -->
                     <div class="dropdown">
                         <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" aria-label="Open profile menu" aria-expanded="false">
                             <div class="nav-avatar m-0" id="navAvatar" style="width: 35px; height: 35px; border-radius: 50%; background: var(--mitwpu-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600;">
@@ -629,10 +642,15 @@
                                 <div class="fw-bold" id="profileName">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
                                 <div class="text-muted small" id="profileEmail">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
                             </li>
-                            <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            {% if session.get('professional_id') %}
+                                <li><a class="dropdown-item py-2" href="{{ url_for('professional.profile') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            {% endif %}
                         </ul>
                     </div>
-                    {% endif %}
                 {% endif %}
             </div>
         </div>

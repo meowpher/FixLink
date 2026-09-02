@@ -66,6 +66,25 @@
         transform: scale(1.03);
     }
 
+    .profile-avatar-overlay {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.45);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+    }
+
+    .profile-avatar-wrapper:hover .profile-avatar-overlay {
+        opacity: 1;
+    }
+
     .profile-avatar-img {
         width: 100%;
         height: 100%;
@@ -240,14 +259,17 @@
                 <div class="card-body pt-0 px-4 pb-4">
                     <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="profile-avatar-container">
-                            <div class="profile-avatar-wrapper" id="profileAvatarWrapper" onclick="document.getElementById('avatarFileInput').click()" title="Click to upload profile photo" role="button" tabindex="0">
+                            <div class="profile-avatar-wrapper" id="profileAvatarWrapper" onclick="handleAvatarClick()" title="Click to change profile photo" role="button" tabindex="0">
                                 {% if professional.profile_picture %}
                                     <img src="{{ professional.profile_picture }}" alt="{{ professional.name }}" class="profile-avatar-img" id="profileAvatarImg">
                                 {% else %}
                                     <i class="bi {{ cat_icon }}" id="profileAvatarIcon"></i>
                                 {% endif %}
+                                <div class="profile-avatar-overlay">
+                                    <i class="bi bi-camera-fill"></i>
+                                </div>
                             </div>
-                            <button type="button" class="avatar-edit-badge" onclick="document.getElementById('avatarFileInput').click()" title="Change photo" aria-label="Change photo">
+                            <button type="button" class="avatar-edit-badge" onclick="handleAvatarClick()" title="Change photo" aria-label="Change photo">
                                 <i class="bi bi-camera-fill"></i>
                             </button>
                         </div>
@@ -255,14 +277,9 @@
 
                         <div class="flex-grow-1">
                             <h5 class="mb-1 fw-bold text-body">{{ professional.name }}</h5>
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <span class="badge bg-primary-subtle text-primary border px-2 py-1" style="font-size: 0.75rem;">
-                                    {{ category_name }}
-                                </span>
-                                <button type="button" class="btn btn-link btn-sm text-danger p-0 text-decoration-none {% if not professional.profile_picture %}d-none{% endif %}" id="removeAvatarBtn" onclick="removeAvatar()" style="font-size: 0.75rem;">
-                                    <i class="bi bi-trash me-1"></i>Remove photo
-                                </button>
-                            </div>
+                            <span class="badge bg-primary-subtle text-primary border px-2 py-1" style="font-size: 0.75rem;">
+                                {{ category_name }}
+                            </span>
                         </div>
                     </div>
 
@@ -367,6 +384,25 @@
         </div>
     </div>
 </div>
+<!-- Avatar Action Modal (Options to change or remove photo) -->
+<div class="modal fade" id="avatarActionModal" tabindex="-1" aria-labelledby="avatarActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content rounded-4 border-0 shadow-lg overflow-hidden" style="background: var(--bg-card); border: 1px solid var(--border-color) !important;">
+            <div class="modal-header border-0 pb-1 pt-3 px-3 justify-content-between align-items-center">
+                <h6 class="modal-title fw-bold text-body mb-0" id="avatarActionModalLabel">Profile Photo</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="font-size: 0.75rem;"></button>
+            </div>
+            <div class="modal-body p-3 d-flex flex-column gap-2">
+                <button type="button" class="btn btn-primary rounded-pill py-2 d-flex align-items-center justify-content-center gap-2" onclick="triggerFileInput()">
+                    <i class="bi bi-camera-fill"></i>Change Photo
+                </button>
+                <button type="button" class="btn btn-outline-danger rounded-pill py-2 d-flex align-items-center justify-content-center gap-2" onclick="removeAvatarFromModal()">
+                    <i class="bi bi-trash"></i>Remove Photo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -374,18 +410,50 @@
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('avatarFileInput');
     const wrapper = document.getElementById('profileAvatarWrapper');
-    const removeBtn = document.getElementById('removeAvatarBtn');
     const catIcon = '{{ cat_icon }}';
 
     if (!fileInput || !wrapper) return;
 
-    // Accessibility: Enter or Space triggers upload
+    // Accessibility: Enter or Space triggers avatar click
     wrapper.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            fileInput.click();
+            handleAvatarClick();
         }
     });
+
+    window.handleAvatarClick = function() {
+        const hasPhoto = !!document.getElementById('profileAvatarImg');
+        if (hasPhoto) {
+            const modalEl = document.getElementById('avatarActionModal');
+            if (modalEl) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            } else {
+                fileInput.click();
+            }
+        } else {
+            fileInput.click();
+        }
+    };
+
+    window.triggerFileInput = function() {
+        const modalEl = document.getElementById('avatarActionModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+        fileInput.click();
+    };
+
+    window.removeAvatarFromModal = async function() {
+        const modalEl = document.getElementById('avatarActionModal');
+        if (modalEl) {
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            if (modal) modal.hide();
+        }
+        await window.removeAvatar();
+    };
 
     fileInput.addEventListener('change', async function(e) {
         const file = e.target.files && e.target.files[0];
@@ -417,8 +485,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const res = await response.json();
             if (res.success) {
-                wrapper.innerHTML = `<img src="${res.profile_picture}" alt="Profile Picture" class="profile-avatar-img" id="profileAvatarImg">`;
-                if (removeBtn) removeBtn.classList.remove('d-none');
+                wrapper.innerHTML = `
+                    <img src="${res.profile_picture}" alt="Profile Picture" class="profile-avatar-img" id="profileAvatarImg">
+                    <div class="profile-avatar-overlay"><i class="bi bi-camera-fill"></i></div>
+                `;
                 showToast('Profile photo updated successfully!', 'success');
             } else {
                 wrapper.innerHTML = origHtml;
@@ -478,8 +548,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             const res = await response.json();
             if (res.success) {
-                wrapper.innerHTML = `<i class="bi ${catIcon}" id="profileAvatarIcon"></i>`;
-                if (removeBtn) removeBtn.classList.add('d-none');
+                wrapper.innerHTML = `
+                    <i class="bi ${catIcon}" id="profileAvatarIcon"></i>
+                    <div class="profile-avatar-overlay"><i class="bi bi-camera-fill"></i></div>
+                `;
                 showToast('Profile photo removed.', 'info');
             } else {
                 showToast(res.error || 'Failed to remove picture', 'danger');

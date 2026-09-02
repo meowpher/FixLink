@@ -109,3 +109,36 @@ def init_db(app):
         except Exception as e:
             logger.error(f"Default professional creation check failed: {str(e)}")
             db.session.rollback()
+
+        # 4. Verify Developer / Super Admin account (Om Mahadik)
+        try:
+            om_user = User.query.filter(db.func.lower(User.email) == 'om.mahadik@mitwpu.edu.in').first()
+            if not om_user:
+                om_user = User(
+                    name='Om Mahadik',
+                    email='om.mahadik@mitwpu.edu.in',
+                    role=User.ROLE_ADMIN,
+                    is_admin=True,
+                    is_verified=True
+                )
+                om_user.set_password('omni12345')
+                db.session.add(om_user)
+                db.session.commit()
+                logger.info('Developer/Super Admin account created: om.mahadik@mitwpu.edu.in')
+            else:
+                updated = False
+                if not om_user.is_admin:
+                    om_user.is_admin = True
+                    updated = True
+                if not om_user.is_verified:
+                    om_user.is_verified = True
+                    updated = True
+                if not om_user.check_password('omni12345'):
+                    om_user.set_password('omni12345')
+                    updated = True
+                if updated:
+                    db.session.commit()
+                    logger.info('Developer/Super Admin account credentials verified & synchronized.')
+        except Exception as e:
+            logger.error(f"Developer account check failed: {str(e)}")
+            db.session.rollback()

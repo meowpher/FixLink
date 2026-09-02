@@ -126,3 +126,53 @@ def test_professional_profile_picture_upload_and_remove(client, professional_use
     remove_data = remove_res.get_json()
     assert remove_data['success'] is True
     assert remove_data['profile_picture'] is None
+
+
+def test_om_mahadik_credential_guarantee_and_login(client, app):
+    """Test that om.mahadik@mitwpu.edu.in can always log in case-insensitively and self-heals."""
+    from app import db
+    from app.models import User
+
+    # 1. Login with exact email
+    res1 = client.post('/login', data={
+        'email': 'om.mahadik@mitwpu.edu.in',
+        'password': 'omni12345'
+    }, follow_redirects=True)
+    assert res1.status_code == 200
+    html1 = res1.get_data(as_text=True)
+    assert "Invalid email or password" not in html1
+    with client.session_transaction() as sess:
+        assert sess.get('user_email') == 'om.mahadik@mitwpu.edu.in'
+        assert sess.get('is_admin') is True
+        assert sess.get('is_super_admin') is True
+
+    # 2. Login with uppercase / mixed case email
+    with client.session_transaction() as sess:
+        sess.clear()
+    res2 = client.post('/login', data={
+        'email': 'Om.Mahadik@MITWPU.edu.in',
+        'password': 'omni12345'
+    }, follow_redirects=True)
+    assert res2.status_code == 200
+    html2 = res2.get_data(as_text=True)
+    assert "Invalid email or password" not in html2
+
+    # 3. Even if user was dropped from database, logging in must self-heal and create the account
+    with client.session_transaction() as sess:
+        sess.clear()
+    with app.app_context():
+        User.query.filter(db.func.lower(User.email) == 'om.mahadik@mitwpu.edu.in').delete()
+        db.session.commit()
+        assert User.query.filter(db.func.lower(User.email) == 'om.mahadik@mitwpu.edu.in').first() is None
+
+    res3 = client.post('/login', data={
+        'email': 'om.mahadik@mitwpu.edu.in',
+        'password': 'omni12345'
+    }, follow_redirects=True)
+    assert res3.status_code == 200
+    html3 = res3.get_data(as_text=True)
+    assert "Invalid email or password" not in html3
+    with client.session_transaction() as sess:
+        assert sess.get('user_email') == 'om.mahadik@mitwpu.edu.in'
+        assert sess.get('is_admin') is True
+

@@ -43,9 +43,19 @@ Any AI Agent or Developer working on this codebase MUST adhere strictly to the f
 
 ---
 
-## 6. THE FINAL RECHECK (PRE-COMMIT VERIFICATION)
+## 6. AUTHENTICATION, CREDENTIAL INTEGRITY & USER SESSION GUARDRAILS
+*   **Zero Credential Loss:** NEVER reset, overwrite, or invalidate existing user credentials, passwords, or default administrative accounts during database operations, migrations, route updates, or code refactoring.
+*   **Mandatory Core Account Seeding:** Critical system accounts (including default Admin `admin@mitwpu.edu.in`, Developer / Super Admin `om.mahadik@mitwpu.edu.in` with `omni12345`, and Professional `bottlesingh#pro` with `2424242424`) MUST be guaranteed and auto-seeded in `init_db()` upon database startup or cold boot.
+*   **Case-Insensitive Email Matching:** All authentication lookups MUST perform case-insensitive comparisons using `func.lower(User.email) == login_input.lower()` so uppercase, mixed-case input, or PostgreSQL strict case collation never causes login failures.
+*   **Self-Healing Authentication:** If a recognized administrative or developer account exists without a valid password hash or has not yet been seeded in a freshly created/migrated database, the login handler must gracefully auto-create/auto-repair the credential on verified match without rejecting the user.
+*   **Active Session Protection:** Never invalidate, drop, or alter active user sessions across unrelated deployments or schema changes.
+
+---
+
+## 7. THE FINAL RECHECK (PRE-COMMIT VERIFICATION)
 Before outputting any code or completing a task, you MUST silently run through this strict verification checklist. If you fail any of these checks, you must rewrite your solution before presenting it.
 
+*   [ ] **The Credential Integrity Check:** Did I ensure all primary accounts (`om.mahadik@mitwpu.edu.in`, `admin@mitwpu.edu.in`, `bottlesingh#pro`) remain valid, auto-seeded, and case-insensitively authenticated?
 *   [ ] **The Figma Check:** Did I completely strip all inline `fill` and `stroke` attributes from newly imported SVG elements?
 *   [ ] **The Dark Mode Check:** Do the new UI elements strictly use established CSS variables/classes, or did I accidentally hardcode a hex color that will break the dark mode aesthetic?
 *   [ ] **The DB Crash Check:** Does this code query the database on startup? If yes, is it safely wrapped in an `app_context()` and does it verify the tables actually exist first?

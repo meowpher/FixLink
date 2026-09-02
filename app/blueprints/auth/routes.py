@@ -80,8 +80,20 @@ def login():
         user = User.query.get(session['user_id'])
         if user:
             return redirect(url_for('admin.dashboard')) if user.is_admin else redirect(url_for('main.report_form'))
+        else:
+            session.pop('user_id', None)
+            session.pop('is_admin', None)
+            session.pop('user_name', None)
+            session.pop('user_role', None)
+
     if 'professional_id' in session:
-        return redirect(url_for('professional.dashboard'))
+        prof = Professional.query.get(session['professional_id'])
+        if prof:
+            return redirect(url_for('professional.dashboard'))
+        else:
+            session.pop('professional_id', None)
+            session.pop('professional_name', None)
+            session.pop('professional_category', None)
     
     # Check for special query parameter to show phone login (for professionals only)
     show_phone_hint = request.args.get('pro') == '1'

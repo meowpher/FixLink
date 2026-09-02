@@ -16,9 +16,9 @@ def init_db(app):
     3. Ensure admin users exist.
     """
     with app.app_context():
-        # Skip setup logic on Vercel or in Testing mode (DB managed externally)
-        if os.environ.get('VERCEL') or app.config.get('TESTING') or os.environ.get('TESTING') == 'True':
-            logger.info('Skipping database setup on Vercel / Testing environment.')
+        # Skip setup logic in Testing mode (DB managed by pytest fixture)
+        if app.config.get('TESTING') or os.environ.get('TESTING') == 'True':
+            logger.info('Skipping database setup in Testing environment.')
             return
 
         # 0. Ensure models are registered with SQLAlchemy
@@ -41,7 +41,7 @@ def init_db(app):
             try:
                 from scripts.init_data import create_vyas_data
                 logger.info("Auto-seeding Vyas architecture, 8 floors, and rooms...")
-                create_vyas_data(app)
+                create_vyas_data(app, interactive=False)
             except Exception as e:
                 logger.error(f"Auto-seeding Vyas data failed: {str(e)}")
         else:
@@ -51,7 +51,7 @@ def init_db(app):
                 if not Building.query.filter_by(name='Vyas').first():
                     from scripts.init_data import create_vyas_data
                     logger.info("Vyas building record missing. Auto-seeding...")
-                    create_vyas_data(app)
+                    create_vyas_data(app, interactive=False)
             except Exception as e:
                 logger.error(f"Building query check failed: {str(e)}")
 

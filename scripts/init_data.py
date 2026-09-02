@@ -20,7 +20,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import create_app, db
 from app.models import Building, Floor, Room, Asset, Ticket
 
-def create_vyas_data(app=None):
+def create_vyas_data(app=None, interactive=False):
     """Create Vyas building with floors and rooms."""
     if app is None:
         app = create_app()
@@ -33,8 +33,15 @@ def create_vyas_data(app=None):
         # Check if data already exists
         existing = Building.query.filter_by(name='Vyas').first()
         if existing:
-            print(f"\n  Vyas building already exists.")
-            response = input("Do you want to reset and recreate all data? (y/N): ")
+            print("\n  Vyas building already exists.")
+            if not interactive:
+                print("  Non-interactive mode: skipping recreation.")
+                return
+            try:
+                response = input("Do you want to reset and recreate all data? (y/N): ")
+            except (EOFError, OSError):
+                print("  No input stream available: skipping recreation.")
+                return
             if response.lower() != 'y':
                 print("Operation cancelled.")
                 return

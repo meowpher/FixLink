@@ -28,6 +28,18 @@ def admin_required(f):
                 return api_response(success=False, error='Admin access required. Please log in again.', status=401)
             flash('Admin access required.', 'error')
             return redirect(url_for('auth.login'))
+        
+        from .models import User
+        user = User.query.get(session['user_id'])
+        if not user or not user.is_admin:
+            session.pop('user_id', None)
+            session.pop('is_admin', None)
+            session.pop('user_name', None)
+            session.pop('user_role', None)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return api_response(success=False, error='Admin access required.', status=401)
+            flash('Admin account not found or access revoked.', 'error')
+            return redirect(url_for('auth.login'))
         return f(*args, **kwargs)
     return decorated_function
 
@@ -37,6 +49,17 @@ def user_login_required(f):
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
             # Handle AJAX requests by returning 401 JSON instead of redirect
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return api_response(success=False, error='Session expired. Please log in again.', status=401)
+            return redirect(url_for('auth.login'))
+        
+        from .models import User
+        user = User.query.get(session['user_id'])
+        if not user:
+            session.pop('user_id', None)
+            session.pop('is_admin', None)
+            session.pop('user_name', None)
+            session.pop('user_role', None)
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
             return redirect(url_for('auth.login'))
@@ -71,6 +94,17 @@ def professional_login_required(f):
             # Handle AJAX requests by returning 401 JSON instead of redirect
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
+            return redirect(url_for('auth.login', pro=1))
+        
+        from .models import Professional
+        prof = Professional.query.get(session['professional_id'])
+        if not prof:
+            session.pop('professional_id', None)
+            session.pop('professional_name', None)
+            session.pop('professional_category', None)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return api_response(success=False, error='Account not found. Please log in again.', status=401)
+            flash('Professional account not found or session expired. Please log in again.', 'warning')
             return redirect(url_for('auth.login', pro=1))
         return f(*args, **kwargs)
     return decorated_function

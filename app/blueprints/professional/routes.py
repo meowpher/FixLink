@@ -45,6 +45,11 @@ def logout():
 def dashboard():
     """Professional dashboard - view assigned tasks."""
     professional = Professional.query.get(session['professional_id'])
+    if not professional:
+        session.pop('professional_id', None)
+        session.pop('professional_name', None)
+        session.pop('professional_category', None)
+        return redirect(url_for('professional.login'))
     
     # Get all assigned tickets for this professional where they are the primary appointee
     from sqlalchemy.orm import joinedload
@@ -108,6 +113,11 @@ def dashboard():
 def chat():
     """Professional chat page."""
     professional = Professional.query.get(session['professional_id'])
+    if not professional:
+        session.pop('professional_id', None)
+        session.pop('professional_name', None)
+        session.pop('professional_category', None)
+        return redirect(url_for('professional.login'))
     
     # Category display names
     category_names = {
@@ -127,6 +137,11 @@ def chat():
 def history():
     """Professional task history."""
     professional = Professional.query.get(session['professional_id'])
+    if not professional:
+        session.pop('professional_id', None)
+        session.pop('professional_name', None)
+        session.pop('professional_category', None)
+        return redirect(url_for('professional.login'))
     
     # Get all completed tickets for this professional
     from sqlalchemy.orm import joinedload

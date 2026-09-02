@@ -34,6 +34,47 @@
         flex-shrink: 0;
     }
 
+    .chat-back-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: white;
+        background: rgba(255, 255, 255, 0.16);
+        font-size: 1.15rem;
+        text-decoration: none;
+        transition: background 0.2s ease, transform 0.15s ease;
+        flex-shrink: 0;
+        margin-right: 10px;
+    }
+
+    .chat-back-btn:hover {
+        background: rgba(255, 255, 255, 0.28);
+        color: white;
+        transform: scale(1.08);
+    }
+
+    .chat-back-btn:active {
+        transform: scale(0.95);
+    }
+
+    [data-theme="dark"] .chat-header {
+        background: #111111;
+        border-bottom: 1px solid #262626;
+    }
+
+    [data-theme="dark"] .chat-back-btn {
+        background: rgba(255, 255, 255, 0.08);
+        color: #f4f4f5;
+    }
+
+    [data-theme="dark"] .chat-back-btn:hover {
+        background: rgba(255, 255, 255, 0.18);
+        color: #ffffff;
+    }
+
     .chat-messages {
         flex: 1 1 0%;
         min-height: 0;
@@ -283,6 +324,9 @@
     <div class="chat-container">
         <div class="chat-header shadow-sm">
             <div class="d-flex align-items-center">
+                <a href="{{ url_for('professional.dashboard') }}" class="chat-back-btn" aria-label="Go Back" title="Back" onclick="if(window.history.length > 1){event.preventDefault(); window.history.back();}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
                 <span class="admin-status-dot"></span>
                 <h5 class="mb-0 fw-bold text-white">Admin Support Team</h5>
             </div>

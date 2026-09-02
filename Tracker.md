@@ -15,6 +15,9 @@
 ## 2. Chronological Log of Pushed Updates
 
 ### Release v1.4.3 (2026-09-02)
+- `f6bb33c`: **fix(vercel): eliminate 500 internal server error from stale sessions and missing db tables**
+  - **Database Auto-Healing**: Removed blanket skip on Vercel; the app now safely inspects tables and auto-initializes missing tables via `scripts/init_data.py` non-interactively without throwing `EOFError`.
+  - **Session Stale Guarding**: Protected `user_login_required`, `admin_required`, and `professional_login_required` decorators as well as `auth.login` and professional routes (`dashboard`, `chat`, `history`, `profile`) to clear orphaned session IDs and redirect to login instead of crashing with `AttributeError`.
 - `5905248`: **feat(professional): add dedicated profile page, bottom nav link, and remove top bar avatar**
   - **Dedicated Profile Route & View**: Created `/professional/profile` and template `app/templates/professional/profile.html` featuring technician trade icon, specialty badge, contact info, "Open Chat Support" pill button, work activity counters, and account sign-out.
   - **Bottom Navigation**: Added the **Profile** tab (`bi-person-badge`) to `#mobile-bottom-nav` for technicians alongside Tasks and Chat.

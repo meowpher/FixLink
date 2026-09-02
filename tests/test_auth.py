@@ -57,8 +57,9 @@ def test_professional_profile_access(client, professional_user):
     assert "Open Chat Support" in html
     assert "href=\"/professional/profile\"" in html
 
-    # Verify top nav avatar is removed for professionals
+    # Verify top nav avatar and back button are removed for professionals
     assert "id=\"mobileNavAvatar\"" not in html
+    assert "id=\"mobile-topbar-back-btn\"" not in html
 
     # Verify dashboard renders 200 without the old duplicate card
     dash_response = client.get('/professional/dashboard')
@@ -66,6 +67,7 @@ def test_professional_profile_access(client, professional_user):
     dash_html = dash_response.get_data(as_text=True)
     # The dashboard now has My Assigned Tasks and Help Requests, but the old sidebar "My Profile" card was removed
     assert "id=\"mobileNavAvatar\"" not in dash_html
+    assert "id=\"mobile-topbar-back-btn\"" not in dash_html
 
 
 def test_bottlesingh_professional_login(client, run_app_context):

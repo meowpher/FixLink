@@ -65,21 +65,29 @@
     ══════════════════════════════════════════════════════ -->
     <div id="mobile-top-bar" class="d-md-none">
         <div class="top-bar-left">
-            {% if not (request.endpoint and (
+            {% if not (session.get('professional_id') or (request.endpoint and (
+                request.endpoint.startswith('professional.') or
                 request.endpoint.endswith('.login') or 
                 request.endpoint == 'admin.dashboard' or 
                 request.endpoint == 'admin.status_map' or 
                 request.endpoint == 'admin.analytics' or
                 request.endpoint in ['admin.chat', 'professional.chat', 'main.report_form', 'main.index', 'admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history', 'admin.add_professional', 'admin.professional_history', 'admin.professional_analytics', 'main.report_bug']
-            )) %}
+            ))) %}
             <button class="top-bar-btn" id="mobile-topbar-back-btn" onclick="handleTopbarBack()">
                 <i class="bi bi-chevron-left"></i> Back
             </button>
             {% endif %}
+            {% if session.get('professional_id') %}
+            <a href="{{ url_for('professional.dashboard') }}" class="top-bar-brand text-decoration-none">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU Logo" width="100" height="28" loading="eager">
+                <span>FixLink</span>
+            </a>
+            {% else %}
             <div class="top-bar-brand">
                 <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU Logo" width="100" height="28" loading="eager">
                 <span>FixLink</span>
             </div>
+            {% endif %}
         </div>
         <div class="top-bar-actions">
             <!-- Theme Toggle -->
@@ -533,7 +541,7 @@
     <div class="fixed-top mt-4 d-none d-lg-flex justify-content-center pointer-events-none" style="z-index: 1040;">
         <div class="nav-capsule pointer-events-auto">
             <!-- Brand -->
-            <a class="d-flex align-items-center me-3 text-decoration-none" href="{{ url_for('main.index') }}">
+            <a class="d-flex align-items-center me-3 text-decoration-none" href="{% if session.get('professional_id') %}{{ url_for('professional.dashboard') }}{% else %}{{ url_for('main.index') }}{% endif %}">
                 <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="Logo" class="mitwpu-logo me-2" style="height: 28px; width: auto;" width="100" height="28" loading="eager" fetchpriority="high" decoding="sync">
                 <span class="brand-text-capsule">FixLink</span>
             </a>

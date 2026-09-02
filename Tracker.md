@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.4.5** | 2026-09-02 | **Deployed** | Removed `< Back` button from professional top nav, aligned MIT logo & FixLink brand to far left. |
 | **v1.4.4** | 2026-09-02 | **Deployed** | Technician profile photo upload/removal, chat header UI simplification to 'Admin Support Team', keyboard viewport lock. |
 | **v1.4.3** | 2026-09-02 | **Deployed** | Dedicated professional profile page, bottom nav link, top nav avatar removal, Rules.md compliance. |
 | **v1.4.2** | 2026-09-02 | **Deployed** | LSP zero-warning cleanup, Touch pinch-to-zoom map, Mobile bug reporting, Faculty timetable migration, #undefined ticket fix. |
@@ -14,6 +15,11 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.4.5 (2026-09-02)
+- `775d42d`: **feat(nav): remove back button from professional top bar and align brand logo to the left**
+  - **Removed Back Button for Professionals**: Added `session.get('professional_id')` and `request.endpoint.startswith('professional.')` exclusion to `#mobile-topbar-back-btn` in `base.html`.
+  - **Left-Aligned Branding**: Positioned the MIT-WPU logo and FixLink brand text cleanly on the left side of `#mobile-top-bar` without offset.
 
 ### Release v1.4.4 (2026-09-02)
 - `25ab42b`: **feat(professional): add profile picture upload and simplify chat header to intact Admin Support Team**

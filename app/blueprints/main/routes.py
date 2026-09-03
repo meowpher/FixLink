@@ -543,5 +543,6 @@ def get_unread_chat_total():
         
     return api_response(
         success=True,
-        data={'unread_count': unread_count}
+        data={'unread_count': unread_count},
+        unread_count=unread_count
     )

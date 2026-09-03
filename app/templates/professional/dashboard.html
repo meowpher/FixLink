@@ -62,8 +62,9 @@
             </div>
             <div class="col-md-6 text-md-end">
                 <div class="admin-actions">
-                    <a href="{{ url_for('professional.chat') }}" class="btn btn-outline-light me-2">
+                    <a href="{{ url_for('professional.chat') }}" class="btn btn-outline-light me-2 position-relative">
                         <i class="bi bi-chat-dots me-1"></i>Support Chat
+                        <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span>
                     </a>
                     <a href="{{ url_for('professional.history') }}" class="btn btn-outline-light">
                         <i class="bi bi-clock-history me-1"></i>My History

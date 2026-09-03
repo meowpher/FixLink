@@ -179,8 +179,11 @@
                 <i class="bi bi-bar-chart-line"></i>
                 <span>Analytics</span>
             </a>
-            <a href="{{ url_for('admin.chat') }}" class="bottom-nav-item {% if request.endpoint == 'admin.chat' %}active{% endif %}">
-                <i class="bi bi-chat"></i>
+            <a href="{{ url_for('admin.chat') }}" class="bottom-nav-item position-relative {% if request.endpoint == 'admin.chat' %}active{% endif %}">
+                <div class="position-relative d-inline-flex align-items-center justify-content-center">
+                    <i class="bi bi-chat-dots"></i>
+                    <span class="badge rounded-pill bg-danger d-none global-chat-badge bottom-nav-chat-badge">0</span>
+                </div>
                 <span>Chat</span>
             </a>
         {% elif session.get('professional_id') and not session.get('is_super_admin') and not (request.blueprint == 'superadmin') %}
@@ -188,8 +191,11 @@
                 <i class="bi bi-tools"></i>
                 <span>Tasks</span>
             </a>
-            <a href="{{ url_for('professional.chat') }}" class="bottom-nav-item {% if request.endpoint == 'professional.chat' %}active{% endif %}">
-                <i class="bi bi-chat-dots"></i>
+            <a href="{{ url_for('professional.chat') }}" class="bottom-nav-item position-relative {% if request.endpoint == 'professional.chat' %}active{% endif %}">
+                <div class="position-relative d-inline-flex align-items-center justify-content-center">
+                    <i class="bi bi-chat-dots"></i>
+                    <span class="badge rounded-pill bg-danger d-none global-chat-badge bottom-nav-chat-badge">0</span>
+                </div>
                 <span>Chat</span>
             </a>
             <a href="{{ url_for('professional.profile') }}" class="bottom-nav-item {% if request.endpoint == 'professional.profile' %}active{% endif %}">
@@ -556,6 +562,36 @@
             font-size: 1.15rem;
             color: var(--text-main);
             letter-spacing: -0.5px;
+        }
+        .global-chat-badge {
+            font-size: 0.68rem !important;
+            font-weight: 700 !important;
+            line-height: 1 !important;
+            padding: 2.5px 5.5px !important;
+            background-color: #ef4444 !important;
+            color: #ffffff !important;
+            border-radius: 999px !important;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4) !important;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease !important;
+            vertical-align: middle !important;
+        }
+        .bottom-nav-chat-badge {
+            position: absolute !important;
+            top: -5px !important;
+            right: -10px !important;
+            font-size: 0.6rem !important;
+            padding: 2px 4.5px !important;
+            min-width: 15px !important;
+            text-align: center !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+        }
+        .chat-badge-pulse {
+            animation: chatBadgePulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes chatBadgePulse {
+            0% { transform: scale(0.5); }
+            60% { transform: scale(1.3); }
+            100% { transform: scale(1); }
         }
     </style>
 
@@ -1212,13 +1248,21 @@
     window.addEventListener('load', function() {
         // Fetch unread count on page load
         function updateGlobalChatBadges(count) {
+            const numCount = parseInt(count, 10) || 0;
             const badges = document.querySelectorAll('.global-chat-badge');
             badges.forEach(badge => {
-                if (count > 0) {
-                    badge.textContent = count > 9 ? '9+' : count;
+                if (numCount > 0) {
+                    const text = numCount > 99 ? '99+' : (numCount > 9 ? '9+' : String(numCount));
+                    if (badge.textContent !== text) {
+                        badge.textContent = text;
+                        badge.classList.remove('chat-badge-pulse');
+                        void badge.offsetWidth; // Trigger DOM reflow for pulse animation
+                        badge.classList.add('chat-badge-pulse');
+                    }
                     badge.classList.remove('d-none');
                 } else {
                     badge.classList.add('d-none');
+                    badge.textContent = '0';
                 }
             });
         }
@@ -1230,8 +1274,11 @@
                 fetch('/api/chat/unread_total')
                     .then(r => r.json())
                     .then(data => {
-                        if (data.success) {
-                            updateGlobalChatBadges(data.unread_count);
+                        if (data && data.success) {
+                            const count = (data.data && typeof data.data.unread_count !== 'undefined') 
+                                ? data.data.unread_count 
+                                : (typeof data.unread_count !== 'undefined' ? data.unread_count : 0);
+                            updateGlobalChatBadges(count);
                         }
                     })
                     .catch(e => console.error('Failed to fetch unread chat count:', e));
@@ -1239,6 +1286,13 @@
             
             // Initial fetch
             window.refreshGlobalChatBadges();
+
+            // Periodic background sync every 10 seconds for real-time fallback
+            setInterval(function() {
+                if (!window.location.pathname.includes('/chat')) {
+                    window.refreshGlobalChatBadges();
+                }
+            }, 10000);
                 
             // Setup global Pusher for live chat pings
             const pKey = '{{ config["PUSHER_KEY"] }}';
@@ -1250,22 +1304,19 @@
                         authEndpoint: '/pusher/auth',
                         auth: {
                             headers: {
-                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
                             }
                         }
                     });
                     
-                    let channelName = document.querySelector('meta[name="chat-channel"]').content;
+                    let channelName = document.querySelector('meta[name="chat-channel"]')?.content;
                     
                     if (channelName) {
                         const channel = pusher.subscribe(channelName);
                         channel.bind('new_chat_message', function(data) {
-                            // If we are on the chat page, let the chat page logic handle read state.
-                            // Otherwise, increment the global badge immediately.
+                            // If we are not on the chat page, refresh global badges immediately.
                             if (!window.location.pathname.includes('/chat')) {
-                                const badges = document.querySelectorAll('.global-chat-badge');
-                                let currentCount = parseInt(badges[0]?.textContent || '0') || 0;
-                                updateGlobalChatBadges(currentCount + 1);
+                                window.refreshGlobalChatBadges();
                                 
                                 // Optional: play a subtle notification sound
                                 try {

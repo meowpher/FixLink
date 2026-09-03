@@ -245,4 +245,47 @@ def test_root_redirects_to_login_and_profile_button_present(client, admin_user, 
         assert 'professional_id' not in sess
 
 
+def test_unread_chat_notifications(client, admin_user, professional_user):
+    """Test unread chat count API and badge element presence."""
+    from app.models import ChatMessage
+
+    # 1. Check unauthenticated -> 0 count
+    res = client.get('/api/chat/unread_total')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['success'] is True
+    assert data['data']['unread_count'] == 0
+
+    # 2. Add an unread message from professional to admin
+    msg = ChatMessage(
+        sender_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
+        sender_id=professional_user.id,
+        receiver_type=ChatMessage.SENDER_TYPE_ADMIN,
+        receiver_id=admin_user.id,
+        message="Hello admin, need assistance",
+        is_read=False
+    )
+    db.session.add(msg)
+    db.session.commit()
+
+    # Admin check unread
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['user_id'] = admin_user.id
+        sess['is_admin'] = True
+
+    res = client.get('/api/chat/unread_total')
+    assert res.status_code == 200
+    data = res.get_json()
+    assert data['data']['unread_count'] >= 1
+    assert data['unread_count'] >= 1
+
+    # Check dashboard HTML has global-chat-badge
+    res_admin = client.get('/admin/')
+    assert res_admin.status_code == 200
+    html = res_admin.get_data(as_text=True)
+    assert 'global-chat-badge' in html
+
+
+
 

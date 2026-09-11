@@ -1,3 +1,4 @@
+<!-- DRAFT: pending legal review, not yet approved by MIT-WPU admin -->
 {% extends "base.html" %}
 
 {% block title %}Privacy Policy - MIT-WPU FixLink{% endblock %}
@@ -15,19 +16,11 @@
                 </ol>
             </nav>
 
-            <!-- Legal Draft Notice Alert -->
-            <div class="alert alert-warning d-flex align-items-center mb-4 rounded-3 border-0 shadow-sm" role="alert">
-                <i class="bi bi-info-circle-fill me-3 fs-4" aria-hidden="true"></i>
-                <div class="small">
-                    <strong>Administrative Note:</strong> This document is a structural draft outline created for human legal review and compliance verification. It outlines standard data protection and minimization practices for the MIT-WPU FixLink university facility management platform.
-                </div>
-            </div>
-
             <!-- Policy Card -->
             <article class="card border-0 shadow-sm rounded-4 p-4 p-md-5" style="background: var(--bg-card); border: 1px solid var(--border-color);">
                 <header class="border-bottom pb-4 mb-4">
-                    <h1 class="h2 fw-bold mb-2">Privacy Policy & Data Processing Notice</h1>
-                    <p class="text-muted small mb-0">Effective Date: September 2026 | Last Reviewed: September 2026</p>
+                    <h1 class="h2 fw-bold mb-2 text-body-emphasis">Privacy Policy & Data Processing Notice</h1>
+                    <p class="text-body-secondary small mb-0">Draft Date: September 2026</p>
                 </header>
 
                 <div class="legal-content text-body" style="line-height: 1.75;">
@@ -57,8 +50,9 @@
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">3. Lawful Basis for Processing & Consent</h2>
                         <p>
-                            Personal data is processed pursuant to legitimate campus administrative interests and explicit user consent provided at the time of ticket submission. By checking the consent verification box on our reporting forms, users acknowledge and authorize the collection of their PRN and email solely for the purpose of dispatching and verifying the requested facility maintenance.
+                            Personal data is processed pursuant to legitimate campus administrative interests and explicit user consent provided at the time of ticket submission. By checking the consent verification box on our reporting forms, users acknowledge and consent to the collection of their PRN and email solely for the purpose of dispatching and verifying the requested facility maintenance.
                         </p>
+                        <!-- REVIEW NEEDED: Under Digital Personal Data Protection (DPDP) standards, verify whether ticket form checkbox meets the statutory requirement for notice and unambiguous consent -->
                     </section>
 
                     <section class="mb-4">
@@ -69,26 +63,26 @@
                         <ul class="ps-3 mb-3">
                             <li><strong>Assigned Technicians & Professionals:</strong> View room locations, fault descriptions, and reporter names for on-site task completion.</li>
                             <li><strong>Facility System Administrators:</strong> Oversee campus maintenance resolution metrics and ensure quality of service.</li>
-                            <li><strong>Third Parties:</strong> Data is never commercialized, sold, or shared with external third-party advertisers or data brokers.</li>
+                            <li><strong>Third Parties:</strong> FixLink does not integrate any third-party advertising or analytics services as of this version. User data is not sold or shared with external marketing brokers.</li>
                         </ul>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">5. Data Retention & Archival</h2>
                         <p>
-                            Maintenance records and associated reporter metadata are archived for audit, warranty, and administrative reporting for a maximum duration defined by university facility policies (typically 12 months after ticket resolution), after which personal identifiers are anonymized or permanently purged.
+                            Maintenance records and associated reporter metadata (PRN and university email) are retained indefinitely in the active database. FixLink currently operates with no automated deletion or archival schedule (operational metrics utilize active analytical windows of 60 days for asset health depreciation and up to 180 days for trend reporting, while raw ticket histories remain stored permanently for equipment warranty and campus audit logs unless manually expunged by system administrators).
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">6. User Rights & Inquiries</h2>
                         <p>
-                            Students and faculty members retain the right to inspect personal data associated with their profile, request corrections, or request deletion of resolved maintenance histories by contacting the MIT-WPU Facility Management IT Office:
+                            Students and faculty members retain the right to inspect personal data associated with their profile, request corrections, or request deletion of resolved maintenance histories by contacting the appropriate administrative office:
                         </p>
                         <div class="p-3 rounded-3" style="background: var(--bg-main); border: 1px solid var(--border-color);">
-                            <p class="mb-1 fw-semibold">MIT-WPU Campus Maintenance Administration</p>
-                            <p class="mb-1 small text-muted">Vyas Hall Facility Management Office, Pune, Maharashtra, India</p>
-                            <p class="mb-0 small">Email: <a href="mailto:support@mitwpu.edu.in" class="text-decoration-none">support@mitwpu.edu.in</a></p>
+                            <p class="mb-0 small text-body-secondary font-monospace">
+                                [CONTACT: TO BE CONFIRMED — insert verified department name, office location, and monitored email/support channel before this page is published]
+                            </p>
                         </div>
                     </section>
                 </div>

@@ -1,3 +1,4 @@
+<!-- DRAFT: pending legal review, not yet approved by MIT-WPU admin -->
 {% extends "base.html" %}
 
 {% block title %}Terms of Service - MIT-WPU FixLink{% endblock %}
@@ -15,67 +16,65 @@
                 </ol>
             </nav>
 
-            <!-- Legal Draft Notice Alert -->
-            <div class="alert alert-warning d-flex align-items-center mb-4 rounded-3 border-0 shadow-sm" role="alert">
-                <i class="bi bi-info-circle-fill me-3 fs-4" aria-hidden="true"></i>
-                <div class="small">
-                    <strong>Administrative Note:</strong> This document is a structural draft outline created for human legal review and operational alignment. It establishes the terms of use for university facility reporting.
-                </div>
-            </div>
-
             <!-- Policy Card -->
             <article class="card border-0 shadow-sm rounded-4 p-4 p-md-5" style="background: var(--bg-card); border: 1px solid var(--border-color);">
                 <header class="border-bottom pb-4 mb-4">
-                    <h1 class="h2 fw-bold mb-2">Terms of Service & Acceptable Use Policy</h1>
-                    <p class="text-muted small mb-0">Effective Date: September 2026 | Last Reviewed: September 2026</p>
+                    <h1 class="h2 fw-bold mb-2 text-body-emphasis">Terms of Service & Acceptable Use Policy</h1>
+                    <p class="text-body-secondary small mb-0">Draft Date: September 2026</p>
                 </header>
 
                 <div class="legal-content text-body" style="line-height: 1.75;">
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">1. Acceptance of Terms</h2>
                         <p>
-                            By accessing or submitting information through the FixLink platform ("Service"), you agree to comply with and be bound by these Terms of Service, along with applicable MIT World Peace University ("MIT-WPU") IT policies and student code of conduct regulations.
+                            By accessing or submitting information through the FixLink platform ("Service"), you agree to follow these operational terms, along with applicable MIT World Peace University ("MIT-WPU") IT acceptable use guidelines and campus regulations.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">2. Authorized Users & Access</h2>
                         <p>
-                            Access to FixLink is provided exclusively to registered students, faculty members, facility administrative personnel, and authorized technical staff of MIT-WPU. Users must access the platform using their officially assigned university credentials and must not impersonate other members of the academic community.
+                            Access to FixLink is intended for registered students, faculty members, facility administrative personnel, and authorized technical staff of MIT-WPU. Users must access the platform using their officially assigned university credentials and submit reports only on their own behalf.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">3. Acceptable Use & Reporting Integrity</h2>
                         <p>
-                            FixLink is engineered solely for bona fide reporting of classroom hardware defects, electrical faults, laboratory anomalies, HVAC malfunctions, and general university maintenance needs. Users agree NOT to:
+                            FixLink is engineered solely for reporting classroom hardware defects, electrical faults, laboratory anomalies, HVAC malfunctions, and general campus maintenance needs. To keep the facility queue accurate and operational, users agree:
                         </p>
                         <ul class="ps-3 mb-3">
-                            <li>Submit false, frivolous, malicious, or fabricated maintenance reports.</li>
-                            <li>Upload inappropriate, abusive, defamatory, or non-work-related media attachments.</li>
-                            <li>Attempt to circumvent platform security, session management, or role authorization boundaries.</li>
-                            <li>Harass, intimidate, or post defamatory reviews regarding university technicians and maintenance staff.</li>
+                            <li>Do not submit fault reports for equipment that is not genuinely faulty — this delays response to real hazards.</li>
+                            <li>Do not upload media attachments that are unrelated to the physical room fault or contain inappropriate material.</li>
+                            <li>Do not attempt to circumvent platform authentication, session security, or role authorization boundaries.</li>
+                            <li>Do not use ticket descriptions or technician feedback fields for abusive or defamatory comments directed at maintenance staff.</li>
                         </ul>
                     </section>
 
+                    <!-- Platform Mechanics Notice -->
+                    <div class="p-3 mb-4 rounded-3 text-body-secondary small" style="background: var(--bg-main); border: 1px solid var(--border-color);">
+                        <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
+                        The clauses in this section describe platform mechanics only and do not constitute a binding institutional policy until reviewed and issued by MIT-WPU's administration or legal office.
+                    </div>
+
                     <section class="mb-4">
-                        <h2 class="h5 fw-bold text-primary mb-3">4. Ticket Triage & Resolution Service Levels</h2>
+                        <h2 class="h5 fw-bold text-primary mb-3">4. Ticket Triage & Resolution Workflow</h2>
                         <p>
-                            Submission of a fault report does not guarantee immediate repair. Tickets are automatically categorized, prioritized, and dispatched according to severity (e.g., electrical hazards and exam hall emergencies take precedence over minor cosmetic repairs). Campus administration reserves the unilateral right to reprioritize, reassign, consolidate, or close duplicate reports.
+                            FixLink logs submitted fault reports and organizes them in the operational queue by room, category, and reported urgency (for example, flagging active electrical hazards or exam hall issues for expedited review). Facility technicians and administrators can update ticket status, reassign categories, merge duplicate reports for the same location, or mark tickets resolved once physical inspection is complete.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">5. Equipment Liability & Disclaimer</h2>
                         <p>
-                            FixLink functions as a coordination and workflow dispatch platform. MIT-WPU Facility Operations strives for maximum equipment reliability but disclaims any warranty regarding instantaneous turnaround times. Users must report urgent electrical or life-safety emergencies directly to campus security.
+                            FixLink is a ticket routing and status-tracking tool. It does not control repair timelines, which depend on facility staff availability and part procurement. FixLink is not an emergency dispatch system; urgent electrical hazards, gas leaks, or life-safety emergencies must be reported immediately and directly to campus security.
                         </p>
                     </section>
 
                     <section class="mb-4">
-                        <h2 class="h5 fw-bold text-primary mb-3">6. Modifications & Termination</h2>
+                        <h2 class="h5 fw-bold text-primary mb-3">6. Modifications & Platform Changes</h2>
                         <p>
-                            The university reserves the right to modify these operational terms or suspend platform access for individuals who repeatedly violate acceptable use policies. Continued usage following notice of revisions constitutes acceptance of amended terms.
+                            Platform features, workflows, and this documentation may be updated as FixLink evolves. Any future changes to institutional maintenance policies or formal terms of service will be communicated through official university channels and reflected in this document.
                         </p>
                     </section>
                 </div>

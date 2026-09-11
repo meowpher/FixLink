@@ -1,7 +1,8 @@
+<!-- DRAFT: pending legal review, not yet approved by MIT-WPU admin -->
 {% extends "base.html" %}
 
 {% block title %}Cookie Policy - MIT-WPU FixLink{% endblock %}
-{% block meta_description %}Cookie and Local Storage Policy for FixLink, the Smart Room Maintenance Management Platform.{% endblock %}
+{% block meta_description %}Cookie and Local Storage Policy for MIT-WPU FixLink smart room maintenance management platform.{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -15,42 +16,34 @@
                 </ol>
             </nav>
 
-            <!-- Legal Draft Notice Alert -->
-            <div class="alert alert-warning d-flex align-items-center mb-4 rounded-3 border-0 shadow-sm" role="alert">
-                <i class="bi bi-info-circle-fill me-3 fs-4" aria-hidden="true"></i>
-                <div class="small">
-                    <strong>Administrative Note:</strong> This document is a structural draft outline created for human legal review and operational alignment. It describes session cookies and tracking consent boundaries in FixLink.
-                </div>
-            </div>
-
             <!-- Policy Card -->
             <article class="card border-0 shadow-sm rounded-4 p-4 p-md-5" style="background: var(--bg-card); border: 1px solid var(--border-color);">
                 <header class="border-bottom pb-4 mb-4">
-                    <h1 class="h2 fw-bold mb-2">Cookie & Local Storage Policy</h1>
-                    <p class="text-muted small mb-0">Effective Date: September 2026 | Last Reviewed: September 2026</p>
+                    <h1 class="h2 fw-bold mb-2 text-body-emphasis">Cookie & Local Storage Policy</h1>
+                    <p class="text-body-secondary small mb-0">Draft Date: September 2026</p>
                 </header>
 
                 <div class="legal-content text-body" style="line-height: 1.75;">
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">1. What Are Cookies?</h2>
                         <p>
-                            Cookies and client-side storage technologies (such as <code>localStorage</code> and <code>sessionStorage</code>) are small text files or key-value entries stored on your computer or mobile device when you access web services. They are widely used to maintain secure logins, preserve user interface preferences, and facilitate application performance.
+                            Cookies and browser storage technologies (such as <code>localStorage</code>) are small text files or key-value entries stored on your device when you use web applications. They are used to keep you signed in, preserve interface preferences, and support application security.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">2. How FixLink Uses Cookies</h2>
                         <p>
-                            FixLink follows a privacy-conscious implementation and limits cookies strictly to operational requirements. We categorize our storage mechanisms as follows:
+                            FixLink uses the following cookies and storage keys. No cookie is set for a purpose other than those listed below.
                         </p>
 
-                        <!-- Table of Cookies -->
+                        <!-- Table of Cookies & Storage Keys -->
                         <div class="table-responsive my-3">
                             <table class="table table-bordered table-sm align-middle" style="border-color: var(--border-color);">
                                 <thead style="background: var(--bg-main);">
                                     <tr>
                                         <th scope="col" class="py-2">Category</th>
-                                        <th scope="col" class="py-2">Cookie / Storage Key</th>
+                                        <th scope="col" class="py-2">Key / Mechanism</th>
                                         <th scope="col" class="py-2">Purpose</th>
                                         <th scope="col" class="py-2">Duration</th>
                                     </tr>
@@ -58,27 +51,27 @@
                                 <tbody>
                                     <tr>
                                         <td><strong>Strictly Necessary</strong></td>
-                                        <td><code>session</code></td>
-                                        <td>Maintains secure user login state and server session.</td>
-                                        <td>Session (expires on logout or browser close)</td>
+                                        <td><code>session</code> (HTTP Cookie)</td>
+                                        <td>Maintains authenticated user session state and account verification on the server.</td>
+                                        <td>24 hours (86,400 seconds) or until logout</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Security</strong></td>
-                                        <td><code>csrf_token</code></td>
-                                        <td>Guards form submissions against Cross-Site Request Forgery (CSRF).</td>
-                                        <td>Session</td>
+                                        <td><code>csrf_token</code> (Hidden form field / session value)</td>
+                                        <td>Protects form submissions against Cross-Site Request Forgery (CSRF). Transmitted via form inputs and request headers; not stored as an independent browser cookie.</td>
+                                        <td>Active 24-hour session duration</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Preferences</strong></td>
-                                        <td><code>theme</code> (localStorage)</td>
-                                        <td>Preserves user preference between Light Theme and Dark Theme.</td>
-                                        <td>Persistent (client-side only)</td>
+                                        <td><code>theme</code> (localStorage, client-only)</td>
+                                        <td>Stores your selected visual theme (Light Theme or Dark Theme) locally on your device. Never sent to the server.</td>
+                                        <td>Persistent until browser storage is cleared</td>
                                     </tr>
                                     <tr>
                                         <td><strong>Consent</strong></td>
-                                        <td><code>cookie_consent</code></td>
-                                        <td>Records user choice regarding non-essential diagnostics or telemetry.</td>
-                                        <td>12 months</td>
+                                        <td><code>cookie_consent</code> (Template gate)</td>
+                                        <td>Gating flag evaluated in application templates before loading optional telemetry. Not set as a persistent cookie in the current release.</td>
+                                        <td>None / Not set (0 days) — no tracking scripts are active</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -86,25 +79,19 @@
                     </section>
 
                     <section class="mb-4">
-                        <h2 class="h5 fw-bold text-primary mb-3">3. Consent & Tracking Audit Controls</h2>
+                        <h2 class="h5 fw-bold text-primary mb-3">3. Your Choices About Non-Essential Cookies</h2>
                         <p>
-                            Under our data minimization policy, external analytics and third-party tracking scripts do not execute by default. They are strictly gated behind explicit consent (<code>cookie_consent</code>). When consent is absent or refused, no third-party tracking cookies are deployed or read.
+                            External analytics and tracking scripts do not run by default. They only execute if non-essential cookie consent is explicitly enabled. If consent is absent or declined, no third-party tracking scripts or cookies are loaded.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">4. Managing Your Cookie Preferences</h2>
-                        <p>
-                            Most web browsers allow users to manage cookie settings, including blocking all cookies, blocking third-party cookies, or wiping cookies upon exiting the browser. You may adjust these settings through your browser's preferences:
+                        <p class="mb-2">
+                            You can manage, inspect, or delete cookies through your web browser's privacy settings. Consult your browser vendor's documentation for detailed instructions.
                         </p>
-                        <ul class="ps-3 mb-3">
-                            <li><strong>Google Chrome:</strong> Settings &gt; Privacy and security &gt; Cookies and other site data</li>
-                            <li><strong>Mozilla Firefox:</strong> Settings &gt; Privacy &amp; Security &gt; Enhanced Tracking Protection</li>
-                            <li><strong>Apple Safari:</strong> Preferences &gt; Privacy &gt; Manage Website Data</li>
-                            <li><strong>Microsoft Edge:</strong> Settings &gt; Cookies and site permissions</li>
-                        </ul>
-                        <p class="small text-muted mb-0">
-                            <em>Please note: Disabling strictly necessary session cookies will prevent login authentication and ticket submission functionality.</em>
+                        <p class="small text-body-secondary mb-0">
+                            <em>Note: Disabling the strictly necessary session cookie will prevent login authentication and ticket submission.</em>
                         </p>
                     </section>
                 </div>

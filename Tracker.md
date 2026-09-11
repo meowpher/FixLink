@@ -7,9 +7,10 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
-| **v1.6.2** | 2026-09-11 | **Staged** | WCAG 2.1 AA Color Contrast Hardening (Global Typography, SVG Map Labels Readability, Dark Mode Form Inputs & Interactive Button States). |
-| **v1.6.1** | 2026-09-11 | **Staged** | Custom 404 Error Page (Zone Not Found), Dark Mode Translucent Infrastructure Aesthetic, and Search Engine Indexing Protection. |
-| **v1.6.0** | 2026-09-11 | **Staged** | Web Accessibility (a11y), Data Minimization & Consent, Legal Boilerplates (Privacy, Terms, Cookies), and Asset Security CDN hardening. |
+| **v1.6.3** | 2026-09-11 | **Staged** | Legal Templates Grounding & Artifact Removal (Stripped AI Draft Banners, Corrected Institutional Scope, Codebase-Verified Retention Durations in Cookies, Terms & Privacy). |
+| **v1.6.2** | 2026-09-11 | **Deployed** | WCAG 2.1 AA Color Contrast Hardening (Global Typography, SVG Map Labels Readability, Dark Mode Form Inputs & Interactive Button States). |
+| **v1.6.1** | 2026-09-11 | **Deployed** | Custom 404 Error Page (Zone Not Found), Dark Mode Translucent Infrastructure Aesthetic, and Search Engine Indexing Protection. |
+| **v1.6.0** | 2026-09-11 | **Deployed** | Web Accessibility (a11y), Data Minimization & Consent, Legal Boilerplates (Privacy, Terms, Cookies), and Asset Security CDN hardening. |
 | **v1.5.3** | 2026-09-03 | **Deployed** | Removed 'My Tasks' and technician nav items from the developer site and developer sessions. |
 | **v1.5.2** | 2026-09-02 | **Deployed** | Guaranteed Developer/Superadmin credentials (`om.mahadik@mitwpu.edu.in`), auto-seeding in `init_db()`, self-healing login, and formalized Rule 6 in `Rules.md`. |
 | **v1.5.1** | 2026-09-02 | **Deployed** | Centered 'Admin Support Team' title in chat header with balanced `<` back button navigation. |

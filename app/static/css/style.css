@@ -6043,12 +6043,104 @@ html[data-theme="dark"],
     -webkit-backdrop-filter: blur(12px);
 }
 
-[data-theme="dark"] .room-text,
-[data-bs-theme="dark"] .room-text {
-    fill: #ffffff !important;
-    font-weight: 600;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+/* Floor Map Room Labels: High-Contrast Dynamic Readability (WCAG 2.1 AA) */
+.interactive-map-wrapper [id*="_label"],
+.interactive-map-wrapper [id$="_label"],
+.interactive-map-wrapper [id*="_label_container"],
+.interactive-map-wrapper [id$="_label_container"],
+.interactive-map-wrapper [id*="_label"] path,
+.interactive-map-wrapper [id$="_label_container"] path,
+.interactive-map-wrapper .room-text,
+.interactive-map-wrapper text,
+.interactive-map-wrapper tspan {
+    fill: #1e293b !important; /* Dark slate in light mode: > 12:1 contrast against floor */
+    stroke: none !important;
+    stroke-width: 0 !important;
+    font-weight: 600 !important;
+    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.9)) !important;
+    pointer-events: none !important;
 }
+
+/* Floor Map Room Labels: High-Contrast Dark Slate in Dark Mode over translucent room fills & light floor canvas */
+[data-theme="dark"] .interactive-room text,
+[data-bs-theme="dark"] .interactive-room text,
+[data-theme="dark"] .interactive-room tspan,
+[data-bs-theme="dark"] .interactive-room tspan,
+[data-theme="dark"] .room-text,
+[data-bs-theme="dark"] .room-text,
+[data-theme="dark"] [id*="_label"],
+[data-bs-theme="dark"] [id*="_label"],
+[data-theme="dark"] [id$="_label"],
+[data-bs-theme="dark"] [id$="_label"],
+[data-theme="dark"] [id*="_label_container"],
+[data-bs-theme="dark"] [id*="_label_container"],
+[data-theme="dark"] [id*="_label"] path,
+[data-bs-theme="dark"] [id*="_label"] path,
+[data-theme="dark"] [id$="_label_container"] path,
+[data-bs-theme="dark"] [id$="_label_container"] path,
+[data-theme="dark"] svg text,
+[data-bs-theme="dark"] svg text,
+[data-theme="dark"] svg tspan,
+[data-bs-theme="dark"] svg tspan,
+[data-theme="dark"] .interactive-map-wrapper [id*="_label"],
+[data-bs-theme="dark"] .interactive-map-wrapper [id*="_label"],
+[data-theme="dark"] .interactive-map-wrapper [id$="_label"],
+[data-bs-theme="dark"] .interactive-map-wrapper [id$="_label"],
+[data-theme="dark"] .interactive-map-wrapper [id*="_label_container"],
+[data-bs-theme="dark"] .interactive-map-wrapper [id*="_label_container"],
+[data-theme="dark"] .interactive-map-wrapper [id*="_label"] path,
+[data-bs-theme="dark"] .interactive-map-wrapper [id*="_label"] path,
+[data-theme="dark"] .interactive-map-wrapper .room-text,
+[data-bs-theme="dark"] .interactive-map-wrapper .room-text,
+[data-theme="dark"] .interactive-map-wrapper text,
+[data-bs-theme="dark"] .interactive-map-wrapper text,
+[data-theme="dark"] .interactive-map-wrapper tspan,
+[data-bs-theme="dark"] .interactive-map-wrapper tspan {
+    fill: #1e293b !important; /* High-contrast dark slate pops cleanly against translucent room fills */
+    font-weight: 600 !important;
+    text-anchor: middle !important;
+    dominant-baseline: middle !important;
+    stroke: none !important;
+    stroke-width: 0 !important;
+    filter: none !important;
+    pointer-events: none !important;
+}
+
+/* Interactive Room Labels: Hover and Selection States */
+.interactive-map-wrapper .room-group:hover text,
+.interactive-map-wrapper .room-group:hover [id*="_label"],
+.interactive-map-wrapper .room-group:hover [id*="_label"] path {
+    fill: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+[data-theme="dark"] .interactive-map-wrapper .room-group:hover text,
+[data-bs-theme="dark"] .interactive-map-wrapper .room-group:hover text,
+[data-theme="dark"] .interactive-map-wrapper .room-group:hover [id*="_label"],
+[data-bs-theme="dark"] .interactive-map-wrapper .room-group:hover [id*="_label"],
+[data-theme="dark"] .interactive-map-wrapper .room-group:hover [id*="_label"] path,
+[data-bs-theme="dark"] .interactive-map-wrapper .room-group:hover [id*="_label"] path {
+    fill: #0f172a !important;
+    font-weight: 600 !important;
+}
+
+.interactive-map-wrapper .room-group.selected text,
+.interactive-map-wrapper .room-group.selected [id*="_label"],
+.interactive-map-wrapper .room-group.selected [id*="_label"] path {
+    fill: #000000 !important;
+    font-weight: 700 !important;
+}
+
+[data-theme="dark"] .interactive-map-wrapper .room-group.selected text,
+[data-bs-theme="dark"] .interactive-map-wrapper .room-group.selected text,
+[data-theme="dark"] .interactive-map-wrapper .room-group.selected [id*="_label"],
+[data-bs-theme="dark"] .interactive-map-wrapper .room-group.selected [id*="_label"],
+[data-theme="dark"] .interactive-map-wrapper .room-group.selected [id*="_label"] path,
+[data-bs-theme="dark"] .interactive-map-wrapper .room-group.selected [id*="_label"] path {
+    fill: #000000 !important;
+    font-weight: 700 !important;
+}
+
 
 [data-theme="dark"] .legend-box.class,
 [data-bs-theme="dark"] .legend-box.class {
@@ -7035,3 +7127,267 @@ select.compact-input {
     opacity: 0.45;
     cursor: default !important;
 }
+
+/* ==========================================================================
+   Web Accessibility (a11y) & Keyboard Focus (:focus-visible)
+   Compliant with WCAG 2.2 Success Criterion 2.4.11 & 2.4.13
+   ========================================================================== */
+
+/* Universal focus-visible resets for keyboard users */
+:focus-visible {
+    outline: 2px solid var(--mitwpu-blue, #0b4d8c);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px rgba(11, 77, 140, 0.25);
+    transition: outline-offset 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Form controls focus-visible */
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible,
+.form-check-input:focus-visible {
+    outline: 2px solid var(--mitwpu-blue, #0b4d8c) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(11, 77, 140, 0.25) !important;
+    border-color: var(--mitwpu-blue, #0b4d8c) !important;
+}
+
+/* Interactive buttons, links, and triggers focus-visible */
+button:focus-visible,
+.btn:focus-visible,
+a.btn:focus-visible,
+[role="button"]:focus-visible,
+.cfd-trigger:focus-visible,
+.top-bar-btn:focus-visible,
+.top-bar-icon-btn:focus-visible,
+.msb-item:focus-visible,
+.bottom-nav-item:focus-visible,
+.btn-close:focus-visible {
+    outline: 2px solid var(--mitwpu-blue, #0b4d8c) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(11, 77, 140, 0.3) !important;
+}
+
+/* DARK THEME: High-contrast focus state against deep dark background (#0a0a0a / #141414) */
+[data-theme="dark"] :focus-visible {
+    outline: 2px solid #38bdf8 !important; /* Sky Blue - high contrast against dark surface */
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.35) !important;
+}
+
+[data-theme="dark"] input:focus-visible,
+[data-theme="dark"] select:focus-visible,
+[data-theme="dark"] textarea:focus-visible,
+[data-theme="dark"] .form-control:focus-visible,
+[data-theme="dark"] .form-select:focus-visible,
+[data-theme="dark"] .form-check-input:focus-visible {
+    outline: 2px solid #38bdf8 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.35) !important;
+    border-color: #38bdf8 !important;
+    background-color: var(--bg-surface, #141414) !important;
+}
+
+[data-theme="dark"] button:focus-visible,
+[data-theme="dark"] .btn:focus-visible,
+[data-theme="dark"] a.btn:focus-visible,
+[data-theme="dark"] [role="button"]:focus-visible,
+[data-theme="dark"] .cfd-trigger:focus-visible,
+[data-theme="dark"] .top-bar-btn:focus-visible,
+[data-theme="dark"] .top-bar-icon-btn:focus-visible,
+[data-theme="dark"] .msb-item:focus-visible,
+[data-theme="dark"] .bottom-nav-item:focus-visible,
+[data-theme="dark"] .btn-close:focus-visible {
+    outline: 2px solid #38bdf8 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.4) !important;
+}
+
+/* Remove default outline only when focus is via pointer/mouse */
+:focus:not(:focus-visible) {
+    outline: none !important;
+}
+
+/* ==========================================================================
+   WCAG 2.1 AA Color Contrast Hardening System (Minimum 4.5:1 Text Contrast)
+   ========================================================================== */
+
+/* --- 1. Global Typography & Background Inversion --- */
+
+/* Light mode text contrast hardening: Ensure >= 4.5:1 against white/light surfaces */
+:root {
+    --text-muted: #4b5563; /* Gray 600: 7.0:1 contrast against #ffffff, replaces failing #6c757d */
+    --text-secondary: #4b5563;
+    --text-body: #1f2937; /* Gray 800: 13.6:1 against #ffffff */
+    --text-body-emphasis: #111827; /* Gray 900: 16.0:1 against #ffffff */
+}
+
+/* Base utilities light theme */
+.text-muted,
+.text-secondary,
+.form-text {
+    color: var(--text-muted, #4b5563) !important;
+}
+
+.text-body {
+    color: var(--text-body, #1f2937) !important;
+}
+
+.text-body-emphasis {
+    color: var(--text-body-emphasis, #111827) !important;
+}
+
+/* Dark mode text contrast hardening: High-visibility zinc/white (>= 4.5:1 against #0a0a0a & #141414) */
+[data-theme="dark"] .text-muted,
+[data-bs-theme="dark"] .text-muted,
+[data-theme="dark"] .text-secondary,
+[data-bs-theme="dark"] .text-secondary,
+[data-theme="dark"] .form-text,
+[data-bs-theme="dark"] .form-text {
+    color: #a1a1aa !important; /* Zinc 400: 7.4:1 against #0a0a0a canvas, 6.6:1 against #141414 card */
+}
+
+[data-theme="dark"] .text-body,
+[data-bs-theme="dark"] .text-body {
+    color: #e4e4e7 !important; /* Zinc 200: 15.3:1 against #0a0a0a, 13.7:1 against #141414 */
+}
+
+[data-theme="dark"] .text-body-emphasis,
+[data-bs-theme="dark"] .text-body-emphasis {
+    color: #ffffff !important; /* Pure white: 21:1 against #0a0a0a */
+}
+
+/* Dark mode inverted background utilities */
+[data-theme="dark"] .bg-light,
+[data-bs-theme="dark"] .bg-light {
+    background-color: var(--bg-surface, #141414) !important;
+    color: #f4f4f5 !important;
+}
+
+[data-theme="dark"] .bg-white,
+[data-bs-theme="dark"] .bg-white {
+    background-color: var(--bg-card, #141414) !important;
+    color: #f4f4f5 !important;
+}
+
+/* --- 2. Forms, Inputs, Placeholders & Dividers --- */
+
+/* Light mode form control baseline */
+.form-control,
+.form-select {
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    color: #1f2937;
+}
+
+.form-control::placeholder,
+textarea::placeholder,
+input::placeholder {
+    color: #6b7280 !important; /* 4.6:1 against #ffffff (WCAG AA Pass) */
+    opacity: 1 !important;
+}
+
+/* Dark mode form controls: Distinct background (rgba 5%), clear border (rgba 20%), high-contrast text */
+[data-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-control,
+[data-theme="dark"] .form-select,
+[data-bs-theme="dark"] .form-select,
+[data-theme="dark"] .form-check-input,
+[data-bs-theme="dark"] .form-check-input,
+[data-theme="dark"] select.form-select,
+[data-bs-theme="dark"] select.form-select,
+[data-theme="dark"] textarea.form-control,
+[data-bs-theme="dark"] textarea.form-control {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+    color: #f4f4f5 !important;
+}
+
+/* High-contrast dark mode placeholder text */
+[data-theme="dark"] .form-control::placeholder,
+[data-bs-theme="dark"] .form-control::placeholder,
+[data-theme="dark"] textarea::placeholder,
+[data-bs-theme="dark"] textarea::placeholder,
+[data-theme="dark"] input::placeholder,
+[data-bs-theme="dark"] input::placeholder {
+    color: #a1a1aa !important; /* 5.8:1 contrast against input background */
+    opacity: 1 !important;
+}
+
+/* Modal and card dividers in dark mode */
+[data-theme="dark"] .modal-header,
+[data-bs-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer,
+[data-bs-theme="dark"] .modal-footer,
+[data-theme="dark"] .dropdown-divider,
+[data-bs-theme="dark"] .dropdown-divider,
+[data-theme="dark"] .modal-content,
+[data-bs-theme="dark"] .modal-content,
+[data-theme="dark"] .border,
+[data-bs-theme="dark"] .border,
+[data-theme="dark"] .border-top,
+[data-bs-theme="dark"] .border-top,
+[data-theme="dark"] .border-bottom,
+[data-bs-theme="dark"] .border-bottom,
+[data-theme="dark"] hr,
+[data-bs-theme="dark"] hr {
+    border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+/* --- 3. Interactive States (Hover/Focus & Buttons) --- */
+
+/* Primary Button High-Contrast Overrides */
+.btn-primary {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    color: #ffffff !important;
+}
+
+.btn-primary:active {
+    background-color: #1e40af !important;
+    border-color: #1e40af !important;
+    color: #ffffff !important;
+}
+
+/* Secondary & Outline Buttons */
+.btn-outline-secondary {
+    border-color: #6b7280;
+    color: #374151;
+}
+
+[data-theme="dark"] .btn-outline-secondary,
+[data-bs-theme="dark"] .btn-outline-secondary {
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    color: #f4f4f5 !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+[data-theme="dark"] .btn-outline-secondary:hover,
+[data-bs-theme="dark"] .btn-outline-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.40) !important;
+    color: #ffffff !important;
+}
+
+/* Warning state text contrast protection (Yellow backgrounds require dark text for 4.5:1) */
+.btn-warning,
+.badge.bg-warning,
+.badge.text-bg-warning,
+.alert-warning {
+    color: #18181b !important; /* 12.8:1 contrast against yellow */
+}
+
+/* Consent check box styling in dark mode */
+[data-theme="dark"] .consent-box {
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.20) !important;
+}

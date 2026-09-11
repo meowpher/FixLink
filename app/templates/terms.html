@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Terms of Service - MIT-WPU FixLink{% endblock %}
+{% block meta_description %}Terms of Service and Acceptable Use Policy for FixLink, the Smart Room Maintenance Management Platform.{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            <!-- Breadcrumb Navigation -->
+            <nav aria-label="Breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Terms of Service</li>
+                </ol>
+            </nav>
+
+            <!-- Legal Draft Notice Alert -->
+            <div class="alert alert-warning d-flex align-items-center mb-4 rounded-3 border-0 shadow-sm" role="alert">
+                <i class="bi bi-info-circle-fill me-3 fs-4" aria-hidden="true"></i>
+                <div class="small">
+                    <strong>Administrative Note:</strong> This document is a structural draft outline created for human legal review and operational alignment. It establishes the terms of use for university facility reporting.
+                </div>
+            </div>
+
+            <!-- Policy Card -->
+            <article class="card border-0 shadow-sm rounded-4 p-4 p-md-5" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+                <header class="border-bottom pb-4 mb-4">
+                    <h1 class="h2 fw-bold mb-2">Terms of Service & Acceptable Use Policy</h1>
+                    <p class="text-muted small mb-0">Effective Date: September 2026 | Last Reviewed: September 2026</p>
+                </header>
+
+                <div class="legal-content text-body" style="line-height: 1.75;">
+                    <section class="mb-4">
+                        <h2 class="h5 fw-bold text-primary mb-3">1. Acceptance of Terms</h2>
+                        <p>
+                            By accessing or submitting information through the FixLink platform ("Service"), you agree to comply with and be bound by these Terms of Service, along with applicable MIT World Peace University ("MIT-WPU") IT policies and student code of conduct regulations.
+                        </p>
+                    </section>
+
+                    <section class="mb-4">
+                        <h2 class="h5 fw-bold text-primary mb-3">2. Authorized Users & Access</h2>
+                        <p>
+                            Access to FixLink is provided exclusively to registered students, faculty members, facility administrative personnel, and authorized technical staff of MIT-WPU. Users must access the platform using their officially assigned university credentials and must not impersonate other members of the academic community.
+                        </p>
+                    </section>
+
+                    <section class="mb-4">
+                        <h2 class="h5 fw-bold text-primary mb-3">3. Acceptable Use & Reporting Integrity</h2>
+                        <p>
+                            FixLink is engineered solely for bona fide reporting of classroom hardware defects, electrical faults, laboratory anomalies, HVAC malfunctions, and general university maintenance needs. Users agree NOT to:
+                        </p>
+                        <ul class="ps-3 mb-3">
+                            <li>Submit false, frivolous, malicious, or fabricated maintenance reports.</li>
+                            <li>Upload inappropriate, abusive, defamatory, or non-work-related media attachments.</li>
+                            <li>Attempt to circumvent platform security, session management, or role authorization boundaries.</li>
+                            <li>Harass, intimidate, or post defamatory reviews regarding university technicians and maintenance staff.</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-4">
+                        <h2 class="h5 fw-bold text-primary mb-3">4. Ticket Triage & Resolution Service Levels</h2>
+                        <p>
+                            Submission of a fault report does not guarantee immediate repair. Tickets are automatically categorized, prioritized, and dispatched according to severity (e.g., electrical hazards and exam hall emergencies take precedence over minor cosmetic repairs). Campus administration reserves the unilateral right to reprioritize, reassign, consolidate, or close duplicate reports.
+                        </p>
+                    </section>
+
+                    <section class="mb-4">
+                        <h2 class="h5 fw-bold text-primary mb-3">5. Equipment Liability & Disclaimer</h2>
+                        <p>
+                            FixLink functions as a coordination and workflow dispatch platform. MIT-WPU Facility Operations strives for maximum equipment reliability but disclaims any warranty regarding instantaneous turnaround times. Users must report urgent electrical or life-safety emergencies directly to campus security.
+                        </p>
+                    </section>
+
+                    <section class="mb-4">
+                        <h2 class="h5 fw-bold text-primary mb-3">6. Modifications & Termination</h2>
+                        <p>
+                            The university reserves the right to modify these operational terms or suspend platform access for individuals who repeatedly violate acceptable use policies. Continued usage following notice of revisions constitutes acceptance of amended terms.
+                        </p>
+                    </section>
+                </div>
+            </article>
+        </div>
+    </div>
+</div>
+{% endblock %}

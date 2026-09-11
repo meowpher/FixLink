@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - MIT-WPU FixLink{% endblock %}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+{% block meta_description %}The page or fault ticket you're looking for doesn't exist or may have been resolved and archived.{% endblock %}
+
+{% block content %}
+<div class="container py-5 my-auto d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 180px);">
+    <div class="row justify-content-center w-100">
+        <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
+            <div class="card shadow-sm rounded-4 p-4 p-md-5 text-center" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+                <!-- Functional Facility Map Icon -->
+                <div class="mb-3 text-secondary">
+                    <i class="bi bi-geo-alt-slash display-4" aria-hidden="true"></i>
+                </div>
+
+                <!-- Actual h1 Landmark Heading -->
+                <h1 class="h2 fw-bold mb-2 text-body-emphasis">Page Not Found</h1>
+
+                <!-- Plain Factual Explanation -->
+                <p class="text-body-secondary mb-3">
+                    The page or fault ticket you're looking for doesn't exist or may have been resolved and archived.
+                </p>
+
+                <!-- Real Attempted Path -->
+                {% if request.path %}
+                <div class="p-2 px-3 mb-4 rounded-3 text-start small font-monospace text-body-secondary" style="background: rgba(127, 127, 127, 0.08); border: 1px solid var(--border-color);">
+                    <span class="text-body-tertiary">Requested:</span> <span class="text-break">{{ request.path }}</span>
+                </div>
+                {% endif %}
+
+                <!-- Single Primary Action Button -->
+                <div class="d-grid gap-2 mb-3">
+                    <a href="/" class="btn btn-primary py-2 fw-semibold d-flex align-items-center justify-content-center gap-2" id="returnMapBtn">
+                        <i class="bi bi-map" aria-hidden="true"></i>
+                        <span>Return to Fault Map</span>
+                    </a>
+                </div>
+
+                <!-- Secondary Plain Text Link -->
+                <div>
+                    <a href="javascript:history.back()" class="text-body-secondary small text-decoration-none" onclick="if (window.history.length > 1) { window.history.back(); return false; }">
+                        &larr; Go back to previous page
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

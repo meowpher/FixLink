@@ -758,7 +758,7 @@
 <!-- Mobile-only custom top bar -->
 <div class="mobile-topbar" style="display:none;">
     <div class="topbar-left">
-        <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo"
+        <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU FixLink Logo"
              class="topbar-logo mitwpu-logo" loading="eager" fetchpriority="high" width="120" height="34">
         <div class="topbar-divider"></div>
         <div class="topbar-text">
@@ -807,7 +807,7 @@
                         <i class="bi bi-plus-circle me-2"></i>Submit Another Report
                     </button>
                     <button type="button" class="btn btn-modal-close" onclick="closeSuccessModal()">
-                        Done
+                        Close Confirmation
                     </button>
                 </div>
             </div>
@@ -979,12 +979,20 @@
                             </div>
                         </div>
 
+                        <!-- Data Minimization & Consent -->
+                        <div class="mb-3 form-check consent-check">
+                            <input type="checkbox" class="form-check-input" id="data_consent" name="data_consent" required>
+                            <label class="form-check-label small text-muted" for="data_consent">
+                                I consent to the collection of my PRN and email solely to process this maintenance request.
+                            </label>
+                        </div>
+
                         <!-- Submit Button -->
                         <button type="submit"
                             class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
                             id="submitBtn">
                             <i class="bi bi-send-fill"></i>
-                            <span>Submit Report</span>
+                            <span>Submit Fault Report</span>
                         </button>
                     </form>
                 </div>

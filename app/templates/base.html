@@ -9,19 +9,26 @@
     <meta name="robots" content="{% block meta_robots %}index, follow{% endblock %}">
     <link rel="canonical" href="{{ request.base_url }}">
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/FLOGOCLR.webp') }}">
-    <!-- Preconnect & DNS-Prefetch for external CDNs -->
-    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preconnect" href="https://js.pusher.com" crossorigin>
-    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
-    <link rel="dns-prefetch" href="https://js.pusher.com">
+    <!-- Preconnect & DNS-Prefetch for external CDNs (Asset Security) -->
+    <link rel="preconnect noopener noreferrer" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect noopener noreferrer" href="https://js.pusher.com" crossorigin>
+    <link rel="dns-prefetch noopener noreferrer" href="https://cdnjs.cloudflare.com">
+    <link rel="dns-prefetch noopener noreferrer" href="https://js.pusher.com">
+
+    <!-- External Analytics & Tracking (Data Minimization: Consent Gated) -->
+    {% if cookie_consent %}
+    {% block analytics %}
+    <!-- Third-party tracking scripts only execute upon explicit cookie consent -->
+    {% endblock %}
+    {% endif %}
 
     <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.3" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.4" as="style">
 
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.4">
 
     <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -74,23 +81,23 @@
                 request.endpoint == 'admin.analytics' or
                 request.endpoint in ['admin.chat', 'professional.chat', 'main.report_form', 'main.index', 'admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history', 'admin.add_professional', 'admin.professional_history', 'admin.professional_analytics', 'main.report_bug']
             ))) %}
-            <button class="top-bar-btn" id="mobile-topbar-back-btn" onclick="handleTopbarBack()">
+            <button class="top-bar-btn" id="mobile-topbar-back-btn" onclick="handleTopbarBack()" aria-label="Go back to previous page">
                 <i class="bi bi-chevron-left"></i> Back
             </button>
             {% endif %}
             {% if session.get('is_super_admin') %}
             <a href="{{ url_for('superadmin.dashboard') }}" class="top-bar-brand text-decoration-none">
-                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU Logo" width="100" height="28" loading="eager">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU FixLink Logo" width="100" height="28" loading="eager">
                 <span>FixLink</span>
             </a>
             {% elif session.get('professional_id') and not (request.blueprint == 'superadmin') %}
             <a href="{{ url_for('professional.dashboard') }}" class="top-bar-brand text-decoration-none">
-                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU Logo" width="100" height="28" loading="eager">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU FixLink Logo" width="100" height="28" loading="eager">
                 <span>FixLink</span>
             </a>
             {% else %}
             <div class="top-bar-brand">
-                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU Logo" width="100" height="28" loading="eager">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU FixLink Logo" width="100" height="28" loading="eager">
                 <span>FixLink</span>
             </div>
             {% endif %}
@@ -138,7 +145,7 @@
                 <a href="#" class="top-bar-icon-btn p-0" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Open profile menu">
                     <div id="mobileNavAvatar" style="width:32px;height:32px;border-radius:50%;background:var(--mitwpu-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:0.85rem;font-weight:600;">
                         <span id="mobileAvatarInitials">{{ display_initials }}</span>
-                        <img class="d-none w-100 h-100 object-fit-cover rounded-circle" id="mobileAvatarImg" src="" alt="Profile" loading="lazy">
+                        <img class="d-none w-100 h-100 object-fit-cover rounded-circle" id="mobileAvatarImg" src="" alt="User profile avatar" loading="lazy">
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2">
@@ -240,7 +247,7 @@
                     style="padding: 0; margin: 0; outline: none; box-shadow: none; height: 100%; font-family: inherit; line-height: inherit;">
                 <div id="mobileNavAvatarBottom" style="width:22px;height:22px;border-radius:50%;background:var(--mitwpu-blue);color:white;display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:700;margin-bottom:2px;">
                     <span id="mobileAvatarInitialsBottom">{{ display_initials }}</span>
-                    <img class="d-none w-100 h-100 object-fit-cover rounded-circle" id="mobileAvatarImgBottom" src="" alt="Profile" loading="lazy">
+                    <img class="d-none w-100 h-100 object-fit-cover rounded-circle" id="mobileAvatarImgBottom" src="" alt="User profile avatar" loading="lazy">
                 </div>
                 <span>Profile</span>
             </button>
@@ -326,7 +333,7 @@
         <!-- Sidebar header -->
         <div class="msb-header">
             <img src="{{ url_for('static', filename='images/logo-lm.webp') }}"
-                 alt="MIT-WPU"
+                 alt="MIT-WPU FixLink Logo"
                  class="mitwpu-logo msb-logo"
                  id="msbLogoImg"
                  loading="eager" fetchpriority="high" decoding="sync">
@@ -599,7 +606,7 @@
         <div class="nav-capsule pointer-events-auto">
             <!-- Brand -->
             <a class="d-flex align-items-center me-3 text-decoration-none" href="{% if session.get('is_super_admin') %}{{ url_for('superadmin.dashboard') }}{% elif session.get('professional_id') and not (request.blueprint == 'superadmin') %}{{ url_for('professional.dashboard') }}{% else %}{{ url_for('main.index') }}{% endif %}">
-                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="Logo" class="mitwpu-logo me-2" style="height: 28px; width: auto;" width="100" height="28" loading="eager" fetchpriority="high" decoding="sync">
+                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU FixLink Logo" class="mitwpu-logo me-2" style="height: 28px; width: auto;" width="100" height="28" loading="eager" fetchpriority="high" decoding="sync">
                 <span class="brand-text-capsule">FixLink</span>
             </a>
 
@@ -677,7 +684,7 @@
                         <a class="nav-link p-0 d-flex align-items-center justify-content-center" href="#" role="button" data-bs-toggle="dropdown" aria-label="Open profile menu" aria-expanded="false">
                             <div class="nav-avatar m-0" id="navAvatar" style="width: 35px; height: 35px; border-radius: 50%; background: var(--mitwpu-blue); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; font-weight: 600;">
                                 <span class="nav-avatar-initials" id="navAvatarInitials">{{ display_initials }}</span>
-                                <img class="nav-avatar-img d-none w-100 h-100 object-fit-cover rounded-circle" id="navAvatarImg" src="" alt="Profile" loading="lazy" decoding="async">
+                                <img class="nav-avatar-img d-none w-100 h-100 object-fit-cover rounded-circle" id="navAvatarImg" src="" alt="User profile avatar" loading="lazy" decoding="async">
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2" style="max-height: 80vh; overflow-y: auto;">
@@ -725,6 +732,15 @@
         request.endpoint in ['admin.chat', 'professional.chat']
     )) %}
     <footer class="mt-auto py-4 border-top" style="border-color: var(--border-color, #333) !important; background-color: var(--bg-main, #121212);">
+        <div class="container text-center text-muted small">
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2">
+                <a href="{{ url_for('main.privacy') }}" class="text-muted text-decoration-none">Privacy Policy</a>
+                <span aria-hidden="true">&bull;</span>
+                <a href="{{ url_for('main.terms') }}" class="text-muted text-decoration-none">Terms of Service</a>
+                <span aria-hidden="true">&bull;</span>
+                <a href="{{ url_for('main.cookies') }}" class="text-muted text-decoration-none">Cookie Policy</a>
+            </div>
+            <p class="mb-0">&copy; MIT-WPU FixLink — Smart Room Maintenance Platform. For internal university facility management.</p>
         </div>
     </footer>
     {% endif %}
@@ -735,7 +751,7 @@
 
     {% if request.endpoint not in ['main.report_form', 'main.report_bug', 'auth.login'] %}
     <!-- Core GSAP for Smooth Animations (self-contained, deferred) -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" rel="noopener noreferrer"></script>
 
     <!-- Custom JS -->
     <script type="module" src="{{ url_for('static', filename='js/animations.js') }}" crossorigin></script>
@@ -1115,8 +1131,8 @@
                     <p class="lead mb-0 text-body fw-medium" id="notificationModalBody"></p>
                 </div>
                 <div class="modal-footer border-0 justify-content-center pb-4">
-                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500;">Close</button>
-                    <a href="#" id="notificationModalActionBtn" class="btn btn-primary px-4 d-none" style="border-radius: 10px; font-weight: 500; background-color: var(--mitwpu-blue);">Go to Page</a>
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 500;">Close Notification</button>
+                    <a href="#" id="notificationModalActionBtn" class="btn btn-primary px-4 d-none" style="border-radius: 10px; font-weight: 500; background-color: var(--mitwpu-blue);">View Notification Details</a>
                 </div>
             </div>
         </div>
@@ -1242,7 +1258,7 @@
 
     <meta name="user-logged-in" content="{{ 'true' if session.get('user_id') or session.get('professional_id') else 'false' }}">
     <meta name="chat-channel" content="{% if session.get('is_admin') %}private-admins{% elif session.get('professional_id') %}private-professional-{{ session.get('professional_id') }}{% endif %}">
-    <script defer src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+    <script defer src="https://js.pusher.com/8.0.1/pusher.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" rel="noopener noreferrer"></script>
     <script>
     // Global Chat Notification Logic (Non-blocking deferred execution)
     window.addEventListener('load', function() {
@@ -1764,7 +1780,7 @@
                                             <div class="fw-semibold small text-truncate" id="bugFileName">file.png</div>
                                             <div class="text-muted" style="font-size: 0.72rem;" id="bugFileSize">0 KB</div>
                                         </div>
-                                        <button type="button" class="bug-file-remove-btn" id="btnRemoveBugFile" title="Remove file">
+                                        <button type="button" class="bug-file-remove-btn" id="btnRemoveBugFile" title="Remove file" aria-label="Remove attached file">
                                             <i class="bi bi-x-lg" style="font-size: 0.75rem;"></i>
                                         </button>
                                     </div>
@@ -1776,11 +1792,11 @@
                     <!-- Modal Footer -->
                     <div class="modal-footer bug-modal-footer d-flex justify-content-between">
                         <button type="button" class="btn btn-bug-cancel" data-bs-dismiss="modal">
-                            Cancel
+                            Cancel Bug Report
                         </button>
                         <button type="submit" class="btn btn-bug-submit" id="globalBugSubmitBtn">
                             <i class="bi bi-send-fill"></i>
-                            <span>Send to Developer</span>
+                            <span>Submit Bug Report</span>
                         </button>
                     </div>
                 </form>

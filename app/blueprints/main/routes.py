@@ -82,6 +82,38 @@ def index():
     return redirect(url_for('auth.login'))
 
 
+@main_bp.route('/privacy')
+def privacy():
+    """Serve Privacy Policy & Data Processing Notice template."""
+    return render_template('privacy.html')
+
+
+@main_bp.route('/terms')
+def terms():
+    """Serve Terms of Service & Acceptable Use Policy template."""
+    return render_template('terms.html')
+
+
+@main_bp.route('/cookies')
+def cookies():
+    """Serve Cookie & Local Storage Policy template."""
+    return render_template('cookies.html')
+
+
+@main_bp.route('/404')
+def page_not_found_preview():
+    """Preview the 404 custom error page."""
+    return render_template('404.html'), 404
+
+
+@main_bp.route('/ticket-form')
+@main_bp.route('/ticket_form')
+def ticket_form():
+    """Serve standalone ticket form template."""
+    rooms = Room.query.all()
+    return render_template('ticket_form.html', rooms=rooms)
+
+
 @main_bp.route('/report', methods=['GET'])
 @user_login_required
 def report_form():

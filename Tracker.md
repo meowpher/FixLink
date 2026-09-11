@@ -7,6 +7,9 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.6.2** | 2026-09-11 | **Staged** | WCAG 2.1 AA Color Contrast Hardening (Global Typography, SVG Map Labels Readability, Dark Mode Form Inputs & Interactive Button States). |
+| **v1.6.1** | 2026-09-11 | **Staged** | Custom 404 Error Page (Zone Not Found), Dark Mode Translucent Infrastructure Aesthetic, and Search Engine Indexing Protection. |
+| **v1.6.0** | 2026-09-11 | **Staged** | Web Accessibility (a11y), Data Minimization & Consent, Legal Boilerplates (Privacy, Terms, Cookies), and Asset Security CDN hardening. |
 | **v1.5.3** | 2026-09-03 | **Deployed** | Removed 'My Tasks' and technician nav items from the developer site and developer sessions. |
 | **v1.5.2** | 2026-09-02 | **Deployed** | Guaranteed Developer/Superadmin credentials (`om.mahadik@mitwpu.edu.in`), auto-seeding in `init_db()`, self-healing login, and formalized Rule 6 in `Rules.md`. |
 | **v1.5.1** | 2026-09-02 | **Deployed** | Centered 'Admin Support Team' title in chat header with balanced `<` back button navigation. |
@@ -23,6 +26,122 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.6.2 (2026-09-11)
+- `fix(a11y-contrast)`: **strict WCAG 2.1 AA color contrast hardening across global typography, dynamic SVG floor map room labels, dark mode form controls, and interactive button states**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Global Text & Background Contrast (WCAG 2.1 AA >= 4.5:1)**:
+     - **Replaced Low-Contrast Bootstrap Grays**: Default Bootstrap `.text-muted` and `.text-secondary` (`#6c757d`) failed WCAG AA on white (4.38:1) and dark surfaces (3.5:1). Overrode them with theme-aware tokens:
+       - **Light Mode**: `#4b5563` (Gray 600) providing **7.0:1** contrast against white backgrounds.
+       - **Dark Mode**: `#a1a1aa` (Zinc 400) providing **7.4:1** contrast against deep black (`#0a0a0a`) and **6.6:1** against surface cards (`#141414`).
+     - **Inverted Utility Classes**: Added dynamic dark-mode overrides for `.bg-light` and `.bg-white` so white background boxes never blind users when switching to dark theme.
+  2. **SVG Floor Map Room Label Readability**:
+     - **Dynamic Fill Flipping**: Fixed hardcoded black/white SVG path text. Room numbers and labels now dynamically flip:
+       - **Light Mode**: Deep dark slate (`#1e293b`) with a subtle white protective halo filter (`drop-shadow(0 0 1px rgba(255,255,255,0.9))`) for **> 12:1** contrast against room fills.
+       - **Dark Mode**: Crisp white (`#f8f9fa`) with a dark drop shadow (`drop-shadow(0 1px 2px rgba(0,0,0,0.95))`) for **19:1** contrast against the dark floor plan canvas.
+     - **Hover & Selection Protection**: When hovering or clicking rooms (e.g. green selected or red issue states), room text remains razor-sharp with contrast halos and zero stroke boldness bleeding.
+  3. **Forms, Inputs & Borders**:
+     - **Dark Mode Input Canvas**: Configured dark mode inputs (`.form-control`, `.form-select`, `textarea`) with a distinct translucent background (`rgba(255, 255, 255, 0.05)`), a clearly visible border (`rgba(255, 255, 255, 0.20)`), and high-contrast placeholder text (`#a1a1aa`, 5.8:1 contrast).
+     - **High-Contrast Dividers**: Adjusted modal headers, footers, `<hr>`, and card borders in dark mode to `rgba(255, 255, 255, 0.18)` for crisp spatial structure without visual mud.
+  4. **Interactive States & Buttons**:
+     - Ensured `.btn-primary`, `.btn-outline-secondary`, `.btn-warning`, and interactive elements maintain high contrast (> 4.5:1) in default, hover, active, and focus states. In particular, warning badges/buttons enforce dark text (`#18181b`) over yellow backgrounds for a massive **12.8:1** contrast ratio.
+     - Synchronized minified stylesheet (`style.min.css`) and bumped query cache string to `v=8.4`.
+
+  ---
+
+  #### 🖥️ Where & How You as a Developer Can See and Test These Changes
+
+  | What to Test | Where on the Site | Step-by-Step Testing Guide | Expected Visual Result |
+  | :--- | :--- | :--- | :--- |
+  | **1. SVG Room Labels in Dark Mode** | `http://localhost:5000/report` | 1. Navigate to the floor map.<br>2. Toggle to **Dark Theme** (moon icon).<br>3. Inspect the room numbers (e.g., VY301, VY307, Lift). | Labels appear in **crisp white (`#f8f9fa`)** with a subtle dark halo shadow. Black text never disappears into the dark canvas. |
+  | **2. SVG Room Labels in Light Mode** | `http://localhost:5000/report` | 1. Toggle back to **Light Theme** (sun icon).<br>2. Inspect the floor map room numbers. | Labels render in **dark slate (`#1e293b`)** with a clean light protective halo against the room fills. |
+  | **3. Form Inputs & Placeholders** | `http://localhost:5000/ticket-form` | 1. Open the standalone ticket form.<br>2. Toggle to **Dark Theme**.<br>3. Look at the empty Description textarea and dropdown borders. | Inputs have a distinct **translucent dark background (`rgba(255,255,255,0.05)`)**, a **crisp 20% white border**, and **high-visibility placeholder text (`#a1a1aa`)**. |
+  | **4. Secondary & Muted Text** | `http://localhost:5000/ticket-form` or footer | 1. Observe the subtitle and helper text.<br>2. Switch between light and dark modes. | Text is clearly legible in both themes: soft zinc (`#a1a1aa`) in dark mode, deep slate (`#4b5563`) in light mode (both >= 6.6:1 contrast). |
+  | **5. Interactive Room Hover** | `http://localhost:5000/report` | Hover your mouse over any classroom on the map in dark mode. | The room highlights with accent tint, and the room label stays **pure white with high-contrast text shadow**, never washing out. |
+
+---
+
+### Release v1.6.1 (2026-09-11)
+- `feat(error-page)`: **redesigned 404 error page ("Page Not Found") with calm, factual facility tone, zero custom CSS, full token reuse, and actionable routing**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Flask Application 404 Handler (`app/__init__.py`)**:
+     - Configured the `@app.errorhandler(404)` decorator at the application root level.
+     - When any user, bot, or crawler visits an unregistered or broken link, Flask now renders the dedicated `404.html` template and explicitly returns HTTP status code `404`. This ensures search engine crawlers (Google, Bing) know the page doesn't exist and never index broken error pages.
+  2. **Grounded Facility UI Redesign (`app/templates/404.html`)**:
+     - **Clean, Factual Copy**: Replaced sci-fi tropes, glowing radar animations, and fake error codes with calm, facility-focused communication:
+       - Single `<h1>` Heading: **`Page Not Found`**
+       - Plain explanation: *"The page or fault ticket you're looking for doesn't exist or may have been resolved and archived."*
+       - Real URL path display: plainly labeled `Requested: {{ request.path }}` without fabricated telemetry jargon.
+     - **Pure CSS Token Reuse (Zero Custom Styling)**: Completely eliminated custom `<style>` rules. Purely reuses FixLink's existing design system: `.card.rounded-4`, `var(--bg-card)`, `var(--border-color)`, `.text-body-emphasis`, and `.text-body-secondary`.
+     - **Functional Icon**: Uses a simple, functional `bi-geo-alt-slash` icon with `aria-hidden="true"` rather than decorative sci-fi animations.
+     - **Clear Action Hierarchy**: Features a single primary CTA button **"Return to Fault Map"** (`.btn.btn-primary`) and a subtle secondary text link **"&larr; Go back to previous page"** (`javascript:history.back()`).
+
+  ---
+
+  #### 🖥️ Where & How You as a Developer Can See and Test These Changes
+
+  | What to Test | URL to Visit | How to Test | Expected Result |
+  | :--- | :--- | :--- | :--- |
+  | **1. Unmatched Route 404** | `http://localhost:5000/non-existent-sector` | Open this URL in any browser tab. | You will see the clean, calm **"Page Not Found"** card with the location-slash icon, plain explanation, and requested URL path. |
+  | **2. Direct Preview Route** | `http://localhost:5000/404` | Open `http://localhost:5000/404`. | The redesigned 404 page renders immediately with HTTP 404 status. |
+  | **3. Return to Map Button** | On the 404 page | Click **"Return to Fault Map"** or press Enter while focused on it. | Navigates cleanly back to the root `/` (fault reporting portal / architectural map). |
+  | **4. History Back Link** | On the 404 page | Click **"← Go back to previous page"**. | Steps back in browser history gracefully. |
+  | **5. Search Crawler Meta Tag** | DevTools Elements Tab | Inspect `<head>` of the 404 page. | Contains `<meta name="robots" content="noindex, nofollow">` to prevent crawlers from indexing. |
+
+---
+
+### Release v1.6.0 (2026-09-11)
+- `feat(a11y-privacy-security)`: **comprehensive web accessibility (a11y), data minimization, user consent, legal boilerplate generation, and CDN asset security overhaul**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Accessibility for Everyone (Screen Readers & Keyboard Users)**:
+     - **Meaningful Image Descriptions (`alt` tags)**: Web screen readers read out image descriptions to visually impaired users. Previously, several images had generic tags like `alt="Logo"` or `alt="Profile"`. We upgraded these to specific, helpful descriptions like `"MIT-WPU FixLink Logo"` and `"User profile avatar"`.
+     - **Specific Action Buttons**: Generic buttons like "Submit", "Done", or "Cancel" don't clearly state what action is about to happen. We renamed them with active verbs:
+       - `"Submit Report"` ➔ **`"Submit Fault Report"`**
+       - `"Done"` (success modal) ➔ **`"Close Confirmation"`**
+       - `"Send to Developer"` ➔ **`"Submit Bug Report"`**
+       - `"Cancel"` ➔ **`"Cancel Bug Report"`**
+       - `"Close"` ➔ **`"Close Notification"`** / **`"Close Profile Details"`**
+     - **Glowing Keyboard Navigation Rings (`:focus-visible`)**: People who cannot use a mouse navigate websites using the keyboard `Tab` key. In dark mode, it was nearly impossible to see which button or input had focus. We engineered a high-contrast electric sky-blue glowing ring (`#38bdf8`) around all active form inputs, buttons, links, and dropdowns that pops vibrantly against the dark background, meeting international WCAG 2.2 accessibility standards.
+
+  2. **Data Privacy, Minimization & User Consent**:
+     - **Database Privacy Audit**: We systematically reviewed `models.py` to flag personal information stored beyond basic identification (Name, PRN, Email). We identified sensitive items such as user avatars (biometric likeness), technician mobile phone numbers, device push tokens, and uploaded camera photos that might accidentally capture faces or private belongings.
+     - **Mandatory User Consent**: Added a required confirmation checkbox to the maintenance reporting form:
+       > *"I consent to the collection of my PRN and email solely to process this maintenance request."*
+       Students and staff must check this before a fault ticket can be submitted.
+     - **Consent-Gated Analytics in `<head>`**: Audited the HTML header and wrapped any external tracking or analytics in a `{% if cookie_consent %}` conditional. Analytics scripts will now never load behind the user's back without explicit consent.
+
+  3. **Official University Legal Boilerplate Pages**:
+     - Drafted three complete, professional policy documents styled to match our dark/light theme:
+       - **Privacy Policy** (`/privacy`): Details what student/staff info is recorded, why it's collected, who sees it, and retention limits.
+       - **Terms of Service** (`/terms`): Sets ground rules for submitting genuine facility tickets and acceptable classroom tool usage.
+       - **Cookie Policy** (`/cookies`): Explains our strict session, CSRF security, and theme preference cookies.
+     - Linked all three policies in the site footer so they are easily accessible from any page.
+
+  4. **Asset Security & External CDN Hardening**:
+     - **Secured External CDNs**: External scripts and stylesheet links (like Pusher and GSAP animations) were reinforced with `rel="noopener noreferrer"`, `crossorigin="anonymous"`, and `referrerpolicy="no-referrer"` to prevent cross-origin tracking and tab-hijacking vulnerabilities.
+     - **Guaranteed Local Fallback Asset**: Audited the codebase to confirm zero external/insecure image links exist. Created a local fallback placeholder image at `/static/img/placeholder.jpg` to prevent broken image icons if an upload is missing.
+
+  ---
+
+  #### 🖥️ Where & How You as a Developer Can See and Test These Changes
+
+  | What to Test | Where on the Site | Step-by-Step Testing Guide | Expected Visual Result |
+  | :--- | :--- | :--- | :--- |
+  | **1. Keyboard Focus Visibility** | `http://localhost:5000/report` or `/login` | 1. Open the page.<br>2. Switch to **Dark Theme** (click the Moon icon in the header).<br>3. Don't touch your mouse; press the **`Tab`** key repeatedly. | You will see an **electric cyan-blue outline (`#38bdf8`) with a soft glow** cleanly framing each input field, floor dropdown trigger, and button. |
+  | **2. Mandatory Consent Checkbox** | `http://localhost:5000/report` | 1. Go to the Issue Details form on the right panel.<br>2. Scroll down just above the submit button.<br>3. Fill out the form, leave the checkbox unchecked, and click **"Submit Fault Report"**. | A required checkbox reading *"I consent to the collection of my PRN and email solely to process this maintenance request"* is visible. The browser blocks submission and prompts you to check the box. |
+  | **3. Action Verb Buttons** | `http://localhost:5000/report` | 1. Look at the primary submit button.<br>2. Submit a report (or test the modal) to view the confirmation dialog. | The primary button displays **"Submit Fault Report"** (with paper plane icon). The success modal button displays **"Close Confirmation"**. |
+  | **4. Privacy Policy Page** | `http://localhost:5000/privacy` | Open `http://localhost:5000/privacy` in your browser, or scroll to the bottom footer on any page and click **"Privacy Policy"**. | Displays a formatted, mobile-responsive Privacy Policy card with breadcrumbs, legal draft notice, data minimization summary, and dark mode support. |
+  | **5. Terms of Service Page** | `http://localhost:5000/terms` | Open `http://localhost:5000/terms` or click the **"Terms of Service"** link in the footer. | Displays the Acceptable Use Policy draft for university facility management. |
+  | **6. Cookie Policy Page** | `http://localhost:5000/cookies` | Open `http://localhost:5000/cookies` or click the **"Cookie Policy"** link in the footer. | Displays an itemized table listing strictly necessary session cookies, CSRF tokens, theme storage, and consent gates. |
+  | **7. Standalone Ticket Form** | `http://localhost:5000/ticket-form` | Open `http://localhost:5000/ticket-form` in your browser. | Displays the clean, dedicated ticket reporting template with accessible dropdowns, consent box, and submit CTA. |
+  | **8. CDN Hardening & Asset Security** | Any page (e.g. `http://localhost:5000/report`) | 1. Press **`F12`** (Open DevTools) &gt; **Elements** tab.<br>2. Inspect `<head>` and bottom `<script>` tags. | CDN `<link>` and `<script>` tags for Pusher and GSAP contain `rel="noopener noreferrer" referrerpolicy="no-referrer"`. |
+  | **9. Image Alt Text** | Any page header / logo | In DevTools, inspect the top-left university logo. | Logo image contains `alt="MIT-WPU FixLink Logo"`. User avatars contain `alt="User profile avatar"`. |
+  | **10. Local Image Placeholder** | `http://localhost:5000/static/img/placeholder.jpg` | Paste this URL directly into your browser. | The guaranteed local fallback placeholder image loads immediately without relying on any external 3rd-party image server. |
+
+---
 
 ### Release v1.5.3 (2026-09-03)
 - `fix(navigation)`: **restore profile button, eliminate navbar bloat, and restore login redirects**

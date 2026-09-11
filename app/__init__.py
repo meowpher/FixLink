@@ -201,7 +201,7 @@ def create_app(config_name=None):
     
     # Graceful CSRF Error Handler
     from flask_wtf.csrf import CSRFError
-    from flask import request, jsonify, redirect, url_for, flash
+    from flask import request, jsonify, redirect, url_for, flash, render_template
     @app.errorhandler(CSRFError)
     def handle_csrf_error(e):
         logger.warning(f"CSRF validation failed: {e.description} for {request.path}")
@@ -210,4 +210,10 @@ def create_app(config_name=None):
         flash('Your session expired or security token was invalid. Please try again.', 'warning')
         return redirect(request.referrer or url_for('auth.login'))
     
+    # 404 Not Found Error Handler - Custom Infrastructure Zone Not Found
+    @app.errorhandler(404)
+    def page_not_found(e):
+        return render_template('404.html'), 404
+    
     return app
+

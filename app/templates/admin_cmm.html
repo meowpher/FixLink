@@ -1,0 +1,570 @@
+{% extends "base.html" %}
+
+{% block title %}Classroom Management Module (CMM) - MIT-WPU FixLink Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4 mb-5">
+    
+    <!-- Hero Header Banner -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" style="background: linear-gradient(135deg, rgba(11,77,140,0.08) 0%, rgba(32,201,151,0.08) 100%);">
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-4">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.8rem;">ADMIN CONTROL CENTER</span>
+                        <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.8rem;">CMM ENGINE</span>
+                    </div>
+                    <h1 class="h2 fw-bold mb-2 text-body">Classroom Management Module (CMM)</h1>
+                    <p class="text-muted mb-0 lead" style="font-size: 1rem; max-width: 720px;">
+                        Centralized portal for managing room timetables, batch importing CSV schedules, clearing floor schedules, and allocating faculty members to unassigned classes.
+                    </p>
+                </div>
+                
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <button class="btn btn-success rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#importTimetableModal">
+                        <i class="bi bi-file-earmark-spreadsheet-fill fs-5"></i>
+                        <span>Mass Import Timetable</span>
+                    </button>
+                    <button class="btn btn-outline-danger rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#deleteTimetableModal">
+                        <i class="bi bi-trash3-fill fs-5"></i>
+                        <span>Delete Timetables</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 rounded-4 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                        <i class="bi bi-calendar-week fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Total Timetable Slots</div>
+                        <div class="fs-3 fw-bold text-body" id="statTotalSlots">{{ total_timetables_count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 rounded-4 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                        <i class="bi bi-person-check-fill fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Allocated Classes</div>
+                        <div class="fs-3 fw-bold text-body" id="statAllocatedSlots">{{ assigned_count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-3 rounded-4 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                        <i class="bi bi-person-exclamation fs-3"></i>
+                    </div>
+                    <div>
+                        <div class="text-muted small fw-semibold text-uppercase">Requiring Allocation</div>
+                        <div class="fs-3 fw-bold text-warning" id="statUnassignedSlots">{{ unassigned_count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unassigned Classes Section -->
+    <section class="unassigned-classes-section" id="unassignedClassesSection">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+            <div class="card-header py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-3" style="background-color: var(--bg-card);">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="p-2.5 rounded-3 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <i class="bi bi-calendar-x-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 fw-bold mb-0 text-body">Unassigned Classes Requiring Faculty Allocation</h4>
+                        <p class="text-muted small mb-0">Imported timetable sessions missing instructor assignments. Select a faculty member to allocate instantly.</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3">
+                    <div class="input-group input-group-sm" style="width: 240px;">
+                        <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-search"></i></span>
+                        <input type="text" id="unassignedSearchInput" class="form-control bg-body-tertiary border-start-0" placeholder="Filter classes...">
+                    </div>
+                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2 fw-semibold" id="unassignedCountBadge">
+                        {{ unassigned_classes|length }} Unassigned
+                    </span>
+                </div>
+            </div>
+            
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="unassignedClassesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4 py-3">Room</th>
+                                <th class="py-3">Day & Time</th>
+                                <th class="py-3">Subject / Course</th>
+                                <th class="py-3">Division</th>
+                                <th class="py-3" style="min-width: 280px;">Faculty Member</th>
+                                <th class="text-end pe-4 py-3" style="width: 140px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unassignedClassesBody">
+                            {% if unassigned_classes %}
+                                {% for cls in unassigned_classes %}
+                                <tr id="class-row-{{ cls.id }}" class="unassigned-row-item">
+                                    <td class="ps-4 fw-bold">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-3">
+                                            {{ cls.room.number if cls.room else ('Room #' ~ cls.room_id) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-body">
+                                            {% if cls.day_of_week == 0 %}Monday
+                                            {% elif cls.day_of_week == 1 %}Tuesday
+                                            {% elif cls.day_of_week == 2 %}Wednesday
+                                            {% elif cls.day_of_week == 3 %}Thursday
+                                            {% elif cls.day_of_week == 4 %}Friday
+                                            {% elif cls.day_of_week == 5 %}Saturday
+                                            {% elif cls.day_of_week == 6 %}Sunday
+                                            {% else %}Day {{ cls.day_of_week }}
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ cls.start_time.strftime('%I:%M %p') if cls.start_time else '' }} - {{ cls.end_time.strftime('%I:%M %p') if cls.end_time else '' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-body search-subject">{{ cls.subject }}</div>
+                                        {% if cls.course %}
+                                        <small class="text-muted search-course">{{ cls.course }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">{{ cls.division or '—' }}</span>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm faculty-select rounded-3" id="faculty-select-{{ cls.id }}" aria-label="Select Faculty">
+                                            <option value="" selected disabled>Choose Faculty...</option>
+                                            {% for fac in all_faculties %}
+                                            <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button type="button" 
+                                                class="btn btn-sm btn-primary rounded-pill px-3 btn-assign-faculty shadow-sm" 
+                                                data-class-id="{{ cls.id }}">
+                                            <i class="bi bi-person-check-fill me-1"></i>Assign
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr id="noUnassignedRow">
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <div class="py-4">
+                                            <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
+                                            <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
+                                            <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     MASS IMPORT TIMETABLE MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="importTimetableModal" tabindex="-1" aria-labelledby="importTimetableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-success text-white py-3 px-4">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="importTimetableModalLabel">
+                    <i class="bi bi-file-earmark-spreadsheet-fill fs-5"></i>Mass Import Timetable (CSV)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            
+            <div class="modal-body p-4">
+                <form id="importTimetableForm">
+                    <div class="mb-4">
+                        <label for="csvFileInput" class="form-label fw-semibold">Select Timetable CSV File</label>
+                        <input class="form-control rounded-3" type="file" id="csvFileInput" accept=".csv" required>
+                        <div class="form-text mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            CSV must contain room numbers (e.g. <code>VY401</code>) and time slots (e.g. <code>09:00-10:00</code>) formatted with weekday columns.
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" id="dryRunToggle" checked>
+                        <label class="form-check-label fw-semibold" for="dryRunToggle">
+                            Dry Run Mode (Validate & Preview CSV without saving to DB)
+                        </label>
+                    </div>
+
+                    <div id="importPreviewContainer" class="d-none mb-4">
+                        <div class="alert alert-info border-0 rounded-3 p-3 mb-3">
+                            <div class="fw-bold mb-1"><i class="bi bi-eye-fill me-1"></i> CSV Preview Results</div>
+                            <div class="small" id="previewSummaryText">0 entries ready for ingestion.</div>
+                        </div>
+
+                        <div id="previewErrorList" class="alert alert-warning border-0 rounded-3 p-3 d-none mb-3 small">
+                            <strong>Warnings / Errors detected:</strong>
+                            <ul class="mb-0 ps-3 mt-1" id="previewErrorsUl"></ul>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="btnPreviewCsv">
+                            <i class="bi bi-search me-1"></i>Preview & Validate
+                        </button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" id="btnCommitImport">
+                            <i class="bi bi-cloud-upload-fill me-1"></i>Commit & Import Schedule
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════
+     DELETE TIMETABLES MODAL
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="deleteTimetableModal" tabindex="-1" aria-labelledby="deleteTimetableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header border-0 bg-danger text-white py-3 px-4">
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="deleteTimetableModalLabel">
+                    <i class="bi bi-trash3-fill fs-5"></i>Delete Timetables
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body p-4">
+                <form id="deleteTimetableForm">
+                    <div class="mb-3">
+                        <label for="deleteScopeSelect" class="form-label fw-semibold">Deletion Scope</label>
+                        <select class="form-select rounded-3" id="deleteScopeSelect" required>
+                            <option value="building" selected>Entire Vyas Building (Clear All Timetables)</option>
+                            <option value="floor">Specific Floor Only</option>
+                            <option value="room">Specific Room Only</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3 d-none" id="deleteFloorGroup">
+                        <label for="deleteFloorSelect" class="form-label fw-semibold">Select Floor</label>
+                        <select class="form-select rounded-3" id="deleteFloorSelect">
+                            <option value="" disabled selected>Choose Floor...</option>
+                            {% for f in floors %}
+                            <option value="{{ f.id }}">{{ f.name }} (Level {{ f.level }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3 d-none" id="deleteRoomGroup">
+                        <label for="deleteRoomSelect" class="form-label fw-semibold">Select Room</label>
+                        <select class="form-select rounded-3" id="deleteRoomSelect">
+                            <option value="" disabled selected>Choose Room...</option>
+                            {% for r in rooms %}
+                            <option value="{{ r.id }}">{{ r.number }} - {{ r.name or 'Classroom' }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="alert alert-danger border-0 rounded-3 p-3 my-4">
+                        <div class="d-flex align-items-center gap-2 text-danger fw-bold mb-1">
+                            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                            <span>Warning: Destructive Action</span>
+                        </div>
+                        <p class="small mb-0 text-danger-emphasis">
+                            This will permanently erase all matching timetable schedules and unassigned class allocations.
+                        </p>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger rounded-pill px-4 shadow-sm" id="btnConfirmDeleteTimetable">
+                            <i class="bi bi-trash3-fill me-1"></i>Confirm Delete
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+
+    // ==================== UNASSIGNED CLASSES FILTER & ASSIGNMENT ====================
+    const searchInput = document.getElementById('unassignedSearchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const term = this.value.toLowerCase().trim();
+            const rows = document.querySelectorAll('.unassigned-row-item');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        });
+    }
+
+    const unassignedTable = document.getElementById('unassignedClassesTable');
+    if (unassignedTable) {
+        unassignedTable.addEventListener('click', function(e) {
+            const assignBtn = e.target.closest('.btn-assign-faculty');
+            if (!assignBtn) return;
+
+            const classId = assignBtn.dataset.classId;
+            if (!classId) return;
+
+            const row = document.getElementById(`class-row-${classId}`) || assignBtn.closest('tr');
+            const select = document.getElementById(`faculty-select-${classId}`) || (row ? row.querySelector('.faculty-select') : null);
+
+            if (!select || !select.value || select.value.trim() === '') {
+                alert('Please select a faculty member from the dropdown before assigning.');
+                if (select) select.focus();
+                return;
+            }
+
+            const facultyId = parseInt(select.value, 10);
+            if (isNaN(facultyId)) {
+                alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
+                return;
+            }
+
+            const originalBtnHtml = assignBtn.innerHTML;
+            assignBtn.disabled = true;
+            assignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Assigning...';
+
+            fetch(`/admin/api/assign_faculty/${classId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ faculty_id: facultyId })
+            })
+            .then(async (response) => {
+                const data = await response.json().catch(() => null);
+                if (response.ok && data && data.success) {
+                    if (row) {
+                        row.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(20px)';
+                        setTimeout(() => {
+                            row.remove();
+                            const tbody = document.getElementById('unassignedClassesBody');
+                            if (tbody) {
+                                const remainingRows = tbody.querySelectorAll('tr:not(#noUnassignedRow)');
+                                const countBadge = document.getElementById('unassignedCountBadge');
+                                if (countBadge) countBadge.textContent = `${remainingRows.length} Unassigned`;
+                                
+                                const statUnassigned = document.getElementById('statUnassignedSlots');
+                                if (statUnassigned) statUnassigned.textContent = remainingRows.length;
+
+                                if (remainingRows.length === 0) {
+                                    tbody.innerHTML = `
+                                        <tr id="noUnassignedRow">
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <div class="py-4">
+                                                    <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
+                                                    <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
+                                                    <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }
+                            }
+                        }, 350);
+                    }
+                } else {
+                    const errorMsg = (data && (data.error || data.message)) || `Server error ${response.status}`;
+                    alert('Failed to allocate faculty: ' + errorMsg);
+                    assignBtn.disabled = false;
+                    assignBtn.innerHTML = originalBtnHtml;
+                }
+            })
+            .catch((err) => {
+                alert('Network error while assigning faculty: ' + (err.message || 'Please try again.'));
+                assignBtn.disabled = false;
+                assignBtn.innerHTML = originalBtnHtml;
+            });
+        });
+    }
+
+    // ==================== MASS IMPORT TIMETABLE LOGIC ====================
+    const btnPreviewCsv = document.getElementById('btnPreviewCsv');
+    const importTimetableForm = document.getElementById('importTimetableForm');
+    const csvFileInput = document.getElementById('csvFileInput');
+
+    async function handleCsvSubmit(isDryRun) {
+        if (!csvFileInput.files || csvFileInput.files.length === 0) {
+            alert('Please select a CSV file first.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', csvFileInput.files[0]);
+        formData.append('dry_run', isDryRun ? 'true' : 'false');
+
+        const btn = isDryRun ? btnPreviewCsv : document.getElementById('btnCommitImport');
+        const origText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Processing...';
+
+        try {
+            const response = await fetch('/admin/api/timetable/import', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+            btn.disabled = false;
+            btn.innerHTML = origText;
+
+            if (result.success) {
+                const data = result.data || {};
+                const previewContainer = document.getElementById('importPreviewContainer');
+                const summaryText = document.getElementById('previewSummaryText');
+                const errorsUl = document.getElementById('previewErrorsUl');
+                const errorBox = document.getElementById('previewErrorList');
+
+                if (previewContainer) previewContainer.classList.remove('d-none');
+                if (summaryText) {
+                    summaryText.textContent = `Successfully parsed ${data.records_parsed || 0} timetable entries. (${data.error_count || 0} warnings/errors)`;
+                }
+
+                if (data.errors && data.errors.length > 0) {
+                    if (errorBox) errorBox.classList.remove('d-none');
+                    if (errorsUl) {
+                        errorsUl.innerHTML = data.errors.map(e => `<li>${e}</li>`).join('');
+                    }
+                } else {
+                    if (errorBox) errorBox.classList.add('d-none');
+                }
+
+                if (!isDryRun) {
+                    alert('Timetable imported successfully!');
+                    window.location.reload();
+                }
+            } else {
+                alert('Import Failed: ' + (result.error || 'Failed to parse CSV file.'));
+            }
+        } catch (err) {
+            btn.disabled = false;
+            btn.innerHTML = origText;
+            alert('Error processing CSV: ' + (err.message || 'Server network error'));
+        }
+    }
+
+    if (btnPreviewCsv) {
+        btnPreviewCsv.addEventListener('click', () => handleCsvSubmit(true));
+    }
+
+    if (importTimetableForm) {
+        importTimetableForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const dryRun = document.getElementById('dryRunToggle').checked;
+            handleCsvSubmit(dryRun);
+        });
+    }
+
+    // ==================== DELETE TIMETABLE SCOPE LOGIC ====================
+    const deleteScopeSelect = document.getElementById('deleteScopeSelect');
+    const deleteFloorGroup = document.getElementById('deleteFloorGroup');
+    const deleteRoomGroup = document.getElementById('deleteRoomGroup');
+    const btnConfirmDeleteTimetable = document.getElementById('btnConfirmDeleteTimetable');
+
+    if (deleteScopeSelect) {
+        deleteScopeSelect.addEventListener('change', function() {
+            const val = this.value;
+            deleteFloorGroup.classList.toggle('d-none', val !== 'floor');
+            deleteRoomGroup.classList.toggle('d-none', val !== 'room');
+        });
+    }
+
+    if (btnConfirmDeleteTimetable) {
+        btnConfirmDeleteTimetable.addEventListener('click', async function() {
+            const scope = deleteScopeSelect.value;
+            const payload = { scope: scope };
+
+            if (scope === 'floor') {
+                const floorVal = document.getElementById('deleteFloorSelect').value;
+                if (!floorVal) {
+                    alert('Please select a floor.');
+                    return;
+                }
+                payload.floor_id = parseInt(floorVal, 10);
+            } else if (scope === 'room') {
+                const roomVal = document.getElementById('deleteRoomSelect').value;
+                if (!roomVal) {
+                    alert('Please select a room.');
+                    return;
+                }
+                payload.room_id = parseInt(roomVal, 10);
+            }
+
+            if (!confirm(`Are you sure you want to delete timetable schedules for scope: '${scope.toUpperCase()}'? This action cannot be undone.`)) {
+                return;
+            }
+
+            const origHtml = btnConfirmDeleteTimetable.innerHTML;
+            btnConfirmDeleteTimetable.disabled = true;
+            btnConfirmDeleteTimetable.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+
+            try {
+                const response = await fetch('/admin/api/timetable/delete', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                btnConfirmDeleteTimetable.disabled = false;
+                btnConfirmDeleteTimetable.innerHTML = origHtml;
+
+                if (result.success) {
+                    alert(result.message || 'Timetables deleted successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Delete failed: ' + (result.error || result.message || 'Server error'));
+                }
+            } catch (err) {
+                btnConfirmDeleteTimetable.disabled = false;
+                btnConfirmDeleteTimetable.innerHTML = origHtml;
+                alert('Network error while deleting timetables: ' + (err.message || 'Please try again.'));
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

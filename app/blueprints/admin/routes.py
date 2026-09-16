@@ -129,14 +129,6 @@ def dashboard():
         Ticket.status == Ticket.STATUS_IN_PROGRESS
     ).order_by(Ticket.created_at.desc()).all()
 
-    # Unassigned timetable classes requiring faculty allocation
-    from ...models import Timetable
-    unassigned_classes = Timetable.query.options(joinedload(Timetable.room)).filter(
-        Timetable.faculty_id.is_(None)
-    ).order_by(Timetable.day_of_week, Timetable.start_time).all()
-
-    all_faculties = User.query.filter_by(role=User.ROLE_FACULTY).order_by(User.name).all()
-
     return render_template('admin.html',
                          tickets=tickets,
                          open_tickets=open_tickets,
@@ -148,9 +140,50 @@ def dashboard():
                          categories=categories,
                          status_filter=status_filter,
                          floor_filter=floor_filter,
-                         category_filter=category_filter,
-                         unassigned_classes=unassigned_classes,
-                         all_faculties=all_faculties)
+                         category_filter=category_filter)
+
+
+@admin_bp.route('/classroom-management')
+@admin_bp.route('/cmm')
+@admin_required
+def classroom_management():
+    """Classroom Management Module (CMM) - Manage timetables, CSV import, deletion & faculty allocations."""
+    from sqlalchemy.orm import joinedload
+    from ...models import Timetable, Floor, Room, User, Building
+
+    # Unassigned classes requiring faculty allocation
+    unassigned_classes = Timetable.query.options(joinedload(Timetable.room)).filter(
+        Timetable.faculty_id.is_(None)
+    ).order_by(Timetable.day_of_week, Timetable.start_time).all()
+
+    all_faculties = User.query.filter_by(role=User.ROLE_FACULTY).order_by(User.name).all()
+
+    # Get floors and rooms for Delete Timetable Modal scope filters
+    vyas = Building.query.filter_by(name='Vyas').first()
+    floors = []
+    rooms = []
+    if vyas:
+        floors = Floor.query.filter_by(building_id=vyas.id).order_by(Floor.level).all()
+        rooms = Room.query.join(Floor).filter(Floor.building_id == vyas.id).order_by(Room.number).all()
+    else:
+        floors = Floor.query.order_by(Floor.level).all()
+        rooms = Room.query.order_by(Room.number).all()
+
+    total_timetables_count = Timetable.query.count()
+    assigned_count = Timetable.query.filter(Timetable.faculty_id.isnot(None)).count()
+    unassigned_count = len(unassigned_classes)
+
+    return render_template(
+        'admin_cmm.html',
+        unassigned_classes=unassigned_classes,
+        all_faculties=all_faculties,
+        floors=floors,
+        rooms=rooms,
+        total_timetables_count=total_timetables_count,
+        assigned_count=assigned_count,
+        unassigned_count=unassigned_count
+    )
+
 
 
 @admin_bp.route('/map')

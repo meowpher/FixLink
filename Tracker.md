@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.0** | 2026-09-16 | **Deployed** | Timetable Bulk Import & Admin Allocation Pattern (Null Foreign Key Data Integrity, Hardcoded Admin Fallback Removal, `/admin/api/assign_faculty/<class_id>` REST Endpoint, Interactive Dashboard Table & Zero-Reload DOM UX). |
 | **v1.6.3** | 2026-09-11 | **Staged** | Legal Templates Grounding & Artifact Removal (Stripped AI Draft Banners, Corrected Institutional Scope, Codebase-Verified Retention Durations in Cookies, Terms & Privacy). |
 | **v1.6.2** | 2026-09-11 | **Deployed** | WCAG 2.1 AA Color Contrast Hardening (Global Typography, SVG Map Labels Readability, Dark Mode Form Inputs & Interactive Button States). |
 | **v1.6.1** | 2026-09-11 | **Deployed** | Custom 404 Error Page (Zone Not Found), Dark Mode Translucent Infrastructure Aesthetic, and Search Engine Indexing Protection. |
@@ -27,6 +28,45 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.0 (2026-09-16)
+- `feat(timetable)`: **Timetable Bulk Import & Admin Allocation Pattern (Backend Data Integrity, Faculty Allocation REST Endpoint, Dashboard UI, and Seamless No-Reload UX)**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Backend Architecture & Data Integrity (Nullable Foreign Key)**:
+     - **Nullable Faculty Assignment**: Confirmed and reinforced `Timetable.faculty_id` as `nullable=True` in `app/models.py`. Updated `to_dict()` serialization so unassigned classes explicitly return `'faculty_name': 'Unassigned'`.
+     - **Removed Hardcoded Admin Fallback**: Eliminated the legacy fallback in `app/blueprints/faculty/routes.py` that automatically attributed imported CSV classes to the logged-in administrator.
+     - **Clean Unassigned Import State**: When parsing timetable CSVs (both matrix and row-based formats), classes lacking an instructor are inserted with `faculty_id = None` (`Unassigned`), preventing them from polluting personal admin schedules.
+  2. **API & Route Infrastructure (`/admin/api/assign_faculty/<class_id>`)**:
+     - **REST Endpoint**: Created `@admin_bp.route('/api/assign_faculty/<int:class_id>', methods=['POST'])` with `@admin_required` and `@handle_api_errors`.
+     - **JSON Payload Validation**: Validates the presence of `faculty_id`, verifies that the target class and faculty user exist in the database, and safely supports unassigning when `null` is passed.
+     - **Database Transaction Safety**: Commits with full rollback handling on database exception, plus real-time occupancy broadcasting via Pusher `emit_room_status_change`.
+     - **Security Decorator Hardening**: Updated `admin_required` in `app/decorators.py` to return clean HTTP 403 JSON responses rather than unexpected 302 HTML redirects for API requests.
+  3. **Frontend UI & Formless DOM Pattern (`app/templates/admin.html`)**:
+     - **Admin Dashboard Table**: Created a Bootstrap 5 card and responsive table labeled **"Unassigned Classes Requiring Faculty Allocation"** with live unassigned count badge.
+     - **Strictly Formless Architecture**: Completely avoided `<form>` tags. Each row contains a `<select class="form-select ... faculty-select">` populated with all registered faculty members (Name and User ID), paired with an Assign button bearing `data-class-id="{{ cls.id }}"`.
+     - **Theme & Dark Mode Styling**: Built without inline color hexes; utilizes CSS variables (`var(--bg-card)`, `var(--border-color)`, `var(--text-muted)`) and supports `[data-theme="dark"]` and `[data-bs-theme="dark"]`.
+  4. **Client-Side UX & Zero-Reload DOM Lifecycle**:
+     - **Frontend Validation**: Validates that an instructor is selected prior to network dispatch; alerts and aborts if empty.
+     - **CSRF Token Security**: Dispatches the asynchronous POST request carrying the CSRF token in the `X-CSRFToken` header read from `<meta name="csrf-token">`.
+     - **Micro-Interactions**: Displays a dynamic button spinner (`Assigning...`) during flight.
+     - **Seamless Fade-Out**: On HTTP 200, applies a smooth CSS fade and slide animation, removes the row after 350ms, decrements the badge count, and renders a clean empty-state banner when all classes are assigned.
+  5. **Automated Verification & Unit Tests (`tests/test_csv_import.py`)**:
+     - Added comprehensive tests for unassigned CSV parsing, unassigned database insertion, non-admin 403 access control, missing payload validation (400), invalid class/faculty ID checks (404), successful assignment (200), null unassignment, and dashboard DOM table rendering. All tests pass with zero regressions.
+
+  ---
+
+  #### 🖥️ Where & How You as a Developer Can See and Test These Changes
+
+  | What to Test | Where on the Site | Step-by-Step Testing Guide | Expected Visual Result |
+  | :--- | :--- | :--- | :--- |
+  | **1. Unassigned Classes Table** | `http://localhost:5000/admin/` | 1. Log in as an Admin (`admin@mitwpu.edu.in`).<br>2. Scroll down on the Admin Dashboard below the tickets section. | A clean card labeled **"Unassigned Classes Requiring Faculty Allocation"** displays with room badges, day/time slots, subjects, division, a faculty select dropdown, and an "Assign" button. |
+  | **2. Client-Side Validation** | `http://localhost:5000/admin/` | 1. Leave the dropdown on "Choose Faculty...".<br>2. Click the **"Assign"** button. | An alert prompts: *"Please select a faculty member from the dropdown before assigning."* Zero network requests are sent. |
+  | **3. Instant Faculty Allocation** | `http://localhost:5000/admin/` | 1. Select a registered faculty member from the dropdown.<br>2. Click **"Assign"**. | Button changes to a spinner (*"Assigning..."*), then the row **smoothly fades out and slides away**. The table count badge decrements instantly without page reload. |
+  | **4. Empty State Display** | `http://localhost:5000/admin/` | Allocate all remaining unassigned classes in the list. | The table body transitions to a green checkmark empty-state banner: *"No unassigned classes found. All classes across the Vyas building have faculty assigned."* |
+  | **5. Dark Mode Rendering** | `http://localhost:5000/admin/` | Toggle to dark mode using the theme button. | The table card, header, select elements, and text smoothly adapt to dark theme surfaces (`var(--bg-surface)`) with high-contrast text and zero hardcoded white boxes. |
+
+---
 
 ### Release v1.6.2 (2026-09-11)
 - `fix(a11y-contrast)`: **strict WCAG 2.1 AA color contrast hardening across global typography, dynamic SVG floor map room labels, dark mode form controls, and interactive button states**

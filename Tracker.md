@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.4** | 2026-09-16 | **Deployed** | Root User / Super Admin Security & Immutable Creator Accounts (Permanently secured creator accounts against unauthorized edits, deletions, and password resets; locked down backend routes with 403 Forbidden checks; hardened admin and superadmin Jinja UI templates). |
 | **v1.7.3** | 2026-09-16 | **Deployed** | Interactive Map Room Popup Position Fix (Prevented room info popup from overlapping the floor dropdown selector and legend; added auto-dismiss on floor change; polished dark mode pop-card contrast). |
 | **v1.7.2** | 2026-09-16 | **Deployed** | Theme Color Mode Bugfixes (Fixed dark mode text contrast on timetable classes, removed hardcoded black box on Booking History in light mode, and restored bright high-contrast room labels on SVG maps). |
 | **v1.7.1** | 2026-09-16 | **Deployed** | Technical Debt Purge & UI Polish (Removed legacy 'Sync My Timetable' button and popup, fixed afternoon class time parsing, and polished Smart Classroom map header). |
@@ -31,6 +32,25 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.4 (2026-09-16)
+- `feat(security)`: **Root User / Super Admin Authorization Lockdown & Creator Account Protection**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Permanently Protected Creator Accounts (Root Security Vault)**:
+     - Established a hardcoded, environment-level security rule protecting the two primary creator accounts (`taha.piplodwala@mitwpu.edu.in` and `om.mahadik@mitwpu.edu.in`).
+     - Added a dynamic `is_super_admin` security check on user accounts that cannot be bypassed or modified through database alterations.
+     - Enforced an immutable ownership policy: no regular Administrator, Faculty member, Student, or other Administrator can edit, change passwords for, or delete these accounts. Only the specific account owner can modify their own details.
+  2. **Backend Route Lockdown (403 Forbidden Shield)**:
+     - Injected a strict security guard across all user management API endpoints (editing details, updating passwords, switching user roles, and deleting accounts).
+     - Any unauthorized attempt to tamper with a Super Admin account immediately halts with an HTTP 403 Forbidden status code and a clear alert ("Unauthorized: Cannot modify Super Admin accounts.").
+  3. **Frontend UI Hardening (Clean & Protected Tables)**:
+     - In the user management tables (both Admin and Developer/Superadmin portals), the Edit (pencil), Delete (trash), Role selection dropdown, and Password reveal buttons are completely stripped from the screen for protected accounts.
+     - Replaced interactive controls with a sleek static "Super Admin" badge and plain text role, while allowing the account owner to retain their own Edit button for profile updates.
+  4. **Automated Security Test Suite**:
+     - Added a dedicated test suite (`tests/test_super_admin_guard.py`) covering all security layers (model properties, API route rejection, self-edit permissions, and template rendering safeguards).
+
+---
 
 ### Release v1.7.3 (2026-09-16)
 - `fix(map-popup)`: **Interactive Map Room Popup Positioning Fix, Unblocked Floor Controls, Auto-Dismiss, and Dark Mode Polish**

@@ -24,12 +24,20 @@ except ImportError:
 load_dotenv()
 logger = logging.getLogger(__name__)
 
+# Root User / Super Admin hardcoded authorization list
+SUPER_ADMIN_EMAILS = [
+    "taha.piplodwala@mitwpu.edu.in",
+    "om.mahadik@mitwpu.edu.in"
+]
+
 
 def create_app(config_name=None):
     """Application factory pattern for creating Flask app."""
     app = Flask(__name__, 
                 template_folder='templates',
                 static_folder='static')
+    
+    app.config['SUPER_ADMIN_EMAILS'] = SUPER_ADMIN_EMAILS
     
     if config_name == 'testing' or os.environ.get('TESTING') == 'True':
         app.config['TESTING'] = True
@@ -180,10 +188,18 @@ def create_app(config_name=None):
     # Global Template Context
     @app.context_processor
     def inject_globals():
-        from .blueprints.superadmin.routes import SUPER_ADMIN_EMAIL, get_super_admin_emails
+        current_user_obj = None
+        if session.get('user_id'):
+            from .models import User
+            current_user_obj = User.query.get(session['user_id'])
+        elif session.get('super_admin_email'):
+            from .models import User
+            current_user_obj = User.query.filter_by(email=session['super_admin_email']).first()
+
         return dict(
-            SUPER_ADMIN_EMAIL=SUPER_ADMIN_EMAIL,
-            SUPER_ADMIN_EMAILS=list(get_super_admin_emails()),
+            SUPER_ADMIN_EMAIL=SUPER_ADMIN_EMAILS[0],
+            SUPER_ADMIN_EMAILS=SUPER_ADMIN_EMAILS,
+            current_user=current_user_obj,
             PUSHER_KEY=os.environ.get('PUSHER_KEY'),
             PUSHER_CLUSTER=os.environ.get('PUSHER_CLUSTER')
         )

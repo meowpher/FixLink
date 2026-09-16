@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.1** | 2026-09-16 | **Deployed** | Technical Debt Purge & UI Polish (Removed legacy 'Sync My Timetable' button and popup, fixed afternoon class time parsing, and polished Smart Classroom map header). |
 | **v1.7.0** | 2026-09-16 | **Deployed** | Timetable Class Allocation (Fixed imported spreadsheet classes wrongly assigning to admin; added easy teacher dropdown on Admin Dashboard with one-click, instant assignment). |
 | **v1.6.3** | 2026-09-11 | **Deployed** | Legal Templates Grounding & Artifact Removal (Stripped AI Draft Banners, Corrected Institutional Scope, Codebase-Verified Retention Durations in Cookies, Terms & Privacy). |
 | **v1.6.2** | 2026-09-11 | **Deployed** | WCAG 2.1 AA Color Contrast Hardening (Global Typography, SVG Map Labels Readability, Dark Mode Form Inputs & Interactive Button States). |
@@ -28,6 +29,26 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.1 (2026-09-16)
+- `refactor(cleanup)`: **Surgical Purge of Legacy Schedule Synchronizer Modal, Afternoon Timetable Slot Parsing Fix, and Smart Classroom Map Header Polish**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Removed the Obsolete "Sync My Timetable" Button & Popup**:
+     - With the modern CSV Mass Timetable Import in place, professors no longer have to manually piece together weekly classes one by one.
+     - Following our "Aggressive Deletion" guardrails, we completely deleted the old **"Sync My Timetable"** button, the popup modal, the staging queue, and the background synchronization route.
+     - Over 450 lines of dead code were removed, making the dashboard load faster and keeping the interface clean.
+  2. **Fixed Afternoon Class Times on the Weekly Grid**:
+     - Timetables written with slots like `2:00 - 4:00` or `3.00-5.00` were previously treated as AM (morning) slots, causing afternoon classes to disappear off the visual 9 AM – 6 PM calendar.
+     - The parser now smartly recognizes daytime university hours (1:00 PM to 7:00 PM) and places them into their correct afternoon slots automatically. Existing database entries were also repaired.
+  3. **Polished "Smart Classroom Management" Map Header**:
+     - **Restored Status Dots**: Added clean, glowing green and red indicator dots next to "Available" and "Occupied" in a sleek rounded pill card.
+     - **Fixed Floor Dropdown Width**: The floor selection dropdown no longer stretches across the entire screen; it is neatly formatted as a compact pill aligned to the right.
+     - **Full Dark Mode Support**: The status card and floor selector seamlessly adapt to dark mode with clear contrast and custom dropdown chevrons.
+  4. **Fresh Stylesheet Cache Busting**:
+     - Updated and compressed `style.min.css` and bumped the version tag to `v=8.5` so browser caches load the newest design immediately.
+
+---
 
 ### Release v1.7.0 (2026-09-16)
 - `feat(timetable)`: **Timetable Bulk Import & Easy Faculty Assignment (Admin Allocation System)**

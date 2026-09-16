@@ -2343,6 +2343,98 @@ body {
     background: var(--border-color);
 }
 
+/* ── Facility Intelligence Map Header & Legend ── */
+.facility-intelligence-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 20px;
+}
+
+.facility-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.status-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+}
+
+.status-legend .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dot.available {
+    background-color: var(--success-color, #10b981);
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+}
+
+.dot.occupied {
+    background-color: var(--danger-color, #ef4444);
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+}
+
+.dot.selected {
+    background-color: var(--mitwpu-blue, #3b82f6);
+    box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+}
+
+.floor-selector-pill {
+    width: auto !important;
+    min-width: 200px;
+    max-width: 260px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border-radius: 30px !important;
+    padding: 8px 16px;
+    border: 1px solid var(--border-color) !important;
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+}
+
+.floor-selector-pill:focus {
+    border-color: var(--mitwpu-blue) !important;
+    box-shadow: 0 0 0 3px rgba(11, 77, 140, 0.15) !important;
+}
+
+[data-theme="dark"] .floor-selector-pill {
+    background-color: var(--bg-surface) !important;
+    border-color: var(--border-subtle) !important;
+    color: var(--text-primary) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23f4f4f5' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+[data-theme="dark"] .status-legend {
+    background: var(--bg-surface) !important;
+    border-color: var(--border-subtle) !important;
+    color: var(--text-primary) !important;
+}
+
 /* Floor Tabs */
 .floor-tabs-section {
     background: var(--bg-main);
@@ -2912,24 +3004,9 @@ body[data-theme="dark"] .stat-label {
 }
 
 /* Modal Content specific fixes */
-[data-theme="dark"] .modal-content,
-[data-theme="dark"] .tt-form-container {
+[data-theme="dark"] .modal-content {
     background-color: var(--bg-surface) !important;
     color: var(--text-primary) !important;
-}
-
-[data-theme="dark"] .selector-group {
-    background: var(--bg-overlay) !important;
-    border-color: var(--border-subtle) !important;
-}
-
-[data-theme="dark"] .smart-grid {
-    background: var(--bg-overlay) !important;
-    border-color: var(--border-subtle) !important;
-}
-
-[data-theme="dark"] .selector-label {
-    color: var(--text-secondary) !important;
 }
 
 [data-theme="dark"] .glass-modal .modal-title {
@@ -2938,26 +3015,6 @@ body[data-theme="dark"] .stat-label {
 
 [data-theme="dark"] .glass-modal .btn-close {
     filter: invert(1) !important;
-}
-
-/* 2. Neural Schedule Synchronizer specific buttons */
-[data-theme="dark"] .room-btn,
-[data-theme="dark"] .choice-btn {
-    background: var(--bg-surface) !important;
-    color: var(--text-primary) !important;
-    border: 1px solid var(--border-subtle) !important;
-}
-
-[data-theme="dark"] .room-btn:hover,
-[data-theme="dark"] .choice-btn:hover {
-    background: var(--bg-overlay) !important;
-}
-
-[data-theme="dark"] .room-btn.selected,
-[data-theme="dark"] .choice-btn.selected {
-    background: var(--mitwpu-blue) !important;
-    color: #ffffff !important;
-    border-color: #00d2ff !important;
 }
 
 /* 3. Button group for tabs (Help Requests: Pending/Approved/etc) */
@@ -3274,9 +3331,7 @@ body[data-theme="dark"] .stat-label {
     /* Touch targets — exclude input-group buttons to avoid breaking inline addon layout */
     .btn:not(.input-group .btn):not(.input-group-text .btn),
     .form-control,
-    .form-select,
-    .room-btn,
-    .choice-btn {
+    .form-select {
         min-height: 44px;
     }
 
@@ -3297,10 +3352,6 @@ body[data-theme="dark"] .stat-label {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 1rem;
-    }
-
-    .tt-form-container {
-        padding: 1rem !important;
     }
 
     /* Map Layouts */
@@ -4244,9 +4295,7 @@ img {
     /* Touch targets — exclude input-group buttons */
     .btn:not(.input-group .btn):not(.input-group-text .btn),
     .form-control,
-    .form-select,
-    .room-btn,
-    .choice-btn {
+    .form-select {
         min-height: 44px;
     }
 
@@ -4261,10 +4310,6 @@ img {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 1rem;
-    }
-
-    .tt-form-container {
-        padding: 1rem !important;
     }
 
     .map-panel,
@@ -4310,8 +4355,7 @@ img {
 
     /* ── Grids: single column ── */
     .dashboard-grid,
-    .stats-grid,
-    .smart-grid {
+    .stats-grid {
         grid-template-columns: 1fr !important;
     }
 
@@ -4357,10 +4401,7 @@ img {
     }
 
     /* ── Touch targets — ONLY on mobile ── */
-    /* ── Touch targets — ONLY on mobile ── */
-    .btn:not(.input-group .btn):not(.input-group-text .btn),
-    .room-btn,
-    .choice-btn {
+    .btn:not(.input-group .btn):not(.input-group-text .btn) {
         min-height: 44px;
     }
 
@@ -4435,10 +4476,6 @@ img {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         padding-bottom: 1rem;
-    }
-
-    .tt-form-container {
-        padding: 1rem !important;
     }
 
     /* ── Padding scale-down ── */
@@ -6245,11 +6282,8 @@ html[data-theme="dark"] {
     box-shadow: none !important;
 }
 
-/* Fix 2: Floor Pills & Active Tabs */
-[data-theme="dark"] .floor-pill.active,
-[data-theme="dark"] .nav-pills .nav-link.active,
-[data-theme="dark"] .room-btn.selected,
-[data-theme="dark"] .choice-btn.selected {
+/* Fix 2: Active Tabs */
+[data-theme="dark"] .nav-pills .nav-link.active {
     background-color: var(--ice-hint) !important;
     color: var(--void) !important;
     border-color: var(--ice-hint) !important;

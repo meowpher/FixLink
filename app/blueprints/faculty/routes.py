@@ -372,71 +372,6 @@ def cancel_timetable_session(timetable_id):
     return api_response(success=True, message="Class marked as cancelled for this hour.")
 
 
-@faculty_bp.route('/api/faculty/timetable', methods=['POST'])
-@faculty_login_required
-@handle_api_errors
-def upsert_timetable():
-    """Bulk upserts timetable entries for the logged-in faculty."""
-    data = request.get_json() # Expecting a list of objects
-    if not isinstance(data, list):
-        return api_response(success=False, error="Data must be a list of timetable entries.", status=400)
-        
-    user_id = session.get('user_id')
-    
-    # For simplicity, we'll clear existing timetable for this faculty or handle updates
-    # The request says "Bulk upserts", I'll implement a basic upsert
-    success_count = 0
-    for entry in data:
-        room_id = entry.get('room_id')
-        day = entry.get('day_of_week')
-        start_time_str = entry.get('start_time') # 'HH:MM'
-        subject = entry.get('subject')
-        duration = int(entry.get('duration', 1))
-        collaborator_id = entry.get('collaborator_id')
-        if collaborator_id == '': collaborator_id = None
-        
-        if not all([room_id, day is not None, start_time_str, subject]):
-            continue
-            
-        try:
-            start_dt = datetime.strptime(start_time_str, '%H:%M')
-            start_time = start_dt.time()
-            end_time = (start_dt + timedelta(hours=duration)).time()
-        except Exception as e:
-            print(f"Error parsing time: {e}")
-            continue
-            
-        # Check for existing entry for this faculty at this time/day to avoid duplicates
-        existing = Timetable.query.filter_by(
-            faculty_id=user_id,
-            day_of_week=day,
-            start_time=start_time
-        ).first()
-        
-        if existing:
-            # Update
-            existing.room_id = room_id
-            existing.subject = subject
-            existing.end_time = end_time
-            existing.collaborator_id = collaborator_id
-        else:
-            # Create
-            new_entry = Timetable(
-                room_id=room_id,
-                faculty_id=user_id,
-                collaborator_id=collaborator_id,
-                day_of_week=day,
-                start_time=start_time,
-                end_time=end_time,
-                subject=subject
-            )
-            db.session.add(new_entry)
-        
-        success_count += 1
-        
-    db.session.commit()
-    return api_response(message=f"Successfully synchronized {success_count} entries to your timetable.")
-
 
 @faculty_bp.route('/api/faculty/timetable/<int:entry_id>', methods=['DELETE'])
 @faculty_login_required
@@ -499,6 +434,9 @@ def parse_time_slot(time_str):
             hr += 12
         elif ampm == 'am' and hr == 12:
             hr = 0
+        elif ampm is None and 1 <= hr <= 7:
+            # University classes between 1 and 7 without AM/PM are afternoon (13:00 to 19:00)
+            hr += 12
         if 0 <= hr <= 23 and 0 <= mn <= 59:
             return datetime.strptime(f"{hr:02d}:{mn:02d}", "%H:%M").time()
         return None

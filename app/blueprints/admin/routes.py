@@ -129,6 +129,14 @@ def dashboard():
         Ticket.status == Ticket.STATUS_IN_PROGRESS
     ).order_by(Ticket.created_at.desc()).all()
 
+    # Unassigned timetable classes requiring faculty allocation
+    from ...models import Timetable
+    unassigned_classes = Timetable.query.options(joinedload(Timetable.room)).filter(
+        Timetable.faculty_id.is_(None)
+    ).order_by(Timetable.day_of_week, Timetable.start_time).all()
+
+    all_faculties = User.query.filter_by(role=User.ROLE_FACULTY).order_by(User.name).all()
+
     return render_template('admin.html',
                          tickets=tickets,
                          open_tickets=open_tickets,
@@ -140,7 +148,9 @@ def dashboard():
                          categories=categories,
                          status_filter=status_filter,
                          floor_filter=floor_filter,
-                         category_filter=category_filter)
+                         category_filter=category_filter,
+                         unassigned_classes=unassigned_classes,
+                         all_faculties=all_faculties)
 
 
 @admin_bp.route('/map')
@@ -1861,6 +1871,7 @@ def import_timetable():
                 
                 tt = Timetable(
                     room_id=room_id,
+                    faculty_id=None,
                     day_of_week=day_map[day_name],
                     start_time=start_t,
                     end_time=end_t,
@@ -1944,4 +1955,68 @@ def delete_timetable_scoped():
 
     else:
         return api_response(success=False, error="Invalid scope. Must be 'room', 'floor', or 'building'.", status=400)
+
+
+@admin_bp.route('/api/assign_faculty/<int:class_id>', methods=['POST'])
+@admin_bp.route('/api/assign-faculty/<int:class_id>', methods=['POST'])
+@admin_required
+@handle_api_errors
+def assign_faculty(class_id):
+    """
+    Assign or update the faculty assigned to a specific Timetable class slot.
+    Payload: {"faculty_id": <int or None>}
+    """
+    from ...models import Timetable, User
+
+    data = request.get_json(silent=True)
+    if data is None:
+        return api_response(success=False, error="Invalid or missing JSON payload.", status=400)
+
+    if 'faculty_id' not in data:
+        return api_response(success=False, error="'faculty_id' is required in JSON payload.", status=400)
+
+    tt = Timetable.query.get(class_id)
+    if not tt:
+        return api_response(success=False, error=f"Class with ID {class_id} not found.", status=404)
+
+    raw_faculty_id = data.get('faculty_id')
+    faculty = None
+    target_faculty_id = None
+
+    if raw_faculty_id is not None and str(raw_faculty_id).strip() not in ['', '0', 'null', 'None']:
+        try:
+            target_faculty_id = int(raw_faculty_id)
+        except (ValueError, TypeError):
+            return api_response(success=False, error="Invalid faculty_id. Must be an integer ID or null.", status=400)
+
+        faculty = User.query.get(target_faculty_id)
+        if not faculty:
+            return api_response(success=False, error=f"Faculty with ID {target_faculty_id} not found.", status=404)
+
+    tt.faculty_id = target_faculty_id
+
+    try:
+        db.session.commit()
+        faculty_name = faculty.name if faculty else "Unassigned"
+
+        try:
+            if tt.room:
+                from ...realtime import emit_room_status_change
+                emit_room_status_change(tt.room, tt.room.current_occupancy_status)
+        except Exception:
+            pass
+
+        return api_response(
+            success=True,
+            message=f"Class '{tt.subject}' successfully assigned to {faculty_name}.",
+            data=tt.to_dict()
+        )
+    except Exception as e:
+        db.session.rollback()
+        return api_response(
+            success=False,
+            error=f"Database commit failed: {str(e)}",
+            status=500
+        )
+
 

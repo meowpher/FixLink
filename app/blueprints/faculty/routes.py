@@ -692,7 +692,8 @@ def parse_timetable_csv(file_bytes):
                             'start_time': start_t.strftime('%H:%M'),
                             'end_time': end_t.strftime('%H:%M'),
                             'duration': duration,
-                            'subject': subj
+                            'subject': subj,
+                            'faculty_id': None
                         })
         else:
             day_val = row[day_single_col_idx].strip().lower() if day_single_col_idx != -1 and day_single_col_idx < len(row) else ''
@@ -724,7 +725,8 @@ def parse_timetable_csv(file_bytes):
                 'start_time': start_t.strftime('%H:%M'),
                 'end_time': end_t.strftime('%H:%M'),
                 'duration': duration,
-                'subject': subj_val
+                'subject': subj_val,
+                'faculty_id': None
             })
 
     return parsed_entries, errors
@@ -773,7 +775,6 @@ def import_timetable_csv():
     if not entries or not isinstance(entries, list):
         return api_response(success=False, error="No timetable entries provided to commit.", status=400)
 
-    admin_user_id = session.get('user_id')
     success_count = 0
 
     for entry in entries:
@@ -782,7 +783,7 @@ def import_timetable_csv():
         start_time_str = entry.get('start_time')
         subject = entry.get('subject')
         duration = int(entry.get('duration', 1))
-        fac_id = entry.get('faculty_id') or admin_user_id
+        fac_id = entry.get('faculty_id') or None  # Explicit None when unassigned; no admin fallback
 
         if not all([room_id, day is not None, start_time_str, subject]):
             continue

@@ -23,9 +23,9 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session or not session.get('is_admin'):
-            # Handle AJAX requests by returning 401 JSON instead of redirect
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return api_response(success=False, error='Admin access required. Please log in again.', status=401)
+            # Handle AJAX or JSON API requests
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+                return api_response(success=False, error='Admin access required. Please log in again.', status=403)
             flash('Admin access required.', 'error')
             return redirect(url_for('auth.login'))
         
@@ -36,8 +36,8 @@ def admin_required(f):
             session.pop('is_admin', None)
             session.pop('user_name', None)
             session.pop('user_role', None)
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return api_response(success=False, error='Admin access required.', status=401)
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+                return api_response(success=False, error='Admin access required.', status=403)
             flash('Admin account not found or access revoked.', 'error')
             return redirect(url_for('auth.login'))
         return f(*args, **kwargs)

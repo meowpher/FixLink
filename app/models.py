@@ -871,7 +871,7 @@ class Timetable(db.Model):
         return {
             'id': self.id,
             'faculty_id': self.faculty_id,
-            'faculty_name': self.faculty.name if self.faculty else 'Unknown',
+            'faculty_name': self.faculty.name if self.faculty else 'Unassigned',
             'collaborator_id': self.collaborator_id,
             'collaborator_name': self.collaborator.name if self.collaborator else None,
             'room_id': self.room_id,

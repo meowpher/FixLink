@@ -129,6 +129,50 @@
             padding: 1rem;
         }
     }
+
+    /* Unassigned Classes Section Styles */
+    .unassigned-classes-section .card {
+        border-radius: 16px;
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+    }
+    .unassigned-classes-section .card-header {
+        background: var(--bg-card, #ffffff);
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+    }
+    .unassigned-classes-section .table th {
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 700;
+        color: var(--text-muted, #64748b);
+    }
+    [data-theme="dark"] .unassigned-classes-section .card,
+    [data-bs-theme="dark"] .unassigned-classes-section .card {
+        background: var(--bg-surface, #1e293b);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1)) !important;
+    }
+    [data-theme="dark"] .unassigned-classes-section .card-header,
+    [data-bs-theme="dark"] .unassigned-classes-section .card-header {
+        background: var(--bg-surface, #1e293b) !important;
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1)) !important;
+    }
+    [data-theme="dark"] .unassigned-classes-section .table,
+    [data-bs-theme="dark"] .unassigned-classes-section .table {
+        color: #f1f5f9;
+    }
+    [data-theme="dark"] .unassigned-classes-section .table thead.table-light th,
+    [data-bs-theme="dark"] .unassigned-classes-section .table thead.table-light th {
+        background-color: rgba(15, 23, 42, 0.6) !important;
+        color: #94a3b8 !important;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    [data-theme="dark"] .unassigned-classes-section .form-select,
+    [data-bs-theme="dark"] .unassigned-classes-section .form-select {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #f1f5f9;
+    }
 </style>
 {% endblock %}
 
@@ -459,6 +503,106 @@
                     {{ ticket_table_from(in_progress_tickets) }}
                 </div>
 
+                </div>
+            </div>
+        </div>
+</section>
+
+<!-- Unassigned Classes Requiring Faculty Allocation Section -->
+<section class="unassigned-classes-section py-4" id="unassignedClassesSection">
+    <div class="container">
+        <div class="card shadow-sm border-0 rounded-4 overflow-hidden">
+            <div class="card-header py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="p-2 rounded-3 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="bi bi-calendar-x-fill fs-5"></i>
+                    </div>
+                    <div>
+                        <h4 class="h5 fw-bold mb-0 text-body">Unassigned Classes Requiring Faculty Allocation</h4>
+                        <p class="text-muted small mb-0">Imported timetable sessions missing instructor assignments. Select a faculty member to allocate instantly.</p>
+                    </div>
+                </div>
+                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2 fw-semibold" id="unassignedCountBadge">
+                    {{ unassigned_classes|length }} Unassigned
+                </span>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0" id="unassignedClassesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="ps-4 py-3">Room</th>
+                                <th class="py-3">Day & Time</th>
+                                <th class="py-3">Subject / Course</th>
+                                <th class="py-3">Division</th>
+                                <th class="py-3" style="min-width: 280px;">Faculty Member</th>
+                                <th class="text-end pe-4 py-3" style="width: 140px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="unassignedClassesBody">
+                            {% if unassigned_classes %}
+                                {% for cls in unassigned_classes %}
+                                <tr id="class-row-{{ cls.id }}">
+                                    <td class="ps-4 fw-bold">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+                                            {{ cls.room.number if cls.room else ('Room #' ~ cls.room_id) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-body">
+                                            {% if cls.day_of_week == 0 %}Monday
+                                            {% elif cls.day_of_week == 1 %}Tuesday
+                                            {% elif cls.day_of_week == 2 %}Wednesday
+                                            {% elif cls.day_of_week == 3 %}Thursday
+                                            {% elif cls.day_of_week == 4 %}Friday
+                                            {% elif cls.day_of_week == 5 %}Saturday
+                                            {% elif cls.day_of_week == 6 %}Sunday
+                                            {% else %}Day {{ cls.day_of_week }}
+                                            {% endif %}
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ cls.start_time.strftime('%I:%M %p') if cls.start_time else '' }} - {{ cls.end_time.strftime('%I:%M %p') if cls.end_time else '' }}
+                                        </small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold text-body">{{ cls.subject }}</div>
+                                        {% if cls.course %}
+                                        <small class="text-muted">{{ cls.course }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="text-muted small">{{ cls.division or '—' }}</span>
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm faculty-select" id="faculty-select-{{ cls.id }}" aria-label="Select Faculty">
+                                            <option value="" selected disabled>Choose Faculty...</option>
+                                            {% for fac in all_faculties %}
+                                            <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <button type="button" 
+                                                class="btn btn-sm btn-primary rounded-pill px-3 btn-assign-faculty" 
+                                                data-class-id="{{ cls.id }}">
+                                            <i class="bi bi-person-check-fill me-1"></i>Assign
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr id="noUnassignedRow">
+                                    <td colspan="6" class="text-center py-5 text-muted">
+                                        <div class="py-3">
+                                            <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-2"></i>
+                                            <p class="mb-0 fw-semibold">No unassigned classes found.</p>
+                                            <small class="text-muted">All classes across the Vyas building have faculty assigned.</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -890,6 +1034,101 @@
         if (ticketId) {
             viewTicket(parseInt(ticketId));
         }
+    });
+
+    // ==================== UNASSIGNED CLASSES FACULTY ALLOCATION ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        const unassignedTable = document.getElementById('unassignedClassesTable');
+        if (!unassignedTable) return;
+
+        unassignedTable.addEventListener('click', function(e) {
+            const assignBtn = e.target.closest('.btn-assign-faculty');
+            if (!assignBtn) return;
+
+            const classId = assignBtn.dataset.classId;
+            if (!classId) return;
+
+            const row = document.getElementById(`class-row-${classId}`) || assignBtn.closest('tr');
+            const select = document.getElementById(`faculty-select-${classId}`) || (row ? row.querySelector('.faculty-select') : null);
+
+            // Frontend Validation: verify dropdown has a valid faculty selected
+            if (!select || !select.value || select.value.trim() === '') {
+                alert('Please select a faculty member from the dropdown before assigning.');
+                if (select) select.focus();
+                return;
+            }
+
+            const facultyId = parseInt(select.value, 10);
+            if (isNaN(facultyId)) {
+                alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
+                return;
+            }
+
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+            // Visual loading state
+            const originalBtnHtml = assignBtn.innerHTML;
+            assignBtn.disabled = true;
+            assignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Assigning...';
+
+            fetch(`/admin/api/assign_faculty/${classId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ faculty_id: facultyId })
+            })
+            .then(async (response) => {
+                const data = await response.json().catch(() => null);
+                if (response.ok && data && data.success) {
+                    // Successful HTTP 200 response: dynamically fade out and remove row from DOM
+                    if (row) {
+                        row.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+                        row.style.opacity = '0';
+                        row.style.transform = 'translateX(20px)';
+                        setTimeout(() => {
+                            row.remove();
+                            const tbody = document.getElementById('unassignedClassesBody');
+                            if (tbody) {
+                                const remainingRows = tbody.querySelectorAll('tr:not(#noUnassignedRow)');
+                                const countBadge = document.getElementById('unassignedCountBadge');
+                                if (countBadge) {
+                                    countBadge.textContent = `${remainingRows.length} Unassigned`;
+                                }
+                                if (remainingRows.length === 0) {
+                                    tbody.innerHTML = `
+                                        <tr id="noUnassignedRow">
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <div class="py-3">
+                                                    <i class="bi bi-check-circle-fill text-success fs-1 d-block mb-2"></i>
+                                                    <p class="mb-0 fw-semibold">No unassigned classes found.</p>
+                                                    <small class="text-muted">All classes across the Vyas building have faculty assigned.</small>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }
+                            }
+                        }, 350);
+                    }
+                } else {
+                    // Error status response: display alert with error message
+                    const errorMsg = (data && (data.error || data.message)) || `Server responded with status ${response.status}`;
+                    alert('Failed to allocate faculty: ' + errorMsg);
+                    assignBtn.disabled = false;
+                    assignBtn.innerHTML = originalBtnHtml;
+                }
+            })
+            .catch((err) => {
+                console.error('Error assigning faculty:', err);
+                alert('Network error while assigning faculty: ' + (err.message || 'Please try again.'));
+                assignBtn.disabled = false;
+                assignBtn.innerHTML = originalBtnHtml;
+            });
+        });
     });
 </script>
 {% endblock %}

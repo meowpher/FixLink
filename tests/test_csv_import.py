@@ -137,6 +137,11 @@ class TestCSVTimetableImport(unittest.TestCase):
             
             with self.app.app_context():
                 self.assertEqual(Timetable.query.count(), 4)
+                # Ensure faculty_id is None (Unassigned) instead of defaulting to admin user
+                unassigned_records = Timetable.query.filter(Timetable.faculty_id.is_(None)).all()
+                self.assertEqual(len(unassigned_records), 4)
+                admin_records = Timetable.query.filter_by(faculty_id=admin_id).all()
+                self.assertEqual(len(admin_records), 0)
             
             # Delete Room Scope (VY401)
             res_del_room = self.client.post('/admin/api/timetable/delete', json={'scope': 'room', 'room_id': r1_id})
@@ -151,5 +156,117 @@ class TestCSVTimetableImport(unittest.TestCase):
             with self.app.app_context():
                 self.assertEqual(Timetable.query.count(), 0)
 
+    def test_assign_faculty_api(self):
+        from datetime import time
+        with self.app.app_context():
+            admin = User.query.filter_by(email="admin@mitwpu.edu.in").first()
+            fac = User.query.filter_by(email="sharma@mitwpu.edu.in").first()
+            r1 = Room.query.filter_by(number="VY401").first()
+
+            tt = Timetable(
+                room_id=r1.id,
+                faculty_id=None,
+                day_of_week=0,
+                start_time=time(10, 0),
+                end_time=time(11, 0),
+                subject="Computer Graphics"
+            )
+            db.session.add(tt)
+            db.session.commit()
+            tt_id = tt.id
+            admin_id = admin.id
+            fac_id = fac.id
+
+        # 1. Test unauthenticated / non-admin access
+        res = self.client.post(f'/admin/api/assign_faculty/{tt_id}', json={'faculty_id': fac_id})
+        self.assertEqual(res.status_code, 403)
+
+        # 2. Login as admin
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = admin_id
+            sess['user_role'] = User.ROLE_ADMIN
+            sess['is_admin'] = True
+
+        # 3. Test missing payload
+        res = self.client.post(f'/admin/api/assign_faculty/{tt_id}')
+        self.assertEqual(res.status_code, 400)
+        self.assertFalse(res.get_json()['success'])
+
+        # 4. Test missing class_id (404)
+        res = self.client.post('/admin/api/assign_faculty/99999', json={'faculty_id': fac_id})
+        self.assertEqual(res.status_code, 404)
+
+        # 5. Test non-existent faculty_id (404)
+        res = self.client.post(f'/admin/api/assign_faculty/{tt_id}', json={'faculty_id': 99999})
+        self.assertEqual(res.status_code, 404)
+
+        # 6. Successful assignment
+        res = self.client.post(f'/admin/api/assign_faculty/{tt_id}', json={'faculty_id': fac_id})
+        self.assertEqual(res.status_code, 200)
+        data = res.get_json()
+        self.assertTrue(data['success'])
+        self.assertEqual(data['data']['faculty_id'], fac_id)
+        self.assertEqual(data['data']['faculty_name'], 'Prof. Sharma')
+
+        with self.app.app_context():
+            updated = Timetable.query.get(tt_id)
+            self.assertEqual(updated.faculty_id, fac_id)
+
+        # 7. Successful unassignment (passing None/null)
+        res_unassign = self.client.post(f'/admin/api/assign_faculty/{tt_id}', json={'faculty_id': None})
+        self.assertEqual(res_unassign.status_code, 200)
+        data_unassign = res_unassign.get_json()
+        self.assertTrue(data_unassign['success'])
+        self.assertIsNone(data_unassign['data']['faculty_id'])
+        self.assertEqual(data_unassign['data']['faculty_name'], 'Unassigned')
+
+        with self.app.app_context():
+            updated = Timetable.query.get(tt_id)
+            self.assertIsNone(updated.faculty_id)
+
+    def test_admin_dashboard_unassigned_classes_render(self):
+        from datetime import time
+        with self.app.app_context():
+            admin = User.query.filter_by(email="admin@mitwpu.edu.in").first()
+            r1 = Room.query.filter_by(number="VY401").first()
+
+            tt = Timetable(
+                room_id=r1.id,
+                faculty_id=None,
+                day_of_week=1,
+                start_time=time(9, 0),
+                end_time=time(10, 0),
+                subject="Algorithms and Data",
+                course="B.Tech CSE",
+                division="DIV-A"
+            )
+            db.session.add(tt)
+            db.session.commit()
+            tt_id = tt.id
+            admin_id = admin.id
+
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = admin_id
+            sess['user_role'] = User.ROLE_ADMIN
+            sess['is_admin'] = True
+
+        res = self.client.get('/admin/')
+        self.assertEqual(res.status_code, 200)
+        content = res.data.decode('utf-8')
+
+        # Check section title
+        self.assertIn("Unassigned Classes Requiring Faculty Allocation", content)
+        # Check CSRF meta tag
+        self.assertIn('name="csrf-token"', content)
+        # Check table headers and content
+        self.assertIn("Algorithms and Data", content)
+        self.assertIn("Prof. Sharma", content)
+        # Check data attribute on button
+        self.assertIn(f'data-class-id="{tt_id}"', content)
+        # Verify no form tags wrapping the row
+        self.assertNotIn(f'<form id="assign-form-{tt_id}"', content)
+
 if __name__ == '__main__':
     unittest.main()
+
+

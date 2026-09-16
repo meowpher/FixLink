@@ -169,6 +169,37 @@ def classroom_management():
         floors = Floor.query.order_by(Floor.level).all()
         rooms = Room.query.order_by(Room.number).all()
 
+    # Prepare floor-grouped academic rooms for Room filter (exclude lifts, washrooms, MR, ENCAVE)
+    academic_floors = []
+    for f in floors:
+        floor_rooms = []
+        for r in sorted(f.rooms, key=lambda x: x.number):
+            num = (r.number or '').strip()
+            name = (r.name or '').strip().lower()
+            rtype = (r.room_type or '').strip().lower()
+            
+            # Exclude Lifts
+            if 'lift' in num.lower() or 'lift' in name or rtype == 'lift':
+                continue
+            # Exclude Washrooms
+            if 'washroom' in name or rtype == 'washroom':
+                continue
+            # Exclude MR (Meeting Rooms)
+            if num.upper().startswith('MR') or rtype == 'meeting_room' or 'meeting room' in name:
+                continue
+            # Exclude ENCAVE
+            if num.upper() == 'ENCAVE' or 'encave' in name or rtype == 'canteen' or 'canteen' in name:
+                continue
+                
+            floor_rooms.append(r)
+        if floor_rooms:
+            academic_floors.append({
+                'floor': f,
+                'name': f.name,
+                'level': f.level,
+                'rooms': floor_rooms
+            })
+
     total_timetables_count = Timetable.query.count()
     assigned_count = Timetable.query.filter(Timetable.faculty_id.isnot(None)).count()
     unassigned_count = len(unassigned_classes)
@@ -178,6 +209,7 @@ def classroom_management():
         unassigned_classes=unassigned_classes,
         all_faculties=all_faculties,
         floors=floors,
+        academic_floors=academic_floors,
         rooms=rooms,
         total_timetables_count=total_timetables_count,
         assigned_count=assigned_count,

@@ -2,6 +2,216 @@
 
 {% block title %}Classroom Management Module (CMM) - MIT-WPU FixLink Admin{% endblock %}
 
+{% block extra_css %}
+<style>
+    /* Filter Sidebar Panel Styles */
+    .filter-sidebar-panel {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        padding: 1.25rem 1.1rem;
+        position: sticky;
+        top: 90px;
+        transition: all 0.25s ease;
+    }
+
+    .filter-sidebar-title {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.75px;
+        color: var(--text-muted, #64748b);
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        margin-bottom: 1.1rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .filter-sidebar-panel .form-label {
+        font-size: 0.82rem;
+        font-weight: 600;
+        color: var(--text-main, #334155);
+        margin-bottom: 0.4rem;
+    }
+
+    .filter-sidebar-panel .form-select,
+    .filter-sidebar-panel .form-control {
+        border-radius: 10px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        font-size: 0.9rem;
+        height: 42px;
+        padding: 0.5rem 0.85rem;
+        background-color: var(--bg-input, #f8fafc);
+        color: var(--text-main, #0f172a);
+        transition: all 0.2s ease;
+    }
+
+    .filter-sidebar-panel .input-group-text {
+        border-radius: 10px 0 0 10px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-right: none;
+        background-color: var(--bg-input, #f8fafc);
+    }
+
+    .filter-sidebar-panel .input-group .form-control {
+        border-radius: 0 10px 10px 0;
+        border-left: none;
+    }
+
+    .filter-sidebar-panel .form-select:focus,
+    .filter-sidebar-panel .form-control:focus {
+        border-color: var(--mitwpu-blue, #0b4d8c);
+        box-shadow: 0 0 0 3px rgba(11, 77, 140, 0.15);
+        background-color: #ffffff;
+    }
+
+    /* Dark Mode Support for Filter Sidebar */
+    [data-theme="dark"] .filter-sidebar-panel,
+    [data-bs-theme="dark"] .filter-sidebar-panel {
+        background: var(--bg-surface, #1e293b);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .filter-sidebar-title,
+    [data-bs-theme="dark"] .filter-sidebar-title {
+        color: var(--text-muted, #94a3b8);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-label,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-label {
+        color: var(--text-body, #cbd5e1);
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-select,
+    [data-theme="dark"] .filter-sidebar-panel .form-control,
+    [data-theme="dark"] .filter-sidebar-panel .input-group-text,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-select,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-control,
+    [data-bs-theme="dark"] .filter-sidebar-panel .input-group-text {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .form-select:focus,
+    [data-theme="dark"] .filter-sidebar-panel .form-control:focus,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-select:focus,
+    [data-bs-theme="dark"] .filter-sidebar-panel .form-control:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+        background-color: #0f172a;
+    }
+
+    @media (max-width: 767px) {
+        .filter-sidebar-panel {
+            position: static;
+            margin-bottom: 1.25rem;
+            padding: 1rem;
+        }
+    }
+
+    /* Floor Accordion Dropdown inside Filter */
+    .room-accordion-dropdown .dropdown-menu {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    .room-accordion-dropdown .accordion-button {
+        background-color: #f8fafc;
+        color: #334155;
+        border-radius: 8px !important;
+        transition: all 0.2s ease;
+    }
+    .room-accordion-dropdown .accordion-button:not(.collapsed) {
+        background-color: rgba(11, 77, 140, 0.08);
+        color: var(--mitwpu-blue, #0b4d8c);
+        box-shadow: none;
+    }
+    .room-accordion-dropdown .accordion-button::after {
+        background-size: 0.75rem;
+        transition: transform 0.2s ease-in-out;
+        margin-left: auto;
+    }
+    .room-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        width: 100%;
+    }
+    .room-chip-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 32px;
+        padding: 0 2px;
+        font-size: 0.76rem;
+        font-weight: 500;
+        text-align: center;
+        white-space: nowrap;
+        border-radius: 8px;
+        transition: all 0.15s ease-in-out;
+        border: 1px solid rgba(11, 77, 140, 0.15) !important;
+        background-color: rgba(11, 77, 140, 0.06);
+        color: var(--mitwpu-blue, #0b4d8c);
+    }
+    .room-chip-btn:hover {
+        background-color: var(--mitwpu-blue, #0b4d8c) !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+    }
+    .room-chip-btn.active {
+        background-color: var(--mitwpu-blue, #0b4d8c) !important;
+        border-color: var(--mitwpu-blue, #0b4d8c) !important;
+        color: #ffffff !important;
+        font-weight: 600;
+        box-shadow: 0 2px 4px rgba(11, 77, 140, 0.3);
+    }
+
+    /* Dark mode for Room Accordion Dropdown */
+    [data-theme="dark"] .room-accordion-dropdown .dropdown-menu,
+    [data-bs-theme="dark"] .room-accordion-dropdown .dropdown-menu {
+        background: #1e293b;
+        border-color: rgba(255, 255, 255, 0.12);
+    }
+    [data-theme="dark"] .room-accordion-dropdown .accordion-button,
+    [data-bs-theme="dark"] .room-accordion-dropdown .accordion-button {
+        background-color: #0f172a;
+        color: #e2e8f0;
+    }
+    [data-theme="dark"] .room-accordion-dropdown .accordion-button:not(.collapsed),
+    [data-bs-theme="dark"] .room-accordion-dropdown .accordion-button:not(.collapsed) {
+        background-color: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+    }
+    [data-theme="dark"] .room-accordion-dropdown .dropdown-item,
+    [data-bs-theme="dark"] .room-accordion-dropdown .dropdown-item {
+        color: #e2e8f0;
+    }
+    [data-theme="dark"] .room-accordion-dropdown .dropdown-item:hover,
+    [data-bs-theme="dark"] .room-accordion-dropdown .dropdown-item:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+    }
+    [data-theme="dark"] .room-chip-btn,
+    [data-bs-theme="dark"] .room-chip-btn {
+        background-color: rgba(59, 130, 246, 0.12);
+        border-color: rgba(59, 130, 246, 0.25) !important;
+        color: #93c5fd;
+    }
+    [data-theme="dark"] .room-chip-btn:hover,
+    [data-theme="dark"] .room-chip-btn.active,
+    [data-bs-theme="dark"] .room-chip-btn:hover,
+    [data-bs-theme="dark"] .room-chip-btn.active {
+        background-color: #3b82f6 !important;
+        border-color: #3b82f6 !important;
+        color: #ffffff !important;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid px-4 py-4 mb-5">
     
@@ -77,108 +287,235 @@
         </div>
     </div>
 
-    <!-- Unassigned Classes Section -->
+    <!-- Unassigned Classes Section with Left Sidebar Filters -->
     <section class="unassigned-classes-section" id="unassignedClassesSection">
-        <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
-            <div class="card-header py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-3" style="background-color: var(--bg-card);">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="p-2.5 rounded-3 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
-                        <i class="bi bi-calendar-x-fill fs-5"></i>
+        <div class="row g-4">
+            <!-- Left Side: Filter Sidebar Panel (Course, Subject, Day, Room) -->
+            <div class="col-xl-3 col-lg-4 col-md-4">
+                <aside class="filter-sidebar-panel">
+                    <div class="filter-sidebar-title">
+                        <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" id="activeFilterBadge" style="display: none; font-size: 0.72rem;">Filtered</span>
                     </div>
-                    <div>
-                        <h4 class="h5 fw-bold mb-0 text-body">Unassigned Classes Requiring Faculty Allocation</h4>
-                        <p class="text-muted small mb-0">Imported timetable sessions missing instructor assignments. Select a faculty member to allocate instantly.</p>
-                    </div>
-                </div>
+                    <div class="filter-sidebar-form">
+                        <!-- 1. Course Filter -->
+                        <div class="mb-3">
+                            <label for="courseFilter" class="form-label">Course</label>
+                            <select class="form-select" id="courseFilter" aria-label="Filter by Course">
+                                <option value="">All Courses</option>
+                                <option value="BCA">BCA</option>
+                                <option value="MCA">MCA</option>
+                                <option value="BSC">BSC</option>
+                                <option value="MSC">MSC</option>
+                            </select>
+                        </div>
 
-                <div class="d-flex align-items-center gap-3">
-                    <div class="input-group input-group-sm" style="width: 240px;">
-                        <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-search"></i></span>
-                        <input type="text" id="unassignedSearchInput" class="form-control bg-body-tertiary border-start-0" placeholder="Filter classes...">
+                        <!-- 2. Year Filter -->
+                        <div class="mb-3">
+                            <label for="yearFilter" class="form-label">Year</label>
+                            <select class="form-select" id="yearFilter" aria-label="Filter by Year">
+                                <option value="">All Years</option>
+                                <option value="FY">FY</option>
+                                <option value="SY">SY</option>
+                                <option value="TY">TY</option>
+                                <option value="HONS">HONS</option>
+                            </select>
+                            <input type="hidden" id="tableSearchInput">
+                        </div>
+
+                        <!-- 3. Division Filter -->
+                        <div class="mb-3">
+                            <label for="divisionFilter" class="form-label">Division</label>
+                            <select class="form-select" id="divisionFilter" aria-label="Filter by Division">
+                                <option value="">All Divisions</option>
+                                <option value="A">Division A</option>
+                                <option value="B">Division B</option>
+                                <option value="C">Division C</option>
+                                <option value="D">Division D</option>
+                                <option value="E">Division E</option>
+                            </select>
+                        </div>
+
+                        <!-- 4. Day Filter -->
+                        <div class="mb-3">
+                            <label for="dayFilter" class="form-label">Day</label>
+                            <select class="form-select" id="dayFilter" aria-label="Filter by Day">
+                                <option value="">All Days</option>
+                                <option value="Monday">Monday</option>
+                                <option value="Tuesday">Tuesday</option>
+                                <option value="Wednesday">Wednesday</option>
+                                <option value="Thursday">Thursday</option>
+                                <option value="Friday">Friday</option>
+                                <option value="Saturday">Saturday</option>
+                                <option value="Sunday">Sunday</option>
+                            </select>
+                        </div>
+
+                        <!-- 5. Room Filter (Collapsible Floor Accordion with Dropdown Arrows) -->
+                        <div class="mb-3 position-relative room-accordion-dropdown">
+                            <label class="form-label d-flex justify-content-between align-items-center">
+                                <span>Room</span>
+                                <small class="text-muted" style="font-size: 0.72rem;">By Floor</small>
+                            </label>
+                            <div class="dropdown">
+                                <button class="form-select text-start d-flex justify-content-between align-items-center" type="button" id="roomDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                    <span id="selectedRoomLabel" class="text-truncate">All Rooms</span>
+                                    <i class="bi bi-chevron-down ms-2 text-muted" style="font-size: 0.75rem;"></i>
+                                </button>
+                                <input type="hidden" id="roomFilter" value="">
+
+                                <div class="dropdown-menu p-2 shadow-lg rounded-3 w-100" style="max-height: 380px; overflow-y: auto; min-width: 250px; z-index: 1050;">
+                                    <!-- All Rooms Option -->
+                                    <button type="button" class="dropdown-item py-1.5 px-2 rounded-2 fw-semibold mb-1 room-option-item active" data-room-value="">
+                                        <i class="bi bi-grid-fill me-2 text-primary"></i>All Rooms
+                                    </button>
+                                    <div class="dropdown-divider my-1"></div>
+
+                                    <!-- Floor Accordion with Dropdown Arrows -->
+                                    <div class="accordion accordion-flush" id="floorRoomAccordion">
+                                        {% for af in academic_floors %}
+                                        <div class="accordion-item border-0 mb-1 bg-transparent">
+                                            <h3 class="accordion-header" id="headingFloor{{ af.level }}">
+                                                <button class="accordion-button collapsed py-1.5 px-2.5 rounded-2 fw-semibold d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFloor{{ af.level }}" aria-expanded="false" aria-controls="collapseFloor{{ af.level }}" style="font-size: 0.82rem;">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span><i class="bi bi-building me-1.5 text-secondary opacity-75"></i>{{ af.name }}</span>
+                                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill" style="font-size: 0.68rem;">{{ af.rooms|length }}</span>
+                                                    </div>
+                                                </button>
+                                            </h3>
+                                            <div id="collapseFloor{{ af.level }}" class="accordion-collapse collapse" aria-labelledby="headingFloor{{ af.level }}" data-bs-parent="#floorRoomAccordion">
+                                                <div class="accordion-body p-2 pt-1 pb-2">
+                                                    <div class="room-grid">
+                                                        {% for r in af.rooms %}
+                                                        <button type="button" class="btn btn-sm room-chip-btn" data-room-value="{{ r.number }}">
+                                                            {{ r.number }}
+                                                        </button>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Reset Filters Button -->
+                        <div class="pt-1 d-grid gap-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnResetFilters" style="border-radius: 10px;">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters
+                            </button>
+                        </div>
                     </div>
-                    <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2 fw-semibold" id="unassignedCountBadge">
-                        {{ unassigned_classes|length }} Unassigned
-                    </span>
-                </div>
+                </aside>
             </div>
-            
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0" id="unassignedClassesTable">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4 py-3">Room</th>
-                                <th class="py-3">Day & Time</th>
-                                <th class="py-3">Subject / Course</th>
-                                <th class="py-3">Division</th>
-                                <th class="py-3" style="min-width: 280px;">Faculty Member</th>
-                                <th class="text-end pe-4 py-3" style="width: 140px;">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="unassignedClassesBody">
-                            {% if unassigned_classes %}
-                                {% for cls in unassigned_classes %}
-                                <tr id="class-row-{{ cls.id }}" class="unassigned-row-item">
-                                    <td class="ps-4 fw-bold">
-                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-3">
-                                            {{ cls.room.number if cls.room else ('Room #' ~ cls.room_id) }}
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold text-body">
-                                            {% if cls.day_of_week == 0 %}Monday
-                                            {% elif cls.day_of_week == 1 %}Tuesday
-                                            {% elif cls.day_of_week == 2 %}Wednesday
-                                            {% elif cls.day_of_week == 3 %}Thursday
-                                            {% elif cls.day_of_week == 4 %}Friday
-                                            {% elif cls.day_of_week == 5 %}Saturday
-                                            {% elif cls.day_of_week == 6 %}Sunday
-                                            {% else %}Day {{ cls.day_of_week }}
-                                            {% endif %}
-                                        </div>
-                                        <small class="text-muted">
-                                            {{ cls.start_time.strftime('%I:%M %p') if cls.start_time else '' }} - {{ cls.end_time.strftime('%I:%M %p') if cls.end_time else '' }}
-                                        </small>
-                                    </td>
-                                    <td>
-                                        <div class="fw-semibold text-body search-subject">{{ cls.subject }}</div>
-                                        {% if cls.course %}
-                                        <small class="text-muted search-course">{{ cls.course }}</small>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <span class="text-muted small">{{ cls.division or '—' }}</span>
-                                    </td>
-                                    <td>
-                                        <select class="form-select form-select-sm faculty-select rounded-3" id="faculty-select-{{ cls.id }}" aria-label="Select Faculty">
-                                            <option value="" selected disabled>Choose Faculty...</option>
-                                            {% for fac in all_faculties %}
-                                            <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
-                                            {% endfor %}
-                                        </select>
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <button type="button" 
-                                                class="btn btn-sm btn-primary rounded-pill px-3 btn-assign-faculty shadow-sm" 
-                                                data-class-id="{{ cls.id }}">
-                                            <i class="bi bi-person-check-fill me-1"></i>Assign
-                                        </button>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr id="noUnassignedRow">
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <div class="py-4">
-                                            <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
-                                            <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
-                                            <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
+
+            <!-- Right Side: Unassigned Classes Table Card -->
+            <div class="col-xl-9 col-lg-8 col-md-8">
+                <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
+                    <div class="card-header py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-3" style="background-color: var(--bg-card);">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2.5 rounded-3 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                                <i class="bi bi-calendar-x-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="h5 fw-bold mb-0 text-body">Unassigned Classes Requiring Faculty Allocation</h4>
+                                <p class="text-muted small mb-0">Imported timetable sessions missing instructor assignments. Select a faculty member to allocate instantly.</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2 fw-semibold" id="unassignedCountBadge">
+                                {{ unassigned_classes|length }} Unassigned
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0" id="unassignedClassesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-4 py-3">Room</th>
+                                        <th class="py-3">Day & Time</th>
+                                        <th class="py-3">Subject / Course</th>
+                                        <th class="py-3">Division</th>
+                                        <th class="py-3" style="min-width: 280px;">Faculty Member</th>
+                                        <th class="text-end pe-4 py-3" style="width: 140px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="unassignedClassesBody">
+                                    {% if unassigned_classes %}
+                                        {% for cls in unassigned_classes %}
+                                        <tr id="class-row-{{ cls.id }}" class="unassigned-row-item" 
+                                            data-course="{{ cls.course or '' }}" 
+                                            data-subject="{{ cls.subject or '' }}" 
+                                            data-division="{{ cls.division or '' }}" 
+                                            data-room="{{ cls.room.number if cls.room else (cls.room_id|string) }}" 
+                                            data-day="{% if cls.day_of_week == 0 %}Monday{% elif cls.day_of_week == 1 %}Tuesday{% elif cls.day_of_week == 2 %}Wednesday{% elif cls.day_of_week == 3 %}Thursday{% elif cls.day_of_week == 4 %}Friday{% elif cls.day_of_week == 5 %}Saturday{% elif cls.day_of_week == 6 %}Sunday{% endif %}">
+                                            <td class="ps-4 fw-bold">
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-3">
+                                                    {{ cls.room.number if cls.room else ('Room #' ~ cls.room_id) }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold text-body">
+                                                    {% if cls.day_of_week == 0 %}Monday
+                                                    {% elif cls.day_of_week == 1 %}Tuesday
+                                                    {% elif cls.day_of_week == 2 %}Wednesday
+                                                    {% elif cls.day_of_week == 3 %}Thursday
+                                                    {% elif cls.day_of_week == 4 %}Friday
+                                                    {% elif cls.day_of_week == 5 %}Saturday
+                                                    {% elif cls.day_of_week == 6 %}Sunday
+                                                    {% else %}Day {{ cls.day_of_week }}
+                                                    {% endif %}
+                                                </div>
+                                                <small class="text-muted">
+                                                    {{ cls.start_time.strftime('%I:%M %p') if cls.start_time else '' }} - {{ cls.end_time.strftime('%I:%M %p') if cls.end_time else '' }}
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="fw-semibold text-body search-subject">{{ cls.subject }}</div>
+                                                {% if cls.course %}
+                                                <small class="text-muted search-course">{{ cls.course }}</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="text-muted small">{{ cls.division or '—' }}</span>
+                                            </td>
+                                            <td>
+                                                <select class="form-select form-select-sm faculty-select rounded-3" id="faculty-select-{{ cls.id }}" aria-label="Select Faculty">
+                                                    <option value="" selected disabled>Choose Faculty...</option>
+                                                    {% for fac in all_faculties %}
+                                                    <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td class="text-end pe-4">
+                                                <button type="button" 
+                                                        class="btn btn-sm btn-primary rounded-pill px-3 btn-assign-faculty shadow-sm" 
+                                                        data-class-id="{{ cls.id }}">
+                                                    <i class="bi bi-person-check-fill me-1"></i>Assign
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr id="noUnassignedRow">
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <div class="py-4">
+                                                    <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
+                                                    <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
+                                                    <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -311,19 +648,167 @@
 </div>
 
 <script>
+// ==================== UNASSIGNED CLASSES SIDEBAR FILTER ====================
+function filterTable() {
+    const courseFilter = document.getElementById('courseFilter');
+    const yearFilter = document.getElementById('yearFilter');
+    const divisionFilter = document.getElementById('divisionFilter');
+    const dayFilter = document.getElementById('dayFilter');
+    const roomFilter = document.getElementById('roomFilter');
+
+    const courseVal = (courseFilter ? courseFilter.value : '').toLowerCase().trim();
+    const yearVal = (yearFilter ? yearFilter.value : '').toLowerCase().trim();
+    const divisionVal = (divisionFilter ? divisionFilter.value : '').toUpperCase().trim();
+    const dayVal = (dayFilter ? dayFilter.value : '').toLowerCase().trim();
+    const roomVal = (roomFilter ? roomFilter.value : '').toLowerCase().trim();
+
+    const tableBody = document.getElementById('unassignedClassesBody') || document.querySelector('#unassignedClassesTable tbody');
+    if (!tableBody) return;
+
+    const rows = tableBody.querySelectorAll('tr');
+    let visibleCount = 0;
+    let totalCount = 0;
+
+    rows.forEach(row => {
+        if (row.id === 'noUnassignedRow') return;
+        totalCount++;
+
+        const rowText = (row.textContent || '').toLowerCase();
+        const rowCourse = (row.getAttribute('data-course') || '').toLowerCase();
+        const rowSubject = (row.getAttribute('data-subject') || '').toLowerCase();
+        const rowDivision = (row.getAttribute('data-division') || '').toUpperCase();
+        const rowRoom = (row.getAttribute('data-room') || '').toLowerCase();
+        const rowDay = (row.getAttribute('data-day') || '').toLowerCase();
+
+        // 1. Course Filter (dropdown: BCA, MCA, BSC, MSC)
+        const combinedCourseText = `${rowCourse} ${rowSubject} ${rowText}`;
+        const matchCourse = !courseVal || combinedCourseText.includes(courseVal);
+
+        // 2. Year Filter (dropdown: FY, SY, TY, HONS)
+        let matchYear = true;
+        if (yearVal) {
+            if (yearVal === 'fy') {
+                matchYear = /\b(fy|first\s*year|1st\s*year)\b/i.test(combinedCourseText) || 
+                            /\bfy(bca|bsc|mca|msc|ds|cs|it|ai|[a-z]{2,4})/i.test(combinedCourseText) || 
+                            /\bfy[\s\-_]/i.test(combinedCourseText);
+            } else if (yearVal === 'sy') {
+                matchYear = /\b(sy|second\s*year|2nd\s*year)\b/i.test(combinedCourseText) || 
+                            /\bsy(bca|bsc|mca|msc|ds|cs|it|ai|[a-z]{2,4})/i.test(combinedCourseText) || 
+                            /\bsy[\s\-_]/i.test(combinedCourseText);
+            } else if (yearVal === 'ty') {
+                matchYear = /\b(ty|third\s*year|3rd\s*year)\b/i.test(combinedCourseText) || 
+                            /\bty(bca|bsc|mca|msc|ds|cs|it|ai|[a-z]{2,4})/i.test(combinedCourseText) || 
+                            /\bty[\s\-_]/i.test(combinedCourseText);
+            } else if (yearVal === 'hons') {
+                matchYear = /\b(hons|honr|honrs|honor|honors|honour|honours|4th\s*year|final\s*year)\b/i.test(combinedCourseText);
+            } else {
+                matchYear = combinedCourseText.includes(yearVal);
+            }
+        }
+
+        // 3. Division Filter (dropdown: A, B, C, D, E)
+        let matchDivision = true;
+        if (divisionVal) {
+            const divRegex = new RegExp(`\\b(?:div(?:ision)?|batch)?[\\s\\-_]*${divisionVal}\\b|\\bdiv[\\s\\-_]*${divisionVal}\\b|[\\-_]${divisionVal}\\b`, 'i');
+            matchDivision = divRegex.test(rowDivision) || divRegex.test(rowSubject) || divRegex.test(rowText);
+        }
+
+        // 4. Day Filter (dropdown: Monday...Sunday)
+        const matchDay = !dayVal || rowDay === dayVal || rowText.includes(dayVal);
+
+        // 5. Room Filter (dropdown: VY401...)
+        const matchRoom = !roomVal || rowRoom === roomVal || rowText.includes(roomVal);
+
+        if (matchCourse && matchYear && matchDivision && matchDay && matchRoom) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+
+    // Update active filter badge and count badge
+    const activeBadge = document.getElementById('activeFilterBadge');
+    const isFiltered = Boolean(courseVal || yearVal || divisionVal || dayVal || roomVal);
+    if (activeBadge) {
+        activeBadge.style.display = isFiltered ? 'inline-block' : 'none';
+    }
+
+    const countBadge = document.getElementById('unassignedCountBadge');
+    if (countBadge) {
+        if (isFiltered) {
+            countBadge.textContent = `${visibleCount} of ${totalCount} Shown`;
+        } else {
+            countBadge.textContent = `${totalCount} Unassigned`;
+        }
+    }
+}
+window.filterTable = filterTable;
+
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    // ==================== UNASSIGNED CLASSES FILTER & ASSIGNMENT ====================
-    const searchInput = document.getElementById('unassignedSearchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const term = this.value.toLowerCase().trim();
-            const rows = document.querySelectorAll('.unassigned-row-item');
-            rows.forEach(row => {
-                const text = row.innerText.toLowerCase();
-                row.style.display = text.includes(term) ? '' : 'none';
-            });
+    const courseFilter = document.getElementById('courseFilter');
+    const yearFilter = document.getElementById('yearFilter');
+    const divisionFilter = document.getElementById('divisionFilter');
+    const dayFilter = document.getElementById('dayFilter');
+    const roomFilter = document.getElementById('roomFilter');
+    const btnResetFilters = document.getElementById('btnResetFilters');
+
+    if (courseFilter) courseFilter.addEventListener('change', filterTable);
+    if (yearFilter) yearFilter.addEventListener('change', filterTable);
+    if (divisionFilter) divisionFilter.addEventListener('change', filterTable);
+    if (dayFilter) dayFilter.addEventListener('change', filterTable);
+    if (roomFilter) roomFilter.addEventListener('change', filterTable);
+
+    // Custom Room Accordion Selection Helper
+    function selectRoom(roomVal) {
+        if (roomFilter) roomFilter.value = roomVal;
+        const selectedLabel = document.getElementById('selectedRoomLabel');
+        if (selectedLabel) {
+            selectedLabel.textContent = roomVal ? `Room ${roomVal}` : 'All Rooms';
+        }
+
+        // Update active class on chips & items
+        document.querySelectorAll('.room-option-item, .room-chip-btn').forEach(el => {
+            if ((el.getAttribute('data-room-value') || '') === roomVal) {
+                el.classList.add('active');
+            } else {
+                el.classList.remove('active');
+            }
+        });
+
+        // Close dropdown
+        const dropdownBtn = document.getElementById('roomDropdownBtn');
+        if (dropdownBtn && window.bootstrap && bootstrap.Dropdown) {
+            const dd = bootstrap.Dropdown.getInstance(dropdownBtn) || new bootstrap.Dropdown(dropdownBtn);
+            if (dd) dd.hide();
+        }
+
+        filterTable();
+    }
+
+    // Room dropdown menu click delegation
+    const roomDropdownContainer = document.querySelector('.room-accordion-dropdown');
+    if (roomDropdownContainer) {
+        roomDropdownContainer.addEventListener('click', function(e) {
+            const item = e.target.closest('[data-room-value]');
+            if (item) {
+                e.preventDefault();
+                e.stopPropagation();
+                const val = item.getAttribute('data-room-value') || '';
+                selectRoom(val);
+            }
+        });
+    }
+
+    if (btnResetFilters) {
+        btnResetFilters.addEventListener('click', function() {
+            if (courseFilter) courseFilter.value = '';
+            if (yearFilter) yearFilter.value = '';
+            if (divisionFilter) divisionFilter.value = '';
+            if (dayFilter) dayFilter.value = '';
+            selectRoom('');
         });
     }
 

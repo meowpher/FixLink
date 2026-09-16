@@ -1089,9 +1089,14 @@
                         <button class="btn btn-info rounded-pill px-3 py-2 px-md-4 shadow-sm text-white flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#advancedBookingModal" style="font-size: 0.85rem;">
                             <i class="bi bi-calendar-plus me-1 me-md-2"></i>Book a Class
                         </button>
+                        {% if session.get('is_admin') %}
                         <button class="btn btn-outline-success rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="font-size: 0.85rem;">
-                            <i class="bi bi-file-earmark-spreadsheet me-1 me-md-2"></i>Import Timetable
+                            <i class="bi bi-file-earmark-spreadsheet me-1 me-md-2"></i>Mass Import Timetable
                         </button>
+                        <button class="btn btn-outline-danger rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#deleteTimetableModal" style="font-size: 0.85rem;">
+                            <i class="bi bi-trash3 me-1 me-md-2"></i>Delete Timetables
+                        </button>
+                        {% endif %}
                     </div>
                 </div>
 
@@ -1398,6 +1403,67 @@
         </div>
     </div>
 </div>
+
+<!-- Admin Delete Timetables Modal -->
+{% if session.get('is_admin') %}
+<div class="modal fade" id="deleteTimetableModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header border-0 bg-danger text-white py-3" style="border-radius: 16px 16px 0 0;">
+                <h5 class="modal-title d-flex align-items-center">
+                    <i class="bi bi-trash3-fill me-2"></i>Delete Timetables (Admin)
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="deleteTimetableForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Select Deletion Scope</label>
+                        <select class="form-select" id="deleteScopeSelect" required>
+                            <option value="room">Specific Classroom / Lab</option>
+                            <option value="floor">Specific Floor</option>
+                            <option value="building">Entire Vyas Building (All Floors & Rooms)</option>
+                        </select>
+                    </div>
+
+                    <!-- Room Selector Container -->
+                    <div class="mb-3" id="deleteRoomGroup">
+                        <label class="form-label fw-bold">Select Room</label>
+                        <select class="form-select" id="deleteRoomSelect">
+                            {% for r in all_rooms %}
+                            <option value="{{ r.id }}">VYAS {{ r.number }} {% if r.name %}({{ r.name }}){% endif %}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Floor Selector Container -->
+                    <div class="mb-3 d-none" id="deleteFloorGroup">
+                        <label class="form-label fw-bold">Select Floor</label>
+                        <select class="form-select" id="deleteFloorSelect">
+                            {% for floor in floors %}
+                            <option value="{{ floor.id }}">{{ floor.name }} (Level {{ floor.level }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Warning Alert -->
+                    <div class="alert alert-warning d-none" id="deleteBuildingWarning">
+                        <i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i>
+                        <strong>Warning:</strong> This will delete ALL imported timetable entries across every room in the Vyas building.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-0 justify-content-between pb-4 px-4">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Cancel</button>
+                <button type="button" class="btn btn-danger px-4" id="btnConfirmDeleteTimetable" style="border-radius: 10px;">
+                    <span class="spinner-border spinner-border-sm d-none me-1" role="status" aria-hidden="true"></span>
+                    <i class="bi bi-trash3 me-1"></i> Delete Timetables
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 <!-- Timetable Sync Modal -->
 <div class="modal fade" id="timetableModal" tabindex="-1" aria-hidden="true">
@@ -2420,6 +2486,248 @@
                     syncBtn.innerHTML = originalText;
                 }
             });
+
+            // CSV Timetable Import Logic
+            const csvFileInput = document.getElementById('csvFile');
+            const btnPreviewImport = document.getElementById('btnPreviewImport');
+            const btnCommitImport = document.getElementById('btnCommitImport');
+            const importResults = document.getElementById('importResults');
+            const recordsParsedEl = document.getElementById('recordsParsed');
+            const errorCountEl = document.getElementById('errorCount');
+            const errorDetailsEl = document.getElementById('errorDetails');
+            const errorListEl = document.getElementById('errorList');
+            let stagedCSVEntries = [];
+
+            function resetCSVImportUI() {
+                stagedCSVEntries = [];
+                if (importResults) importResults.classList.add('d-none');
+                if (errorDetailsEl) errorDetailsEl.classList.add('d-none');
+                if (errorListEl) errorListEl.innerHTML = '';
+                if (recordsParsedEl) recordsParsedEl.textContent = '0';
+                if (errorCountEl) errorCountEl.textContent = '0';
+                if (btnCommitImport) btnCommitImport.disabled = true;
+            }
+
+            if (csvFileInput) {
+                csvFileInput.addEventListener('change', resetCSVImportUI);
+            }
+
+            if (btnPreviewImport) {
+                btnPreviewImport.addEventListener('click', async () => {
+                    if (!csvFileInput || !csvFileInput.files || csvFileInput.files.length === 0) {
+                        Swal.fire({ icon: 'warning', title: 'File Missing', text: 'Please select a CSV file first.' });
+                        return;
+                    }
+
+                    const file = csvFileInput.files[0];
+                    const formData = new FormData();
+                    formData.append('csvFile', file);
+
+                    const spinner = btnPreviewImport.querySelector('.spinner-border');
+                    const icon = btnPreviewImport.querySelector('.btn-icon');
+                    btnPreviewImport.disabled = true;
+                    if (spinner) spinner.classList.remove('d-none');
+                    if (icon) icon.classList.add('d-none');
+
+                    try {
+                        const res = await fetch('/faculty/api/timetable/preview-csv', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: formData
+                        });
+                        const result = await res.json();
+
+                        if (result.success) {
+                            const data = result.data;
+                            stagedCSVEntries = data.parsed_entries || [];
+
+                            if (importResults) importResults.classList.remove('d-none');
+                            if (recordsParsedEl) recordsParsedEl.textContent = data.records_parsed;
+                            if (errorCountEl) errorCountEl.textContent = data.error_count;
+
+                            if (data.errors && data.errors.length > 0) {
+                                if (errorDetailsEl) errorDetailsEl.classList.remove('d-none');
+                                if (errorListEl) {
+                                    errorListEl.innerHTML = data.errors.map(err => `<li>${err}</li>`).join('');
+                                }
+                            } else {
+                                if (errorDetailsEl) errorDetailsEl.classList.add('d-none');
+                            }
+
+                            if (data.records_parsed > 0) {
+                                if (btnCommitImport) btnCommitImport.disabled = false;
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'info',
+                                    title: `Dry-run complete: ${data.records_parsed} records ready`,
+                                    showConfirmButton: false,
+                                    timer: 3000
+                                });
+                            } else {
+                                if (btnCommitImport) btnCommitImport.disabled = true;
+                                Swal.fire({ icon: 'warning', title: 'No Records Parsed', text: 'No valid timetable entries were found in this CSV file. Please check column headers and room numbers.' });
+                            }
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Parsing Failed', text: result.error || 'Could not parse CSV file.' });
+                        }
+                    } catch (err) {
+                        console.error("CSV preview error:", err);
+                        Swal.fire({ icon: 'error', title: 'Network Error', text: 'An unexpected error occurred while processing the file.' });
+                    } finally {
+                        btnPreviewImport.disabled = false;
+                        if (spinner) spinner.classList.add('d-none');
+                        if (icon) icon.classList.remove('d-none');
+                    }
+                });
+            }
+
+            if (btnCommitImport) {
+                btnCommitImport.addEventListener('click', async () => {
+                    if (!stagedCSVEntries || stagedCSVEntries.length === 0) {
+                        Swal.fire({ icon: 'warning', title: 'No Entries Staged', text: 'Please preview a valid CSV file first.' });
+                        return;
+                    }
+
+                    const spinner = btnCommitImport.querySelector('.spinner-border');
+                    const icon = btnCommitImport.querySelector('.btn-icon');
+                    btnCommitImport.disabled = true;
+                    if (spinner) spinner.classList.remove('d-none');
+                    if (icon) icon.classList.add('d-none');
+
+                    try {
+                        const res = await fetch('/faculty/api/timetable/import-csv', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({ entries: stagedCSVEntries })
+                        });
+                        const result = await res.json();
+
+                        if (result.success) {
+                            try { bootstrap.Modal.getInstance(document.getElementById('importTimetableModal')).hide(); } catch(e){}
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Import Successful',
+                                text: result.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Import Failed', text: result.error || 'Failed to save timetable entries.' });
+                        }
+                    } catch (err) {
+                        console.error("CSV import error:", err);
+                        Swal.fire({ icon: 'error', title: 'Network Error', text: 'An unexpected error occurred while committing the timetable.' });
+                    } finally {
+                        btnCommitImport.disabled = false;
+                        if (spinner) spinner.classList.add('d-none');
+                        if (icon) icon.classList.remove('d-none');
+                    }
+                });
+            }
+
+            // Admin Delete Timetable Handler
+            const deleteScopeSelect = document.getElementById('deleteScopeSelect');
+            const deleteRoomGroup = document.getElementById('deleteRoomGroup');
+            const deleteFloorGroup = document.getElementById('deleteFloorGroup');
+            const deleteBuildingWarning = document.getElementById('deleteBuildingWarning');
+            const btnConfirmDeleteTimetable = document.getElementById('btnConfirmDeleteTimetable');
+
+            if (deleteScopeSelect) {
+                deleteScopeSelect.addEventListener('change', () => {
+                    const scope = deleteScopeSelect.value;
+                    if (scope === 'room') {
+                        if (deleteRoomGroup) deleteRoomGroup.classList.remove('d-none');
+                        if (deleteFloorGroup) deleteFloorGroup.classList.add('d-none');
+                        if (deleteBuildingWarning) deleteBuildingWarning.classList.add('d-none');
+                    } else if (scope === 'floor') {
+                        if (deleteRoomGroup) deleteRoomGroup.classList.add('d-none');
+                        if (deleteFloorGroup) deleteFloorGroup.classList.remove('d-none');
+                        if (deleteBuildingWarning) deleteBuildingWarning.classList.add('d-none');
+                    } else if (scope === 'building') {
+                        if (deleteRoomGroup) deleteRoomGroup.classList.add('d-none');
+                        if (deleteFloorGroup) deleteFloorGroup.classList.add('d-none');
+                        if (deleteBuildingWarning) deleteBuildingWarning.classList.remove('d-none');
+                    }
+                });
+            }
+
+            if (btnConfirmDeleteTimetable) {
+                btnConfirmDeleteTimetable.addEventListener('click', async () => {
+                    const scope = deleteScopeSelect ? deleteScopeSelect.value : 'room';
+                    let payload = { scope: scope };
+
+                    let confirmTitle = 'Delete Timetable?';
+                    let confirmText = 'Are you sure you want to delete these timetable records?';
+
+                    if (scope === 'room') {
+                        const roomSel = document.getElementById('deleteRoomSelect');
+                        payload.room_id = parseInt(roomSel.value);
+                        confirmText = `Delete all timetable entries for ${roomSel.options[roomSel.selectedIndex].text}?`;
+                    } else if (scope === 'floor') {
+                        const floorSel = document.getElementById('deleteFloorSelect');
+                        payload.floor_id = parseInt(floorSel.value);
+                        confirmText = `Delete all timetable entries for all rooms on ${floorSel.options[floorSel.selectedIndex].text}?`;
+                    } else if (scope === 'building') {
+                        confirmTitle = 'CLEAR ALL TIMETABLES?';
+                        confirmText = 'This action cannot be undone. It will wipe all timetable schedules across the entire Vyas building!';
+                    }
+
+                    const confirmRes = await Swal.fire({
+                        title: confirmTitle,
+                        text: confirmText,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#dc3545',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, Delete Now'
+                    });
+
+                    if (!confirmRes.isConfirmed) return;
+
+                    const spinner = btnConfirmDeleteTimetable.querySelector('.spinner-border');
+                    btnConfirmDeleteTimetable.disabled = true;
+                    if (spinner) spinner.classList.remove('d-none');
+
+                    try {
+                        const res = await fetch('/admin/api/timetable/delete', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await res.json();
+
+                        if (result.success) {
+                            try { bootstrap.Modal.getInstance(document.getElementById('deleteTimetableModal')).hide(); } catch(e){}
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Deleted',
+                                text: result.message,
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            Swal.fire({ icon: 'error', title: 'Delete Failed', text: result.error || 'Could not delete timetable records.' });
+                        }
+                    } catch (err) {
+                        console.error("Delete timetable error:", err);
+                        Swal.fire({ icon: 'error', title: 'Network Error', text: 'An error occurred while deleting timetable entries.' });
+                    } finally {
+                        btnConfirmDeleteTimetable.disabled = false;
+                        if (spinner) spinner.classList.add('d-none');
+                    }
+                });
+            }
         });
     </script>
 {% endblock %}

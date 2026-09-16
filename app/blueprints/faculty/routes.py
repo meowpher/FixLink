@@ -453,3 +453,372 @@ def delete_timetable_entry(entry_id):
     db.session.commit()
     
     return api_response(success=True, message="Class removed from your timetable.")
+
+
+# =========================================================================
+# CSV TIMETABLE IMPORT & PREVIEW LOGIC
+# =========================================================================
+import csv
+import io
+import re
+
+DAY_MAP = {
+    'mon': 0, 'monday': 0, '0': 0,
+    'tue': 1, 'tuesday': 1, '1': 1,
+    'wed': 2, 'wednesday': 2, '2': 2,
+    'thu': 3, 'thursday': 3, '3': 3,
+    'fri': 4, 'friday': 4, '4': 4,
+    'sat': 5, 'saturday': 5, '5': 5,
+    'sun': 6, 'sunday': 6, '6': 6
+}
+
+DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+
+
+def parse_time_slot(time_str):
+    """
+    Parses time strings like '10:00 - 11:00', '10:00-11:00', '10:00 AM - 11:00 AM', '10:00', '10'.
+    Returns (start_time_obj, end_time_obj, duration_hours) or None.
+    """
+    if not time_str:
+        return None
+    s = str(time_str).strip().lower()
+    
+    parts = re.split(r'[-–—]|(?:\bto\b)', s)
+    start_str = parts[0].strip()
+    end_str = parts[1].strip() if len(parts) > 1 else None
+    
+    def parse_single_time(t_str):
+        m = re.search(r'(\d{1,2})(?::(\d{2}))?\s*(am|pm)?', t_str)
+        if not m:
+            return None
+        hr = int(m.group(1))
+        mn = int(m.group(2)) if m.group(2) else 0
+        ampm = m.group(3)
+        if ampm == 'pm' and hr < 12:
+            hr += 12
+        elif ampm == 'am' and hr == 12:
+            hr = 0
+        if 0 <= hr <= 23 and 0 <= mn <= 59:
+            return datetime.strptime(f"{hr:02d}:{mn:02d}", "%H:%M").time()
+        return None
+
+    st_time = parse_single_time(start_str)
+    if not st_time:
+        return None
+        
+    if end_str:
+        end_time = parse_single_time(end_str)
+    else:
+        end_time = (datetime.combine(datetime.today(), st_time) + timedelta(hours=1)).time()
+        
+    if not end_time:
+        end_time = (datetime.combine(datetime.today(), st_time) + timedelta(hours=1)).time()
+        
+    dt_st = datetime.combine(datetime.today(), st_time)
+    dt_end = datetime.combine(datetime.today(), end_time)
+    if dt_end <= dt_st:
+        dt_end += timedelta(days=1)
+    duration = int(round((dt_end - dt_st).total_seconds() / 3600))
+    if duration <= 0:
+        duration = 1
+    return st_time, end_time, duration
+
+
+def resolve_room(room_raw, room_dict):
+    """
+    Resolves raw room string against room_dict containing Room models.
+    """
+    if not room_raw:
+        return None
+    raw_clean = re.sub(r'[^A-Z0-9]', '', str(room_raw).strip().upper())
+    if not raw_clean:
+        return None
+    
+    if raw_clean in room_dict:
+        return room_dict[raw_clean]
+        
+    if not raw_clean.startswith('VY'):
+        if f"VY{raw_clean}" in room_dict:
+            return room_dict[f"VY{raw_clean}"]
+            
+    m = re.search(r'(\d{3})', raw_clean)
+    if m:
+        digits = m.group(1)
+        if f"VY{digits}" in room_dict:
+            return room_dict[f"VY{digits}"]
+            
+    return None
+
+
+def parse_timetable_csv(file_bytes):
+    """
+    Parses a CSV file stream supporting Matrix/Grid layout and Row-list layout.
+    Returns (parsed_entries, error_messages).
+    """
+    text = None
+    for encoding in ['utf-8-sig', 'utf-8', 'latin-1']:
+        try:
+            text = file_bytes.decode(encoding)
+            break
+        except UnicodeDecodeError:
+            continue
+
+    if not text:
+        return [], ["Unable to decode file content. Please upload a valid CSV file."]
+
+    stream = io.StringIO(text)
+    try:
+        reader = list(csv.reader(stream))
+    except Exception as e:
+        return [], [f"CSV parsing error: {str(e)}"]
+
+    if not reader:
+        return [], ["CSV file is empty."]
+
+    # Auto-detect Header row (search first 15 rows)
+    header_idx = -1
+    room_col_idx = -1
+    time_col_idx = -1
+    day_cols = {}
+    is_matrix = False
+    day_single_col_idx = -1
+    subject_col_idx = -1
+
+    for idx, row in enumerate(reader[:15]):
+        row_clean = [str(cell).strip().lower() for cell in row]
+        
+        # Search for room column
+        r_idx = -1
+        for c_idx, cell in enumerate(row_clean):
+            if any(k in cell for k in ['room', 'room no', 'room_no', 'classroom', 'lab', 'hall']):
+                r_idx = c_idx
+                break
+                
+        # Search for time column
+        t_idx = -1
+        for c_idx, cell in enumerate(row_clean):
+            if any(k in cell for k in ['time', 'slot', 'timing', 'duration', 'hour']):
+                t_idx = c_idx
+                break
+                
+        # Search for day columns
+        d_cols = {}
+        for c_idx, cell in enumerate(row_clean):
+            for day_k, day_v in DAY_MAP.items():
+                if len(day_k) >= 3 and day_k in cell:
+                    d_cols[c_idx] = day_v
+                    break
+                    
+        if r_idx != -1 and (t_idx != -1 or d_cols):
+            header_idx = idx
+            room_col_idx = r_idx
+            time_col_idx = t_idx
+            
+            has_single_day_col = any(k == 'day' or k == 'weekday' for cell in row_clean for k in cell.split())
+            if d_cols and not has_single_day_col:
+                is_matrix = True
+                day_cols = d_cols
+            elif len(d_cols) >= 2:
+                is_matrix = True
+                day_cols = d_cols
+            else:
+                is_matrix = False
+                for c_idx, cell in enumerate(row_clean):
+                    if any(k in cell for k in ['day', 'weekday']):
+                        day_single_col_idx = c_idx
+                    if any(k in cell for k in ['subject', 'course', 'class', 'title', 'paper']):
+                        subject_col_idx = c_idx
+            break
+
+    if header_idx == -1:
+        return [], ["Header row not detected. Please ensure CSV contains headers like 'Room No', 'Time', 'Mon', 'Tue'..."]
+
+    all_rooms = Room.query.all()
+    room_dict = {}
+    for r in all_rooms:
+        clean_num = re.sub(r'[^A-Z0-9]', '', r.number.upper())
+        room_dict[clean_num] = r
+        if r.name:
+            clean_name = re.sub(r'[^A-Z0-9]', '', r.name.upper())
+            room_dict[clean_name] = r
+
+    parsed_entries = []
+    errors = []
+    
+    current_room_raw = None
+    current_time_raw = None
+
+    for row_num, row in enumerate(reader[header_idx + 1:], start=header_idx + 2):
+        if not any(cell.strip() for cell in row):
+            continue
+            
+        r_cell = row[room_col_idx].strip() if room_col_idx < len(row) else ''
+        t_cell = row[time_col_idx].strip() if time_col_idx != -1 and time_col_idx < len(row) else ''
+        
+        if r_cell:
+            current_room_raw = r_cell
+        if t_cell:
+            current_time_raw = t_cell
+            
+        if not current_room_raw:
+            continue
+            
+        room_obj = resolve_room(current_room_raw, room_dict)
+        if not room_obj:
+            errors.append(f"Row {row_num}: Room '{current_room_raw}' not found in Vyas Building.")
+            continue
+
+        if is_matrix:
+            if not current_time_raw:
+                errors.append(f"Row {row_num}: Missing time slot for Room {room_obj.number}.")
+                continue
+                
+            time_parsed = parse_time_slot(current_time_raw)
+            if not time_parsed:
+                errors.append(f"Row {row_num}: Could not parse time '{current_time_raw}'.")
+                continue
+            start_t, end_t, duration = time_parsed
+
+            for c_idx, day_num in day_cols.items():
+                if c_idx < len(row):
+                    subj = row[c_idx].strip()
+                    if subj and subj.upper() not in ['-', 'N/A', 'NA', 'FREE', 'OFF', 'N/L', 'BREAK', 'LUNCH']:
+                        parsed_entries.append({
+                            'room_id': room_obj.id,
+                            'room_number': room_obj.number,
+                            'day_of_week': day_num,
+                            'day_name': DAY_NAMES[day_num],
+                            'start_time': start_t.strftime('%H:%M'),
+                            'end_time': end_t.strftime('%H:%M'),
+                            'duration': duration,
+                            'subject': subj
+                        })
+        else:
+            day_val = row[day_single_col_idx].strip().lower() if day_single_col_idx != -1 and day_single_col_idx < len(row) else ''
+            subj_val = row[subject_col_idx].strip() if subject_col_idx != -1 and subject_col_idx < len(row) else ''
+            
+            if not subj_val or subj_val.upper() in ['-', 'N/A', 'NA', 'FREE', 'OFF', 'N/L', 'BREAK', 'LUNCH']:
+                continue
+                
+            day_num = None
+            for k, v in DAY_MAP.items():
+                if k in day_val:
+                    day_num = v
+                    break
+            if day_num is None:
+                errors.append(f"Row {row_num}: Unknown day '{day_val}'.")
+                continue
+
+            time_parsed = parse_time_slot(current_time_raw)
+            if not time_parsed:
+                errors.append(f"Row {row_num}: Could not parse time '{current_time_raw}'.")
+                continue
+            start_t, end_t, duration = time_parsed
+
+            parsed_entries.append({
+                'room_id': room_obj.id,
+                'room_number': room_obj.number,
+                'day_of_week': day_num,
+                'day_name': DAY_NAMES[day_num],
+                'start_time': start_t.strftime('%H:%M'),
+                'end_time': end_t.strftime('%H:%M'),
+                'duration': duration,
+                'subject': subj_val
+            })
+
+    return parsed_entries, errors
+
+
+@faculty_bp.route('/api/timetable/preview-csv', methods=['POST'])
+@faculty_login_required
+@handle_api_errors
+def preview_timetable_csv():
+    """Validates and dry-runs a CSV timetable upload without database commit. Admin access required."""
+    if not session.get('is_admin'):
+        return api_response(success=False, error="Mass CSV import is restricted to Admin accounts.", status=403)
+
+    if 'csvFile' not in request.files and 'file' not in request.files:
+        return api_response(success=False, error="No CSV file uploaded.", status=400)
+
+    file_obj = request.files.get('csvFile') or request.files.get('file')
+    if not file_obj or file_obj.filename == '':
+        return api_response(success=False, error="Empty file uploaded.", status=400)
+
+    file_bytes = file_obj.read()
+    parsed_entries, errors = parse_timetable_csv(file_bytes)
+
+    return api_response(
+        success=True,
+        data={
+            'records_parsed': len(parsed_entries),
+            'error_count': len(errors),
+            'errors': errors,
+            'parsed_entries': parsed_entries
+        }
+    )
+
+
+@faculty_bp.route('/api/timetable/import-csv', methods=['POST'])
+@faculty_login_required
+@handle_api_errors
+def import_timetable_csv():
+    """Commits dry-run parsed CSV timetable entries into the database. Admin access required."""
+    if not session.get('is_admin'):
+        return api_response(success=False, error="Mass CSV import is restricted to Admin accounts.", status=403)
+
+    data = request.get_json()
+    entries = data.get('entries', []) if data else []
+    
+    if not entries or not isinstance(entries, list):
+        return api_response(success=False, error="No timetable entries provided to commit.", status=400)
+
+    admin_user_id = session.get('user_id')
+    success_count = 0
+
+    for entry in entries:
+        room_id = entry.get('room_id')
+        day = entry.get('day_of_week')
+        start_time_str = entry.get('start_time')
+        subject = entry.get('subject')
+        duration = int(entry.get('duration', 1))
+        fac_id = entry.get('faculty_id') or admin_user_id
+
+        if not all([room_id, day is not None, start_time_str, subject]):
+            continue
+
+        try:
+            start_dt = datetime.strptime(start_time_str, '%H:%M')
+            start_time = start_dt.time()
+            end_time = (start_dt + timedelta(hours=duration)).time()
+        except Exception:
+            continue
+
+        # For mass admin import, match existing timetable by room_id, day_of_week, start_time
+        existing = Timetable.query.filter_by(
+            room_id=room_id,
+            day_of_week=day,
+            start_time=start_time
+        ).first()
+
+        if existing:
+            existing.subject = subject
+            existing.end_time = end_time
+            existing.faculty_id = fac_id
+        else:
+            new_entry = Timetable(
+                room_id=room_id,
+                faculty_id=fac_id,
+                day_of_week=day,
+                start_time=start_time,
+                end_time=end_time,
+                subject=subject
+            )
+            db.session.add(new_entry)
+
+        success_count += 1
+
+    db.session.commit()
+    return api_response(success=True, message=f"Successfully imported {success_count} timetable records into building schedule.")
+
+

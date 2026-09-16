@@ -67,13 +67,12 @@ def create_app(config_name=None):
         from werkzeug.middleware.proxy_fix import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=2, x_proto=2, x_host=2, x_prefix=2)
     
-    database_url = os.environ.get('DATABASE_URL')
-    if not database_url:
-        # Check if we're in testing mode
-        if config_name == 'testing' or os.environ.get('TESTING') == 'True':
-            database_url = 'sqlite:///:memory:'
-            logger.info('Using in-memory SQLite for testing.')
-        else:
+    if config_name == 'testing' or os.environ.get('TESTING') == 'True':
+        database_url = 'sqlite:///:memory:'
+        logger.info('Using in-memory SQLite for testing.')
+    else:
+        database_url = os.environ.get('DATABASE_URL')
+        if not database_url:
             raise RuntimeError(
                 'DATABASE_URL is not set. A persistent PostgreSQL (Supabase) '
                 'connection is required for the application to start.'

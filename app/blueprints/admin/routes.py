@@ -1890,3 +1890,58 @@ def import_timetable():
             
     except Exception as e:
         return api_response(success=False, error=f"Error processing CSV: {str(e)}", status=500)
+
+
+@admin_bp.route('/api/timetable/delete', methods=['POST'])
+@admin_required
+@handle_api_errors
+def delete_timetable_scoped():
+    """
+    Deletes timetable entries based on scope:
+    - scope='room', room_id=<int>
+    - scope='floor', floor_id=<int>
+    - scope='building'
+    """
+    from ...models import Room, Timetable, Floor
+    data = request.get_json() or {}
+    scope = data.get('scope', '').strip().lower()
+    
+    if not scope:
+        return api_response(success=False, error="Scope parameter ('room', 'floor', or 'building') is required.", status=400)
+
+    if scope == 'room':
+        room_id = data.get('room_id')
+        if not room_id:
+            return api_response(success=False, error="Room ID is required for 'room' scope.", status=400)
+        room = Room.query.get(room_id)
+        if not room:
+            return api_response(success=False, error="Room not found.", status=404)
+            
+        deleted_count = Timetable.query.filter_by(room_id=room_id).delete()
+        db.session.commit()
+        return api_response(success=True, message=f"Deleted {deleted_count} timetable entries for Room {room.number}.")
+
+    elif scope == 'floor':
+        floor_id = data.get('floor_id')
+        if not floor_id:
+            return api_response(success=False, error="Floor ID is required for 'floor' scope.", status=400)
+        floor = Floor.query.get(floor_id)
+        if not floor:
+            return api_response(success=False, error="Floor not found.", status=404)
+
+        room_ids = [r.id for r in Room.query.filter_by(floor_id=floor_id).all()]
+        if not room_ids:
+            return api_response(success=True, message=f"No rooms found on {floor.name}. 0 records deleted.")
+
+        deleted_count = Timetable.query.filter(Timetable.room_id.in_(room_ids)).delete(synchronize_session=False)
+        db.session.commit()
+        return api_response(success=True, message=f"Deleted {deleted_count} timetable entries across {floor.name}.")
+
+    elif scope in ['building', 'all', 'whole_building']:
+        deleted_count = Timetable.query.delete()
+        db.session.commit()
+        return api_response(success=True, message=f"Deleted {deleted_count} timetable entries across the entire Vyas building.")
+
+    else:
+        return api_response(success=False, error="Invalid scope. Must be 'room', 'floor', or 'building'.", status=400)
+

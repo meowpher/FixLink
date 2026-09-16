@@ -6,7 +6,7 @@ import os
 import hmac
 import logging
 from functools import wraps
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, abort
 from werkzeug.security import generate_password_hash, check_password_hash
 from ... import db
 from ...api_utils import api_response
@@ -388,11 +388,21 @@ def list_professionals():
 @super_admin_required
 def delete_admin(admin_id):
     """Delete an admin user."""
-    admin = User.query.get_or_404(admin_id)
+    target_user = User.query.get_or_404(admin_id)
     
-    if is_super_admin_email(admin.email):
-        return api_response(success=False, error='Cannot delete a super admin', status=403)
+    current_user_id = session.get('user_id')
+    try:
+        from flask_login import current_user
+        if current_user and hasattr(current_user, 'id'):
+            current_user_id = current_user.id
+    except Exception:
+        pass
+
+    if target_user.is_super_admin and current_user_id != target_user.id:
+        flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
+        abort(403, description="Unauthorized: Cannot modify Super Admin accounts.")
     
+    admin = target_user
     try:
         db.session.delete(admin)
         db.session.commit()
@@ -514,11 +524,21 @@ def edit_professional(prof_id):
 def delete_user(user_id):
     """Delete a standard user."""
     from ...api_utils import api_response
-    user = User.query.get_or_404(user_id)
+    target_user = User.query.get_or_404(user_id)
     
-    if is_super_admin_email(user.email):
-        return api_response(success=False, error="Cannot delete super admin", status=403)
+    current_user_id = session.get('user_id')
+    try:
+        from flask_login import current_user
+        if current_user and hasattr(current_user, 'id'):
+            current_user_id = current_user.id
+    except Exception:
+        pass
+
+    if target_user.is_super_admin and current_user_id != target_user.id:
+        flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
+        abort(403, description="Unauthorized: Cannot modify Super Admin accounts.")
         
+    user = target_user
     try:
         db.session.delete(user)
         db.session.commit()
@@ -533,7 +553,21 @@ def delete_user(user_id):
 def update_user_role(user_id):
     """Update user role and admin status."""
     from ...api_utils import api_response, validate_json
-    user = User.query.get_or_404(user_id)
+    target_user = User.query.get_or_404(user_id)
+    
+    current_user_id = session.get('user_id')
+    try:
+        from flask_login import current_user
+        if current_user and hasattr(current_user, 'id'):
+            current_user_id = current_user.id
+    except Exception:
+        pass
+
+    if target_user.is_super_admin and current_user_id != target_user.id:
+        flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
+        abort(403, description="Unauthorized: Cannot modify Super Admin accounts.")
+
+    user = target_user
     data, error = validate_json(['role'])
     if error: return error
     
@@ -556,7 +590,21 @@ def update_user_role(user_id):
 def edit_user_details(user_id):
     """Edit user details including password."""
     from ...api_utils import api_response, validate_json
-    user = User.query.get_or_404(user_id)
+    target_user = User.query.get_or_404(user_id)
+    
+    current_user_id = session.get('user_id')
+    try:
+        from flask_login import current_user
+        if current_user and hasattr(current_user, 'id'):
+            current_user_id = current_user.id
+    except Exception:
+        pass
+
+    if target_user.is_super_admin and current_user_id != target_user.id:
+        flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
+        abort(403, description="Unauthorized: Cannot modify Super Admin accounts.")
+
+    user = target_user
     data, error = validate_json(['name', 'email'])
     if error: return error
     

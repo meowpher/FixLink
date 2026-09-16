@@ -404,6 +404,9 @@
                                             <span class="badge bg-body-tertiary text-body border user-prn-text">{{ user.prn or 'N/A' }}</span>
                                         </td>
                                         <td>
+                                            {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                            <span class="fw-semibold text-body">{{ user.role.capitalize() }}</span>
+                                            {% else %}
                                             <select class="form-select form-select-sm border-0 bg-light role-select" 
                                                     style="width: 130px; font-weight: 500;" 
                                                     data-id="{{ user.id }}">
@@ -413,19 +416,27 @@
                                                 </option>
                                                 {% endfor %}
                                             </select>
+                                            {% endif %}
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
+                                                {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                                <code class="me-2 text-muted">********</code>
+                                                {% else %}
                                                 <code class="me-2 text-primary" id="pwd-{{ user.id }}" style="display: none;">{{ user.plaintext_password or 'N/A' }}</code>
                                                 <code class="me-2 text-muted" id="stars-{{ user.id }}">********</code>
                                                 <button class="btn btn-sm p-0 border-0 btn-toggle-reveal" data-user-id="{{ user.id }}" title="Reveal password">
                                                     <i class="bi bi-eye-fill text-muted" id="icon-{{ user.id }}"></i>
                                                 </button>
+                                                {% endif %}
                                             </div>
                                         </td>
                                         <td><small class="text-muted">{{ user.created_at.strftime('%d %b %Y') }}</small></td>
                                         <td class="text-center">
                                             <div class="btn-group">
+                                                {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                                <span class="badge bg-dark px-2 py-1">Super Admin</span>
+                                                {% else %}
                                                 <button class="btn btn-sm btn-outline-primary btn-edit-user" 
                                                         data-id="{{ user.id }}"
                                                         data-name="{{ user.name|escape }}"
@@ -434,7 +445,7 @@
                                                         title="Edit User">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
-                                                {% if user.email.lower() == 'taha.piplodwala@mitwpu.edu.in' or user.email.lower() == 'om.mahadik@mitwpu.edu.in' %}
+                                                {% if user.email in SUPER_ADMIN_EMAILS %}
                                                 <span class="badge bg-dark ms-2">Super Admin</span>
                                                 {% else %}
                                                 <button class="btn btn-sm btn-outline-danger btn-delete-user" 
@@ -443,6 +454,7 @@
                                                         title="Delete User">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
+                                                {% endif %}
                                                 {% endif %}
                                             </div>
                                         </td>
@@ -493,6 +505,9 @@
                             <div class="mc-bottom">
                                 <div class="mc-date"></div>
                                 <div class="mc-actions">
+                                    {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                    <span class="badge bg-dark px-2 py-1">Super Admin</span>
+                                    {% else %}
                                     <button class="btn mc-btn mc-btn-update btn-edit-user"
                                             data-id="{{ user.id }}"
                                             data-name="{{ user.name|escape }}"
@@ -501,7 +516,7 @@
                                             title="Edit User">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    {% if user.email.lower() == 'taha.piplodwala@mitwpu.edu.in' or user.email.lower() == 'om.mahadik@mitwpu.edu.in' %}
+                                    {% if user.email in SUPER_ADMIN_EMAILS %}
                                     <span class="badge bg-dark ms-1">Super Admin</span>
                                     {% else %}
                                     <button class="btn mc-btn mc-btn-delete btn-delete-user"
@@ -510,6 +525,7 @@
                                             title="Delete User">
                                         <i class="bi bi-trash"></i>
                                     </button>
+                                    {% endif %}
                                     {% endif %}
                                 </div>
                             </div>

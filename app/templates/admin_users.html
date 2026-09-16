@@ -135,6 +135,9 @@
                                 <td class="text-muted small">{{ user.created_at.strftime('%d %b %Y') if user.created_at else '—' }}</td>
                                 <td class="text-center">
                                     <div class="d-flex gap-2 justify-content-center">
+                                        {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                        <span class="badge bg-dark px-2 py-1">Super Admin</span>
+                                        {% else %}
                                         <button class="btn btn-sm btn-outline-primary edit-user-btn"
                                                 data-id="{{ user.id }}"
                                                 data-name="{{ user.name | e }}"
@@ -144,7 +147,9 @@
                                                 title="Edit user">
                                             <i class="bi bi-pencil"></i>
                                         </button>
-                                        {% if not user.is_admin %}
+                                        {% if user.email in SUPER_ADMIN_EMAILS %}
+                                        <span class="badge bg-dark ms-1">Super Admin</span>
+                                        {% elif not user.is_admin %}
                                         <button class="btn btn-sm btn-outline-danger"
                                                 onclick="deleteUser({{ user.id }}, '{{ user.name }}')"
                                                 title="Delete user">
@@ -157,6 +162,7 @@
                                                 title="Manually verify user">
                                             <i class="bi bi-shield-check"></i>
                                         </button>
+                                        {% endif %}
                                         {% endif %}
                                     </div>
                                 </td>

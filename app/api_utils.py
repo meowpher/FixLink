@@ -6,6 +6,7 @@ import traceback
 import logging
 from functools import wraps
 from flask import jsonify, request
+from werkzeug.exceptions import HTTPException
 
 logger = logging.getLogger(__name__)
 
@@ -40,6 +41,8 @@ def handle_api_errors(f):
     def decorated_function(*args, **kwargs):
         try:
             return f(*args, **kwargs)
+        except HTTPException:
+            raise
         except Exception as e:
             # Determine if we are in debug mode
             is_debug = os.environ.get('FLASK_DEBUG') == 'True'

@@ -63,6 +63,15 @@ class User(db.Model):
             return False
 
         
+    @property
+    def is_super_admin(self):
+        """Dynamic check against hardcoded config to prevent database manipulation."""
+        if not self.email:
+            return False
+        from . import SUPER_ADMIN_EMAILS
+        normalized_email = self.email.strip().lower()
+        return normalized_email in [admin_email.strip().lower() for admin_email in SUPER_ADMIN_EMAILS]
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -71,6 +80,7 @@ class User(db.Model):
             'prn': self.prn,
             'role': self.role,
             'is_admin': self.is_admin,
+            'is_super_admin': self.is_super_admin,
             'is_verified': self.is_verified,
             'photo_url': self.profile_photo,
             'created_at': self.created_at.isoformat() + 'Z' if self.created_at else None

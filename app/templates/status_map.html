@@ -72,11 +72,12 @@
         left: auto !important;
         transform: none !important;
         width: 380px;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
         background: var(--bg-surface, var(--bg-card));
         border-radius: 16px;
         box-shadow: var(--shadow-lg);
         z-index: 1050;
-        overflow: hidden;
         border: 1px solid var(--border-color);
         display: none;
     }
@@ -84,12 +85,14 @@
     /* Static Floating Pop-up - Locked to Side */
     #roomPopUp {
         position: fixed !important;
-        top: 100px !important;
+        top: 180px !important;
         right: 30px !important;
         left: auto !important;
         transform: none !important;
         z-index: 1050;
         width: 380px;
+        max-height: calc(100vh - 210px);
+        overflow-y: auto;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         display: none;
     }

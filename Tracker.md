@@ -7,8 +7,8 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
-| **v1.7.0** | 2026-09-16 | **Deployed** | Timetable Bulk Import & Admin Allocation Pattern (Null Foreign Key Data Integrity, Hardcoded Admin Fallback Removal, `/admin/api/assign_faculty/<class_id>` REST Endpoint, Interactive Dashboard Table & Zero-Reload DOM UX). |
-| **v1.6.3** | 2026-09-11 | **Staged** | Legal Templates Grounding & Artifact Removal (Stripped AI Draft Banners, Corrected Institutional Scope, Codebase-Verified Retention Durations in Cookies, Terms & Privacy). |
+| **v1.7.0** | 2026-09-16 | **Deployed** | Timetable Class Allocation (Fixed imported spreadsheet classes wrongly assigning to admin; added easy teacher dropdown on Admin Dashboard with one-click, instant assignment). |
+| **v1.6.3** | 2026-09-11 | **Deployed** | Legal Templates Grounding & Artifact Removal (Stripped AI Draft Banners, Corrected Institutional Scope, Codebase-Verified Retention Durations in Cookies, Terms & Privacy). |
 | **v1.6.2** | 2026-09-11 | **Deployed** | WCAG 2.1 AA Color Contrast Hardening (Global Typography, SVG Map Labels Readability, Dark Mode Form Inputs & Interactive Button States). |
 | **v1.6.1** | 2026-09-11 | **Deployed** | Custom 404 Error Page (Zone Not Found), Dark Mode Translucent Infrastructure Aesthetic, and Search Engine Indexing Protection. |
 | **v1.6.0** | 2026-09-11 | **Deployed** | Web Accessibility (a11y), Data Minimization & Consent, Legal Boilerplates (Privacy, Terms, Cookies), and Asset Security CDN hardening. |
@@ -30,29 +30,28 @@
 ## 2. Chronological Log of Pushed Updates
 
 ### Release v1.7.0 (2026-09-16)
-- `feat(timetable)`: **Timetable Bulk Import & Admin Allocation Pattern (Backend Data Integrity, Faculty Allocation REST Endpoint, Dashboard UI, and Seamless No-Reload UX)**
+- `feat(timetable)`: **Timetable Bulk Import & Easy Faculty Assignment (Admin Allocation System)**
 
   #### 📖 Plain English / Layman's Summary of What Was Done
-  1. **Backend Architecture & Data Integrity (Nullable Foreign Key)**:
-     - **Nullable Faculty Assignment**: Confirmed and reinforced `Timetable.faculty_id` as `nullable=True` in `app/models.py`. Updated `to_dict()` serialization so unassigned classes explicitly return `'faculty_name': 'Unassigned'`.
-     - **Removed Hardcoded Admin Fallback**: Eliminated the legacy fallback in `app/blueprints/faculty/routes.py` that automatically attributed imported CSV classes to the logged-in administrator.
-     - **Clean Unassigned Import State**: When parsing timetable CSVs (both matrix and row-based formats), classes lacking an instructor are inserted with `faculty_id = None` (`Unassigned`), preventing them from polluting personal admin schedules.
-  2. **API & Route Infrastructure (`/admin/api/assign_faculty/<class_id>`)**:
-     - **REST Endpoint**: Created `@admin_bp.route('/api/assign_faculty/<int:class_id>', methods=['POST'])` with `@admin_required` and `@handle_api_errors`.
-     - **JSON Payload Validation**: Validates the presence of `faculty_id`, verifies that the target class and faculty user exist in the database, and safely supports unassigning when `null` is passed.
-     - **Database Transaction Safety**: Commits with full rollback handling on database exception, plus real-time occupancy broadcasting via Pusher `emit_room_status_change`.
-     - **Security Decorator Hardening**: Updated `admin_required` in `app/decorators.py` to return clean HTTP 403 JSON responses rather than unexpected 302 HTML redirects for API requests.
-  3. **Frontend UI & Formless DOM Pattern (`app/templates/admin.html`)**:
-     - **Admin Dashboard Table**: Created a Bootstrap 5 card and responsive table labeled **"Unassigned Classes Requiring Faculty Allocation"** with live unassigned count badge.
-     - **Strictly Formless Architecture**: Completely avoided `<form>` tags. Each row contains a `<select class="form-select ... faculty-select">` populated with all registered faculty members (Name and User ID), paired with an Assign button bearing `data-class-id="{{ cls.id }}"`.
-     - **Theme & Dark Mode Styling**: Built without inline color hexes; utilizes CSS variables (`var(--bg-card)`, `var(--border-color)`, `var(--text-muted)`) and supports `[data-theme="dark"]` and `[data-bs-theme="dark"]`.
-  4. **Client-Side UX & Zero-Reload DOM Lifecycle**:
-     - **Frontend Validation**: Validates that an instructor is selected prior to network dispatch; alerts and aborts if empty.
-     - **CSRF Token Security**: Dispatches the asynchronous POST request carrying the CSRF token in the `X-CSRFToken` header read from `<meta name="csrf-token">`.
-     - **Micro-Interactions**: Displays a dynamic button spinner (`Assigning...`) during flight.
-     - **Seamless Fade-Out**: On HTTP 200, applies a smooth CSS fade and slide animation, removes the row after 350ms, decrements the badge count, and renders a clean empty-state banner when all classes are assigned.
-  5. **Automated Verification & Unit Tests (`tests/test_csv_import.py`)**:
-     - Added comprehensive tests for unassigned CSV parsing, unassigned database insertion, non-admin 403 access control, missing payload validation (400), invalid class/faculty ID checks (404), successful assignment (200), null unassignment, and dashboard DOM table rendering. All tests pass with zero regressions.
+  1. **The Problem We Fixed (No More Wrong Teacher Assignments)**:
+     - Previously, when an administrator uploaded a campus timetable spreadsheet (CSV), any class that didn't have an instructor listed was automatically assigned to the administrator (e.g. Taha Mustafa). This cluttered the admin's personal schedule and left real professors with missing classes.
+     - **The Fix**: Classes without a teacher are now cleanly recognized as **"Unassigned"**. They never get dumped onto the admin's account.
+  2. **New "Unassigned Classes" Section on Admin Dashboard**:
+     - Admins now have a dedicated, easy-to-read list titled **"Unassigned Classes Requiring Faculty Allocation"** right on their dashboard.
+     - It displays the room number, day of the week, time slot, and course name for every session that needs a teacher.
+     - A yellow badge at the top shows the exact number of classes still waiting to be assigned.
+  3. **One-Click Teacher Assignment with Dropdowns**:
+     - Each unassigned class has a simple dropdown menu listing all registered faculty members by name.
+     - The admin simply picks a professor from the list and clicks **"Assign"**.
+     - **Friendly Mistake Protection**: If the admin clicks "Assign" before choosing a name, the app gently reminds them: *"Please select a faculty member from the dropdown before assigning."*
+  4. **Instant, No-Reload Screen Updates**:
+     - The moment a teacher is assigned, that row smoothly fades out and disappears from the unassigned list—**without the web page needing to refresh or flicker**.
+     - The unassigned counter automatically counts down in real time.
+     - Once all classes have teachers, the table automatically displays a green checkmark stating: *"No unassigned classes found. All classes across the Vyas building have faculty assigned."*
+  5. **Safety, Security & Verification**:
+     - Only logged-in campus administrators can assign classes.
+     - Runs on existing dark mode and light mode themes with zero visual glitches.
+     - 6 automated test scenarios were added to guarantee that timetable imports and teacher assignments always run reliably without breaking anything.
 
   ---
 
@@ -60,11 +59,11 @@
 
   | What to Test | Where on the Site | Step-by-Step Testing Guide | Expected Visual Result |
   | :--- | :--- | :--- | :--- |
-  | **1. Unassigned Classes Table** | `http://localhost:5000/admin/` | 1. Log in as an Admin (`admin@mitwpu.edu.in`).<br>2. Scroll down on the Admin Dashboard below the tickets section. | A clean card labeled **"Unassigned Classes Requiring Faculty Allocation"** displays with room badges, day/time slots, subjects, division, a faculty select dropdown, and an "Assign" button. |
-  | **2. Client-Side Validation** | `http://localhost:5000/admin/` | 1. Leave the dropdown on "Choose Faculty...".<br>2. Click the **"Assign"** button. | An alert prompts: *"Please select a faculty member from the dropdown before assigning."* Zero network requests are sent. |
-  | **3. Instant Faculty Allocation** | `http://localhost:5000/admin/` | 1. Select a registered faculty member from the dropdown.<br>2. Click **"Assign"**. | Button changes to a spinner (*"Assigning..."*), then the row **smoothly fades out and slides away**. The table count badge decrements instantly without page reload. |
-  | **4. Empty State Display** | `http://localhost:5000/admin/` | Allocate all remaining unassigned classes in the list. | The table body transitions to a green checkmark empty-state banner: *"No unassigned classes found. All classes across the Vyas building have faculty assigned."* |
-  | **5. Dark Mode Rendering** | `http://localhost:5000/admin/` | Toggle to dark mode using the theme button. | The table card, header, select elements, and text smoothly adapt to dark theme surfaces (`var(--bg-surface)`) with high-contrast text and zero hardcoded white boxes. |
+  | **1. Unassigned Classes List** | `http://localhost:5000/admin/` | 1. Log in as an Admin (`admin@mitwpu.edu.in`).<br>2. Scroll down on the Admin Dashboard below the tickets section. | A clean card labeled **"Unassigned Classes Requiring Faculty Allocation"** displays with room badges, day/time slots, subjects, division, a faculty select dropdown, and an "Assign" button. |
+  | **2. Friendly Reminder on Empty Dropdown** | `http://localhost:5000/admin/` | 1. Leave the dropdown on "Choose Faculty...".<br>2. Click the **"Assign"** button. | A pop-up prompts: *"Please select a faculty member from the dropdown before assigning."* Nothing is submitted until a name is picked. |
+  | **3. Instant One-Click Assignment** | `http://localhost:5000/admin/` | 1. Pick any professor from the dropdown (e.g., Prof. Sharma).<br>2. Click **"Assign"**. | The button briefly shows a loading spinner, and the row **smoothly slides and fades away**. The count badge decreases immediately without refreshing the page. |
+  | **4. All-Done Message** | `http://localhost:5000/admin/` | Assign all remaining classes in the table. | The table automatically updates to show a friendly green checkmark: *"No unassigned classes found. All classes across the Vyas building have faculty assigned."* |
+  | **5. Dark Mode Compatibility** | `http://localhost:5000/admin/` | Click the Moon/Sun icon in the header to switch to Dark Mode. | The table, dropdowns, and text automatically adjust to soft dark colors with high-contrast text that is easy on the eyes. |
 
 ---
 

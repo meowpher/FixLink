@@ -404,7 +404,7 @@
                                             <span class="badge bg-body-tertiary text-body border user-prn-text">{{ user.prn or 'N/A' }}</span>
                                         </td>
                                         <td>
-                                            {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                            {% if user.email in SUPER_ADMIN_EMAILS %}
                                             <span class="fw-semibold text-body">{{ user.role.capitalize() }}</span>
                                             {% else %}
                                             <select class="form-select form-select-sm border-0 bg-light role-select" 
@@ -420,7 +420,7 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                                {% if user.email in SUPER_ADMIN_EMAILS %}
                                                 <code class="me-2 text-muted">********</code>
                                                 {% else %}
                                                 <code class="me-2 text-primary" id="pwd-{{ user.id }}" style="display: none;">{{ user.plaintext_password or 'N/A' }}</code>
@@ -434,7 +434,7 @@
                                         <td><small class="text-muted">{{ user.created_at.strftime('%d %b %Y') }}</small></td>
                                         <td class="text-center">
                                             <div class="btn-group">
-                                                {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                                {% if user.email in SUPER_ADMIN_EMAILS %}
                                                 <span class="badge bg-dark px-2 py-1">Super Admin</span>
                                                 {% else %}
                                                 <button class="btn btn-sm btn-outline-primary btn-edit-user" 
@@ -445,16 +445,12 @@
                                                         title="Edit User">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
-                                                {% if user.email in SUPER_ADMIN_EMAILS %}
-                                                <span class="badge bg-dark ms-2">Super Admin</span>
-                                                {% else %}
                                                 <button class="btn btn-sm btn-outline-danger btn-delete-user" 
                                                         data-id="{{ user.id }}"
                                                         data-name="{{ user.name|escape }}"
                                                         title="Delete User">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
-                                                {% endif %}
                                                 {% endif %}
                                             </div>
                                         </td>
@@ -505,7 +501,7 @@
                             <div class="mc-bottom">
                                 <div class="mc-date"></div>
                                 <div class="mc-actions">
-                                    {% if user.email in SUPER_ADMIN_EMAILS and (current_user and current_user.email != user.email or not current_user and session.get('user_email') != user.email) %}
+                                    {% if user.email in SUPER_ADMIN_EMAILS %}
                                     <span class="badge bg-dark px-2 py-1">Super Admin</span>
                                     {% else %}
                                     <button class="btn mc-btn mc-btn-update btn-edit-user"
@@ -516,16 +512,12 @@
                                             title="Edit User">
                                         <i class="bi bi-pencil"></i>
                                     </button>
-                                    {% if user.email in SUPER_ADMIN_EMAILS %}
-                                    <span class="badge bg-dark ms-1">Super Admin</span>
-                                    {% else %}
                                     <button class="btn mc-btn mc-btn-delete btn-delete-user"
                                             data-id="{{ user.id }}"
                                             data-name="{{ user.name|escape }}"
                                             title="Delete User">
                                         <i class="bi bi-trash"></i>
                                     </button>
-                                    {% endif %}
                                     {% endif %}
                                 </div>
                             </div>

@@ -7,7 +7,77 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.6** | 2026-09-16 | **Deployed** | Admin CMM UX Architecture & Safety Hardening (Secured destructive timetable deletion with a warning modal; unified filter architecture by migrating course selector into sidebar; implemented Select column with bulk master checkbox; optimized Assign action buttons). |
+| **v1.7.5** | 2026-09-16 | **Deployed** | Timetable Subject, Course & Division Intelligent Parser & Normalizer (Decomposed combined raw spreadsheet cells into clean Subjects, structured Courses, and Division badges; stripped embedded redundant timestamps; retroactively cleaned 882 database records; upgraded CSV mass importer). |
 | **v1.7.4** | 2026-09-16 | **Deployed** | Root User / Super Admin Security & Immutable Creator Accounts (Permanently secured creator accounts against unauthorized edits, deletions, and password resets; locked down backend routes with 403 Forbidden checks; hardened admin and superadmin Jinja UI templates). |
+
+---
+
+## 2. Chronological Log of Pushed Updates
+ 
+### Release v1.7.6 (2026-09-16)
+- `feat(cmm-ux)`: **Admin Dashboard (CMM) UX Redesign & Security Protection**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Securing Destructive Actions (Accidental Wipe Prevention)**:
+     - Transformed the "Delete Timetables" action in the top right header from a standard button into a high-visibility danger button (`btn-outline-danger`).
+     - Removed direct links/actions and integrated a Bootstrap modal (`#deleteConfirmModal`).
+     - The modal explicitly warns the admin: *"Are you sure you want to wipe all timetable records? This action cannot be undone."* and requires clicking a dedicated confirmation button to trigger the secure backend POST endpoint.
+  2. **Phase 2: Unifying the Filter Architecture**:
+     - Resolved fragmented UX between the sidebar and main table panel by relocating the Course Selection dropdown (`#courseFilter`) directly into the left sidebar as the primary filter above Year, Division, Day, and Room.
+     - Positioned the real-time Text Search input (`#tableSearchInput`) full-width directly above the table as the single, clean data-level filter.
+  3. **Phase 3: Table Readability & Bulk Preparation**:
+     - Added a dedicated `Select` column on the far left of the table header featuring a master checkbox (`#selectAllUnassigned`).
+     - Added individual row checkboxes (`.row-select-checkbox`) on each class row for future bulk operations.
+     - Refined the active `Assign` buttons to use `btn-sm btn-primary` with compact padding (`px-2.5 py-1`) to keep the rows balanced and readable.
+     - Updated table empty state spanning to 7 columns across all dynamic states.
+  4. **JavaScript Script Scope Fix**:
+     - Eliminated duplicate `const btnConfirmDeleteTimetable` declaration that previously caused an uncaught script-level `SyntaxError` during DOM evaluation, restoring real-time event listener bindings on `#tableSearchInput`, `#courseFilter`, and sidebar filters.
+  5. **Multi-Filter Engine Phase 1 (Event Binding & State Extraction)**:
+     - Standardized dropdown IDs to `courseFilter`, `yearFilter`, `divFilter`, `dayFilter`, `roomFilter`, and text search input to `tableSearchInput`.
+     - Verified all default "All" options strictly provide `value=""` so they are recognized as inactive.
+     - Implemented `applyFilters()` vanilla JavaScript function with unified lowercase state extraction.
+     - Attached `change` event listeners to all dropdowns and `input` listeners to the text search bar to trigger `applyFilters()` in real-time.
+  6. **Multi-Filter Engine Phase 2 (Multi-Condition AND Logic)**:
+     - Structured multi-condition boolean evaluation where each condition is TRUE if its filter value is empty (inactive) or matched within the row's normalized `textContent`.
+     - Evaluated `courseMatch && yearMatch && divMatch && dayMatch && roomMatch && searchMatch` with row display toggling (`''` vs `'none'`) and `visibleCount` tracking.
+  7. **Multi-Filter Engine Phase 3 (UI Updates & Reset Functionality)**:
+     - Dynamically updated the results badge (`#unassignedCountBadge`) with the `visibleCount` variable (e.g. `X of 882 Shown`).
+     - Fully wired up the **Reset Filters** button (`#btnResetFilters`) to clear the text search, reset all select dropdowns (`courseFilter`, `yearFilter`, `divFilter`, `dayFilter`) to index 0 (`value=""`), reset room selection, and trigger `applyFilters()` to instantly restore all rows.
+  8. **Bulk Assignment Phase 1 (Bulk Action UI)**:
+     - Created a Bootstrap 5 toolbar row directly above the table dedicated to Bulk Actions.
+     - Added `<select id="bulkFacultySelect">` populated with all registered faculties (`all_faculties` ID and Name).
+     - Added `<button id="bulkAssignBtn">Bulk Assign Selected</button>` with primary styling and iconography.
+     - Standardized the table header master checkbox to `id="selectAllCheckbox"`.
+     - Standardized every row checkbox to include class `row-checkbox` and `data-class-id="{{ cls.id }}"`.
+  9. **Bulk Assignment Phase 2 (Checkbox Toggle Logic)**:
+     - Attached event listener to `#selectAllCheckbox` that checks/unchecks only rows currently visible on the screen (`row.style.display !== 'none'`), gracefully respecting active filter states.
+     - Added event listeners to individual `.row-checkbox` elements to uncheck `#selectAllCheckbox` whenever any row is manually deselected.
+  10. **Bulk Assignment Phase 3 (Bulk Fetch Request Engine)**:
+     - Wired up click listener on `#bulkAssignBtn` with validation for selected faculty and checked `.row-checkbox` items.
+     - Extracted integer array of selected `class_ids` and dispatched `fetch('POST', '/admin/api/bulk_assign_faculty')` with CSRF headers and JSON payload `{ "faculty_id": ..., "class_ids": [...] }`.
+     - On HTTP 200 response, dynamically pruned assigned rows from the DOM, reset selection states, and updated live result counters and empty states with zero page reload.
+  11. **Bulk Assignment Phase 4 (Flask Bulk Update API Route)**:
+     - Implemented `@admin_bp.route('/api/bulk_assign_faculty', methods=['POST'])` with `@admin_required` authorization guard and payload parsing.
+     - Utilized SQLAlchemy bulk update (`Timetable.query.filter(Timetable.id.in_(valid_class_ids)).update({Timetable.faculty_id: faculty_id})`) with single atomic database commit.
+     - Wrapped the transaction in a secure `try/except` block with automatic rollback and comprehensive error handling.
+     - Added automated unit test suite in `tests/test_bulk_assign.py` with 100% test pass rate.
+  12. **Precision Multi-Filter Normalization & Division Filter Fix**:
+     - Resolved an issue where selecting a single division (e.g. Division A) failed to filter because broad substring search on whole-row text matched common words containing 'a' ('AM', 'Monday', 'Assign', 'Faculty').
+     - Upgraded `applyFilters()` to perform normalized, field-level matching on `data-division` (and fallback to cell 4), stripping prefix variants ('Div A', 'Division A', 'A') to guarantee accurate 1:1 division letter matching.
+     - Enhanced Year matching to seamlessly support all Honours variants (`HONS`, `Honours`), and Course matching against explicit course metadata.
+     - Added an empty-state row (`#noFilterMatchRow`) informing admins when active filter combinations match zero classes.
+  13. **Super Admin Immutable Read-Only Hardening (Rule 6 Strict Compliance)**:
+     - Removed the "self-edit" exception in `app/templates/superadmin/list_users.html` and `app/templates/admin_users.html` that previously rendered the pencil edit button, editable role dropdown, and password reveal toggle when a superadmin viewed their own record.
+     - Standardized all Super Admin rows across desktop tables and mobile cards to display only the static `Super Admin` badge with immutable, read-only status.
+     - Updated `tests/test_super_admin_guard.py` to assert that all edit and delete buttons are strictly absent for all superadmin accounts.
+  14. **Insights / Analytics Data Loading Fix (Skeleton Blocker Elimination)**:
+     - Diagnosed and fixed an issue where stat cards on `/admin/analytics` remained permanently blank/shimmering due to missing GSAP `Flip` and `ScrollTrigger` plugin dependencies in `skeleton_loader.js` and `dashboard_stats.js`.
+     - Re-architected `skeleton_loader.js` to use pure, dependency-free vanilla JS with smooth CSS transitions, ensuring card content is immediately revealed after brief shimmer.
+     - Re-engineered `dashboard_stats.js` to utilize native `IntersectionObserver` with smooth fallback counters and SVG trend line animations.
+     - Hardened `dashboard_stats.css` and `admin_analytics.html` with safe fallback visibility ensuring cards are never blocked.
+
+---
 | **v1.7.3** | 2026-09-16 | **Deployed** | Interactive Map Room Popup Position Fix (Prevented room info popup from overlapping the floor dropdown selector and legend; added auto-dismiss on floor change; polished dark mode pop-card contrast). |
 | **v1.7.2** | 2026-09-16 | **Deployed** | Theme Color Mode Bugfixes (Fixed dark mode text contrast on timetable classes, removed hardcoded black box on Booking History in light mode, and restored bright high-contrast room labels on SVG maps). |
 | **v1.7.1** | 2026-09-16 | **Deployed** | Technical Debt Purge & UI Polish (Removed legacy 'Sync My Timetable' button and popup, fixed afternoon class time parsing, and polished Smart Classroom map header). |
@@ -32,6 +102,32 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+ 
+### Release v1.7.5 (2026-09-16)
+- `feat(cmm)`: **Timetable Subject, Course & Division Intelligent Parser, Database Normalizer, and UI Badge System**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Decomposed Raw Blended Strings into Clean Fields**:
+     - Previously, spreadsheet cell contents like `SYBCA DIV-A DS`, `SYMCA DIV E (11.00-12.00)`, and `SYBSC-Div B C++` were stored verbatim as the `subject`, leaving `course` and `division` blank or set to `—`.
+     - Built an intelligent metadata extractor (`parse_timetable_subject_metadata`) that detects and cleanly isolates:
+       - **Course / Program**: `SYBCA`, `SYMCA`, `SYBSC`, `FYMCA`, `BSc CS Honours`, `BCA Honours`.
+       - **Division**: `Div A`, `Div B`, `Div C`, `Div E`, `Batch 1`.
+       - **Clean Subject Title**: `Data Structures (DS)`, `Python Programming`, `C++ Programming`, expanding known acronyms and defaulting empty cohorts to `General Lecture`.
+  2. **Stripped Redundant Embedded Timestamps**:
+     - Removed hardcoded time ranges like `(11.00-12.00)` and `9.00-12.00` from subject titles, preventing visual clutter alongside the dedicated Day & Time column.
+  3. **Retroactive Database Migration (882 Records Cleaned)**:
+     - Executed a migration script across the SQLite database that updated all 882 existing timetable rows to have their structured `course`, `division`, and clean `subject` fields populated.
+  4. **Upgraded CSV Mass Importer**:
+     - Updated `parse_timetable_csv` and `import_timetable_csv` in the backend so all future timetable spreadsheet imports automatically parse and store course and division metadata.
+  5. **CMM UI Polish**:
+     - In `admin_cmm.html`, styled the subject title in bold with a neat sub-badge for the course, and rendered division values as structured primary badges (`[Div A]`, `[Div B]`).
+  6. **Dual-Filter System (Real-Time Search + Course Selection)**:
+     - Implemented a responsive Bootstrap 5 toolbar (`row mb-3`) directly above the Unassigned Classes table with a Course dropdown (`#courseFilter`) and text input (`#tableSearchInput`).
+     - Added a combined vanilla JS real-time filtering engine (`filterTable`) with dynamic `Condition A` (text search) & `Condition B` (course match) evaluation and instant live counter badges.
+  7. **Automated Test Suite**:
+     - Added comprehensive test coverage in `tests/test_timetable_sanitizer.py` verifying degree matching, division extraction, abbreviation expansion, and timestamp stripping.
+
+---
 
 ### Release v1.7.4 (2026-09-16)
 - `feat(security)`: **Root User / Super Admin Authorization Lockdown & Creator Account Protection**

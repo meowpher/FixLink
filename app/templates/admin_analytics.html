@@ -284,6 +284,20 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Ensure skeleton overlays are dismissed and stat content is visible
+        setTimeout(() => {
+            document.querySelectorAll('.advanced-stat-card .skeleton-overlay').forEach(ov => {
+                ov.style.transition = 'opacity 0.3s ease';
+                ov.style.opacity = '0';
+                setTimeout(() => { ov.style.display = 'none'; }, 300);
+            });
+            document.querySelectorAll('.advanced-stat-card .stat-content').forEach(sc => {
+                sc.classList.add('loaded');
+                sc.style.opacity = '1';
+                sc.style.visibility = 'visible';
+            });
+        }, 200);
+
         // Apply progress bar widths
         document.querySelectorAll('.progress-bar.set-width').forEach(el => {
             el.style.width = el.getAttribute('data-width');

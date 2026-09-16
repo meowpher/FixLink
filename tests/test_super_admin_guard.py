@@ -124,7 +124,7 @@ class TestSuperAdminGuard(unittest.TestCase):
         # Regular admin should have edit button for normal student
         self.assertIn(f'data-id="{self.student_id}"', html)
 
-    def test_superadmin_users_ui_hides_controls_for_other_super_admin(self):
+    def test_superadmin_users_ui_hides_controls_for_all_super_admins(self):
         # Logged in as Om Mahadik
         with self.client.session_transaction() as sess:
             sess['user_id'] = self.sa_om_id
@@ -136,12 +136,13 @@ class TestSuperAdminGuard(unittest.TestCase):
         html = res.get_data(as_text=True)
         self.assertEqual(res.status_code, 200)
 
-        # Om cannot edit Taha: edit button for Taha must NOT be rendered
+        # Neither Taha nor Om should have edit or delete buttons rendered
         self.assertNotIn(f'btn-edit-user" data-id="{self.sa_taha_id}"', html)
-        self.assertNotIn(f'data-id="{self.sa_taha_id}">\n                                                <i class="bi bi-trash">', html)
+        self.assertNotIn(f'btn-edit-user" \n                                                        data-id="{self.sa_om_id}"', html)
+        self.assertNotIn(f'btn-delete-user"\n                                            data-id="{self.sa_om_id}"', html)
 
-        # Om CAN edit himself: edit button for Om MUST be rendered
-        self.assertIn(f'btn-edit-user" \n                                                        data-id="{self.sa_om_id}"', html) or self.assertIn(f'data-id="{self.sa_om_id}"', html)
+        # Both Taha and Om must show static Super Admin badge
+        self.assertIn('Super Admin', html)
 
 if __name__ == '__main__':
     unittest.main()

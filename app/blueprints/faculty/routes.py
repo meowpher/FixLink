@@ -463,6 +463,155 @@ def parse_time_slot(time_str):
     return st_time, end_time, duration
 
 
+def parse_timetable_subject_metadata(raw_string):
+    """
+    Parses a raw timetable cell string (e.g., 'SYBCA DIV-A DS', 'SYMCA DIV E (11.00-12.00)', 'SYBSC-Div B C++')
+    and extracts structured metadata:
+    Returns dict:
+    {
+        'course': str or None,     # e.g., 'SYBCA', 'SYMCA', 'SYBSC', 'BSc CS Honours', 'BCA Honours'
+        'division': str or None,   # e.g., 'Div A', 'Div B', 'Div E'
+        'subject': str             # e.g., 'Data Structures (DS)', 'Python Programming', 'General Lecture'
+    }
+    """
+    if not raw_string:
+        return {'course': None, 'division': None, 'subject': 'General Lecture'}
+    
+    text = str(raw_string).strip()
+    
+    # 1. Strip redundant embedded time slot patterns like (11.00-12.00), 9.00-12.00, 10:00-11:00
+    time_slot_regex = r'\(?\s*\d{1,2}(?:[\.:]\d{2})?\s*(?:am|pm)?\s*[-–—to\s]+\s*\d{1,2}(?:[\.:]\d{2})?\s*(?:am|pm)?\s*\)?'
+    text = re.sub(time_slot_regex, ' ', text, flags=re.IGNORECASE)
+    
+    # 2. Extract Division (e.g., DIV-A, DIV A, Div B, Batch 1, -Div B, -B)
+    division = None
+    div_match = re.search(r'\b(?:div(?:ision)?|batch|sec(?:tion)?)[.\s\-_]*([A-Z0-9]+)\b', text, re.IGNORECASE)
+    if div_match:
+        div_val = div_match.group(1).upper()
+        division = f"Batch {div_val}" if div_val.isdigit() else f"Div {div_val}"
+        text = text[:div_match.start()] + ' ' + text[div_match.end():]
+    else:
+        div_alt = re.search(r'[\-_]([A-E])\b', text)
+        if div_alt:
+            div_val = div_alt.group(1).upper()
+            division = f"Div {div_val}"
+            text = text[:div_alt.start()] + ' ' + text[div_alt.end():]
+
+    # 3. Extract Course & Year
+    # Structured degree program patterns:
+    course = None
+    course_regex = re.compile(
+        r'\b('
+        r'(?:FY|SY|TY|4TH\s*YEAR|FINAL\s*YEAR)?[\s\-_]*(?:BSC|B\.SC)(?:[\s\-_]*(?:CS|IT|DS|AI|DATA\s*SCIENCE))?(?:[\s\-_]*(?:HONORS|HONOURS|HONS))?'
+        r'|'
+        r'(?:FY|SY|TY|4TH\s*YEAR|FINAL\s*YEAR)?[\s\-_]*(?:MSC|M\.SC)(?:[\s\-_]*(?:CS|IT|DS|AI|DATA\s*SCIENCE))?'
+        r'|'
+        r'(?:FY|SY|TY|4TH\s*YEAR|FINAL\s*YEAR)?[\s\-_]*BCA(?:[\s\-_]*(?:HONORS|HONOURS|HONS))?'
+        r'|'
+        r'(?:FY|SY|TY|4TH\s*YEAR|FINAL\s*YEAR)?[\s\-_]*MCA'
+        r'|'
+        r'(?:FY|SY|TY|4TH\s*YEAR|FINAL\s*YEAR)?[\s\-_]*BTECH(?:[\s\-_]*(?:CS|IT|DS|AI|DATA\s*SCIENCE))?'
+        r')\b',
+        re.IGNORECASE
+    )
+    
+    course_match = course_regex.search(text)
+    if course_match and course_match.group(1).strip():
+        raw_course = course_match.group(1).strip()
+        clean_course = re.sub(r'\s+', ' ', raw_course).upper()
+        clean_course = re.sub(r'\bB\.SC\b', 'BSC', clean_course)
+        clean_course = re.sub(r'\bM\.SC\b', 'MSC', clean_course)
+        clean_course = re.sub(r'\bHONOURS\b|\bHONORS\b', 'HONS', clean_course)
+        clean_course = re.sub(r'[\-_]', ' ', clean_course)
+        clean_course = re.sub(r'\s+', ' ', clean_course).strip()
+        
+        if clean_course in ['BSC CS HONS', 'BSC CS HONORS']:
+            course = 'BSc CS Honours'
+        elif clean_course in ['BCA HONS', 'BCA HONORS']:
+            course = 'BCA Honours'
+        elif clean_course == 'BSC CS':
+            course = 'BSc Computer Science'
+        elif clean_course == 'BSC IT':
+            course = 'BSc Information Technology'
+        elif clean_course.startswith('SYBCA'):
+            course = 'SYBCA'
+        elif clean_course.startswith('SYMCA'):
+            course = 'SYMCA'
+        elif clean_course.startswith('SYBSC'):
+            course = 'SYBSC'
+        elif clean_course.startswith('FYMCA'):
+            course = 'FYMCA'
+        elif clean_course.startswith('FYBCA'):
+            course = 'FYBCA'
+        elif clean_course.startswith('TYBCA'):
+            course = 'TYBCA'
+        elif clean_course.startswith('TYBSC'):
+            course = 'TYBSC'
+        else:
+            course = clean_course
+            
+        text = text[:course_match.start()] + ' ' + text[course_match.end():]
+    else:
+        standalone_match = re.search(r'^(BCA|MCA|BSC|MSC)\b', text, re.IGNORECASE)
+        if standalone_match:
+            course = standalone_match.group(1).upper()
+            text = text[standalone_match.end():]
+
+    # 4. Clean up remaining subject string
+    clean_subj = re.sub(r'^[\s\-_:;,./\(\)\[\]]+|[\s\-_:;,./\(\)\[\]]+$', '', text).strip()
+    clean_subj = re.sub(r'\s*[\-_:/]\s*', ' ', clean_subj)
+    clean_subj = re.sub(r'\s+', ' ', clean_subj).strip()
+    
+    SUBJECT_MAP = {
+        'DS': 'Data Structures (DS)',
+        'DATA STRUCTURES': 'Data Structures',
+        'PYTHON': 'Python Programming',
+        'PYTHON PROGRAMMING': 'Python Programming',
+        'C++': 'C++ Programming',
+        'CPP': 'C++ Programming',
+        'JAVA': 'Java Programming',
+        'DBMS': 'Database Management Systems (DBMS)',
+        'OS': 'Operating Systems (OS)',
+        'CN': 'Computer Networks (CN)',
+        'SE': 'Software Engineering (SE)',
+        'AI': 'Artificial Intelligence (AI)',
+        'ML': 'Machine Learning (ML)',
+        'AI & ML': 'Artificial Intelligence & Machine Learning',
+        'AI/ML': 'Artificial Intelligence & Machine Learning',
+        'DAA': 'Design and Analysis of Algorithms (DAA)',
+        'WT': 'Web Technologies (WT)',
+        'WEB DEV': 'Web Development',
+        'WEB DEVELOPMENT': 'Web Development',
+        'MATHS': 'Mathematics',
+        'MATH': 'Mathematics',
+        'STATS': 'Statistics',
+        'STATISTICS': 'Statistics',
+        'IOT': 'Internet of Things (IoT)',
+        'CLOUD': 'Cloud Computing',
+        'CLOUD COMPUTING': 'Cloud Computing',
+    }
+    
+    clean_upper = clean_subj.upper()
+    if clean_upper in SUBJECT_MAP:
+        subject = SUBJECT_MAP[clean_upper]
+    elif len(clean_subj) >= 2:
+        if clean_subj.isupper() and len(clean_subj) > 3:
+            subject = clean_subj.title()
+        else:
+            subject = clean_subj
+    else:
+        if course:
+            subject = 'General Lecture'
+        else:
+            subject = raw_string.strip() if raw_string.strip() else 'General Lecture'
+            
+    return {
+        'course': course,
+        'division': division,
+        'subject': subject
+    }
+
+
 def resolve_room(room_raw, room_dict):
     """
     Resolves raw room string against room_dict containing Room models.
@@ -620,8 +769,9 @@ def parse_timetable_csv(file_bytes):
 
             for c_idx, day_num in day_cols.items():
                 if c_idx < len(row):
-                    subj = row[c_idx].strip()
-                    if subj and subj.upper() not in ['-', 'N/A', 'NA', 'FREE', 'OFF', 'N/L', 'BREAK', 'LUNCH']:
+                    raw_subj = row[c_idx].strip()
+                    if raw_subj and raw_subj.upper() not in ['-', 'N/A', 'NA', 'FREE', 'OFF', 'N/L', 'BREAK', 'LUNCH']:
+                        meta = parse_timetable_subject_metadata(raw_subj)
                         parsed_entries.append({
                             'room_id': room_obj.id,
                             'room_number': room_obj.number,
@@ -630,14 +780,16 @@ def parse_timetable_csv(file_bytes):
                             'start_time': start_t.strftime('%H:%M'),
                             'end_time': end_t.strftime('%H:%M'),
                             'duration': duration,
-                            'subject': subj,
+                            'subject': meta['subject'],
+                            'course': meta['course'],
+                            'division': meta['division'],
                             'faculty_id': None
                         })
         else:
             day_val = row[day_single_col_idx].strip().lower() if day_single_col_idx != -1 and day_single_col_idx < len(row) else ''
-            subj_val = row[subject_col_idx].strip() if subject_col_idx != -1 and subject_col_idx < len(row) else ''
+            raw_subj = row[subject_col_idx].strip() if subject_col_idx != -1 and subject_col_idx < len(row) else ''
             
-            if not subj_val or subj_val.upper() in ['-', 'N/A', 'NA', 'FREE', 'OFF', 'N/L', 'BREAK', 'LUNCH']:
+            if not raw_subj or raw_subj.upper() in ['-', 'N/A', 'NA', 'FREE', 'OFF', 'N/L', 'BREAK', 'LUNCH']:
                 continue
                 
             day_num = None
@@ -655,6 +807,7 @@ def parse_timetable_csv(file_bytes):
                 continue
             start_t, end_t, duration = time_parsed
 
+            meta = parse_timetable_subject_metadata(raw_subj)
             parsed_entries.append({
                 'room_id': room_obj.id,
                 'room_number': room_obj.number,
@@ -663,7 +816,9 @@ def parse_timetable_csv(file_bytes):
                 'start_time': start_t.strftime('%H:%M'),
                 'end_time': end_t.strftime('%H:%M'),
                 'duration': duration,
-                'subject': subj_val,
+                'subject': meta['subject'],
+                'course': meta['course'],
+                'division': meta['division'],
                 'faculty_id': None
             })
 
@@ -720,6 +875,8 @@ def import_timetable_csv():
         day = entry.get('day_of_week')
         start_time_str = entry.get('start_time')
         subject = entry.get('subject')
+        course = entry.get('course')
+        division = entry.get('division')
         duration = int(entry.get('duration', 1))
         fac_id = entry.get('faculty_id') or None  # Explicit None when unassigned; no admin fallback
 
@@ -742,6 +899,8 @@ def import_timetable_csv():
 
         if existing:
             existing.subject = subject
+            existing.course = course
+            existing.division = division
             existing.end_time = end_time
             existing.faculty_id = fac_id
         else:
@@ -751,7 +910,9 @@ def import_timetable_csv():
                 day_of_week=day,
                 start_time=start_time,
                 end_time=end_time,
-                subject=subject
+                subject=subject,
+                course=course,
+                division=division
             )
             db.session.add(new_entry)
 
@@ -759,5 +920,6 @@ def import_timetable_csv():
 
     db.session.commit()
     return api_response(success=True, message=f"Successfully imported {success_count} timetable records into building schedule.")
+
 
 

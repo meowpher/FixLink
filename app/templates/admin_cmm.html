@@ -235,7 +235,7 @@
                         <i class="bi bi-file-earmark-spreadsheet-fill fs-5"></i>
                         <span>Mass Import Timetable</span>
                     </button>
-                    <button class="btn btn-outline-danger rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#deleteTimetableModal">
+                    <button class="btn btn-outline-danger rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
                         <i class="bi bi-trash3-fill fs-5"></i>
                         <span>Delete Timetables</span>
                     </button>
@@ -320,13 +320,12 @@
                                 <option value="TY">TY</option>
                                 <option value="HONS">HONS</option>
                             </select>
-                            <input type="hidden" id="tableSearchInput">
                         </div>
 
                         <!-- 3. Division Filter -->
                         <div class="mb-3">
-                            <label for="divisionFilter" class="form-label">Division</label>
-                            <select class="form-select" id="divisionFilter" aria-label="Filter by Division">
+                            <label for="divFilter" class="form-label">Division</label>
+                            <select class="form-select" id="divFilter" aria-label="Filter by Division">
                                 <option value="">All Divisions</option>
                                 <option value="A">Division A</option>
                                 <option value="B">Division B</option>
@@ -433,11 +432,53 @@
                     </div>
                     
                     <div class="card-body p-0">
+                        <!-- Search Bar & Bulk Actions Toolbar -->
+                        <div class="p-3 bg-body-tertiary border-bottom">
+                            <!-- Real-Time Text Search directly above the table -->
+                            <div class="row g-3 align-items-center mb-2">
+                                <div class="col-12">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-body border-end-0">
+                                            <i class="bi bi-search text-muted"></i>
+                                        </span>
+                                        <input type="text" class="form-control border-start-0" id="tableSearchInput" placeholder="Filter by Subject, Day, or Room..." aria-label="Filter by Subject, Day, or Room">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Phase 1: Bulk Action UI Row -->
+                            <div class="row g-2 align-items-center" id="bulkActionRow">
+                                <div class="col-md-7 col-lg-8">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="bulkFacultySelect" class="form-label mb-0 fw-semibold text-body small text-nowrap">
+                                            <i class="bi bi-person-check text-primary me-1"></i>Bulk Faculty:
+                                        </label>
+                                        <select class="form-select form-select-sm rounded-3" id="bulkFacultySelect" aria-label="Select Faculty for Bulk Assignment">
+                                            <option value="" selected disabled>Choose Faculty for Bulk Assignment...</option>
+                                            {% for fac in all_faculties %}
+                                            <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-5 col-lg-4 text-md-end">
+                                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm fw-semibold w-100 w-md-auto" id="bulkAssignBtn">
+                                        <i class="bi bi-people-fill me-1.5"></i>Bulk Assign Selected
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="table-responsive">
                             <table class="table table-hover align-middle mb-0" id="unassignedClassesTable">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="ps-4 py-3">Room</th>
+                                        <th class="ps-4 py-3" style="width: 85px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input class="form-check-input mt-0" type="checkbox" id="selectAllCheckbox" aria-label="Select all classes">
+                                                <span class="small fw-semibold text-body">Select</span>
+                                            </div>
+                                        </th>
+                                        <th class="py-3">Room</th>
                                         <th class="py-3">Day & Time</th>
                                         <th class="py-3">Subject / Course</th>
                                         <th class="py-3">Division</th>
@@ -454,7 +495,12 @@
                                             data-division="{{ cls.division or '' }}" 
                                             data-room="{{ cls.room.number if cls.room else (cls.room_id|string) }}" 
                                             data-day="{% if cls.day_of_week == 0 %}Monday{% elif cls.day_of_week == 1 %}Tuesday{% elif cls.day_of_week == 2 %}Wednesday{% elif cls.day_of_week == 3 %}Thursday{% elif cls.day_of_week == 4 %}Friday{% elif cls.day_of_week == 5 %}Saturday{% elif cls.day_of_week == 6 %}Sunday{% endif %}">
-                                            <td class="ps-4 fw-bold">
+                                            <td class="ps-4">
+                                                <div class="form-check mb-0">
+                                                    <input class="form-check-input row-checkbox row-select-checkbox" type="checkbox" value="{{ cls.id }}" data-class-id="{{ cls.id }}" aria-label="Select class #{{ cls.id }}">
+                                                </div>
+                                            </td>
+                                            <td class="fw-bold">
                                                 <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-3">
                                                     {{ cls.room.number if cls.room else ('Room #' ~ cls.room_id) }}
                                                 </span>
@@ -476,13 +522,17 @@
                                                 </small>
                                             </td>
                                             <td>
-                                                <div class="fw-semibold text-body search-subject">{{ cls.subject }}</div>
+                                                <div class="fw-bold text-body search-subject mb-1">{{ cls.subject }}</div>
                                                 {% if cls.course %}
-                                                <small class="text-muted search-course">{{ cls.course }}</small>
+                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-0.5 rounded-2 small search-course">{{ cls.course }}</span>
                                                 {% endif %}
                                             </td>
                                             <td>
-                                                <span class="text-muted small">{{ cls.division or '—' }}</span>
+                                                {% if cls.division %}
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-2 fw-semibold">{{ cls.division }}</span>
+                                                {% else %}
+                                                <span class="text-muted small">—</span>
+                                                {% endif %}
                                             </td>
                                             <td>
                                                 <select class="form-select form-select-sm faculty-select rounded-3" id="faculty-select-{{ cls.id }}" aria-label="Select Faculty">
@@ -494,7 +544,7 @@
                                             </td>
                                             <td class="text-end pe-4">
                                                 <button type="button" 
-                                                        class="btn btn-sm btn-primary rounded-pill px-3 btn-assign-faculty shadow-sm" 
+                                                        class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 btn-assign-faculty shadow-sm" 
                                                         data-class-id="{{ cls.id }}">
                                                     <i class="bi bi-person-check-fill me-1"></i>Assign
                                                 </button>
@@ -503,7 +553,7 @@
                                         {% endfor %}
                                     {% else %}
                                         <tr id="noUnassignedRow">
-                                            <td colspan="6" class="text-center py-5 text-muted">
+                                            <td colspan="7" class="text-center py-5 text-muted">
                                                 <div class="py-4">
                                                     <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
                                                     <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
@@ -512,6 +562,15 @@
                                             </td>
                                         </tr>
                                     {% endif %}
+                                    <tr id="noFilterMatchRow" style="display: none;">
+                                        <td colspan="7" class="text-center py-5 text-muted">
+                                            <div class="py-4">
+                                                <i class="bi bi-funnel text-secondary display-6 d-block mb-3"></i>
+                                                <p class="mb-1 fw-bold fs-5 text-body">No classes match the selected filters</p>
+                                                <small class="text-muted">Try resetting or adjusting your filter criteria.</small>
+                                            </div>
+                                        </td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -582,144 +641,115 @@
 </div>
 
 <!-- ═══════════════════════════════════════════════════
-     DELETE TIMETABLES MODAL
+     DELETE CONFIRM MODAL (Phase 1: Securing Destructive Actions)
 ══════════════════════════════════════════════════════ -->
-<div class="modal fade" id="deleteTimetableModal" tabindex="-1" aria-labelledby="deleteTimetableModalLabel" aria-hidden="true">
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
             <div class="modal-header border-0 bg-danger text-white py-3 px-4">
-                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="deleteTimetableModalLabel">
-                    <i class="bi bi-trash3-fill fs-5"></i>Delete Timetables
+                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="deleteConfirmModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>Confirm Timetable Deletion
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body p-4">
-                <form id="deleteTimetableForm">
-                    <div class="mb-3">
-                        <label for="deleteScopeSelect" class="form-label fw-semibold">Deletion Scope</label>
-                        <select class="form-select rounded-3" id="deleteScopeSelect" required>
-                            <option value="building" selected>Entire Vyas Building (Clear All Timetables)</option>
-                            <option value="floor">Specific Floor Only</option>
-                            <option value="room">Specific Room Only</option>
-                        </select>
-                    </div>
+            <div class="modal-body p-4 text-center">
+                <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex mb-3">
+                    <i class="bi bi-trash3-fill display-5"></i>
+                </div>
+                <h5 class="fw-bold text-body mb-2">Delete Timetable Records</h5>
+                <p class="text-danger fw-semibold mb-3" style="font-size: 1.05rem;">
+                    Are you sure you want to wipe all timetable records? This action cannot be undone.
+                </p>
+                <div class="alert alert-danger border-0 rounded-3 p-3 mb-0 small text-danger-emphasis text-start">
+                    <i class="bi bi-info-circle-fill me-1"></i>
+                    This action will permanently delete all classroom timetables, recurring schedules, and unassigned class allocations across the Vyas building.
+                </div>
+            </div>
 
-                    <div class="mb-3 d-none" id="deleteFloorGroup">
-                        <label for="deleteFloorSelect" class="form-label fw-semibold">Select Floor</label>
-                        <select class="form-select rounded-3" id="deleteFloorSelect">
-                            <option value="" disabled selected>Choose Floor...</option>
-                            {% for f in floors %}
-                            <option value="{{ f.id }}">{{ f.name }} (Level {{ f.level }})</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="mb-3 d-none" id="deleteRoomGroup">
-                        <label for="deleteRoomSelect" class="form-label fw-semibold">Select Room</label>
-                        <select class="form-select rounded-3" id="deleteRoomSelect">
-                            <option value="" disabled selected>Choose Room...</option>
-                            {% for r in rooms %}
-                            <option value="{{ r.id }}">{{ r.number }} - {{ r.name or 'Classroom' }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <div class="alert alert-danger border-0 rounded-3 p-3 my-4">
-                        <div class="d-flex align-items-center gap-2 text-danger fw-bold mb-1">
-                            <i class="bi bi-exclamation-triangle-fill fs-5"></i>
-                            <span>Warning: Destructive Action</span>
-                        </div>
-                        <p class="small mb-0 text-danger-emphasis">
-                            This will permanently erase all matching timetable schedules and unassigned class allocations.
-                        </p>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger rounded-pill px-4 shadow-sm" id="btnConfirmDeleteTimetable">
-                            <i class="bi bi-trash3-fill me-1"></i>Confirm Delete
-                        </button>
-                    </div>
-                </form>
+            <div class="modal-footer border-0 p-4 pt-0 justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 shadow-sm fw-semibold" id="btnConfirmDeleteTimetable">
+                    <i class="bi bi-trash3-fill me-1"></i>Yes, Wipe All Timetables
+                </button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-// ==================== UNASSIGNED CLASSES SIDEBAR FILTER ====================
-function filterTable() {
+// ==================== PHASE 1: EVENT BINDING AND STATE EXTRACTION ====================
+function applyFilters() {
+    // 1. Extract current value of every input and convert it to lowercase
     const courseFilter = document.getElementById('courseFilter');
     const yearFilter = document.getElementById('yearFilter');
-    const divisionFilter = document.getElementById('divisionFilter');
+    const divFilter = document.getElementById('divFilter');
     const dayFilter = document.getElementById('dayFilter');
     const roomFilter = document.getElementById('roomFilter');
+    const searchInput = document.getElementById('tableSearchInput');
 
     const courseVal = (courseFilter ? courseFilter.value : '').toLowerCase().trim();
     const yearVal = (yearFilter ? yearFilter.value : '').toLowerCase().trim();
-    const divisionVal = (divisionFilter ? divisionFilter.value : '').toUpperCase().trim();
+    const divVal = (divFilter ? divFilter.value : '').toLowerCase().trim();
     const dayVal = (dayFilter ? dayFilter.value : '').toLowerCase().trim();
     const roomVal = (roomFilter ? roomFilter.value : '').toLowerCase().trim();
+    const searchVal = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
     const tableBody = document.getElementById('unassignedClassesBody') || document.querySelector('#unassignedClassesTable tbody');
     if (!tableBody) return;
 
+    // Phase 2: Grab all the table rows inside the table body
     const rows = tableBody.querySelectorAll('tr');
+    
+    // Set up a visibleCount variable starting at 0
     let visibleCount = 0;
     let totalCount = 0;
 
+    // Loop through each row
     rows.forEach(row => {
-        if (row.id === 'noUnassignedRow') return;
+        if (row.id === 'noUnassignedRow' || row.id === 'noFilterMatchRow') return;
         totalCount++;
 
+        // Grab text and metadata attributes of the row
         const rowText = (row.textContent || '').toLowerCase();
-        const rowCourse = (row.getAttribute('data-course') || '').toLowerCase();
-        const rowSubject = (row.getAttribute('data-subject') || '').toLowerCase();
-        const rowDivision = (row.getAttribute('data-division') || '').toUpperCase();
-        const rowRoom = (row.getAttribute('data-room') || '').toLowerCase();
-        const rowDay = (row.getAttribute('data-day') || '').toLowerCase();
+        const rowCourse = (row.getAttribute('data-course') || row.dataset.course || '').toLowerCase().trim();
+        const rowDay = (row.getAttribute('data-day') || row.dataset.day || '').toLowerCase().trim();
+        const rowRoom = (row.getAttribute('data-room') || row.dataset.room || '').toLowerCase().trim();
+        const rowDivRaw = (row.getAttribute('data-division') || row.dataset.division || (row.cells && row.cells[4] ? row.cells[4].textContent : '')).trim();
 
-        // 1. Course Filter (dropdown: BCA, MCA, BSC, MSC)
-        const combinedCourseText = `${rowCourse} ${rowSubject} ${rowText}`;
-        const matchCourse = !courseVal || combinedCourseText.includes(courseVal);
+        // 1. Course Match (e.g. 'BCA', 'MCA', 'BSC', 'MSC')
+        const courseMatch = !courseVal || (rowCourse ? rowCourse.includes(courseVal) : rowText.includes(courseVal));
 
-        // 2. Year Filter (dropdown: FY, SY, TY, HONS)
-        let matchYear = true;
+        // 2. Year Match (FY, SY, TY, HONS / HONOURS)
+        let yearMatch = !yearVal;
         if (yearVal) {
-            if (yearVal === 'fy') {
-                matchYear = /\b(fy|first\s*year|1st\s*year)\b/i.test(combinedCourseText) || 
-                            /\bfy(bca|bsc|mca|msc|ds|cs|it|ai|[a-z]{2,4})/i.test(combinedCourseText) || 
-                            /\bfy[\s\-_]/i.test(combinedCourseText);
-            } else if (yearVal === 'sy') {
-                matchYear = /\b(sy|second\s*year|2nd\s*year)\b/i.test(combinedCourseText) || 
-                            /\bsy(bca|bsc|mca|msc|ds|cs|it|ai|[a-z]{2,4})/i.test(combinedCourseText) || 
-                            /\bsy[\s\-_]/i.test(combinedCourseText);
-            } else if (yearVal === 'ty') {
-                matchYear = /\b(ty|third\s*year|3rd\s*year)\b/i.test(combinedCourseText) || 
-                            /\bty(bca|bsc|mca|msc|ds|cs|it|ai|[a-z]{2,4})/i.test(combinedCourseText) || 
-                            /\bty[\s\-_]/i.test(combinedCourseText);
-            } else if (yearVal === 'hons') {
-                matchYear = /\b(hons|honr|honrs|honor|honors|honour|honours|4th\s*year|final\s*year)\b/i.test(combinedCourseText);
+            if (yearVal === 'hons' || yearVal === 'honours') {
+                yearMatch = rowCourse.includes('hon') || rowText.includes('hon');
             } else {
-                matchYear = combinedCourseText.includes(yearVal);
+                yearMatch = rowCourse.includes(yearVal) || rowText.includes(yearVal);
             }
         }
 
-        // 3. Division Filter (dropdown: A, B, C, D, E)
-        let matchDivision = true;
-        if (divisionVal) {
-            const divRegex = new RegExp(`\\b(?:div(?:ision)?|batch)?[\\s\\-_]*${divisionVal}\\b|\\bdiv[\\s\\-_]*${divisionVal}\\b|[\\-_]${divisionVal}\\b`, 'i');
-            matchDivision = divRegex.test(rowDivision) || divRegex.test(rowSubject) || divRegex.test(rowText);
+        // 3. Division Match (Accurately matches 'A', 'Div A', 'Division A' without false-matching 'a' in entire row text)
+        let divMatch = !divVal;
+        if (divVal) {
+            const targetDivLetter = divVal.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
+            const rowDivLetter = rowDivRaw.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
+            divMatch = rowDivLetter !== '' && (rowDivLetter === targetDivLetter || rowDivRaw.toLowerCase() === divVal);
         }
 
-        // 4. Day Filter (dropdown: Monday...Sunday)
-        const matchDay = !dayVal || rowDay === dayVal || rowText.includes(dayVal);
+        // 4. Day Match (Monday through Sunday)
+        const dayMatch = !dayVal || (rowDay ? rowDay === dayVal : rowText.includes(dayVal));
 
-        // 5. Room Filter (dropdown: VY401...)
-        const matchRoom = !roomVal || rowRoom === roomVal || rowText.includes(roomVal);
+        // 5. Room Match
+        const roomMatch = !roomVal || (rowRoom ? rowRoom === roomVal : rowText.includes(roomVal));
 
-        if (matchCourse && matchYear && matchDivision && matchDay && matchRoom) {
+        // 6. Text Search Match
+        const searchMatch = !searchVal || rowText.includes(searchVal);
+
+        // Evaluate: IF (courseMatch AND yearMatch AND divMatch AND dayMatch AND roomMatch AND searchMatch) is true,
+        // set the row display to an empty string (visible) and increment visibleCount. ELSE, set the row display to "none" (hidden).
+        if (courseMatch && yearMatch && divMatch && dayMatch && roomMatch && searchMatch) {
             row.style.display = '';
             visibleCount++;
         } else {
@@ -727,39 +757,112 @@ function filterTable() {
         }
     });
 
+    // Toggle "No matches" empty state if active filters hide all rows
+    const noMatchRow = document.getElementById('noFilterMatchRow');
+    if (noMatchRow) {
+        noMatchRow.style.display = (totalCount > 0 && visibleCount === 0) ? '' : 'none';
+    }
+
+    // Uncheck master checkbox if visible selection changes
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox) {
+        const visibleCheckboxes = Array.from(document.querySelectorAll('.row-checkbox')).filter(c => {
+            const r = c.closest('tr');
+            return r && r.style.display !== 'none';
+        });
+        selectAllCheckbox.checked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(c => c.checked);
+    }
+
     // Update active filter badge and count badge
     const activeBadge = document.getElementById('activeFilterBadge');
-    const isFiltered = Boolean(courseVal || yearVal || divisionVal || dayVal || roomVal);
+    const isFiltered = Boolean(searchVal || courseVal || yearVal || divVal || dayVal || roomVal);
     if (activeBadge) {
         activeBadge.style.display = isFiltered ? 'inline-block' : 'none';
     }
 
+    // Phase 3: Update the text of the results badge (the "X of 882 Shown" element) using visibleCount
     const countBadge = document.getElementById('unassignedCountBadge');
     if (countBadge) {
-        if (isFiltered) {
-            countBadge.textContent = `${visibleCount} of ${totalCount} Shown`;
-        } else {
-            countBadge.textContent = `${totalCount} Unassigned`;
-        }
+        countBadge.textContent = `${visibleCount} of ${totalCount} Shown`;
     }
 }
-window.filterTable = filterTable;
+window.applyFilters = applyFilters;
+window.filterTable = applyFilters;
 
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
+    // Phase 1: Attach event listeners to all dropdowns and text search input
     const courseFilter = document.getElementById('courseFilter');
     const yearFilter = document.getElementById('yearFilter');
-    const divisionFilter = document.getElementById('divisionFilter');
+    const divFilter = document.getElementById('divFilter');
     const dayFilter = document.getElementById('dayFilter');
     const roomFilter = document.getElementById('roomFilter');
-    const btnResetFilters = document.getElementById('btnResetFilters');
+    const tableSearchInput = document.getElementById('tableSearchInput');
 
-    if (courseFilter) courseFilter.addEventListener('change', filterTable);
-    if (yearFilter) yearFilter.addEventListener('change', filterTable);
-    if (divisionFilter) divisionFilter.addEventListener('change', filterTable);
-    if (dayFilter) dayFilter.addEventListener('change', filterTable);
-    if (roomFilter) roomFilter.addEventListener('change', filterTable);
+    if (courseFilter) courseFilter.addEventListener('change', applyFilters);
+    if (yearFilter) yearFilter.addEventListener('change', applyFilters);
+    if (divFilter) divFilter.addEventListener('change', applyFilters);
+    if (dayFilter) dayFilter.addEventListener('change', applyFilters);
+    if (roomFilter) roomFilter.addEventListener('change', applyFilters);
+    if (tableSearchInput) tableSearchInput.addEventListener('input', applyFilters);
+
+    // ==================== PHASE 2: CHECKBOX TOGGLE LOGIC ====================
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const tableBody = document.getElementById('unassignedClassesBody');
+
+    if (selectAllCheckbox) {
+        // When checked, finds all checkboxes with class "row-checkbox" that are currently VISIBLE on the screen and checks them. When unchecked, unchecks them.
+        selectAllCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            const allRowCheckboxes = document.querySelectorAll('.row-checkbox');
+            allRowCheckboxes.forEach(cb => {
+                const row = cb.closest('tr');
+                // Ignore rows hidden by text/course filters
+                if (row && row.style.display !== 'none') {
+                    cb.checked = isChecked;
+                }
+            });
+        });
+    }
+
+    // Add listeners to the individual row checkboxes so that if one is manually unchecked, master selectAllCheckbox unchecks
+    document.querySelectorAll('.row-checkbox').forEach(cb => {
+        cb.addEventListener('change', function() {
+            if (!this.checked && selectAllCheckbox) {
+                selectAllCheckbox.checked = false;
+            } else if (this.checked && selectAllCheckbox) {
+                // If all visible row checkboxes are checked, set master selectAllCheckbox to checked
+                const visibleCheckboxes = Array.from(document.querySelectorAll('.row-checkbox')).filter(c => {
+                    const r = c.closest('tr');
+                    return r && r.style.display !== 'none';
+                });
+                if (visibleCheckboxes.length > 0 && visibleCheckboxes.every(c => c.checked)) {
+                    selectAllCheckbox.checked = true;
+                }
+            }
+        });
+    });
+
+    if (tableBody) {
+        tableBody.addEventListener('change', function(e) {
+            if (e.target && e.target.classList.contains('row-checkbox')) {
+                if (!e.target.checked && selectAllCheckbox) {
+                    selectAllCheckbox.checked = false;
+                } else if (e.target.checked && selectAllCheckbox) {
+                    const visibleCheckboxes = Array.from(document.querySelectorAll('.row-checkbox')).filter(c => {
+                        const r = c.closest('tr');
+                        return r && r.style.display !== 'none';
+                    });
+                    if (visibleCheckboxes.length > 0 && visibleCheckboxes.every(c => c.checked)) {
+                        selectAllCheckbox.checked = true;
+                    }
+                }
+            }
+        });
+    }
+
+    const btnResetFilters = document.getElementById('btnResetFilters');
 
     // Custom Room Accordion Selection Helper
     function selectRoom(roomVal) {
@@ -785,7 +888,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (dd) dd.hide();
         }
 
-        filterTable();
+        applyFilters();
     }
 
     // Room dropdown menu click delegation
@@ -802,13 +905,145 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Phase 3: Wire up the "Reset Filters" button in the sidebar
     if (btnResetFilters) {
         btnResetFilters.addEventListener('click', function() {
-            if (courseFilter) courseFilter.value = '';
-            if (yearFilter) yearFilter.value = '';
-            if (divisionFilter) divisionFilter.value = '';
-            if (dayFilter) dayFilter.value = '';
+            // 1. Clear the text search
+            const searchInput = document.getElementById('tableSearchInput');
+            if (searchInput) searchInput.value = '';
+
+            // 2. Reset all select dropdowns to their default (empty) index
+            const selectDropdowns = [
+                document.getElementById('courseFilter'),
+                document.getElementById('yearFilter'),
+                document.getElementById('divFilter'),
+                document.getElementById('dayFilter')
+            ];
+            selectDropdowns.forEach(dropdown => {
+                if (dropdown) {
+                    dropdown.selectedIndex = 0;
+                    dropdown.value = '';
+                }
+            });
+
+            // Reset room filter
             selectRoom('');
+
+            // 3. Call applyFilters() to reveal all rows again
+            applyFilters();
+        });
+    }
+
+    // ==================== PHASE 3: THE BULK FETCH REQUEST ====================
+    const bulkAssignBtn = document.getElementById('bulkAssignBtn');
+    const bulkFacultySelect = document.getElementById('bulkFacultySelect');
+
+    if (bulkAssignBtn) {
+        bulkAssignBtn.addEventListener('click', async function() {
+            // 1. Validate that bulkFacultySelect has a valid faculty ID selected
+            if (!bulkFacultySelect || !bulkFacultySelect.value || bulkFacultySelect.value.trim() === '') {
+                alert('Please select a faculty member from the dropdown before bulk assigning.');
+                if (bulkFacultySelect) bulkFacultySelect.focus();
+                return;
+            }
+
+            const facultyId = parseInt(bulkFacultySelect.value, 10);
+            if (isNaN(facultyId)) {
+                alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
+                return;
+            }
+
+            // 2. Query all checked row-checkbox elements
+            const checkedBoxes = Array.from(document.querySelectorAll('.row-checkbox:checked'));
+            if (checkedBoxes.length === 0) {
+                alert('Please select at least one class checkbox to assign.');
+                return;
+            }
+
+            // 3. Map through checked checkboxes to extract array of class_ids
+            const classIds = checkedBoxes.map(cb => {
+                const idVal = cb.getAttribute('data-class-id') || cb.value;
+                return parseInt(idVal, 10);
+            }).filter(id => !isNaN(id));
+
+            if (classIds.length === 0) {
+                alert('No valid class IDs found in the selected rows.');
+                return;
+            }
+
+            const originalBtnHtml = bulkAssignBtn.innerHTML;
+            bulkAssignBtn.disabled = true;
+            bulkAssignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Assigning...';
+
+            try {
+                // 4. Send POST request via fetch() to /admin/api/bulk_assign_faculty
+                const response = await fetch('/admin/api/bulk_assign_faculty', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({
+                        faculty_id: facultyId,
+                        class_ids: classIds
+                    })
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (response.ok && data && (data.success !== false)) {
+                    // 5. On successful 200 response, dynamically remove checked rows from DOM
+                    checkedBoxes.forEach(cb => {
+                        const row = cb.closest('tr');
+                        if (row) {
+                            row.remove();
+                        }
+                    });
+
+                    // Reset master checkbox
+                    if (selectAllCheckbox) {
+                        selectAllCheckbox.checked = false;
+                    }
+
+                    // Update the "X of 882 Shown" counter without reloading the page
+                    applyFilters();
+
+                    const tbody = document.getElementById('unassignedClassesBody');
+                    if (tbody) {
+                        const remainingRows = tbody.querySelectorAll('tr:not(#noUnassignedRow)');
+                        const statUnassigned = document.getElementById('statUnassignedSlots');
+                        if (statUnassigned) statUnassigned.textContent = remainingRows.length;
+
+                        if (remainingRows.length === 0) {
+                            tbody.innerHTML = `
+                                <tr id="noUnassignedRow">
+                                    <td colspan="7" class="text-center py-5 text-muted">
+                                        <div class="py-4">
+                                            <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
+                                            <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
+                                            <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                    }
+
+                    // Reset the faculty dropdown
+                    if (bulkFacultySelect) {
+                        bulkFacultySelect.selectedIndex = 0;
+                    }
+                } else {
+                    const errorMsg = (data && (data.error || data.message)) || `Server returned status ${response.status}`;
+                    alert('Failed to bulk assign classes: ' + errorMsg);
+                }
+            } catch (err) {
+                alert('Network error while performing bulk assignment: ' + (err.message || 'Please try again.'));
+            } finally {
+                bulkAssignBtn.disabled = false;
+                bulkAssignBtn.innerHTML = originalBtnHtml;
+            }
         });
     }
 
@@ -870,7 +1105,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 if (remainingRows.length === 0) {
                                     tbody.innerHTML = `
                                         <tr id="noUnassignedRow">
-                                            <td colspan="6" class="text-center py-5 text-muted">
+                                            <td colspan="7" class="text-center py-5 text-muted">
                                                 <div class="py-4">
                                                     <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
                                                     <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
@@ -988,39 +1223,17 @@ document.addEventListener('DOMContentLoaded', function() {
     if (deleteScopeSelect) {
         deleteScopeSelect.addEventListener('change', function() {
             const val = this.value;
-            deleteFloorGroup.classList.toggle('d-none', val !== 'floor');
-            deleteRoomGroup.classList.toggle('d-none', val !== 'room');
+            if (deleteFloorGroup) deleteFloorGroup.classList.toggle('d-none', val !== 'floor');
+            if (deleteRoomGroup) deleteRoomGroup.classList.toggle('d-none', val !== 'room');
         });
     }
 
+    // ==================== DELETE TIMETABLE CONFIRMATION LOGIC ====================
     if (btnConfirmDeleteTimetable) {
         btnConfirmDeleteTimetable.addEventListener('click', async function() {
-            const scope = deleteScopeSelect.value;
-            const payload = { scope: scope };
-
-            if (scope === 'floor') {
-                const floorVal = document.getElementById('deleteFloorSelect').value;
-                if (!floorVal) {
-                    alert('Please select a floor.');
-                    return;
-                }
-                payload.floor_id = parseInt(floorVal, 10);
-            } else if (scope === 'room') {
-                const roomVal = document.getElementById('deleteRoomSelect').value;
-                if (!roomVal) {
-                    alert('Please select a room.');
-                    return;
-                }
-                payload.room_id = parseInt(roomVal, 10);
-            }
-
-            if (!confirm(`Are you sure you want to delete timetable schedules for scope: '${scope.toUpperCase()}'? This action cannot be undone.`)) {
-                return;
-            }
-
             const origHtml = btnConfirmDeleteTimetable.innerHTML;
             btnConfirmDeleteTimetable.disabled = true;
-            btnConfirmDeleteTimetable.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Deleting...';
+            btnConfirmDeleteTimetable.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Deleting...';
 
             try {
                 const response = await fetch('/admin/api/timetable/delete', {
@@ -1030,7 +1243,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         'X-CSRFToken': csrfToken,
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify({ scope: 'building' })
                 });
 
                 const result = await response.json();
@@ -1038,7 +1251,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 btnConfirmDeleteTimetable.innerHTML = origHtml;
 
                 if (result.success) {
-                    alert(result.message || 'Timetables deleted successfully!');
+                    alert(result.message || 'Timetables wiped successfully!');
                     window.location.reload();
                 } else {
                     alert('Delete failed: ' + (result.error || result.message || 'Server error'));

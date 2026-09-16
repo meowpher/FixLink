@@ -2127,3 +2127,89 @@ def assign_faculty(class_id):
         )
 
 
+@admin_bp.route('/api/bulk_assign_faculty', methods=['POST'])
+@admin_bp.route('/api/bulk-assign-faculty', methods=['POST'])
+@admin_required
+@handle_api_errors
+def bulk_assign_faculty():
+    """
+    Bulk assign multiple Timetable classes to a single faculty member.
+    Payload: {"faculty_id": <int>, "class_ids": [<int>, ...]}
+    """
+    from ...models import Timetable, User
+
+    data = request.get_json(silent=True)
+    if not data:
+        return api_response(success=False, error="Invalid or missing JSON payload.", status=400)
+
+    raw_faculty_id = data.get('faculty_id')
+    class_ids = data.get('class_ids')
+
+    if not raw_faculty_id:
+        return api_response(success=False, error="'faculty_id' is required.", status=400)
+
+    if not class_ids or not isinstance(class_ids, list):
+        return api_response(success=False, error="'class_ids' must be a non-empty list of IDs.", status=400)
+
+    try:
+        faculty_id = int(raw_faculty_id)
+    except (ValueError, TypeError):
+        return api_response(success=False, error="Invalid 'faculty_id'. Must be an integer ID.", status=400)
+
+    faculty = User.query.get(faculty_id)
+    if not faculty:
+        return api_response(success=False, error=f"Faculty with ID {faculty_id} not found.", status=404)
+
+    # Sanitize and extract integer class_ids
+    valid_class_ids = []
+    for cid in class_ids:
+        try:
+            valid_class_ids.append(int(cid))
+        except (ValueError, TypeError):
+            continue
+
+    if not valid_class_ids:
+        return api_response(success=False, error="No valid class IDs provided in payload.", status=400)
+
+    try:
+        # Bulk update setting the faculty_id for all matched records
+        updated_count = Timetable.query.filter(Timetable.id.in_(valid_class_ids)).update(
+            {Timetable.faculty_id: faculty_id},
+            synchronize_session='fetch'
+        )
+
+        # Commit the transaction to the database exactly once to ensure optimal performance
+        db.session.commit()
+
+        # Emit room status updates if realtime is enabled
+        try:
+            from ...realtime import emit_room_status_change
+            rooms_to_update = db.session.query(Timetable.room_id).filter(Timetable.id.in_(valid_class_ids)).distinct().all()
+            for (rid,) in rooms_to_update:
+                if rid:
+                    from ...models import Room
+                    room = Room.query.get(rid)
+                    if room:
+                        emit_room_status_change(room, room.current_occupancy_status)
+        except Exception:
+            pass
+
+        return api_response(
+            success=True,
+            message=f"Successfully assigned {updated_count} classes to {faculty.name}.",
+            data={
+                "faculty_id": faculty_id,
+                "faculty_name": faculty.name,
+                "updated_count": updated_count
+            }
+        )
+    except Exception as e:
+        db.session.rollback()
+        return api_response(
+            success=False,
+            error=f"Database transaction failed during bulk assignment: {str(e)}",
+            status=500
+        )
+
+
+

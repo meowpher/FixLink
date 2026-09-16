@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.3** | 2026-09-16 | **Deployed** | Interactive Map Room Popup Position Fix (Prevented room info popup from overlapping the floor dropdown selector and legend; added auto-dismiss on floor change; polished dark mode pop-card contrast). |
 | **v1.7.2** | 2026-09-16 | **Deployed** | Theme Color Mode Bugfixes (Fixed dark mode text contrast on timetable classes, removed hardcoded black box on Booking History in light mode, and restored bright high-contrast room labels on SVG maps). |
 | **v1.7.1** | 2026-09-16 | **Deployed** | Technical Debt Purge & UI Polish (Removed legacy 'Sync My Timetable' button and popup, fixed afternoon class time parsing, and polished Smart Classroom map header). |
 | **v1.7.0** | 2026-09-16 | **Deployed** | Timetable Class Allocation (Fixed imported spreadsheet classes wrongly assigning to admin; added easy teacher dropdown on Admin Dashboard with one-click, instant assignment). |
@@ -30,6 +31,24 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.3 (2026-09-16)
+- `fix(map-popup)`: **Interactive Map Room Popup Positioning Fix, Unblocked Floor Controls, Auto-Dismiss, and Dark Mode Polish**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Unblocked Floor Selector & Legend (No More Overlapping Popups)**:
+     - When clicking on any room or lab (such as Computer Lab 427) on the interactive floor map, the floating room card was popping up too high on the screen (`top: 100px`).
+     - This caused the top of the popup and its close button to sit directly on top of the "4th Floor (Interactive)" dropdown and the green/red status legend dots, blocking clicks and covering the controls.
+     - We adjusted the popup's desktop positioning to `top: 180px` with a responsive height limit (`max-height: calc(100vh - 210px)`). The room card now docks neatly beneath the floor controls, keeping the floor dropdown and status legend 100% visible and easily clickable at all times.
+  2. **Smart Auto-Dismiss When Switching Floors**:
+     - Previously, if a professor had a room card open on Floor 4 and changed the dropdown to Floor 3, the old room card stayed on screen, showing outdated details.
+     - The floor dropdown now automatically closes any active room popup when a new floor is picked, keeping the interface clean and context-accurate.
+  3. **High-Contrast Dark Mode for Room Information**:
+     - Enhanced the dark mode appearance of the room popup: the card borders, titles, 'X' close button, and status alert boxes (such as "Optimal Levels / Room is vacant") now render with crisp text and high-contrast styling without washed-out gray tones.
+  4. **Production Cache Busting**:
+     - Bumped the stylesheet cache buster in `base.html` to `v=8.7`.
+
+---
 
 ### Release v1.7.2 (2026-09-16)
 - `fix(theme-colors)`: **Theme Color Mode Bugfixes: Timetable Dark Mode Typography, Booking History Light Mode Alignment, and SVG Floor Map Label Legibility**

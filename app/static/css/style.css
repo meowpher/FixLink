@@ -2435,6 +2435,72 @@ body {
     color: var(--text-primary) !important;
 }
 
+/* ── Glass Card & Theme Table Alignment ── */
+.glass-card {
+    background: var(--bg-card, #ffffff) !important;
+    border: 1px solid var(--border-color, #e2e8f0) !important;
+    color: var(--text-main, #0f172a) !important;
+}
+
+[data-theme="dark"] .glass-card {
+    background: var(--bg-surface, #141414) !important;
+    border-color: var(--border-default, #262626) !important;
+    color: var(--text-primary, #f4f4f5) !important;
+}
+
+[data-theme="dark"] thead.table-light,
+[data-theme="dark"] thead.table-light th {
+    background-color: var(--bg-surface, #141414) !important;
+    color: var(--text-primary, #f4f4f5) !important;
+    border-color: var(--border-default, #262626) !important;
+}
+
+[data-theme="dark"] .table-hover > tbody > tr:hover > * {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    color: var(--text-primary, #f4f4f5) !important;
+}
+
+/* ── Timetable Grid Dark Mode Alignment ── */
+[data-theme="dark"] .timetable-grid th,
+[data-theme="dark"] .timetable-grid td {
+    border-color: var(--border-default, #262626) !important;
+}
+
+[data-theme="dark"] .time-col,
+[data-theme="dark"] .day-label,
+[data-theme="dark"] .slot-header {
+    background: var(--bg-surface, #141414) !important;
+    color: var(--text-primary, #f4f4f5) !important;
+}
+
+[data-theme="dark"] .cell-subject {
+    color: #f8fafc !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .cell-meta {
+    color: #94a3b8 !important;
+}
+
+[data-theme="dark"] .cell-content {
+    background: rgba(37, 99, 235, 0.22) !important;
+    border-color: #3b82f6 !important;
+}
+
+[data-theme="dark"] .occupied:nth-child(even) .cell-content {
+    background: rgba(14, 165, 233, 0.22) !important;
+    border-color: #38bdf8 !important;
+}
+
+[data-theme="dark"] .occupied:nth-child(3n) .cell-content {
+    background: rgba(99, 102, 241, 0.22) !important;
+    border-color: #818cf8 !important;
+}
+
+[data-theme="dark"] .timetable-cell.vacant {
+    background: var(--bg-surface, #141414) !important;
+}
+
 /* Floor Tabs */
 .floor-tabs-section {
     background: var(--bg-main);
@@ -6090,15 +6156,15 @@ html[data-theme="dark"],
 .interactive-map-wrapper .room-text,
 .interactive-map-wrapper text,
 .interactive-map-wrapper tspan {
-    fill: #1e293b !important; /* Dark slate in light mode: > 12:1 contrast against floor */
+    fill: #ffffff !important; /* Crisp white for AAA contrast (> 9:1) on deep blue, red, orange, and teal rooms */
     stroke: none !important;
     stroke-width: 0 !important;
-    font-weight: 600 !important;
-    filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.9)) !important;
+    font-weight: 700 !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9)) !important;
     pointer-events: none !important;
 }
 
-/* Floor Map Room Labels: High-Contrast Dark Slate in Dark Mode over translucent room fills & light floor canvas */
+/* Floor Map Room Labels: High-Contrast White in Dark Mode against dark floor canvas */
 [data-theme="dark"] .interactive-room text,
 [data-bs-theme="dark"] .interactive-room text,
 [data-theme="dark"] .interactive-room tspan,
@@ -6133,49 +6199,41 @@ html[data-theme="dark"],
 [data-bs-theme="dark"] .interactive-map-wrapper text,
 [data-theme="dark"] .interactive-map-wrapper tspan,
 [data-bs-theme="dark"] .interactive-map-wrapper tspan {
-    fill: #1e293b !important; /* High-contrast dark slate pops cleanly against translucent room fills */
-    font-weight: 600 !important;
-    text-anchor: middle !important;
-    dominant-baseline: middle !important;
+    fill: #f8fafc !important; /* High-contrast white (> 16:1) over dark floor canvas */
+    font-weight: 700 !important;
     stroke: none !important;
     stroke-width: 0 !important;
-    filter: none !important;
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.95)) !important;
     pointer-events: none !important;
 }
 
-/* Interactive Room Labels: Hover and Selection States */
+/* Interactive Room Labels: Hover and Selection States (Preserve crisp white with glow) */
 .interactive-map-wrapper .room-group:hover text,
 .interactive-map-wrapper .room-group:hover [id*="_label"],
-.interactive-map-wrapper .room-group:hover [id*="_label"] path {
-    fill: #0f172a !important;
-    font-weight: 600 !important;
-}
-
+.interactive-map-wrapper .room-group:hover [id*="_label"] path,
 [data-theme="dark"] .interactive-map-wrapper .room-group:hover text,
 [data-bs-theme="dark"] .interactive-map-wrapper .room-group:hover text,
 [data-theme="dark"] .interactive-map-wrapper .room-group:hover [id*="_label"],
 [data-bs-theme="dark"] .interactive-map-wrapper .room-group:hover [id*="_label"],
 [data-theme="dark"] .interactive-map-wrapper .room-group:hover [id*="_label"] path,
 [data-bs-theme="dark"] .interactive-map-wrapper .room-group:hover [id*="_label"] path {
-    fill: #0f172a !important;
-    font-weight: 600 !important;
+    fill: #ffffff !important;
+    font-weight: 700 !important;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.95)) !important;
 }
 
 .interactive-map-wrapper .room-group.selected text,
 .interactive-map-wrapper .room-group.selected [id*="_label"],
-.interactive-map-wrapper .room-group.selected [id*="_label"] path {
-    fill: #000000 !important;
-    font-weight: 700 !important;
-}
-
+.interactive-map-wrapper .room-group.selected [id*="_label"] path,
 [data-theme="dark"] .interactive-map-wrapper .room-group.selected text,
 [data-bs-theme="dark"] .interactive-map-wrapper .room-group.selected text,
 [data-theme="dark"] .interactive-map-wrapper .room-group.selected [id*="_label"],
 [data-bs-theme="dark"] .interactive-map-wrapper .room-group.selected [id*="_label"],
 [data-theme="dark"] .interactive-map-wrapper .room-group.selected [id*="_label"] path,
 [data-bs-theme="dark"] .interactive-map-wrapper .room-group.selected [id*="_label"] path {
-    fill: #000000 !important;
-    font-weight: 700 !important;
+    fill: #ffffff !important;
+    font-weight: 800 !important;
+    filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.95)) !important;
 }
 
 
@@ -7100,52 +7158,73 @@ select.compact-input {
     filter: drop-shadow(0 0 8px rgba(39, 174, 96, 0.9)) !important;
 }
 
-/* Color classes for room types */
-.interactive-map-wrapper .fill-blue,
-.interactive-map-wrapper .fill-blue * {
+/* Color classes for room types (Target geometry only, NEVER text or label paths) */
+.interactive-map-wrapper .fill-blue .room-poly,
+.interactive-map-wrapper .fill-blue rect,
+.interactive-map-wrapper .fill-blue polygon,
+.interactive-map-wrapper .fill-blue path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper rect.fill-blue,
+.interactive-map-wrapper path.fill-blue:not([id*="_label"]) {
     fill: var(--mitwpu-blue) !important;
 }
 
-.interactive-map-wrapper .fill-teal,
-.interactive-map-wrapper .fill-teal * {
+.interactive-map-wrapper .fill-teal .room-poly,
+.interactive-map-wrapper .fill-teal rect,
+.interactive-map-wrapper .fill-teal polygon,
+.interactive-map-wrapper .fill-teal path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper rect.fill-teal,
+.interactive-map-wrapper path.fill-teal:not([id*="_label"]) {
     fill: var(--lab-teal) !important;
 }
 
-.interactive-map-wrapper .fill-red,
-.interactive-map-wrapper .fill-red * {
+.interactive-map-wrapper .fill-red .room-poly,
+.interactive-map-wrapper .fill-red rect,
+.interactive-map-wrapper .fill-red polygon,
+.interactive-map-wrapper .fill-red path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper rect.fill-red,
+.interactive-map-wrapper path.fill-red:not([id*="_label"]) {
     fill: var(--mitwpu-red) !important;
 }
 
-.interactive-map-wrapper .fill-orange,
-.interactive-map-wrapper .fill-orange * {
+.interactive-map-wrapper .fill-orange .room-poly,
+.interactive-map-wrapper .fill-orange rect,
+.interactive-map-wrapper .fill-orange polygon,
+.interactive-map-wrapper .fill-orange path:not([id*="_label"]):not([id$="_label"]) {
     fill: #f39c12 !important;
 }
 
-.interactive-map-wrapper .fill-pink,
-.interactive-map-wrapper .fill-pink * {
+.interactive-map-wrapper .fill-pink .room-poly,
+.interactive-map-wrapper .fill-pink rect,
+.interactive-map-wrapper .fill-pink polygon,
+.interactive-map-wrapper .fill-pink path:not([id*="_label"]):not([id$="_label"]) {
     fill: #e83e8c !important;
 }
 
-.interactive-map-wrapper .fill-purple,
-.interactive-map-wrapper .fill-purple * {
+.interactive-map-wrapper .fill-purple .room-poly,
+.interactive-map-wrapper .fill-purple rect,
+.interactive-map-wrapper .fill-purple polygon,
+.interactive-map-wrapper .fill-purple path:not([id*="_label"]):not([id$="_label"]) {
     fill: #6f42c1 !important;
 }
 
 /* Status overlays */
-.interactive-map-wrapper .has-issue,
-.interactive-map-wrapper .has-issue * {
+.interactive-map-wrapper .has-issue .room-poly,
+.interactive-map-wrapper .has-issue rect,
+.interactive-map-wrapper .has-issue polygon {
     fill: #dc3545 !important;
     animation: svgPulse 2s infinite;
 }
 
-.interactive-map-wrapper .in-progress,
-.interactive-map-wrapper .in-progress * {
+.interactive-map-wrapper .in-progress .room-poly,
+.interactive-map-wrapper .in-progress rect,
+.interactive-map-wrapper .in-progress polygon {
     fill: #ffc107 !important;
     animation: svgPulse 2s infinite;
 }
 
-.interactive-map-wrapper .assigned,
-.interactive-map-wrapper .assigned * {
+.interactive-map-wrapper .assigned .room-poly,
+.interactive-map-wrapper .assigned rect,
+.interactive-map-wrapper .assigned polygon {
     fill: #0d6efd !important;
 }
 

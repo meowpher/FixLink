@@ -699,13 +699,13 @@
         padding: 0 !important;
         height: 80px;
         vertical-align: middle;
-        border: 1px solid #f1f5f9 !important;
+        border: 1px solid var(--border-color, #f1f5f9) !important;
         text-align: center;
     }
 
-    .time-col { width: 120px; background: #f8fafc !important; font-weight: 700; color: #64748b; font-size: 0.75rem; text-transform: uppercase; }
-    .day-label { background: #f8fafc !important; font-weight: 700; color: #334155; font-size: 0.85rem; }
-    .slot-header { background: #f1f5f9 !important; font-size: 0.75rem; color: #64748b; font-weight: 600; }
+    .time-col { width: 120px; background: var(--bg-main, #f8fafc) !important; font-weight: 700; color: var(--text-muted, #64748b); font-size: 0.75rem; text-transform: uppercase; }
+    .day-label { background: var(--bg-main, #f8fafc) !important; font-weight: 700; color: var(--text-main, #334155); font-size: 0.85rem; }
+    .slot-header { background: var(--bg-main, #f1f5f9) !important; font-size: 0.75rem; color: var(--text-muted, #64748b); font-weight: 600; }
 
     .timetable-cell.occupied {
         padding: 8px !important;
@@ -768,7 +768,48 @@
     .cell-subject { font-weight: 700; font-size: 0.8rem; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cell-meta { font-size: 0.65rem; color: #64748b; font-weight: 600; margin-top: 2px; }
 
-    .timetable-cell.vacant { background: var(--bg-surface); }
+    .timetable-cell.vacant { background: var(--bg-card); }
+
+    /* Dark Mode Timetable Hardening */
+    [data-theme="dark"] .timetable-grid th,
+    [data-theme="dark"] .timetable-grid td {
+        border-color: var(--border-default, #262626) !important;
+    }
+
+    [data-theme="dark"] .time-col,
+    [data-theme="dark"] .day-label,
+    [data-theme="dark"] .slot-header {
+        background: var(--bg-surface, #141414) !important;
+        color: var(--text-primary, #f4f4f5) !important;
+    }
+
+    [data-theme="dark"] .cell-subject {
+        color: #f8fafc !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+    }
+
+    [data-theme="dark"] .cell-meta {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .cell-content {
+        background: rgba(37, 99, 235, 0.22) !important;
+        border-color: #3b82f6 !important;
+    }
+
+    [data-theme="dark"] .occupied:nth-child(even) .cell-content {
+        background: rgba(14, 165, 233, 0.22) !important;
+        border-color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .occupied:nth-child(3n) .cell-content {
+        background: rgba(99, 102, 241, 0.22) !important;
+        border-color: #818cf8 !important;
+    }
+
+    [data-theme="dark"] .timetable-cell.vacant {
+        background: var(--bg-surface, #141414) !important;
+    }
 
     @media (max-width: 767px) {
         #roomPopUp {
@@ -1144,9 +1185,9 @@
                     </div>
                 </div>
                 
-                <div class="table-responsive glass-card border-0 shadow-sm rounded-4 overflow-hidden p-3 text-white">
-                    <table class="table table-dark table-hover mb-0 bg-transparent">
-                        <thead>
+                <div class="table-responsive glass-card border shadow-sm rounded-4 overflow-hidden p-3">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
                             <tr>
                                 <th>Date & Time</th>
                                 <th>Room</th>
@@ -1159,8 +1200,8 @@
                             {% for b in booking_history %}
                             <tr>
                                 <td>{{ b.date.strftime('%d %b %Y') }} at {{ b.slot_start.strftime('%I:%M %p') }}</td>
-                                <td>{{ b.room.number }}</td>
-                                <td>{{ b.subject }}</td>
+                                <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">{{ b.room.number }}</span></td>
+                                <td class="fw-bold">{{ b.subject }}</td>
                                 <td>{{ b.division or '-' }} / {{ b.course or '-' }}</td>
                                 <td>
                                     {% if b.status == 'active' %}
@@ -1171,7 +1212,7 @@
                                 </td>
                             </tr>
                             {% else %}
-                            <tr><td colspan="5" class="text-center py-4 text-muted">No booking history found.</td></tr>
+                            <tr><td colspan="5" class="text-center py-5 text-muted"><i class="bi bi-inbox display-6 d-block mb-2 opacity-50"></i>No booking history found.</td></tr>
                             {% endfor %}
                         </tbody>
                     </table>

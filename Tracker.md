@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.2** | 2026-09-16 | **Deployed** | Theme Color Mode Bugfixes (Fixed dark mode text contrast on timetable classes, removed hardcoded black box on Booking History in light mode, and restored bright high-contrast room labels on SVG maps). |
 | **v1.7.1** | 2026-09-16 | **Deployed** | Technical Debt Purge & UI Polish (Removed legacy 'Sync My Timetable' button and popup, fixed afternoon class time parsing, and polished Smart Classroom map header). |
 | **v1.7.0** | 2026-09-16 | **Deployed** | Timetable Class Allocation (Fixed imported spreadsheet classes wrongly assigning to admin; added easy teacher dropdown on Admin Dashboard with one-click, instant assignment). |
 | **v1.6.3** | 2026-09-11 | **Deployed** | Legal Templates Grounding & Artifact Removal (Stripped AI Draft Banners, Corrected Institutional Scope, Codebase-Verified Retention Durations in Cookies, Terms & Privacy). |
@@ -29,6 +30,24 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.2 (2026-09-16)
+- `fix(theme-colors)`: **Theme Color Mode Bugfixes: Timetable Dark Mode Typography, Booking History Light Mode Alignment, and SVG Floor Map Label Legibility**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Timetable Cells Readable in Dark Mode (No More Hidden Text)**:
+     - Previously, when switching to dark mode, scheduled class names (e.g. `TYBCA DIV A (3.00-4.00)`) were colored in dark slate `#0f172a`, making them almost black-on-black and impossible to read.
+     - They now dynamically adapt to crisp bright white (`#f8fafc`) with soft contrast shadows, while room meta badges (`VYAS VY427`) and vacant cells cleanly match the dark theme.
+  2. **Booking History Table Fits Both Light & Dark Themes**:
+     - The "Booking History" table previously had a hardcoded `table-dark` class, meaning it stayed pitch black with muddy gray text even when the user was browsing in clean Light Mode.
+     - Replaced the hardcoded black table with a theme-aware card that renders with a crisp white background and clean borders in light mode, and seamlessly switches to sleek dark charcoal in dark mode.
+  3. **Crystal-Clear Room Numbers on the SVG Floor Map**:
+     - An aggressive CSS selector (`fill: #1e293b !important;` and `.fill-blue *`) was previously overriding room number text, turning labels dark slate on deep navy blue classrooms and gray-on-gray on utility rooms.
+     - Restored crisp, brilliant white text labels (`#ffffff`) with protective drop shadows across classrooms, labs, and washrooms in light mode, and bright `#f8fafc` text in dark mode. Room numbers like `VY401`, `VY414`, `VY424` are now instantly readable at any zoom level.
+  4. **Production Stylesheet Sync & Cache Busting**:
+     - Recompiled `style.min.css` and bumped the preload and stylesheet version query to `v=8.6`.
+
+---
 
 ### Release v1.7.1 (2026-09-16)
 - `refactor(cleanup)`: **Surgical Purge of Legacy Schedule Synchronizer Modal, Afternoon Timetable Slot Parsing Fix, and Smart Classroom Map Header Polish**

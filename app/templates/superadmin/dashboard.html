@@ -5,36 +5,92 @@
 {% block extra_css %}
 <style>
     :root {
-        --dev-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-        --primary-glow: rgba(59, 130, 246, 0.5);
+        --dev-gradient: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        --primary-glow: rgba(59, 130, 246, 0.15);
     }
 
     .developer-dashboard {
         padding-bottom: 3rem;
     }
 
-    /* Hero Section */
+    /* Hero Section - Light Mode Base */
     .dev-hero {
-        background: var(--dev-gradient);
+        background: #ffffff;
         border-radius: 20px;
-        padding: 3rem 2rem;
+        padding: 2.75rem 2rem;
         margin-bottom: 2.5rem;
         position: relative;
+        border: 1px solid var(--border-color, #e2e8f0);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
         overflow: hidden;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
     }
 
+    /* Top glowing accent sheen line - Only on hover */
     .dev-hero::before {
         content: '';
         position: absolute;
-        top: -50%;
-        right: -10%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
-        opacity: 0.3;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: 20px 20px 0 0;
+        background: linear-gradient(90deg, transparent 0%, #0b4d8c 30%, #3b82f6 70%, transparent 100%);
+        opacity: 0;
+        z-index: 2;
+        pointer-events: none;
+        transition: opacity 0.4s ease, height 0.4s ease;
+    }
+
+    /* Rich Ambient Mesh Gradient Layer - Only on hover */
+    .dev-hero::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 20px;
+        background: 
+            radial-gradient(ellipse 65% 75% at 88% 20%, rgba(59, 130, 246, 0.08) 0%, transparent 65%),
+            radial-gradient(ellipse 55% 65% at 12% 80%, rgba(99, 102, 241, 0.06) 0%, transparent 65%),
+            linear-gradient(160deg, #f8fafc 0%, #ffffff 100%);
+        opacity: 0;
         z-index: 0;
+        pointer-events: none;
+        transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .dev-hero:hover {
+        border-color: #93c5fd;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.08), 0 0 24px rgba(59, 130, 246, 0.08);
+    }
+
+    .dev-hero:hover::before {
+        opacity: 1;
+        height: 3px;
+    }
+
+    .dev-hero:hover::after {
+        opacity: 1;
+    }
+
+    .dev-hero-logout {
+        border: 1px solid rgba(220, 38, 38, 0.3) !important;
+        background: rgba(220, 38, 38, 0.04) !important;
+        color: #dc2626 !important;
+        font-weight: 600;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.25s ease !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .dev-hero-logout:hover {
+        background: #dc2626 !important;
+        color: #ffffff !important;
+        border-color: #dc2626 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3) !important;
     }
 
     .dev-hero-content {
@@ -45,149 +101,1096 @@
     .dev-hero h1 {
         font-weight: 800;
         letter-spacing: -1px;
-        color: #fff;
+        color: #0f172a;
         margin-bottom: 0.5rem;
     }
 
     .dev-hero p {
-        color: rgba(255, 255, 255, 0.7);
-        font-size: 1.1rem;
+        color: #64748b;
+        font-size: 1.05rem;
+        font-weight: 400;
     }
 
-    /* Stat Cards */
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap');
+
+    .dev-hero-title {
+        display: inline-flex;
+        align-items: center;
+        perspective: 1000px;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .hero-code-icon {
+        display: inline-block;
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.3s ease;
+        vertical-align: middle;
+        color: #0b4d8c;
+    }
+
+    .dev-hero-title:hover .hero-code-icon {
+        transform: rotate(12deg) scale(1.06);
+        color: #0284c7;
+    }
+
+    .flip-cylinder {
+        display: inline-grid;
+        place-items: center start;
+        position: relative;
+        transform-style: preserve-3d;
+        height: 1.25em;
+        line-height: 1.25em;
+        transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        vertical-align: middle;
+    }
+
+    .dev-hero-title:hover .flip-cylinder {
+        transform: rotateX(-180deg);
+    }
+
+    .flip-face {
+        grid-area: 1 / 1;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+    }
+
+    .flip-front {
+        transform: rotateX(0deg) translateZ(16px);
+        color: #0f172a;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+    }
+
+    .flip-back {
+        transform: rotateX(-180deg) translateZ(16px);
+        font-family: 'JetBrains Mono', 'Cascadia Code', 'SF Mono', 'Roboto Mono', monospace;
+        font-weight: 800;
+        gap: 0.35em;
+        letter-spacing: 0.5px;
+    }
+
+    .name-om {
+        color: #0284c7;
+        font-weight: 800;
+    }
+
+    .name-ampersand {
+        color: #94a3b8;
+        font-weight: 700;
+        background: transparent !important;
+        -webkit-text-fill-color: #94a3b8 !important;
+        display: inline-block;
+        padding: 0 0.1em;
+    }
+
+    .name-taha {
+        color: #059669;
+        font-weight: 800;
+    }
+
+    /* ── STRICT DARK MODE OVERRIDES ── */
+    [data-theme="dark"] .dev-hero {
+        background: linear-gradient(160deg, rgba(22, 22, 26, 0.95) 0%, rgba(14, 14, 17, 0.95) 100%) !important;
+        border-color: rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    [data-theme="dark"] .dev-hero h1 {
+        color: #f4f4f5 !important;
+    }
+
+    [data-theme="dark"] .flip-front {
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .hero-code-icon {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .dev-hero-title:hover .hero-code-icon {
+        color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .dev-hero p {
+        color: #a1a1aa !important;
+    }
+
+    [data-theme="dark"] .name-om {
+        color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .name-ampersand {
+        color: #64748b !important;
+        -webkit-text-fill-color: #64748b !important;
+    }
+
+    [data-theme="dark"] .name-taha {
+        color: #34d399 !important;
+    }
+
+    [data-theme="dark"] .dev-hero::before {
+        background: linear-gradient(90deg, transparent 0%, rgba(59, 130, 246, 0.8) 30%, rgba(37, 99, 235, 0.6) 70%, transparent 100%) !important;
+    }
+
+    [data-theme="dark"] .dev-hero::after {
+        background: 
+            radial-gradient(ellipse 65% 75% at 88% 20%, rgba(37, 99, 235, 0.16) 0%, transparent 65%),
+            radial-gradient(ellipse 55% 65% at 12% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 65%),
+            linear-gradient(160deg, rgba(28, 28, 34, 0.98) 0%, rgba(17, 17, 21, 0.98) 100%) !important;
+    }
+
+    [data-theme="dark"] .dev-hero:hover {
+        border-color: rgba(59, 130, 246, 0.35) !important;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(59, 130, 246, 0.12) !important;
+    }
+
+    [data-theme="dark"] .dev-hero-logout {
+        border: 1px solid rgba(239, 68, 68, 0.35) !important;
+        background: rgba(239, 68, 68, 0.06) !important;
+        color: #f87171 !important;
+    }
+
+    [data-theme="dark"] .dev-hero-logout:hover {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+        border-color: #ef4444 !important;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4) !important;
+    }
+
+    /* Enhanced Stylish Stat Cards with Subtle Gradient Effects */
     .dev-stat-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 18px;
-        padding: 1.5rem;
+        border-radius: 20px;
+        padding: 1.6rem 1.5rem;
         height: 100%;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* Top ambient glow & glass sheen - Only on hover */
+    .dev-stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--card-accent, var(--mitwpu-blue)), transparent);
+        opacity: 0;
+        transition: opacity 0.35s ease, height 0.35s ease;
+    }
+
+    .dev-stat-card::after {
+        content: '';
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 140px;
+        height: 140px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--card-glow, rgba(59, 130, 246, 0.15)) 0%, transparent 70%);
+        pointer-events: none;
+        transition: transform 0.4s ease, opacity 0.4s ease;
+        opacity: 0;
+        transform: scale(0.9);
     }
 
     .dev-stat-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-lg);
-        border-color: var(--mitwpu-blue);
+        transform: translateY(-6px);
+        box-shadow: 0 16px 32px -8px var(--card-shadow, rgba(0, 0, 0, 0.25));
+        border-color: var(--card-accent, var(--mitwpu-blue));
+    }
+
+    .dev-stat-card:hover::before {
+        opacity: 1;
+        height: 4px;
+    }
+
+    .dev-stat-card:hover::after {
+        transform: scale(1.3);
+        opacity: 1;
+    }
+
+    /* Individual Color Themes */
+    .stat-card-admin {
+        --card-accent: #3b82f6;
+        --card-glow: rgba(59, 130, 246, 0.2);
+        --card-shadow: rgba(59, 130, 246, 0.15);
+    }
+    .stat-card-admin .stat-icon-wrapper {
+        background: rgba(59, 130, 246, 0.08);
+        border: 1px solid rgba(59, 130, 246, 0.16);
+        color: #2563eb;
+        box-shadow: none;
+    }
+    .dev-stat-card.stat-card-admin:hover .stat-icon-wrapper {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.22) 0%, rgba(37, 99, 235, 0.1) 100%);
+        border-color: rgba(59, 130, 246, 0.35);
+        box-shadow: 0 6px 18px rgba(59, 130, 246, 0.25);
+        color: #1d4ed8;
+    }
+    .stat-card-admin .stats-link {
+        color: #2563eb;
+    }
+
+    .stat-card-faculty {
+        --card-accent: #f59e0b;
+        --card-glow: rgba(245, 158, 11, 0.2);
+        --card-shadow: rgba(245, 158, 11, 0.15);
+    }
+    .stat-card-faculty .stat-icon-wrapper {
+        background: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.18);
+        color: #d97706;
+        box-shadow: none;
+    }
+    .dev-stat-card.stat-card-faculty:hover .stat-icon-wrapper {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.1) 100%);
+        border-color: rgba(245, 158, 11, 0.35);
+        box-shadow: 0 6px 18px rgba(245, 158, 11, 0.25);
+        color: #b45309;
+    }
+    .stat-card-faculty .stats-link {
+        color: #d97706;
+    }
+
+    .stat-card-prof {
+        --card-accent: #10b981;
+        --card-glow: rgba(16, 185, 129, 0.2);
+        --card-shadow: rgba(16, 185, 129, 0.15);
+    }
+    .stat-card-prof .stat-icon-wrapper {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.18);
+        color: #059669;
+        box-shadow: none;
+    }
+    .dev-stat-card.stat-card-prof:hover .stat-icon-wrapper {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.1) 100%);
+        border-color: rgba(16, 185, 129, 0.35);
+        box-shadow: 0 6px 18px rgba(16, 185, 129, 0.25);
+        color: #047857;
+    }
+    .stat-card-prof .stats-link {
+        color: #059669;
+    }
+
+    .stat-card-users {
+        --card-accent: #06b6d4;
+        --card-glow: rgba(6, 182, 212, 0.2);
+        --card-shadow: rgba(6, 182, 212, 0.15);
+    }
+    .stat-card-users .stat-icon-wrapper {
+        background: rgba(6, 182, 212, 0.08);
+        border: 1px solid rgba(6, 182, 212, 0.18);
+        color: #0284c7;
+        box-shadow: none;
+    }
+    .dev-stat-card.stat-card-users:hover .stat-icon-wrapper {
+        background: linear-gradient(135deg, rgba(6, 182, 212, 0.22) 0%, rgba(14, 165, 233, 0.1) 100%);
+        border-color: rgba(6, 182, 212, 0.35);
+        box-shadow: 0 6px 18px rgba(6, 182, 212, 0.25);
+        color: #0369a1;
+    }
+    .stat-card-users .stats-link {
+        color: #0284c7;
+    }
+
+    /* Dark theme specific enhancements */
+    [data-theme="dark"] .dev-stat-card {
+        background: linear-gradient(160deg, rgba(22, 22, 24, 0.95) 0%, rgba(15, 15, 17, 0.95) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .stat-icon-wrapper {
-        width: 54px;
-        height: 54px;
+        width: 52px;
+        height: 52px;
         border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 1.25rem;
-        font-size: 1.5rem;
+        font-size: 1.45rem;
+        transition: all 0.35s ease;
+    }
+
+    .dev-stat-card:hover .stat-icon-wrapper {
+        transform: scale(1.08) rotate(3deg);
     }
 
     .stats-label {
         color: var(--text-muted);
-        font-size: 0.85rem;
-        font-weight: 600;
+        font-size: 0.78rem;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0.25rem;
+        letter-spacing: 1.2px;
+        margin-bottom: 0.35rem;
     }
 
     .stats-value {
-        font-size: 2rem;
+        font-size: 2.25rem;
         font-weight: 800;
         color: var(--text-main);
-        margin-bottom: 1rem;
+        line-height: 1.1;
+        margin-bottom: 1.1rem;
+        letter-spacing: -0.5px;
+    }
+
+    [data-theme="dark"] .stats-value {
+        color: #f8fafc;
     }
 
     .stats-link {
-        font-size: 0.85rem;
+        font-size: 0.84rem;
         font-weight: 600;
-        color: var(--mitwpu-blue);
         text-decoration: none;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 0.5rem;
-        transition: gap 0.2s;
+        gap: 0.45rem;
+        transition: all 0.2s ease;
+        margin-top: auto;
     }
 
-    .stats-link:hover {
-        gap: 0.75rem;
+    .stats-link i {
+        font-size: 0.85rem;
+        transition: transform 0.2s ease;
     }
 
-    /* Action Cards */
+    .dev-stat-card:hover .stats-link {
+        opacity: 1;
+    }
+
+    .dev-stat-card:hover .stats-link i {
+        transform: translateX(4px);
+    }
+
+    /* Enhanced Stylish Action Cards with Ambient Glow & Gradients - Only on hover */
     .dev-action-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        border-radius: 24px;
-        padding: 2.5rem;
+        border-radius: 22px;
+        padding: 2.25rem 1.6rem;
         text-align: center;
         height: 100%;
-        transition: all 0.3s ease;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
         display: flex;
         flex-direction: column;
         align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    /* Ambient top glow bar - Hidden by default */
+    .dev-action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--action-accent, var(--mitwpu-blue)), transparent);
+        opacity: 0;
+        transition: opacity 0.35s ease, height 0.35s ease;
+    }
+
+    /* Top radial soft glow - Hidden by default */
+    .dev-action-card::after {
+        content: '';
+        position: absolute;
+        top: -80px;
+        left: 50%;
+        transform: translateX(-50%) scale(0.9);
+        width: 200px;
+        height: 200px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--action-glow, rgba(59, 130, 246, 0.15)) 0%, transparent 70%);
+        pointer-events: none;
+        transition: transform 0.4s ease, opacity 0.4s ease;
+        opacity: 0;
     }
 
     .dev-action-card:hover {
-        border-color: var(--mitwpu-blue);
-        background: rgba(var(--mitwpu-blue-rgb), 0.02);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px -12px var(--action-shadow, rgba(0, 0, 0, 0.25));
+        border-color: var(--action-accent, var(--mitwpu-blue));
     }
 
-    .action-icon-large {
-        font-size: 4.5rem;
+    .dev-action-card:hover::before {
+        opacity: 1;
+        height: 4px;
+    }
+
+    .dev-action-card:hover::after {
+        transform: translateX(-50%) scale(1.3);
+        opacity: 1;
+    }
+
+    /* Action Icon Badge */
+    .action-icon-badge {
+        width: 80px;
+        height: 80px;
+        border-radius: 22px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.35rem;
         margin-bottom: 1.5rem;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        z-index: 1;
+        background: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: none;
+    }
+
+    .dev-action-card:hover .action-icon-badge {
+        transform: scale(1.1) translateY(-3px);
     }
 
     .dev-action-card h3 {
+        font-size: 1.25rem;
         font-weight: 700;
-        margin-bottom: 1rem;
+        margin-bottom: 0.6rem;
+        color: var(--text-main);
+        letter-spacing: -0.3px;
+        position: relative;
+        z-index: 1;
     }
 
     .dev-action-card p {
         color: var(--text-muted);
-        max-width: 300px;
-        margin-bottom: 2rem;
+        font-size: 0.85rem;
+        line-height: 1.55;
+        max-width: 280px;
+        margin-bottom: 1.8rem;
+        position: relative;
+        z-index: 1;
     }
 
-    /* Quick Link Tiles */
+    .dev-action-card code {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 2px 6px;
+        border-radius: 6px;
+        color: #db2777;
+        font-size: 0.76rem;
+    }
+
+    [data-theme="dark"] .dev-action-card code {
+        background: rgba(255, 255, 255, 0.08);
+        color: #f472b6;
+    }
+
+    /* Individual Action Card Themes */
+    .action-card-admin {
+        --action-accent: #3b82f6;
+        --action-glow: rgba(59, 130, 246, 0.2);
+        --action-shadow: rgba(59, 130, 246, 0.18);
+    }
+    .action-card-admin .action-icon-badge {
+        color: #2563eb;
+        background: rgba(59, 130, 246, 0.08);
+        border-color: rgba(59, 130, 246, 0.16);
+    }
+    .dev-action-card.action-card-admin:hover .action-icon-badge {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.25) 0%, rgba(37, 99, 235, 0.1) 100%);
+        border-color: rgba(59, 130, 246, 0.35);
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.25);
+        color: #1d4ed8;
+    }
+    .action-card-admin .btn-action {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+        border: none !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25) !important;
+    }
+    .action-card-admin .btn-action:hover,
+    .dev-action-card.action-card-admin:hover .btn-action {
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45) !important;
+    }
+    .action-card-admin .btn-action:hover {
+        background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%) !important;
+        transform: translateY(-2px);
+    }
+
+    .action-card-faculty {
+        --action-accent: #f59e0b;
+        --action-glow: rgba(245, 158, 11, 0.2);
+        --action-shadow: rgba(245, 158, 11, 0.18);
+    }
+    .action-card-faculty .action-icon-badge {
+        color: #d97706;
+        background: rgba(245, 158, 11, 0.08);
+        border-color: rgba(245, 158, 11, 0.16);
+    }
+    .dev-action-card.action-card-faculty:hover .action-icon-badge {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.1) 100%);
+        border-color: rgba(245, 158, 11, 0.35);
+        box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
+        color: #b45309;
+    }
+    .action-card-faculty .btn-action {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        border: none !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.25) !important;
+    }
+    .action-card-faculty .btn-action:hover,
+    .dev-action-card.action-card-faculty:hover .btn-action {
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.45) !important;
+    }
+    .action-card-faculty .btn-action:hover {
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%) !important;
+        transform: translateY(-2px);
+    }
+
+    .action-card-prof {
+        --action-accent: #10b981;
+        --action-glow: rgba(16, 185, 129, 0.2);
+        --action-shadow: rgba(16, 185, 129, 0.18);
+    }
+    .action-card-prof .action-icon-badge {
+        color: #059669;
+        background: rgba(16, 185, 129, 0.08);
+        border-color: rgba(16, 185, 129, 0.16);
+    }
+    .dev-action-card.action-card-prof:hover .action-icon-badge {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.1) 100%);
+        border-color: rgba(16, 185, 129, 0.35);
+        box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+        color: #047857;
+    }
+    .action-card-prof .btn-action {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+        border: none !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25) !important;
+    }
+    .action-card-prof .btn-action:hover,
+    .dev-action-card.action-card-prof:hover .btn-action {
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45) !important;
+    }
+    .action-card-prof .btn-action:hover {
+        background: linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
+        transform: translateY(-2px);
+    }
+
+    .action-card-bulk {
+        --action-accent: #06b6d4;
+        --action-glow: rgba(6, 182, 212, 0.2);
+        --action-shadow: rgba(6, 182, 212, 0.18);
+    }
+    .action-card-bulk .action-icon-badge {
+        color: #0284c7;
+        background: rgba(6, 182, 212, 0.08);
+        border-color: rgba(6, 182, 212, 0.16);
+    }
+    .dev-action-card.action-card-bulk:hover .action-icon-badge {
+        background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(14, 165, 233, 0.1) 100%);
+        border-color: rgba(6, 182, 212, 0.35);
+        box-shadow: 0 8px 24px rgba(6, 182, 212, 0.25);
+        color: #0369a1;
+    }
+    .action-card-bulk .btn-action {
+        background: linear-gradient(135deg, #06b6d4 0%, #0284c7 100%) !important;
+        border: none !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(6, 182, 212, 0.25) !important;
+    }
+    .action-card-bulk .btn-action:hover,
+    .dev-action-card.action-card-bulk:hover .btn-action {
+        box-shadow: 0 6px 20px rgba(6, 182, 212, 0.45) !important;
+    }
+    .action-card-bulk .btn-action:hover {
+        background: linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%) !important;
+        transform: translateY(-2px);
+    }
+
+    .btn-action {
+        padding: 0.6rem 1.4rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.45rem;
+        transition: all 0.25s ease;
+        text-decoration: none;
+    }
+
+    /* Dark theme action card surface */
+    [data-theme="dark"] .dev-action-card {
+        background: linear-gradient(160deg, rgba(22, 22, 24, 0.95) 0%, rgba(15, 15, 17, 0.95) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    [data-theme="dark"] .dev-action-card h3 {
+        color: #f8fafc;
+    }
+
+    [data-theme="dark"] .dev-action-card p {
+        color: var(--sub-text, #8A8A96);
+    }
+
+    /* Enhanced Reported Bugs Section */
+    .bugs-tracking-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+        position: relative;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .bugs-tracking-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #ef4444 30%, #f59e0b 60%, #3b82f6 90%, transparent);
+        opacity: 0;
+        transition: opacity 0.35s ease, height 0.35s ease;
+    }
+
+    [data-theme="dark"] .bugs-tracking-card {
+        background: linear-gradient(160deg, rgba(22, 22, 24, 0.95) 0%, rgba(15, 15, 17, 0.95) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .bugs-tracking-card:hover {
+        border-color: rgba(239, 68, 68, 0.3);
+        box-shadow: 0 16px 36px -10px rgba(239, 68, 68, 0.15);
+    }
+
+    .bugs-tracking-card:hover::before {
+        opacity: 0.85;
+    }
+
+    .bugs-tracking-card .table {
+        margin-bottom: 0;
+    }
+
+    .bugs-tracking-card .table thead th {
+        background: rgba(0, 0, 0, 0.02);
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-muted);
+        font-size: 0.74rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        padding: 1.15rem 1.4rem;
+    }
+
+    [data-theme="dark"] .bugs-tracking-card .table thead th {
+        background: rgba(255, 255, 255, 0.02);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        color: #94a3b8;
+    }
+
+    .bugs-tracking-card .table tbody tr {
+        transition: background-color 0.2s ease;
+    }
+
+    .bugs-tracking-card .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02) !important;
+    }
+
+    [data-theme="dark"] .bugs-tracking-card .table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+
+    .bugs-tracking-card .table tbody td {
+        padding: 1.15rem 1.4rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        vertical-align: middle;
+    }
+
+    [data-theme="dark"] .bugs-tracking-card .table tbody td {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .empty-bugs-state {
+        padding: 3.8rem 2rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .empty-bugs-state::before {
+        content: '';
+        position: absolute;
+        width: 180px;
+        height: 180px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(34, 197, 94, 0.12) 0%, transparent 70%);
+        pointer-events: none;
+    }
+
+    .empty-bugs-icon {
+        width: 68px;
+        height: 68px;
+        border-radius: 20px;
+        background: rgba(34, 197, 94, 0.08);
+        border: 1px solid rgba(34, 197, 94, 0.18);
+        color: #16a34a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 1.1rem;
+        box-shadow: none;
+        position: relative;
+        z-index: 1;
+        transition: all 0.35s ease;
+    }
+
+    .bugs-tracking-card:hover .empty-bugs-icon {
+        transform: scale(1.08) rotate(3deg);
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%);
+        border-color: rgba(34, 197, 94, 0.35);
+        box-shadow: 0 8px 24px rgba(34, 197, 94, 0.2);
+    }
+
+    .empty-bugs-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: var(--text-main);
+        letter-spacing: -0.2px;
+        position: relative;
+        z-index: 1;
+    }
+
+    [data-theme="dark"] .empty-bugs-title {
+        color: #f8fafc;
+    }
+
+    .empty-bugs-sub {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        max-width: 360px;
+        line-height: 1.5;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Enhanced Quick Access Section & Tiles - Only on hover */
+    .quick-access-header {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin-bottom: 1.1rem;
+    }
+
+    .quick-access-header h5 {
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.3px;
+        color: var(--text-muted);
+        margin-bottom: 0;
+    }
+
     .dev-tile-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1.25rem;
     }
 
     .dev-tile {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
-        padding: 1.25rem;
-        border-radius: 14px;
+        padding: 1.25rem 1.4rem;
+        border-radius: 20px;
         text-decoration: none;
         color: var(--text-main);
         display: flex;
         align-items: center;
-        gap: 1rem;
-        font-weight: 600;
-        transition: all 0.2s ease;
+        gap: 1.1rem;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .dev-tile::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--tile-accent, var(--mitwpu-blue)), transparent);
+        opacity: 0;
+        transition: opacity 0.35s ease, height 0.35s ease;
+    }
+
+    .dev-tile::after {
+        content: '';
+        position: absolute;
+        top: -40px;
+        right: -40px;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: radial-gradient(circle, var(--tile-glow, rgba(59, 130, 246, 0.15)) 0%, transparent 70%);
+        pointer-events: none;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: transform 0.4s ease, opacity 0.4s ease;
+    }
+
+    .dev-tile-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+        transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        position: relative;
+        z-index: 1;
+        background: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-shadow: none;
+    }
+
+    .dev-tile-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        position: relative;
+        z-index: 1;
+        min-width: 0;
+    }
+
+    .dev-tile-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text-main);
+        letter-spacing: -0.2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: color 0.2s ease;
+    }
+
+    .dev-tile-desc {
+        font-size: 0.74rem;
+        color: var(--text-muted);
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .dev-tile .tile-arrow-box {
+        margin-left: auto;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.03);
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        flex-shrink: 0;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
     }
 
     .dev-tile:hover {
-        background: var(--bg-card-hover);
-        border-color: var(--mitwpu-blue);
-        color: var(--mitwpu-blue);
-        transform: scale(1.02);
+        transform: translateY(-5px);
+        box-shadow: 0 16px 32px -8px var(--tile-shadow, rgba(0, 0, 0, 0.25));
+        border-color: var(--tile-accent, var(--mitwpu-blue));
+        color: var(--text-main);
     }
 
-    .dev-tile i {
-        font-size: 1.2rem;
+    .dev-tile:hover::before {
+        opacity: 1;
+        height: 4px;
     }
 
-    /* Theme Overrides for Dark Mode */
-    [data-theme="dark"] .dev-stat-card,
-    [data-theme="dark"] .dev-action-card,
+    .dev-tile:hover::after {
+        transform: scale(1.4);
+        opacity: 1;
+    }
+
+    .dev-tile:hover .dev-tile-icon {
+        transform: scale(1.12) rotate(4deg);
+    }
+
+    .dev-tile:hover .dev-tile-title {
+        color: var(--tile-accent, var(--mitwpu-blue));
+    }
+
+    .dev-tile:hover .tile-arrow-box {
+        background: var(--tile-accent, var(--mitwpu-blue));
+        border-color: var(--tile-accent, var(--mitwpu-blue));
+        color: #ffffff;
+        transform: translateX(4px);
+        box-shadow: 0 4px 12px var(--tile-shadow, rgba(0, 0, 0, 0.2));
+    }
+
+    /* Tile Themes */
+    .tile-dashboard {
+        --tile-accent: #3b82f6;
+        --tile-glow: rgba(59, 130, 246, 0.2);
+        --tile-shadow: rgba(59, 130, 246, 0.18);
+    }
+    .tile-dashboard .dev-tile-icon {
+        color: #2563eb;
+        background: rgba(59, 130, 246, 0.08);
+        border-color: rgba(59, 130, 246, 0.16);
+    }
+    .dev-tile.tile-dashboard:hover .dev-tile-icon {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.22) 0%, rgba(37, 99, 235, 0.08) 100%);
+        border-color: rgba(59, 130, 246, 0.35);
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.2);
+        color: #1d4ed8;
+    }
+
+    .tile-staff {
+        --tile-accent: #06b6d4;
+        --tile-glow: rgba(6, 182, 212, 0.2);
+        --tile-shadow: rgba(6, 182, 212, 0.18);
+    }
+    .tile-staff .dev-tile-icon {
+        color: #0284c7;
+        background: rgba(6, 182, 212, 0.08);
+        border-color: rgba(6, 182, 212, 0.16);
+    }
+    .dev-tile.tile-staff:hover .dev-tile-icon {
+        background: linear-gradient(135deg, rgba(6, 182, 212, 0.22) 0%, rgba(14, 165, 233, 0.08) 100%);
+        border-color: rgba(6, 182, 212, 0.35);
+        box-shadow: 0 4px 14px rgba(6, 182, 212, 0.2);
+        color: #0369a1;
+    }
+
+    .tile-help {
+        --tile-accent: #f59e0b;
+        --tile-glow: rgba(245, 158, 11, 0.2);
+        --tile-shadow: rgba(245, 158, 11, 0.18);
+    }
+    .tile-help .dev-tile-icon {
+        color: #d97706;
+        background: rgba(245, 158, 11, 0.08);
+        border-color: rgba(245, 158, 11, 0.16);
+    }
+    .dev-tile.tile-help:hover .dev-tile-icon {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.08) 100%);
+        border-color: rgba(245, 158, 11, 0.35);
+        box-shadow: 0 4px 14px rgba(245, 158, 11, 0.2);
+        color: #b45309;
+    }
+
+    .tile-map {
+        --tile-accent: #10b981;
+        --tile-glow: rgba(16, 185, 129, 0.2);
+        --tile-shadow: rgba(16, 185, 129, 0.18);
+    }
+    .tile-map .dev-tile-icon {
+        color: #059669;
+        background: rgba(16, 185, 129, 0.08);
+        border-color: rgba(16, 185, 129, 0.16);
+    }
+    .dev-tile.tile-map:hover .dev-tile-icon {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.22) 0%, rgba(5, 150, 105, 0.08) 100%);
+        border-color: rgba(16, 185, 129, 0.35);
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+        color: #047857;
+    }
+
     [data-theme="dark"] .dev-tile {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(10px);
-        border-color: rgba(255, 255, 255, 0.08);
+        background: linear-gradient(160deg, rgba(22, 22, 24, 0.95) 0%, rgba(15, 15, 17, 0.95) 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #f1f5f9 !important;
+    }
+
+    [data-theme="dark"] .dev-tile-title {
+        color: #f8fafc;
+    }
+
+    [data-theme="dark"] .dev-tile-icon {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    [data-theme="dark"] .dev-tile .tile-arrow-box {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+    }
+
+    [data-theme="dark"] .tile-dashboard .dev-tile-icon { color: #60a5fa !important; }
+    [data-theme="dark"] .tile-staff .dev-tile-icon { color: #38bdf8 !important; }
+    [data-theme="dark"] .tile-help .dev-tile-icon { color: #fbbf24 !important; }
+    [data-theme="dark"] .tile-map .dev-tile-icon { color: #34d399 !important; }
+
+    [data-theme="dark"] .stat-card-admin .stat-icon-wrapper {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #60a5fa !important;
+    }
+    [data-theme="dark"] .stat-card-faculty .stat-icon-wrapper {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #fbbf24 !important;
+    }
+    [data-theme="dark"] .stat-card-prof .stat-icon-wrapper {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #34d399 !important;
+    }
+    [data-theme="dark"] .stat-card-users .stat-icon-wrapper {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .action-icon-badge {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    [data-theme="dark"] .action-card-admin .action-icon-badge { color: #60a5fa !important; }
+    [data-theme="dark"] .action-card-faculty .action-icon-badge { color: #fbbf24 !important; }
+    [data-theme="dark"] .action-card-prof .action-icon-badge { color: #34d399 !important; }
+    [data-theme="dark"] .action-card-bulk .action-icon-badge { color: #38bdf8 !important; }
+
+    [data-theme="dark"] .empty-bugs-icon {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: #4ade80 !important;
     }
 
     /* ── Restore vivid status badge colours in dark mode ── */
@@ -266,13 +1269,344 @@
     [data-theme="dark"] .action-icon-large.text-success { color: #4ade80 !important; }
     [data-theme="dark"] .action-icon-large.text-info    { color: #38bdf8 !important; }
     [data-theme="dark"] .action-icon-large.text-danger  { color: #f87171 !important; }
-    /* Quick-link tile icons */
-    [data-theme="dark"] .dev-tile .text-primary { color: #60a5fa !important; }
-    [data-theme="dark"] .dev-tile .text-warning { color: #fbbf24 !important; }
-    [data-theme="dark"] .dev-tile .text-success { color: #4ade80 !important; }
-    [data-theme="dark"] .dev-tile .text-info    { color: #38bdf8 !important; }
-    [data-theme="dark"] .dev-tile .text-danger  { color: #f87171 !important; }
+    /* ── Flashlight Directional Off-White Light Studio & Tilting Dial in Navbar ── */
+    .flashlight-control-container {
+        position: relative;
+        z-index: 1050;
+        display: flex;
+        align-items: center;
+    }
+
+    .btn-flashlight {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1.5px solid #cbd5e1;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        position: relative;
+        transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        user-select: none;
+        touch-action: none;
+        padding: 0;
+    }
+
+    .btn-flashlight:hover {
+        border-color: #0b4d8c;
+        box-shadow: 0 0 12px rgba(11, 77, 140, 0.25);
+    }
+
+    .btn-flashlight:active, .btn-flashlight.dragging {
+        cursor: grabbing;
+        transform: scale(0.94);
+        border-color: #0b4d8c;
+        box-shadow: 0 0 16px rgba(11, 77, 140, 0.35);
+    }
+
+    [data-theme="dark"] .btn-flashlight {
+        background: linear-gradient(145deg, #1e1e24 0%, #121216 100%);
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        color: #f8fafc;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+    }
+
+    [data-theme="dark"] .btn-flashlight:hover {
+        border-color: rgba(248, 250, 252, 0.7);
+        box-shadow: 0 0 14px rgba(248, 250, 252, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.3);
+    }
+
+    [data-theme="dark"] .btn-flashlight:active, [data-theme="dark"] .btn-flashlight.dragging {
+        cursor: grabbing;
+        transform: scale(0.94);
+        border-color: #ffffff;
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Rotating Torch Container */
+    .flashlight-icon-rotor {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        transform: rotate(var(--fl-angle, 225deg));
+        transition: transform 0.08s linear;
+        pointer-events: none;
+    }
+
+    .flashlight-svg {
+        width: 19px;
+        height: 19px;
+        filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+    }
+
+    [data-theme="dark"] .flashlight-svg {
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+    }
+
+    /* Outer dial angle indicator tick */
+    .flashlight-dial-tick {
+        position: absolute;
+        top: 1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 3px;
+        height: 4px;
+        border-radius: 1.5px;
+        background: #0b4d8c;
+        box-shadow: 0 0 4px rgba(11, 77, 140, 0.6);
+    }
+
+    [data-theme="dark"] .flashlight-dial-tick {
+        background: #ffffff;
+        box-shadow: 0 0 6px #ffffff;
+    }
+
+    .flashlight-status-dot {
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #22c55e;
+        border: 1.5px solid #ffffff;
+        box-shadow: 0 0 5px #22c55e;
+        transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] .flashlight-status-dot {
+        border-color: #161618;
+    }
+
+    .btn-flashlight.power-off .flashlight-status-dot {
+        background: #64748b;
+        box-shadow: none;
+    }
+
+    .btn-flashlight.power-off .flashlight-svg {
+        opacity: 0.4;
+    }
+
+    /* Flashlight Settings Popup Panel */
+    .flashlight-panel {
+        position: absolute;
+        top: calc(100% + 14px);
+        right: 0;
+        width: 320px;
+        background: rgba(18, 18, 22, 0.96);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 20px;
+        padding: 1.3rem;
+        z-index: 1050;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(248, 250, 252, 0.1);
+        animation: panelFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes panelFadeIn {
+        from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .flashlight-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 0.85rem;
+        margin-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .flashlight-panel-header span {
+        font-size: 0.92rem;
+        color: #f8fafc;
+    }
+
+    .control-label {
+        font-size: 0.74rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        display: block;
+        margin-bottom: 0.45rem;
+    }
+
+    .btn-quick-angle {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #cbd5e1;
+        font-size: 0.74rem;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-quick-angle:hover, .btn-quick-angle.active {
+        background: rgba(248, 250, 252, 0.15);
+        border-color: #f8fafc;
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Off-White Swatches */
+    .offwhite-swatches-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0.5rem;
+    }
+
+    .offwhite-swatch-btn {
+        height: 36px;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+
+    .offwhite-swatch-btn:hover {
+        transform: scale(1.06);
+    }
+
+    .offwhite-swatch-btn.active {
+        border-color: #38bdf8;
+        box-shadow: 0 0 14px rgba(255, 255, 255, 0.6);
+        transform: scale(1.05);
+    }
+
+    .custom-range {
+        accent-color: #e2e8f0;
+    }
+
+    /* Fixed Off-White Directional Flashlight Beam Layer */
+    .flashlight-ambient-canvas {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 99;
+        mix-blend-mode: screen;
+        opacity: 1;
+        transition: opacity 0.3s ease;
+    }
 </style>
+{% endblock %}
+
+{% block navbar_extra %}
+<!-- Flashlight Studio Controller Button & Tilt Dial in Top Navbar -->
+<div class="flashlight-control-container ms-2">
+    <button id="flashlight-btn" class="btn-flashlight" type="button" title="Flashlight: Click & drag to tilt light, or click to adjust settings" aria-expanded="false" aria-label="Toggle Flashlight Beam">
+        <div id="flashlight-rotor" class="flashlight-icon-rotor">
+            <span class="flashlight-dial-tick"></span>
+            <svg class="flashlight-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Torch Head (Top) -->
+                <path d="M10 7h12l-1.8 5.5h-8.4L10 7z" fill="#f8fafc" stroke="#cbd5e1" stroke-width="0.8"/>
+                <path d="M9 4.5h14a1 1 0 0 1 1 1v1.5H8V5.5a1 1 0 0 1 1-1z" fill="#e2e8f0"/>
+                <ellipse cx="16" cy="4.5" rx="7" ry="1.8" fill="#ffffff"/>
+                <!-- Torch Body -->
+                <rect x="12" y="12.5" width="8" height="14" rx="2" fill="#64748b" stroke="#475569" stroke-width="0.8"/>
+                <!-- Grip lines -->
+                <line x1="13.5" y1="15.5" x2="18.5" y2="15.5" stroke="#334155" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="13.5" y1="18.5" x2="18.5" y2="18.5" stroke="#334155" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="13.5" y1="21.5" x2="18.5" y2="21.5" stroke="#334155" stroke-width="1.2" stroke-linecap="round"/>
+                <!-- Power switch button -->
+                <rect x="14.5" y="13.2" width="3" height="1.8" rx="0.6" fill="#38bdf8"/>
+                <!-- Base cap -->
+                <rect x="11.5" y="26.5" width="9" height="2.5" rx="1" fill="#475569"/>
+                <!-- Flashlight Head Mini Beam Rays -->
+                <line x1="16" y1="1" x2="16" y2="3" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round"/>
+                <line x1="11" y1="1.8" x2="12.2" y2="3.2" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
+                <line x1="21" y1="1.8" x2="19.8" y2="3.2" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+        </div>
+        <span class="flashlight-status-dot"></span>
+    </button>
+    
+    <!-- Flashlight Adjustment Popup Panel -->
+    <div id="flashlight-panel" class="flashlight-panel d-none">
+        <div class="flashlight-panel-header">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-lightbulb-fill text-warning"></i>
+                <span class="fw-bold">Off-White Flashlight</span>
+            </div>
+            <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" id="flashlight-power" checked title="Toggle Flashlight Power">
+            </div>
+        </div>
+        
+        <div class="flashlight-panel-body">
+            <!-- Tilt Angle Controls -->
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="control-label mb-0">Torch Tilt Angle</label>
+                    <span id="angle-value-label" class="badge bg-secondary-subtle text-light small fw-bold">225°</span>
+                </div>
+                <input type="range" class="form-range custom-range" id="flashlight-angle" min="0" max="359" value="225">
+                <div class="d-flex justify-content-between mt-1">
+                    <button type="button" class="btn-quick-angle active" data-angle="225" title="Tilt diagonally down-left across dashboard">↙ 225°</button>
+                    <button type="button" class="btn-quick-angle" data-angle="180" title="Tilt straight down">⬇ 180°</button>
+                    <button type="button" class="btn-quick-angle" data-angle="270" title="Tilt straight left">⬅ 270°</button>
+                    <button type="button" class="btn-quick-angle" data-angle="135" title="Tilt down-right">↘ 135°</button>
+                    <button type="button" class="btn-quick-angle" data-angle="315" title="Tilt up-left">↖ 315°</button>
+                </div>
+            </div>
+
+            <!-- Off-White Tone Swatches -->
+            <div class="mb-3">
+                <label class="control-label">Off-White Tone</label>
+                <div class="offwhite-swatches-grid">
+                    <button type="button" class="offwhite-swatch-btn active" data-tone="xenon" style="background: #f8fafc;" title="Pure Xenon (Crisp White)">
+                        Xenon
+                    </button>
+                    <button type="button" class="offwhite-swatch-btn" data-tone="moonlight" style="background: #e2e8f0;" title="Moonlight (Ice White)">
+                        Moon
+                    </button>
+                    <button type="button" class="offwhite-swatch-btn" data-tone="warm" style="background: #fef3c7;" title="Warm Cream (Warm White)">
+                        Warm
+                    </button>
+                    <button type="button" class="offwhite-swatch-btn" data-tone="silver" style="background: #cbd5e1;" title="Silver Glow">
+                        Silver
+                    </button>
+                </div>
+            </div>
+
+            <!-- Brightness Intensity -->
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="control-label mb-0">Light Intensity</label>
+                    <span id="intensity-value-label" class="badge bg-secondary-subtle text-light small">75%</span>
+                </div>
+                <input type="range" class="form-range custom-range" id="flashlight-intensity" min="15" max="100" value="75">
+            </div>
+
+            <!-- Beam Cone Width / Spread -->
+            <div class="mb-1">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="control-label mb-0">Beam Cone Width</label>
+                    <span id="spread-value-label" class="badge bg-secondary-subtle text-light small">55°</span>
+                </div>
+                <input type="range" class="form-range custom-range" id="flashlight-spread" min="25" max="90" value="55">
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block content %}
@@ -293,69 +1627,92 @@
         {% endif %}
     {% endwith %}
 
+    <!-- Full Dashboard Ambient Light Canvas -->
+    <div id="flashlight-ambient-canvas" class="flashlight-ambient-canvas"></div>
+
     <!-- Hero Section -->
     <div class="dev-hero animate-on-load" style="opacity: 0; transform: translateY(20px);">
         <div class="dev-hero-content d-flex justify-content-between align-items-center">
             <div>
-                <h1><i class="bi bi-code-square me-3"></i>Developer Center</h1>
+                <h1 class="dev-hero-title">
+                    <i class="bi bi-code-square me-3 hero-code-icon"></i>
+                    <span class="flip-cylinder">
+                        <span class="flip-face flip-front">Developer Center</span>
+                        <span class="flip-face flip-back">
+                            <span class="name-om">Om</span>
+                            <span class="name-ampersand">&amp;</span>
+                            <span class="name-taha">Taha</span>
+                        </span>
+                    </span>
+                </h1>
                 <p class="mb-0">System administration and high-level platform management.</p>
             </div>
-            <a href="{{ url_for('superadmin.logout') }}" class="btn btn-outline-danger btn-lg rounded-pill px-4">
-                <i class="bi bi-box-arrow-right me-2"></i>Logout
-            </a>
+            <div>
+                <a href="{{ url_for('superadmin.logout') }}" class="btn btn-outline-danger btn-lg rounded-pill px-4 dev-hero-logout">
+                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- Stats Overview -->
     <div class="row g-4 mb-5">
         <div class="col-md-3 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-stat-card">
-                <div class="stat-icon-wrapper bg-primary bg-opacity-10 text-primary">
-                    <i class="bi bi-shield-lock"></i>
+            <div class="dev-stat-card stat-card-admin">
+                <div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div class="stats-label">Administrators</div>
+                    <div class="stats-value">{{ admin_count }}</div>
                 </div>
-                <div class="stats-label">Administrators</div>
-                <div class="stats-value">{{ admin_count }}</div>
                 <a href="{{ url_for('superadmin.list_admins') }}" class="stats-link">
-                    View Registry <i class="bi bi-arrow-right"></i>
+                    <span>View Registry</span> <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
 
         <div class="col-md-3 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-stat-card">
-                <div class="stat-icon-wrapper bg-warning bg-opacity-10 text-warning">
-                    <i class="bi bi-mortarboard"></i>
+            <div class="dev-stat-card stat-card-faculty">
+                <div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-mortarboard-fill"></i>
+                    </div>
+                    <div class="stats-label">Faculty Staff</div>
+                    <div class="stats-value">{{ faculty_count }}</div>
                 </div>
-                <div class="stats-label">Faculty Staff</div>
-                <div class="stats-value">{{ faculty_count }}</div>
                 <a href="{{ url_for('superadmin.list_users', role='faculty') }}" class="stats-link">
-                    Staff Directory <i class="bi bi-arrow-right"></i>
+                    <span>Staff Directory</span> <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
 
         <div class="col-md-3 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-stat-card">
-                <div class="stat-icon-wrapper bg-success bg-opacity-10 text-success">
-                    <i class="bi bi-tools"></i>
+            <div class="dev-stat-card stat-card-prof">
+                <div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-tools"></i>
+                    </div>
+                    <div class="stats-label">Certified Professionals</div>
+                    <div class="stats-value">{{ professional_count }}</div>
                 </div>
-                <div class="stats-label">Certified Professionals</div>
-                <div class="stats-value">{{ professional_count }}</div>
                 <a href="{{ url_for('superadmin.list_professionals') }}" class="stats-link">
-                    Manage Workforce <i class="bi bi-arrow-right"></i>
+                    <span>Manage Workforce</span> <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
 
         <div class="col-md-3 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-stat-card">
-                <div class="stat-icon-wrapper bg-info bg-opacity-10 text-info">
-                    <i class="bi bi-people"></i>
+            <div class="dev-stat-card stat-card-users">
+                <div>
+                    <div class="stat-icon-wrapper">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="stats-label">System Users</div>
+                    <div class="stats-value">{{ user_count }}</div>
                 </div>
-                <div class="stats-label">System Users</div>
-                <div class="stats-value">{{ user_count }}</div>
                 <a href="{{ url_for('superadmin.list_users') }}" class="stats-link">
-                    User Management <i class="bi bi-arrow-right"></i>
+                    <span>User Management</span> <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -364,47 +1721,50 @@
     <!-- Main Actions -->
     <div class="row g-4 mb-5">
         <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-action-card">
-                <div class="action-icon-large text-primary">
+            <div class="dev-action-card action-card-admin">
+                <div class="action-icon-badge">
                     <i class="bi bi-person-plus-fill"></i>
                 </div>
                 <h3>Enroll Administrator</h3>
                 <p>Grant full dashboard privileges to a new administrative staff member.</p>
-                <a href="{{ url_for('superadmin.add_user', role='admin') }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow mt-auto">
-                    <i class="bi bi-plus-lg me-2"></i>Add Admin
+                <a href="{{ url_for('superadmin.add_user', role='admin') }}" class="btn-action mt-auto">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Add Admin</span>
                 </a>
             </div>
         </div>
 
         <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-action-card">
-                <div class="action-icon-large text-warning">
+            <div class="dev-action-card action-card-faculty">
+                <div class="action-icon-badge">
                     <i class="bi bi-mortarboard-fill"></i>
                 </div>
                 <h3>Enroll Faculty</h3>
                 <p>Register a new faculty member with classroom booking and portal access.</p>
-                <a href="{{ url_for('superadmin.add_user', role='faculty') }}" class="btn btn-warning btn-sm rounded-pill px-4 shadow mt-auto">
-                    <i class="bi bi-plus-lg me-2"></i>Add Faculty
+                <a href="{{ url_for('superadmin.add_user', role='faculty') }}" class="btn-action mt-auto">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Add Faculty</span>
                 </a>
             </div>
         </div>
 
         <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-action-card">
-                <div class="action-icon-large text-success">
+            <div class="dev-action-card action-card-prof">
+                <div class="action-icon-badge">
                     <i class="bi bi-wrench-adjustable-circle-fill"></i>
                 </div>
                 <h3>Enroll Professional</h3>
                 <p>Initialize a new Job Certified Professional for field maintenance tasks.</p>
-                <a href="{{ url_for('superadmin.add_professional') }}" class="btn btn-success btn-sm rounded-pill px-4 shadow mt-auto">
-                    <i class="bi bi-plus-lg me-2"></i>Add Professional
+                <a href="{{ url_for('superadmin.add_professional') }}" class="btn-action mt-auto">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>Add Professional</span>
                 </a>
             </div>
         </div>
 
         <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-action-card">
-                <div class="action-icon-large text-info">
+            <div class="dev-action-card action-card-bulk">
+                <div class="action-icon-badge">
                     <i class="bi bi-file-earmark-spreadsheet-fill"></i>
                 </div>
                 <h3>Bulk Import Users</h3>
@@ -414,8 +1774,9 @@
                     <div class="mb-3 w-100">
                         <input class="form-control form-control-sm rounded-pill" type="file" name="csv_file" accept=".csv" required>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm rounded-pill w-100 px-4 shadow">
-                        <i class="bi bi-upload me-2"></i>Upload CSV
+                    <button type="submit" class="btn-action w-100 border-0">
+                        <i class="bi bi-upload"></i>
+                        <span>Upload CSV</span>
                     </button>
                 </form>
             </div>
@@ -424,66 +1785,79 @@
 
     <!-- Bug Tracking Section -->
     <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h5 class="mb-0 fw-bold"><i class="bi bi-bug-fill text-danger me-2"></i>Reported Bugs</h5>
-            <span class="badge bg-primary rounded-pill">{{ bugs|length }} Total</span>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                <span class="d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171;">
+                    <i class="bi bi-bug-fill"></i>
+                </span>
+                <span>Reported Bugs</span>
+            </h5>
+            {% if bugs|length > 0 %}
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.78rem;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ bugs|length }} Open Issues
+                </span>
+            {% else %}
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.78rem;">
+                    <i class="bi bi-check-circle-fill me-1"></i>0 Issues
+                </span>
+            {% endif %}
         </div>
         
-        <div class="card bg-card border shadow-sm" style="border-radius: 16px; overflow: hidden; border-color: var(--border-color) !important;">
+        <div class="bugs-tracking-card">
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle">
-                    <thead class="bg-body-secondary text-muted">
+                <table class="table align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th class="ps-4 border-bottom-0 py-3 fw-semibold">Status</th>
-                            <th class="border-bottom-0 py-3 fw-semibold">Title & Description</th>
-                            <th class="border-bottom-0 py-3 fw-semibold">Reporter</th>
-                            <th class="border-bottom-0 py-3 fw-semibold">Date</th>
-                            <th class="border-bottom-0 py-3 fw-semibold text-center">Actions</th>
+                            <th class="ps-4">Status</th>
+                            <th>Title & Description</th>
+                            <th>Reporter</th>
+                            <th>Date</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for bug in bugs %}
                         <tr>
-                            <td class="ps-4 py-3">
+                            <td class="ps-4">
                                 {% if bug.status == 'open' %}
-                                    <span class="badge bg-danger rounded-pill px-3 py-2"><i class="bi bi-exclamation-circle me-1"></i>Open</span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold"><i class="bi bi-exclamation-circle me-1"></i>Open</span>
                                 {% else %}
-                                    <span class="badge bg-success rounded-pill px-3 py-2"><i class="bi bi-check-circle me-1"></i>Resolved</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold"><i class="bi bi-check-circle me-1"></i>Resolved</span>
                                 {% endif %}
                             </td>
-                            <td class="py-3" style="max-width: 400px;">
+                            <td style="max-width: 400px;">
                                 <div class="fw-bold mb-1" style="color: var(--text-main);">{{ bug.title }}</div>
                                 <div class="text-muted small text-truncate">{{ bug.description }}</div>
                             </td>
-                            <td class="py-3">
+                            <td>
                                 {% if bug.reporter_type == 'guest' %}
-                                    <span class="badge bg-secondary">Guest</span>
+                                    <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2.5 py-1">Guest</span>
                                 {% else %}
-                                    <span class="badge bg-info text-capitalize">{{ bug.reporter_type }}</span>
-                                    <div class="small text-muted mt-1">ID: {{ bug.reporter_id }}</div>
+                                    <span class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2.5 py-1 text-capitalize">{{ bug.reporter_type }}</span>
+                                    <div class="small text-muted mt-1" style="font-size: 0.72rem;">ID: {{ bug.reporter_id }}</div>
                                 {% endif %}
                             </td>
-                            <td class="py-3 text-muted small">
+                            <td class="text-muted small">
                                 {{ bug.created_at.strftime('%b %d, %Y %H:%M') }}
                             </td>
-                            <td class="py-3 text-center">
+                            <td class="text-center">
                                 <div class="btn-group">
                                     {% if bug.file_path %}
-                                    <a href="{{ url_for('superadmin.view_bug_attachment', bug_id=bug.id) }}" target="_blank" class="btn btn-sm btn-outline-info" title="View Attachment">
+                                    <a href="{{ url_for('superadmin.view_bug_attachment', bug_id=bug.id) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill me-1 px-2.5" title="View Attachment">
                                         <i class="bi bi-paperclip"></i>
                                     </a>
                                     {% endif %}
                                     {% if bug.status == 'open' %}
                                     <form action="{{ url_for('superadmin.resolve_bug', bug_id=bug.id) }}" method="POST" class="d-inline">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Mark as Resolved">
+                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-pill me-1 px-2.5" title="Mark as Resolved">
                                             <i class="bi bi-check-lg"></i>
                                         </button>
                                     </form>
                                     {% endif %}
-                                    <form action="{{ url_for('superadmin.delete_bug', bug_id=bug.id) }}" method="POST" class="d-inline ms-1" onsubmit="return confirm('Delete this bug report permanently?');">
+                                    <form action="{{ url_for('superadmin.delete_bug', bug_id=bug.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this bug report permanently?');">
                                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2.5" title="Delete">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -492,9 +1866,14 @@
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="5" class="text-center py-5 text-muted">
-                                <i class="bi bi-emoji-smile fs-1 d-block mb-3 opacity-50"></i>
-                                No bugs reported yet. Great job!
+                            <td colspan="5" class="p-0 border-0">
+                                <div class="empty-bugs-state">
+                                    <div class="empty-bugs-icon">
+                                        <i class="bi bi-shield-check"></i>
+                                    </div>
+                                    <div class="empty-bugs-title mb-1">No Bugs Reported Yet</div>
+                                    <div class="empty-bugs-sub">Platform is running smoothly. All services and sessions are operating within healthy parameters.</div>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -506,23 +1885,58 @@
 
     <!-- Quick Access Grid -->
     <div class="mb-4 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-        <h5 class="mb-3 fw-bold text-muted text-uppercase small letter-spacing-1">Quick Access</h5>
+        <div class="quick-access-header">
+            <i class="bi bi-grid-fill text-muted" style="font-size: 0.8rem;"></i>
+            <h5>Quick Access</h5>
+        </div>
         <div class="dev-tile-grid">
-            <a href="{{ url_for('admin.dashboard') }}" class="dev-tile">
-                <i class="bi bi-speedometer2 text-primary"></i>
-                <span>Admin Dashboard</span>
+            <a href="{{ url_for('admin.dashboard') }}" class="dev-tile tile-dashboard">
+                <div class="dev-tile-icon">
+                    <i class="bi bi-speedometer2"></i>
+                </div>
+                <div class="dev-tile-info">
+                    <div class="dev-tile-title">Admin Dashboard</div>
+                    <div class="dev-tile-desc">Analytics & metrics</div>
+                </div>
+                <div class="tile-arrow-box">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
             </a>
-            <a href="{{ url_for('admin.professionals') }}" class="dev-tile">
-                <i class="bi bi-person-badge text-info"></i>
-                <span>Staff Management</span>
+            <a href="{{ url_for('admin.professionals') }}" class="dev-tile tile-staff">
+                <div class="dev-tile-icon">
+                    <i class="bi bi-person-badge"></i>
+                </div>
+                <div class="dev-tile-info">
+                    <div class="dev-tile-title">Staff Management</div>
+                    <div class="dev-tile-desc">Workforce directory</div>
+                </div>
+                <div class="tile-arrow-box">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
             </a>
-            <a href="{{ url_for('admin.help_requests') }}" class="dev-tile">
-                <i class="bi bi-hand-thumbs-up text-warning"></i>
-                <span>Help Requests</span>
+            <a href="{{ url_for('admin.help_requests') }}" class="dev-tile tile-help">
+                <div class="dev-tile-icon">
+                    <i class="bi bi-hand-thumbs-up"></i>
+                </div>
+                <div class="dev-tile-info">
+                    <div class="dev-tile-title">Help Requests</div>
+                    <div class="dev-tile-desc">Support & queries</div>
+                </div>
+                <div class="tile-arrow-box">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
             </a>
-            <a href="{{ url_for('admin.status_map') }}" class="dev-tile">
-                <i class="bi bi-map text-success"></i>
-                <span>System Map</span>
+            <a href="{{ url_for('admin.status_map') }}" class="dev-tile tile-map">
+                <div class="dev-tile-icon">
+                    <i class="bi bi-map"></i>
+                </div>
+                <div class="dev-tile-info">
+                    <div class="dev-tile-title">System Map</div>
+                    <div class="dev-tile-desc">Campus infrastructure</div>
+                </div>
+                <div class="tile-arrow-box">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
             </a>
         </div>
     </div>
@@ -550,6 +1964,271 @@
                 el.style.transition = 'all 0.6s ease';
             });
         }
+
+        // ── Tiltable Off-White Directional Flashlight Studio ──
+        const FlashlightStudio = (() => {
+            const state = {
+                powered: true,
+                angle: 225, // 225 deg: points diagonally down-left across the cards
+                tone: 'xenon', // 'xenon', 'moonlight', 'warm', 'silver'
+                intensity: 75,
+                spread: 55 // Cone angle spread in degrees
+            };
+
+            const offWhiteTones = {
+                xenon: { r: 248, g: 250, b: 252, name: 'Pure Xenon' },
+                moonlight: { r: 226, g: 232, b: 240, name: 'Moonlight' },
+                warm: { r: 254, g: 243, b: 199, name: 'Warm Cream' },
+                silver: { r: 203, g: 213, b: 225, name: 'Silver Glow' }
+            };
+
+            // DOM references
+            const btn = document.getElementById('flashlight-btn');
+            const rotor = document.getElementById('flashlight-rotor');
+            const panel = document.getElementById('flashlight-panel');
+            const canvas = document.getElementById('flashlight-ambient-canvas');
+            const powerSwitch = document.getElementById('flashlight-power');
+            const angleSlider = document.getElementById('flashlight-angle');
+            const angleLabel = document.getElementById('angle-value-label');
+            const intensitySlider = document.getElementById('flashlight-intensity');
+            const intensityLabel = document.getElementById('intensity-value-label');
+            const spreadSlider = document.getElementById('flashlight-spread');
+            const spreadLabel = document.getElementById('spread-value-label');
+            const toneButtons = document.querySelectorAll('.offwhite-swatch-btn');
+            const quickAngleButtons = document.querySelectorAll('.btn-quick-angle');
+
+            // Load saved preferences
+            try {
+                const saved = localStorage.getItem('fixlink_dev_flashlight_v2');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    Object.assign(state, parsed);
+                }
+            } catch (e) {}
+
+            function saveState() {
+                try {
+                    localStorage.setItem('fixlink_dev_flashlight_v2', JSON.stringify({
+                        powered: state.powered,
+                        angle: state.angle,
+                        tone: state.tone,
+                        intensity: state.intensity,
+                        spread: state.spread
+                    }));
+                } catch (e) {}
+            }
+
+            function updateUI() {
+                if (!btn || !rotor) return;
+
+                // Power state
+                if (state.powered) {
+                    btn.classList.remove('power-off');
+                    if (canvas) canvas.style.opacity = '1';
+                    if (powerSwitch) powerSwitch.checked = true;
+                } else {
+                    btn.classList.add('power-off');
+                    if (canvas) canvas.style.opacity = '0';
+                    if (powerSwitch) powerSwitch.checked = false;
+                }
+
+                // Tilt angle on the torch icon
+                rotor.style.transform = `rotate(${state.angle}deg)`;
+
+                // Form controls
+                if (angleSlider) angleSlider.value = state.angle;
+                if (angleLabel) angleLabel.textContent = `${state.angle}°`;
+                quickAngleButtons.forEach(b => {
+                    b.classList.toggle('active', parseInt(b.dataset.angle) === state.angle);
+                });
+
+                if (intensitySlider) intensitySlider.value = state.intensity;
+                if (intensityLabel) intensityLabel.textContent = `${state.intensity}%`;
+                if (spreadSlider) spreadSlider.value = state.spread;
+                if (spreadLabel) spreadLabel.textContent = `${state.spread}°`;
+
+                toneButtons.forEach(s => {
+                    s.classList.toggle('active', s.dataset.tone === state.tone);
+                });
+
+                renderLight();
+            }
+
+            function getOrigin() {
+                if (!btn) return { x: window.innerWidth - 100, y: 150 };
+                const rect = btn.getBoundingClientRect();
+                return {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+
+            function renderLight() {
+                if (!canvas || !state.powered) {
+                    if (canvas) canvas.style.background = 'none';
+                    return;
+                }
+
+                const { x: ox, y: oy } = getOrigin();
+                const rgb = offWhiteTones[state.tone] || offWhiteTones.xenon;
+                const baseAlpha = (state.intensity / 100) * 0.45;
+
+                const cCore = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${baseAlpha * 1.35})`;
+                const cMid = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${baseAlpha * 0.7})`;
+                const cEdge = `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${baseAlpha * 0.22})`;
+
+                const halfSpread = state.spread / 2;
+                const startAngle = (state.angle - halfSpread + 360) % 360;
+
+                canvas.style.background = `conic-gradient(from ${startAngle}deg at ${ox}px ${oy}px, transparent 0deg, ${cEdge} ${halfSpread * 0.25}deg, ${cMid} ${halfSpread * 0.65}deg, ${cCore} ${halfSpread}deg, ${cMid} ${halfSpread * 1.35}deg, ${cEdge} ${halfSpread * 1.75}deg, transparent ${state.spread}deg)`;
+                canvas.style.webkitMaskImage = `radial-gradient(circle 1500px at ${ox}px ${oy}px, black 15%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0.3) 75%, transparent 100%)`;
+                canvas.style.maskImage = `radial-gradient(circle 1500px at ${ox}px ${oy}px, black 15%, rgba(0,0,0,0.85) 45%, rgba(0,0,0,0.3) 75%, transparent 100%)`;
+            }
+
+            function bindEvents() {
+                if (!btn) return;
+
+                // ── Direct Click & Drag to Tilt Flashlight Dial ──
+                let isDragging = false;
+                let dragMoved = false;
+
+                function calcAngleFromEvent(e) {
+                    const { x: ox, y: oy } = getOrigin();
+                    const clientX = e.clientX ?? (e.touches && e.touches[0]?.clientX);
+                    const clientY = e.clientY ?? (e.touches && e.touches[0]?.clientY);
+                    if (clientX === undefined || clientY === undefined) return state.angle;
+
+                    const dx = clientX - ox;
+                    const dy = clientY - oy;
+                    // Standard atan2 where 0 rad is (1, 0) right.
+                    // Flashlight SVG is drawn facing UP (0 deg is 12 o'clock).
+                    // So deg = rad * 180 / PI + 90
+                    let deg = Math.round((Math.atan2(dy, dx) * 180 / Math.PI + 90 + 360) % 360);
+                    return deg;
+                }
+
+                btn.addEventListener('pointerdown', (e) => {
+                    if (e.target.closest('#flashlight-panel')) return;
+                    isDragging = true;
+                    dragMoved = false;
+                    btn.classList.add('dragging');
+                    btn.setPointerCapture(e.pointerId);
+                });
+
+                btn.addEventListener('pointermove', (e) => {
+                    if (!isDragging) return;
+                    dragMoved = true;
+                    state.angle = calcAngleFromEvent(e);
+                    rotor.style.transform = `rotate(${state.angle}deg)`;
+                    if (angleSlider) angleSlider.value = state.angle;
+                    if (angleLabel) angleLabel.textContent = `${state.angle}°`;
+                    quickAngleButtons.forEach(b => {
+                        b.classList.toggle('active', parseInt(b.dataset.angle) === state.angle);
+                    });
+                    renderLight();
+                });
+
+                function endDrag(e) {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    btn.classList.remove('dragging');
+                    try { btn.releasePointerCapture(e.pointerId); } catch(err) {}
+
+                    saveState();
+
+                    // If user just clicked without dragging, toggle the settings panel
+                    if (!dragMoved) {
+                        panel.classList.toggle('d-none');
+                        btn.classList.toggle('active', !panel.classList.contains('d-none'));
+                    }
+                }
+
+                btn.addEventListener('pointerup', endDrag);
+                btn.addEventListener('pointercancel', endDrag);
+
+                // Click outside closes panel
+                document.addEventListener('click', (e) => {
+                    if (!panel.classList.contains('d-none') && !panel.contains(e.target) && !btn.contains(e.target)) {
+                        panel.classList.add('d-none');
+                        btn.classList.remove('active');
+                    }
+                });
+
+                // Power Switch
+                if (powerSwitch) {
+                    powerSwitch.addEventListener('change', () => {
+                        state.powered = powerSwitch.checked;
+                        saveState();
+                        updateUI();
+                    });
+                }
+
+                // Angle Slider
+                if (angleSlider) {
+                    angleSlider.addEventListener('input', () => {
+                        state.angle = parseInt(angleSlider.value);
+                        if (angleLabel) angleLabel.textContent = `${state.angle}°`;
+                        quickAngleButtons.forEach(b => {
+                            b.classList.toggle('active', parseInt(b.dataset.angle) === state.angle);
+                        });
+                        rotor.style.transform = `rotate(${state.angle}deg)`;
+                        renderLight();
+                    });
+                    angleSlider.addEventListener('change', saveState);
+                }
+
+                // Quick Angle Buttons
+                quickAngleButtons.forEach(b => {
+                    b.addEventListener('click', () => {
+                        state.angle = parseInt(b.dataset.angle);
+                        saveState();
+                        updateUI();
+                    });
+                });
+
+                // Tone Swatches
+                toneButtons.forEach(s => {
+                    s.addEventListener('click', () => {
+                        state.tone = s.dataset.tone;
+                        saveState();
+                        updateUI();
+                    });
+                });
+
+                // Intensity
+                if (intensitySlider) {
+                    intensitySlider.addEventListener('input', () => {
+                        state.intensity = parseInt(intensitySlider.value);
+                        if (intensityLabel) intensityLabel.textContent = `${state.intensity}%`;
+                        renderLight();
+                    });
+                    intensitySlider.addEventListener('change', saveState);
+                }
+
+                // Spread
+                if (spreadSlider) {
+                    spreadSlider.addEventListener('input', () => {
+                        state.spread = parseInt(spreadSlider.value);
+                        if (spreadLabel) spreadLabel.textContent = `${state.spread}°`;
+                        renderLight();
+                    });
+                    spreadSlider.addEventListener('change', saveState);
+                }
+
+                // Window Resize & Scroll: Re-anchor off-white light beam origin
+                window.addEventListener('resize', renderLight, { passive: true });
+                window.addEventListener('scroll', renderLight, { passive: true });
+            }
+
+            return {
+                init() {
+                    bindEvents();
+                    updateUI();
+                }
+            };
+        })();
+
+        FlashlightStudio.init();
     });
 </script>
 {% endblock %}

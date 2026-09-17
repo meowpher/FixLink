@@ -146,27 +146,30 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
                     } else if (type === 'washroom') {
                         targetForFill.classList.add('fill-red', 'washroom');
                         containerEl.classList.add('washroom');
-                    } else if (type === 'faculty') {
-                        targetForFill.classList.add('fill-orange', 'faculty-room');
-                        containerEl.classList.add('faculty-room');
+                    } else if (type === 'faculty' || type === 'faculty_room') {
+                        targetForFill.classList.add('fill-orange', 'faculty-room', 'faculty');
+                        containerEl.classList.add('faculty-room', 'faculty');
                     } else if (type === 'lift') {
                         targetForFill.classList.add('fill-pink', 'lift');
                         containerEl.classList.add('lift');
                     } else if (type === 'kitchen') {
                         targetForFill.classList.add('fill-orange', 'kitchen');
                         containerEl.classList.add('kitchen');
-                    } else if (type === 'canteen' || roomNum.toLowerCase() === 'encave') {
-                        targetForFill.classList.add('fill-darkgreen', 'canteen');
-                        containerEl.classList.add('canteen');
+                    } else if (type === 'canteen' || type === 'encave' || roomNum.toLowerCase() === 'encave') {
+                        targetForFill.classList.add('fill-darkgreen', 'canteen', 'encave');
+                        containerEl.classList.add('canteen', 'encave');
                         targetForFill.style.setProperty('fill', '#023F24', 'important');
                         if (shapeEl) shapeEl.style.setProperty('fill', '#023F24', 'important');
                         if (containerEl) {
                             const label = containerEl.querySelector('[id$="_label"], text, path:not(#encave)');
                             if (label) label.style.setProperty('fill', '#ffffff', 'important');
                         }
-                    } else if (type === 'meeting' || type === 'meeting_room' || type === 'conference' || type === 'conference_room') {
-                        targetForFill.classList.add('fill-purple', 'conference-room');
-                        containerEl.classList.add('conference-room');
+                    } else if (type === 'conference' || type === 'conference_room') {
+                        targetForFill.classList.add('fill-purple', 'conference-room', 'conference');
+                        containerEl.classList.add('conference-room', 'conference');
+                    } else if (type === 'meeting' || type === 'meeting_room') {
+                        targetForFill.classList.add('fill-indigo', 'meeting-room', 'meeting');
+                        containerEl.classList.add('meeting-room', 'meeting');
                     } else if (type === 'unavailable') {
                         targetForFill.style.opacity = '0.5';
                     }

@@ -24,11 +24,11 @@
 
     <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.7" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=11.0" as="style">
 
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=8.7">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=11.0">
 
     <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -707,6 +707,8 @@
                         </ul>
                     </div>
                 {% endif %}
+
+                {% block navbar_extra %}{% endblock %}
             </div>
         </div>
     </div>
@@ -1359,12 +1361,18 @@
     <!-- Global Floating Report Bug Button & Modern Modal -->
     <style>
         .floating-bug-trigger {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 1045;
-            display: inline-flex;
-            align-items: center;
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            left: auto !important;
+            top: auto !important;
+            width: auto !important;
+            max-width: fit-content !important;
+            min-width: unset !important;
+            z-index: 1045 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
             gap: 9px;
             background: #ffffff;
             color: #0f172a;
@@ -1414,7 +1422,7 @@
             background: #ffffff !important;
             border: 1px solid rgba(0, 0, 0, 0.08) !important;
             border-radius: 22px !important;
-            box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.18) !important;
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.15) !important;
             overflow: hidden;
             transition: all 0.25s ease;
         }
@@ -1444,8 +1452,8 @@
         }
         .bug-field-block:focus-within {
             background: #ffffff;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3.5px rgba(59, 130, 246, 0.12);
+            border-color: #ef4444;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
         }
         .bug-field-label {
             display: flex;
@@ -1489,8 +1497,8 @@
         }
         .bug-dropzone:hover,
         .bug-dropzone.dragover {
-            background: #f1f5f9;
-            border-color: #3b82f6;
+            background: #fef2f2;
+            border-color: #ef4444;
             transform: scale(1.005);
         }
         .bug-dropzone-icon {
@@ -1501,7 +1509,7 @@
             transition: transform 0.2s ease, color 0.2s ease;
         }
         .bug-dropzone:hover .bug-dropzone-icon {
-            color: #3b82f6;
+            color: #ef4444;
             transform: translateY(-2px);
         }
         .bug-dropzone-text {
@@ -1556,7 +1564,7 @@
         }
         .btn-bug-cancel:hover {
             background: #e2e8f0;
-            color: #1e293b;
+            color: #0f172a;
         }
         .btn-bug-submit {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
@@ -1583,79 +1591,86 @@
         }
 
         /* ══════════════════════════════════════════════
-           DARK MODE: PURE SHADE OF BLACK (NO BLUE/SLATE)
+           DARK MODE: STRICT CARBON BLACK (ZERO BLUE/NAVY)
            ══════════════════════════════════════════════ */
         [data-theme="dark"] .floating-bug-trigger,
         [data-bs-theme="dark"] .floating-bug-trigger {
-            background: #0b0e14 !important;
-            border: 1px solid rgba(255, 255, 255, 0.14) !important;
-            color: #f8fafc !important;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+            position: fixed !important;
+            bottom: 24px !important;
+            right: 24px !important;
+            left: auto !important;
+            top: auto !important;
+            width: auto !important;
+            max-width: fit-content !important;
+            background: #141414 !important;
+            border: 1px solid #262626 !important;
+            color: #f4f4f5 !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7) !important;
         }
         [data-theme="dark"] .floating-bug-trigger:hover,
         [data-bs-theme="dark"] .floating-bug-trigger:hover {
-            background: #141822 !important;
-            border-color: rgba(255, 255, 255, 0.24) !important;
+            background: #1e1e22 !important;
+            border-color: #38383e !important;
             color: #ffffff !important;
         }
         [data-theme="dark"] .bug-modal-card,
         [data-bs-theme="dark"] .bug-modal-card {
-            background: #0b0e14 !important;
-            border: 1px solid rgba(255, 255, 255, 0.09) !important;
-            box-shadow: 0 28px 70px -15px rgba(0, 0, 0, 0.88) !important;
+            background: #141414 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 28px 70px -15px rgba(0, 0, 0, 0.9) !important;
         }
         [data-theme="dark"] .bug-modal-header,
         [data-bs-theme="dark"] .bug-modal-header {
-            background: #0b0e14 !important;
+            background: #141414 !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
         }
         [data-theme="dark"] .bug-modal-body,
         [data-bs-theme="dark"] .bug-modal-body {
-            background: #0b0e14 !important;
+            background: #141414 !important;
         }
         [data-theme="dark"] .bug-modal-footer,
         [data-bs-theme="dark"] .bug-modal-footer {
-            background: #07090f !important;
+            background: #0d0d0f !important;
             border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
         }
         [data-theme="dark"] .bug-field-block,
         [data-bs-theme="dark"] .bug-field-block {
-            background: #121622 !important;
-            border: 1px solid rgba(255, 255, 255, 0.09) !important;
+            background: #1b1b1f !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
         [data-theme="dark"] .bug-field-block:focus-within,
         [data-bs-theme="dark"] .bug-field-block:focus-within {
-            background: #151a28 !important;
+            background: #222227 !important;
             border-color: #ef4444 !important;
-            box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 0.2) !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
         }
         [data-theme="dark"] .bug-field-label,
         [data-bs-theme="dark"] .bug-field-label {
-            color: #94a3b8 !important;
+            color: #a1a1aa !important;
         }
         [data-theme="dark"] .bug-input-control,
         [data-bs-theme="dark"] .bug-input-control {
-            color: #f8fafc !important;
+            color: #f4f4f5 !important;
         }
         [data-theme="dark"] .bug-input-control::placeholder,
         [data-bs-theme="dark"] .bug-input-control::placeholder {
-            color: #64748b !important;
+            color: #71717a !important;
         }
         [data-theme="dark"] .bug-dropzone,
         [data-bs-theme="dark"] .bug-dropzone {
-            background: #121622 !important;
-            border: 1.5px dashed rgba(255, 255, 255, 0.14) !important;
+            background: #1b1b1f !important;
+            border: 1.5px dashed rgba(255, 255, 255, 0.12) !important;
         }
         [data-theme="dark"] .bug-dropzone:hover,
         [data-theme="dark"] .bug-dropzone.dragover,
         [data-bs-theme="dark"] .bug-dropzone:hover,
         [data-bs-theme="dark"] .bug-dropzone.dragover {
-            background: #171c2b !important;
+            background: #242429 !important;
             border-color: #ef4444 !important;
         }
         [data-theme="dark"] .bug-dropzone-icon,
         [data-bs-theme="dark"] .bug-dropzone-icon {
-            color: #94a3b8 !important;
+            color: #a1a1aa !important;
         }
         [data-theme="dark"] .bug-dropzone:hover .bug-dropzone-icon,
         [data-bs-theme="dark"] .bug-dropzone:hover .bug-dropzone-icon {
@@ -1663,28 +1678,29 @@
         }
         [data-theme="dark"] .bug-dropzone-text,
         [data-bs-theme="dark"] .bug-dropzone-text {
-            color: #cbd5e1 !important;
+            color: #d4d4d8 !important;
         }
         [data-theme="dark"] .bug-dropzone-hint,
         [data-bs-theme="dark"] .bug-dropzone-hint {
-            color: #64748b !important;
+            color: #71717a !important;
         }
         [data-theme="dark"] .bug-file-preview-card,
         [data-bs-theme="dark"] .bug-file-preview-card {
-            background: #171c2a !important;
-            border: 1px solid rgba(255, 255, 255, 0.1) !important;
-            color: #f8fafc !important;
+            background: #222227 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            color: #f4f4f5 !important;
         }
         [data-theme="dark"] .btn-bug-cancel,
         [data-bs-theme="dark"] .btn-bug-cancel {
-            background: #131722 !important;
-            color: #cbd5e1 !important;
-            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            background: #1e1e22 !important;
+            color: #d4d4d8 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
         }
         [data-theme="dark"] .btn-bug-cancel:hover,
         [data-bs-theme="dark"] .btn-bug-cancel:hover {
-            background: #19202f !important;
+            background: #28282e !important;
             color: #ffffff !important;
+            border-color: rgba(255, 255, 255, 0.16) !important;
         }
         [data-theme="dark"] #globalBugReportModal .btn-close,
         [data-bs-theme="dark"] #globalBugReportModal .btn-close {
@@ -1698,7 +1714,8 @@
             data-bs-toggle="modal" 
             data-bs-target="#globalBugReportModal" 
             aria-label="Report a bug" 
-            title="Report a bug">
+            title="Report a bug"
+            style="position: fixed !important; bottom: 24px !important; right: 24px !important; left: auto !important; top: auto !important; width: auto !important; max-width: fit-content !important; z-index: 1045 !important;">
         <span class="bug-icon-bubble">
             <i class="bi bi-bug-fill"></i>
         </span>

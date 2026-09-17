@@ -4,29 +4,71 @@
 
 {% block extra_css %}
 <style>
+    /* Lock page and viewport so whole page is unscrollable */
+    html, body {
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+
+    body {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+    }
+
+    .main-content {
+        flex: 1 1 auto !important;
+        height: calc(100vh - 90px) !important;
+        height: calc(100dvh - 90px) !important;
+        padding-top: 12px !important;
+        padding-bottom: 16px !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+    }
+
+    .chat-page-wrapper {
+        height: 100% !important;
+        max-height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        min-height: 0 !important;
+    }
+
     .chat-container {
-        height: calc(100vh - 160px);
-        display: flex;
+        height: 100% !important;
+        max-height: 100% !important;
+        min-height: 0 !important;
+        display: flex !important;
+        flex: 1 1 auto !important;
         background: var(--bg-card);
         border-radius: var(--border-radius-lg);
-        overflow: hidden;
+        overflow: hidden !important;
         box-shadow: var(--shadow-lg);
         border: 1px solid var(--border-color);
-        margin-bottom: 2rem;
+        margin-bottom: 0 !important;
     }
 
     /* Sidebar Styles */
     .chat-sidebar {
         width: 320px;
+        height: 100%;
+        min-height: 0;
         border-right: 1px solid var(--border-color);
         display: flex;
         flex-direction: column;
         background: rgba(255, 255, 255, 0.02);
+        overflow: hidden;
     }
 
     .sidebar-header {
-        padding: 1.5rem;
+        padding: 1.25rem 1.5rem;
         border-bottom: 1px solid var(--border-color);
+        flex-shrink: 0;
     }
 
     .sidebar-header h4 {
@@ -36,8 +78,10 @@
     }
 
     .prof-list {
-        flex: 1;
-        overflow-y: auto;
+        flex: 1 1 auto;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+        min-height: 0;
     }
 
     .prof-item {
@@ -113,10 +157,13 @@
 
     /* Main Chat Area */
     .chat-main {
-        flex: 1;
+        flex: 1 1 auto;
+        height: 100%;
+        min-height: 0;
         display: flex;
         flex-direction: column;
         background: var(--bg-card);
+        overflow: hidden;
     }
 
     .chat-header {
@@ -126,16 +173,19 @@
         align-items: center;
         justify-content: space-between;
         background: rgba(255, 255, 255, 0.02);
+        flex-shrink: 0;
     }
 
     .chat-messages {
-        flex: 1;
+        flex: 1 1 auto;
         padding: 1.5rem;
-        overflow-y: auto;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
         display: flex;
         flex-direction: column;
         gap: 1rem;
         background: rgba(0,0,0,0.01);
+        min-height: 0;
     }
 
     .message {
@@ -292,12 +342,13 @@
             padding: 0 !important;
             margin: 0 !important;
             padding-top: 0 !important;
+            padding-bottom: 0 !important;
             height: calc(100dvh - 120px) !important;
             overflow: hidden !important;
             display: flex;
             flex-direction: column;
         }
-        .container.py-4 {
+        .container.chat-page-wrapper {
             padding: 0 !important;
             margin: 0 !important;
             max-width: 100% !important;
@@ -487,7 +538,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="container chat-page-wrapper">
     <div id="chatConfig" data-professional-id="{{ professional_id if professional_id else '' }}" class="d-none"></div>
     <div class="chat-container">
         <!-- Sidebar -->
@@ -517,7 +568,7 @@
             </div>
 
             <!-- Active Chat State -->
-            <div class="d-none" id="activeChat" style="height: 100%; flex-direction: column;">
+            <div class="d-none" id="activeChat" style="height: 100%; flex-direction: column; min-height: 0; flex: 1 1 auto; overflow: hidden;">
                 <div class="chat-header">
                     <!-- Mobile Back Button -->
                     <button class="mob-back-btn" id="mobBackBtn" onclick="closeMobileChat()" aria-label="Back to contacts">

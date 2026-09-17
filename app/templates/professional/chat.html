@@ -4,16 +4,54 @@
 
 {% block extra_css %}
 <style>
+    /* Lock page and viewport so whole page is unscrollable */
+    html, body {
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+
+    body {
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+    }
+
+    .main-content {
+        flex: 1 1 auto !important;
+        height: calc(100vh - 90px) !important;
+        height: calc(100dvh - 90px) !important;
+        padding-top: 12px !important;
+        padding-bottom: 16px !important;
+        overflow: hidden !important;
+        display: flex !important;
+        flex-direction: column !important;
+        min-height: 0 !important;
+    }
+
+    .chat-page-wrapper {
+        height: 100% !important;
+        max-height: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        padding-top: 0 !important;
+        padding-bottom: 0 !important;
+        min-height: 0 !important;
+    }
+
     .chat-container {
-        height: calc(100vh - 160px);
+        height: 100% !important;
+        max-height: 100% !important;
+        min-height: 0 !important;
         background: var(--bg-card);
         border-radius: var(--border-radius-lg);
-        overflow: hidden;
+        overflow: hidden !important;
         box-shadow: var(--shadow-lg);
         border: 1px solid var(--border-color);
-        margin-bottom: 2rem;
-        display: flex;
-        flex-direction: column;
+        margin-bottom: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 1 auto !important;
     }
 
     /* Professional Chat Theme Customization */
@@ -272,7 +310,7 @@
             display: flex !important;
             flex-direction: column !important;
         }
-        .container.mt-4 {
+        .container.chat-page-wrapper {
             padding: 0 !important;
             margin: 0 !important;
             max-width: 100% !important;
@@ -348,7 +386,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container mt-4">
+<div class="container chat-page-wrapper">
     <div class="chat-container">
         <div class="chat-header shadow-sm">
             <a href="{{ url_for('professional.dashboard') }}" class="chat-back-btn" aria-label="Go Back" title="Back" onclick="if(window.history.length > 1){event.preventDefault(); window.history.back();}">

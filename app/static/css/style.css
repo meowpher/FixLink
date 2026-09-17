@@ -52,6 +52,13 @@
     --input-bg: #ffffff;
     --input-border: #ced4da;
     --input-text: #212529;
+
+    /* Digital Twin Floor Map Variables - Light Mode */
+    --map-base-fill: #f8fafc;
+    --map-base-stroke: #cbd5e1;
+    --map-text-fill: #1e293b;
+    --map-text-shadow: none;
+    --map-text-filter: none;
 }
 
 [data-theme="dark"] {
@@ -63,6 +70,13 @@
     --bg-main: var(--bg-base);
     --bg-card: var(--bg-surface);
     --bg-card-hover: var(--bg-overlay);
+
+    /* Digital Twin Floor Map Variables - Dark Mode (Strict Dark Black, No Blue) */
+    --map-base-fill: #0a0a0a;
+    --map-base-stroke: #334155;
+    --map-text-fill: #ffffff;
+    --map-text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.9);
+    --map-text-filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.9));
 
     /* Typography: Clean neutral tones */
     --text-primary: #f4f4f5;
@@ -133,6 +147,10 @@
    STRICT DARK MODE: GLOBAL LEFT-TO-RIGHT BUTTON HOVER TRANSITION
    ══════════════════════════════════════════════════════════════ */
 [data-theme="dark"] .btn:not(.floating-bug-trigger):not(#mobile-fab):not(#flashlightToggle):not(.flashlight-btn),
+.cursor-pointer {
+    cursor: pointer !important;
+}
+
 [data-theme="dark"] button:not(.btn-close):not(.carousel-control-prev):not(.carousel-control-next):not(.navbar-toggler):not(.flatpickr-prev-month):not(.flatpickr-next-month):not(.topbar-theme-btn):not(.floating-bug-trigger):not(#mobile-fab):not(#flashlightToggle):not(.flashlight-btn),
 [data-theme="dark"] .btn-action,
 [data-theme="dark"] .btn-bug-submit,
@@ -362,54 +380,130 @@
     fill: #374151;
 }
 
-[data-theme="dark"] .room-poly.fill-orange {
-    fill: #fbbf24;
+/* ==========================================================================
+   Dual-Theme Base & Text Architecture for Floor Maps
+   ========================================================================== */
+
+/* 1. Building Base (Hallways & Outline) */
+#Background,
+#background,
+.building-base,
+.building-outline,
+[data-theme="light"] #Background,
+[data-bs-theme="light"] #Background,
+[data-theme="light"] #background,
+[data-bs-theme="light"] #background,
+[data-theme="light"] .building-base,
+[data-bs-theme="light"] .building-base,
+[data-theme="light"] .building-outline,
+[data-bs-theme="light"] .building-outline {
+    fill: #f8fafc !important;
+    stroke: #cbd5e1 !important;
+    stroke-width: 1.5px !important;
+    transition: fill var(--transition-normal), stroke var(--transition-normal);
 }
 
-/* Washroom: Deep Burgundy / Crimson Red */
-[data-theme="dark"] .room-poly.fill-red,
-[data-theme="dark"] .room-poly.washroom,
-[data-bs-theme="dark"] .room-poly.fill-red,
-[data-bs-theme="dark"] .room-poly.washroom {
-    fill: #801824 !important;
-    stroke: rgba(239, 68, 68, 0.45) !important;
+[data-theme="dark"] #Background,
+[data-bs-theme="dark"] #Background,
+[data-theme="dark"] #background,
+[data-bs-theme="dark"] #background,
+[data-theme="dark"] .building-base,
+[data-bs-theme="dark"] .building-base,
+[data-theme="dark"] .building-outline,
+[data-bs-theme="dark"] .building-outline {
+    fill: #0a0a0a !important;
+    stroke: #334155 !important;
+    stroke-width: 2px !important;
 }
 
-/* Classroom: Deep Cobalt / Royal Blue */
-[data-theme="dark"] .room-poly.fill-blue,
-[data-theme="dark"] .room-poly.classroom,
-[data-theme="dark"] .room-poly.class,
-[data-bs-theme="dark"] .room-poly.fill-blue,
-[data-bs-theme="dark"] .room-poly.classroom,
-[data-bs-theme="dark"] .room-poly.class {
-    fill: #1e40af !important;
-    stroke: rgba(59, 130, 246, 0.45) !important;
+/* 2. Room Text Elements (<text>, <tspan>, .room-text, .room-label) */
+.room-label,
+svg text,
+svg tspan,
+.room-text,
+.interactive-map-wrapper text,
+.vyas-floor-map text {
+    font-weight: 700 !important;
+    text-anchor: middle !important;
+    dominant-baseline: middle !important;
+    alignment-baseline: middle !important;
+    pointer-events: none !important;
 }
 
-/* Lab: Deep Forest / Pine Emerald Green */
-[data-theme="dark"] .room-poly.fill-teal,
-[data-theme="dark"] .room-poly.fill-green,
-[data-theme="dark"] .room-poly.fill-darkgreen,
-[data-theme="dark"] .room-poly.lab,
-[data-bs-theme="dark"] .room-poly.fill-teal,
-[data-bs-theme="dark"] .room-poly.fill-green,
-[data-bs-theme="dark"] .room-poly.fill-darkgreen,
-[data-bs-theme="dark"] .room-poly.lab {
-    fill: #023F24 !important;
-    stroke: rgba(16, 185, 129, 0.45) !important;
+[data-theme="light"] .room-label,
+[data-bs-theme="light"] .room-label,
+[data-theme="light"] svg text,
+[data-bs-theme="light"] svg text,
+[data-theme="light"] svg tspan,
+[data-bs-theme="light"] svg tspan,
+[data-theme="light"] .room-text,
+[data-bs-theme="light"] .room-text,
+[data-theme="light"] .interactive-map-wrapper text,
+[data-bs-theme="light"] .vyas-floor-map text {
+    fill: #1e293b !important;
+    color: #1e293b !important;
+    font-weight: 700 !important;
+    text-shadow: none !important;
+    text-anchor: middle !important;
+    dominant-baseline: middle !important;
+    alignment-baseline: middle !important;
+    pointer-events: none;
+    transition: fill var(--transition-normal), color var(--transition-normal);
 }
 
-[data-theme="dark"] .room-poly.fill-pink {
-    fill: #f472b6;
+[data-theme="dark"] .room-label,
+[data-bs-theme="dark"] .room-label,
+[data-theme="dark"] svg text,
+[data-bs-theme="dark"] svg text,
+[data-theme="dark"] svg tspan,
+[data-bs-theme="dark"] svg tspan,
+[data-theme="dark"] .room-text,
+[data-bs-theme="dark"] .room-text,
+[data-theme="dark"] .interactive-map-wrapper text,
+[data-bs-theme="dark"] .interactive-map-wrapper text,
+[data-theme="dark"] .vyas-floor-map text,
+[data-bs-theme="dark"] .vyas-floor-map text {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    text-shadow: 0px 1px 3px rgba(0, 0, 0, 0.9) !important;
+    text-anchor: middle !important;
+    dominant-baseline: middle !important;
+    alignment-baseline: middle !important;
+    pointer-events: none;
 }
 
-[data-theme="dark"] .room-poly.fill-purple {
-    fill: #c084fc;
+/* 3. Room Path Glyphs ([id$="_label"]) */
+svg [id$="_label"],
+svg [id*="_label_"],
+svg [id$="_label_container"],
+[data-theme="light"] svg [id$="_label"],
+[data-bs-theme="light"] svg [id$="_label"],
+[data-theme="light"] svg [id*="_label_"],
+[data-bs-theme="light"] svg [id*="_label_"],
+[data-theme="light"] svg [id$="_label_container"],
+[data-bs-theme="light"] svg [id$="_label_container"],
+[data-theme="light"] .room-group path[id$="_label"],
+[data-bs-theme="light"] .room-group path[id$="_label"] {
+    fill: #1e293b !important;
+    color: #1e293b !important;
+    filter: none !important;
+    pointer-events: none;
+    transition: fill var(--transition-normal);
 }
 
-[data-theme="dark"] .building-outline {
-    fill: #1f2937;
-    stroke: #374151;
+[data-theme="dark"] svg [id$="_label"],
+[data-bs-theme="dark"] svg [id$="_label"],
+[data-theme="dark"] svg [id*="_label_"],
+[data-bs-theme="dark"] svg [id*="_label_"],
+[data-theme="dark"] svg [id$="_label_container"],
+[data-bs-theme="dark"] svg [id$="_label_container"],
+[data-theme="dark"] .room-group path[id$="_label"],
+[data-bs-theme="dark"] .room-group path[id$="_label"] {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    filter: drop-shadow(0px 1px 3px rgba(0, 0, 0, 0.9)) !important;
+    pointer-events: none;
 }
 
 [data-theme="dark"] .room-group:hover .room-poly {
@@ -421,22 +515,6 @@
     fill: #27ae60 !important;
     stroke: #a7f3d0 !important;
     filter: drop-shadow(0 0 8px rgba(39, 174, 96, 0.8));
-}
-
-[data-theme="dark"] .room-text,
-[data-theme="dark"] svg text.room-text,
-[data-theme="dark"] svg text,
-[data-theme="dark"] .interactive-map-wrapper text,
-[data-theme="dark"] .vyas-floor-map text,
-[data-bs-theme="dark"] .room-text,
-[data-bs-theme="dark"] svg text.room-text,
-[data-bs-theme="dark"] svg text,
-[data-bs-theme="dark"] .interactive-map-wrapper text,
-[data-bs-theme="dark"] .vyas-floor-map text {
-    fill: #ffffff !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95), 0 0 2px rgba(0, 0, 0, 0.95) !important;
 }
 
 [data-theme="dark"] .room-block {
@@ -478,74 +556,107 @@
     color: #ffffff !important;
 }
 
+/* ── LEGEND SWATCHES: Dark Mode — Translucent glass (mirrors map Phase 4) ── */
 [data-theme="dark"] .legend-color.class,
 [data-theme="dark"] .legend-box.class,
+[data-theme="dark"] .legend-box.room-classroom,
 [data-bs-theme="dark"] .legend-color.class,
-[data-bs-theme="dark"] .legend-box.class {
-    background: #1e40af !important;
-    border: 1.5px solid #3b82f6 !important;
+[data-bs-theme="dark"] .legend-box.class,
+[data-bs-theme="dark"] .legend-box.room-classroom {
+    background: rgba(37, 99, 235, 0.2) !important;
+    border: 2px solid #3b82f6 !important;
 }
 
 [data-theme="dark"] .legend-color.lab,
 [data-theme="dark"] .legend-box.lab,
+[data-theme="dark"] .legend-box.room-lab,
 [data-bs-theme="dark"] .legend-color.lab,
-[data-bs-theme="dark"] .legend-box.lab {
-    background: #023F24 !important;
-    border: 1.5px solid #10b981 !important;
+[data-bs-theme="dark"] .legend-box.lab,
+[data-bs-theme="dark"] .legend-box.room-lab {
+    background: rgba(22, 163, 74, 0.2) !important;
+    border: 2px solid #22c55e !important;
 }
 
 [data-theme="dark"] .legend-color.washroom,
 [data-theme="dark"] .legend-box.washroom,
+[data-theme="dark"] .legend-box.room-washroom,
 [data-bs-theme="dark"] .legend-color.washroom,
-[data-bs-theme="dark"] .legend-box.washroom {
-    background: #801824 !important;
-    border: 1.5px solid #ef4444 !important;
+[data-bs-theme="dark"] .legend-box.washroom,
+[data-bs-theme="dark"] .legend-box.room-washroom {
+    background: rgba(220, 38, 38, 0.2) !important;
+    border: 2px solid #ef4444 !important;
 }
 
 [data-theme="dark"] .legend-color.faculty,
 [data-theme="dark"] .legend-box.faculty,
+[data-theme="dark"] .legend-box.room-faculty,
 [data-bs-theme="dark"] .legend-color.faculty,
-[data-bs-theme="dark"] .legend-box.faculty {
-    background: #78350f !important;
-    border: 1.5px solid #f59e0b !important;
+[data-bs-theme="dark"] .legend-box.faculty,
+[data-bs-theme="dark"] .legend-box.room-faculty {
+    background: rgba(234, 88, 12, 0.2) !important;
+    border: 2px solid #f97316 !important;
 }
 
 [data-theme="dark"] .legend-color.conference,
 [data-theme="dark"] .legend-box.conference,
+[data-theme="dark"] .legend-box.room-conference,
 [data-bs-theme="dark"] .legend-color.conference,
-[data-bs-theme="dark"] .legend-box.conference {
-    background: #581c87 !important;
-    border: 1.5px solid #c084fc !important;
+[data-bs-theme="dark"] .legend-box.conference,
+[data-bs-theme="dark"] .legend-box.room-conference {
+    background: rgba(147, 51, 234, 0.2) !important;
+    border: 2px solid #a855f7 !important;
 }
 
 [data-theme="dark"] .legend-color.meeting,
 [data-theme="dark"] .legend-box.meeting,
+[data-theme="dark"] .legend-box.room-meeting,
 [data-bs-theme="dark"] .legend-color.meeting,
-[data-bs-theme="dark"] .legend-box.meeting {
-    background: #312e81 !important;
-    border: 1.5px solid #818cf8 !important;
+[data-bs-theme="dark"] .legend-box.meeting,
+[data-bs-theme="dark"] .legend-box.room-meeting {
+    background: rgba(8, 145, 178, 0.2) !important;
+    border: 2px solid #06b6d4 !important;
 }
 
 [data-theme="dark"] .legend-color.encave,
 [data-theme="dark"] .legend-box.encave,
+[data-theme="dark"] .legend-box.room-encave,
 [data-theme="dark"] .legend-color.canteen,
 [data-theme="dark"] .legend-box.canteen,
+[data-theme="dark"] .legend-box.room-canteen,
 [data-bs-theme="dark"] .legend-color.encave,
 [data-bs-theme="dark"] .legend-box.encave,
+[data-bs-theme="dark"] .legend-box.room-encave,
 [data-bs-theme="dark"] .legend-color.canteen,
-[data-bs-theme="dark"] .legend-box.canteen {
-    background: #023F24 !important;
-    border: 1.5px solid #10b981 !important;
+[data-bs-theme="dark"] .legend-box.canteen,
+[data-bs-theme="dark"] .legend-box.room-canteen {
+    background: rgba(219, 39, 119, 0.2) !important;
+    border: 2px solid #ec4899 !important;
 }
 
 [data-theme="dark"] .legend-color.lift,
-[data-theme="dark"] .legend-box.lift {
-    background: #f472b6;
+[data-theme="dark"] .legend-box.lift,
+[data-theme="dark"] .legend-box.room-lift,
+[data-bs-theme="dark"] .legend-color.lift,
+[data-bs-theme="dark"] .legend-box.lift,
+[data-bs-theme="dark"] .legend-box.room-lift {
+    background: rgba(219, 39, 119, 0.2) !important;
+    border: 2px solid #ec4899 !important;
 }
 
 [data-theme="dark"] .legend-color.kitchen,
-[data-theme="dark"] .legend-box.kitchen {
-    background: #fbbf24;
+[data-theme="dark"] .legend-box.kitchen,
+[data-theme="dark"] .legend-box.room-kitchen,
+[data-theme="dark"] .legend-color.bar,
+[data-theme="dark"] .legend-box.bar,
+[data-theme="dark"] .legend-box.room-bar,
+[data-bs-theme="dark"] .legend-color.kitchen,
+[data-bs-theme="dark"] .legend-box.kitchen,
+[data-bs-theme="dark"] .legend-box.room-kitchen,
+[data-bs-theme="dark"] .legend-color.bar,
+[data-bs-theme="dark"] .legend-box.bar,
+[data-bs-theme="dark"] .legend-box.room-bar {
+    background: rgba(202, 138, 4, 0.2) !important;
+    border: 2px solid #eab308 !important;
 }
 
 [data-theme="dark"] .room-block.faculty,
@@ -1715,67 +1826,92 @@ body {
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-/* Map Room Colors - Updated for Reference */
+/* Map Room Colors — Translucent Palette (deprecated legacy selectors, kept for SVG fallback) */
+/* These are superseded by Phase 3 rules but kept as a lower-specificity fallback */
 .room-poly.fill-silver {
-    fill: #bdc3c7;
-}
-
-/* Management */
-.room-poly.fill-orange {
-    fill: #f39c12;
+    fill: rgba(148, 163, 184, 0.15);
+    stroke: #64748b;
 }
 
 /* Faculty */
-.room-poly.fill-red {
-    fill: #c0392b;
+.room-poly.fill-orange,
+.room-poly.faculty-room,
+.room-poly.faculty {
+    fill: rgba(234, 88, 12, 0.2);
+    stroke: #f97316;
+}
+
+/* Kitchen / Bar */
+.room-poly.fill-kitchen,
+.room-poly.kitchen,
+.room-poly.bar {
+    fill: rgba(202, 138, 4, 0.2);
+    stroke: #eab308;
 }
 
 /* Washrooms */
-.room-poly.fill-red {
-    fill: #c0392b;
-    /* Fixed to match legend in light mode */
-    color: white;
+.room-poly.fill-red,
+.room-poly.washroom {
+    fill: rgba(220, 38, 38, 0.2);
+    stroke: #ef4444;
 }
 
 /* Classrooms */
-.room-poly.fill-blue {
-    fill: #0d47a1;
-    color: white;
+.room-poly.fill-blue,
+.room-poly.classroom,
+.room-poly.class {
+    fill: rgba(37, 99, 235, 0.2);
+    stroke: #3b82f6;
 }
 
 /* Lifts */
-.room-poly.fill-pink {
-    fill: #FF69B4;
-    color: white;
+.room-poly.fill-pink,
+.room-poly.lift {
+    fill: rgba(219, 39, 119, 0.2);
+    stroke: #ec4899;
 }
 
 /* Labs */
-.room-poly.fill-teal {
-    fill: #26a69a;
-    color: white;
+.room-poly.fill-teal,
+.room-poly.lab {
+    fill: rgba(22, 163, 74, 0.2);
+    stroke: #22c55e;
 }
 
-/* Meeting & Conference */
-.room-poly.fill-purple {
-    fill: #6f42c1;
-    color: white;
+/* Conference */
+.room-poly.fill-purple,
+.room-poly.conference-room,
+.room-poly.conference {
+    fill: rgba(147, 51, 234, 0.2);
+    stroke: #a855f7;
 }
 
-/* Canteen / Encave - Dark Green */
+/* Meeting Room */
+.room-poly.fill-cyan,
+.room-poly.meeting-room,
+.room-poly.meeting {
+    fill: rgba(8, 145, 178, 0.2);
+    stroke: #06b6d4;
+}
+
+/* Canteen / Encave */
+.room-poly.fill-encave,
 .room-poly.fill-darkgreen,
-.room-poly.fill-green,
-.fill-darkgreen {
-    fill: #023F24 !important;
-    color: white !important;
+.room-poly.canteen,
+.room-poly.encave,
+.fill-encave {
+    fill: rgba(219, 39, 119, 0.2);
+    stroke: #ec4899;
 }
 
 .room-poly {
-    fill: #ecf0f1;
+    fill: rgba(148, 163, 184, 0.1);
     stroke: #7f8c8d;
     stroke-width: 1;
     transition: all 0.2s;
     cursor: pointer;
 }
+
 
 .room-poly:hover {
     fill-opacity: 0.8;
@@ -1814,12 +1950,20 @@ body {
     fill: #0d6efd !important;
 }
 
-.room-poly.occupied-status {
-    fill: var(--danger-color) !important;
+.room-poly.occupied-status,
+.interactive-map-wrapper .occupied-status {
+    fill: rgba(185, 28, 28, 0.35) !important;
+    stroke: #ef4444 !important;
+    stroke-width: 1.5px !important;
+    opacity: 0.65;
 }
 
-.room-poly.vacant-status {
-    fill: var(--success-color) !important;
+.room-poly.vacant-status,
+.interactive-map-wrapper .vacant-status {
+    fill: #16a34a !important;
+    stroke: #22c55e !important;
+    stroke-width: 2px !important;
+    opacity: 1;
 }
 
 .room-group.selected .room-text {
@@ -2004,48 +2148,74 @@ body {
     border-radius: 4px;
 }
 
-.legend-color.class {
-    background: var(--mitwpu-blue);
+/* ── LEGEND SWATCHES: Light Mode — Solid fills (mirrors map Phase 3) ── */
+.legend-color.class,
+.legend-box.class,
+.legend-box.room-classroom {
+    background: #3b82f6;
+    border: 2px solid #1d4ed8;
 }
 
-.legend-color.lab {
-    background: var(--lab-teal);
+.legend-color.lab,
+.legend-box.lab,
+.legend-box.room-lab {
+    background: #22c55e;
+    border: 2px solid #15803d;
 }
 
-.legend-color.washroom {
-    background: var(--mitwpu-red);
+.legend-color.washroom,
+.legend-box.washroom,
+.legend-box.room-washroom {
+    background: #ef4444;
+    border: 2px solid #b91c1c;
 }
 
 .legend-color.faculty,
-.legend-box.faculty {
-    background: #f39c12;
+.legend-box.faculty,
+.legend-box.room-faculty {
+    background: #f97316;
+    border: 2px solid #c2410c;
 }
 
 .legend-color.lift,
-.legend-box.lift {
-    background: #FF69B4;
+.legend-box.lift,
+.legend-box.room-lift {
+    background: #ec4899;
+    border: 2px solid #9d174d;
 }
 
 .legend-color.kitchen,
-.legend-box.kitchen {
-    background: #f39c12;
+.legend-box.kitchen,
+.legend-color.bar,
+.legend-box.bar,
+.legend-box.room-kitchen,
+.legend-box.room-bar {
+    background: #eab308;
+    border: 2px solid #854d0e;
 }
 
 .legend-color.conference,
-.legend-box.conference {
-    background: #6f42c1;
+.legend-box.conference,
+.legend-box.room-conference {
+    background: #a855f7;
+    border: 2px solid #7e22ce;
 }
 
 .legend-color.meeting,
-.legend-box.meeting {
-    background: #4f46e5;
+.legend-box.meeting,
+.legend-box.room-meeting {
+    background: #06b6d4;
+    border: 2px solid #0e7490;
 }
 
 .legend-color.encave,
 .legend-box.encave,
 .legend-color.canteen,
-.legend-box.canteen {
-    background: #023F24;
+.legend-box.canteen,
+.legend-box.room-encave,
+.legend-box.room-canteen {
+    background: #ec4899;
+    border: 2px solid #9d174d;
 }
 
 .room-block.faculty {
@@ -2662,18 +2832,6 @@ body {
     border-radius: 4px;
 }
 
-.legend-box.class {
-    background: var(--mitwpu-blue);
-}
-
-.legend-box.lab {
-    background: var(--lab-teal);
-}
-
-.legend-box.washroom {
-    background: var(--mitwpu-red);
-}
-
 .legend-divider {
     width: 1px;
     height: 20px;
@@ -2688,6 +2846,17 @@ body {
     align-items: center;
     gap: 1rem;
     margin-bottom: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 14px 18px;
+    z-index: 1020;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.facility-intelligence-header.sticky-top {
+    top: 80px;
 }
 
 .facility-header-controls {
@@ -4836,7 +5005,37 @@ img {
     }
 
     /* ── Sidebar / hero stacking ── */
-    .faculty-hero,
+    .faculty-hero-col {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1030 !important;
+        margin-left: -1rem !important;
+        margin-right: -1rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+
+    .faculty-hero {
+        position: relative !important;
+        top: 0 !important;
+        height: auto !important;
+        min-height: unset !important;
+        max-height: 15vh !important;
+        border-radius: 0 0 18px 18px !important;
+        padding: 10px 16px !important;
+        margin-bottom: 0 !important;
+        box-shadow: 0 4px 20px rgba(0, 70, 140, 0.25) !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+    }
+
+    .faculty-hero .faculty-name {
+        font-size: 1.05rem !important;
+        font-weight: 700 !important;
+        line-height: 1.2 !important;
+        margin-bottom: 2px !important;
+    }
+
     .admin-sidebar {
         height: auto !important;
         position: relative !important;
@@ -4845,27 +5044,81 @@ img {
     }
 
     .hero-stats {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin-top: 3px !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        padding-bottom: 2px !important;
+        width: 100% !important;
+    }
+
+    .hero-stats::-webkit-scrollbar {
+        display: none !important;
     }
 
     .stat-mini-card {
-        flex: 1 1 calc(50% - 0.5rem);
-        min-width: 120px;
+        flex: 0 0 auto !important;
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        background: rgba(255, 255, 255, 0.18) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        border-radius: 50px !important;
+        padding: 3px 10px 3px 6px !important;
+        gap: 6px !important;
+        white-space: nowrap !important;
     }
 
-    /* ── Nav pills ── */
-    .nav-pills-premium {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+    .stat-mini-card:last-child {
+        flex: 0 0 auto !important;
     }
 
-    .nav-pills-premium .btn {
-        flex: 1 1 calc(50% - 0.5rem);
-        margin-bottom: 0;
-        min-width: 120px;
+    .stat-icon {
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 50% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .stat-icon i {
+        color: var(--mitwpu-blue, #0b4d8c) !important;
+        font-size: 0.65rem !important;
+    }
+
+    .stat-info {
+        display: inline-flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+
+    .stat-label {
+        font-size: 0.68rem !important;
+        color: rgba(255, 255, 255, 0.85) !important;
+        font-weight: 500 !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+    }
+
+    .stat-label::after {
+        content: ":";
+    }
+
+    .stat-value {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        color: #ffffff !important;
+        line-height: 1 !important;
     }
 
     /* ── Map ── */
@@ -6431,100 +6684,297 @@ html[data-theme="dark"],
 }
 
 /* Map Polygons overrides for Dark Mode */
+[data-theme="dark"] #Background,
+[data-bs-theme="dark"] #Background,
+[data-theme="dark"] #background,
+[data-bs-theme="dark"] #background,
+[data-theme="dark"] .building-base,
+[data-bs-theme="dark"] .building-base,
 [data-theme="dark"] .building-outline,
 [data-bs-theme="dark"] .building-outline {
-    fill: #1a2233 !important;
+    fill: #0a0a0a !important;
     stroke: #334155 !important;
     stroke-width: 2px !important;
 }
 
-/* Rule 3: Dark Mode SVG Glow Aesthetic - Low opacity fills (15%) with 2px stroke */
+[data-theme="dark"] g.room-group,
+[data-bs-theme="dark"] g.room-group {
+    stroke: none !important;
+}
+
+/* ==========================================================================
+   Phase 3: The Universal Translucent Room Palette (Light & Dark Themes)
+   ========================================================================== */
+
+/* Universal Room Poly Base */
+.room-poly,
+svg .room-poly,
+[data-theme="light"] .room-poly,
+[data-bs-theme="light"] .room-poly,
 [data-theme="dark"] .room-poly,
-[data-bs-theme="dark"] .room-poly,
-[data-theme="dark"] .interactive-room,
-[data-bs-theme="dark"] .interactive-room {
+[data-bs-theme="dark"] .room-poly {
     stroke-width: 2px !important;
     transition: fill 0.2s ease, stroke 0.2s ease, filter 0.2s ease;
 }
 
+/* 1. Classroom (Blue): Fill rgba(37, 99, 235, 0.2), Stroke #3b82f6 */
+.room-poly.fill-blue,
+.room-poly.classroom,
+.room-poly.room-classroom,
+.room-poly.class,
+.room-classroom,
+[data-theme="light"] .room-poly.fill-blue,
+[data-bs-theme="light"] .room-poly.fill-blue,
+[data-theme="light"] .room-poly.classroom,
+[data-bs-theme="light"] .room-poly.classroom,
+[data-theme="light"] .room-poly.room-classroom,
+[data-bs-theme="light"] .room-poly.room-classroom,
 [data-theme="dark"] .room-poly.fill-blue,
 [data-bs-theme="dark"] .room-poly.fill-blue,
-[data-theme="dark"] .interactive-room.classroom,
-[data-bs-theme="dark"] .interactive-room.classroom {
-    fill: #1e40af !important;
+[data-theme="dark"] .room-poly.classroom,
+[data-bs-theme="dark"] .room-poly.classroom,
+[data-theme="dark"] .room-poly.room-classroom,
+[data-bs-theme="dark"] .room-poly.room-classroom,
+[data-theme="dark"] .room-poly.class,
+[data-bs-theme="dark"] .room-poly.class {
+    fill: rgba(37, 99, 235, 0.2) !important;
     stroke: #3b82f6 !important;
 }
 
+/* 2. Lab (Green): Fill rgba(22, 163, 74, 0.2), Stroke #22c55e */
+.room-poly.fill-teal,
+.room-poly.fill-green,
+.room-poly.lab,
+.room-poly.room-lab,
+.room-lab,
+[data-theme="light"] .room-poly.fill-teal,
+[data-bs-theme="light"] .room-poly.fill-teal,
+[data-theme="light"] .room-poly.fill-green,
+[data-bs-theme="light"] .room-poly.fill-green,
+[data-theme="light"] .room-poly.lab,
+[data-bs-theme="light"] .room-poly.lab,
+[data-theme="light"] .room-poly.room-lab,
+[data-bs-theme="light"] .room-poly.room-lab,
 [data-theme="dark"] .room-poly.fill-teal,
 [data-bs-theme="dark"] .room-poly.fill-teal,
-[data-theme="dark"] .interactive-room.lab,
-[data-bs-theme="dark"] .interactive-room.lab {
-    fill: #023F24 !important;
-    stroke: #10b981 !important;
+[data-theme="dark"] .room-poly.fill-green,
+[data-bs-theme="dark"] .room-poly.fill-green,
+[data-theme="dark"] .room-poly.lab,
+[data-bs-theme="dark"] .room-poly.lab,
+[data-theme="dark"] .room-poly.room-lab,
+[data-bs-theme="dark"] .room-poly.room-lab {
+    fill: rgba(22, 163, 74, 0.2) !important;
+    stroke: #22c55e !important;
 }
 
+/* 3. Washroom (Red): Fill rgba(220, 38, 38, 0.2), Stroke #ef4444 */
+.room-poly.fill-red,
+.room-poly.washroom,
+.room-poly.room-washroom,
+.room-washroom,
+[data-theme="light"] .room-poly.fill-red,
+[data-bs-theme="light"] .room-poly.fill-red,
+[data-theme="light"] .room-poly.washroom,
+[data-bs-theme="light"] .room-poly.washroom,
+[data-theme="light"] .room-poly.room-washroom,
+[data-bs-theme="light"] .room-poly.room-washroom,
 [data-theme="dark"] .room-poly.fill-red,
 [data-bs-theme="dark"] .room-poly.fill-red,
-[data-theme="dark"] .interactive-room.washroom,
-[data-bs-theme="dark"] .interactive-room.washroom {
-    fill: #801824 !important;
+[data-theme="dark"] .room-poly.washroom,
+[data-bs-theme="dark"] .room-poly.washroom,
+[data-theme="dark"] .room-poly.room-washroom,
+[data-bs-theme="dark"] .room-poly.room-washroom {
+    fill: rgba(220, 38, 38, 0.2) !important;
     stroke: #ef4444 !important;
 }
 
+/* 4. Faculty (Orange): Fill rgba(234, 88, 12, 0.2), Stroke #f97316 */
+.room-poly.fill-orange,
+.room-poly.faculty-room,
+.room-poly.faculty,
+.room-poly.room-faculty,
+.room-faculty,
+[data-theme="light"] .room-poly.fill-orange,
+[data-bs-theme="light"] .room-poly.fill-orange,
+[data-theme="light"] .room-poly.faculty-room,
+[data-bs-theme="light"] .room-poly.faculty-room,
+[data-theme="light"] .room-poly.faculty,
+[data-bs-theme="light"] .room-poly.faculty,
+[data-theme="light"] .room-poly.room-faculty,
+[data-bs-theme="light"] .room-poly.room-faculty,
 [data-theme="dark"] .room-poly.fill-orange,
 [data-bs-theme="dark"] .room-poly.fill-orange,
-[data-theme="dark"] .interactive-room.faculty-room,
-[data-bs-theme="dark"] .interactive-room.faculty-room,
-[data-theme="dark"] .interactive-room.faculty,
-[data-bs-theme="dark"] .interactive-room.faculty {
-    fill: #78350f !important;
-    stroke: #f59e0b !important;
+[data-theme="dark"] .room-poly.faculty-room,
+[data-bs-theme="dark"] .room-poly.faculty-room,
+[data-theme="dark"] .room-poly.faculty,
+[data-bs-theme="dark"] .room-poly.faculty,
+[data-theme="dark"] .room-poly.room-faculty,
+[data-bs-theme="dark"] .room-poly.room-faculty {
+    fill: rgba(234, 88, 12, 0.2) !important;
+    stroke: #f97316 !important;
 }
 
-[data-theme="dark"] .room-poly.fill-pink,
-[data-bs-theme="dark"] .room-poly.fill-pink,
-[data-theme="dark"] .interactive-room.lift,
-[data-bs-theme="dark"] .interactive-room.lift {
-    fill: rgba(236, 72, 153, 0.15) !important;
+/* 5. Conference Room (Purple): Fill rgba(147, 51, 234, 0.2), Stroke #a855f7 */
+.room-poly.fill-purple,
+.room-poly.conference-room,
+.room-poly.conference,
+.room-poly.room-conference,
+.room-conference,
+[data-theme="light"] .room-poly.fill-purple,
+[data-bs-theme="light"] .room-poly.fill-purple,
+[data-theme="light"] .room-poly.conference-room,
+[data-bs-theme="light"] .room-poly.conference-room,
+[data-theme="light"] .room-poly.conference,
+[data-bs-theme="light"] .room-poly.conference,
+[data-theme="light"] .room-poly.room-conference,
+[data-bs-theme="light"] .room-poly.room-conference,
+[data-theme="dark"] .room-poly.fill-purple,
+[data-bs-theme="dark"] .room-poly.fill-purple,
+[data-theme="dark"] .room-poly.conference-room,
+[data-bs-theme="dark"] .room-poly.conference-room,
+[data-theme="dark"] .room-poly.conference,
+[data-bs-theme="dark"] .room-poly.conference,
+[data-theme="dark"] .room-poly.room-conference,
+[data-bs-theme="dark"] .room-poly.room-conference {
+    fill: rgba(147, 51, 234, 0.2) !important;
+    stroke: #a855f7 !important;
+}
+
+/* 6. Meeting Room (Cyan): Fill rgba(8, 145, 178, 0.2), Stroke #06b6d4 */
+.room-poly.fill-cyan,
+.room-poly.fill-indigo,
+.room-poly.meeting-room,
+.room-poly.meeting,
+.room-poly.room-meeting,
+.room-meeting,
+[data-theme="light"] .room-poly.fill-cyan,
+[data-bs-theme="light"] .room-poly.fill-cyan,
+[data-theme="light"] .room-poly.fill-indigo,
+[data-bs-theme="light"] .room-poly.fill-indigo,
+[data-theme="light"] .room-poly.meeting-room,
+[data-bs-theme="light"] .room-poly.meeting-room,
+[data-theme="light"] .room-poly.meeting,
+[data-bs-theme="light"] .room-poly.meeting,
+[data-theme="light"] .room-poly.room-meeting,
+[data-bs-theme="light"] .room-poly.room-meeting,
+[data-theme="dark"] .room-poly.fill-cyan,
+[data-bs-theme="dark"] .room-poly.fill-cyan,
+[data-theme="dark"] .room-poly.fill-indigo,
+[data-bs-theme="dark"] .room-poly.fill-indigo,
+[data-theme="dark"] .room-poly.meeting-room,
+[data-bs-theme="dark"] .room-poly.meeting-room,
+[data-theme="dark"] .room-poly.meeting,
+[data-bs-theme="dark"] .room-poly.meeting,
+[data-theme="dark"] .room-poly.room-meeting,
+[data-bs-theme="dark"] .room-poly.room-meeting {
+    fill: rgba(8, 145, 178, 0.2) !important;
+    stroke: #06b6d4 !important;
+}
+
+/* 7. Encave / Canteen (Pink): Fill rgba(219, 39, 119, 0.2), Stroke #ec4899 */
+.room-poly.fill-encave,
+.room-poly.fill-darkgreen,
+.room-poly.canteen,
+.room-poly.encave,
+.room-poly.room-canteen,
+.room-poly.room-encave,
+.room-encave,
+.room-canteen,
+[data-theme="light"] .room-poly.fill-encave,
+[data-bs-theme="light"] .room-poly.fill-encave,
+[data-theme="light"] .room-poly.fill-darkgreen,
+[data-bs-theme="light"] .room-poly.fill-darkgreen,
+[data-theme="light"] .room-poly.canteen,
+[data-bs-theme="light"] .room-poly.canteen,
+[data-theme="light"] .room-poly.encave,
+[data-bs-theme="light"] .room-poly.encave,
+[data-theme="light"] .room-poly.room-canteen,
+[data-bs-theme="light"] .room-poly.room-canteen,
+[data-theme="light"] .room-poly.room-encave,
+[data-bs-theme="light"] .room-poly.room-encave,
+[data-theme="dark"] .room-poly.fill-encave,
+[data-bs-theme="dark"] .room-poly.fill-encave,
+[data-theme="dark"] .room-poly.fill-darkgreen,
+[data-bs-theme="dark"] .room-poly.fill-darkgreen,
+[data-theme="dark"] .room-poly.canteen,
+[data-bs-theme="dark"] .room-poly.canteen,
+[data-theme="dark"] .room-poly.encave,
+[data-bs-theme="dark"] .room-poly.encave,
+[data-theme="dark"] .room-poly.room-canteen,
+[data-bs-theme="dark"] .room-poly.room-canteen,
+[data-theme="dark"] .room-poly.room-encave,
+[data-bs-theme="dark"] .room-poly.room-encave {
+    fill: rgba(219, 39, 119, 0.2) !important;
     stroke: #ec4899 !important;
 }
 
+/* 8. Kitchen / Bar (Gold): Fill rgba(202, 138, 4, 0.2), Stroke #eab308 */
+.room-poly.fill-kitchen,
+.room-poly.kitchen,
+.room-poly.bar,
+.room-poly.room-kitchen,
+.room-poly.room-bar,
+.room-kitchen,
+.room-bar,
+[data-theme="light"] .room-poly.fill-kitchen,
+[data-bs-theme="light"] .room-poly.fill-kitchen,
+[data-theme="light"] .room-poly.kitchen,
+[data-bs-theme="light"] .room-poly.kitchen,
+[data-theme="light"] .room-poly.bar,
+[data-bs-theme="light"] .room-poly.bar,
+[data-theme="light"] .room-poly.room-kitchen,
+[data-bs-theme="light"] .room-poly.room-kitchen,
+[data-theme="light"] .room-poly.room-bar,
+[data-bs-theme="light"] .room-poly.room-bar,
+[data-theme="dark"] .room-poly.fill-kitchen,
+[data-bs-theme="dark"] .room-poly.fill-kitchen,
+[data-theme="dark"] .room-poly.kitchen,
+[data-bs-theme="dark"] .room-poly.kitchen,
+[data-theme="dark"] .room-poly.bar,
+[data-bs-theme="dark"] .room-poly.bar,
+[data-theme="dark"] .room-poly.room-kitchen,
+[data-bs-theme="dark"] .room-poly.room-kitchen,
+[data-theme="dark"] .room-poly.room-bar,
+[data-bs-theme="dark"] .room-poly.room-bar {
+    fill: rgba(202, 138, 4, 0.2) !important;
+    stroke: #eab308 !important;
+}
+
+/* Lifts (Pink) */
+.room-poly.fill-pink,
+.room-poly.lift,
+.room-poly.room-lift,
+.room-lift,
+[data-theme="light"] .room-poly.fill-pink,
+[data-bs-theme="light"] .room-poly.fill-pink,
+[data-theme="light"] .room-poly.lift,
+[data-bs-theme="light"] .room-poly.lift,
+[data-theme="light"] .room-poly.room-lift,
+[data-bs-theme="light"] .room-poly.room-lift,
+[data-theme="dark"] .room-poly.fill-pink,
+[data-bs-theme="dark"] .room-poly.fill-pink,
+[data-theme="dark"] .room-poly.lift,
+[data-bs-theme="dark"] .room-poly.lift,
+[data-theme="dark"] .room-poly.room-lift,
+[data-bs-theme="dark"] .room-poly.room-lift {
+    fill: rgba(219, 39, 119, 0.2) !important;
+    stroke: #ec4899 !important;
+}
+
+/* Unavailable / Storage (Silver) */
+.room-poly.fill-silver,
+.room-poly.unavailable,
+.room-poly.room-unavailable,
+[data-theme="light"] .room-poly.fill-silver,
+[data-bs-theme="light"] .room-poly.fill-silver,
+[data-theme="light"] .room-poly.unavailable,
+[data-bs-theme="light"] .room-poly.unavailable,
 [data-theme="dark"] .room-poly.fill-silver,
-[data-bs-theme="dark"] .room-poly.fill-silver {
+[data-bs-theme="dark"] .room-poly.fill-silver,
+[data-theme="dark"] .room-poly.unavailable,
+[data-bs-theme="dark"] .room-poly.unavailable {
     fill: rgba(148, 163, 184, 0.15) !important;
     stroke: #64748b !important;
-}
-
-[data-theme="dark"] .room-poly.fill-purple,
-[data-bs-theme="dark"] .room-poly.fill-purple,
-[data-theme="dark"] .interactive-room.conference-room,
-[data-bs-theme="dark"] .interactive-room.conference-room,
-[data-theme="dark"] .interactive-room.conference,
-[data-bs-theme="dark"] .interactive-room.conference {
-    fill: #581c87 !important;
-    stroke: #c084fc !important;
-}
-
-[data-theme="dark"] .room-poly.fill-indigo,
-[data-bs-theme="dark"] .room-poly.fill-indigo,
-[data-theme="dark"] .interactive-room.meeting-room,
-[data-bs-theme="dark"] .interactive-room.meeting-room,
-[data-theme="dark"] .interactive-room.meeting,
-[data-bs-theme="dark"] .interactive-room.meeting {
-    fill: #312e81 !important;
-    stroke: #818cf8 !important;
-}
-
-[data-theme="dark"] .room-poly.fill-darkgreen,
-[data-bs-theme="dark"] .room-poly.fill-darkgreen,
-[data-theme="dark"] .room-poly.fill-green,
-[data-bs-theme="dark"] .room-poly.fill-green,
-[data-theme="dark"] .interactive-room.canteen,
-[data-bs-theme="dark"] .interactive-room.canteen,
-[data-theme="dark"] .interactive-room.encave,
-[data-bs-theme="dark"] .interactive-room.encave {
-    fill: #023F24 !important;
-    stroke: #10b981 !important;
 }
 
 [data-theme="dark"] .room-poly.has-issue,
@@ -6652,7 +7102,10 @@ html[data-theme="dark"],
     -webkit-backdrop-filter: blur(12px);
 }
 
-/* Floor Map Room Labels: High-Contrast Dynamic Readability (WCAG 2.1 AA) */
+/* Floor Map Room Labels: Base & Dual-Theme High-Contrast Readability */
+.room-label,
+svg .room-label,
+.interactive-map-wrapper .room-label,
 .interactive-map-wrapper [id*="_label"],
 .interactive-map-wrapper [id$="_label"],
 .interactive-map-wrapper [id*="_label_container"],
@@ -6662,31 +7115,66 @@ html[data-theme="dark"],
 .interactive-map-wrapper .room-text,
 .interactive-map-wrapper text,
 .interactive-map-wrapper tspan {
-    fill: #ffffff !important; /* Crisp white for AAA contrast (> 9:1) on deep blue, red, orange, and teal rooms */
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    font-weight: 700 !important;
+    text-anchor: middle !important;
+    dominant-baseline: middle !important;
+    pointer-events: none !important;
+    user-select: none !important;
     stroke: none !important;
     stroke-width: 0 !important;
-    font-weight: 700 !important;
-    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.9)) !important;
-    pointer-events: none !important;
+    transition: fill 0.2s ease, filter 0.2s ease;
 }
 
-/* Floor Map Room Labels: High-Contrast White in Dark Mode against dark floor canvas */
+/* Light Mode: Pure white labels on solid vivid fills — maximum contrast */
+[data-theme="light"] .room-label,
+[data-bs-theme="light"] .room-label,
+[data-theme="light"] svg .room-label,
+[data-bs-theme="light"] svg .room-label,
+[data-theme="light"] .interactive-map-wrapper .room-label,
+[data-bs-theme="light"] .interactive-map-wrapper .room-label,
+[data-theme="light"] .interactive-room text,
+[data-bs-theme="light"] .interactive-room text,
+[data-theme="light"] .interactive-room tspan,
+[data-bs-theme="light"] .interactive-room tspan,
+[data-theme="light"] .room-text,
+[data-bs-theme="light"] .room-text,
+[data-theme="light"] [id*="_label"],
+[data-bs-theme="light"] [id*="_label"],
+[data-theme="light"] [id$="_label"],
+[data-bs-theme="light"] [id$="_label"],
+[data-theme="light"] [id*="_label_container"],
+[data-bs-theme="light"] [id*="_label_container"],
+[data-theme="light"] [id*="_label"] path,
+[data-bs-theme="light"] [id*="_label"] path,
+[data-theme="light"] [id$="_label_container"] path,
+[data-bs-theme="light"] [id$="_label_container"] path,
+[data-theme="light"] svg text,
+[data-bs-theme="light"] svg text,
+[data-theme="light"] svg tspan,
+[data-bs-theme="light"] svg tspan,
+[data-theme="light"] .interactive-map-wrapper text,
+[data-bs-theme="light"] .interactive-map-wrapper text,
+[data-theme="light"] .interactive-map-wrapper tspan,
+[data-bs-theme="light"] .interactive-map-wrapper tspan {
+    fill: #ffffff !important;
+    font-weight: 700 !important;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.6)) !important;
+}
+
+/* Dark Mode: Pure white (#ffffff / #f8fafc) with subtle dark shadow */
+[data-theme="dark"] .room-label,
+[data-bs-theme="dark"] .room-label,
+[data-theme="dark"] svg .room-label,
+[data-bs-theme="dark"] svg .room-label,
+[data-theme="dark"] .interactive-map-wrapper .room-label,
+[data-bs-theme="dark"] .interactive-map-wrapper .room-label,
 [data-theme="dark"] .interactive-room text,
 [data-bs-theme="dark"] .interactive-room text,
 [data-theme="dark"] .interactive-room tspan,
 [data-bs-theme="dark"] .interactive-room tspan,
 [data-theme="dark"] .room-text,
 [data-bs-theme="dark"] .room-text,
-[data-theme="dark"] [id*="_label"],
-[data-bs-theme="dark"] [id*="_label"],
-[data-theme="dark"] [id$="_label"],
-[data-bs-theme="dark"] [id$="_label"],
-[data-theme="dark"] [id*="_label_container"],
-[data-bs-theme="dark"] [id*="_label_container"],
-[data-theme="dark"] [id*="_label"] path,
-[data-bs-theme="dark"] [id*="_label"] path,
-[data-theme="dark"] [id$="_label_container"] path,
-[data-bs-theme="dark"] [id$="_label_container"] path,
 [data-theme="dark"] svg text,
 [data-bs-theme="dark"] svg text,
 [data-theme="dark"] svg tspan,
@@ -6705,12 +7193,8 @@ html[data-theme="dark"],
 [data-bs-theme="dark"] .interactive-map-wrapper text,
 [data-theme="dark"] .interactive-map-wrapper tspan,
 [data-bs-theme="dark"] .interactive-map-wrapper tspan {
-    fill: #f8fafc !important; /* High-contrast white (> 16:1) over dark floor canvas */
-    font-weight: 700 !important;
-    stroke: none !important;
-    stroke-width: 0 !important;
+    fill: #ffffff !important;
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.95)) !important;
-    pointer-events: none !important;
 }
 
 /* Interactive Room Labels: Hover and Selection States (Preserve crisp white with glow) */
@@ -6743,23 +7227,7 @@ html[data-theme="dark"],
 }
 
 
-[data-theme="dark"] .legend-box.class,
-[data-bs-theme="dark"] .legend-box.class {
-    background-color: #1e3a8a !important;
-    border: 1px solid #3b82f6 !important;
-}
 
-[data-theme="dark"] .legend-box.lab,
-[data-bs-theme="dark"] .legend-box.lab {
-    background-color: #064e3b !important;
-    border: 1px solid #10b981 !important;
-}
-
-[data-theme="dark"] .legend-box.washroom,
-[data-bs-theme="dark"] .legend-box.washroom {
-    background-color: #7f1d1d !important;
-    border: 1px solid #ef4444 !important;
-}
 
 /* ============================================
    STRICT DARK MODE - MOBILE EDGE CASES
@@ -7635,6 +8103,58 @@ select.compact-input {
     height: auto;
 }
 
+/* ── Phase 2: Building Base — Dual-Theme ─────────────────────────── */
+
+/* SVG root background — transparent in both themes so it inherits the
+   dashboard card/panel background naturally. */
+.interactive-map-wrapper svg,
+.interactive-map-wrapper > svg {
+    background: transparent !important;
+}
+
+/* Interior hallway divider lines
+   Light: medium cool gray  |  Dark: muted slate (visible but not harsh) */
+.interactive-map-wrapper .building-interior-outlines path,
+.interactive-map-wrapper #Interior_outlines path {
+    stroke: #94a3b8 !important;    /* slate-400 — works on light gray bg */
+    stroke-width: 1px !important;
+    fill: none !important;
+}
+
+/* Building exterior / shell outline
+   Light: slightly darker border  |  Dark: crisp slate edge */
+.interactive-map-wrapper .building-map-outlines path,
+.interactive-map-wrapper #Map_Outlines path {
+    stroke: #64748b !important;    /* slate-500 — defines building edges clearly */
+    stroke-width: 1.5px !important;
+    fill: none !important;
+}
+
+/* Light Mode overrides */
+:root .interactive-map-wrapper .building-interior-outlines path,
+:root .interactive-map-wrapper #Interior_outlines path {
+    stroke: #94a3b8 !important;   /* cool gray — legible on #f8fafc base */
+}
+:root .interactive-map-wrapper .building-map-outlines path,
+:root .interactive-map-wrapper #Map_Outlines path {
+    stroke: #64748b !important;   /* stronger border on light bg */
+    stroke-width: 2px !important;
+}
+
+/* Dark Mode overrides */
+[data-theme="dark"] .interactive-map-wrapper .building-interior-outlines path,
+[data-theme="dark"] .interactive-map-wrapper #Interior_outlines path {
+    stroke: #334155 !important;   /* slate-700 — subtle on true-black bg */
+    stroke-width: 1px !important;
+}
+[data-theme="dark"] .interactive-map-wrapper .building-map-outlines path,
+[data-theme="dark"] .interactive-map-wrapper #Map_Outlines path {
+    stroke: #475569 !important;   /* slate-600 — crisp shell edge in dark */
+    stroke-width: 2px !important;
+}
+
+/* ── End Phase 2 ─────────────────────────────────────────────────── */
+
 .interactive-map-wrapper .room-group {
     transition: all var(--transition-fast);
 }
@@ -7656,53 +8176,294 @@ select.compact-input {
     filter: drop-shadow(0 0 8px rgba(39, 174, 96, 0.9)) !important;
 }
 
-/* Color classes for room types (Target geometry only, NEVER text or label paths) */
+/* ══════════════════════════════════════════════════════════════════
+   PHASE 3: Dual-Theme Room Fill Palette
+   Light Mode (default) : Solid vibrant fills   — white labels
+   Dark Mode            : Translucent rgba fills — white labels
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── LIGHT MODE: Solid fills (default, no [data-theme] scope) ─────── */
+
+/* Classroom — Vivid Blue */
 .interactive-map-wrapper .fill-blue .room-poly,
 .interactive-map-wrapper .fill-blue rect,
 .interactive-map-wrapper .fill-blue polygon,
 .interactive-map-wrapper .fill-blue path:not([id*="_label"]):not([id$="_label"]),
 .interactive-map-wrapper rect.fill-blue,
-.interactive-map-wrapper path.fill-blue:not([id*="_label"]) {
-    fill: var(--mitwpu-blue) !important;
+.interactive-map-wrapper path.fill-blue:not([id*="_label"]),
+.interactive-map-wrapper .room-poly.fill-blue,
+.interactive-map-wrapper .room-poly.classroom,
+.interactive-map-wrapper .room-poly.room-classroom {
+    fill: #3b82f6 !important;
+    stroke: #1d4ed8 !important;
+    stroke-width: 2px !important;
 }
 
+/* Lab — Vivid Green */
 .interactive-map-wrapper .fill-teal .room-poly,
 .interactive-map-wrapper .fill-teal rect,
 .interactive-map-wrapper .fill-teal polygon,
 .interactive-map-wrapper .fill-teal path:not([id*="_label"]):not([id$="_label"]),
 .interactive-map-wrapper rect.fill-teal,
-.interactive-map-wrapper path.fill-teal:not([id*="_label"]) {
-    fill: var(--lab-teal) !important;
+.interactive-map-wrapper path.fill-teal:not([id*="_label"]),
+.interactive-map-wrapper .room-poly.fill-teal,
+.interactive-map-wrapper .room-poly.lab,
+.interactive-map-wrapper .room-poly.room-lab {
+    fill: #22c55e !important;
+    stroke: #15803d !important;
+    stroke-width: 2px !important;
 }
 
+/* Washroom — Vivid Red */
 .interactive-map-wrapper .fill-red .room-poly,
 .interactive-map-wrapper .fill-red rect,
 .interactive-map-wrapper .fill-red polygon,
 .interactive-map-wrapper .fill-red path:not([id*="_label"]):not([id$="_label"]),
 .interactive-map-wrapper rect.fill-red,
-.interactive-map-wrapper path.fill-red:not([id*="_label"]) {
-    fill: var(--mitwpu-red) !important;
+.interactive-map-wrapper path.fill-red:not([id*="_label"]),
+.interactive-map-wrapper .room-poly.fill-red,
+.interactive-map-wrapper .room-poly.washroom,
+.interactive-map-wrapper .room-poly.room-washroom {
+    fill: #ef4444 !important;
+    stroke: #b91c1c !important;
+    stroke-width: 2px !important;
 }
 
+/* Faculty — Vivid Orange */
 .interactive-map-wrapper .fill-orange .room-poly,
 .interactive-map-wrapper .fill-orange rect,
 .interactive-map-wrapper .fill-orange polygon,
-.interactive-map-wrapper .fill-orange path:not([id*="_label"]):not([id$="_label"]) {
-    fill: #f39c12 !important;
+.interactive-map-wrapper .fill-orange path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper .room-poly.fill-orange,
+.interactive-map-wrapper .room-poly.faculty,
+.interactive-map-wrapper .room-poly.faculty-room,
+.interactive-map-wrapper .room-poly.room-faculty {
+    fill: #f97316 !important;
+    stroke: #c2410c !important;
+    stroke-width: 2px !important;
 }
 
+/* Lift — Vivid Pink */
 .interactive-map-wrapper .fill-pink .room-poly,
 .interactive-map-wrapper .fill-pink rect,
 .interactive-map-wrapper .fill-pink polygon,
-.interactive-map-wrapper .fill-pink path:not([id*="_label"]):not([id$="_label"]) {
-    fill: #e83e8c !important;
+.interactive-map-wrapper .fill-pink path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper .room-poly.fill-pink,
+.interactive-map-wrapper .room-poly.lift,
+.interactive-map-wrapper .room-poly.room-lift {
+    fill: #ec4899 !important;
+    stroke: #9d174d !important;
+    stroke-width: 2px !important;
 }
 
+/* Conference Room — Vivid Purple */
 .interactive-map-wrapper .fill-purple .room-poly,
 .interactive-map-wrapper .fill-purple rect,
 .interactive-map-wrapper .fill-purple polygon,
-.interactive-map-wrapper .fill-purple path:not([id*="_label"]):not([id$="_label"]) {
-    fill: #6f42c1 !important;
+.interactive-map-wrapper .fill-purple path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper .room-poly.fill-purple,
+.interactive-map-wrapper .room-poly.conference,
+.interactive-map-wrapper .room-poly.conference-room,
+.interactive-map-wrapper .room-poly.room-conference {
+    fill: #a855f7 !important;
+    stroke: #7e22ce !important;
+    stroke-width: 2px !important;
+}
+
+/* Meeting Room — Vivid Cyan */
+.interactive-map-wrapper .fill-indigo .room-poly,
+.interactive-map-wrapper .fill-indigo rect,
+.interactive-map-wrapper .fill-indigo polygon,
+.interactive-map-wrapper .fill-indigo path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper .fill-cyan .room-poly,
+.interactive-map-wrapper .fill-cyan rect,
+.interactive-map-wrapper .fill-cyan polygon,
+.interactive-map-wrapper .fill-cyan path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper .room-poly.fill-cyan,
+.interactive-map-wrapper .room-poly.fill-indigo,
+.interactive-map-wrapper .room-poly.meeting,
+.interactive-map-wrapper .room-poly.meeting-room,
+.interactive-map-wrapper .room-poly.room-meeting {
+    fill: #06b6d4 !important;
+    stroke: #0e7490 !important;
+    stroke-width: 2px !important;
+}
+
+/* Encave / Canteen — Vivid Pink-Rose */
+.interactive-map-wrapper .fill-darkgreen .room-poly,
+.interactive-map-wrapper .fill-darkgreen rect,
+.interactive-map-wrapper .fill-darkgreen polygon,
+.interactive-map-wrapper .fill-darkgreen path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper .fill-encave .room-poly,
+.interactive-map-wrapper .fill-encave rect,
+.interactive-map-wrapper .fill-encave polygon,
+.interactive-map-wrapper .fill-encave path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper .room-poly.fill-encave,
+.interactive-map-wrapper .room-poly.fill-darkgreen,
+.interactive-map-wrapper .room-poly.canteen,
+.interactive-map-wrapper .room-poly.encave,
+.interactive-map-wrapper .room-poly.room-encave,
+.interactive-map-wrapper .room-poly.room-canteen {
+    fill: #ec4899 !important;
+    stroke: #9d174d !important;
+    stroke-width: 2px !important;
+}
+
+/* Kitchen / Bar — Vivid Amber/Gold */
+.interactive-map-wrapper .fill-kitchen .room-poly,
+.interactive-map-wrapper .fill-kitchen rect,
+.interactive-map-wrapper .fill-kitchen polygon,
+.interactive-map-wrapper .fill-kitchen path:not([id*="_label"]):not([id$="_label"]),
+.interactive-map-wrapper .room-poly.fill-kitchen,
+.interactive-map-wrapper .room-poly.kitchen,
+.interactive-map-wrapper .room-poly.bar,
+.interactive-map-wrapper .room-poly.room-kitchen,
+.interactive-map-wrapper .room-poly.room-bar {
+    fill: #eab308 !important;
+    stroke: #854d0e !important;
+    stroke-width: 2px !important;
+}
+
+/* ── DARK MODE: Translucent rgba fills ───────────────────────────── */
+
+/* Classroom — Translucent Blue */
+[data-theme="dark"] .interactive-map-wrapper .fill-blue .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-blue rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-blue polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-blue path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper rect.fill-blue,
+[data-theme="dark"] .interactive-map-wrapper path.fill-blue:not([id*="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-blue,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.classroom,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-classroom {
+    fill: rgba(37, 99, 235, 0.2) !important;
+    stroke: #3b82f6 !important;
+    stroke-width: 2px !important;
+}
+
+/* Lab — Translucent Green */
+[data-theme="dark"] .interactive-map-wrapper .fill-teal .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-teal rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-teal polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-teal path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper rect.fill-teal,
+[data-theme="dark"] .interactive-map-wrapper path.fill-teal:not([id*="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-teal,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.lab,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-lab {
+    fill: rgba(22, 163, 74, 0.2) !important;
+    stroke: #22c55e !important;
+    stroke-width: 2px !important;
+}
+
+/* Washroom — Translucent Red */
+[data-theme="dark"] .interactive-map-wrapper .fill-red .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-red rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-red polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-red path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper rect.fill-red,
+[data-theme="dark"] .interactive-map-wrapper path.fill-red:not([id*="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-red,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.washroom,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-washroom {
+    fill: rgba(220, 38, 38, 0.2) !important;
+    stroke: #ef4444 !important;
+    stroke-width: 2px !important;
+}
+
+/* Faculty — Translucent Orange */
+[data-theme="dark"] .interactive-map-wrapper .fill-orange .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-orange rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-orange polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-orange path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-orange,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.faculty,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.faculty-room,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-faculty {
+    fill: rgba(234, 88, 12, 0.2) !important;
+    stroke: #f97316 !important;
+    stroke-width: 2px !important;
+}
+
+/* Lift — Translucent Pink */
+[data-theme="dark"] .interactive-map-wrapper .fill-pink .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-pink rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-pink polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-pink path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-pink,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.lift,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-lift {
+    fill: rgba(219, 39, 119, 0.2) !important;
+    stroke: #ec4899 !important;
+    stroke-width: 2px !important;
+}
+
+/* Conference Room — Translucent Purple */
+[data-theme="dark"] .interactive-map-wrapper .fill-purple .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-purple rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-purple polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-purple path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-purple,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.conference,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.conference-room,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-conference {
+    fill: rgba(147, 51, 234, 0.2) !important;
+    stroke: #a855f7 !important;
+    stroke-width: 2px !important;
+}
+
+/* Meeting Room — Translucent Cyan */
+[data-theme="dark"] .interactive-map-wrapper .fill-indigo .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-indigo rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-indigo polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-indigo path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .fill-cyan .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-cyan rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-cyan polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-cyan path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-cyan,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-indigo,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.meeting,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.meeting-room,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-meeting {
+    fill: rgba(8, 145, 178, 0.2) !important;
+    stroke: #06b6d4 !important;
+    stroke-width: 2px !important;
+}
+
+/* Encave / Canteen — Translucent Pink */
+[data-theme="dark"] .interactive-map-wrapper .fill-darkgreen .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-darkgreen rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-darkgreen polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-darkgreen path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .fill-encave .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-encave rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-encave polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-encave path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-encave,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-darkgreen,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.canteen,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.encave,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-encave,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-canteen {
+    fill: rgba(219, 39, 119, 0.2) !important;
+    stroke: #ec4899 !important;
+    stroke-width: 2px !important;
+}
+
+/* Kitchen / Bar — Translucent Amber */
+[data-theme="dark"] .interactive-map-wrapper .fill-kitchen .room-poly,
+[data-theme="dark"] .interactive-map-wrapper .fill-kitchen rect,
+[data-theme="dark"] .interactive-map-wrapper .fill-kitchen polygon,
+[data-theme="dark"] .interactive-map-wrapper .fill-kitchen path:not([id*="_label"]):not([id$="_label"]),
+[data-theme="dark"] .interactive-map-wrapper .room-poly.fill-kitchen,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.kitchen,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.bar,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-kitchen,
+[data-theme="dark"] .interactive-map-wrapper .room-poly.room-bar {
+    fill: rgba(202, 138, 4, 0.2) !important;
+    stroke: #eab308 !important;
+    stroke-width: 2px !important;
 }
 
 /* Status overlays */
@@ -8001,4 +8762,157 @@ input::placeholder {
 [data-theme="dark"] .consent-box {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.20) !important;
+}
+
+/* Defensive Form Disabled State */
+.form-disabled {
+    opacity: 0.5 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    filter: grayscale(15%);
+    transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
+/* ── Faculty Native Mobile Bottom Navigation ── */
+.faculty-bottom-nav {
+    background: var(--bg-card, #ffffff);
+    border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+    height: 64px;
+    padding: 6px 12px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+}
+
+[data-theme="dark"] .faculty-bottom-nav {
+    background: #0f172a !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.4) !important;
+}
+
+.bottom-nav-btn {
+    background: transparent;
+    border: none;
+    outline: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    color: var(--text-muted, #64748b);
+    padding: 4px 0;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+}
+
+.bottom-nav-btn i {
+    font-size: 1.25rem;
+    line-height: 1;
+    transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.bottom-nav-btn span {
+    font-size: 0.65rem;
+    font-weight: 500;
+    margin-top: 4px;
+    line-height: 1;
+    letter-spacing: 0.2px;
+    transition: color 0.2s ease, font-weight 0.2s ease;
+}
+
+.bottom-nav-btn:hover {
+    color: var(--mitwpu-blue, #0b4d8c);
+}
+
+.bottom-nav-btn.active {
+    color: var(--mitwpu-blue, #0b4d8c) !important;
+}
+
+.bottom-nav-btn.active i {
+    color: var(--mitwpu-blue, #0b4d8c) !important;
+    transform: translateY(-2px) scale(1.12);
+}
+
+.bottom-nav-btn.active span {
+    color: var(--mitwpu-blue, #0b4d8c) !important;
+    font-weight: 700;
+}
+
+[data-theme="dark"] .bottom-nav-btn.active,
+[data-theme="dark"] .bottom-nav-btn.active i,
+[data-theme="dark"] .bottom-nav-btn.active span {
+    color: #38bdf8 !important;
+}
+
+/* ── Floating Action Button (FAB) ── */
+.faculty-fab {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    width: 58px;
+    height: 58px;
+    border-radius: 50% !important;
+    background: var(--mitwpu-blue, #0b4d8c) !important;
+    color: #ffffff !important;
+    border: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 25px rgba(11, 77, 140, 0.45), 0 4px 10px rgba(0, 0, 0, 0.2);
+    z-index: 1050;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-decoration: none;
+}
+
+.faculty-fab:hover {
+    transform: translateY(-4px) scale(1.08);
+    box-shadow: 0 12px 30px rgba(11, 77, 140, 0.6), 0 6px 14px rgba(0, 0, 0, 0.25);
+    color: #ffffff !important;
+}
+
+.faculty-fab:active {
+    transform: translateY(-1px) scale(0.96);
+}
+
+.faculty-fab i {
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .faculty-fab {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+    box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+[data-theme="dark"] .faculty-fab:hover {
+    box-shadow: 0 12px 32px rgba(37, 99, 235, 0.7), 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* ── Bottom Sheet Drawer Styling ── */
+.offcanvas.offcanvas-bottom {
+    border-top-left-radius: 20px !important;
+    border-top-right-radius: 20px !important;
+    border: none !important;
+    box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-theme="dark"] .offcanvas.offcanvas-bottom {
+    background: #1e293b !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6) !important;
+}
+
+.drag-handle-pill {
+    width: 42px;
+    height: 5px;
+    background: var(--text-muted, #94a3b8);
+    opacity: 0.45;
+    border-radius: 10px;
+    margin: 0 auto;
+    cursor: grab;
 }

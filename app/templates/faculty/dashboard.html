@@ -127,15 +127,47 @@
     
     .nav-pills-premium .btn {
         width: 100%;
-        margin-bottom: 4px;
+        margin-bottom: 6px;
         justify-content: flex-start;
         align-items: center;
         text-align: left;
         padding: 12px 16px !important;
         white-space: nowrap;
         font-size: 0.95rem;
+        font-weight: 500;
         border-radius: 12px !important;
-        transition: all 0.2s ease;
+        background: transparent !important;
+        color: #ffffff !important;
+        opacity: 0.8;
+        border: none !important;
+        box-shadow: none !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .nav-pills-premium .btn:hover {
+        background: rgba(255, 255, 255, 0.15) !important;
+        color: #ffffff !important;
+        opacity: 1;
+        transform: translateY(-1px);
+    }
+
+    .nav-pills-premium .btn.active,
+    .nav-pills-premium .btn.active:hover {
+        background: #ffffff !important;
+        color: var(--mitwpu-blue, #0b4d8c) !important;
+        font-weight: 700 !important;
+        opacity: 1 !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+        transform: none !important;
+    }
+
+    [data-theme="dark"] .nav-pills-premium .btn.active,
+    [data-theme="dark"] .nav-pills-premium .btn.active:hover,
+    [data-bs-theme="dark"] .nav-pills-premium .btn.active,
+    [data-bs-theme="dark"] .nav-pills-premium .btn.active:hover {
+        background: #ffffff !important;
+        color: #1d4ed8 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
     }
 
     .nav-pills-premium .btn:last-child {
@@ -412,6 +444,17 @@
         align-items: center;
         gap: 1rem;
         margin-bottom: 20px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 14px 18px;
+        z-index: 1020;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
+    .facility-intelligence-header.sticky-top {
+        top: 80px;
     }
 
     .facility-header-controls {
@@ -437,30 +480,91 @@
     .legend-item {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+        font-weight: 600;
+        font-size: 0.82rem;
     }
 
     .dot {
         display: inline-block;
-        width: 10px;
-        height: 10px;
+        width: 12px;
+        height: 12px;
         border-radius: 50%;
         flex-shrink: 0;
+        box-sizing: border-box;
     }
 
     .dot.available {
-        background-color: var(--success-color, #10b981);
-        box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
+        background-color: #16a34a !important; /* solid vibrant green rgba(22, 163, 74, 1) */
+        border: 1.5px solid #22c55e !important;
+        box-shadow: 0 0 8px rgba(22, 163, 74, 0.45);
     }
 
     .dot.occupied {
-        background-color: var(--danger-color, #ef4444);
-        box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+        background-color: rgba(220, 38, 38, 0.35) !important; /* dimmed / dark red */
+        border: 1.5px solid #ef4444 !important;
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.25);
     }
 
     .dot.selected {
-        background-color: var(--mitwpu-blue, #3b82f6);
-        box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+        background-color: var(--mitwpu-blue, #3b82f6) !important;
+        border: 1.5px solid #1d4ed8 !important;
+        box-shadow: 0 0 8px rgba(59, 130, 246, 0.45);
+    }
+
+    /* ── SVG Map Occupancy Lighting for Faculty Portal ── */
+    .interactive-map-wrapper .room-poly.vacant-status,
+    .interactive-map-wrapper .vacant-status,
+    .interactive-map-wrapper [data-room].vacant-status .room-poly {
+        fill: #16a34a !important; /* solid vibrant green */
+        stroke: #22c55e !important;
+        stroke-width: 2px !important;
+        opacity: 1 !important;
+        filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.35));
+        transition: fill 0.2s ease, stroke 0.2s ease, opacity 0.2s ease;
+    }
+
+    .interactive-map-wrapper .room-poly.occupied-status,
+    .interactive-map-wrapper .occupied-status,
+    .interactive-map-wrapper [data-room].occupied-status .room-poly {
+        fill: rgba(185, 28, 28, 0.35) !important; /* dimmed / dark red */
+        stroke: #ef4444 !important;
+        stroke-width: 1.5px !important;
+        opacity: 0.65 !important;
+        filter: none !important;
+        transition: fill 0.2s ease, stroke 0.2s ease, opacity 0.2s ease;
+    }
+
+    [data-theme="dark"] .dot.available {
+        background-color: #16a34a !important;
+        border: 1.5px solid #22c55e !important;
+        box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    }
+
+    [data-theme="dark"] .dot.occupied {
+        background-color: rgba(185, 28, 28, 0.4) !important;
+        border: 1.5px solid #ef4444 !important;
+        box-shadow: none;
+    }
+
+    [data-theme="dark"] .interactive-map-wrapper .room-poly.vacant-status,
+    [data-theme="dark"] .interactive-map-wrapper .vacant-status,
+    [data-theme="dark"] .interactive-map-wrapper [data-room].vacant-status .room-poly {
+        fill: rgba(22, 163, 74, 0.5) !important;
+        stroke: #22c55e !important;
+        stroke-width: 2px !important;
+        opacity: 1 !important;
+        filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+    }
+
+    [data-theme="dark"] .interactive-map-wrapper .room-poly.occupied-status,
+    [data-theme="dark"] .interactive-map-wrapper .occupied-status,
+    [data-theme="dark"] .interactive-map-wrapper [data-room].occupied-status .room-poly {
+        fill: rgba(127, 29, 29, 0.35) !important;
+        stroke: #ef4444 !important;
+        stroke-width: 1.5px !important;
+        opacity: 0.55 !important;
+        filter: none !important;
     }
 
     .floor-selector-pill {
@@ -734,27 +838,40 @@
     .slot-header { background: var(--bg-main, #f1f5f9) !important; font-size: 0.75rem; color: var(--text-muted, #64748b); font-weight: 600; }
 
     .timetable-cell.occupied {
-        padding: 8px !important;
+        padding: 6px !important;
         cursor: pointer;
-        transition: all 0.2s ease;
+        position: relative;
     }
-    
-    .timetable-cell.occupied:hover {
-        transform: scale(1.02);
-        z-index: 10;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+    .cursor-pointer {
+        cursor: pointer !important;
     }
 
     .cell-content {
         position: relative;
         height: 100%;
-        background: rgba(var(--mitwpu-blue-rgb), 0.1);
-        border: 1.5px solid var(--mitwpu-blue);
+        background: rgba(59, 130, 246, 0.1);
+        border: 1.5px solid rgba(59, 130, 246, 0.4);
         border-radius: 8px;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        padding: 6px;
+        padding: 6px 8px;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 0.22s ease,
+                    background-color 0.22s ease;
+    }
+
+    .timetable-cell.occupied:hover .cell-content,
+    .cell-content:hover {
+        transform: translateY(-3px);
+        background: rgba(59, 130, 246, 0.16);
+        border-color: #3b82f6;
+        box-shadow: 0 8px 18px rgba(59, 130, 246, 0.22), 0 0 0 1px rgba(59, 130, 246, 0.3);
+        z-index: 5;
     }
 
     .btn-delete-class {
@@ -765,7 +882,7 @@
         height: 22px;
         border-radius: 6px;
         border: none;
-        background: rgba(255, 255, 255, 0.4);
+        background: rgba(255, 255, 255, 0.5);
         color: #ef4444;
         display: flex;
         align-items: center;
@@ -774,7 +891,7 @@
         cursor: pointer;
         opacity: 0;
         transition: all 0.2s ease;
-        z-index: 5;
+        z-index: 6;
         box-shadow: 0 2px 4px rgba(0,0,0,0.05);
     }
 
@@ -788,8 +905,27 @@
         transform: scale(1.1);
     }
     
-    .occupied:nth-child(even) .cell-content { background: rgba(14, 165, 233, 0.1); border-color: #0ea5e9; }
-    .occupied:nth-child(3n) .cell-content { background: rgba(3, 105, 161, 0.1); border-color: #0369a1; }
+    .occupied:nth-child(even) .cell-content { 
+        background: rgba(14, 165, 233, 0.1); 
+        border-color: rgba(14, 165, 233, 0.4); 
+    }
+    .timetable-cell.occupied:nth-child(even):hover .cell-content {
+        transform: translateY(-3px);
+        background: rgba(14, 165, 233, 0.18);
+        border-color: #0ea5e9;
+        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.24), 0 0 0 1px rgba(14, 165, 233, 0.35);
+    }
+
+    .occupied:nth-child(3n) .cell-content { 
+        background: rgba(99, 102, 241, 0.1); 
+        border-color: rgba(99, 102, 241, 0.4); 
+    }
+    .timetable-cell.occupied:nth-child(3n):hover .cell-content {
+        transform: translateY(-3px);
+        background: rgba(99, 102, 241, 0.18);
+        border-color: #6366f1;
+        box-shadow: 0 8px 18px rgba(99, 102, 241, 0.24), 0 0 0 1px rgba(99, 102, 241, 0.35);
+    }
 
     .cell-subject { font-weight: 700; font-size: 0.8rem; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cell-meta { font-size: 0.65rem; color: #64748b; font-weight: 600; margin-top: 2px; }
@@ -819,18 +955,41 @@
     }
 
     [data-theme="dark"] .cell-content {
-        background: rgba(37, 99, 235, 0.22) !important;
+        background: rgba(37, 99, 235, 0.18) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-theme="dark"] .timetable-cell.occupied:hover .cell-content,
+    [data-theme="dark"] .cell-content:hover {
+        transform: translateY(-3px) !important;
+        background: rgba(37, 99, 235, 0.32) !important;
         border-color: #3b82f6 !important;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35), 0 0 12px rgba(59, 130, 246, 0.25) !important;
     }
 
     [data-theme="dark"] .occupied:nth-child(even) .cell-content {
-        background: rgba(14, 165, 233, 0.22) !important;
+        background: rgba(14, 165, 233, 0.18) !important;
+        border-color: rgba(56, 189, 248, 0.4) !important;
+    }
+
+    [data-theme="dark"] .timetable-cell.occupied:nth-child(even):hover .cell-content {
+        transform: translateY(-3px) !important;
+        background: rgba(14, 165, 233, 0.32) !important;
         border-color: #38bdf8 !important;
+        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35), 0 0 12px rgba(56, 189, 248, 0.25) !important;
     }
 
     [data-theme="dark"] .occupied:nth-child(3n) .cell-content {
-        background: rgba(99, 102, 241, 0.22) !important;
+        background: rgba(99, 102, 241, 0.18) !important;
+        border-color: rgba(129, 140, 248, 0.4) !important;
+    }
+
+    [data-theme="dark"] .timetable-cell.occupied:nth-child(3n):hover .cell-content {
+        transform: translateY(-3px) !important;
+        background: rgba(99, 102, 241, 0.32) !important;
         border-color: #818cf8 !important;
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35), 0 0 12px rgba(129, 140, 248, 0.25) !important;
     }
 
     [data-theme="dark"] .timetable-cell.vacant {
@@ -849,105 +1008,121 @@
             z-index: 1100 !important;
         }
         
+        .faculty-hero-col {
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 1030 !important;
+            margin-left: -1rem !important;
+            margin-right: -1rem !important;
+            margin-bottom: 0.75rem !important;
+        }
+
         .faculty-hero {
-            padding: 1rem !important;
+            position: relative !important;
+            top: 0 !important;
             height: auto !important;
             min-height: unset !important;
-            border-radius: 16px !important;
-            margin-bottom: 1rem !important;
-        }
-
-        .faculty-hero .mb-4 {
-            margin-bottom: 0.5rem !important;
-        }
-
-        .faculty-hero h1.h3 {
-            font-size: 1.15rem !important;
-            display: inline-block !important;
+            max-height: 15vh !important;
+            border-radius: 0 0 18px 18px !important;
+            padding: 10px 16px !important;
             margin-bottom: 0 !important;
+            box-shadow: 0 4px 20px rgba(0, 70, 140, 0.25) !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
         }
 
-        .faculty-hero h2.h5 {
-            font-size: 1.15rem !important;
-            display: inline-block !important;
-            margin-left: 5px !important;
-            margin-bottom: 0.25rem !important;
+        .faculty-hero .faculty-name {
+            font-size: 1.05rem !important;
+            font-weight: 700 !important;
+            line-height: 1.2 !important;
+            margin-bottom: 2px !important;
         }
 
-        .faculty-hero p.small {
-            font-size: 0.72rem !important;
-            opacity: 0.8 !important;
-        }
-
+        /* Stats flex-pills: small, horizontally scrolling flex row under name */
         .hero-stats {
+            display: flex !important;
             flex-direction: row !important;
-            flex-wrap: wrap !important;
-            gap: 6px !important;
-            margin-top: 0.75rem !important;
-            flex-grow: 0 !important;
+            flex-wrap: nowrap !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+            gap: 8px !important;
+            margin-top: 3px !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            scrollbar-width: none !important;
+            padding-bottom: 2px !important;
+            width: 100% !important;
+        }
+
+        .hero-stats::-webkit-scrollbar {
+            display: none !important;
         }
 
         .stat-mini-card {
-            flex: 1 1 calc(50% - 6px) !important;
-            padding: 6px 8px !important;
+            flex: 0 0 auto !important;
+            display: inline-flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            background: rgba(255, 255, 255, 0.18) !important;
+            border: 1px solid rgba(255, 255, 255, 0.25) !important;
+            border-radius: 50px !important;
+            padding: 3px 10px 3px 6px !important;
             gap: 6px !important;
-            border-radius: 10px !important;
+            white-space: nowrap !important;
         }
 
         .stat-mini-card:last-child {
-            flex: 1 1 100% !important;
+            flex: 0 0 auto !important;
         }
 
         .stat-icon {
-            width: 30px !important;
-            height: 30px !important;
-            min-width: 30px !important;
-            font-size: 0.9rem !important;
-            border-radius: 6px !important;
+            width: 20px !important;
+            height: 20px !important;
+            min-width: 20px !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            border-radius: 50% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         .stat-icon i {
-            color: var(--mitwpu-blue) !important;
-            font-size: 0.9rem !important;
+            color: var(--mitwpu-blue, #0b4d8c) !important;
+            font-size: 0.65rem !important;
         }
 
         .stat-info {
-            gap: 0px !important;
+            display: inline-flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 4px !important;
         }
 
         .stat-label {
-            font-size: 0.65rem !important;
-            line-height: 1.2 !important;
+            font-size: 0.68rem !important;
+            color: rgba(255, 255, 255, 0.85) !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+            line-height: 1 !important;
+        }
+
+        .stat-label::after {
+            content: ":";
         }
 
         .stat-value {
-            font-size: 0.8rem !important;
-            font-weight: 700 !important;
-            line-height: 1.2 !important;
-        }
-
-        .nav-pills-premium {
-            flex-direction: row !important;
-            flex-wrap: wrap !important;
-            gap: 4px !important;
-            margin-top: 0.75rem !important;
-        }
-
-        .nav-pills-premium .btn {
-            flex: 1 1 calc(50% - 4px) !important;
-            padding: 8px 6px !important;
             font-size: 0.72rem !important;
-            justify-content: center !important;
-            border-radius: 8px !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            line-height: 1 !important;
         }
 
-        .nav-pills-premium .btn:last-child {
-            flex: 1 1 100% !important;
-        }
-
-        .nav-pills-premium .btn i {
-            margin-right: 4px !important;
-            font-size: 0.85rem !important;
+        .facility-intelligence-header.sticky-top {
+            top: 80px;
+            padding: 10px 14px;
         }
         
         .dashboard-header-buttons .btn {
@@ -955,6 +1130,254 @@
             padding: 8px 12px !important;
             white-space: nowrap !important;
         }
+
+        .faculty-dashboard {
+            padding-bottom: 85px !important;
+        }
+    }
+
+    /* ── Native Mobile Bottom Navigation ── */
+    .faculty-bottom-nav {
+        background: var(--bg-card, #ffffff);
+        border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+        height: 64px;
+        padding: 6px 12px;
+        padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    [data-theme="dark"] .faculty-bottom-nav {
+        background: #0f172a !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    .bottom-nav-btn {
+        background: transparent;
+        border: none;
+        outline: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        flex: 1;
+        color: var(--text-muted, #64748b);
+        padding: 4px 0;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+        text-decoration: none;
+        user-select: none;
+    }
+
+    .bottom-nav-btn i {
+        font-size: 1.25rem;
+        line-height: 1;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+
+    .bottom-nav-btn span {
+        font-size: 0.65rem;
+        font-weight: 500;
+        margin-top: 4px;
+        line-height: 1;
+        letter-spacing: 0.2px;
+        transition: color 0.2s ease, font-weight 0.2s ease;
+    }
+
+    .bottom-nav-btn:hover {
+        color: var(--mitwpu-blue, #0b4d8c);
+    }
+
+    .bottom-nav-btn.active {
+        color: var(--mitwpu-blue, #0b4d8c) !important;
+    }
+
+    .bottom-nav-btn.active i {
+        color: var(--mitwpu-blue, #0b4d8c) !important;
+        transform: translateY(-2px) scale(1.12);
+    }
+
+    .bottom-nav-btn.active span {
+        color: var(--mitwpu-blue, #0b4d8c) !important;
+        font-weight: 700;
+    }
+
+    [data-theme="dark"] .bottom-nav-btn.active,
+    [data-theme="dark"] .bottom-nav-btn.active i,
+    [data-theme="dark"] .bottom-nav-btn.active span {
+        color: #38bdf8 !important;
+    }
+
+    /* ── Floating Action Button (FAB) ── */
+    .faculty-fab {
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 58px;
+        height: 58px;
+        border-radius: 50% !important;
+        background: var(--mitwpu-blue, #0b4d8c) !important;
+        color: #ffffff !important;
+        border: none !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 25px rgba(11, 77, 140, 0.45), 0 4px 10px rgba(0, 0, 0, 0.2);
+        z-index: 1050;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        text-decoration: none;
+    }
+
+    .faculty-fab:hover {
+        transform: translateY(-4px) scale(1.08);
+        box-shadow: 0 12px 30px rgba(11, 77, 140, 0.6), 0 6px 14px rgba(0, 0, 0, 0.25);
+        color: #ffffff !important;
+    }
+
+    .faculty-fab:active {
+        transform: translateY(-1px) scale(0.96);
+    }
+
+    .faculty-fab i {
+        font-size: 1.85rem;
+        font-weight: 700;
+        line-height: 1;
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .faculty-fab {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="dark"] .faculty-fab:hover {
+        box-shadow: 0 12px 32px rgba(37, 99, 235, 0.7), 0 6px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── Bottom Sheet Drawer Styling ── */
+    .offcanvas.offcanvas-bottom {
+        border-top-left-radius: 20px !important;
+        border-top-right-radius: 20px !important;
+        border: none !important;
+        box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.2) !important;
+    }
+
+    [data-theme="dark"] .offcanvas.offcanvas-bottom {
+        background: #1e293b !important;
+        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .drag-handle-pill {
+        width: 42px;
+        height: 5px;
+        background: var(--text-muted, #94a3b8);
+        opacity: 0.45;
+        border-radius: 10px;
+        margin: 0 auto;
+        cursor: grab;
+    }
+
+    /* ── Touch-Friendly Floor Chips Grid ── */
+    .floor-chip-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+    }
+    @media (min-width: 576px) {
+        .floor-chip-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    .floor-chip-label {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        font-weight: 600;
+        border-radius: 50rem !important;
+        border: 1.5px solid var(--border-color, #e2e8f0);
+        color: var(--text-color, #334155);
+        background: transparent;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        user-select: none;
+        cursor: pointer;
+        padding: 0.5rem 0.75rem;
+    }
+
+    .floor-chip-label:hover {
+        background-color: rgba(0, 114, 198, 0.08);
+        border-color: var(--mitwpu-blue, #0072c6);
+        color: var(--mitwpu-blue, #0072c6);
+    }
+
+    .btn-check:checked + .floor-chip-label,
+    .btn-check:checked + .btn-outline-secondary {
+        background-color: var(--mitwpu-blue, #0072c6) !important;
+        border-color: var(--mitwpu-blue, #0072c6) !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0, 114, 198, 0.3) !important;
+    }
+
+    [data-theme="dark"] .floor-chip-label {
+        border-color: rgba(255, 255, 255, 0.15);
+        color: #cbd5e1;
+    }
+
+    [data-theme="dark"] .floor-chip-label:hover {
+        background-color: rgba(37, 99, 235, 0.15);
+        border-color: #3b82f6;
+        color: #60a5fa;
+    }
+
+    [data-theme="dark"] .btn-check:checked + .floor-chip-label,
+    [data-theme="dark"] .btn-check:checked + .btn-outline-secondary {
+        background-color: #2563eb !important;
+        border-color: #2563eb !important;
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45) !important;
+    }
+
+    /* ── Sticky CTA Footer & Prominent Button ── */
+    .offcanvas-sticky-footer {
+        background: var(--bg-card, #ffffff);
+        border-top: 1px solid var(--border-color, #e2e8f0);
+        z-index: 10;
+    }
+
+    [data-theme="dark"] .offcanvas-sticky-footer {
+        background: #1e293b !important;
+        border-top-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .btn-search-prominent {
+        background: linear-gradient(135deg, var(--mitwpu-blue, #0072c6), #005a9e) !important;
+        border: none !important;
+        font-size: 1rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.3px;
+        padding: 0.85rem 1.5rem !important;
+        border-radius: 14px !important;
+        box-shadow: 0 6px 18px rgba(0, 114, 198, 0.35) !important;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+
+    .btn-search-prominent:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 24px rgba(0, 114, 198, 0.45) !important;
+    }
+
+    .btn-search-prominent:active {
+        transform: translateY(0);
+    }
+
+    [data-theme="dark"] .btn-search-prominent {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
     }
 </style>
 {% endblock %}
@@ -962,13 +1385,15 @@
 {% block content %}
 <div class="container-fluid px-4 faculty-dashboard mb-2">
     <div class="row">
-        <!-- Dashboard Sidebar -->
-        <div class="col-lg-3 col-xl-2 mb-4">
-            <div class="faculty-hero">
-                <div class="mb-4">
-                    <h1 class="h3 fw-bold mb-1">Welcome,</h1>
-                    <h2 class="h5 fw-light mb-3">{{ faculty.name }}</h2>
-                    <p class="small opacity-75 mb-0">{{ (my_schedules|length) + (my_adhoc|length) }} sessions this week.</p>
+        <!-- Dashboard Sidebar / Compact Mobile Sticky Header -->
+        <div class="col-lg-3 col-xl-2 mb-3 mb-lg-4 px-0 px-lg-2 faculty-hero-col">
+            <div class="faculty-hero sticky-top">
+                <div class="faculty-hero-greeting mb-1 mb-lg-4">
+                    <h5 class="faculty-name mb-0 fw-bold">
+                        <span class="opacity-75 fw-normal me-1 d-none d-lg-inline">Welcome,</span>
+                        {{ faculty.name }}
+                    </h5>
+                    <p class="small opacity-75 mb-0 d-none d-lg-block">{{ (my_schedules|length) + (my_adhoc|length) }} sessions this week.</p>
                 </div>
 
                 <div class="hero-stats">
@@ -986,23 +1411,16 @@
                             <span class="stat-value">{{ my_adhoc|length }}</span>
                         </div>
                     </div>
-                    <div class="stat-mini-card">
-                        <div class="stat-icon"><i class="bi bi-clock-history"></i></div>
-                        <div class="stat-info">
-                            <span class="stat-label">Time</span>
-                            <span class="stat-value" id="liveTime">00:00</span>
-                        </div>
-                    </div>
                 </div>
 
-                <div class="nav-pills-premium bg-white bg-opacity-10 rounded-4 p-2 mt-4">
-                    <button class="btn rounded-3 px-3 py-2 {% if view == 'schedule' or not view %}active btn-light shadow-sm{% else %}text-white{% endif %} d-flex align-items-center" id="btn-schedule">
+                <div class="nav-pills-premium bg-white bg-opacity-10 rounded-4 p-2 mt-4 d-none d-lg-flex">
+                    <button class="btn rounded-3 px-3 py-2 {% if view == 'schedule' or not view %}active{% endif %} d-flex align-items-center" id="btn-schedule">
                         <i class="bi bi-calendar-check me-2 fs-5"></i>Schedule
                     </button>
-                    <button class="btn rounded-3 px-3 py-2 {% if view == 'tracker' %}active btn-light shadow-sm{% else %}text-white{% endif %} d-flex align-items-center" id="btn-tracker">
+                    <button class="btn rounded-3 px-3 py-2 {% if view == 'tracker' %}active{% endif %} d-flex align-items-center" id="btn-tracker">
                         <i class="bi bi-map me-2 fs-5"></i>Map Tracker
                     </button>
-                    <button class="btn rounded-3 px-3 py-2 text-white d-flex align-items-center" id="btn-history">
+                    <button class="btn rounded-3 px-3 py-2 d-flex align-items-center" id="btn-history">
                         <i class="bi bi-clock-history me-2 fs-5"></i>Booking History
                     </button>
                 </div>
@@ -1023,19 +1441,16 @@
                         <h3 class="fw-bold mb-0">Upcoming Agenda</h3>
                         <p class="text-muted mb-0">Your synchronized teaching schedule across the Vyas building.</p>
                     </div>
+                    {% if session.get('is_admin') %}
                     <div class="d-flex gap-2 w-100 w-md-auto dashboard-header-buttons">
-                        <button class="btn btn-info rounded-pill px-3 py-2 px-md-4 shadow-sm text-white flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#advancedBookingModal" style="font-size: 0.85rem;">
-                            <i class="bi bi-calendar-plus me-1 me-md-2"></i>Book a Class
-                        </button>
-                        {% if session.get('is_admin') %}
                         <button class="btn btn-outline-success rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="font-size: 0.85rem;">
                             <i class="bi bi-file-earmark-spreadsheet me-1 me-md-2"></i>Mass Import Timetable
                         </button>
                         <button class="btn btn-outline-danger rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#deleteTimetableModal" style="font-size: 0.85rem;">
                             <i class="bi bi-trash3 me-1 me-md-2"></i>Delete Timetables
                         </button>
-                        {% endif %}
                     </div>
+                    {% endif %}
                 </div>
 
                 <!-- Ad-Hoc Section -->
@@ -1069,7 +1484,8 @@
                 </div>
 
                 {% if my_schedules %}
-                <div class="table-responsive glass-card border-0 shadow-sm rounded-4 overflow-hidden">
+                <!-- Desktop Table View -->
+                <div class="table-responsive glass-card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block">
                     <table class="table table-bordered timetable-grid mb-0">
                         <thead>
                             <tr>
@@ -1119,9 +1535,9 @@
 
                                         {% if found %}
                                             {% set match = found[0] %}
-                                            <td colspan="{{ match.duration }}" class="timetable-cell occupied" 
+                                            <td colspan="{{ match.duration }}" class="timetable-cell occupied cursor-pointer" 
                                                 onclick="locateRoom('{{ match.room.number }}', '{{ match.room.id }}', '{{ match.room.floor.level }}')">
-                                                <div class="cell-content">
+                                                <div class="cell-content cursor-pointer">
                                                     {% if not match.is_booking %}
                                                         {% if faculty.id %} {# We use JS to delete, ensure faculty matches #}
                                                         <button class="btn-delete-class" onclick="deleteClass(event, '{{ match.id }}')">
@@ -1157,8 +1573,88 @@
                         </tbody>
                     </table>
                 </div>
+
+                <!-- Mobile-Only Card Stack View -->
+                <div class="d-block d-md-none">
+                    {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] %}
+                    {% for day_idx in range(6) %}
+                        {% set day_name = days[day_idx] %}
+                        {% for s in my_schedules %}
+                            {% if s.day_of_week == day_idx and s.start_time and s.end_time %}
+                            <div class="card glass-card border shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" onclick="locateRoom('{{ s.room.number }}', '{{ s.room.id }}', '{{ s.room.floor.level }}')">
+                                <div class="card-body p-3">
+                                    <!-- Floating Status Badge in Top Right -->
+                                    <span class="badge bg-success px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3">
+                                        <i class="bi bi-calendar-check me-1"></i>Regular
+                                    </span>
+                                    
+                                    <!-- Stacked: Subject -->
+                                    <div class="pe-5 mb-2">
+                                        <h6 class="fw-bold mb-1 text-body">{{ s.subject }}</h6>
+                                        {% if s.collaborator %}
+                                        <div class="text-muted small">
+                                            <i class="bi bi-people me-1 text-primary"></i>Co-Faculty: {{ s.collaborator.name }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Stacked: Date / Time -->
+                                    <div class="text-muted small mb-2 d-flex align-items-center">
+                                        <i class="bi bi-clock me-1.5 text-primary"></i>{{ day_name }}, {{ s.start_time.strftime('%I:%M %p') }} - {{ s.end_time.strftime('%I:%M %p') }}
+                                    </div>
+                                    
+                                    <!-- Stacked: Room Pill -->
+                                    <div class="pt-2 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">
+                                            <i class="bi bi-geo-alt-fill me-1 text-primary"></i>Room {{ s.room.number }}
+                                        </span>
+                                        {% if session.get('is_admin') or faculty.id %}
+                                        <button class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" onclick="deleteClass(event, '{{ s.id }}')" title="Delete Class">
+                                            <i class="bi bi-trash3-fill" style="font-size: 0.75rem;"></i>
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% for b in bookings_this_week %}
+                            {% if b.slot_start.weekday() == day_idx %}
+                            <div class="card glass-card border shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" onclick="locateRoom('{{ b.room.number }}', '{{ b.room.id }}', '{{ b.room.floor.level }}')">
+                                <div class="card-body p-3">
+                                    <!-- Floating Status Badge in Top Right -->
+                                    <span class="badge bg-warning text-dark px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3">
+                                        <i class="bi bi-lightning-charge me-1"></i>Ad-Hoc
+                                    </span>
+                                    
+                                    <!-- Stacked: Subject -->
+                                    <div class="pe-5 mb-2">
+                                        <h6 class="fw-bold mb-1 text-body">{{ b.subject }}</h6>
+                                    </div>
+                                    
+                                    <!-- Stacked: Date / Time -->
+                                    <div class="text-muted small mb-2 d-flex align-items-center">
+                                        <i class="bi bi-clock me-1.5 text-warning"></i>{{ day_name }}, {{ b.slot_start.strftime('%I:%M %p') }}
+                                    </div>
+                                    
+                                    <!-- Stacked: Room Pill -->
+                                    <div class="pt-2 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">
+                                            <i class="bi bi-geo-alt-fill me-1 text-primary"></i>Room {{ b.room.number }}
+                                        </span>
+                                        <button class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" onclick="deleteBooking(event, '{{ b.id }}')" title="Delete Booking">
+                                            <i class="bi bi-trash3-fill" style="font-size: 0.75rem;"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endfor %}
+                </div>
                 {% else %}
-                    <div class="text-center py-5 glass-card border-dashed">
+                    <div class="text-center py-5 glass-card border-dashed rounded-4">
                         <i class="bi bi-calendar-x display-4 text-muted mb-3 d-block"></i>
                         <p class="text-muted">No recurring classes found on your schedule.</p>
                     </div>
@@ -1169,7 +1665,7 @@
 
     <!-- Section: Smart Classroom Management (SVG Map) -->
     <div id="view-tracker" class="view-section">
-        <div class="facility-intelligence-header">
+        <div class="facility-intelligence-header sticky-top shadow-sm">
             <div>
                 <h4 class="mb-1 d-flex align-items-center"><i class="bi bi-cpu me-2 text-primary"></i>Smart Classroom Management</h4>
                 <p class="text-muted small mb-0">Real-time room occupancy and automated faculty scheduling.</p>
@@ -1211,7 +1707,8 @@
                     </div>
                 </div>
                 
-                <div class="table-responsive glass-card border shadow-sm rounded-4 overflow-hidden p-3">
+                <!-- Desktop Table View -->
+                <div class="table-responsive glass-card border shadow-sm rounded-4 overflow-hidden p-3 d-none d-md-block">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
@@ -1226,14 +1723,18 @@
                             {% for b in booking_history %}
                             <tr>
                                 <td>{{ b.date.strftime('%d %b %Y') }} at {{ b.slot_start.strftime('%I:%M %p') }}</td>
-                                <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">{{ b.room.number }}</span></td>
+                                <td><span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">{{ b.room.number }}</span></td>
                                 <td class="fw-bold">{{ b.subject }}</td>
                                 <td>{{ b.division or '-' }} / {{ b.course or '-' }}</td>
                                 <td>
-                                    {% if b.status == 'active' %}
-                                    <span class="badge bg-success">Active</span>
+                                    {% if b.status in ['active', 'confirmed', 'Active', 'Confirmed'] %}
+                                    <span class="badge bg-success px-2.5 py-1.5 fw-semibold"><i class="bi bi-check-circle me-1"></i>Active</span>
+                                    {% elif b.status in ['pending', 'Pending'] %}
+                                    <span class="badge bg-warning text-dark px-2.5 py-1.5 fw-semibold"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                                    {% elif b.status in ['cancelled', 'Cancelled'] %}
+                                    <span class="badge bg-danger px-2.5 py-1.5 fw-semibold"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
                                     {% else %}
-                                    <span class="badge bg-danger">Cancelled</span>
+                                    <span class="badge bg-secondary px-2.5 py-1.5 fw-semibold">{{ b.status|capitalize }}</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -1242,6 +1743,55 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Mobile-Only Card Stack View -->
+                <div class="d-block d-md-none">
+                    {% for b in booking_history %}
+                    <div class="card glass-card border shadow-sm rounded-4 mb-3 overflow-hidden position-relative">
+                        <div class="card-body p-3">
+                            <!-- Floating Status Badge in Top Right -->
+                            <div class="position-absolute top-0 end-0 mt-3 me-3">
+                                {% if b.status in ['active', 'confirmed', 'Active', 'Confirmed'] %}
+                                <span class="badge bg-success px-2.5 py-1.5 fw-semibold"><i class="bi bi-check-circle me-1"></i>Active</span>
+                                {% elif b.status in ['pending', 'Pending'] %}
+                                <span class="badge bg-warning text-dark px-2.5 py-1.5 fw-semibold"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                                {% elif b.status in ['cancelled', 'Cancelled'] %}
+                                <span class="badge bg-danger px-2.5 py-1.5 fw-semibold"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                                {% else %}
+                                <span class="badge bg-secondary px-2.5 py-1.5 fw-semibold">{{ b.status|capitalize }}</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Stacked: Subject -->
+                            <div class="pe-5 mb-2">
+                                <h6 class="fw-bold mb-1 text-body">{{ b.subject }}</h6>
+                                {% if b.division or b.course %}
+                                <div class="text-muted small">
+                                    <i class="bi bi-mortarboard me-1"></i>{{ b.division or '-' }} / {{ b.course or '-' }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Stacked: Date / Time -->
+                            <div class="text-muted small mb-2 d-flex align-items-center">
+                                <i class="bi bi-calendar3 me-1.5 text-primary"></i>{{ b.date.strftime('%d %b %Y') }} at {{ b.slot_start.strftime('%I:%M %p') }}
+                            </div>
+
+                            <!-- Stacked: Room Pill -->
+                            <div class="pt-2 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">
+                                    <i class="bi bi-geo-alt-fill me-1 text-primary"></i>Room {{ b.room.number }}
+                                </span>
+                                <small class="text-muted">{{ b.room.floor.name }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="card glass-card border shadow-sm rounded-4 text-center py-5 text-muted">
+                        <i class="bi bi-inbox display-6 d-block mb-2 opacity-50"></i>No booking history found.
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -1462,66 +2012,104 @@
     </div>
 </div>
 
-<!-- Advanced Booking Search Modal -->
-<div class="modal fade" id="advancedBookingModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-search me-2"></i>Find Available Room</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body p-4">
-                <form id="advancedBookingForm">
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Date</label>
-                        <input type="date" class="form-control" id="advDate" required>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Start Time</label>
-                            <select class="form-select" id="advStartTime" required>
-                                {% for h in range(7, 19) %}
-                                <option value="{{ h }}:00">{{ h > 12 and h-12 or h }}:00 {{ h >= 12 and 'PM' or 'AM' }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-6">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Duration</label>
-                            <select class="form-select" id="advDuration" required>
-                                <option value="1">1 Hour</option>
-                                <option value="2">2 Hours</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Preferred Floors</label>
-                        <div class="d-flex flex-wrap gap-2">
-                            {% for floor in floors %}
-                            <div class="form-check">
-                                <input class="form-check-input adv-floor-checkbox" type="checkbox" value="{{ floor.id }}" id="advFloor{{ floor.id }}" checked>
-                                <label class="form-check-label text-body fw-medium" for="advFloor{{ floor.id }}">{{ floor.name }}</label>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Room Type</label>
-                        <select class="form-select" id="advRoomType">
-                            <option value="all">Any Type</option>
-                            <option value="class">Classroom</option>
-                            <option value="lab">Lab</option>
-                        </select>
-                    </div>
-                    <div class="mt-4 pt-2">
-                        <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-bold text-white shadow-sm" id="btnSearchRooms" style="background: var(--mitwpu-blue); border: none;">
-                            <i class="bi bi-search me-2"></i>FIND ROOMS
+<!-- Advanced Booking Search Bottom Sheet (Offcanvas Bottom) -->
+<div class="offcanvas offcanvas-bottom h-auto border-0 shadow-lg d-flex flex-column" tabindex="-1" id="advancedBookingModal" aria-labelledby="advancedBookingModalLabel" style="border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; max-height: 85vh; background: var(--bg-card);">
+    <!-- Centered Drag Handle Indicator -->
+    <div class="d-flex justify-content-center pt-2 pb-1 flex-shrink-0">
+        <div class="drag-handle-pill" style="width: 42px; height: 5px; background: var(--text-muted, #94a3b8); opacity: 0.45; border-radius: 10px;"></div>
+    </div>
+
+    <div class="offcanvas-header border-bottom-0 pt-1 pb-1 px-4 flex-shrink-0">
+        <h5 class="offcanvas-title fw-bold text-primary mb-0" id="advancedBookingModalLabel">
+            <i class="bi bi-calendar-plus me-2"></i>Ad-Hoc Room Request
+        </h5>
+    </div>
+    
+    <form id="advancedBookingForm" class="d-flex flex-column flex-grow-1 overflow-hidden m-0">
+        <!-- Scrollable Body with overflow-y-auto -->
+        <div class="offcanvas-body p-4 pt-2 flex-grow-1 overflow-y-auto" style="max-height: calc(85vh - 130px);">
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label text-muted small fw-bold text-uppercase mb-0">Date</label>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-1 px-2.5" id="btnQuickDateToday" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">
+                            <i class="bi bi-calendar-event me-1"></i>Today
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-1 px-2.5" id="btnQuickDateTomorrow" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">
+                            <i class="bi bi-calendar-plus me-1"></i>Tomorrow
                         </button>
                     </div>
-                </form>
+                </div>
+                <input type="date" class="form-control" id="advDate" required>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Start Time</label>
+                    <select class="form-select" id="advStartTime" required>
+                        {% for h in range(7, 19) %}
+                        <option value="{{ h }}:00">{{ h > 12 and h-12 or h }}:00 {{ h >= 12 and 'PM' or 'AM' }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-6">
+                    <label class="form-label text-muted small fw-bold text-uppercase">Duration</label>
+                    <select class="form-select" id="advDuration" required>
+                        <option value="1">1 Hour</option>
+                        <option value="2">2 Hours</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-muted small fw-bold text-uppercase mb-2">Preferred Floors</label>
+                <div class="floor-chip-grid">
+                    {% for floor in floors %}
+                    <input type="checkbox" class="btn-check adv-floor-checkbox" id="advFloor{{ floor.id }}" value="{{ floor.id }}" autocomplete="off" checked>
+                    <label class="btn btn-outline-secondary floor-chip-label" for="advFloor{{ floor.id }}">
+                        {{ floor.name }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="mb-2">
+                <label class="form-label text-muted small fw-bold text-uppercase">Room Type</label>
+                <select class="form-select" id="advRoomType">
+                    <option value="all">Any Type</option>
+                    <option value="class">Classroom</option>
+                    <option value="lab">Lab</option>
+                </select>
             </div>
         </div>
-    </div>
+
+        <!-- Sticky Call to Action Footer -->
+        <div class="p-3 px-4 offcanvas-sticky-footer flex-shrink-0 sticky-bottom shadow-sm">
+            <button type="submit" class="btn btn-primary w-100 btn-search-prominent d-flex align-items-center justify-content-center gap-2 text-white" id="btnSearchRooms">
+                <i class="bi bi-search fs-6"></i>
+                <span>Search Availability</span>
+            </button>
+        </div>
+    </form>
 </div>
+
+<!-- Floating Action Button (FAB) for Ad-Hoc Room Request -->
+<button class="faculty-fab shadow-lg" data-bs-toggle="offcanvas" data-bs-target="#advancedBookingModal" id="fabBookClass" aria-label="Request Ad-Hoc Room" title="Request Ad-Hoc Room">
+    <i class="bi bi-plus-lg"></i>
+</button>
+
+<!-- Native Bottom Navigation Bar (Mobile Viewport Only) -->
+<nav class="faculty-bottom-nav position-fixed bottom-0 start-0 end-0 w-100 d-flex d-lg-none justify-content-around align-items-center" style="z-index: 1050;" aria-label="Mobile Navigation">
+    <button class="bottom-nav-btn {% if view == 'schedule' or not view %}active{% endif %}" id="btn-bottom-agenda" type="button" aria-label="Agenda View">
+        <i class="bi bi-calendar-check"></i>
+        <span>Agenda</span>
+    </button>
+    <button class="bottom-nav-btn {% if view == 'tracker' %}active{% endif %}" id="btn-bottom-map" type="button" aria-label="Map View">
+        <i class="bi bi-map"></i>
+        <span>Map</span>
+    </button>
+    <button class="bottom-nav-btn" id="btn-bottom-history" type="button" aria-label="Booking History View">
+        <i class="bi bi-clock-history"></i>
+        <span>History</span>
+    </button>
+</nav>
 
 {% endblock %}
 
@@ -1538,13 +2126,16 @@
             // Current logged-in user ID (read from meta tag to keep Jinja out of JS module scope)
             const currentUserId = JSON.parse(document.querySelector('meta[name="current-user-id"]').content);
 
-            // Live Clock for Hero
-            function updateClock() {
-                const now = new Date();
-                document.getElementById('liveTime').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            // Live Clock for Hero (if element is present)
+            const liveTimeEl = document.getElementById('liveTime');
+            if (liveTimeEl) {
+                function updateClock() {
+                    const now = new Date();
+                    liveTimeEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                }
+                setInterval(updateClock, 1000);
+                updateClock();
             }
-            setInterval(updateClock, 1000);
-            updateClock();
 
             // Staggered Entry Animation
             if (window.gsap) {
@@ -1566,22 +2157,40 @@
             // Setup GSAP View Switching
             const btnSchedule = document.getElementById('btn-schedule');
             const btnTracker = document.getElementById('btn-tracker');
+            const btnHistory = document.getElementById('btn-history');
+
+            const btnBottomAgenda = document.getElementById('btn-bottom-agenda');
+            const btnBottomMap = document.getElementById('btn-bottom-map');
+            const btnBottomHistory = document.getElementById('btn-bottom-history');
+
             const viewSchedule = document.getElementById('view-schedule');
             const viewTracker = document.getElementById('view-tracker');
+            const viewHistory = document.getElementById('view-history');
             
             gsap.set(viewTracker, { display: 'none', opacity: 0 });
+            if (viewHistory) gsap.set(viewHistory, { display: 'none', opacity: 0 });
             
-            function switchView(fromView, toView, btnActive) {
+            function switchView(fromView, toView, tabKey) {
                 if (!fromView || !toView || toView.classList.contains('active')) return;
                 
-                // Update buttons
+                // Update desktop buttons
                 document.querySelectorAll('.nav-pills-premium .btn').forEach(btn => {
-                    btn.classList.remove('active', 'btn-light');
-                    btn.classList.add('text-white');
+                    btn.classList.remove('active');
                 });
-                if(btnActive) {
-                    btnActive.classList.add('active', 'btn-light');
-                    btnActive.classList.remove('text-white');
+                // Update mobile bottom nav buttons
+                document.querySelectorAll('.bottom-nav-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+
+                if (tabKey === 'schedule' || tabKey === 'agenda') {
+                    if (btnSchedule) btnSchedule.classList.add('active');
+                    if (btnBottomAgenda) btnBottomAgenda.classList.add('active');
+                } else if (tabKey === 'tracker' || tabKey === 'map') {
+                    if (btnTracker) btnTracker.classList.add('active');
+                    if (btnBottomMap) btnBottomMap.classList.add('active');
+                } else if (tabKey === 'history') {
+                    if (btnHistory) btnHistory.classList.add('active');
+                    if (btnBottomHistory) btnBottomHistory.classList.add('active');
                 }
                 
                 const onTransitionComplete = () => {
@@ -1607,24 +2216,35 @@
                 }
             }
 
-            btnSchedule.addEventListener('click', () => {
-                switchView(document.querySelector('.view-section.active'), viewSchedule, btnSchedule);
-            });
+            if (btnSchedule) {
+                btnSchedule.addEventListener('click', () => {
+                    switchView(document.querySelector('.view-section.active'), viewSchedule, 'schedule');
+                });
+            }
+            if (btnBottomAgenda) {
+                btnBottomAgenda.addEventListener('click', () => {
+                    switchView(document.querySelector('.view-section.active'), viewSchedule, 'schedule');
+                });
+            }
             
-            btnTracker.addEventListener('click', () => {
-                switchView(document.querySelector('.view-section.active'), viewTracker, btnTracker);
-                // Initialize Map only on first click or forcefully refresh
+            function activateTrackerView() {
+                switchView(document.querySelector('.view-section.active'), viewTracker, 'tracker');
                 if (!window.mapInitialized) {
                     refreshMapStatus(4);
                     window.mapInitialized = true;
                 }
-            });
+            }
+            if (btnTracker) btnTracker.addEventListener('click', activateTrackerView);
+            if (btnBottomMap) btnBottomMap.addEventListener('click', activateTrackerView);
             
-            const btnHistory = document.getElementById('btn-history');
-            const viewHistory = document.getElementById('view-history');
-            if(btnHistory) {
+            if (btnHistory) {
                 btnHistory.addEventListener('click', () => {
-                    switchView(document.querySelector('.view-section.active'), viewHistory, btnHistory);
+                    switchView(document.querySelector('.view-section.active'), viewHistory, 'history');
+                });
+            }
+            if (btnBottomHistory) {
+                btnBottomHistory.addEventListener('click', () => {
+                    switchView(document.querySelector('.view-section.active'), viewHistory, 'history');
                 });
             }
 
@@ -1700,17 +2320,30 @@
 
             function applyOccupancyStyling() {
                 Object.values(currentStatusData).forEach(room => {
-                    const el = document.querySelector(`g[data-room-id="${room.id}"] rect`);
-                    if (el) {
-                        const occ = room.occupancy || { status: 'vacant' };
-                        if (occ.status === 'occupied') {
+                    const roomNum = room.number;
+                    const roomId = room.id;
+                    const occ = room.occupancy || { status: 'vacant' };
+                    const isOccupied = (occ.status === 'occupied');
+
+                    // Match all shapes and groups for this room across ID and number
+                    const elements = document.querySelectorAll(
+                        `g[data-room-id="${roomId}"], g[data-room="${roomNum}"], [data-room-id="${roomId}"].room-poly, [data-room="${roomNum}"].room-poly, #${roomNum}, #${roomNum.toLowerCase()}, #${roomNum.toUpperCase()}`
+                    );
+
+                    elements.forEach(el => {
+                        const target = el.classList.contains('room-poly') ? el : (el.querySelector('.room-poly, rect, path:not([id*="_label"]), polygon') || el);
+                        if (isOccupied) {
+                            target.classList.add('occupied-status');
+                            target.classList.remove('vacant-status');
                             el.classList.add('occupied-status');
                             el.classList.remove('vacant-status');
                         } else {
+                            target.classList.add('vacant-status');
+                            target.classList.remove('occupied-status');
                             el.classList.add('vacant-status');
                             el.classList.remove('occupied-status');
                         }
-                    }
+                    });
                 });
             }
 
@@ -1720,13 +2353,11 @@
                 if (!info) return;
 
                 // Highlight selection
-                document.querySelectorAll('.room-group, rect').forEach(r => r.classList.remove('selected'));
-                const group = document.querySelector(`g[data-room-id="${roomId}"]`);
-                if (group) {
-                    group.classList.add('selected');
-                    const rect = group.querySelector('rect');
-                    if (rect) rect.classList.add('selected');
-                }
+                document.querySelectorAll('.room-group, .room-poly, rect, path, polygon').forEach(r => r.classList.remove('selected'));
+                const elements = document.querySelectorAll(
+                    `g[data-room-id="${roomId}"], g[data-room="${roomNumber}"], [data-room-id="${roomId}"].room-poly, [data-room="${roomNumber}"].room-poly, #${roomNumber}, #${roomNumber.toLowerCase()}, #${roomNumber.toUpperCase()}`
+                );
+                elements.forEach(el => el.classList.add('selected'));
                 
                 // Static Side Position
                 const pop = document.getElementById('roomPopUp');
@@ -1925,6 +2556,41 @@
                 }
             });
 
+            // Quick-Select Date Pills (Today & Tomorrow)
+            const btnQuickToday = document.getElementById('btnQuickDateToday');
+            const btnQuickTomorrow = document.getElementById('btnQuickDateTomorrow');
+            const advDateInput = document.getElementById('advDate');
+
+            function formatDateToYMD(d) {
+                const year = d.getFullYear();
+                const month = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            }
+
+            if (advDateInput) {
+                // Pre-populate with today if empty
+                if (!advDateInput.value) {
+                    advDateInput.value = formatDateToYMD(new Date());
+                }
+                
+                if (btnQuickToday) {
+                    btnQuickToday.addEventListener('click', () => {
+                        advDateInput.value = formatDateToYMD(new Date());
+                        advDateInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                }
+
+                if (btnQuickTomorrow) {
+                    btnQuickTomorrow.addEventListener('click', () => {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        advDateInput.value = formatDateToYMD(tomorrow);
+                        advDateInput.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                }
+            }
+
             // Advanced Booking Form Submit
             const advForm = document.getElementById('advancedBookingForm');
             if(advForm) {
@@ -1960,7 +2626,11 @@
                         timeStr: time
                     };
                     
-                    try { bootstrap.Modal.getInstance(document.getElementById('advancedBookingModal')).hide(); } catch(err){}
+                    try { 
+                        const offcanvasEl = document.getElementById('advancedBookingModal');
+                        const offcanvasInst = bootstrap.Offcanvas.getInstance(offcanvasEl) || bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
+                        if (offcanvasInst) offcanvasInst.hide();
+                    } catch(err){}
                     
                     btnTracker.click();
                     

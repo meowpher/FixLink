@@ -78,6 +78,12 @@ export function selectRoom(event, roomNumber, roomId, roomName, roomType) {
         `;
     }
 
+    // Defensive Form UI: remove disabled state once a valid room is selected
+    const formBody = document.getElementById('reportFormBody');
+    if (formBody) {
+        formBody.classList.remove('form-disabled');
+    }
+
     // Highlight on map
     document.querySelectorAll('.room-group, .room-poly').forEach(el => el.classList.remove('selected'));
     const roomElements = document.querySelectorAll(`[data-room="${roomNumber}"], [data-room-id="${roomId}"]`);
@@ -213,6 +219,13 @@ export function resetRoomSelection() {
     const display = document.getElementById('selectedRoomDisplay');
 
     if (roomInput) roomInput.value = '';
+    
+    // Defensive Form UI: reinstate disabled state when room selection is reset
+    const formBody = document.getElementById('reportFormBody');
+    if (formBody) {
+        formBody.classList.add('form-disabled');
+    }
+
     if (display) {
         display.innerHTML = `
             <div class="room-placeholder">

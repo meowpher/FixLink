@@ -297,10 +297,8 @@ FLOOR_DEFINITIONS = {
         {'number': 'VY6Lift8', 'type': 'lift', 'name': 'Lift 8'},
     ],
     7: [
-        # Faculty
-        {'number': 'VY707', 'type': 'faculty', 'name': 'Faculty Room 707'},
-
-        # Kitchens
+        # Bar & Kitchens
+        {'number': 'VY707', 'type': Room.ROOM_TYPE_BAR, 'name': 'Bar 707'},
         {'number': 'VY706', 'type': Room.ROOM_TYPE_KITCHEN, 'name': 'Main Kitchen 706'},
         {'number': 'VY712', 'type': Room.ROOM_TYPE_KITCHEN, 'name': 'Pastry Kitchen 712'},
         {'number': 'VY713', 'type': Room.ROOM_TYPE_KITCHEN, 'name': 'Kitchen 713'},
@@ -408,7 +406,7 @@ def sync_single_floor(level, definitions):
                     {'name': 'Video Conferencing Kit', 'type': 'camera'},
                     {'name': 'AC Unit', 'type': 'ac'},
                 ]
-            elif room.room_type == Room.ROOM_TYPE_KITCHEN:
+            elif room.room_type in [Room.ROOM_TYPE_KITCHEN, Room.ROOM_TYPE_BAR]:
                 asset_defs = [
                     {'name': 'Commercial Stove', 'type': 'stove'},
                     {'name': 'Industrial Exhaust System', 'type': 'exhaust'},

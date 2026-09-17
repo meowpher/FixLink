@@ -150,6 +150,9 @@ def report_form():
         floors = Floor.query.filter_by(building_id=building.id).order_by(Floor.level).all()
         selected_building = building.id
         
+        if not selected_floor and floors:
+            selected_floor = floors[0].id
+        
         if selected_floor:
             from ...cache import get_cached_floor_data
             rooms_data = get_cached_floor_data(selected_floor)

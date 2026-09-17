@@ -114,6 +114,19 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
                 }
 
                 if (containerEl) {
+                    // Mark non-shape child elements inside container as labels so CSS styling doesn't corrupt them
+                    if (shapeEl && containerEl.children) {
+                        Array.from(containerEl.children).forEach(child => {
+                            if (child !== shapeEl) {
+                                if (!child.id || !child.id.includes('_label')) {
+                                    child.setAttribute('id', (child.id || roomNum) + '_label');
+                                }
+                                child.classList.add('room-label');
+                                child.style.pointerEvents = 'none';
+                            }
+                        });
+                    }
+
                     // Set classes and attributes on container (Rule 2: Base .interactive-room + pointer-events: auto)
                     containerEl.classList.add('room-group', 'interactive-room');
                     containerEl.setAttribute('data-room', roomNum);
@@ -129,47 +142,46 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
                         containerEl.classList.add('room-poly', 'svg-room-interactive');
                     }
 
-                    // Rule 2: Strip hardcoded inline fill & stroke from SVG imports (unless special branding)
-                    if (shapeEl && roomNum.toLowerCase() !== 'encave') {
+                    // Standardize fills: Strip any hardcoded inline fill, stroke, and style
+                    if (shapeEl) {
                         shapeEl.removeAttribute('fill');
                         shapeEl.removeAttribute('stroke');
+                        shapeEl.removeAttribute('style');
+                    }
+                    if (containerEl && containerEl !== shapeEl) {
+                        containerEl.removeAttribute('fill');
+                        containerEl.removeAttribute('stroke');
                     }
 
-                    // Apply semantic class category (Rule 2)
+                    // Apply semantic class category
                     const targetForFill = (shapeEl && shapeEl !== containerEl) ? shapeEl : containerEl;
                     if (type === 'class') {
-                        targetForFill.classList.add('fill-blue', 'classroom');
-                        containerEl.classList.add('classroom');
+                        targetForFill.classList.add('fill-blue', 'classroom', 'room-classroom', 'class');
+                        containerEl.classList.add('classroom', 'room-classroom', 'class');
                     } else if (type === 'lab') {
-                        targetForFill.classList.add('fill-teal', 'lab');
-                        containerEl.classList.add('lab');
+                        targetForFill.classList.add('fill-teal', 'lab', 'room-lab');
+                        containerEl.classList.add('lab', 'room-lab');
                     } else if (type === 'washroom') {
-                        targetForFill.classList.add('fill-red', 'washroom');
-                        containerEl.classList.add('washroom');
+                        targetForFill.classList.add('fill-red', 'washroom', 'room-washroom');
+                        containerEl.classList.add('washroom', 'room-washroom');
                     } else if (type === 'faculty' || type === 'faculty_room') {
-                        targetForFill.classList.add('fill-orange', 'faculty-room', 'faculty');
-                        containerEl.classList.add('faculty-room', 'faculty');
+                        targetForFill.classList.add('fill-orange', 'faculty-room', 'faculty', 'room-faculty');
+                        containerEl.classList.add('faculty-room', 'faculty', 'room-faculty');
                     } else if (type === 'lift') {
-                        targetForFill.classList.add('fill-pink', 'lift');
-                        containerEl.classList.add('lift');
-                    } else if (type === 'kitchen') {
-                        targetForFill.classList.add('fill-orange', 'kitchen');
-                        containerEl.classList.add('kitchen');
+                        targetForFill.classList.add('fill-pink', 'lift', 'room-lift');
+                        containerEl.classList.add('lift', 'room-lift');
+                    } else if (type === 'kitchen' || type === 'bar') {
+                        targetForFill.classList.add('fill-kitchen', 'kitchen', 'bar', 'room-kitchen', 'room-bar');
+                        containerEl.classList.add('kitchen', 'bar', 'room-kitchen', 'room-bar');
                     } else if (type === 'canteen' || type === 'encave' || roomNum.toLowerCase() === 'encave') {
-                        targetForFill.classList.add('fill-darkgreen', 'canteen', 'encave');
-                        containerEl.classList.add('canteen', 'encave');
-                        targetForFill.style.setProperty('fill', '#023F24', 'important');
-                        if (shapeEl) shapeEl.style.setProperty('fill', '#023F24', 'important');
-                        if (containerEl) {
-                            const label = containerEl.querySelector('[id$="_label"], text, path:not(#encave)');
-                            if (label) label.style.setProperty('fill', '#ffffff', 'important');
-                        }
+                        targetForFill.classList.add('fill-encave', 'canteen', 'encave', 'room-canteen', 'room-encave');
+                        containerEl.classList.add('canteen', 'encave', 'room-canteen', 'room-encave');
                     } else if (type === 'conference' || type === 'conference_room') {
-                        targetForFill.classList.add('fill-purple', 'conference-room', 'conference');
-                        containerEl.classList.add('conference-room', 'conference');
+                        targetForFill.classList.add('fill-purple', 'conference-room', 'conference', 'room-conference');
+                        containerEl.classList.add('conference-room', 'conference', 'room-conference');
                     } else if (type === 'meeting' || type === 'meeting_room') {
-                        targetForFill.classList.add('fill-indigo', 'meeting-room', 'meeting');
-                        containerEl.classList.add('meeting-room', 'meeting');
+                        targetForFill.classList.add('fill-cyan', 'meeting-room', 'meeting', 'room-meeting');
+                        containerEl.classList.add('meeting-room', 'meeting', 'room-meeting');
                     } else if (type === 'unavailable') {
                         targetForFill.style.opacity = '0.5';
                     }

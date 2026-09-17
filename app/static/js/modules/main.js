@@ -7,19 +7,11 @@ import * as render from './render.js';
 import * as ui from './ui.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    // Defer heavy DOM manipulation (like SVG rendering) to avoid blocking initial paint and causing forced reflows
-    const runHeavyInit = () => {
-        initializeFloorMap();
-        initializeReportForm();
-        initializeValidation();
+    initializeFloorMap();
+    initializeReportForm();
+    initializeValidation();
+    if (ui && ui.initializeIssueDropdown) {
         ui.initializeIssueDropdown();
-    };
-
-    if ('requestIdleCallback' in window) {
-        requestIdleCallback(runHeavyInit, { timeout: 1000 });
-    } else {
-        setTimeout(runHeavyInit, 100);
     }
 });
 
@@ -37,13 +29,13 @@ function initializeFloorMap() {
         const floorId = this.value;
         const option = this.options[this.selectedIndex];
         
-        if (!floorId) {
+        if (!floorId || !option) {
             renderPlaceholder(floorMapContainer);
             return;
         }
 
         try {
-                if (!hasLoadedInitialData && window.initialRoomsData && floorId == window.preSelectedFloor) {
+            if (!hasLoadedInitialData && window.initialRoomsData && floorId == window.preSelectedFloor) {
                 hasLoadedInitialData = true;
                 render.renderFloorMap(floorMapContainer, window.initialRoomsData, option.dataset.level, false, true);
             } else {
@@ -56,9 +48,14 @@ function initializeFloorMap() {
         }
     });
 
-    // Handle pre-selection (Flask injection)
+    // Handle pre-selection (Flask injection or first available floor)
     if (typeof window.preSelectedFloor !== 'undefined' && window.preSelectedFloor) {
         floorSelect.value = window.preSelectedFloor;
+        floorSelect.dispatchEvent(new Event('change'));
+    } else if (floorSelect.value) {
+        floorSelect.dispatchEvent(new Event('change'));
+    } else if (floorSelect.options.length > 1) {
+        floorSelect.selectedIndex = 1;
         floorSelect.dispatchEvent(new Event('change'));
     }
 }
@@ -111,7 +108,7 @@ function initializeReportForm() {
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:0.5rem"><i class="bi bi-send-fill"></i>Submit Report</span>';
+                submitBtn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:0.5rem"><i class="bi bi-send-fill"></i>Submit Issue Report</span>';
             }
         }
     });
@@ -126,6 +123,17 @@ function initializeValidation() {
         prnInput.addEventListener('input', function() {
             this.value = this.value.replace(/[^0-9]/g, '');
         });
+    }
+
+    // Defensive Form UI initialization: sync disabled state based on room_id presence
+    const roomIdInput = document.getElementById('room_id');
+    const formBody = document.getElementById('reportFormBody');
+    if (formBody) {
+        if (roomIdInput && roomIdInput.value && roomIdInput.value.trim() !== '') {
+            formBody.classList.remove('form-disabled');
+        } else {
+            formBody.classList.add('form-disabled');
+        }
     }
 }
 

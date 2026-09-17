@@ -168,21 +168,24 @@
         border: 1px solid var(--border-color, #e2e8f0);
         border-radius: var(--border-radius-lg, 16px);
         box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
-        padding: 1.25rem 0.9rem;
+        padding: 1rem 0.75rem;
         position: sticky;
         top: 90px;
+        max-height: calc(100vh - 110px);
+        overflow-y: auto;
+        scrollbar-width: thin;
         transition: all 0.25s ease;
     }
 
     .floor-sidebar-title {
-        font-size: 0.82rem;
+        font-size: 0.78rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.75px;
         color: var(--text-muted, #64748b);
-        padding: 0 0.5rem 0.75rem 0.5rem;
+        padding: 0 0.4rem 0.6rem 0.4rem;
         border-bottom: 1px solid var(--border-color, #e2e8f0);
-        margin-bottom: 0.75rem;
+        margin-bottom: 0.6rem;
         display: flex;
         align-items: center;
     }
@@ -190,21 +193,21 @@
     .floor-sidebar-nav {
         display: flex;
         flex-direction: column;
-        gap: 0.4rem;
+        gap: 0.3rem;
     }
 
     .floor-sidebar-btn {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0.75rem 1rem;
+        padding: 0.55rem 0.85rem;
         background: transparent;
         border: 1px solid transparent;
         border-radius: 8px;
         text-decoration: none;
         color: var(--text-main, #334155);
         font-weight: 500;
-        font-size: 0.92rem;
+        font-size: 0.88rem;
         transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
     }
 
@@ -270,6 +273,98 @@
         box-shadow: none !important;
     }
 
+    /* ── Sidebar Map Legend Accordion Styling ── */
+    #mapLegendAccordion .accordion-item {
+        background: transparent !important;
+        border: none !important;
+    }
+
+    #mapLegendAccordion .accordion-button {
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.65rem 0.85rem;
+        border-radius: 8px !important;
+        background-color: var(--bg-card, rgba(0, 0, 0, 0.03));
+        color: var(--text-main, #334155);
+        border: 1px solid var(--border-color, #e2e8f0);
+        box-shadow: none !important;
+        transition: all 0.2s ease;
+    }
+
+    #mapLegendAccordion .accordion-button:not(.collapsed) {
+        background-color: rgba(11, 77, 140, 0.08);
+        color: var(--mitwpu-blue, #0b4d8c);
+        border-color: rgba(11, 77, 140, 0.2);
+    }
+
+    #mapLegendAccordion .accordion-button::after {
+        background-size: 0.75rem;
+        width: 0.75rem;
+        height: 0.75rem;
+    }
+
+    #mapLegendAccordion .accordion-body {
+        padding: 0.85rem 0.5rem 0.25rem 0.5rem;
+    }
+
+    /* Dark Mode Accordion Theme Override */
+    [data-theme="dark"] #mapLegendAccordion .accordion-button,
+    [data-bs-theme="dark"] #mapLegendAccordion .accordion-button {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        color: var(--text-body, #e2e8f0) !important;
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.12)) !important;
+    }
+
+    [data-theme="dark"] #mapLegendAccordion .accordion-button:not(.collapsed),
+    [data-bs-theme="dark"] #mapLegendAccordion .accordion-button:not(.collapsed) {
+        background-color: rgba(255, 255, 255, 0.1) !important;
+        color: #ffffff !important;
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.2)) !important;
+    }
+
+    [data-theme="dark"] #mapLegendAccordion .accordion-button::after,
+    [data-bs-theme="dark"] #mapLegendAccordion .accordion-button::after {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+
+    .legend-box {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
+    .legend-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        box-sizing: border-box;
+    }
+
+    .legend-label {
+        font-size: 0.82rem;
+        font-weight: 500;
+        color: var(--text-main, #334155);
+        transition: color 0.15s ease;
+    }
+
+    .legend-heading {
+        color: var(--text-muted, #64748b);
+    }
+
+    /* Dark Mode High-Contrast Text */
+    [data-theme="dark"] .legend-label,
+    [data-bs-theme="dark"] .legend-label {
+        color: #f1f5f9 !important;
+    }
+
+    [data-theme="dark"] .legend-heading,
+    [data-bs-theme="dark"] .legend-heading {
+        color: #94a3b8 !important;
+    }
+
     @media (max-width: 767px) {
         .floor-sidebar-panel {
             position: static;
@@ -316,70 +411,11 @@
     </div>
 </section>
 
-<!-- Status Legend -->
-<section class="status-legend-section">
-    <div class="container">
-        <div class="legend-bar">
-            <div class="legend-group">
-                <span class="legend-title">Status:</span>
-                <span class="legend-item">
-                    <span class="legend-dot normal"></span>
-                    <span>Normal</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-dot issue"></span>
-                    <span>Issue Reported</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-dot" style="background-color: #ffc107;"></span>
-                    <span>Issue In Progress</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-dot" style="background-color: #0d6efd;"></span>
-                    <span>Assigned</span>
-                </span>
-            </div>
-            <span class="legend-divider"></span>
-            <div class="legend-group">
-                <span class="legend-title">Room Types:</span>
-                <span class="legend-item">
-                    <span class="legend-box class"></span>
-                    <span>Classroom</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-box lab"></span>
-                    <span>Lab</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-box washroom"></span>
-                    <span>Washroom</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-box faculty"></span>
-                    <span>Faculty</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-box conference"></span>
-                    <span>Conference Room</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-box meeting"></span>
-                    <span>Meeting Room</span>
-                </span>
-                <span class="legend-item">
-                    <span class="legend-box encave"></span>
-                    <span>Encave</span>
-                </span>
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Floor Map Section with Vertical Floor Navigation -->
 <section class="floor-map-section py-4">
     <div class="container-fluid px-lg-4 px-3">
         <div class="row g-4">
-            <!-- Left Side: Vertical Floor List -->
+            <!-- Left Side: Vertical Floor List & Legend Sidebar -->
             <div class="col-xl-2 col-lg-3 col-md-3">
                 <aside class="floor-sidebar-panel">
                     <div class="floor-sidebar-title">
@@ -394,6 +430,84 @@
                         </a>
                         {% endfor %}
                     </nav>
+
+                    <!-- Collapsible Map Legend Accordion -->
+                    <div class="accordion mt-3" id="mapLegendAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingMapLegend">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMapLegend" aria-expanded="false" aria-controls="collapseMapLegend">
+                                    <i class="bi bi-palette me-2 text-primary"></i>Map Legend
+                                </button>
+                            </h2>
+                            <div id="collapseMapLegend" class="accordion-collapse collapse" aria-labelledby="headingMapLegend" data-bs-parent="#mapLegendAccordion">
+                                <div class="accordion-body">
+                                    <!-- Status Section -->
+                                    <div class="legend-section mb-3">
+                                        <div class="fw-bold text-uppercase mb-2 legend-heading" style="font-size: 0.68rem; letter-spacing: 0.05em;">Status</div>
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-dot normal me-2"></span>
+                                                <span class="legend-label">Normal</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-dot issue me-2"></span>
+                                                <span class="legend-label">Issue Reported</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-dot me-2" style="background-color: rgba(234, 179, 8, 0.2); border: 1.5px solid #eab308;"></span>
+                                                <span class="legend-label">Issue In Progress</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-dot me-2" style="background-color: rgba(37, 99, 235, 0.2); border: 1.5px solid #3b82f6;"></span>
+                                                <span class="legend-label">Assigned</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-2 opacity-25">
+
+                                    <!-- Room Types Section -->
+                                    <div class="legend-section">
+                                        <div class="fw-bold text-uppercase mb-2 legend-heading" style="font-size: 0.68rem; letter-spacing: 0.05em;">Room Types</div>
+                                        <div class="d-flex flex-column">
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-box class room-classroom me-2"></span>
+                                                <span class="legend-label">Classroom</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-box lab room-lab me-2"></span>
+                                                <span class="legend-label">Lab</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-box washroom room-washroom me-2"></span>
+                                                <span class="legend-label">Washroom</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-box faculty room-faculty me-2"></span>
+                                                <span class="legend-label">Faculty</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-box conference room-conference me-2"></span>
+                                                <span class="legend-label">Conference Room</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-box meeting room-meeting me-2"></span>
+                                                <span class="legend-label">Meeting Room</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-box encave room-encave me-2"></span>
+                                                <span class="legend-label">Encave</span>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span class="legend-box kitchen room-kitchen me-2"></span>
+                                                <span class="legend-label">Kitchen / Bar</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </aside>
             </div>
 

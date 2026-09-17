@@ -24,11 +24,11 @@
 
     <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=11.0" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=12.0" as="style">
 
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=11.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=12.0">
 
     <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -72,9 +72,10 @@
     ══════════════════════════════════════════════════════ -->
     <div id="mobile-top-bar" class="d-md-none">
         <div class="top-bar-left">
-            {% if not (session.get('professional_id') or session.get('is_super_admin') or request.blueprint == 'superadmin' or (request.endpoint and (
+            {% if not (session.get('professional_id') or session.get('is_super_admin') or request.blueprint == 'superadmin' or request.blueprint == 'faculty' or (request.endpoint and (
                 request.endpoint.startswith('professional.') or
                 request.endpoint.startswith('superadmin.') or
+                request.endpoint.startswith('faculty.') or
                 request.endpoint.endswith('.login') or 
                 request.endpoint == 'admin.dashboard' or 
                 request.endpoint == 'admin.status_map' or 

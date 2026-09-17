@@ -148,11 +148,12 @@ class Room(db.Model):
     ROOM_TYPE_WASHROOM = 'washroom'
     ROOM_TYPE_STORAGE = 'storage'
     ROOM_TYPE_KITCHEN = 'kitchen'
+    ROOM_TYPE_BAR = 'bar'
     ROOM_TYPE_CONFERENCE = 'conference_room'
     ROOM_TYPE_MEETING = 'meeting_room'
     ROOM_TYPE_OTHER = 'other'
     
-    ROOM_TYPES = [ROOM_TYPE_CLASSROOM, ROOM_TYPE_LAB, ROOM_TYPE_WASHROOM, ROOM_TYPE_STORAGE, ROOM_TYPE_KITCHEN, ROOM_TYPE_CONFERENCE, ROOM_TYPE_MEETING, ROOM_TYPE_OTHER]
+    ROOM_TYPES = [ROOM_TYPE_CLASSROOM, ROOM_TYPE_LAB, ROOM_TYPE_WASHROOM, ROOM_TYPE_STORAGE, ROOM_TYPE_KITCHEN, ROOM_TYPE_BAR, ROOM_TYPE_CONFERENCE, ROOM_TYPE_MEETING, ROOM_TYPE_OTHER]
     
     id = db.Column(db.Integer, primary_key=True)
     floor_id = db.Column(db.Integer, db.ForeignKey('floors.id'), nullable=False)

@@ -14,18 +14,20 @@
         box-shadow: none !important;
     }
     
-    /* Hide mobile hamburger menu */
-    #mobileMenuBtn {
+    /* Hide mobile hamburger menu, bottom nav, and floating bug button */
+    #mobileMenuBtn, #mobile-bottom-nav, #floatingBugTrigger, .floating-bug-trigger {
         display: none !important;
     }
     
-    /* Hide Login/Signup/Report links in the navbar, leaving only the theme toggle */
+    /* Hide Login/Signup/Report links in navbar and top bar, leaving only the theme toggle */
     .vyas-navbar .nav-item a[href*="/login"],
     .vyas-navbar .nav-item a[href*="/signup"],
     .vyas-navbar .nav-item a[href*="/report"],
     .nav-capsule .nav-item a[href*="/login"],
     .nav-capsule .nav-item a[href*="/signup"],
-    .nav-capsule .nav-item a[href*="/report"] {
+    .nav-capsule .nav-item a[href*="/report"],
+    #mobile-top-bar a[href*="/login"],
+    .top-bar-icon-btn[href*="/login"] {
         display: none !important;
     }
     
@@ -192,7 +194,6 @@
         background-color: #080808 !important;
         background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.02%22/%3E%3C/svg%3E') !important;
         color: #ffffff;
-        overflow: hidden !important;
     }
     
     
@@ -309,10 +310,6 @@
         filter: invert(1) grayscale(100%) brightness(200%);
     }
 
-    body {
-        overflow: hidden !important;
-    }
-
     /* Password Eye Button */
     .glass-login-card .btn-eye {
         background: transparent;
@@ -416,7 +413,10 @@
             max-width: 420px !important;
         }
 
-        body, html { overflow-y: hidden !important; }
+        body, html {
+            overflow-x: hidden !important;
+            overflow-y: auto !important;
+        }
     }
 </style>
 {% endblock %}

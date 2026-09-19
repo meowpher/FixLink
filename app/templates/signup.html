@@ -11,9 +11,11 @@
         background: transparent !important;
         box-shadow: none !important;
     }
-    #mobileMenuBtn { display: none !important; }
+    #mobileMenuBtn, #mobile-bottom-nav, #floatingBugTrigger, .floating-bug-trigger { display: none !important; }
     .vyas-navbar .nav-item a[href*="/login"],
-    .vyas-navbar .nav-item a[href*="/signup"] { display: none !important; }
+    .vyas-navbar .nav-item a[href*="/signup"],
+    #mobile-top-bar a[href*="/login"],
+    .top-bar-icon-btn[href*="/login"] { display: none !important; }
     #themeToggleBtn, #themeToggleBtnGuest {
         background: transparent !important;
         border: none !important;
@@ -252,7 +254,6 @@
     /* Dark Mode */
     body[data-theme="dark"] {
         background-color: #080808 !important;
-        overflow: hidden !important;
     }
     body[data-theme="dark"] .glass-signup-card {
         background: rgba(255,255,255,0.05);
@@ -288,8 +289,6 @@
     body[data-theme="dark"] .glass-signup-card .btn-primary:hover {
         background: rgba(255,255,255,0.2) !important;
     }
-    body[data-theme="dark"] .glass-signup-card .footer-links { color: rgba(255,255,255,0.4); }
-    body[data-theme="dark"] .glass-signup-card .footer-links a { color: #ffffff; }
 </style>
 {% endblock %}
 

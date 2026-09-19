@@ -50,6 +50,27 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/carousels.css') }}">
     </noscript>
 
+    <style>
+        /* Global Typography Scaling */
+        html {
+            font-size: 14px !important;
+        }
+        body {
+            font-size: 0.875rem !important;
+            line-height: 1.5 !important;
+        }
+        .small, small {
+            font-size: 0.75rem !important;
+        }
+        /* Footer Typography */
+        footer, .site-footer {
+            font-size: 0.72rem !important;
+        }
+        footer a, footer p, footer span {
+            font-size: inherit !important;
+        }
+    </style>
+
     {% block extra_css %}{% endblock %}
 </head>
 
@@ -76,6 +97,7 @@
                 request.endpoint.startswith('professional.') or
                 request.endpoint.startswith('superadmin.') or
                 request.endpoint.startswith('faculty.') or
+                request.endpoint.startswith('auth.') or
                 request.endpoint.endswith('.login') or 
                 request.endpoint == 'admin.dashboard' or 
                 request.endpoint == 'admin.status_map' or 
@@ -110,7 +132,7 @@
             </button>
 
             <!-- Report Bug (icon only, opens modal) -->
-            {% if not (request.endpoint and request.endpoint.endswith('.login')) %}
+            {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login'))) %}
             <button type="button"
                     class="top-bar-icon-btn"
                     data-bs-toggle="modal"
@@ -160,14 +182,17 @@
             {% endif %}
 
             {% else %}
+            {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login'))) %}
             <!-- Guest Login Link -->
             <a href="{{ url_for('auth.login') }}" class="top-bar-icon-btn" aria-label="Login">
                 <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
             </a>
             {% endif %}
+            {% endif %}
         </div>
     </div>
 
+    {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login') or request.endpoint == 'main.report_bug' or request.endpoint in ['main.privacy', 'main.terms', 'main.cookies'])) %}
     <nav id="mobile-bottom-nav" class="d-md-none" aria-label="Mobile navigation">
         {% if session.get('is_admin') %}
             <a href="{{ url_for('admin.dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
@@ -267,6 +292,7 @@
             {% endif %}
         {% endif %}
     </nav>
+    {% endif %}
 
     <!-- Manage Offcanvas (Admin only) -->
     {% if session.get('is_admin') %}
@@ -655,7 +681,7 @@
 
             <!-- Utils (Right Side) -->
             <div class="d-flex align-items-center ms-3 border-start ps-3" style="border-color: var(--border-color) !important;">
-                {% if not (session.get('user_id') or session.get('professional_id')) %}
+                {% if not (session.get('user_id') or session.get('professional_id')) and not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login'))) %}
                     <a class="nav-link d-flex align-items-center me-2 text-decoration-none text-muted" href="{{ url_for('auth.login') }}"><i class="bi bi-box-arrow-in-right me-1"></i>Login</a>
                 {% endif %}
                 
@@ -733,16 +759,16 @@
         request.endpoint == 'admin.analytics' or
         request.endpoint in ['admin.chat', 'professional.chat']
     )) %}
-    <footer class="mt-auto py-4 border-top" style="border-color: var(--border-color, #333) !important; background-color: var(--bg-main, #121212);">
-        <div class="container text-center text-muted small">
-            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2">
-                <a href="{{ url_for('main.privacy') }}" class="text-muted text-decoration-none">Privacy Policy</a>
-                <span aria-hidden="true">&bull;</span>
-                <a href="{{ url_for('main.terms') }}" class="text-muted text-decoration-none">Terms of Service</a>
-                <span aria-hidden="true">&bull;</span>
-                <a href="{{ url_for('main.cookies') }}" class="text-muted text-decoration-none">Cookie Policy</a>
+    <footer class="mt-auto py-3 border-top" style="border-color: var(--border-color, #262626) !important; background-color: var(--bg-main, #0a0a0a);">
+        <div class="container text-center text-muted" style="font-size: 0.72rem; line-height: 1.5;">
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-1" style="font-size: 0.72rem;">
+                <a href="{{ url_for('main.privacy') }}" class="text-muted text-decoration-none" style="font-size: 0.72rem;">Privacy Policy</a>
+                <span aria-hidden="true" style="opacity: 0.4;">&bull;</span>
+                <a href="{{ url_for('main.terms') }}" class="text-muted text-decoration-none" style="font-size: 0.72rem;">Terms of Service</a>
+                <span aria-hidden="true" style="opacity: 0.4;">&bull;</span>
+                <a href="{{ url_for('main.cookies') }}" class="text-muted text-decoration-none" style="font-size: 0.72rem;">Cookie Policy</a>
             </div>
-            <p class="mb-0">&copy; MIT-WPU FixLink — Smart Room Maintenance Platform. For internal university facility management.</p>
+            <p class="mb-0" style="font-size: 0.68rem; opacity: 0.65;">&copy; MIT-WPU FixLink — Smart Room Maintenance Platform. For internal university facility management.</p>
         </div>
     </footer>
     {% endif %}
@@ -1703,6 +1729,7 @@
         }
     </style>
 
+    {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login') or request.endpoint == 'main.report_bug' or request.endpoint in ['main.privacy', 'main.terms', 'main.cookies'])) %}
     <button type="button" 
             class="floating-bug-trigger" 
             id="floatingBugTrigger" 
@@ -1716,6 +1743,7 @@
         </span>
         <span>Report Bug</span>
     </button>
+    {% endif %}
 
     <!-- Global Bug Report Modal -->
     <div class="modal fade" id="globalBugReportModal" tabindex="-1" aria-labelledby="globalBugReportModalLabel" aria-hidden="true" style="z-index: 1060;">

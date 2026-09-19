@@ -60,11 +60,10 @@
     .glass-login-card {
         width: 100%;
         max-width: 460px;
-        padding: 40px 36px;
         background: #ffffff;
         border: none;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
         z-index: 1;
         position: relative;
     }
@@ -73,28 +72,16 @@
         width: auto;
         height: auto;
         object-fit: contain;
-        margin: 0 auto 24px auto;
-        display: block;
     }
     .glass-login-card .login-heading {
-        font-size: 26px;
-        font-weight: 700;
         color: #212529;
-        text-align: left;
-        margin: 0 0 6px 0;
     }
     .glass-login-card .subtext {
         font-size: 14px;
-        color: #6c757d;
-        text-align: left;
-        margin: 0 0 24px 0;
     }
     .glass-login-card .form-label {
         font-size: 13px;
-        font-weight: 500;
         color: #212529;
-        margin: 0 0 6px 0;
-        display: block;
     }
     .glass-login-card .text-danger { color: #dc3545 !important; }
     .glass-login-card .form-control {
@@ -114,36 +101,16 @@
         border-color: #86b7fe !important;
         box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25) !important;
     }
-    .glass-login-card .field-group { margin-bottom: 14px; }
-    .glass-login-card .pwd-wrapper { position: relative; display: block; width: 100%; }
-    .glass-login-card .btn-eye {
-        position: absolute;
-        right: 14px;
-        top: 50%;
-        transform: translateY(-50%);
-        background: none;
-        border: none;
-        color: #6c757d;
-        padding: 0;
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-    }
-    .glass-login-card .btn-eye:hover { color: #212529; }
     .glass-login-card .forgot-pwd {
-        display: block;
-        text-align: left;
-        font-size: 13px;
         color: #6c757d;
-        text-decoration: none;
-        margin-top: 6px;
-        margin-bottom: 20px;
+        font-size: 13px;
+        margin: 0;
+        padding: 0;
+        display: inline-block;
+        transition: color 0.2s ease;
     }
-    .glass-login-card .forgot-pwd:hover { color: #0b4d8c; text-decoration: underline; }
+    .glass-login-card .forgot-pwd:hover { color: #0b4d8c !important; text-decoration: underline !important; }
     .glass-login-card .btn-primary {
-        width: 100%;
         height: 46px;
         border-radius: 8px;
         background: #0b4d8c !important;
@@ -154,35 +121,18 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: all 0.2s ease;
     }
     .glass-login-card .btn-primary:hover {
         background: #083968 !important;
         border-color: #083968 !important;
     }
-    .glass-login-card .footer-links {
-        margin-top: 24px;
-        text-align: left;
-        font-size: 14px;
-        display: flex;
-        justify-content: flex-start;
-        gap: 6px;
-    }
-    .glass-login-card .footer-text { color: #6c757d; }
-    .glass-login-card .footer-link { color: #0b4d8c; font-weight: 600; text-decoration: none; }
-    .glass-login-card .footer-link:hover { text-decoration: underline; }
+    .glass-login-card .footer-link { color: #0b4d8c; }
+    .glass-login-card .footer-link:hover { text-decoration: underline !important; }
     
-    .glass-login-card .pro-link-group {
-        margin-top: 12px;
-        text-align: left;
-        font-size: 13px;
-        padding-top: 16px;
-        border-top: 1px solid #e9ecef;
-    }
-    .glass-login-card .pro-text { color: #6c757d; }
     .glass-login-card .pro-highlight { color: #212529; font-weight: 600; }
-    .glass-login-card .pro-link { color: #0b4d8c; font-weight: 600; text-decoration: none; }
-    
-    .glass-login-card .alert { font-size: 14px; border-radius: 8px; margin-bottom: 20px; }
+    .glass-login-card .pro-link { color: #0b4d8c; font-weight: 600; }
+    .glass-login-card .pro-link:hover { text-decoration: underline !important; }
     
     /* Professional Portal Styles Override */
     .glass-login-card.pro-card {
@@ -202,7 +152,7 @@
         border-top: 5px solid #0b4d8c !important;
     }
 
-    /* Target Portal Link Highlights (Green for Professional, Blue for Student/Admin) */
+    /* Target Portal Link Highlights */
     .glass-login-card.user-card .pro-highlight,
     .glass-login-card.user-card .pro-link {
         color: #198754 !important;
@@ -363,6 +313,25 @@
         overflow: hidden !important;
     }
 
+    /* Password Eye Button */
+    .glass-login-card .btn-eye {
+        background: transparent;
+        border: none;
+        color: #6c757d;
+        padding: 4px 8px;
+        line-height: 1;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .glass-login-card .btn-eye:hover,
+    .glass-login-card .btn-eye:focus {
+        color: #212529;
+        outline: none;
+        box-shadow: none;
+    }
+
     /* ── Mobile Responsive (must be last) ── */
     @media (max-width: 575px) {
         /* Hide vyas-navbar on mobile — custom topbar used instead */
@@ -444,20 +413,8 @@
 
         .glass-login-card {
             width: 100% !important;
-            max-width: 400px !important;
-            border-radius: 12px !important;
-            padding: 20px 20px 20px !important;
+            max-width: 420px !important;
         }
-        .glass-login-card .form-logo { max-width: 80px !important; margin-bottom: 10px !important; }
-        .glass-login-card .login-heading { font-size: 18px !important; margin-bottom: 2px !important; }
-        .glass-login-card .subtext { font-size: 12px !important; margin-bottom: 10px !important; }
-        .glass-login-card .form-control { height: 40px !important; font-size: 13px !important; }
-        .glass-login-card .form-label { font-size: 11px !important; margin-bottom: 4px !important; }
-        .glass-login-card .field-group { margin-bottom: 8px !important; }
-        .glass-login-card .forgot-pwd { font-size: 11px !important; margin-bottom: 10px !important; margin-top: 4px !important; }
-        .glass-login-card .btn-primary { height: 40px !important; font-size: 14px !important; }
-        .glass-login-card .footer-links { font-size: 12px !important; margin-top: 10px !important; }
-        .glass-login-card .pro-link-group { font-size: 11px !important; padding-top: 8px !important; margin-top: 8px !important; }
 
         body, html { overflow-y: hidden !important; }
     }
@@ -484,15 +441,15 @@
 </div>
 
 
-<div class="glass-login-card {% if show_phone_hint %}pro-card{% else %}user-card{% endif %}">
-    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo" loading="eager" fetchpriority="high" width="200" height="57">
-    <h1 class="login-heading">{% if show_phone_hint %}Technician Portal{% else %}Welcome Back{% endif %}</h1>
-    <p class="subtext">{% if show_phone_hint %}Sign in to access your jobs{% else %}Sign in to your account{% endif %}</p>
+<div class="glass-login-card p-4 p-sm-5 text-start {% if show_phone_hint %}pro-card{% else %}user-card{% endif %}">
+    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo d-block mx-auto mb-4" loading="eager" fetchpriority="high" width="200" height="57">
+    <h1 class="login-heading fs-4 fw-bold text-start mb-1">{% if show_phone_hint %}Technician Portal{% else %}Welcome Back{% endif %}</h1>
+    <p class="subtext text-muted text-start mb-4">{% if show_phone_hint %}Sign in to access your jobs{% else %}Sign in to your account{% endif %}</p>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show mb-4" role="alert">
                     {{ message }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -503,8 +460,8 @@
     <form method="POST" action="{{ url_for('auth.login') }}{% if show_phone_hint %}?pro=1{% endif %}" aria-label="Sign in form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
-        <div class="field-group">
-            <label class="form-label" for="loginInput">
+        <div class="mb-3 text-start">
+            <label class="form-label small fw-semibold mb-1" for="loginInput">
                 {% if show_phone_hint %}
                     Email, Username, or Phone
                 {% else %}
@@ -515,42 +472,43 @@
                    placeholder="{% if show_phone_hint %}name@mitwpu.edu.in or username or 9876543210{% else %}name@mitwpu.edu.in{% endif %}"
                    aria-required="true" aria-label="{% if show_phone_hint %}Email, Username, or Phone{% else %}Email Address{% endif %}">
             {% if show_phone_hint %}
-            <div class="form-text mt-2 mb-0" style="color: rgba(255,255,255,0.4); font-size: 12px;">
-                <i class="bi bi-info-circle me-1"></i>
-                Job Certified Professionals can use their username or phone number
+            <div class="form-text mt-1 text-muted small" style="font-size: 12px;">
+                <i class="bi bi-info-circle me-1"></i>Job Certified Professionals can use their username or phone number
             </div>
             {% endif %}
         </div>
         
-        <div class="field-group" style="margin-bottom: 0;">
-            <label class="form-label" for="loginPassword">Password<span class="text-danger" aria-hidden="true">*</span></label>
-            <div class="pwd-wrapper">
-                <input type="password" name="password" id="loginPassword" class="form-control" required autocomplete="current-password" aria-required="true">
-                <button type="button" class="btn-eye" onclick="togglePwd()" tabindex="-1" aria-label="Toggle password visibility">
+        <div class="mb-3 text-start">
+            <label class="form-label small fw-semibold mb-1" for="loginPassword">Password<span class="text-danger ms-1" aria-hidden="true">*</span></label>
+            <div class="position-relative">
+                <input type="password" name="password" id="loginPassword" class="form-control pe-5" required autocomplete="current-password" aria-required="true">
+                <button type="button" class="btn-eye position-absolute top-50 end-0 translate-middle-y me-3" onclick="togglePwd()" tabindex="-1" aria-label="Toggle password visibility">
                     <i class="bi bi-eye" id="loginEyeIcon" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
         
-        <a href="{{ url_for('auth.forgot_password') }}" class="forgot-pwd">Forgot password?</a>
+        <div class="mb-4 text-start">
+            <a href="{{ url_for('auth.forgot_password') }}" class="forgot-pwd small text-decoration-none">Forgot password?</a>
+        </div>
         
-        <button type="submit" class="btn btn-primary" aria-label="Sign in to your account">Login</button>
+        <button type="submit" class="btn btn-primary w-100 fw-semibold mb-3" aria-label="Sign in to your account">Login</button>
     </form>
     
     {% if not show_phone_hint %}
-    <div class="footer-links">
-        <span class="footer-text">Don't have an account?</span> 
-        <a href="{{ url_for('auth.signup') }}" class="footer-link">Sign Up</a>
+    <div class="footer-links text-start small mb-3">
+        <span class="footer-text text-muted">Don't have an account?</span> 
+        <a href="{{ url_for('auth.signup') }}" class="footer-link fw-semibold ms-1">Sign Up</a>
     </div>
     {% endif %}
     
-    <div class="pro-link-group" {% if show_phone_hint %}style="border-top: 1px solid rgba(255,255,255,0.1);"{% endif %}>
+    <div class="pro-link-group pt-3 border-top text-start small">
         {% if show_phone_hint %}
-            <span class="pro-text">Are you a <span class="pro-highlight">Student or Admin</span>?</span> 
-            <a href="{{ url_for('auth.login') }}" class="pro-link">Click here</a>
+            <span class="pro-text text-muted">Are you a <span class="pro-highlight">Student or Admin</span>?</span> 
+            <a href="{{ url_for('auth.login') }}" class="pro-link fw-semibold ms-1">Click here</a>
         {% else %}
-            <span class="pro-text">Are you a <span class="pro-highlight">Job Certified Professional</span>?</span> 
-            <a href="?pro=1" class="pro-link">Click here</a>
+            <span class="pro-text text-muted">Are you a <span class="pro-highlight">Job Certified Professional</span>?</span> 
+            <a href="?pro=1" class="pro-link fw-semibold ms-1">Click here</a>
         {% endif %}
     </div>
 </div>

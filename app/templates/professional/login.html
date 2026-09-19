@@ -6,14 +6,16 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-4">
-            <div class="card shadow">
-                <div class="card-body p-4">
-                    <h2 class="text-center mb-4">Professional Login</h2>
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-body p-4 p-sm-5 text-start">
+                    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo d-block mx-auto mb-4" loading="eager" fetchpriority="high" width="180">
+                    <h2 class="fs-4 fw-bold text-start mb-1">Technician Portal</h2>
+                    <p class="text-muted text-start small mb-4">Sign in to access your jobs</p>
                     
                     {% with messages = get_flashed_messages(with_categories=true) %}
                         {% if messages %}
                             {% for category, message in messages %}
-                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                                <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show mb-4" role="alert">
                                     {{ message }}
                                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                                 </div>
@@ -22,28 +24,49 @@
                     {% endwith %}
                     
                     <form method="POST" action="{{ url_for('professional.login') }}">
-                        <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        
+                        <div class="mb-3 text-start">
+                            <label for="email" class="form-label small fw-semibold mb-1">Email, Username, or Phone</label>
+                            <input type="text" class="form-control" id="email" name="email" required placeholder="name@mitwpu.edu.in or username or phone">
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                        <div class="mb-4 text-start">
+                            <label for="password" class="form-label small fw-semibold mb-1">Password<span class="text-danger ms-1">*</span></label>
+                            <div class="position-relative">
+                                <input type="password" class="form-control pe-5" id="password" name="password" required placeholder="Enter password">
+                                <button type="button" class="btn btn-link position-absolute top-50 end-0 translate-middle-y me-3 p-0 text-muted border-0 text-decoration-none shadow-none" onclick="toggleProfessionalPwd()" tabindex="-1" aria-label="Toggle password visibility">
+                                    <i class="bi bi-eye" id="profEyeIcon" aria-hidden="true"></i>
+                                </button>
+                            </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                        <button type="submit" class="btn btn-primary w-100 fw-semibold mb-3">Login</button>
                     </form>
                     
-                    <hr class="my-4">
-                    
-                    <div class="text-center">
-                        <p class="text-muted mb-2">Are you a student or admin?</p>
-                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-secondary btn-sm">Go to User Login</a>
+                    <div class="pt-3 border-top text-start small">
+                        <span class="text-muted">Are you a <strong>Student or Admin</strong>?</span>
+                        <a href="{{ url_for('auth.login') }}" class="fw-semibold ms-1">Click here</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleProfessionalPwd() {
+    const inp = document.getElementById('password');
+    const icon = document.getElementById('profEyeIcon');
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.classList.replace('bi-eye', 'bi-eye-slash');
+    } else {
+        inp.type = 'password';
+        icon.classList.replace('bi-eye-slash', 'bi-eye');
+    }
+}
+</script>
 {% endblock %}

@@ -567,6 +567,332 @@
         background-color: #f8fafc;
         border-bottom: 1px solid #e2e8f0;
     }
+
+    /* Custom CMM Modal Styling */
+    .cmm-custom-modal {
+        background-color: #161618 !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        color: #EDEDF0;
+    }
+    .cmm-modal-header {
+        background-color: #141414;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07) !important;
+    }
+    .cmm-modal-icon-badge {
+        width: 38px;
+        height: 38px;
+        border-radius: 9px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+    .cmm-modal-icon-center {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    .bg-emerald-subtle {
+        background: rgba(16, 185, 129, 0.15) !important;
+    }
+    .text-emerald {
+        color: #34d399 !important;
+    }
+    .bg-danger-subtle {
+        background: rgba(239, 68, 68, 0.15) !important;
+    }
+
+    /* Custom File Dropzone */
+    .cmm-file-dropzone {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1.5px dashed rgba(255, 255, 255, 0.16);
+        border-radius: 12px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .cmm-file-dropzone:hover,
+    .cmm-file-dropzone.dragover {
+        background: rgba(16, 185, 129, 0.06);
+        border-color: #34d399;
+    }
+    .cmm-file-dropzone.has-file {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: rgba(16, 185, 129, 0.45);
+        border-style: solid;
+    }
+    .cmm-file-dropzone .dropzone-icon i {
+        font-size: 1.85rem;
+        color: #60a5fa;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .cmm-file-dropzone:hover .dropzone-icon i {
+        transform: translateY(-2px);
+        color: #34d399;
+    }
+
+    /* Format Note */
+    .cmm-format-note {
+        display: flex;
+        align-items: flex-start;
+        gap: 7px;
+        font-size: 0.77rem;
+        color: #94a3b8;
+        background: rgba(59, 130, 246, 0.06);
+        border: 1px solid rgba(59, 130, 246, 0.16);
+        border-radius: 8px;
+        padding: 8px 12px;
+        line-height: 1.4;
+    }
+    .cmm-format-note i {
+        color: #60a5fa;
+        margin-top: 1px;
+    }
+    .cmm-format-note code {
+        background: rgba(59, 130, 246, 0.18);
+        color: #bfdbfe;
+        padding: 1px 5px;
+        border-radius: 4px;
+        font-size: 0.74rem;
+        font-family: ui-monospace, 'Roboto Mono', monospace;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    /* Toggle Tile */
+    .cmm-toggle-tile {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px 14px;
+    }
+    .cmm-toggle-tile .form-check-input {
+        background-color: rgba(255, 255, 255, 0.16);
+        border-color: rgba(255, 255, 255, 0.25);
+        cursor: pointer;
+        box-shadow: none !important;
+        outline: none !important;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .cmm-toggle-tile .form-check-input:checked {
+        background-color: #10b981 !important;
+        border-color: #10b981 !important;
+        box-shadow: none !important;
+    }
+    .cmm-toggle-tile .form-check-input:focus {
+        border-color: #10b981;
+        box-shadow: none !important;
+    }
+
+    /* Danger Box */
+    .cmm-danger-box {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* Preview Alerts */
+    .cmm-preview-success {
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        color: #34d399;
+    }
+    .cmm-preview-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        color: #fbbf24;
+    }
+
+    /* Modal Action Button Layout & Responsive Grid */
+    .cmm-modal-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 14px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        margin-top: 6px;
+    }
+
+    @media (max-width: 575px) {
+        .cmm-modal-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .cmm-modal-actions .cmm-btn-cancel {
+            grid-column: 1;
+            grid-row: 2;
+            width: 100%;
+            padding: 0 8px;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        .cmm-modal-actions .cmm-btn-preview {
+            grid-column: 2;
+            grid-row: 2;
+            width: 100%;
+            padding: 0 8px;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+        .cmm-modal-actions .cmm-btn-commit {
+            grid-column: 1 / span 2;
+            grid-row: 1;
+            width: 100%;
+            height: 40px;
+            font-size: 0.86rem;
+            white-space: nowrap;
+        }
+    }
+
+    @media (min-width: 576px) {
+        .cmm-modal-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        .cmm-modal-actions .cmm-btn-cancel {
+            margin-right: auto;
+        }
+    }
+
+    /* Modal Action Buttons - Uniform 38px height, 8px radius */
+    .cmm-btn-cancel {
+        height: 38px;
+        padding: 0 16px;
+        font-size: 0.84rem;
+        font-weight: 500;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        color: #EDEDF0;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s ease;
+    }
+    .cmm-btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+    }
+
+    .cmm-btn-preview {
+        height: 38px;
+        padding: 0 16px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        border-radius: 8px;
+        background: rgba(59, 130, 246, 0.12);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+    }
+    .cmm-btn-preview:hover {
+        background: rgba(59, 130, 246, 0.22);
+        color: #93c5fd;
+        border-color: rgba(59, 130, 246, 0.5);
+    }
+
+    .cmm-btn-commit {
+        height: 38px;
+        padding: 0 18px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        border-radius: 8px;
+        background: #10b981;
+        color: #ffffff;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+        transition: all 0.15s ease;
+    }
+    .cmm-btn-commit:hover {
+        background: #059669;
+        color: #ffffff;
+        box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+        transform: translateY(-1px);
+    }
+
+    .cmm-btn-danger {
+        height: 38px;
+        padding: 0 18px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        border-radius: 8px;
+        background: #ef4444;
+        color: #ffffff;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
+        transition: all 0.15s ease;
+    }
+    .cmm-btn-danger:hover {
+        background: #dc2626;
+        color: #ffffff;
+    }
+
+    /* Light Theme Overrides for Modals */
+    [data-theme="light"] .cmm-custom-modal,
+    [data-bs-theme="light"] .cmm-custom-modal {
+        background-color: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        color: #0f172a;
+    }
+    [data-theme="light"] .cmm-modal-header,
+    [data-bs-theme="light"] .cmm-modal-header {
+        background-color: #f8fafc;
+        border-bottom-color: #e2e8f0 !important;
+    }
+    [data-theme="light"] .cmm-modal-header .modal-title,
+    [data-bs-theme="light"] .cmm-modal-header .modal-title {
+        color: #0f172a !important;
+    }
+    [data-theme="light"] .cmm-modal-header .btn-close,
+    [data-bs-theme="light"] .cmm-modal-header .btn-close {
+        filter: none;
+    }
+    [data-theme="light"] .cmm-file-dropzone,
+    [data-bs-theme="light"] .cmm-file-dropzone {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
+    [data-theme="light"] .cmm-file-dropzone .dropzone-title,
+    [data-bs-theme="light"] .cmm-file-dropzone .dropzone-title {
+        color: #1e293b !important;
+    }
+    [data-theme="light"] .cmm-toggle-tile,
+    [data-bs-theme="light"] .cmm-toggle-tile {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    [data-theme="light"] .cmm-toggle-tile .fw-semibold,
+    [data-bs-theme="light"] .cmm-toggle-tile .fw-semibold {
+        color: #1e293b !important;
+    }
+    [data-theme="light"] .cmm-btn-cancel,
+    [data-bs-theme="light"] .cmm-btn-cancel {
+        background: #f1f5f9;
+        color: #334155;
+        border-color: #cbd5e1;
+    }
+    [data-theme="light"] .cmm-btn-cancel:hover,
+    [data-bs-theme="light"] .cmm-btn-cancel:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
 </style>
 {% endblock %}
 
@@ -1020,52 +1346,87 @@
      MASS IMPORT TIMETABLE MODAL
 ══════════════════════════════════════════════════════ -->
 <div class="modal fade" id="importTimetableModal" tabindex="-1" aria-labelledby="importTimetableModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header border-0 bg-success text-white py-3 px-4">
-                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="importTimetableModalLabel">
-                    <i class="bi bi-file-earmark-spreadsheet-fill fs-5"></i>Mass Import Timetable (CSV)
-                </h5>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 540px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden cmm-custom-modal">
+            <!-- Modal Header -->
+            <div class="modal-header border-0 py-3 px-4 d-flex align-items-center justify-content-between cmm-modal-header">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="cmm-modal-icon-badge bg-emerald-subtle">
+                        <i class="bi bi-file-earmark-spreadsheet-fill text-emerald"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="importTimetableModalLabel" style="font-size: 1.05rem; letter-spacing: -0.2px;">
+                            Mass Import Timetable (CSV)
+                        </h5>
+                        <div class="text-muted" style="font-size: 0.74rem;">Batch upload room schedule records</div>
+                    </div>
+                </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             
-            <div class="modal-body p-4">
+            <div class="modal-body p-4 pt-3">
                 <form id="importTimetableForm">
-                    <div class="mb-4">
-                        <label for="csvFileInput" class="form-label fw-semibold">Select Timetable CSV File</label>
-                        <input class="form-control rounded-3" type="file" id="csvFileInput" accept=".csv" required>
-                        <div class="form-text mt-2">
-                            <i class="bi bi-info-circle me-1"></i>
-                            CSV must contain room numbers (e.g. <code>VY401</code>) and time slots (e.g. <code>09:00-10:00</code>) formatted with weekday columns.
+                    <!-- Custom File Dropzone -->
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-white-50 small mb-2">Select Timetable CSV File</label>
+                        <div class="cmm-file-dropzone" id="csvDropzone" onclick="document.getElementById('csvFileInput').click();">
+                            <input class="d-none" type="file" id="csvFileInput" accept=".csv" required>
+                            <div class="dropzone-content py-3 text-center">
+                                <div class="dropzone-icon mb-2">
+                                    <i class="bi bi-cloud-arrow-up-fill" id="dropzoneIcon"></i>
+                                </div>
+                                <div class="fw-semibold text-white dropzone-title" id="dropzoneTitle" style="font-size: 0.88rem;">
+                                    Click to browse or drop CSV file
+                                </div>
+                                <div class="text-muted small mt-1 dropzone-sub" id="dropzoneSub" style="font-size: 0.75rem;">
+                                    Supports standard .csv timetable matrices
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Helper note -->
+                        <div class="cmm-format-note mt-2">
+                            <i class="bi bi-info-circle-fill me-1 flex-shrink-0"></i>
+                            <span>CSV must contain room codes (e.g. <code>VY401</code>) &amp; time slots (e.g. <code>09:00-10:00</code>) formatted with weekday columns.</span>
                         </div>
                     </div>
 
-                    <div class="form-check form-switch mb-4">
-                        <input class="form-check-input" type="checkbox" id="dryRunToggle" checked>
-                        <label class="form-check-label fw-semibold" for="dryRunToggle">
-                            Dry Run Mode (Validate & Preview CSV without saving to DB)
-                        </label>
+                    <!-- Dry run toggle tile -->
+                    <div class="cmm-toggle-tile mb-3">
+                        <div class="pe-2">
+                            <div class="fw-semibold text-white" style="font-size: 0.86rem;">Dry Run Mode</div>
+                            <div class="text-muted" style="font-size: 0.74rem; line-height: 1.3;">Validate &amp; preview data without saving to database</div>
+                        </div>
+                        <div class="form-check form-switch m-0 p-0 d-flex align-items-center">
+                            <input class="form-check-input ms-0" type="checkbox" id="dryRunToggle" checked style="cursor: pointer; width: 2.3em; height: 1.2em;">
+                        </div>
                     </div>
 
-                    <div id="importPreviewContainer" class="d-none mb-4">
-                        <div class="alert alert-info border-0 rounded-3 p-3 mb-3">
-                            <div class="fw-bold mb-1"><i class="bi bi-eye-fill me-1"></i> CSV Preview Results</div>
-                            <div class="small" id="previewSummaryText">0 entries ready for ingestion.</div>
+                    <!-- Ingestion / Error Preview -->
+                    <div id="importPreviewContainer" class="d-none mb-3">
+                        <div class="cmm-preview-success p-3 rounded-3 mb-2">
+                            <div class="fw-bold mb-1 d-flex align-items-center gap-1" style="font-size: 0.84rem;">
+                                <i class="bi bi-check-circle-fill"></i> CSV Preview Results
+                            </div>
+                            <div class="small opacity-90" id="previewSummaryText">0 entries ready for ingestion.</div>
                         </div>
 
-                        <div id="previewErrorList" class="alert alert-warning border-0 rounded-3 p-3 d-none mb-3 small">
-                            <strong>Warnings / Errors detected:</strong>
+                        <div id="previewErrorList" class="cmm-preview-warning p-3 rounded-3 d-none small">
+                            <div class="fw-bold mb-1 d-flex align-items-center gap-1">
+                                <i class="bi bi-exclamation-triangle-fill"></i> Warnings / Errors detected:
+                            </div>
                             <ul class="mb-0 ps-3 mt-1" id="previewErrorsUl"></ul>
                         </div>
                     </div>
 
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="btnPreviewCsv">
-                            <i class="bi bi-search me-1"></i>Preview & Validate
+                    <!-- Action Buttons -->
+                    <div class="cmm-modal-actions">
+                        <button type="button" class="btn cmm-btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn cmm-btn-preview" id="btnPreviewCsv">
+                            <i class="bi bi-search me-1"></i>Preview &amp; Validate
                         </button>
-                        <button type="submit" class="btn btn-success rounded-pill px-4 shadow-sm" id="btnCommitImport">
-                            <i class="bi bi-cloud-upload-fill me-1"></i>Commit & Import Schedule
+                        <button type="submit" class="btn cmm-btn-commit" id="btnCommitImport">
+                            <i class="bi bi-cloud-upload-fill me-1"></i>Commit &amp; Import
                         </button>
                     </div>
                 </form>
@@ -1078,32 +1439,44 @@
      DELETE CONFIRM MODAL (Phase 1: Securing Destructive Actions)
 ══════════════════════════════════════════════════════ -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
-            <div class="modal-header border-0 bg-danger text-white py-3 px-4">
-                <h5 class="modal-title fw-bold d-flex align-items-center gap-2" id="deleteConfirmModalLabel">
-                    <i class="bi bi-exclamation-triangle-fill fs-5"></i>Confirm Timetable Deletion
-                </h5>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden cmm-custom-modal">
+            <div class="modal-header border-0 py-3 px-4 d-flex align-items-center justify-content-between cmm-modal-header">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="cmm-modal-icon-badge bg-danger-subtle">
+                        <i class="bi bi-exclamation-triangle-fill text-danger"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="deleteConfirmModalLabel" style="font-size: 1.05rem; letter-spacing: -0.2px;">
+                            Confirm Timetable Deletion
+                        </h5>
+                        <div class="text-muted" style="font-size: 0.74rem;">Destructive schedule purge action</div>
+                    </div>
+                </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <div class="modal-body p-4 text-center">
-                <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex mb-3">
-                    <i class="bi bi-trash3-fill display-5"></i>
+            <div class="modal-body p-4 pt-3 text-center">
+                <div class="cmm-modal-icon-center bg-danger-subtle mb-3">
+                    <i class="bi bi-trash3-fill text-danger fs-2"></i>
                 </div>
-                <h5 class="fw-bold text-body mb-2">Delete Timetable Records</h5>
-                <p class="text-danger fw-semibold mb-3" style="font-size: 1.05rem;">
-                    Are you sure you want to wipe all timetable records? This action cannot be undone.
+                <h5 class="fw-bold text-white mb-2" style="font-size: 1.08rem;">Wipe All Timetable Records?</h5>
+                <p class="text-danger fw-semibold small mb-3" style="line-height: 1.45;">
+                    Are you sure you want to delete all timetable entries? This action cannot be undone.
                 </p>
-                <div class="alert alert-danger border-0 rounded-3 p-3 mb-0 small text-danger-emphasis text-start">
-                    <i class="bi bi-info-circle-fill me-1"></i>
-                    This action will permanently delete all classroom timetables, recurring schedules, and unassigned class allocations across the Vyas building.
+                <div class="cmm-danger-box text-start p-3 rounded-3 mb-0 small">
+                    <div class="d-flex gap-2 align-items-start">
+                        <i class="bi bi-info-circle-fill text-danger mt-0.5 flex-shrink-0"></i>
+                        <span style="color: rgba(255,255,255,0.75); line-height: 1.4;">
+                            This action will permanently delete all classroom timetables, recurring schedules, and unassigned class allocations across the Vyas building.
+                        </span>
+                    </div>
                 </div>
             </div>
 
             <div class="modal-footer border-0 p-4 pt-0 justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger rounded-pill px-4 shadow-sm fw-semibold" id="btnConfirmDeleteTimetable">
+                <button type="button" class="btn cmm-btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn cmm-btn-danger" id="btnConfirmDeleteTimetable">
                     <i class="bi bi-trash3-fill me-1"></i>Yes, Wipe All Timetables
                 </button>
             </div>
@@ -1497,6 +1870,56 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnPreviewCsv = document.getElementById('btnPreviewCsv');
     const importTimetableForm = document.getElementById('importTimetableForm');
     const csvFileInput = document.getElementById('csvFileInput');
+    const csvDropzone = document.getElementById('csvDropzone');
+    const dropzoneIcon = document.getElementById('dropzoneIcon');
+    const dropzoneTitle = document.getElementById('dropzoneTitle');
+    const dropzoneSub = document.getElementById('dropzoneSub');
+
+    // Interactive Dropzone Event Handling
+    if (csvFileInput && csvDropzone) {
+        csvFileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                const file = this.files[0];
+                const sizeKb = (file.size / 1024).toFixed(1);
+                csvDropzone.classList.add('has-file');
+                if (dropzoneIcon) dropzoneIcon.className = 'bi bi-file-earmark-check-fill text-emerald';
+                if (dropzoneTitle) dropzoneTitle.textContent = file.name;
+                if (dropzoneSub) dropzoneSub.textContent = `${sizeKb} KB • Ready for import (Click to replace)`;
+            } else {
+                csvDropzone.classList.remove('has-file');
+                if (dropzoneIcon) dropzoneIcon.className = 'bi bi-cloud-arrow-up-fill';
+                if (dropzoneTitle) dropzoneTitle.textContent = 'Click to browse or drop CSV file';
+                if (dropzoneSub) dropzoneSub.textContent = 'Supports standard .csv timetable matrices';
+            }
+        });
+
+        // Drag & Drop
+        ['dragenter', 'dragover'].forEach(eventName => {
+            csvDropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                csvDropzone.classList.add('dragover');
+            }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            csvDropzone.addEventListener(eventName, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                csvDropzone.classList.remove('dragover');
+            }, false);
+        });
+
+        csvDropzone.addEventListener('drop', (e) => {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files && files.length > 0) {
+                csvFileInput.files = files;
+                const changeEvt = new Event('change');
+                csvFileInput.dispatchEvent(changeEvt);
+            }
+        });
+    }
 
     async function handleCsvSubmit(isDryRun) {
         if (!csvFileInput.files || csvFileInput.files.length === 0) {

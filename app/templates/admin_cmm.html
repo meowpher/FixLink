@@ -1497,103 +1497,42 @@
                                             <div class="d-flex align-items-center gap-2">
                                                 <input class="form-check-input mt-0" type="checkbox" id="selectAllCheckbox" aria-label="Select all classes">
                                                 <span class="small fw-semibold text-body">Select</span>
-                                            </div>
-                                        </th>
-                                        <th class="py-3">Room</th>
-                                        <th class="py-3">Day & Time</th>
-                                        <th class="py-3">Subject / Course</th>
-                                        <th class="py-3">Division</th>
-                                        <th class="py-3" style="min-width: 280px;">Faculty Member</th>
-                                        <th class="text-end pe-4 py-3" style="width: 140px;">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="unassignedClassesBody">
-                                    {% if unassigned_classes %}
-                                        {% for cls in unassigned_classes %}
-                                        <tr id="class-row-{{ cls.id }}" class="unassigned-row-item" 
-                                            data-course="{{ cls.course or '' }}" 
-                                            data-subject="{{ cls.subject or '' }}" 
-                                            data-division="{{ cls.division or '' }}" 
-                                            data-room="{{ cls.room.number if cls.room else (cls.room_id|string) }}" 
-                                            data-day="{% if cls.day_of_week == 0 %}Monday{% elif cls.day_of_week == 1 %}Tuesday{% elif cls.day_of_week == 2 %}Wednesday{% elif cls.day_of_week == 3 %}Thursday{% elif cls.day_of_week == 4 %}Friday{% elif cls.day_of_week == 5 %}Saturday{% elif cls.day_of_week == 6 %}Sunday{% endif %}">
-                                            <td class="ps-4">
-                                                <div class="form-check mb-0">
-                                                    <input class="form-check-input row-checkbox row-select-checkbox" type="checkbox" value="{{ cls.id }}" data-class-id="{{ cls.id }}" aria-label="Select class #{{ cls.id }}">
-                                                </div>
-                                            </td>
-                                            <td class="fw-bold">
-                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-3">
-                                                    {{ cls.room.number if cls.room else ('Room #' ~ cls.room_id) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="fw-semibold text-body">
-                                                    {% if cls.day_of_week == 0 %}Monday
-                                                    {% elif cls.day_of_week == 1 %}Tuesday
-                                                    {% elif cls.day_of_week == 2 %}Wednesday
-                                                    {% elif cls.day_of_week == 3 %}Thursday
-                                                    {% elif cls.day_of_week == 4 %}Friday
-                                                    {% elif cls.day_of_week == 5 %}Saturday
-                                                    {% elif cls.day_of_week == 6 %}Sunday
-                                                    {% else %}Day {{ cls.day_of_week }}
-                                                    {% endif %}
-                                                </div>
-                                                <small class="text-muted">
-                                                    {{ cls.start_time.strftime('%I:%M %p') if cls.start_time else '' }} - {{ cls.end_time.strftime('%I:%M %p') if cls.end_time else '' }}
-                                                </small>
-                                            </td>
-                                            <td>
-                                                <div class="fw-bold text-body search-subject mb-1">{{ cls.subject }}</div>
-                                                {% if cls.course %}
-                                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-0.5 rounded-2 small search-course">{{ cls.course }}</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                {% if cls.division %}
-                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-2 fw-semibold">{{ cls.division }}</span>
-                                                {% else %}
-                                                <span class="text-muted small">—</span>
-                                                {% endif %}
-                                            </td>
-                                            <td>
-                                                <select class="form-select form-select-sm faculty-select rounded-3" id="faculty-select-{{ cls.id }}" aria-label="Select Faculty">
-                                                    <option value="" selected disabled>Choose Faculty...</option>
-                                                    {% for fac in all_faculties %}
-                                                    <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
-                                                    {% endfor %}
-                                                </select>
-                                            </td>
-                                            <td class="text-end pe-4">
-                                                <button type="button" 
-                                                        class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 btn-assign-faculty shadow-sm" 
-                                                        data-class-id="{{ cls.id }}">
-                                                    <i class="bi bi-person-check-fill me-1"></i>Assign
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        {% endfor %}
-                                    {% else %}
-                                        <tr id="noUnassignedRow">
-                                            <td colspan="7" class="text-center py-5 text-muted">
-                                                <div class="py-4">
-                                                    <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
-                                                    <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
-                                                    <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    {% endif %}
-                                    <tr id="noFilterMatchRow" style="display: none;">
-                                        <td colspan="7" class="text-center py-5 text-muted">
-                                            <div class="py-4">
-                                                <i class="bi bi-funnel text-secondary display-6 d-block mb-3"></i>
-                                                <p class="mb-1 fw-bold fs-5 text-body">No classes match the selected filters</p>
-                                                <small class="text-muted">Try resetting or adjusting your filter criteria.</small>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                                        <tbody id="unassignedClassesBody">
+                                    <!-- Dynamic High-Speed Paginated Render (25 items per page) -->
                                 </tbody>
                             </table>
+                            <div id="noUnassignedRow" class="text-center py-5 text-muted d-none">
+                                <div class="py-4">
+                                    <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
+                                    <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
+                                    <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
+                                </div>
+                            </div>
+                            <div id="noFilterMatchRow" class="text-center py-5 text-muted d-none">
+                                <div class="py-4">
+                                    <i class="bi bi-funnel text-secondary display-6 d-block mb-3"></i>
+                                    <p class="mb-1 fw-bold fs-5 text-body">No classes match the selected filters</p>
+                                    <small class="text-muted">Try resetting or adjusting your filter criteria.</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Desktop Pagination Controls -->
+                        <div class="d-none d-md-flex justify-content-between align-items-center px-4 py-3 border-top" id="cmmPaginationContainer" style="border-color: var(--border-color, rgba(255,255,255,0.08)) !important;">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="text-muted small" id="cmmPaginationInfo">Showing 1-25 of 880 classes</span>
+                                <select class="form-select form-select-sm" id="cmmPageSizeSelect" style="width: auto; height: 32px; font-size: 0.8rem; border-radius: 6px;">
+                                    <option value="25" selected>25 per page</option>
+                                    <option value="50">50 per page</option>
+                                    <option value="100">100 per page</option>
+                                    <option value="all">All</option>
+                                </select>
+                            </div>
+                            <nav aria-label="Unassigned classes pagination">
+                                <ul class="pagination pagination-sm mb-0 gap-1" id="cmmPaginationNav">
+                                    <!-- Dynamic pagination items -->
+                                </ul>
+                            </nav>
                         </div>
 
                         <!-- ═══════════════════════════════════════════════════
@@ -1610,67 +1549,36 @@
                             </div>
 
                             <div class="d-flex flex-column gap-2 px-3 pb-3" id="unassignedMobileCards">
-                                {% if unassigned_classes %}
-                                    {% for cls in unassigned_classes %}
-                                    <div id="mobile-class-card-{{ cls.id }}" class="cmm-mobile-card unassigned-row-item"
-                                        data-course="{{ cls.course or '' }}" 
-                                        data-subject="{{ cls.subject or '' }}" 
-                                        data-division="{{ cls.division or '' }}" 
-                                        data-room="{{ cls.room.number if cls.room else (cls.room_id|string) }}" 
-                                        data-day="{% if cls.day_of_week == 0 %}Monday{% elif cls.day_of_week == 1 %}Tuesday{% elif cls.day_of_week == 2 %}Wednesday{% elif cls.day_of_week == 3 %}Thursday{% elif cls.day_of_week == 4 %}Friday{% elif cls.day_of_week == 5 %}Saturday{% elif cls.day_of_week == 6 %}Sunday{% endif %}">
-                                        
-                                        <!-- Top Row: checkbox + room pill + div badge + course label -->
-                                        <div class="card-top-row">
-                                            <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                                                <input class="form-check-input row-checkbox row-select-checkbox mt-0" type="checkbox" value="{{ cls.id }}" data-class-id="{{ cls.id }}" aria-label="Select class #{{ cls.id }}" style="width:15px;height:15px;">
-                                                <span class="room-pill">{{ cls.room.number if cls.room else ('R-' ~ cls.room_id) }}</span>
-                                                {% if cls.division %}
-                                                <span class="div-pill">Div {{ cls.division }}</span>
-                                                {% endif %}
-                                            </div>
-                                            {% if cls.course %}
-                                            <span class="course-label">{{ cls.course }}</span>
-                                            {% endif %}
-                                        </div>
+                                <!-- Dynamic High-Speed Mobile Cards Render -->
+                            </div>
+                            
+                            <div class="text-center py-5 text-muted d-none" id="mobileNoUnassigned">
+                                <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
+                                <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
+                                <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
+                            </div>
+                            
+                            <div id="mobileNoFilterMatch" class="text-center py-5 text-muted d-none">
+                                <i class="bi bi-funnel text-secondary display-6 d-block mb-3"></i>
+                                <p class="mb-1 fw-bold fs-5 text-body">No classes match the selected filters</p>
+                                <small class="text-muted">Try resetting or adjusting your filter criteria.</small>
+                            </div>
 
-                                        <!-- Subject Name -->
-                                        <div class="subject-name">{{ cls.subject }}</div>
-
-                                        <!-- Meta: Day · Time -->
-                                        <div class="meta-row">
-                                            <i class="bi bi-calendar3"></i>
-                                            <span>{% if cls.day_of_week == 0 %}Mon{% elif cls.day_of_week == 1 %}Tue{% elif cls.day_of_week == 2 %}Wed{% elif cls.day_of_week == 3 %}Thu{% elif cls.day_of_week == 4 %}Fri{% elif cls.day_of_week == 5 %}Sat{% elif cls.day_of_week == 6 %}Sun{% else %}Day {{ cls.day_of_week }}{% endif %}</span>
-                                            <i class="bi bi-clock" style="margin-left: 4px;"></i>
-                                            <span>{{ cls.start_time.strftime('%I:%M %p') if cls.start_time else '' }} – {{ cls.end_time.strftime('%I:%M %p') if cls.end_time else '' }}</span>
-                                        </div>
-
-                                        <!-- Faculty Allocation Action Row -->
-                                        <div class="action-row">
-                                            <select class="faculty-select faculty-select-input" id="mobile-faculty-select-{{ cls.id }}" aria-label="Select Faculty">
-                                                <option value="" selected disabled>Choose Faculty</option>
-                                                {% for fac in all_faculties %}
-                                                <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
-                                                {% endfor %}
-                                            </select>
-                                            <button type="button" class="btn-assign btn-assign-faculty" data-class-id="{{ cls.id }}">
-                                                <i class="bi bi-person-check-fill"></i>
-                                                <span>Assign</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                {% else %}
-                                    <div class="text-center py-5 text-muted" id="mobileNoUnassigned">
-                                        <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
-                                        <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
-                                        <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
-                                    </div>
-                                {% endif %}
-                                <div id="mobileNoFilterMatch" class="text-center py-5 text-muted" style="display: none;">
-                                    <i class="bi bi-funnel text-secondary display-6 d-block mb-3"></i>
-                                    <p class="mb-1 fw-bold fs-5 text-body">No classes match the selected filters</p>
-                                    <small class="text-muted">Try resetting or adjusting your filter criteria.</small>
+                            <!-- Mobile Pagination Controls -->
+                            <div class="d-flex flex-column gap-2 px-3 py-3 border-top" id="cmmMobilePaginationContainer" style="border-color: var(--border-color, rgba(255,255,255,0.08)) !important;">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-muted small" id="cmmMobilePaginationInfo">Showing 1-25 of 880</span>
+                                    <select class="form-select form-select-sm" id="cmmMobilePageSizeSelect" style="width: auto; height: 30px; font-size: 0.75rem; border-radius: 6px;">
+                                        <option value="25" selected>25 / page</option>
+                                        <option value="50">50 / page</option>
+                                        <option value="all">All</option>
+                                    </select>
                                 </div>
+                                <nav aria-label="Mobile unassigned classes pagination">
+                                    <ul class="pagination pagination-sm justify-content-center mb-0 gap-1 flex-wrap" id="cmmMobilePaginationNav">
+                                        <!-- Dynamic mobile pagination items -->
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>
@@ -1809,255 +1717,432 @@
                 <button type="button" class="btn cmm-btn-danger" id="btnConfirmDeleteTimetable">
                     <i class="bi bi-trash3-fill me-1"></i>Yes, Wipe All Timetables
                 </button>
-            </div>
-        </div>
-    </div>
 </div>
 
+<!-- Embedded Compact JSON Data for Lightning-Fast Virtualized Client Rendering -->
+<script id="cmmUnassignedData" type="application/json">{{ unassigned_classes_data|tojson }}</script>
+<script id="cmmFacultiesData" type="application/json">{{ all_faculties_data|tojson }}</script>
+
 <script>
-// ==================== PHASE 1: EVENT BINDING AND FILTER LOGIC ====================
-function applyFilters() {
-    const courseFilter = document.getElementById('courseFilter');
-    const yearFilter = document.getElementById('yearFilter');
-    const divFilter = document.getElementById('divFilter');
-    const dayFilter = document.getElementById('dayFilter');
-    const roomFilter = document.getElementById('roomFilter');
-    const desktopSearch = document.getElementById('tableSearchInput');
-    const mobileSearch = document.getElementById('mobileTableSearchInput');
-
-    const courseVal = (courseFilter ? courseFilter.value : '').toLowerCase().trim();
-    const yearVal = (yearFilter ? yearFilter.value : '').toLowerCase().trim();
-    const divVal = (divFilter ? divFilter.value : '').toLowerCase().trim();
-    const dayVal = (dayFilter ? dayFilter.value : '').toLowerCase().trim();
-    const roomVal = (roomFilter ? roomFilter.value : '').toLowerCase().trim();
-    
-    // Check search query from either desktop or mobile search input
-    const searchVal = (desktopSearch && desktopSearch.value.trim() !== '' 
-        ? desktopSearch.value 
-        : (mobileSearch ? mobileSearch.value : '')).toLowerCase().trim();
-
-    // Query all unassigned row items (matches desktop tr.unassigned-row-item and mobile .cmm-mobile-card.unassigned-row-item)
-    const allItems = document.querySelectorAll('.unassigned-row-item');
-    
-    let visibleCount = 0;
-    const countedIds = new Set();
-    const totalIds = new Set();
-
-    allItems.forEach(item => {
-        const itemId = item.getAttribute('data-class-id') || item.id.replace(/^(class-row-|mobile-class-card-)/, '');
-        totalIds.add(itemId);
-
-        // Grab text and metadata attributes of the item
-        const itemText = (item.textContent || '').toLowerCase();
-        const itemCourse = (item.getAttribute('data-course') || item.dataset.course || '').toLowerCase().trim();
-        const itemDay = (item.getAttribute('data-day') || item.dataset.day || '').toLowerCase().trim();
-        const itemRoom = (item.getAttribute('data-room') || item.dataset.room || '').toLowerCase().trim();
-        const itemDivRaw = (item.getAttribute('data-division') || item.dataset.division || '').trim();
-
-        // 1. Course Match
-        const courseMatch = !courseVal || (itemCourse ? itemCourse.includes(courseVal) : itemText.includes(courseVal));
-
-        // 2. Year Match (FY, SY, TY, HONS / HONOURS)
-        let yearMatch = !yearVal;
-        if (yearVal) {
-            if (yearVal === 'hons' || yearVal === 'honours') {
-                yearMatch = itemCourse.includes('hon') || itemText.includes('hon');
-            } else {
-                yearMatch = itemCourse.includes(yearVal) || itemText.includes(yearVal);
-            }
-        }
-
-        // 3. Division Match
-        let divMatch = !divVal;
-        if (divVal) {
-            const targetDivLetter = divVal.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
-            const itemDivLetter = itemDivRaw.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
-            divMatch = itemDivLetter !== '' && (itemDivLetter === targetDivLetter || itemDivRaw.toLowerCase() === divVal);
-        }
-
-        // 4. Day Match
-        const dayMatch = !dayVal || (itemDay ? itemDay === dayVal : itemText.includes(dayVal));
-
-        // 5. Room Match
-        const roomMatch = !roomVal || (itemRoom ? itemRoom === roomVal : itemText.includes(roomVal));
-
-        // 6. Text Search Match
-        const searchMatch = !searchVal || itemText.includes(searchVal);
-
-        if (courseMatch && yearMatch && divMatch && dayMatch && roomMatch && searchMatch) {
-            item.style.display = '';
-            countedIds.add(itemId);
-        } else {
-            item.style.display = 'none';
-        }
-    });
-
-    visibleCount = countedIds.size;
-    const totalCount = totalIds.size;
-
-    // Toggle "No matches" empty state
-    const noMatchRow = document.getElementById('noFilterMatchRow');
-    if (noMatchRow) {
-        noMatchRow.style.display = (totalCount > 0 && visibleCount === 0) ? '' : 'none';
-    }
-    const mobileNoMatch = document.getElementById('mobileNoFilterMatch');
-    if (mobileNoMatch) {
-        mobileNoMatch.style.display = (totalCount > 0 && visibleCount === 0) ? '' : 'none';
-    }
-
-    // Update active filter badge and count badge
-    const activeBadge = document.getElementById('activeFilterBadge');
-    const isFiltered = Boolean(searchVal || courseVal || yearVal || divVal || dayVal || roomVal);
-    if (activeBadge) {
-        activeBadge.style.display = isFiltered ? 'inline-block' : 'none';
-    }
-
-    const countBadge = document.getElementById('unassignedCountBadge');
-    if (countBadge) {
-        countBadge.textContent = `${visibleCount} of ${totalCount} Shown`;
-    }
-}
-window.applyFilters = applyFilters;
-window.filterTable = applyFilters;
-
-document.addEventListener('DOMContentLoaded', function() {
+// ==================== CMM ULTRA-FAST PAGINATED ENGINE ====================
+(function() {
+    let allClasses = [];
+    let allFaculties = [];
+    let filteredClasses = [];
+    let currentPage = 1;
+    let pageSize = 25;
+    const selectedIds = new Set();
+    let facultyOptionsHtml = '';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    // Attach filter listeners
-    const courseFilter = document.getElementById('courseFilter');
-    const yearFilter = document.getElementById('yearFilter');
-    const divFilter = document.getElementById('divFilter');
-    const dayFilter = document.getElementById('dayFilter');
-    const roomFilter = document.getElementById('roomFilter');
-    const desktopSearch = document.getElementById('tableSearchInput');
-    const mobileSearch = document.getElementById('mobileTableSearchInput');
-
-    if (courseFilter) courseFilter.addEventListener('change', applyFilters);
-    if (yearFilter) yearFilter.addEventListener('change', applyFilters);
-    if (divFilter) divFilter.addEventListener('change', applyFilters);
-    if (dayFilter) dayFilter.addEventListener('change', applyFilters);
-    if (roomFilter) roomFilter.addEventListener('change', applyFilters);
-    
-    if (desktopSearch) {
-        desktopSearch.addEventListener('input', function() {
-            if (mobileSearch) mobileSearch.value = this.value;
-            applyFilters();
-        });
-    }
-    if (mobileSearch) {
-        mobileSearch.addEventListener('input', function() {
-            if (desktopSearch) desktopSearch.value = this.value;
-            applyFilters();
-        });
+    // Initialize raw data
+    try {
+        const unassignedRaw = document.getElementById('cmmUnassignedData')?.textContent || '[]';
+        const facultiesRaw = document.getElementById('cmmFacultiesData')?.textContent || '[]';
+        allClasses = JSON.parse(unassignedRaw);
+        allFaculties = JSON.parse(facultiesRaw);
+        filteredClasses = [...allClasses];
+    } catch (e) {
+        console.error('Failed to parse CMM data:', e);
     }
 
-    // ==================== CHECKBOX TOGGLE & SYNC LOGIC ====================
-    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-    const mobileSelectAllCheckbox = document.getElementById('mobileSelectAllCheckbox');
-    const mobileSelectedCounter = document.getElementById('mobileSelectedCounter');
+    // Pre-build shared faculty options HTML string once (eliminates 90,000 DOM nodes)
+    facultyOptionsHtml = '<option value="" selected disabled>Choose Faculty...</option>' +
+        allFaculties.map(f => `<option value="${f.id}">${f.name} (ID: ${f.id})</option>`).join('');
 
     function updateSelectedCounter() {
-        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        const uniqueIds = new Set(Array.from(checkedBoxes).map(cb => cb.dataset.classId || cb.value));
-        const count = uniqueIds.size;
-        if (mobileSelectedCounter) {
-            mobileSelectedCounter.textContent = `${count} selected`;
+        const count = selectedIds.size;
+        const mobileCounter = document.getElementById('mobileSelectedCounter');
+        if (mobileCounter) {
+            mobileCounter.textContent = `${count} selected`;
         }
+
+        const selectAllCb = document.getElementById('selectAllCheckbox');
+        const mobileSelectAllCb = document.getElementById('mobileSelectAllCheckbox');
+
+        // Check if all visible items on current page are selected
+        const currentSlice = getCurrentPageSlice();
+        const allCurrentSelected = currentSlice.length > 0 && currentSlice.every(cls => selectedIds.has(cls.id));
+        if (selectAllCb) selectAllCb.checked = allCurrentSelected;
+        if (mobileSelectAllCb) mobileSelectAllCb.checked = allCurrentSelected;
     }
 
-    function toggleAllCheckboxes(isChecked) {
-        const allRowCheckboxes = document.querySelectorAll('.row-checkbox');
-        allRowCheckboxes.forEach(cb => {
-            const container = cb.closest('tr, .cmm-mobile-card');
-            if (container && container.style.display !== 'none') {
-                cb.checked = isChecked;
+    function getCurrentPageSlice() {
+        if (pageSize === 'all' || pageSize >= filteredClasses.length) {
+            return filteredClasses;
+        }
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = Math.min(startIndex + pageSize, filteredClasses.length);
+        return filteredClasses.slice(startIndex, endIndex);
+    }
+
+    function renderPaginationNav(totalPages) {
+        const desktopNav = document.getElementById('cmmPaginationNav');
+        const mobileNav = document.getElementById('cmmMobilePaginationNav');
+        const desktopContainer = document.getElementById('cmmPaginationContainer');
+        const mobileContainer = document.getElementById('cmmMobilePaginationContainer');
+
+        if (filteredClasses.length === 0 || totalPages <= 1) {
+            if (desktopContainer) desktopContainer.classList.add('d-none');
+            if (mobileContainer) mobileContainer.classList.add('d-none');
+            return;
+        }
+
+        if (desktopContainer) desktopContainer.classList.remove('d-none');
+        if (mobileContainer) mobileContainer.classList.remove('d-none');
+
+        // Build pagination items
+        let itemsHtml = '';
+
+        // Previous button
+        itemsHtml += `
+            <li class="page-item ${currentPage === 1 ? 'disabled' : ''}">
+                <button class="page-link py-1 px-2.5 rounded-2" data-page="${currentPage - 1}" aria-label="Previous page">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+            </li>
+        `;
+
+        // Page numbers calculation
+        const delta = 2;
+        const range = [];
+        for (let i = Math.max(2, currentPage - delta); i <= Math.min(totalPages - 1, currentPage + delta); i++) {
+            range.push(i);
+        }
+
+        if (currentPage - delta > 2) range.unshift('...');
+        range.unshift(1);
+        if (currentPage + delta < totalPages - 1) range.push('...');
+        if (totalPages > 1) range.push(totalPages);
+
+        range.forEach(p => {
+            if (p === '...') {
+                itemsHtml += `<li class="page-item disabled"><span class="page-link py-1 px-2.5 bg-transparent border-0">…</span></li>`;
+            } else {
+                itemsHtml += `
+                    <li class="page-item ${p === currentPage ? 'active' : ''}">
+                        <button class="page-link py-1 px-2.5 rounded-2 fw-semibold" data-page="${p}">${p}</button>
+                    </li>
+                `;
             }
         });
-        if (selectAllCheckbox) selectAllCheckbox.checked = isChecked;
-        if (mobileSelectAllCheckbox) mobileSelectAllCheckbox.checked = isChecked;
+
+        // Next button
+        itemsHtml += `
+            <li class="page-item ${currentPage === totalPages ? 'disabled' : ''}">
+                <button class="page-link py-1 px-2.5 rounded-2" data-page="${currentPage + 1}" aria-label="Next page">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </li>
+        `;
+
+        if (desktopNav) desktopNav.innerHTML = itemsHtml;
+        if (mobileNav) mobileNav.innerHTML = itemsHtml;
+    }
+
+    function render() {
+        const desktopTbody = document.getElementById('unassignedClassesBody');
+        const mobileContainer = document.getElementById('unassignedMobileCards');
+        const noUnassignedRow = document.getElementById('noUnassignedRow');
+        const noFilterMatchRow = document.getElementById('noFilterMatchRow');
+        const mobileNoUnassigned = document.getElementById('mobileNoUnassigned');
+        const mobileNoFilterMatch = document.getElementById('mobileNoFilterMatch');
+        const countBadge = document.getElementById('unassignedCountBadge');
+        const desktopInfo = document.getElementById('cmmPaginationInfo');
+        const mobileInfo = document.getElementById('cmmMobilePaginationInfo');
+
+        // Handle Empty States
+        if (filteredClasses.length === 0) {
+            if (desktopTbody) desktopTbody.innerHTML = '';
+            if (mobileContainer) mobileContainer.innerHTML = '';
+
+            if (allClasses.length === 0) {
+                if (noUnassignedRow) noUnassignedRow.classList.remove('d-none');
+                if (mobileNoUnassigned) mobileNoUnassigned.classList.remove('d-none');
+                if (noFilterMatchRow) noFilterMatchRow.classList.add('d-none');
+                if (mobileNoFilterMatch) mobileNoFilterMatch.classList.add('d-none');
+            } else {
+                if (noUnassignedRow) noUnassignedRow.classList.add('d-none');
+                if (mobileNoUnassigned) mobileNoUnassigned.classList.add('d-none');
+                if (noFilterMatchRow) noFilterMatchRow.classList.remove('d-none');
+                if (mobileNoFilterMatch) mobileNoFilterMatch.classList.remove('d-none');
+            }
+
+            if (countBadge) countBadge.textContent = `0 of ${allClasses.length} Shown`;
+            renderPaginationNav(0);
+            return;
+        }
+
+        // Hide empty states
+        if (noUnassignedRow) noUnassignedRow.classList.add('d-none');
+        if (mobileNoUnassigned) mobileNoUnassigned.classList.add('d-none');
+        if (noFilterMatchRow) noFilterMatchRow.classList.add('d-none');
+        if (mobileNoFilterMatch) mobileNoFilterMatch.classList.add('d-none');
+
+        const totalPages = pageSize === 'all' ? 1 : Math.ceil(filteredClasses.length / pageSize);
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = pageSize === 'all' ? 0 : (currentPage - 1) * pageSize;
+        const endIndex = pageSize === 'all' ? filteredClasses.length : Math.min(startIndex + pageSize, filteredClasses.length);
+        const currentSlice = filteredClasses.slice(startIndex, endIndex);
+
+        // Update Info Labels
+        const infoText = `Showing ${startIndex + 1}–${endIndex} of ${filteredClasses.length} classes`;
+        if (desktopInfo) desktopInfo.textContent = infoText;
+        if (mobileInfo) mobileInfo.textContent = `Showing ${startIndex + 1}–${endIndex} of ${filteredClasses.length}`;
+        if (countBadge) countBadge.textContent = `${filteredClasses.length} Unassigned`;
+
+        // 1. Render Desktop Rows
+        if (desktopTbody) {
+            const rowsHtml = currentSlice.map(cls => `
+                <tr id="class-row-${cls.id}" class="unassigned-row-item" data-class-id="${cls.id}"
+                    data-course="${cls.course}" data-subject="${cls.subject}" data-division="${cls.division}"
+                    data-room="${cls.room_number}" data-day="${cls.day_name}">
+                    <td class="ps-4">
+                        <div class="form-check mb-0">
+                            <input class="form-check-input row-checkbox row-select-checkbox" type="checkbox" 
+                                   value="${cls.id}" data-class-id="${cls.id}" aria-label="Select class #${cls.id}"
+                                   ${selectedIds.has(cls.id) ? 'checked' : ''}>
+                        </div>
+                    </td>
+                    <td class="fw-bold">
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1.5 rounded-3">
+                            ${cls.room_number || ('Room #' + cls.room_id)}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="fw-semibold text-body">${cls.day_name}</div>
+                        <small class="text-muted">${cls.start_time} - ${cls.end_time}</small>
+                    </td>
+                    <td>
+                        <div class="fw-bold text-body search-subject mb-1">${cls.subject}</div>
+                        ${cls.course ? `<span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle px-2 py-0.5 rounded-2 small search-course">${cls.course}</span>` : ''}
+                    </td>
+                    <td>
+                        ${cls.division ? `<span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-2 fw-semibold">${cls.division}</span>` : '<span class="text-muted small">—</span>'}
+                    </td>
+                    <td>
+                        <select class="form-select form-select-sm faculty-select rounded-3" id="faculty-select-${cls.id}" aria-label="Select Faculty for ${cls.subject}">
+                            ${facultyOptionsHtml}
+                        </select>
+                    </td>
+                    <td class="text-end pe-4">
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill px-2.5 py-1 btn-assign-faculty shadow-sm" data-class-id="${cls.id}">
+                            <i class="bi bi-person-check-fill me-1"></i>Assign
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            desktopTbody.innerHTML = rowsHtml;
+        }
+
+        // 2. Render Mobile Cards
+        if (mobileContainer) {
+            const cardsHtml = currentSlice.map(cls => `
+                <div id="mobile-class-card-${cls.id}" class="cmm-mobile-card unassigned-row-item" data-class-id="${cls.id}"
+                    data-course="${cls.course}" data-subject="${cls.subject}" data-division="${cls.division}"
+                    data-room="${cls.room_number}" data-day="${cls.day_name}">
+                    <div class="card-top-row">
+                        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                            <input class="form-check-input row-checkbox row-select-checkbox mt-0" type="checkbox" 
+                                   value="${cls.id}" data-class-id="${cls.id}" aria-label="Select class #${cls.id}" style="width:15px;height:15px;"
+                                   ${selectedIds.has(cls.id) ? 'checked' : ''}>
+                            <span class="room-pill">${cls.room_number || ('R-' + cls.room_id)}</span>
+                            ${cls.division ? `<span class="div-pill">Div ${cls.division}</span>` : ''}
+                        </div>
+                        ${cls.course ? `<span class="course-label">${cls.course}</span>` : ''}
+                    </div>
+                    <div class="subject-name">${cls.subject}</div>
+                    <div class="meta-row">
+                        <i class="bi bi-calendar3"></i>
+                        <span>${cls.day_name ? cls.day_name.substring(0, 3) : ''}</span>
+                        <i class="bi bi-clock" style="margin-left: 4px;"></i>
+                        <span>${cls.start_time} – ${cls.end_time}</span>
+                    </div>
+                    <div class="action-row">
+                        <select class="faculty-select faculty-select-input" id="mobile-faculty-select-${cls.id}" aria-label="Select Faculty for ${cls.subject}">
+                            ${facultyOptionsHtml}
+                        </select>
+                        <button type="button" class="btn-assign btn-assign-faculty" data-class-id="${cls.id}">
+                            <i class="bi bi-person-check-fill"></i>
+                            <span>Assign</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            mobileContainer.innerHTML = cardsHtml;
+        }
+
+        renderPaginationNav(totalPages);
         updateSelectedCounter();
     }
 
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', function() {
-            toggleAllCheckboxes(this.checked);
+    function applyFilters() {
+        const courseVal = (document.getElementById('courseFilter')?.value || '').toLowerCase().trim();
+        const yearVal = (document.getElementById('yearFilter')?.value || '').toLowerCase().trim();
+        const divVal = (document.getElementById('divFilter')?.value || '').toLowerCase().trim();
+        const dayVal = (document.getElementById('dayFilter')?.value || '').toLowerCase().trim();
+        const roomVal = (document.getElementById('roomFilter')?.value || '').toLowerCase().trim();
+        
+        const desktopSearch = document.getElementById('tableSearchInput')?.value || '';
+        const mobileSearch = document.getElementById('mobileTableSearchInput')?.value || '';
+        const searchVal = (desktopSearch.trim() !== '' ? desktopSearch : mobileSearch).toLowerCase().trim();
+
+        filteredClasses = allClasses.filter(cls => {
+            const courseStr = (cls.course || '').toLowerCase();
+            const subjectStr = (cls.subject || '').toLowerCase();
+            const dayStr = (cls.day_name || '').toLowerCase();
+            const roomStr = (cls.room_number || '').toLowerCase();
+            const divRaw = (cls.division || '').trim();
+            const fullText = `${courseStr} ${subjectStr} ${dayStr} ${roomStr} ${divRaw}`.toLowerCase();
+
+            // 1. Course Match
+            if (courseVal && !courseStr.includes(courseVal) && !fullText.includes(courseVal)) return false;
+
+            // 2. Year Match
+            if (yearVal) {
+                if (yearVal === 'hons' || yearVal === 'honours') {
+                    if (!courseStr.includes('hon') && !fullText.includes('hon')) return false;
+                } else {
+                    if (!courseStr.includes(yearVal) && !fullText.includes(yearVal)) return false;
+                }
+            }
+
+            // 3. Division Match
+            if (divVal) {
+                const targetDiv = divVal.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
+                const itemDiv = divRaw.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
+                if (itemDiv !== targetDiv && divRaw.toLowerCase() !== divVal) return false;
+            }
+
+            // 4. Day Match
+            if (dayVal && dayStr !== dayVal && !dayStr.includes(dayVal)) return false;
+
+            // 5. Room Match
+            if (roomVal && roomStr !== roomVal && !roomStr.includes(roomVal)) return false;
+
+            // 6. Text Search Match
+            if (searchVal && !fullText.includes(searchVal)) return false;
+
+            return true;
         });
+
+        currentPage = 1;
+        render();
+
+        const activeBadge = document.getElementById('activeFilterBadge');
+        const isFiltered = Boolean(searchVal || courseVal || yearVal || divVal || dayVal || roomVal);
+        if (activeBadge) {
+            activeBadge.style.display = isFiltered ? 'inline-block' : 'none';
+        }
     }
 
-    if (mobileSelectAllCheckbox) {
-        mobileSelectAllCheckbox.addEventListener('change', function() {
-            toggleAllCheckboxes(this.checked);
-        });
-    }
+    window.applyFilters = applyFilters;
+    window.filterTable = applyFilters;
 
-    // Sync row checkboxes between desktop table & mobile cards
-    document.addEventListener('change', function(e) {
-        if (e.target && e.target.classList.contains('row-checkbox')) {
-            const classId = e.target.dataset.classId || e.target.value;
-            const isChecked = e.target.checked;
-            document.querySelectorAll(`.row-checkbox[data-class-id="${classId}"], .row-checkbox[value="${classId}"]`).forEach(cb => {
-                cb.checked = isChecked;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initial fast render
+        render();
+
+        // Attach filter listeners
+        ['courseFilter', 'yearFilter', 'divFilter', 'dayFilter', 'roomFilter'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', applyFilters);
+        });
+
+        const desktopSearch = document.getElementById('tableSearchInput');
+        const mobileSearch = document.getElementById('mobileTableSearchInput');
+
+        if (desktopSearch) {
+            desktopSearch.addEventListener('input', function() {
+                if (mobileSearch) mobileSearch.value = this.value;
+                applyFilters();
             });
-            updateSelectedCounter();
         }
-    });
-
-    const btnResetFilters = document.getElementById('btnResetFilters');
-
-    // Custom Room Accordion Selection Helper
-    function selectRoom(roomVal) {
-        if (roomFilter) roomFilter.value = roomVal;
-        const selectedLabel = document.getElementById('selectedRoomLabel');
-        if (selectedLabel) {
-            selectedLabel.textContent = roomVal ? `Room ${roomVal}` : 'All Rooms';
+        if (mobileSearch) {
+            mobileSearch.addEventListener('input', function() {
+                if (desktopSearch) desktopSearch.value = this.value;
+                applyFilters();
+            });
         }
 
-        document.querySelectorAll('.room-option-item, .room-chip-btn').forEach(el => {
-            if ((el.getAttribute('data-room-value') || '') === roomVal) {
-                el.classList.add('active');
-            } else {
-                el.classList.remove('active');
+        // Page Size Change Handlers
+        const desktopPageSize = document.getElementById('cmmPageSizeSelect');
+        const mobilePageSize = document.getElementById('cmmMobilePageSizeSelect');
+
+        function setPageSize(val) {
+            pageSize = val === 'all' ? 'all' : parseInt(val, 10);
+            if (desktopPageSize) desktopPageSize.value = val;
+            if (mobilePageSize) mobilePageSize.value = val;
+            currentPage = 1;
+            render();
+        }
+
+        if (desktopPageSize) desktopPageSize.addEventListener('change', function() { setPageSize(this.value); });
+        if (mobilePageSize) mobilePageSize.addEventListener('change', function() { setPageSize(this.value); });
+
+        // Pagination Click Handler (Event delegation)
+        document.addEventListener('click', function(e) {
+            const pageBtn = e.target.closest('#cmmPaginationNav button, #cmmMobilePaginationNav button');
+            if (pageBtn && pageBtn.dataset.page) {
+                const targetPage = parseInt(pageBtn.dataset.page, 10);
+                const totalPages = pageSize === 'all' ? 1 : Math.ceil(filteredClasses.length / pageSize);
+                if (!isNaN(targetPage) && targetPage >= 1 && targetPage <= totalPages && targetPage !== currentPage) {
+                    currentPage = targetPage;
+                    render();
+                    const tableTop = document.getElementById('unassignedClassesTable') || document.getElementById('unassignedMobileContainer');
+                    if (tableTop) tableTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
             }
         });
 
-        const dropdownBtn = document.getElementById('roomDropdownBtn');
-        if (dropdownBtn && window.bootstrap && bootstrap.Dropdown) {
-            const dd = bootstrap.Dropdown.getInstance(dropdownBtn) || new bootstrap.Dropdown(dropdownBtn);
-            if (dd) dd.hide();
+        // Checkbox Toggle & Sync
+        function toggleCurrentPageCheckboxes(isChecked) {
+            const currentSlice = getCurrentPageSlice();
+            currentSlice.forEach(cls => {
+                if (isChecked) {
+                    selectedIds.add(cls.id);
+                } else {
+                    selectedIds.delete(cls.id);
+                }
+            });
+            render();
         }
 
-        applyFilters();
-    }
+        document.getElementById('selectAllCheckbox')?.addEventListener('change', function() {
+            toggleCurrentPageCheckboxes(this.checked);
+        });
 
-    const roomDropdownContainer = document.querySelector('.room-accordion-dropdown');
-    if (roomDropdownContainer) {
-        roomDropdownContainer.addEventListener('click', function(e) {
-            const item = e.target.closest('[data-room-value]');
-            if (item) {
-                e.preventDefault();
-                e.stopPropagation();
-                const val = item.getAttribute('data-room-value') || '';
-                selectRoom(val);
+        document.getElementById('mobileSelectAllCheckbox')?.addEventListener('change', function() {
+            toggleCurrentPageCheckboxes(this.checked);
+        });
+
+        // Individual Row Checkbox Changes
+        document.addEventListener('change', function(e) {
+            if (e.target && e.target.classList.contains('row-checkbox')) {
+                const classId = parseInt(e.target.dataset.classId || e.target.value, 10);
+                if (!isNaN(classId)) {
+                    if (e.target.checked) {
+                        selectedIds.add(classId);
+                    } else {
+                        selectedIds.delete(classId);
+                    }
+                    updateSelectedCounter();
+                }
             }
         });
-    }
 
-    // Reset Filters
-    if (btnResetFilters) {
-        btnResetFilters.addEventListener('click', function() {
+        // Reset Filters
+        document.getElementById('btnResetFilters')?.addEventListener('click', function() {
             if (desktopSearch) desktopSearch.value = '';
             if (mobileSearch) mobileSearch.value = '';
 
-            const selectDropdowns = [
-                document.getElementById('courseFilter'),
-                document.getElementById('yearFilter'),
-                document.getElementById('divFilter'),
-                document.getElementById('dayFilter')
-            ];
-            selectDropdowns.forEach(dropdown => {
-                if (dropdown) dropdown.selectedIndex = 0;
+            ['courseFilter', 'yearFilter', 'divFilter', 'dayFilter'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.selectedIndex = 0;
             });
 
+            const roomFilter = document.getElementById('roomFilter');
             if (roomFilter) roomFilter.value = '';
             const selectedLabel = document.getElementById('selectedRoomLabel');
             if (selectedLabel) selectedLabel.textContent = 'All Rooms';
@@ -2065,348 +2150,329 @@ document.addEventListener('DOMContentLoaded', function() {
 
             applyFilters();
         });
-    }
 
-    // ==================== BULK ASSIGN HANDLER (DESKTOP & MOBILE) ====================
-    async function executeBulkAssign(facultySelectEl, assignBtnEl) {
-        if (!facultySelectEl || !facultySelectEl.value || facultySelectEl.value.trim() === '') {
-            alert('Please select a faculty member from the dropdown before bulk assigning.');
-            if (facultySelectEl) facultySelectEl.focus();
-            return;
-        }
+        // Room Selection Helper
+        const roomDropdownContainer = document.querySelector('.room-accordion-dropdown');
+        if (roomDropdownContainer) {
+            roomDropdownContainer.addEventListener('click', function(e) {
+                const item = e.target.closest('[data-room-value]');
+                if (item) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const val = item.getAttribute('data-room-value') || '';
+                    const roomFilter = document.getElementById('roomFilter');
+                    if (roomFilter) roomFilter.value = val;
+                    const selectedLabel = document.getElementById('selectedRoomLabel');
+                    if (selectedLabel) selectedLabel.textContent = val ? `Room ${val}` : 'All Rooms';
+                    document.querySelectorAll('.room-option-item, .room-chip-btn').forEach(el => {
+                        el.classList.toggle('active', (el.getAttribute('data-room-value') || '') === val);
+                    });
 
-        const facultyId = parseInt(facultySelectEl.value, 10);
-        if (isNaN(facultyId)) {
-            alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
-            return;
-        }
-
-        const checkedBoxes = Array.from(document.querySelectorAll('.row-checkbox:checked'));
-        const classIds = Array.from(new Set(checkedBoxes.map(cb => {
-            const idVal = cb.getAttribute('data-class-id') || cb.value;
-            return parseInt(idVal, 10);
-        }).filter(id => !isNaN(id))));
-
-        if (classIds.length === 0) {
-            alert('Please select at least one class checkbox to assign.');
-            return;
-        }
-
-        const originalBtnHtml = assignBtnEl.innerHTML;
-        assignBtnEl.disabled = true;
-        assignBtnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Assigning...';
-
-        try {
-            const response = await fetch('/admin/api/bulk_assign_faculty', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({
-                    faculty_id: facultyId,
-                    class_ids: classIds
-                })
-            });
-
-            const data = await response.json().catch(() => null);
-
-            if (response.ok && data && (data.success !== false)) {
-                classIds.forEach(id => {
-                    const row = document.getElementById(`class-row-${id}`);
-                    if (row) row.remove();
-                    const card = document.getElementById(`mobile-class-card-${id}`);
-                    if (card) card.remove();
-                });
-
-                if (selectAllCheckbox) selectAllCheckbox.checked = false;
-                if (mobileSelectAllCheckbox) mobileSelectAllCheckbox.checked = false;
-                updateSelectedCounter();
-                applyFilters();
-
-                const desktopSelect = document.getElementById('bulkFacultySelect');
-                const mobileSelect = document.getElementById('mobileBulkFacultySelect');
-                if (desktopSelect) desktopSelect.selectedIndex = 0;
-                if (mobileSelect) mobileSelect.selectedIndex = 0;
-            } else {
-                const errorMsg = (data && (data.error || data.message)) || `Server returned status ${response.status}`;
-                alert('Failed to bulk assign classes: ' + errorMsg);
-            }
-        } catch (err) {
-            alert('Network error while performing bulk assignment: ' + (err.message || 'Please try again.'));
-        } finally {
-            assignBtnEl.disabled = false;
-            assignBtnEl.innerHTML = originalBtnHtml;
-        }
-    }
-
-    const bulkAssignBtn = document.getElementById('bulkAssignBtn');
-    const bulkFacultySelect = document.getElementById('bulkFacultySelect');
-    if (bulkAssignBtn) {
-        bulkAssignBtn.addEventListener('click', () => executeBulkAssign(bulkFacultySelect, bulkAssignBtn));
-    }
-
-    const mobileBulkAssignBtn = document.getElementById('mobileBulkAssignBtn');
-    const mobileBulkFacultySelect = document.getElementById('mobileBulkFacultySelect');
-    if (mobileBulkAssignBtn) {
-        mobileBulkAssignBtn.addEventListener('click', () => executeBulkAssign(mobileBulkFacultySelect, mobileBulkAssignBtn));
-    }
-
-    // ==================== SINGLE ASSIGN HANDLER ====================
-    document.addEventListener('click', function(e) {
-        const assignBtn = e.target.closest('.btn-assign-faculty');
-        if (!assignBtn) return;
-
-        const classId = assignBtn.dataset.classId;
-        if (!classId) return;
-
-        const container = assignBtn.closest('tr, .cmm-mobile-card');
-        const select = document.getElementById(`faculty-select-${classId}`) || 
-                       document.getElementById(`mobile-faculty-select-${classId}`) || 
-                       (container ? container.querySelector('.faculty-select') : null);
-
-        if (!select || !select.value || select.value.trim() === '') {
-            alert('Please select a faculty member from the dropdown before assigning.');
-            if (select) select.focus();
-            return;
-        }
-
-        const facultyId = parseInt(select.value, 10);
-        if (isNaN(facultyId)) {
-            alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
-            return;
-        }
-
-        const originalBtnHtml = assignBtn.innerHTML;
-        assignBtn.disabled = true;
-        assignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Assigning...';
-
-        fetch(`/admin/api/assign_faculty/${classId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken,
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            body: JSON.stringify({ faculty_id: facultyId })
-        })
-        .then(async (response) => {
-            const data = await response.json().catch(() => null);
-            if (response.ok && data && data.success) {
-                const row = document.getElementById(`class-row-${classId}`);
-                const card = document.getElementById(`mobile-class-card-${classId}`);
-                
-                if (row) {
-                    row.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-                    row.style.opacity = '0';
-                    row.style.transform = 'translateX(20px)';
-                    setTimeout(() => row.remove(), 250);
-                }
-                if (card) {
-                    card.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
-                    card.style.opacity = '0';
-                    card.style.transform = 'translateX(20px)';
-                    setTimeout(() => card.remove(), 250);
-                }
-                setTimeout(() => {
-                    applyFilters();
-                    updateSelectedCounter();
-                }, 300);
-            } else {
-                const errorMsg = (data && (data.error || data.message)) || `Server error ${response.status}`;
-                alert('Failed to allocate faculty: ' + errorMsg);
-                assignBtn.disabled = false;
-                assignBtn.innerHTML = originalBtnHtml;
-            }
-        })
-        .catch(err => {
-            alert('Network error: ' + (err.message || 'Please try again.'));
-            assignBtn.disabled = false;
-            assignBtn.innerHTML = originalBtnHtml;
-        });
-    });
-
-    // ==================== MASS IMPORT TIMETABLE LOGIC ====================
-    const btnPreviewCsv = document.getElementById('btnPreviewCsv');
-    const importTimetableForm = document.getElementById('importTimetableForm');
-    const csvFileInput = document.getElementById('csvFileInput');
-    const csvDropzone = document.getElementById('csvDropzone');
-    const dropzoneIcon = document.getElementById('dropzoneIcon');
-    const dropzoneTitle = document.getElementById('dropzoneTitle');
-    const dropzoneSub = document.getElementById('dropzoneSub');
-
-    // Interactive Dropzone Event Handling
-    if (csvFileInput && csvDropzone) {
-        csvFileInput.addEventListener('change', function() {
-            if (this.files && this.files.length > 0) {
-                const file = this.files[0];
-                const sizeKb = (file.size / 1024).toFixed(1);
-                csvDropzone.classList.add('has-file');
-                if (dropzoneIcon) dropzoneIcon.className = 'bi bi-file-earmark-check-fill text-emerald';
-                if (dropzoneTitle) dropzoneTitle.textContent = file.name;
-                if (dropzoneSub) dropzoneSub.textContent = `${sizeKb} KB • Ready for import (Click to replace)`;
-            } else {
-                csvDropzone.classList.remove('has-file');
-                if (dropzoneIcon) dropzoneIcon.className = 'bi bi-cloud-arrow-up-fill';
-                if (dropzoneTitle) dropzoneTitle.textContent = 'Click to browse or drop CSV file';
-                if (dropzoneSub) dropzoneSub.textContent = 'Supports standard .csv timetable matrices';
-            }
-        });
-
-        // Drag & Drop
-        ['dragenter', 'dragover'].forEach(eventName => {
-            csvDropzone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                csvDropzone.classList.add('dragover');
-            }, false);
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            csvDropzone.addEventListener(eventName, (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                csvDropzone.classList.remove('dragover');
-            }, false);
-        });
-
-        csvDropzone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if (files && files.length > 0) {
-                csvFileInput.files = files;
-                const changeEvt = new Event('change');
-                csvFileInput.dispatchEvent(changeEvt);
-            }
-        });
-    }
-
-    async function handleCsvSubmit(isDryRun) {
-        if (!csvFileInput.files || csvFileInput.files.length === 0) {
-            alert('Please select a CSV file first.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', csvFileInput.files[0]);
-        formData.append('dry_run', isDryRun ? 'true' : 'false');
-
-        const btn = isDryRun ? btnPreviewCsv : document.getElementById('btnCommitImport');
-        const origText = btn.innerHTML;
-        btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Processing...';
-
-        try {
-            const response = await fetch('/admin/api/timetable/import', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: formData
-            });
-
-            const result = await response.json();
-            btn.disabled = false;
-            btn.innerHTML = origText;
-
-            if (result.success) {
-                const data = result.data || {};
-                const previewContainer = document.getElementById('importPreviewContainer');
-                const summaryText = document.getElementById('previewSummaryText');
-                const errorsUl = document.getElementById('previewErrorsUl');
-                const errorBox = document.getElementById('previewErrorList');
-
-                if (previewContainer) previewContainer.classList.remove('d-none');
-                if (summaryText) {
-                    summaryText.textContent = `Successfully parsed ${data.records_parsed || 0} timetable entries. (${data.error_count || 0} warnings/errors)`;
-                }
-
-                if (data.errors && data.errors.length > 0) {
-                    if (errorBox) errorBox.classList.remove('d-none');
-                    if (errorsUl) {
-                        errorsUl.innerHTML = data.errors.map(e => `<li>${e}</li>`).join('');
+                    const dropdownBtn = document.getElementById('roomDropdownBtn');
+                    if (dropdownBtn && window.bootstrap && bootstrap.Dropdown) {
+                        const dd = bootstrap.Dropdown.getInstance(dropdownBtn) || new bootstrap.Dropdown(dropdownBtn);
+                        if (dd) dd.hide();
                     }
-                } else {
-                    if (errorBox) errorBox.classList.add('d-none');
+                    applyFilters();
                 }
-
-                if (!isDryRun) {
-                    alert('Timetable imported successfully!');
-                    window.location.reload();
-                }
-            } else {
-                alert('Import Failed: ' + (result.error || 'Failed to parse CSV file.'));
-            }
-        } catch (err) {
-            btn.disabled = false;
-            btn.innerHTML = origText;
-            alert('Error processing CSV: ' + (err.message || 'Server network error'));
+            });
         }
-    }
 
-    if (btnPreviewCsv) {
-        btnPreviewCsv.addEventListener('click', () => handleCsvSubmit(true));
-    }
+        // ==================== BULK ASSIGN HANDLER ====================
+        async function executeBulkAssign(facultySelectEl, assignBtnEl) {
+            if (!facultySelectEl || !facultySelectEl.value) {
+                alert('Please select a faculty member from the dropdown before bulk assigning.');
+                if (facultySelectEl) facultySelectEl.focus();
+                return;
+            }
 
-    if (importTimetableForm) {
-        importTimetableForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const dryRun = document.getElementById('dryRunToggle').checked;
-            handleCsvSubmit(dryRun);
-        });
-    }
+            const facultyId = parseInt(facultySelectEl.value, 10);
+            const classIds = Array.from(selectedIds);
 
-    // ==================== DELETE TIMETABLE SCOPE LOGIC ====================
-    const deleteScopeSelect = document.getElementById('deleteScopeSelect');
-    const deleteFloorGroup = document.getElementById('deleteFloorGroup');
-    const deleteRoomGroup = document.getElementById('deleteRoomGroup');
-    const btnConfirmDeleteTimetable = document.getElementById('btnConfirmDeleteTimetable');
+            if (classIds.length === 0) {
+                alert('Please select at least one class checkbox to assign.');
+                return;
+            }
 
-    if (deleteScopeSelect) {
-        deleteScopeSelect.addEventListener('change', function() {
-            const val = this.value;
-            if (deleteFloorGroup) deleteFloorGroup.classList.toggle('d-none', val !== 'floor');
-            if (deleteRoomGroup) deleteRoomGroup.classList.toggle('d-none', val !== 'room');
-        });
-    }
-
-    // ==================== DELETE TIMETABLE CONFIRMATION LOGIC ====================
-    if (btnConfirmDeleteTimetable) {
-        btnConfirmDeleteTimetable.addEventListener('click', async function() {
-            const origHtml = btnConfirmDeleteTimetable.innerHTML;
-            btnConfirmDeleteTimetable.disabled = true;
-            btnConfirmDeleteTimetable.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Deleting...';
+            const origHtml = assignBtnEl.innerHTML;
+            assignBtnEl.disabled = true;
+            assignBtnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Assigning...';
 
             try {
-                const response = await fetch('/admin/api/timetable/delete', {
+                const response = await fetch('/admin/api/bulk_assign_faculty', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': csrfToken,
                         'X-Requested-With': 'XMLHttpRequest'
                     },
-                    body: JSON.stringify({ scope: 'building' })
+                    body: JSON.stringify({
+                        faculty_id: facultyId,
+                        class_ids: classIds
+                    })
+                });
+
+                const data = await response.json().catch(() => null);
+
+                if (response.ok && data && (data.success !== false)) {
+                    // Remove allocated classes from in-memory arrays
+                    const removedSet = new Set(classIds);
+                    allClasses = allClasses.filter(c => !removedSet.has(c.id));
+                    classIds.forEach(id => selectedIds.delete(id));
+
+                    applyFilters();
+
+                    const desktopSelect = document.getElementById('bulkFacultySelect');
+                    const mobileSelect = document.getElementById('mobileBulkFacultySelect');
+                    if (desktopSelect) desktopSelect.selectedIndex = 0;
+                    if (mobileSelect) mobileSelect.selectedIndex = 0;
+                } else {
+                    const errorMsg = (data && (data.error || data.message)) || `Server returned status ${response.status}`;
+                    alert('Failed to bulk assign classes: ' + errorMsg);
+                }
+            } catch (err) {
+                alert('Network error while performing bulk assignment: ' + (err.message || 'Please try again.'));
+            } finally {
+                assignBtnEl.disabled = false;
+                assignBtnEl.innerHTML = origHtml;
+            }
+        }
+
+        const bulkAssignBtn = document.getElementById('bulkAssignBtn');
+        const bulkFacultySelect = document.getElementById('bulkFacultySelect');
+        if (bulkAssignBtn) bulkAssignBtn.addEventListener('click', () => executeBulkAssign(bulkFacultySelect, bulkAssignBtn));
+
+        const mobileBulkAssignBtn = document.getElementById('mobileBulkAssignBtn');
+        const mobileBulkFacultySelect = document.getElementById('mobileBulkFacultySelect');
+        if (mobileBulkAssignBtn) mobileBulkAssignBtn.addEventListener('click', () => executeBulkAssign(mobileBulkFacultySelect, mobileBulkAssignBtn));
+
+        // ==================== SINGLE ASSIGN HANDLER ====================
+        document.addEventListener('click', function(e) {
+            const assignBtn = e.target.closest('.btn-assign-faculty');
+            if (!assignBtn) return;
+
+            const classId = parseInt(assignBtn.dataset.classId, 10);
+            if (isNaN(classId)) return;
+
+            const container = assignBtn.closest('tr, .cmm-mobile-card');
+            const select = document.getElementById(`faculty-select-${classId}`) || 
+                           document.getElementById(`mobile-faculty-select-${classId}`) || 
+                           (container ? container.querySelector('.faculty-select') : null);
+
+            if (!select || !select.value) {
+                alert('Please select a faculty member from the dropdown before assigning.');
+                if (select) select.focus();
+                return;
+            }
+
+            const facultyId = parseInt(select.value, 10);
+            const origHtml = assignBtn.innerHTML;
+            assignBtn.disabled = true;
+            assignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Assigning...';
+
+            fetch(`/admin/api/assign_faculty/${classId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({ faculty_id: facultyId })
+            })
+            .then(async (response) => {
+                const data = await response.json().catch(() => null);
+                if (response.ok && data && data.success) {
+                    allClasses = allClasses.filter(c => c.id !== classId);
+                    selectedIds.delete(classId);
+                    applyFilters();
+                } else {
+                    const errorMsg = (data && (data.error || data.message)) || `Server error ${response.status}`;
+                    alert('Failed to allocate faculty: ' + errorMsg);
+                    assignBtn.disabled = false;
+                    assignBtn.innerHTML = origHtml;
+                }
+            })
+            .catch(err => {
+                alert('Network error: ' + (err.message || 'Please try again.'));
+                assignBtn.disabled = false;
+                assignBtn.innerHTML = origHtml;
+            });
+        });
+
+        // ==================== MASS IMPORT TIMETABLE LOGIC ====================
+        const btnPreviewCsv = document.getElementById('btnPreviewCsv');
+        const importTimetableForm = document.getElementById('importTimetableForm');
+        const csvFileInput = document.getElementById('csvFileInput');
+        const csvDropzone = document.getElementById('csvDropzone');
+        const dropzoneIcon = document.getElementById('dropzoneIcon');
+        const dropzoneTitle = document.getElementById('dropzoneTitle');
+        const dropzoneSub = document.getElementById('dropzoneSub');
+
+        if (csvFileInput && csvDropzone) {
+            csvFileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                    const file = this.files[0];
+                    const sizeKb = (file.size / 1024).toFixed(1);
+                    csvDropzone.classList.add('has-file');
+                    if (dropzoneIcon) dropzoneIcon.className = 'bi bi-file-earmark-check-fill text-emerald';
+                    if (dropzoneTitle) dropzoneTitle.textContent = file.name;
+                    if (dropzoneSub) dropzoneSub.textContent = `${sizeKb} KB • Ready for import (Click to replace)`;
+                } else {
+                    csvDropzone.classList.remove('has-file');
+                    if (dropzoneIcon) dropzoneIcon.className = 'bi bi-cloud-arrow-up-fill';
+                    if (dropzoneTitle) dropzoneTitle.textContent = 'Click to browse or drop CSV file';
+                    if (dropzoneSub) dropzoneSub.textContent = 'Supports standard .csv timetable matrices';
+                }
+            });
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                csvDropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    csvDropzone.classList.add('dragover');
+                }, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                csvDropzone.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    csvDropzone.classList.remove('dragover');
+                }, false);
+            });
+
+            csvDropzone.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                if (files && files.length > 0) {
+                    csvFileInput.files = files;
+                    const changeEvt = new Event('change');
+                    csvFileInput.dispatchEvent(changeEvt);
+                }
+            });
+        }
+
+        async function handleCsvSubmit(isDryRun) {
+            if (!csvFileInput.files || csvFileInput.files.length === 0) {
+                alert('Please select a CSV file first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', csvFileInput.files[0]);
+            formData.append('dry_run', isDryRun ? 'true' : 'false');
+
+            const btn = isDryRun ? btnPreviewCsv : document.getElementById('btnCommitImport');
+            const origText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Processing...';
+
+            try {
+                const response = await fetch('/admin/api/timetable/import', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
                 });
 
                 const result = await response.json();
-                btnConfirmDeleteTimetable.disabled = false;
-                btnConfirmDeleteTimetable.innerHTML = origHtml;
+                btn.disabled = false;
+                btn.innerHTML = origText;
 
                 if (result.success) {
-                    alert(result.message || 'Timetables wiped successfully!');
-                    window.location.reload();
+                    const data = result.data || {};
+                    const previewContainer = document.getElementById('importPreviewContainer');
+                    const summaryText = document.getElementById('previewSummaryText');
+                    const errorsUl = document.getElementById('previewErrorsUl');
+                    const errorBox = document.getElementById('previewErrorList');
+
+                    if (previewContainer) previewContainer.classList.remove('d-none');
+                    if (summaryText) {
+                        summaryText.textContent = `Successfully parsed ${data.records_parsed || 0} timetable entries. (${data.error_count || 0} warnings/errors)`;
+                    }
+
+                    if (data.errors && data.errors.length > 0) {
+                        if (errorBox) errorBox.classList.remove('d-none');
+                        if (errorsUl) {
+                            errorsUl.innerHTML = data.errors.map(e => `<li>${e}</li>`).join('');
+                        }
+                    } else {
+                        if (errorBox) errorBox.classList.add('d-none');
+                    }
+
+                    if (!isDryRun) {
+                        alert('Timetable imported successfully!');
+                        window.location.reload();
+                    }
                 } else {
-                    alert('Delete failed: ' + (result.error || result.message || 'Server error'));
+                    alert('Import Failed: ' + (result.error || 'Failed to parse CSV file.'));
                 }
             } catch (err) {
-                btnConfirmDeleteTimetable.disabled = false;
-                btnConfirmDeleteTimetable.innerHTML = origHtml;
-                alert('Network error while deleting timetables: ' + (err.message || 'Please try again.'));
+                btn.disabled = false;
+                btn.innerHTML = origText;
+                alert('Error processing CSV: ' + (err.message || 'Server network error'));
             }
-        });
-    }
-});
+        }
+
+        if (btnPreviewCsv) btnPreviewCsv.addEventListener('click', () => handleCsvSubmit(true));
+        if (importTimetableForm) {
+            importTimetableForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                handleCsvSubmit(document.getElementById('dryRunToggle').checked);
+            });
+        }
+
+        // ==================== DELETE TIMETABLE SCOPE LOGIC ====================
+        const deleteScopeSelect = document.getElementById('deleteScopeSelect');
+        const deleteFloorGroup = document.getElementById('deleteFloorGroup');
+        const deleteRoomGroup = document.getElementById('deleteRoomGroup');
+        const btnConfirmDeleteTimetable = document.getElementById('btnConfirmDeleteTimetable');
+
+        if (deleteScopeSelect) {
+            deleteScopeSelect.addEventListener('change', function() {
+                const val = this.value;
+                if (deleteFloorGroup) deleteFloorGroup.classList.toggle('d-none', val !== 'floor');
+                if (deleteRoomGroup) deleteRoomGroup.classList.toggle('d-none', val !== 'room');
+            });
+        }
+
+        if (btnConfirmDeleteTimetable) {
+            btnConfirmDeleteTimetable.addEventListener('click', async function() {
+                const origHtml = btnConfirmDeleteTimetable.innerHTML;
+                btnConfirmDeleteTimetable.disabled = true;
+                btnConfirmDeleteTimetable.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Deleting...';
+
+                try {
+                    const response = await fetch('/admin/api/timetable/delete', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': csrfToken,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({ scope: 'building' })
+                    });
+
+                    const result = await response.json();
+                    btnConfirmDeleteTimetable.disabled = false;
+                    btnConfirmDeleteTimetable.innerHTML = origHtml;
+
+                    if (result.success) {
+                        alert(result.message || 'Timetables wiped successfully!');
+                        window.location.reload();
+                    } else {
+                        alert('Delete failed: ' + (result.error || result.message || 'Server error'));
+                    }
+                } catch (err) {
+                    btnConfirmDeleteTimetable.disabled = false;
+                    btnConfirmDeleteTimetable.innerHTML = origHtml;
+                    alert('Network error while deleting timetables: ' + (err.message || 'Please try again.'));
+                }
+            });
+        }
+    });
+})();
 </script>
 {% endblock %}

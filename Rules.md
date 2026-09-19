@@ -67,6 +67,7 @@ Before outputting any code or completing a task, you MUST silently run through t
 *   [ ] **The Lighthouse Check:** Did I introduce any heavy external dependencies, unoptimized raster images (`<img>`), or blocking JavaScript that threatens the 95+ performance score?
 *   [ ] **The Interactive Twin & Pointer Events Check:** Did I ensure SVG digital twin containers maintain `pointer-events: none;` with `pointer-events: auto;` only on interactive elements, preserving room clickability and Flashlight mode?
 *   [ ] **The Automated Pytest Suite Run Check:** Did I execute `./venv/Scripts/pytest.exe` to verify that 100% of test suites pass with zero failures and zero regressions?
+*   [ ] **The Rigorous Testing & Real Assertion Check:** Do test cases rigorously exercise actual route logic, assert real HTTP responses/status codes, verify DB state mutations, and test permission/boundary failures rather than relying on superficial, brittle, or dummy assertions?
 *   [ ] **The Boy Scout Check:** Did I actively delete the dead code, consolidate duplicate logic, or remove legacy technical debt in the surrounding area of my fix?
 *   [ ] **The Constraint Check:** Did I follow the exact tech stack required (HTML, vanilla CSS, vanilla JS, Python/Flask, Bootstrap 5) without hallucinating Next.js, React, or Tailwind solutions?
 

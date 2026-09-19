@@ -258,11 +258,10 @@ class TestCSVTimetableImport(unittest.TestCase):
         self.assertIn("Unassigned Classes", content)
         # Check CSRF meta tag
         self.assertIn('name="csrf-token"', content)
-        # Check table headers and content
+        # Check that data is serialized for client-side rendering
         self.assertIn("Algorithms and Data", content)
         self.assertIn("Prof. Sharma", content)
-        # Check data attribute on button
-        self.assertIn(f'data-class-id="{tt_id}"', content)
+        self.assertIn(f'"id": {tt_id}', content)
         # Verify no form tags wrapping the row
         self.assertNotIn(f'<form id="assign-form-{tt_id}"', content)
 

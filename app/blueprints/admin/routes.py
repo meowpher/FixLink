@@ -254,10 +254,30 @@ def classroom_management():
     assigned_count = Timetable.query.filter(Timetable.faculty_id.isnot(None)).count()
     unassigned_count = len(unassigned_classes)
 
+    day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+    unassigned_classes_data = [
+        {
+            'id': cls.id,
+            'course': cls.course or '',
+            'subject': cls.subject or '',
+            'division': cls.division or '',
+            'room_number': cls.room.number if cls.room else (f"Room #{cls.room_id}" if cls.room_id else ""),
+            'room_id': cls.room_id,
+            'day_of_week': cls.day_of_week,
+            'day_name': day_names[cls.day_of_week] if (cls.day_of_week is not None and 0 <= cls.day_of_week < 7) else (f"Day {cls.day_of_week}" if cls.day_of_week is not None else ""),
+            'start_time': cls.start_time.strftime('%I:%M %p') if cls.start_time else '',
+            'end_time': cls.end_time.strftime('%I:%M %p') if cls.end_time else '',
+        }
+        for cls in unassigned_classes
+    ]
+    all_faculties_data = [{'id': fac.id, 'name': fac.name} for fac in all_faculties]
+
     return render_template(
         'admin_cmm.html',
         unassigned_classes=unassigned_classes,
+        unassigned_classes_data=unassigned_classes_data,
         all_faculties=all_faculties,
+        all_faculties_data=all_faculties_data,
         floors=floors,
         academic_floors=academic_floors,
         rooms=rooms,

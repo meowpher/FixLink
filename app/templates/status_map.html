@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Status Map - MIT-WPU Vyas Tracker{% endblock %}
+{% block title %}Live Campus Status Map - Vyas Building Floor Plans | FixLink{% endblock %}
+{% block meta_description %}Explore live room status, maintenance conditions, and operational readiness across all floors of the Vyas Building at MIT World Peace University.{% endblock %}
+
+{% block og_title %}Live Vyas Building Floor Status Map — MIT-WPU FixLink{% endblock %}
+{% block og_description %}Real-time floor map showing classroom, lab, washroom, and elevator maintenance conditions at MIT World Peace University.{% endblock %}
+
 {% block extra_css %}
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/admin_map.js') }}">
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/render.js') }}">

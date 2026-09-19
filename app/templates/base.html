@@ -1434,85 +1434,117 @@
             }
         }
 
-        /* ── Modern Non-Boxy Bug Modal ── */
+        /* ── Modern Sleek Bug Modal Redesign ── */
         .bug-modal-dialog {
-            max-width: 480px;
+            max-width: 440px;
             margin: 1.5rem auto;
         }
         .bug-modal-card {
             background: #ffffff !important;
             border: 1px solid rgba(0, 0, 0, 0.08) !important;
-            border-radius: 22px !important;
-            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.15) !important;
+            border-radius: 18px !important;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.15) !important;
             overflow: hidden;
             transition: all 0.25s ease;
         }
         .bug-modal-header {
             background: #ffffff !important;
             border-bottom: 1px solid #f1f5f9 !important;
-            padding: 1.25rem 1.5rem !important;
+            padding: 1rem 1.25rem !important;
+        }
+        .bug-header-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .bug-modal-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.25;
+            margin: 0;
+        }
+        .bug-modal-subtitle {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 2px;
+            line-height: 1.25;
         }
         .bug-modal-body {
             background: #ffffff !important;
-            padding: 1.35rem 1.4rem 0.8rem !important;
+            padding: 1.15rem 1.25rem 0.6rem !important;
         }
         .bug-modal-footer {
-            background: #f8fafc !important;
+            background: #ffffff !important;
             border-top: 1px solid #f1f5f9 !important;
-            padding: 1rem 1.4rem;
-        }
-
-        /* Dynamic Input Blocks */
-        .bug-field-block {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 14px;
-            padding: 10px 14px;
-            margin-bottom: 14px;
-            transition: all 0.2s ease;
-        }
-        .bug-field-block:focus-within {
-            background: #ffffff;
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
-        }
-        .bug-field-label {
+            padding: 0.85rem 1.25rem !important;
             display: flex;
             align-items: center;
-            gap: 6px;
-            font-size: 0.76rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            color: #64748b;
-            margin-bottom: 6px;
-        }
-        .bug-field-label i {
-            font-size: 0.85rem;
-            color: #ef4444;
-        }
-        .bug-input-control {
-            width: 100%;
-            background: transparent !important;
-            border: none !important;
-            outline: none !important;
-            box-shadow: none !important;
-            padding: 2px 0;
-            font-size: 0.92rem;
-            color: #0f172a;
-        }
-        .bug-input-control::placeholder {
-            color: #94a3b8;
-            font-size: 0.88rem;
+            gap: 10px;
         }
 
-        /* Interactive File Dropzone */
+        /* Form Labels and Controls */
+        .bug-form-group {
+            margin-bottom: 0.85rem;
+        }
+        .bug-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        .bug-required {
+            color: #ef4444;
+            font-weight: 700;
+        }
+        .bug-input,
+        .bug-textarea {
+            width: 100%;
+            background: #f8fafc !important;
+            border: 1px solid #e2e8f0 !important;
+            border-radius: 10px !important;
+            padding: 8px 12px !important;
+            font-size: 0.86rem !important;
+            color: #0f172a !important;
+            transition: all 0.2s ease !important;
+            box-shadow: none !important;
+        }
+        .bug-input:focus,
+        .bug-textarea:focus {
+            background: #ffffff !important;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12) !important;
+            outline: none !important;
+        }
+        .bug-input::placeholder,
+        .bug-textarea::placeholder {
+            color: #94a3b8;
+            font-size: 0.82rem;
+        }
+        .bug-textarea {
+            resize: vertical;
+            min-height: 72px;
+        }
+
+        /* Sleek Attachment Bar */
         .bug-dropzone {
             background: #f8fafc;
-            border: 1.5px dashed #cbd5e1;
-            border-radius: 14px;
-            padding: 14px;
-            text-align: center;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 9px 12px;
             cursor: pointer;
             transition: all 0.2s ease;
         }
@@ -1520,46 +1552,49 @@
         .bug-dropzone.dragover {
             background: #fef2f2;
             border-color: #ef4444;
-            transform: scale(1.005);
         }
-        .bug-dropzone-icon {
-            font-size: 1.6rem;
-            color: #64748b;
-            line-height: 1;
-            margin-bottom: 4px;
-            transition: transform 0.2s ease, color 0.2s ease;
-        }
-        .bug-dropzone:hover .bug-dropzone-icon {
+        .bug-attach-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
-            transform: translateY(-2px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.82rem;
+            flex-shrink: 0;
         }
-        .bug-dropzone-text {
-            font-size: 0.84rem;
-            color: #334155;
+        .bug-attach-text {
+            font-size: 0.8rem;
+            color: #475569;
+            font-weight: 500;
         }
-        .bug-dropzone-hint {
-            font-size: 0.72rem;
+        .bug-attach-badge {
+            font-size: 0.68rem;
             color: #94a3b8;
-            margin-top: 2px;
+            background: #f1f5f9;
+            padding: 2px 7px;
+            border-radius: 6px;
+            font-weight: 600;
         }
 
         /* File Preview Chip */
         .bug-file-preview-card {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             background: #ffffff;
             border: 1px solid #e2e8f0;
-            border-radius: 10px;
-            padding: 8px 12px;
-            margin-top: 4px;
+            border-radius: 8px;
+            padding: 6px 10px;
         }
         .bug-file-remove-btn {
             background: rgba(239, 68, 68, 0.1);
             color: #ef4444;
             border: none;
-            width: 26px;
-            height: 26px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -1572,47 +1607,52 @@
             color: #ffffff;
         }
 
-        /* Modal Action Buttons */
+        /* Action Buttons */
+        .btn-bug-cancel,
+        .btn-bug-submit {
+            flex: 1;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.84rem;
+            font-weight: 600;
+            border-radius: 10px;
+            padding: 0 16px;
+            line-height: 1;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            white-space: nowrap;
+        }
         .btn-bug-cancel {
             background: #f1f5f9;
             color: #475569;
             border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 8px 18px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            transition: all 0.15s ease;
         }
         .btn-bug-cancel:hover {
             background: #e2e8f0;
             color: #0f172a;
+            border-color: #cbd5e1;
         }
         .btn-bug-submit {
             background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
             color: #ffffff;
-            border: none;
-            border-radius: 12px;
-            padding: 8px 22px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.28);
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            gap: 7px;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
         }
         .btn-bug-submit:hover {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
             color: #ffffff;
             transform: translateY(-1px);
-            box-shadow: 0 6px 18px rgba(239, 68, 68, 0.38);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.35);
         }
         .btn-bug-submit:active {
             transform: translateY(0);
         }
 
         /* ══════════════════════════════════════════════
-           DARK MODE: STRICT CARBON BLACK (ZERO BLUE/NAVY)
+           DARK MODE: STRICT CARBON BLACK
            ══════════════════════════════════════════════ */
         [data-theme="dark"] .floating-bug-trigger,
         [data-bs-theme="dark"] .floating-bug-trigger {
@@ -1623,111 +1663,206 @@
             top: auto !important;
             width: auto !important;
             max-width: fit-content !important;
-            background: #141414 !important;
-            border: 1px solid #262626 !important;
+            background: #141416 !important;
+            border: 1px solid #27272a !important;
             color: #f4f4f5 !important;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7) !important;
         }
         [data-theme="dark"] .floating-bug-trigger:hover,
         [data-bs-theme="dark"] .floating-bug-trigger:hover {
-            background: #1e1e22 !important;
-            border-color: #38383e !important;
+            background: #1f1f23 !important;
+            border-color: #3f3f46 !important;
             color: #ffffff !important;
         }
         [data-theme="dark"] .bug-modal-card,
         [data-bs-theme="dark"] .bug-modal-card {
-            background: #141414 !important;
+            background: #151518 !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            box-shadow: 0 28px 70px -15px rgba(0, 0, 0, 0.9) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 25px 60px -12px rgba(0, 0, 0, 0.85) !important;
         }
         [data-theme="dark"] .bug-modal-header,
         [data-bs-theme="dark"] .bug-modal-header {
-            background: #141414 !important;
+            background: #151518 !important;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+        }
+        [data-theme="dark"] .bug-modal-title,
+        [data-bs-theme="dark"] .bug-modal-title {
+            color: #f4f4f5 !important;
+        }
+        [data-theme="dark"] .bug-modal-subtitle,
+        [data-bs-theme="dark"] .bug-modal-subtitle {
+            color: #71717a !important;
         }
         [data-theme="dark"] .bug-modal-body,
         [data-bs-theme="dark"] .bug-modal-body {
-            background: #141414 !important;
+            background: #151518 !important;
         }
         [data-theme="dark"] .bug-modal-footer,
         [data-bs-theme="dark"] .bug-modal-footer {
-            background: #0d0d0f !important;
+            background: #151518 !important;
             border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
         }
-        [data-theme="dark"] .bug-field-block,
-        [data-bs-theme="dark"] .bug-field-block {
-            background: #1b1b1f !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        }
-        [data-theme="dark"] .bug-field-block:focus-within,
-        [data-bs-theme="dark"] .bug-field-block:focus-within {
-            background: #222227 !important;
-            border-color: #ef4444 !important;
-            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
-        }
-        [data-theme="dark"] .bug-field-label,
-        [data-bs-theme="dark"] .bug-field-label {
+        [data-theme="dark"] .bug-label,
+        [data-bs-theme="dark"] .bug-label {
             color: #a1a1aa !important;
         }
-        [data-theme="dark"] .bug-input-control,
-        [data-bs-theme="dark"] .bug-input-control {
+        [data-theme="dark"] .bug-input,
+        [data-theme="dark"] .bug-textarea,
+        [data-bs-theme="dark"] .bug-input,
+        [data-bs-theme="dark"] .bug-textarea {
+            background: #1e1e23 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
             color: #f4f4f5 !important;
         }
-        [data-theme="dark"] .bug-input-control::placeholder,
-        [data-bs-theme="dark"] .bug-input-control::placeholder {
+        [data-theme="dark"] .bug-input:focus,
+        [data-theme="dark"] .bug-textarea:focus,
+        [data-bs-theme="dark"] .bug-input:focus,
+        [data-bs-theme="dark"] .bug-textarea:focus {
+            background: #23232a !important;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+        }
+        [data-theme="dark"] .bug-input::placeholder,
+        [data-theme="dark"] .bug-textarea::placeholder,
+        [data-bs-theme="dark"] .bug-input::placeholder,
+        [data-bs-theme="dark"] .bug-textarea::placeholder {
             color: #71717a !important;
         }
         [data-theme="dark"] .bug-dropzone,
         [data-bs-theme="dark"] .bug-dropzone {
-            background: #1b1b1f !important;
-            border: 1.5px dashed rgba(255, 255, 255, 0.12) !important;
+            background: #1a1a1f !important;
+            border: 1px dashed rgba(255, 255, 255, 0.12) !important;
         }
         [data-theme="dark"] .bug-dropzone:hover,
         [data-theme="dark"] .bug-dropzone.dragover,
         [data-bs-theme="dark"] .bug-dropzone:hover,
         [data-bs-theme="dark"] .bug-dropzone.dragover {
-            background: #242429 !important;
+            background: rgba(239, 68, 68, 0.07) !important;
             border-color: #ef4444 !important;
         }
-        [data-theme="dark"] .bug-dropzone-icon,
-        [data-bs-theme="dark"] .bug-dropzone-icon {
-            color: #a1a1aa !important;
+        [data-theme="dark"] .bug-attach-icon,
+        [data-bs-theme="dark"] .bug-attach-icon {
+            background: rgba(239, 68, 68, 0.14) !important;
         }
-        [data-theme="dark"] .bug-dropzone:hover .bug-dropzone-icon,
-        [data-bs-theme="dark"] .bug-dropzone:hover .bug-dropzone-icon {
-            color: #ef4444 !important;
-        }
-        [data-theme="dark"] .bug-dropzone-text,
-        [data-bs-theme="dark"] .bug-dropzone-text {
+        [data-theme="dark"] .bug-attach-text,
+        [data-bs-theme="dark"] .bug-attach-text {
             color: #d4d4d8 !important;
         }
-        [data-theme="dark"] .bug-dropzone-hint,
-        [data-bs-theme="dark"] .bug-dropzone-hint {
+        [data-theme="dark"] .bug-attach-badge,
+        [data-bs-theme="dark"] .bug-attach-badge {
             color: #71717a !important;
+            background: rgba(255, 255, 255, 0.06) !important;
         }
         [data-theme="dark"] .bug-file-preview-card,
         [data-bs-theme="dark"] .bug-file-preview-card {
-            background: #222227 !important;
+            background: #202026 !important;
             border: 1px solid rgba(255, 255, 255, 0.08) !important;
             color: #f4f4f5 !important;
         }
         [data-theme="dark"] .btn-bug-cancel,
         [data-bs-theme="dark"] .btn-bug-cancel {
-            background: #1e1e22 !important;
-            color: #d4d4d8 !important;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            background: #1e1e24 !important;
+            color: #a1a1aa !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
         }
         [data-theme="dark"] .btn-bug-cancel:hover,
         [data-bs-theme="dark"] .btn-bug-cancel:hover {
-            background: #28282e !important;
+            background: #27272f !important;
             color: #ffffff !important;
-            border-color: rgba(255, 255, 255, 0.16) !important;
+            border-color: rgba(255, 255, 255, 0.2) !important;
         }
         [data-theme="dark"] #globalBugReportModal .btn-close,
         [data-bs-theme="dark"] #globalBugReportModal .btn-close {
             filter: invert(1) grayscale(1) brightness(1.2) !important;
         }
+
+        /* ── Compact Mobile Layout for Bug Report Modal ── */
+        @media (max-width: 767.98px) {
+            .bug-modal-dialog {
+                max-width: calc(100% - 1.25rem) !important;
+                margin: 0.75rem auto !important;
+            }
+            .bug-modal-card {
+                border-radius: 16px !important;
+            }
+            .bug-modal-header {
+                padding: 0.8rem 1rem !important;
+            }
+            .bug-header-badge {
+                width: 30px !important;
+                height: 30px !important;
+                font-size: 0.9rem !important;
+                border-radius: 8px !important;
+            }
+            .bug-modal-title {
+                font-size: 0.92rem !important;
+            }
+            .bug-modal-subtitle {
+                font-size: 0.7rem !important;
+            }
+            .bug-modal-body {
+                padding: 0.85rem 1rem 0.4rem !important;
+            }
+            .bug-label {
+                font-size: 0.68rem !important;
+                margin-bottom: 4px !important;
+            }
+            .bug-input,
+            .bug-textarea {
+                padding: 7px 10px !important;
+                font-size: 0.82rem !important;
+                border-radius: 8px !important;
+            }
+            .bug-textarea {
+                min-height: 60px !important;
+            }
+            .bug-dropzone {
+                padding: 7px 10px !important;
+                border-radius: 8px !important;
+            }
+            .bug-attach-text {
+                font-size: 0.75rem !important;
+            }
+            .bug-attach-badge {
+                font-size: 0.62rem !important;
+                padding: 1px 5px !important;
+            }
+            .bug-modal-footer {
+                padding: 0.75rem 1rem !important;
+                gap: 8px !important;
+            }
+            .btn-bug-cancel,
+            .btn-bug-submit {
+                height: 34px !important;
+                padding: 0 13px !important;
+                font-size: 0.78rem !important;
+                border-radius: 8px !important;
+            }
+            .floating-bug-trigger,
+            #floatingBugTrigger,
+            [data-theme="dark"] .floating-bug-trigger,
+            [data-bs-theme="dark"] .floating-bug-trigger {
+                display: none !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+            }
+        }
     </style>
+
+    {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login') or request.endpoint == 'main.report_bug' or request.endpoint in ['main.privacy', 'main.terms', 'main.cookies'])) %}
+    <button type="button" 
+            class="floating-bug-trigger d-none d-md-inline-flex" 
+            id="floatingBugTrigger" 
+            data-bs-toggle="modal" 
+            data-bs-target="#globalBugReportModal" 
+            aria-label="Report a bug" 
+            title="Report a bug">
+        <span class="bug-icon-bubble">
+            <i class="bi bi-bug-fill"></i>
+        </span>
+        <span>Report Bug</span>
+    </button>
+    {% endif %}
 
     <!-- Global Bug Report Modal -->
     <div class="modal fade" id="globalBugReportModal" tabindex="-1" aria-labelledby="globalBugReportModalLabel" aria-hidden="true" style="z-index: 1060;">
@@ -1735,13 +1870,13 @@
             <div class="modal-content bug-modal-card">
                 <!-- Modal Header -->
                 <div class="modal-header bug-modal-header d-flex justify-content-between align-items-center">
-                    <div class="d-flex align-items-center gap-3">
-                        <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.22); display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0;">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="bug-header-badge">
                             <i class="bi bi-bug-fill"></i>
                         </div>
                         <div>
-                            <h5 class="modal-title fw-bold mb-0" id="globalBugReportModalLabel" style="font-size: 1.12rem; line-height: 1.3;">Report a Bug</h5>
-                            <div class="text-muted" style="font-size: 0.8rem; margin-top: 3px; line-height: 1.3;">Sends directly to the Developer Dashboard</div>
+                            <h5 class="bug-modal-title" id="globalBugReportModalLabel">Report a Bug</h5>
+                            <div class="bug-modal-subtitle">Sends directly to the Developer Dashboard</div>
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1755,13 +1890,14 @@
                         <!-- Alert Box -->
                         <div id="globalBugAlert" class="alert d-none mb-3 py-2 px-3 small" role="alert"></div>
 
-                        <!-- Title Input Block -->
-                        <div class="bug-field-block">
-                            <label for="globalBugTitle" class="bug-field-label">
-                                <i class="bi bi-chat-left-dots-fill"></i> Issue Title <span class="text-danger">*</span>
+                        <!-- Title Input -->
+                        <div class="bug-form-group">
+                            <label for="globalBugTitle" class="bug-label">
+                                <span>Issue Title</span>
+                                <span class="bug-required">*</span>
                             </label>
                             <input type="text" 
-                                   class="bug-input-control" 
+                                   class="bug-input" 
                                    id="globalBugTitle" 
                                    name="title" 
                                    placeholder="e.g., Room map not loading on floor 3" 
@@ -1769,21 +1905,21 @@
                                    autocomplete="off">
                         </div>
 
-                        <!-- Description Block -->
-                        <div class="bug-field-block">
-                            <label for="globalBugDesc" class="bug-field-label">
-                                <i class="bi bi-list-task"></i> Steps to Reproduce / Details <span class="text-danger">*</span>
+                        <!-- Description -->
+                        <div class="bug-form-group">
+                            <label for="globalBugDesc" class="bug-label">
+                                <span>Details & Steps</span>
+                                <span class="bug-required">*</span>
                             </label>
-                            <textarea class="bug-input-control" 
+                            <textarea class="bug-textarea" 
                                       id="globalBugDesc" 
                                       name="description" 
                                       rows="3" 
-                                      placeholder="1. What were you doing?&#10;2. What went wrong?&#10;3. What did you expect?" 
-                                      required 
-                                      style="resize: vertical; min-height: 80px;"></textarea>
+                                      placeholder="Describe what happened and how to reproduce it..." 
+                                      required></textarea>
                         </div>
 
-                        <!-- Dynamic File Upload Dropzone -->
+                        <!-- Sleek File Upload Attachment Row -->
                         <div class="mb-2">
                             <div class="bug-dropzone" id="bugDropzone" tabindex="0" role="button" aria-label="Upload screenshot or video">
                                 <input type="file" 
@@ -1792,25 +1928,25 @@
                                        accept="image/png,image/jpeg,image/webp,video/mp4" 
                                        class="d-none">
                                 
-                                <div id="bugDropzoneIdle">
-                                    <div class="bug-dropzone-icon">
-                                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                                <div id="bugDropzoneIdle" class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="bug-attach-icon">
+                                            <i class="bi bi-paperclip"></i>
+                                        </div>
+                                        <div class="bug-attach-text">Attach screenshot or video</div>
                                     </div>
-                                    <div class="bug-dropzone-text">
-                                        <span class="fw-semibold">Click to upload</span> or drag and drop
-                                    </div>
-                                    <div class="bug-dropzone-hint">Screenshot or screen recording (max 16MB)</div>
+                                    <span class="bug-attach-badge">Max 16MB</span>
                                 </div>
 
                                 <div id="bugDropzoneSelected" class="d-none">
                                     <div class="bug-file-preview-card">
-                                        <i class="bi bi-file-earmark-image-fill fs-4 text-danger" id="bugFileIcon"></i>
+                                        <i class="bi bi-file-earmark-image-fill fs-5 text-danger" id="bugFileIcon"></i>
                                         <div class="text-truncate flex-grow-1 text-start">
                                             <div class="fw-semibold small text-truncate" id="bugFileName">file.png</div>
-                                            <div class="text-muted" style="font-size: 0.72rem;" id="bugFileSize">0 KB</div>
+                                            <div class="text-muted" style="font-size: 0.7rem;" id="bugFileSize">0 KB</div>
                                         </div>
                                         <button type="button" class="bug-file-remove-btn" id="btnRemoveBugFile" title="Remove file" aria-label="Remove attached file">
-                                            <i class="bi bi-x-lg" style="font-size: 0.75rem;"></i>
+                                            <i class="bi bi-x-lg" style="font-size: 0.72rem;"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -1819,13 +1955,13 @@
                     </div>
 
                     <!-- Modal Footer -->
-                    <div class="modal-footer bug-modal-footer d-flex justify-content-between">
+                    <div class="modal-footer bug-modal-footer">
                         <button type="button" class="btn btn-bug-cancel" data-bs-dismiss="modal">
-                            Cancel Bug Report
+                            Cancel
                         </button>
                         <button type="submit" class="btn btn-bug-submit" id="globalBugSubmitBtn">
                             <i class="bi bi-send-fill"></i>
-                            <span>Submit Bug Report</span>
+                            <span>Submit Bug</span>
                         </button>
                     </div>
                 </form>

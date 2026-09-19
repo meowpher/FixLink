@@ -2,6 +2,7 @@
 MIT-WPU Vyas Smart-Room Maintenance Tracker
 Flask Application Factory
 """
+from datetime import timedelta
 import os
 import secrets
 import logging
@@ -56,21 +57,19 @@ def create_app(config_name=None):
         )
     app.config['SECRET_KEY'] = secret_key
 
-    # Session security & CSRF configuration (applied to ALL environments)
+    # Phase 1: Cookie & Session Lockdown
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SECURE=True,
         SESSION_COOKIE_SAMESITE='Lax',
-        PERMANENT_SESSION_LIFETIME=86400,    # 24 hours
-        WTF_CSRF_TIME_LIMIT=None,            # No timeout to prevent stale form issues
-        WTF_CSRF_SSL_STRICT=False,           # Disable strict referer checking for local/proxy environments
-        WTF_CSRF_ENABLED=True,               # Explicitly enabled
+        PERMANENT_SESSION_LIFETIME=timedelta(hours=2),    # Strict 2-hour idle session expiration
+        WTF_CSRF_TIME_LIMIT=None,                        # No timeout to prevent stale form issues
+        WTF_CSRF_SSL_STRICT=False,                       # Disable strict referer checking for local/proxy environments
+        WTF_CSRF_ENABLED=True,                           # Explicitly enabled
     )
 
-    # Vercel-specific session security
+    # Vercel / Reverse Proxy headers support
     if os.environ.get('VERCEL'):
-        app.config.update(
-            SESSION_COOKIE_SECURE=True,
-        )
         # Trust Vercel's proxy headers (Vercel uses multiple layers of proxy)
         from werkzeug.middleware.proxy_fix import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=2, x_proto=2, x_host=2, x_prefix=2)
@@ -176,9 +175,11 @@ def create_app(config_name=None):
     else:
         logger.info("Running on Vercel: Background scheduler disabled.")
     
-    # Global Session Sanitizer Hook (Zero DB queries, purely in-memory)
+    # Global Session Sanitizer & Lifetime Hook (Zero DB queries, purely in-memory)
     @app.before_request
     def sanitize_conflicting_session():
+        # Enforce permanent session lifecycle so 2-hour idle timeout is applied
+        session.permanent = True
         # Prevent technician keys from polluting admin/user sessions
         if session.get('user_id') and session.get('professional_id'):
             session.pop('professional_id', None)

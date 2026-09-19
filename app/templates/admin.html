@@ -381,6 +381,137 @@
         border-color: rgba(255, 255, 255, 0.12);
         color: #f1f5f9;
     }
+
+    /* Admin Header - Dark Mode Shiny & Grainy Blue-to-Green Gradient */
+    [data-theme="dark"] .vyas-admin-header,
+    [data-bs-theme="dark"] .vyas-admin-header,
+    [data-theme="dark"] .admin-header,
+    [data-bs-theme="dark"] .admin-header,
+    body[data-theme="dark"] .vyas-admin-header,
+    body[data-theme="dark"] .admin-header {
+        position: relative !important;
+        isolation: isolate !important;
+        padding: 2.25rem 0 !important;
+        background: 
+            radial-gradient(ellipse 80% 90% at 15% -10%, rgba(59, 130, 246, 0.32) 0%, transparent 65%),
+            radial-gradient(ellipse 70% 85% at 85% 110%, rgba(16, 185, 129, 0.28) 0%, transparent 65%),
+            linear-gradient(135deg, #0b437e 0%, #09405b 48%, #07473a 100%) !important;
+        border-bottom: 1px solid rgba(59, 130, 246, 0.35) !important;
+        box-shadow: 0 10px 30px -5px rgba(6, 69, 59, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+        overflow: hidden !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .vyas-admin-header::before,
+    [data-bs-theme="dark"] .vyas-admin-header::before,
+    [data-theme="dark"] .admin-header::before,
+    [data-bs-theme="dark"] .admin-header::before,
+    body[data-theme="dark"] .vyas-admin-header::before,
+    body[data-theme="dark"] .admin-header::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E") !important;
+        pointer-events: none !important;
+        mix-blend-mode: overlay !important;
+        z-index: 0 !important;
+    }
+
+    [data-theme="dark"] .vyas-admin-header::after,
+    [data-bs-theme="dark"] .vyas-admin-header::after,
+    [data-theme="dark"] .admin-header::after,
+    [data-bs-theme="dark"] .admin-header::after,
+    body[data-theme="dark"] .vyas-admin-header::after,
+    body[data-theme="dark"] .admin-header::after {
+        content: "" !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 48% !important;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0) 100%) !important;
+        pointer-events: none !important;
+        z-index: 0 !important;
+    }
+
+    [data-theme="dark"] .vyas-admin-header .container,
+    [data-bs-theme="dark"] .vyas-admin-header .container,
+    [data-theme="dark"] .admin-header .container,
+    [data-bs-theme="dark"] .admin-header .container,
+    body[data-theme="dark"] .vyas-admin-header .container,
+    body[data-theme="dark"] .admin-header .container {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    [data-theme="dark"] .vyas-admin-header .admin-title,
+    [data-bs-theme="dark"] .vyas-admin-header .admin-title,
+    [data-theme="dark"] .admin-header .admin-title,
+    [data-bs-theme="dark"] .admin-header .admin-title,
+    body[data-theme="dark"] .vyas-admin-header .admin-title,
+    body[data-theme="dark"] .admin-header .admin-title {
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .vyas-admin-header .admin-subtitle,
+    [data-bs-theme="dark"] .vyas-admin-header .admin-subtitle,
+    [data-theme="dark"] .admin-header .admin-subtitle,
+    [data-bs-theme="dark"] .admin-header .admin-subtitle,
+    body[data-theme="dark"] .vyas-admin-header .admin-subtitle,
+    body[data-theme="dark"] .admin-header .admin-subtitle {
+        color: rgba(255, 255, 255, 0.85) !important;
+        opacity: 0.9 !important;
+    }
+
+    /* Stats Section & Admin Header Spacing */
+    .vyas-admin-header,
+    .admin-header {
+        margin-bottom: 2.25rem !important;
+    }
+
+    .stats-section {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+        margin-top: 0.5rem !important;
+    }
+
+    /* Mobile Center Alignment */
+    @media (max-width: 767.98px) {
+        .vyas-admin-header,
+        .admin-header {
+            text-align: center !important;
+            padding: 1.75rem 1rem !important;
+        }
+
+        .vyas-admin-header .row,
+        .admin-header .row {
+            justify-content: center !important;
+            text-align: center !important;
+        }
+
+        .vyas-admin-header .col-md-6,
+        .admin-header .col-md-6 {
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+
+        .admin-title {
+            text-align: center !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+
+        .admin-subtitle {
+            text-align: center !important;
+            width: 100% !important;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -388,9 +519,9 @@
 <!-- Admin Header -->
 <section class="admin-header vyas-admin-header">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1 class="admin-title">
+        <div class="row align-items-center text-center text-md-start">
+            <div class="col-md-6 text-center text-md-start">
+                <h1 class="admin-title d-flex align-items-center justify-content-center justify-content-md-start">
                     <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard
                 </h1>
                 <p class="admin-subtitle">Vyas Building Maintenance Management</p>
@@ -401,7 +532,7 @@
 </section>
 
 <!-- Statistics Cards -->
-<section class="stats-section">
+<section class="stats-section py-4">
     <div class="container">
         <div class="row g-4 justify-content-center">
             <div class="col-12 col-sm-6 col-lg-4 col-xl fade-in" style="animation-delay: 0s;">

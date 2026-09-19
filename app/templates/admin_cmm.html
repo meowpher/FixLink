@@ -4,69 +4,69 @@
 
 {% block extra_css %}
 <style>
-    /* Filter Sidebar Panel Styles - Compressed & Compact */
+    /* =========================================================
+       DESKTOP FILTER SIDEBAR PANEL (Original Restored)
+       ========================================================= */
     .filter-sidebar-panel {
         background: var(--bg-card, #ffffff);
         border: 1px solid var(--border-color, #e2e8f0);
-        border-radius: 14px;
+        border-radius: 16px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        padding: 0.85rem 0.95rem;
+        padding: 1.25rem 1.1rem;
         position: sticky;
         top: 90px;
         transition: all 0.25s ease;
     }
 
     .filter-sidebar-title {
-        font-size: 0.78rem;
+        font-size: 0.85rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.6px;
+        letter-spacing: 0.75px;
         color: var(--text-muted, #64748b);
-        padding-bottom: 0.5rem;
-        margin-bottom: 0.65rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        margin-bottom: 1.1rem;
         display: flex;
         align-items: center;
-        justify-content: flex-start;
-        gap: 6px;
+        justify-content: space-between;
     }
 
     .filter-sidebar-panel .form-label {
-        font-size: 0.72rem;
+        font-size: 0.82rem;
         font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.4px;
-        color: var(--text-main, #475569);
-        margin-bottom: 0.2rem;
+        color: var(--text-main, #334155);
+        margin-bottom: 0.4rem;
     }
 
     .filter-sidebar-panel .form-select,
     .filter-sidebar-panel .form-control {
-        border-radius: 8px;
+        border-radius: 10px;
         border: 1px solid var(--border-color, #e2e8f0);
-        font-size: 0.82rem;
-        height: 35px;
-        padding: 0.35rem 0.65rem;
+        font-size: 0.9rem;
+        height: 42px;
+        padding: 0.5rem 0.85rem;
         background-color: var(--bg-input, #f8fafc);
         color: var(--text-main, #0f172a);
         transition: all 0.2s ease;
     }
 
     .filter-sidebar-panel .input-group-text {
-        border-radius: 8px 0 0 8px;
+        border-radius: 10px 0 0 10px;
         border: 1px solid var(--border-color, #e2e8f0);
         border-right: none;
         background-color: var(--bg-input, #f8fafc);
     }
 
     .filter-sidebar-panel .input-group .form-control {
-        border-radius: 0 8px 8px 0;
+        border-radius: 0 10px 10px 0;
         border-left: none;
     }
 
     .filter-sidebar-panel .form-select:focus,
     .filter-sidebar-panel .form-control:focus {
         border-color: var(--mitwpu-blue, #0b4d8c);
-        box-shadow: 0 0 0 2px rgba(11, 77, 140, 0.15);
+        box-shadow: 0 0 0 3px rgba(11, 77, 140, 0.15);
         background-color: #ffffff;
     }
 
@@ -80,6 +80,7 @@
     [data-theme="dark"] .filter-sidebar-title,
     [data-bs-theme="dark"] .filter-sidebar-title {
         color: var(--sub-text, #8A8A96) !important;
+        border-color: var(--border, rgba(255, 255, 255, 0.06)) !important;
     }
 
     [data-theme="dark"] .filter-sidebar-panel .form-label,
@@ -103,15 +104,42 @@
     [data-bs-theme="dark"] .filter-sidebar-panel .form-select:focus,
     [data-bs-theme="dark"] .filter-sidebar-panel .form-control:focus {
         border-color: var(--ice-hint, #C8D8E8) !important;
-        box-shadow: 0 0 0 2px rgba(200, 216, 232, 0.2) !important;
+        box-shadow: 0 0 0 3px rgba(200, 216, 232, 0.2) !important;
         background-color: var(--raised, #222226) !important;
     }
 
+    /* Mobile Filter Sidebar Compact Overrides */
     @media (max-width: 767px) {
         .filter-sidebar-panel {
             position: static;
             margin-bottom: 1rem;
             padding: 0.75rem 0.85rem;
+            border-radius: 14px;
+        }
+        .filter-sidebar-title {
+            font-size: 0.78rem;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.65rem;
+            border-bottom: none;
+            justify-content: flex-start;
+            gap: 6px;
+        }
+        .filter-sidebar-panel .form-label {
+            font-size: 0.72rem;
+            margin-bottom: 0.2rem;
+        }
+        .filter-sidebar-panel .form-select,
+        .filter-sidebar-panel .form-control {
+            height: 35px;
+            font-size: 0.82rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 8px;
+        }
+        .filter-sidebar-panel .input-group-text {
+            border-radius: 8px 0 0 8px;
+        }
+        .filter-sidebar-panel .input-group .form-control {
+            border-radius: 0 8px 8px 0;
         }
     }
 
@@ -258,19 +286,226 @@
         font-weight: 700 !important;
     }
 
-    /* CMM Hero Banner */
+    /* =========================================================
+       CMM HERO BANNER — BLUE TO GREEN GRADIENT WITH SHINY & GRAINY EFFECT
+       ========================================================= */
     .cmm-hero-card {
-        background: linear-gradient(135deg, rgba(11,77,140,0.08) 0%, rgba(32,201,151,0.06) 100%) !important;
-        border: 1px solid var(--border-color, #e2e8f0) !important;
+        position: relative;
+        isolation: isolate;
+        background: 
+            radial-gradient(ellipse 80% 90% at 15% -10%, rgba(59, 130, 246, 0.32) 0%, transparent 65%),
+            radial-gradient(ellipse 70% 85% at 85% 110%, rgba(16, 185, 129, 0.28) 0%, transparent 65%),
+            linear-gradient(135deg, #0b437e 0%, #09405b 48%, #07473a 100%) !important;
+        border: 1px solid rgba(59, 130, 246, 0.35) !important;
         border-radius: 16px !important;
+        box-shadow: 0 10px 30px -5px rgba(6, 69, 59, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+        overflow: hidden;
+        color: #ffffff !important;
     }
 
+    /* Subtle Grain Texture Overlay */
+    .cmm-hero-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: inherit;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E");
+        pointer-events: none;
+        mix-blend-mode: overlay;
+        z-index: 0;
+    }
+
+    /* Subtle Top Specular Shine Layer */
+    .cmm-hero-card::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 48%;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0) 100%);
+        pointer-events: none;
+        border-radius: inherit;
+        z-index: 0;
+    }
+
+    .cmm-hero-card > .card-body {
+        position: relative;
+        z-index: 1;
+    }
+
+    .cmm-hero-card h1,
+    .cmm-hero-card .text-body {
+        color: #ffffff !important;
+    }
+    .cmm-hero-card p,
+    .cmm-hero-card .text-muted {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+    .cmm-hero-card .badge.bg-primary {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    }
+    .cmm-hero-card .badge.bg-secondary-subtle {
+        background-color: rgba(255, 255, 255, 0.12) !important;
+        color: rgba(255, 255, 255, 0.92) !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    }
+    .cmm-hero-card .btn-mass-import,
+    .cmm-hero-card .btn-success {
+        background-color: #10b981 !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.25) !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3) !important;
+        transition: all 0.2s ease;
+    }
+    .cmm-hero-card .btn-mass-import i,
+    .cmm-hero-card .btn-mass-import span,
+    .cmm-hero-card .btn-success i,
+    .cmm-hero-card .btn-success span {
+        color: #ffffff !important;
+    }
+    .cmm-hero-card .btn-mass-import:hover,
+    .cmm-hero-card .btn-success:hover {
+        background-color: #059669 !important;
+        color: #ffffff !important;
+        border-color: rgba(255, 255, 255, 0.45) !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.45) !important;
+    }
+    .cmm-hero-card .btn-outline-danger {
+        border: 1.5px solid #ef4444 !important;
+        color: #fca5a5 !important;
+        background-color: rgba(239, 68, 68, 0.12) !important;
+        font-weight: 600 !important;
+        transition: all 0.2s ease;
+    }
+    .cmm-hero-card .btn-outline-danger i,
+    .cmm-hero-card .btn-outline-danger span {
+        color: #fca5a5 !important;
+    }
+    .cmm-hero-card .btn-outline-danger:hover {
+        background-color: #ef4444 !important;
+        border-color: #ef4444 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4) !important;
+    }
+    .cmm-hero-card .btn-outline-danger:hover i,
+    .cmm-hero-card .btn-outline-danger:hover span {
+        color: #ffffff !important;
+    }
+
+    /* Dark Mode Support for Hero Banner */
     [data-theme="dark"] .cmm-hero-card,
     [data-bs-theme="dark"] .cmm-hero-card {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%), var(--surface, #0F0F11) !important;
-        border-color: var(--border, rgba(255, 255, 255, 0.08)) !important;
+        background: 
+            radial-gradient(ellipse 80% 90% at 15% -10%, rgba(59, 130, 246, 0.28) 0%, transparent 65%),
+            radial-gradient(ellipse 70% 85% at 85% 110%, rgba(16, 185, 129, 0.22) 0%, transparent 65%),
+            linear-gradient(135deg, rgba(14, 32, 60, 0.95) 0%, rgba(10, 38, 48, 0.95) 50%, rgba(9, 44, 34, 0.95) 100%) !important;
+        border-color: rgba(59, 130, 246, 0.25) !important;
+        box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
     }
-    /* CMM Unassigned Classes Toolbar */
+    [data-theme="dark"] .cmm-hero-card h1,
+    [data-bs-theme="dark"] .cmm-hero-card h1 {
+        color: #ffffff !important;
+    }
+    [data-theme="dark"] .cmm-hero-card p,
+    [data-bs-theme="dark"] .cmm-hero-card p {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+    [data-theme="dark"] .cmm-hero-card .badge.bg-primary,
+    [data-bs-theme="dark"] .cmm-hero-card .badge.bg-primary {
+        background-color: #3b82f6 !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    [data-theme="dark"] .cmm-hero-card .badge.bg-secondary-subtle,
+    [data-bs-theme="dark"] .cmm-hero-card .badge.bg-secondary-subtle {
+        background-color: rgba(255, 255, 255, 0.08) !important;
+        color: var(--smoke-white, #C8C8D0) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    [data-theme="dark"] .cmm-hero-card .btn-mass-import,
+    [data-theme="dark"] .cmm-hero-card .btn-success,
+    [data-bs-theme="dark"] .cmm-hero-card .btn-mass-import,
+    [data-bs-theme="dark"] .cmm-hero-card .btn-success {
+        background-color: #10b981 !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    [data-theme="dark"] .cmm-hero-card .btn-mass-import:hover,
+    [data-theme="dark"] .cmm-hero-card .btn-success:hover,
+    [data-bs-theme="dark"] .cmm-hero-card .btn-mass-import:hover,
+    [data-bs-theme="dark"] .cmm-hero-card .btn-success:hover {
+        background-color: #059669 !important;
+        color: #ffffff !important;
+    }
+    [data-theme="dark"] .cmm-hero-card .btn-outline-danger,
+    [data-bs-theme="dark"] .cmm-hero-card .btn-outline-danger {
+        border: 1px solid #ef4444 !important;
+        color: #ef4444 !important;
+        background: transparent !important;
+    }
+    [data-theme="dark"] .cmm-hero-card .btn-outline-danger:hover,
+    [data-bs-theme="dark"] .cmm-hero-card .btn-outline-danger:hover {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+    }
+
+    /* Desktop Toolbar Styling */
+    .cmm-desktop-toolbar {
+        background-color: var(--bg-card, #ffffff);
+        border-bottom: 1px solid var(--border-color, #e2e8f0);
+        padding: 1.15rem 1.25rem;
+    }
+    .cmm-desktop-toolbar .input-group {
+        height: 40px;
+        border-radius: 10px;
+    }
+    .cmm-desktop-toolbar .input-group-text {
+        border-radius: 10px 0 0 10px;
+        border-right: none;
+        padding-left: 14px;
+        padding-right: 12px;
+    }
+    .cmm-desktop-toolbar .form-control {
+        border-radius: 0 10px 10px 0;
+        border-left: none;
+        height: 40px;
+        font-size: 0.88rem;
+    }
+    .cmm-desktop-toolbar .form-select {
+        height: 40px;
+        border-radius: 10px;
+        font-size: 0.88rem;
+    }
+    .cmm-desktop-toolbar #bulkAssignBtn {
+        height: 40px;
+        font-size: 0.88rem;
+    }
+
+    [data-theme="dark"] .cmm-desktop-toolbar,
+    [data-bs-theme="dark"] .cmm-desktop-toolbar {
+        background-color: #121214 !important;
+        border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+    }
+    [data-theme="dark"] .cmm-desktop-toolbar .input-group-text,
+    [data-theme="dark"] .cmm-desktop-toolbar .form-control,
+    [data-theme="dark"] .cmm-desktop-toolbar .form-select,
+    [data-bs-theme="dark"] .cmm-desktop-toolbar .input-group-text,
+    [data-bs-theme="dark"] .cmm-desktop-toolbar .form-control,
+    [data-bs-theme="dark"] .cmm-desktop-toolbar .form-select {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #EDEDF0 !important;
+    }
+
+    /* =========================================================
+       MOBILE CMM TOOLBAR (< 768px)
+       ========================================================= */
     .cmm-toolbar {
         background-color: transparent;
         border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.07));
@@ -323,20 +558,23 @@
     }
 
     /* Faculty select */
+    .cmm-toolbar .cmm-select,
+    .faculty-select {
+        color: #0f172a !important;
+        background-color: #ffffff;
+    }
     .cmm-toolbar .cmm-select {
         height: 40px;
         width: 100%;
         font-size: 0.84rem;
         border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 8px;
-        background-color: var(--bg-input, #ffffff);
-        color: var(--text-main, #0f172a);
         padding: 0 2.5rem 0 0.75rem;
         margin-bottom: 8px;
         transition: border-color 0.15s ease;
         appearance: none;
         -webkit-appearance: none;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%239ca3af' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
         background-repeat: no-repeat;
         background-position: right 0.85rem center;
         background-size: 12px;
@@ -361,7 +599,7 @@
         letter-spacing: 0.2px;
     }
 
-    /* Dark mode — inputs blend with card, not float as dark blocks */
+    /* Dark mode toolbar inputs */
     [data-theme="dark"] .cmm-search-box,
     [data-bs-theme="dark"] .cmm-search-box {
         background-color: rgba(255, 255, 255, 0.05) !important;
@@ -372,13 +610,30 @@
         color: #EDEDF0 !important;
     }
     [data-theme="dark"] .cmm-toolbar .cmm-select,
-    [data-bs-theme="dark"] .cmm-toolbar .cmm-select {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-        border-color: rgba(255, 255, 255, 0.1) !important;
+    [data-bs-theme="dark"] .cmm-toolbar .cmm-select,
+    [data-theme="dark"] .faculty-select,
+    [data-bs-theme="dark"] .faculty-select {
+        background-color: #1a1a1e !important;
+        border-color: rgba(255, 255, 255, 0.15) !important;
+        color: #EDEDF0 !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%239ca3af' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    }
+    [data-theme="dark"] .cmm-toolbar .cmm-select option,
+    [data-bs-theme="dark"] .cmm-toolbar .cmm-select option,
+    [data-theme="dark"] .faculty-select option,
+    [data-bs-theme="dark"] .faculty-select option {
+        background-color: #1a1a1e !important;
         color: #EDEDF0 !important;
     }
+    .cmm-toolbar .cmm-select option,
+    .faculty-select option {
+        color: #0f172a;
+        background-color: #ffffff;
+    }
 
-    /* Mobile Unassigned Classes Cards — Premium Redesign */
+    /* =========================================================
+       MOBILE UNASSIGNED CARDS (< 768px)
+       ========================================================= */
     .cmm-mobile-card {
         background: var(--bg-card, #1c1c21);
         border: 1px solid var(--border-color, rgba(255,255,255,0.08)) !important;
@@ -392,7 +647,6 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.25);
     }
 
-    /* Top row of the card */
     .cmm-mobile-card .card-top-row {
         display: flex;
         align-items: center;
@@ -401,7 +655,6 @@
         margin-bottom: 6px;
     }
 
-    /* Room pill accent */
     .cmm-mobile-card .room-pill {
         display: inline-flex;
         align-items: center;
@@ -418,7 +671,6 @@
         flex-shrink: 0;
     }
 
-    /* Div badge */
     .cmm-mobile-card .div-pill {
         font-size: 0.7rem;
         font-weight: 600;
@@ -429,7 +681,6 @@
         border: 1px solid rgba(255,255,255,0.1);
     }
 
-    /* Course label (top-right) */
     .cmm-mobile-card .course-label {
         font-size: 0.68rem;
         font-weight: 600;
@@ -441,7 +692,6 @@
         letter-spacing: 0.3px;
     }
 
-    /* Subject name */
     .cmm-mobile-card .subject-name {
         font-size: 0.92rem;
         font-weight: 700;
@@ -451,7 +701,6 @@
         margin-bottom: 4px;
     }
 
-    /* Meta row: day + time */
     .cmm-mobile-card .meta-row {
         display: flex;
         align-items: center;
@@ -470,7 +719,6 @@
         opacity: 0.3;
     }
 
-    /* Bottom action row */
     .cmm-mobile-card .action-row {
         display: flex;
         align-items: center;
@@ -521,7 +769,7 @@
         background: #2563eb;
     }
 
-    /* Light theme overrides */
+    /* Light theme overrides for mobile cards */
     [data-theme="light"] .cmm-mobile-card,
     [data-bs-theme="light"] .cmm-mobile-card {
         background: #ffffff;
@@ -557,7 +805,7 @@
         color: #0f172a;
     }
 
-    /* Select All bar — explicit dark bg to prevent white flash */
+    /* Select All bar */
     .cmm-select-all-bar {
         background-color: #141414;
         border-bottom: 1px solid rgba(255, 255, 255, 0.07);
@@ -568,7 +816,9 @@
         border-bottom: 1px solid #e2e8f0;
     }
 
-    /* Custom CMM Modal Styling */
+    /* =========================================================
+       CUSTOM MODAL STYLING (Dark / Light Perfected)
+       ========================================================= */
     .cmm-custom-modal {
         background-color: #161618 !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -642,25 +892,43 @@
         align-items: flex-start;
         gap: 7px;
         font-size: 0.77rem;
-        color: #94a3b8;
-        background: rgba(59, 130, 246, 0.06);
-        border: 1px solid rgba(59, 130, 246, 0.16);
+        color: #475569;
+        background: rgba(37, 99, 235, 0.06);
+        border: 1px solid rgba(37, 99, 235, 0.18);
         border-radius: 8px;
         padding: 8px 12px;
         line-height: 1.4;
     }
     .cmm-format-note i {
-        color: #60a5fa;
+        color: #2563eb;
         margin-top: 1px;
     }
     .cmm-format-note code {
-        background: rgba(59, 130, 246, 0.18);
-        color: #bfdbfe;
-        padding: 1px 5px;
+        background: rgba(37, 99, 235, 0.12);
+        color: #1d4ed8;
+        padding: 1px 6px;
         border-radius: 4px;
         font-size: 0.74rem;
+        font-weight: 600;
         font-family: ui-monospace, 'Roboto Mono', monospace;
-        border: 1px solid rgba(59, 130, 246, 0.25);
+        border: 1px solid rgba(37, 99, 235, 0.25);
+    }
+
+    [data-theme="dark"] .cmm-format-note,
+    [data-bs-theme="dark"] .cmm-format-note {
+        color: #94a3b8;
+        background: rgba(59, 130, 246, 0.06);
+        border-color: rgba(59, 130, 246, 0.16);
+    }
+    [data-theme="dark"] .cmm-format-note i,
+    [data-bs-theme="dark"] .cmm-format-note i {
+        color: #60a5fa;
+    }
+    [data-theme="dark"] .cmm-format-note code,
+    [data-bs-theme="dark"] .cmm-format-note code {
+        background: rgba(59, 130, 246, 0.18);
+        color: #93c5fd;
+        border-color: rgba(59, 130, 246, 0.3);
     }
 
     /* Toggle Tile */
@@ -694,7 +962,15 @@
     /* Danger Box */
     .cmm-danger-box {
         background: rgba(239, 68, 68, 0.08);
-        border: 1px solid rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+    .cmm-danger-box .danger-box-text {
+        color: #991b1b;
+        line-height: 1.45;
+    }
+    [data-theme="dark"] .cmm-danger-box .danger-box-text,
+    [data-bs-theme="dark"] .cmm-danger-box .danger-box-text {
+        color: rgba(255, 255, 255, 0.85);
     }
 
     /* Preview Alerts */
@@ -899,27 +1175,35 @@
 {% block content %}
 <div class="container-fluid px-3 px-md-4 py-3 py-md-4 mb-5">
     
-    <!-- Hero Header Banner -->
+    <!-- Hero Header Banner (Streamlined on Mobile, Spacious on Desktop) -->
     <div class="card border-0 shadow-sm rounded-4 mb-3 mb-md-4 overflow-hidden cmm-hero-card">
-        <div class="card-body p-3.5 p-md-4">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
-                <div class="pe-lg-3">
-                    <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-primary px-2.5 py-1 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">ADMIN CONTROL</span>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">CMM ENGINE</span>
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center w-100" style="row-gap: 20px;">
+                <div class="flex-grow-1 pe-md-4">
+                    <!-- Badges with comfortable bottom spacing -->
+                    <div class="d-flex align-items-center gap-2 mb-2.5 mb-md-3">
+                        <span class="badge bg-primary px-2.5 px-md-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">ADMIN CONTROL</span>
+                        <span class="badge bg-secondary-subtle text-secondary px-2.5 px-md-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">CMM ENGINE</span>
                     </div>
-                    <h1 class="h3 fw-bold mb-1.5 text-body">Classroom Management Module (CMM)</h1>
-                    <p class="text-muted small mb-0" style="max-width: 720px; line-height: 1.5;">
+                    <!-- Title with clean line-height and margin -->
+                    <h1 class="h3 h2-md fw-bold mb-2.5 text-body text-md-nowrap" style="letter-spacing: -0.3px; line-height: 1.35;">Classroom Management Module (CMM)</h1>
+                    <!-- Mobile concise context with relaxed line-height -->
+                    <p class="text-muted mb-0 small d-md-none" style="font-size: 0.85rem; line-height: 1.55;">
+                        Manage room timetables, batch CSV imports, and faculty allocations.
+                    </p>
+                    <!-- Desktop detailed context -->
+                    <p class="text-muted mb-0 lead d-none d-md-block" style="font-size: 0.95rem; max-width: 850px; line-height: 1.6;">
                         Centralized portal for managing room timetables, CSV batch imports, schedule clearing, and faculty allocations.
                     </p>
                 </div>
                 
-                <div class="d-flex flex-row align-items-center gap-2 w-100 w-lg-auto flex-shrink-0 pt-1 pt-lg-0">
-                    <button class="btn btn-primary rounded-3 px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 fw-semibold flex-fill flex-lg-grow-0" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="height: 38px; font-size: 0.82rem; white-space: nowrap;">
+                <!-- Action Buttons with top separation on mobile -->
+                <div class="d-flex flex-row align-items-center flex-shrink-0 ms-md-auto w-100 w-md-auto" style="gap: 12px;">
+                    <button class="btn btn-success btn-mass-import rounded-pill px-3.5 px-md-4 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 gap-md-2 fw-semibold flex-fill flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="height: 40px; font-size: 0.84rem; white-space: nowrap;">
                         <i class="bi bi-file-earmark-spreadsheet-fill"></i>
                         <span>Mass Import</span>
                     </button>
-                    <button class="btn btn-outline-danger rounded-3 px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 fw-semibold flex-fill flex-lg-grow-0" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" style="height: 38px; font-size: 0.82rem; white-space: nowrap;">
+                    <button class="btn btn-outline-danger rounded-pill px-3.5 px-md-4 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 gap-md-2 fw-semibold flex-fill flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" style="height: 40px; font-size: 0.84rem; white-space: nowrap;">
                         <i class="bi bi-trash3-fill"></i>
                         <span>Delete Timetables</span>
                     </button>
@@ -928,16 +1212,16 @@
         </div>
     </div>
 
-    <!-- Quick Stats Cards Row -->
-    <div class="row g-2 g-md-3 mb-3 mb-md-4">
+    <!-- Quick Stats Cards Row (Desktop 3 Equal Large Cards, Mobile 3-in-a-row) -->
+    <div class="row g-2 g-md-3 mb-4">
         <div class="col-4 col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3">
-                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-center gap-2 gap-sm-3 text-center text-sm-start">
-                    <div class="p-2 p-md-3 rounded-3 rounded-md-4 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-3 text-center text-md-start">
+                    <div class="p-2 p-md-3 rounded-4 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
                         <i class="bi bi-calendar-week fs-4 fs-md-3"></i>
                     </div>
                     <div class="min-w-0">
-                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.68rem; letter-spacing: 0.4px;">Total Slots</div>
+                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.72rem; letter-spacing: 0.4px;">Total Slots</div>
                         <div class="fs-4 fs-md-3 fw-bold text-body lh-1 mt-1" id="statTotalSlots">{{ total_timetables_count }}</div>
                     </div>
                 </div>
@@ -945,12 +1229,12 @@
         </div>
         <div class="col-4 col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3">
-                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-center gap-2 gap-sm-3 text-center text-sm-start">
-                    <div class="p-2 p-md-3 rounded-3 rounded-md-4 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-3 text-center text-md-start">
+                    <div class="p-2 p-md-3 rounded-4 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
                         <i class="bi bi-person-check-fill fs-4 fs-md-3"></i>
                     </div>
                     <div class="min-w-0">
-                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.68rem; letter-spacing: 0.4px;">Allocated</div>
+                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.72rem; letter-spacing: 0.4px;">Allocated</div>
                         <div class="fs-4 fs-md-3 fw-bold text-body lh-1 mt-1" id="statAllocatedSlots">{{ assigned_count }}</div>
                     </div>
                 </div>
@@ -958,12 +1242,12 @@
         </div>
         <div class="col-4 col-md-4">
             <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3">
-                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-center gap-2 gap-sm-3 text-center text-sm-start">
-                    <div class="p-2 p-md-3 rounded-3 rounded-md-4 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-3 text-center text-md-start">
+                    <div class="p-2 p-md-3 rounded-4 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
                         <i class="bi bi-person-exclamation fs-4 fs-md-3"></i>
                     </div>
                     <div class="min-w-0">
-                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.68rem; letter-spacing: 0.4px;">Unassigned</div>
+                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.72rem; letter-spacing: 0.4px;">Unassigned</div>
                         <div class="fs-4 fs-md-3 fw-bold text-warning lh-1 mt-1" id="statUnassignedSlots">{{ unassigned_count }}</div>
                     </div>
                 </div>
@@ -974,23 +1258,23 @@
     <!-- Unassigned Classes Section with Left Sidebar Filters -->
     <section class="unassigned-classes-section" id="unassignedClassesSection">
         <div class="row g-4">
-            <!-- Left Side: Filter Sidebar Panel (Course, Subject, Day, Room) -->
+            <!-- Left Side: Filter Sidebar Panel (Course, Year, Division, Day, Room) -->
             <div class="col-xl-3 col-lg-4 col-md-4">
                 <aside class="filter-sidebar-panel">
                     <div class="filter-sidebar-title" data-bs-toggle="collapse" data-bs-target="#cmmFilterSidebarCollapse" role="button" aria-expanded="false" aria-controls="cmmFilterSidebarCollapse">
-                        <i class="bi bi-funnel-fill text-primary"></i>
-                        <span>Filters</span>
+                        <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" id="activeFilterBadge" style="display: none; font-size: 0.72rem;">Filtered</span>
                         <i class="bi bi-chevron-down d-md-none filter-collapse-icon" style="margin-left: 2px; font-size: 0.75rem;"></i>
                     </div>
                     
                     <div class="collapse d-md-block" id="cmmFilterSidebarCollapse">
                         <div class="filter-sidebar-form pt-1 pt-md-0">
-                            <div class="row g-2 filter-form-grid">
+                            <!-- Responsive grid for mobile (2 columns), single column on desktop sidebar -->
+                            <div class="row g-2 g-md-3">
                                 <!-- 1. Course Filter -->
-                                <div class="col-6">
+                                <div class="col-6 col-md-12">
                                     <label for="courseFilter" class="form-label">Course</label>
-                                    <select class="form-select form-select-sm" id="courseFilter" aria-label="Filter by Course">
+                                    <select class="form-select" id="courseFilter" aria-label="Filter by Course">
                                         <option value="">All Courses</option>
                                         <option value="BCA">BCA</option>
                                         <option value="MCA">MCA</option>
@@ -1000,9 +1284,9 @@
                                 </div>
 
                                 <!-- 2. Year Filter -->
-                                <div class="col-6">
+                                <div class="col-6 col-md-12">
                                     <label for="yearFilter" class="form-label">Year</label>
-                                    <select class="form-select form-select-sm" id="yearFilter" aria-label="Filter by Year">
+                                    <select class="form-select" id="yearFilter" aria-label="Filter by Year">
                                         <option value="">All Years</option>
                                         <option value="FY">FY</option>
                                         <option value="SY">SY</option>
@@ -1012,9 +1296,9 @@
                                 </div>
 
                                 <!-- 3. Division Filter -->
-                                <div class="col-6">
+                                <div class="col-6 col-md-12">
                                     <label for="divFilter" class="form-label">Division</label>
-                                    <select class="form-select form-select-sm" id="divFilter" aria-label="Filter by Division">
+                                    <select class="form-select" id="divFilter" aria-label="Filter by Division">
                                         <option value="">All Divisions</option>
                                         <option value="A">Division A</option>
                                         <option value="B">Division B</option>
@@ -1025,9 +1309,9 @@
                                 </div>
 
                                 <!-- 4. Day Filter -->
-                                <div class="col-6">
+                                <div class="col-6 col-md-12">
                                     <label for="dayFilter" class="form-label">Day</label>
-                                    <select class="form-select form-select-sm" id="dayFilter" aria-label="Filter by Day">
+                                    <select class="form-select" id="dayFilter" aria-label="Filter by Day">
                                         <option value="">All Days</option>
                                         <option value="Monday">Monday</option>
                                         <option value="Tuesday">Tuesday</option>
@@ -1039,22 +1323,22 @@
                                     </select>
                                 </div>
 
-                                <!-- 5. Room Filter (Collapsible Floor Accordion with Dropdown Arrows) -->
+                                <!-- 5. Room Filter (Collapsible Floor Accordion with Dropdown) -->
                                 <div class="col-12 position-relative room-accordion-dropdown">
-                                    <label class="form-label d-flex justify-content-between align-items-center mb-1">
+                                    <label class="form-label d-flex justify-content-between align-items-center">
                                         <span>Room</span>
-                                        <small class="text-muted text-capitalize" style="font-size: 0.68rem; letter-spacing: 0;">By Floor</small>
+                                        <small class="text-muted" style="font-size: 0.72rem;">By Floor</small>
                                     </label>
                                     <div class="dropdown">
-                                        <button class="form-select form-select-sm text-start d-flex justify-content-between align-items-center" type="button" id="roomDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                        <button class="form-select text-start d-flex justify-content-between align-items-center" type="button" id="roomDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
                                             <span id="selectedRoomLabel" class="text-truncate">All Rooms</span>
-                                            <i class="bi bi-chevron-down ms-1 text-muted" style="font-size: 0.72rem;"></i>
+                                            <i class="bi bi-chevron-down ms-2 text-muted" style="font-size: 0.75rem;"></i>
                                         </button>
                                         <input type="hidden" id="roomFilter" value="">
 
-                                        <div class="dropdown-menu p-2 shadow-lg rounded-3 w-100" style="max-height: 380px; overflow-y: auto; min-width: 240px; z-index: 1050;">
+                                        <div class="dropdown-menu p-2 shadow-lg rounded-3 w-100" style="max-height: 380px; overflow-y: auto; min-width: 250px; z-index: 1050;">
                                             <!-- All Rooms Option -->
-                                            <button type="button" class="dropdown-item py-1 px-2 rounded-2 fw-semibold mb-1 room-option-item active" data-room-value="" style="font-size: 0.8rem;">
+                                            <button type="button" class="dropdown-item py-1.5 px-2 rounded-2 fw-semibold mb-1 room-option-item active" data-room-value="">
                                                 <i class="bi bi-grid-fill me-2 text-primary"></i>All Rooms
                                             </button>
                                             <div class="dropdown-divider my-1"></div>
@@ -1064,18 +1348,18 @@
                                                 {% for af in academic_floors %}
                                                 <div class="accordion-item border-0 mb-1 bg-transparent">
                                                     <h3 class="accordion-header" id="headingFloor{{ af.level }}">
-                                                        <button class="accordion-button collapsed py-1 px-2 rounded-2 fw-semibold d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFloor{{ af.level }}" aria-expanded="false" aria-controls="collapseFloor{{ af.level }}" style="font-size: 0.78rem;">
-                                                            <div class="d-flex align-items-center gap-1.5">
+                                                        <button class="accordion-button collapsed py-1.5 px-2.5 rounded-2 fw-semibold d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFloor{{ af.level }}" aria-expanded="false" aria-controls="collapseFloor{{ af.level }}" style="font-size: 0.82rem;">
+                                                            <div class="d-flex align-items-center gap-2">
                                                                 <span>{{ af.name }}</span>
-                                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill" style="font-size: 0.65rem; padding: 2px 6px;">{{ af.rooms|length }}</span>
+                                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill" style="font-size: 0.68rem;">{{ af.rooms|length }}</span>
                                                             </div>
                                                         </button>
                                                     </h3>
                                                     <div id="collapseFloor{{ af.level }}" class="accordion-collapse collapse" aria-labelledby="headingFloor{{ af.level }}" data-bs-parent="#floorRoomAccordion">
-                                                        <div class="accordion-body p-1.5 pt-1 pb-1.5">
+                                                        <div class="accordion-body p-2 pt-1 pb-2">
                                                             <div class="room-grid">
                                                                 {% for r in af.rooms %}
-                                                                <button type="button" class="btn btn-sm room-chip-btn" data-room-value="{{ r.number }}" style="height: 28px; font-size: 0.72rem;">
+                                                                <button type="button" class="btn btn-sm room-chip-btn" data-room-value="{{ r.number }}">
                                                                     {{ r.number }}
                                                                 </button>
                                                                 {% endfor %}
@@ -1091,7 +1375,7 @@
 
                                 <!-- Reset Filters Button -->
                                 <div class="col-12 pt-1">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center gap-1.5" id="btnResetFilters" style="border-radius: 8px; height: 32px; font-size: 0.78rem; font-weight: 500;">
+                                    <button type="button" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-1.5" id="btnResetFilters" style="border-radius: 10px; height: 38px; font-size: 0.85rem; font-weight: 500;">
                                         <i class="bi bi-arrow-counterclockwise"></i>
                                         <span>Reset Filters</span>
                                     </button>
@@ -1105,38 +1389,72 @@
             <!-- Right Side: Unassigned Classes Table Card -->
             <div class="col-xl-9 col-lg-8 col-md-8">
                 <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
-                    <div class="card-header px-3 px-md-4 d-flex align-items-center justify-content-between gap-2" style="background-color: var(--bg-card); border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-top: 0.65rem; padding-bottom: 0.65rem; min-height: 52px;">
-                        <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
-                            <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-warning bg-opacity-10 text-warning rounded-3" style="width: 32px; height: 32px;">
-                                <i class="bi bi-calendar-x-fill" style="font-size: 1rem;"></i>
+                    <!-- Card Header (Title & Icon on Left, Unassigned Tag on Right) -->
+                    <div class="card-header py-3 px-3 px-md-4 d-flex justify-content-between align-items-center gap-3" style="background-color: var(--bg-card); border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08));">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="p-2.5 rounded-3 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                                <i class="bi bi-calendar-x-fill fs-5"></i>
                             </div>
-                            <div style="min-width: 0; flex: 1;">
-                                <div class="d-flex align-items-center gap-2" style="flex-wrap: nowrap; overflow: hidden;">
-                                    <span class="fw-bold text-body text-truncate" style="font-size: 0.9rem;">Unassigned Classes</span>
-                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill fw-semibold flex-shrink-0" id="unassignedCountBadge" style="font-size: 0.68rem; padding: 2px 8px; white-space: nowrap;">
-                                        {{ unassigned_classes|length }} Unassigned
-                                    </span>
-                                </div>
-                                <p class="text-muted mb-0 d-none d-md-block" style="font-size: 0.75rem; margin-top: 1px;">Timetable sessions missing instructor assignments.</p>
+                            <div>
+                                <h4 class="h5 fw-bold mb-0 text-body">Unassigned Classes</h4>
+                                <p class="text-muted small mb-0 mt-0.5 d-none d-md-block">Timetable sessions missing instructor assignments.</p>
                             </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill px-3 py-1.5 fw-semibold" id="unassignedCountBadge" style="font-size: 0.76rem; letter-spacing: 0.3px;">
+                                {{ unassigned_classes|length }} Unassigned
+                            </span>
                         </div>
                     </div>
                     
                     <div class="card-body p-0">
-                        <!-- Search Bar & Bulk Actions Toolbar — all 3 blocks equal width, equal height -->
-                        <div class="cmm-toolbar">
-                            <!-- 1. Search Box — custom seamless flex -->
+                        <!-- ═══════════════════════════════════════════════════
+                             DESKTOP TOOLBAR (≥ 768px: Clean Seamless Flex Layout)
+                        ══════════════════════════════════════════════════════ -->
+                        <div class="cmm-desktop-toolbar d-none d-md-block">
+                            <!-- 1. Search Bar with comfortable bottom margin -->
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-search text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="tableSearchInput" placeholder="Filter by Subject, Day, or Room..." aria-label="Filter by Subject, Day, or Room">
+                                </div>
+                            </div>
+
+                            <!-- 2. Bulk Action Row — Label + Flex-grow Select + Action Button -->
+                            <div class="d-flex align-items-center" id="bulkActionRow" style="gap: 12px;">
+                                <label for="bulkFacultySelect" class="form-label mb-0 fw-semibold text-body small text-nowrap d-flex align-items-center gap-1.5 flex-shrink-0">
+                                    <i class="bi bi-person-check text-primary fs-6"></i>
+                                    <span>Bulk Faculty:</span>
+                                </label>
+                                <select class="form-select flex-grow-1" id="bulkFacultySelect" aria-label="Select Faculty for Bulk Assignment">
+                                    <option value="" selected disabled>Choose Faculty for Bulk Assignment...</option>
+                                    {% for fac in all_faculties %}
+                                    <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
+                                    {% endfor %}
+                                </select>
+                                <button type="button" class="btn btn-primary rounded-pill px-4 shadow-sm fw-semibold d-inline-flex align-items-center justify-content-center gap-2 flex-shrink-0" id="bulkAssignBtn" style="white-space: nowrap;">
+                                    <i class="bi bi-people-fill"></i>
+                                    <span>Bulk Assign Selected</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- ═══════════════════════════════════════════════════
+                             MOBILE TOOLBAR (< 768px: Compact Stacked Layout)
+                        ══════════════════════════════════════════════════════ -->
+                        <div class="cmm-toolbar d-md-none">
                             <div class="cmm-search-box">
                                 <span class="search-icon">
                                     <i class="bi bi-search"></i>
                                 </span>
-                                <input type="text" id="tableSearchInput"
+                                <input type="text" id="mobileTableSearchInput"
                                     placeholder="Filter by Subject, Day, or Room..."
                                     aria-label="Filter by Subject, Day, or Room">
                             </div>
 
-                            <!-- 2. Faculty Select — full width -->
-                            <select class="cmm-select" id="bulkFacultySelect"
+                            <select class="cmm-select" id="mobileBulkFacultySelect"
                                 aria-label="Select Faculty for Bulk Assignment">
                                 <option value="" selected disabled>Choose Faculty</option>
                                 {% for fac in all_faculties %}
@@ -1144,14 +1462,15 @@
                                 {% endfor %}
                             </select>
 
-                            <!-- 3. Bulk Assign Button — full width -->
-                            <button type="button" class="btn btn-primary btn-bulk-assign shadow-sm" id="bulkAssignBtn">
+                            <button type="button" class="btn btn-primary btn-bulk-assign shadow-sm" id="mobileBulkAssignBtn">
                                 <i class="bi bi-people-fill"></i>
                                 <span>Bulk Assign Selected</span>
                             </button>
                         </div>
 
-                        <!-- Desktop Table Wrapper -->
+                        <!-- ═══════════════════════════════════════════════════
+                             DESKTOP TABLE (≥ 768px: Original Table Structure)
+                        ══════════════════════════════════════════════════════ -->
                         <div class="table-responsive d-none d-md-block">
                             <table class="table table-hover align-middle mb-0" id="unassignedClassesTable">
                                 <thead class="table-light">
@@ -1259,7 +1578,9 @@
                             </table>
                         </div>
 
-                        <!-- Mobile Card List View -->
+                        <!-- ═══════════════════════════════════════════════════
+                             MOBILE CARD LIST VIEW (< 768px: Mobile Cards)
+                        ══════════════════════════════════════════════════════ -->
                         <div class="d-md-none" id="unassignedMobileContainer">
                             <!-- Mobile Select All Bar -->
                             <div class="d-flex justify-content-between align-items-center px-3 py-2 cmm-select-all-bar">
@@ -1355,91 +1676,84 @@
                         <i class="bi bi-file-earmark-spreadsheet-fill text-emerald"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title fw-bold text-white mb-0" id="importTimetableModalLabel" style="font-size: 1.05rem; letter-spacing: -0.2px;">
-                            Mass Import Timetable (CSV)
-                        </h5>
-                        <div class="text-muted" style="font-size: 0.74rem;">Batch upload room schedule records</div>
+                        <h5 class="modal-title fw-bold mb-0 text-body" id="importTimetableModalLabel" style="font-size: 1.05rem;">Mass Import Timetable</h5>
+                        <small class="text-muted" style="font-size: 0.76rem;">Upload timetable schedule CSV files</small>
                     </div>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            
-            <div class="modal-body p-4 pt-3">
-                <form id="importTimetableForm">
-                    <!-- Custom File Dropzone -->
+
+            <form id="importTimetableForm" enctype="multipart/form-data">
+                <div class="modal-body p-4 pt-3">
+                    <!-- Dropzone -->
                     <div class="mb-3">
-                        <label class="form-label fw-semibold text-white-50 small mb-2">Select Timetable CSV File</label>
-                        <div class="cmm-file-dropzone" id="csvDropzone" onclick="document.getElementById('csvFileInput').click();">
-                            <input class="d-none" type="file" id="csvFileInput" accept=".csv" required>
-                            <div class="dropzone-content py-3 text-center">
-                                <div class="dropzone-icon mb-2">
-                                    <i class="bi bi-cloud-arrow-up-fill" id="dropzoneIcon"></i>
-                                </div>
-                                <div class="fw-semibold text-white dropzone-title" id="dropzoneTitle" style="font-size: 0.88rem;">
-                                    Click to browse or drop CSV file
-                                </div>
-                                <div class="text-muted small mt-1 dropzone-sub" id="dropzoneSub" style="font-size: 0.75rem;">
-                                    Supports standard .csv timetable matrices
-                                </div>
+                        <label class="form-label fw-semibold small text-body mb-1.5">Timetable CSV File</label>
+                        <div class="cmm-file-dropzone text-center" id="csvDropzone" onclick="document.getElementById('csvFileInput').click()">
+                            <input type="file" class="d-none" id="csvFileInput" name="file" accept=".csv" required>
+                            <div class="dropzone-icon mb-2">
+                                <i class="bi bi-cloud-arrow-up-fill" id="dropzoneIcon"></i>
                             </div>
-                        </div>
-
-                        <!-- Helper note -->
-                        <div class="cmm-format-note mt-2">
-                            <i class="bi bi-info-circle-fill me-1 flex-shrink-0"></i>
-                            <span>CSV must contain room codes (e.g. <code>VY401</code>) &amp; time slots (e.g. <code>09:00-10:00</code>) formatted with weekday columns.</span>
+                            <div class="dropzone-title fw-bold small text-body mb-0.5" id="dropzoneTitle">Click to browse or drop CSV file</div>
+                            <div class="dropzone-sub text-muted" style="font-size: 0.74rem;" id="dropzoneSub">Supports standard .csv timetable matrices</div>
                         </div>
                     </div>
 
-                    <!-- Dry run toggle tile -->
+                    <!-- Format Guide Note -->
+                    <div class="cmm-format-note mb-3">
+                        <i class="bi bi-info-circle-fill flex-shrink-0"></i>
+                        <span>
+                            CSV format: <code>Room</code>, <code>Day</code>, <code>Start Time</code>, <code>End Time</code>, <code>Subject</code>, <code>Course</code>, <code>Division</code>, <code>Faculty Email</code>
+                        </span>
+                    </div>
+
+                    <!-- Dry Run Option Tile -->
                     <div class="cmm-toggle-tile mb-3">
-                        <div class="pe-2">
-                            <div class="fw-semibold text-white" style="font-size: 0.86rem;">Dry Run Mode</div>
-                            <div class="text-muted" style="font-size: 0.74rem; line-height: 1.3;">Validate &amp; preview data without saving to database</div>
+                        <div>
+                            <div class="fw-semibold small text-body">Dry Run (Preview Mode)</div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Validate data and detect conflicts before committing changes</small>
                         </div>
-                        <div class="form-check form-switch m-0 p-0 d-flex align-items-center">
-                            <input class="form-check-input ms-0" type="checkbox" id="dryRunToggle" checked style="cursor: pointer; width: 2.3em; height: 1.2em;">
-                        </div>
-                    </div>
-
-                    <!-- Ingestion / Error Preview -->
-                    <div id="importPreviewContainer" class="d-none mb-3">
-                        <div class="cmm-preview-success p-3 rounded-3 mb-2">
-                            <div class="fw-bold mb-1 d-flex align-items-center gap-1" style="font-size: 0.84rem;">
-                                <i class="bi bi-check-circle-fill"></i> CSV Preview Results
-                            </div>
-                            <div class="small opacity-90" id="previewSummaryText">0 entries ready for ingestion.</div>
-                        </div>
-
-                        <div id="previewErrorList" class="cmm-preview-warning p-3 rounded-3 d-none small">
-                            <div class="fw-bold mb-1 d-flex align-items-center gap-1">
-                                <i class="bi bi-exclamation-triangle-fill"></i> Warnings / Errors detected:
-                            </div>
-                            <ul class="mb-0 ps-3 mt-1" id="previewErrorsUl"></ul>
+                        <div class="form-check form-switch mb-0">
+                            <input class="form-check-input" type="checkbox" id="dryRunToggle" role="switch" checked style="width: 2.2em; height: 1.2em;">
                         </div>
                     </div>
 
-                    <!-- Action Buttons -->
+                    <!-- Live Validation Preview Container -->
+                    <div id="importPreviewContainer" class="d-none">
+                        <div class="p-3 rounded-3 mb-3 cmm-preview-success small">
+                            <div class="d-flex align-items-center gap-2 fw-semibold">
+                                <i class="bi bi-check-circle-fill"></i>
+                                <span id="previewSummaryText">Ready to import</span>
+                            </div>
+                        </div>
+                        <div id="previewErrorList" class="p-3 rounded-3 mb-3 cmm-preview-warning small d-none">
+                            <div class="fw-semibold mb-1 d-flex align-items-center gap-1.5">
+                                <i class="bi bi-exclamation-triangle-fill"></i>Warnings / Unmapped Rows:
+                            </div>
+                            <ul class="mb-0 ps-3" id="previewErrorsUl" style="font-size: 0.76rem;"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Modal Actions Grid -->
                     <div class="cmm-modal-actions">
                         <button type="button" class="btn cmm-btn-cancel" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn cmm-btn-preview" id="btnPreviewCsv">
-                            <i class="bi bi-search me-1"></i>Preview &amp; Validate
+                            <i class="bi bi-eye me-1.5"></i>Validate
                         </button>
                         <button type="submit" class="btn cmm-btn-commit" id="btnCommitImport">
-                            <i class="bi bi-cloud-upload-fill me-1"></i>Commit &amp; Import
+                            <i class="bi bi-check2-circle me-1.5"></i>Upload & Apply
                         </button>
                     </div>
-                </form>
-            </div>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════
-     DELETE CONFIRM MODAL (Phase 1: Securing Destructive Actions)
+     DELETE TIMETABLES MODAL
 ══════════════════════════════════════════════════════ -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
         <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden cmm-custom-modal">
             <div class="modal-header border-0 py-3 px-4 d-flex align-items-center justify-content-between cmm-modal-header">
                 <div class="d-flex align-items-center gap-2">
@@ -1447,10 +1761,8 @@
                         <i class="bi bi-exclamation-triangle-fill text-danger"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title fw-bold text-white mb-0" id="deleteConfirmModalLabel" style="font-size: 1.05rem; letter-spacing: -0.2px;">
-                            Confirm Timetable Deletion
-                        </h5>
-                        <div class="text-muted" style="font-size: 0.74rem;">Destructive schedule purge action</div>
+                        <h5 class="modal-title fw-bold mb-0 text-body" id="deleteConfirmModalLabel" style="font-size: 1.05rem;">Delete Timetables</h5>
+                        <small class="text-muted" style="font-size: 0.76rem;">Permanent schedule clearing</small>
                     </div>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -1460,14 +1772,14 @@
                 <div class="cmm-modal-icon-center bg-danger-subtle mb-3">
                     <i class="bi bi-trash3-fill text-danger fs-2"></i>
                 </div>
-                <h5 class="fw-bold text-white mb-2" style="font-size: 1.08rem;">Wipe All Timetable Records?</h5>
+                <h5 class="fw-bold text-body mb-2" style="font-size: 1.08rem;">Wipe All Timetable Records?</h5>
                 <p class="text-danger fw-semibold small mb-3" style="line-height: 1.45;">
                     Are you sure you want to delete all timetable entries? This action cannot be undone.
                 </p>
                 <div class="cmm-danger-box text-start p-3 rounded-3 mb-0 small">
                     <div class="d-flex gap-2 align-items-start">
                         <i class="bi bi-info-circle-fill text-danger mt-0.5 flex-shrink-0"></i>
-                        <span style="color: rgba(255,255,255,0.75); line-height: 1.4;">
+                        <span class="danger-box-text">
                             This action will permanently delete all classroom timetables, recurring schedules, and unassigned class allocations across the Vyas building.
                         </span>
                     </div>
@@ -1485,22 +1797,26 @@
 </div>
 
 <script>
-// ==================== PHASE 1: EVENT BINDING AND STATE EXTRACTION ====================
+// ==================== PHASE 1: EVENT BINDING AND FILTER LOGIC ====================
 function applyFilters() {
-    // 1. Extract current value of every input and convert it to lowercase
     const courseFilter = document.getElementById('courseFilter');
     const yearFilter = document.getElementById('yearFilter');
     const divFilter = document.getElementById('divFilter');
     const dayFilter = document.getElementById('dayFilter');
     const roomFilter = document.getElementById('roomFilter');
-    const searchInput = document.getElementById('tableSearchInput');
+    const desktopSearch = document.getElementById('tableSearchInput');
+    const mobileSearch = document.getElementById('mobileTableSearchInput');
 
     const courseVal = (courseFilter ? courseFilter.value : '').toLowerCase().trim();
     const yearVal = (yearFilter ? yearFilter.value : '').toLowerCase().trim();
     const divVal = (divFilter ? divFilter.value : '').toLowerCase().trim();
     const dayVal = (dayFilter ? dayFilter.value : '').toLowerCase().trim();
     const roomVal = (roomFilter ? roomFilter.value : '').toLowerCase().trim();
-    const searchVal = (searchInput ? searchInput.value : '').toLowerCase().trim();
+    
+    // Check search query from either desktop or mobile search input
+    const searchVal = (desktopSearch && desktopSearch.value.trim() !== '' 
+        ? desktopSearch.value 
+        : (mobileSearch ? mobileSearch.value : '')).toLowerCase().trim();
 
     // Query all unassigned row items (matches desktop tr.unassigned-row-item and mobile .cmm-mobile-card.unassigned-row-item)
     const allItems = document.querySelectorAll('.unassigned-row-item');
@@ -1520,7 +1836,7 @@ function applyFilters() {
         const itemRoom = (item.getAttribute('data-room') || item.dataset.room || '').toLowerCase().trim();
         const itemDivRaw = (item.getAttribute('data-division') || item.dataset.division || '').trim();
 
-        // 1. Course Match (e.g. 'BCA', 'MCA', 'BSC', 'MSC')
+        // 1. Course Match
         const courseMatch = !courseVal || (itemCourse ? itemCourse.includes(courseVal) : itemText.includes(courseVal));
 
         // 2. Year Match (FY, SY, TY, HONS / HONOURS)
@@ -1541,7 +1857,7 @@ function applyFilters() {
             divMatch = itemDivLetter !== '' && (itemDivLetter === targetDivLetter || itemDivRaw.toLowerCase() === divVal);
         }
 
-        // 4. Day Match (Monday through Sunday)
+        // 4. Day Match
         const dayMatch = !dayVal || (itemDay ? itemDay === dayVal : itemText.includes(dayVal));
 
         // 5. Room Match
@@ -1595,14 +1911,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const divFilter = document.getElementById('divFilter');
     const dayFilter = document.getElementById('dayFilter');
     const roomFilter = document.getElementById('roomFilter');
-    const tableSearchInput = document.getElementById('tableSearchInput');
+    const desktopSearch = document.getElementById('tableSearchInput');
+    const mobileSearch = document.getElementById('mobileTableSearchInput');
 
     if (courseFilter) courseFilter.addEventListener('change', applyFilters);
     if (yearFilter) yearFilter.addEventListener('change', applyFilters);
     if (divFilter) divFilter.addEventListener('change', applyFilters);
     if (dayFilter) dayFilter.addEventListener('change', applyFilters);
     if (roomFilter) roomFilter.addEventListener('change', applyFilters);
-    if (tableSearchInput) tableSearchInput.addEventListener('input', applyFilters);
+    
+    if (desktopSearch) {
+        desktopSearch.addEventListener('input', function() {
+            if (mobileSearch) mobileSearch.value = this.value;
+            applyFilters();
+        });
+    }
+    if (mobileSearch) {
+        mobileSearch.addEventListener('input', function() {
+            if (desktopSearch) desktopSearch.value = this.value;
+            applyFilters();
+        });
+    }
 
     // ==================== CHECKBOX TOGGLE & SYNC LOGIC ====================
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
@@ -1648,7 +1977,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.target && e.target.classList.contains('row-checkbox')) {
             const classId = e.target.dataset.classId || e.target.value;
             const isChecked = e.target.checked;
-            // Sync all checkboxes matching this classId
             document.querySelectorAll(`.row-checkbox[data-class-id="${classId}"], .row-checkbox[value="${classId}"]`).forEach(cb => {
                 cb.checked = isChecked;
             });
@@ -1699,8 +2027,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Reset Filters
     if (btnResetFilters) {
         btnResetFilters.addEventListener('click', function() {
-            const searchInput = document.getElementById('tableSearchInput');
-            if (searchInput) searchInput.value = '';
+            if (desktopSearch) desktopSearch.value = '';
+            if (mobileSearch) mobileSearch.value = '';
 
             const selectDropdowns = [
                 document.getElementById('courseFilter'),
@@ -1721,80 +2049,90 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ==================== BULK ASSIGN HANDLER ====================
-    const bulkAssignBtn = document.getElementById('bulkAssignBtn');
-    const bulkFacultySelect = document.getElementById('bulkFacultySelect');
+    // ==================== BULK ASSIGN HANDLER (DESKTOP & MOBILE) ====================
+    async function executeBulkAssign(facultySelectEl, assignBtnEl) {
+        if (!facultySelectEl || !facultySelectEl.value || facultySelectEl.value.trim() === '') {
+            alert('Please select a faculty member from the dropdown before bulk assigning.');
+            if (facultySelectEl) facultySelectEl.focus();
+            return;
+        }
 
-    if (bulkAssignBtn) {
-        bulkAssignBtn.addEventListener('click', async function() {
-            if (!bulkFacultySelect || !bulkFacultySelect.value || bulkFacultySelect.value.trim() === '') {
-                alert('Please select a faculty member from the dropdown before bulk assigning.');
-                if (bulkFacultySelect) bulkFacultySelect.focus();
-                return;
-            }
+        const facultyId = parseInt(facultySelectEl.value, 10);
+        if (isNaN(facultyId)) {
+            alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
+            return;
+        }
 
-            const facultyId = parseInt(bulkFacultySelect.value, 10);
-            if (isNaN(facultyId)) {
-                alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
-                return;
-            }
+        const checkedBoxes = Array.from(document.querySelectorAll('.row-checkbox:checked'));
+        const classIds = Array.from(new Set(checkedBoxes.map(cb => {
+            const idVal = cb.getAttribute('data-class-id') || cb.value;
+            return parseInt(idVal, 10);
+        }).filter(id => !isNaN(id))));
 
-            const checkedBoxes = Array.from(document.querySelectorAll('.row-checkbox:checked'));
-            const classIds = Array.from(new Set(checkedBoxes.map(cb => {
-                const idVal = cb.getAttribute('data-class-id') || cb.value;
-                return parseInt(idVal, 10);
-            }).filter(id => !isNaN(id))));
+        if (classIds.length === 0) {
+            alert('Please select at least one class checkbox to assign.');
+            return;
+        }
 
-            if (classIds.length === 0) {
-                alert('Please select at least one class checkbox to assign.');
-                return;
-            }
+        const originalBtnHtml = assignBtnEl.innerHTML;
+        assignBtnEl.disabled = true;
+        assignBtnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Assigning...';
 
-            const originalBtnHtml = bulkAssignBtn.innerHTML;
-            bulkAssignBtn.disabled = true;
-            bulkAssignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Assigning...';
+        try {
+            const response = await fetch('/admin/api/bulk_assign_faculty', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    faculty_id: facultyId,
+                    class_ids: classIds
+                })
+            });
 
-            try {
-                const response = await fetch('/admin/api/bulk_assign_faculty', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken,
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    body: JSON.stringify({
-                        faculty_id: facultyId,
-                        class_ids: classIds
-                    })
+            const data = await response.json().catch(() => null);
+
+            if (response.ok && data && (data.success !== false)) {
+                classIds.forEach(id => {
+                    const row = document.getElementById(`class-row-${id}`);
+                    if (row) row.remove();
+                    const card = document.getElementById(`mobile-class-card-${id}`);
+                    if (card) card.remove();
                 });
 
-                const data = await response.json().catch(() => null);
+                if (selectAllCheckbox) selectAllCheckbox.checked = false;
+                if (mobileSelectAllCheckbox) mobileSelectAllCheckbox.checked = false;
+                updateSelectedCounter();
+                applyFilters();
 
-                if (response.ok && data && (data.success !== false)) {
-                    classIds.forEach(id => {
-                        const row = document.getElementById(`class-row-${id}`);
-                        if (row) row.remove();
-                        const card = document.getElementById(`mobile-class-card-${id}`);
-                        if (card) card.remove();
-                    });
-
-                    if (selectAllCheckbox) selectAllCheckbox.checked = false;
-                    if (mobileSelectAllCheckbox) mobileSelectAllCheckbox.checked = false;
-                    updateSelectedCounter();
-                    applyFilters();
-
-                    if (bulkFacultySelect) bulkFacultySelect.selectedIndex = 0;
-                } else {
-                    const errorMsg = (data && (data.error || data.message)) || `Server returned status ${response.status}`;
-                    alert('Failed to bulk assign classes: ' + errorMsg);
-                }
-            } catch (err) {
-                alert('Network error while performing bulk assignment: ' + (err.message || 'Please try again.'));
-            } finally {
-                bulkAssignBtn.disabled = false;
-                bulkAssignBtn.innerHTML = originalBtnHtml;
+                const desktopSelect = document.getElementById('bulkFacultySelect');
+                const mobileSelect = document.getElementById('mobileBulkFacultySelect');
+                if (desktopSelect) desktopSelect.selectedIndex = 0;
+                if (mobileSelect) mobileSelect.selectedIndex = 0;
+            } else {
+                const errorMsg = (data && (data.error || data.message)) || `Server returned status ${response.status}`;
+                alert('Failed to bulk assign classes: ' + errorMsg);
             }
-        });
+        } catch (err) {
+            alert('Network error while performing bulk assignment: ' + (err.message || 'Please try again.'));
+        } finally {
+            assignBtnEl.disabled = false;
+            assignBtnEl.innerHTML = originalBtnHtml;
+        }
+    }
+
+    const bulkAssignBtn = document.getElementById('bulkAssignBtn');
+    const bulkFacultySelect = document.getElementById('bulkFacultySelect');
+    if (bulkAssignBtn) {
+        bulkAssignBtn.addEventListener('click', () => executeBulkAssign(bulkFacultySelect, bulkAssignBtn));
+    }
+
+    const mobileBulkAssignBtn = document.getElementById('mobileBulkAssignBtn');
+    const mobileBulkFacultySelect = document.getElementById('mobileBulkFacultySelect');
+    if (mobileBulkAssignBtn) {
+        mobileBulkAssignBtn.addEventListener('click', () => executeBulkAssign(mobileBulkFacultySelect, mobileBulkAssignBtn));
     }
 
     // ==================== SINGLE ASSIGN HANDLER ====================
@@ -1862,9 +2200,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 alert('Failed to allocate faculty: ' + errorMsg);
                 assignBtn.disabled = false;
                 assignBtn.innerHTML = originalBtnHtml;
-            });
+            }
+        })
+        .catch(err => {
+            alert('Network error: ' + (err.message || 'Please try again.'));
+            assignBtn.disabled = false;
+            assignBtn.innerHTML = originalBtnHtml;
         });
-    }
+    });
 
     // ==================== MASS IMPORT TIMETABLE LOGIC ====================
     const btnPreviewCsv = document.getElementById('btnPreviewCsv');

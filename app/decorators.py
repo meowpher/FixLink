@@ -127,3 +127,60 @@ def super_admin_required(f):
             
         return f(*args, **kwargs)
     return decorated_function
+
+def require_ownership(model_class, id_param='id', owner_field='user_id', allow_admin=True):
+    """
+    IDOR Prevention Decorator:
+    Enforces that the current authenticated user owns the database record being accessed/modified.
+    
+    :param model_class: The SQLAlchemy Model class (e.g., RoomBooking, Ticket, Timetable, BugReport).
+    :param id_param: The URL keyword argument name containing the record's Primary Key.
+    :param owner_field: The attribute name on the model representing the owner (e.g., 'user_id', 'faculty_id', 'reporter_id').
+    :param allow_admin: Whether administrators/superadmins can override ownership checks.
+    """
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # 1. Verify user is authenticated
+            current_user_id = session.get('user_id') or session.get('professional_id')
+            if not current_user_id:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+                    return api_response(success=False, error='Authentication required.', status=401)
+                return redirect(url_for('auth.login'))
+
+            # 2. Extract record ID from route parameters (or request payload)
+            record_id = kwargs.get(id_param) or (request.view_args.get(id_param) if request.view_args else None)
+            if not record_id:
+                return api_response(success=False, error=f'Missing parameter {id_param}', status=400)
+
+            # 3. Retrieve target record from database
+            record = model_class.query.get(record_id)
+            if not record:
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+                    return api_response(success=False, error='Resource not found.', status=404)
+                flash('The requested resource was not found.', 'error')
+                return redirect(url_for('main.index'))
+
+            # 4. Check for Administrative / SuperAdmin Override
+            is_admin = session.get('is_admin', False) or session.get('is_super_admin', False)
+            if allow_admin and is_admin:
+                return f(*args, **kwargs)
+
+            # 5. Enforce strict IDOR ownership match
+            record_owner_id = getattr(record, owner_field, None)
+            
+            # If owner doesn't match current session -> INSTANT 403 FORBIDDEN
+            if record_owner_id is None or str(record_owner_id) != str(current_user_id):
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+                    return api_response(
+                        success=False,
+                        error='Access Denied: You do not have permission to modify this resource.',
+                        status=403
+                    )
+                flash('Access Denied: You cannot modify a record that does not belong to you.', 'error')
+                return redirect(url_for('main.index')), 403
+
+            # Authorized -> Proceed to route handler
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator

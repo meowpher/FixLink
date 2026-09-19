@@ -58,7 +58,15 @@ Before outputting any code or completing a task, you MUST silently run through t
 *   [ ] **The Credential Integrity Check:** Did I ensure all primary accounts (`om.mahadik@mitwpu.edu.in`, `admin@mitwpu.edu.in`, `bottlesingh#pro`) remain valid, auto-seeded, and case-insensitively authenticated?
 *   [ ] **The Figma Check:** Did I completely strip all inline `fill` and `stroke` attributes from newly imported SVG elements?
 *   [ ] **The Dark Mode Check:** Do the new UI elements strictly use established CSS variables/classes, or did I accidentally hardcode a hex color that will break the dark mode aesthetic?
+*   [ ] **The Mobile Responsiveness Check:** Did I verify that newly added or modified modals, headers, action bars, and floating triggers adapt cleanly to mobile viewports (`< 768px`) without horizontal overflow or screen crowding, and that desktop-only floating buttons use `d-none d-md-inline-flex`?
+*   [ ] **The OWASP Cookie & Session Lockdown Check:** Are session cookies strictly configured with `SESSION_COOKIE_HTTPONLY=True`, `SESSION_COOKIE_SECURE=True`, `SESSION_COOKIE_SAMESITE='Lax'`, and a bounded `PERMANENT_SESSION_LIFETIME` (2 hours) to defeat session hijacking and XSS cookie theft?
+*   [ ] **The CSRF & Security Form Check:** Did I ensure all new forms and AJAX/`fetch()` POST/PUT/DELETE requests include valid CSRF tokens (`csrf_token()` / `X-CSRFToken`) and server-side role/session guards?
+*   [ ] **The Rate Limiting & DDoS Prevention Check:** Are sensitive public endpoints (login, report/bug submission) protected with strict rate limiting decorators to prevent brute-force attacks and bot spamming?
+*   [ ] **The IDOR & Resource Ownership Check:** Are state-mutating API routes (canceling bookings, modifying timetables, updating tickets) guarded by `@require_ownership` or strict role-based permission checks returning 403 Forbidden for unauthorized users?
 *   [ ] **The DB Crash Check:** Does this code query the database on startup? If yes, is it safely wrapped in an `app_context()` and does it verify the tables actually exist first?
 *   [ ] **The Lighthouse Check:** Did I introduce any heavy external dependencies, unoptimized raster images (`<img>`), or blocking JavaScript that threatens the 95+ performance score?
+*   [ ] **The Interactive Twin & Pointer Events Check:** Did I ensure SVG digital twin containers maintain `pointer-events: none;` with `pointer-events: auto;` only on interactive elements, preserving room clickability and Flashlight mode?
+*   [ ] **The Automated Pytest Suite Run Check:** Did I execute `./venv/Scripts/pytest.exe` to verify that 100% of test suites pass with zero failures and zero regressions?
 *   [ ] **The Boy Scout Check:** Did I actively delete the dead code, consolidate duplicate logic, or remove legacy technical debt in the surrounding area of my fix?
 *   [ ] **The Constraint Check:** Did I follow the exact tech stack required (HTML, vanilla CSS, vanilla JS, Python/Flask, Bootstrap 5) without hallucinating Next.js, React, or Tailwind solutions?
+

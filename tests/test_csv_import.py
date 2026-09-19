@@ -255,7 +255,7 @@ class TestCSVTimetableImport(unittest.TestCase):
         content = res.data.decode('utf-8')
 
         # Check section title
-        self.assertIn("Unassigned Classes Requiring Faculty Allocation", content)
+        self.assertIn("Unassigned Classes", content)
         # Check CSRF meta tag
         self.assertIn('name="csrf-token"', content)
         # Check table headers and content

@@ -115,8 +115,6 @@
 /* Dark Mode Page Headers - Neutral dark gradient instead of blue wash */
 [data-theme="dark"] .profile-page-header,
 [data-theme="dark"] .history-header,
-[data-theme="dark"] .admin-header,
-[data-theme="dark"] .vyas-admin-header,
 [data-theme="dark"] .page-header {
     background: linear-gradient(180deg, #111111 0%, #161616 100%) !important;
     border-bottom: 1px solid #262626 !important;
@@ -124,9 +122,139 @@
 }
 
 [data-theme="dark"] .profile-page-header .text-white-50,
-[data-theme="dark"] .history-header .text-white-50,
-[data-theme="dark"] .admin-header .admin-subtitle {
+[data-theme="dark"] .history-header .text-white-50 {
     color: #a1a1aa !important;
+}
+
+/* Admin & Status Map Header in Dark Mode - Shiny & Grainy Blue-to-Green Gradient */
+[data-theme="dark"] .vyas-admin-header,
+[data-bs-theme="dark"] .vyas-admin-header,
+[data-theme="dark"] .admin-header,
+[data-bs-theme="dark"] .admin-header,
+[data-theme="dark"] .status-map-header,
+[data-bs-theme="dark"] .status-map-header,
+body[data-theme="dark"] .vyas-admin-header,
+body[data-theme="dark"] .admin-header,
+body[data-theme="dark"] .status-map-header {
+    position: relative !important;
+    isolation: isolate !important;
+    padding: 2.25rem 0 !important;
+    background: 
+        radial-gradient(ellipse 80% 90% at 15% -10%, rgba(59, 130, 246, 0.32) 0%, transparent 65%),
+        radial-gradient(ellipse 70% 85% at 85% 110%, rgba(16, 185, 129, 0.28) 0%, transparent 65%),
+        linear-gradient(135deg, #0b437e 0%, #09405b 48%, #07473a 100%) !important;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.35) !important;
+    box-shadow: 0 10px 30px -5px rgba(6, 69, 59, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+    overflow: hidden !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .vyas-admin-header::before,
+[data-bs-theme="dark"] .vyas-admin-header::before,
+[data-theme="dark"] .admin-header::before,
+[data-bs-theme="dark"] .admin-header::before,
+[data-theme="dark"] .status-map-header::before,
+[data-bs-theme="dark"] .status-map-header::before,
+body[data-theme="dark"] .vyas-admin-header::before,
+body[data-theme="dark"] .admin-header::before,
+body[data-theme="dark"] .status-map-header::before {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E") !important;
+    pointer-events: none !important;
+    mix-blend-mode: overlay !important;
+    z-index: 0 !important;
+}
+
+[data-theme="dark"] .vyas-admin-header::after,
+[data-bs-theme="dark"] .vyas-admin-header::after,
+[data-theme="dark"] .admin-header::after,
+[data-bs-theme="dark"] .admin-header::after,
+[data-theme="dark"] .status-map-header::after,
+[data-bs-theme="dark"] .status-map-header::after,
+body[data-theme="dark"] .vyas-admin-header::after,
+body[data-theme="dark"] .admin-header::after,
+body[data-theme="dark"] .status-map-header::after {
+    content: "" !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 48% !important;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0) 100%) !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+}
+
+[data-theme="dark"] .vyas-admin-header .container,
+[data-bs-theme="dark"] .vyas-admin-header .container,
+[data-theme="dark"] .admin-header .container,
+[data-bs-theme="dark"] .admin-header .container,
+[data-theme="dark"] .status-map-header .container,
+[data-bs-theme="dark"] .status-map-header .container,
+body[data-theme="dark"] .vyas-admin-header .container,
+body[data-theme="dark"] .admin-header .container,
+body[data-theme="dark"] .status-map-header .container {
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+[data-theme="dark"] .vyas-admin-header .admin-title,
+[data-bs-theme="dark"] .vyas-admin-header .admin-title,
+[data-theme="dark"] .admin-header .admin-title,
+[data-bs-theme="dark"] .admin-header .admin-title,
+[data-theme="dark"] .status-map-header .status-map-title,
+[data-bs-theme="dark"] .status-map-header .status-map-title,
+body[data-theme="dark"] .vyas-admin-header .admin-title,
+body[data-theme="dark"] .admin-header .admin-title,
+body[data-theme="dark"] .status-map-header .status-map-title {
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .vyas-admin-header .admin-subtitle,
+[data-bs-theme="dark"] .vyas-admin-header .admin-subtitle,
+[data-theme="dark"] .admin-header .admin-subtitle,
+[data-bs-theme="dark"] .admin-header .admin-subtitle,
+[data-theme="dark"] .status-map-header .status-map-subtitle,
+[data-bs-theme="dark"] .status-map-header .status-map-subtitle,
+body[data-theme="dark"] .vyas-admin-header .admin-subtitle,
+body[data-theme="dark"] .admin-header .admin-subtitle,
+body[data-theme="dark"] .status-map-header .status-map-subtitle {
+    color: rgba(255, 255, 255, 0.85) !important;
+    opacity: 0.9 !important;
+}
+
+[data-theme="dark"] .status-map-header .btn-outline-light,
+[data-bs-theme="dark"] .status-map-header .btn-outline-light,
+body[data-theme="dark"] .status-map-header .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.35) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    backdrop-filter: blur(4px) !important;
+}
+[data-theme="dark"] .status-map-header .btn-outline-light:hover,
+[data-bs-theme="dark"] .status-map-header .btn-outline-light:hover,
+body[data-theme="dark"] .status-map-header .btn-outline-light:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    color: #ffffff !important;
+}
+
+/* Header Spacing & Separation */
+.vyas-admin-header,
+.admin-header,
+.status-map-header {
+    margin-bottom: 2.25rem !important;
+}
+
+/* Stats, Map & Professional Section Global Spacing */
+.stats-section,
+.floor-map-section,
+.prof-page-container {
+    padding-top: 1.5rem !important;
+    padding-bottom: 1.5rem !important;
+    margin-top: 0.5rem !important;
 }
 
 /* Primary Button in Dark Mode */
@@ -2421,7 +2549,7 @@ body {
 .vyas-admin-header {
     background: linear-gradient(135deg, var(--mitwpu-blue) 0%, var(--mitwpu-blue-dark) 100%);
     color: var(--mitwpu-white);
-    padding: 3.2rem 0 1.25rem;
+    padding: 2.25rem 0 !important;
 }
 
 .admin-title {
@@ -3551,11 +3679,6 @@ body[data-theme="dark"] .stat-label {
 /* Final Header & Legend Dark Mode Overrides */
 [data-theme="dark"] .status-legend-section {
     background: var(--bg-surface) !important;
-    border-bottom: 1px solid var(--border-subtle) !important;
-}
-
-[data-theme="dark"] .status-map-header {
-    background: var(--bg-overlay) !important;
     border-bottom: 1px solid var(--border-subtle) !important;
 }
 
@@ -5838,15 +5961,62 @@ img {
    ────────────────────────────────────────── */
 @media (max-width: 767px) {
 
-    /* ── Admin/Professional header ── */
-    .admin-header .row.align-items-center {
-        flex-direction: column;
-        text-align: center;
+    /* ── Admin/Professional/Status Map Header Mobile Centering ── */
+    .admin-header,
+    .vyas-admin-header,
+    .status-map-header {
+        text-align: center !important;
+        padding: 1.75rem 1rem !important;
     }
 
-    .admin-header .col-md-6.text-md-end {
+    .admin-header .row,
+    .vyas-admin-header .row,
+    .status-map-header .row {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
         text-align: center !important;
-        margin-top: 0.75rem;
+    }
+
+    .admin-header .col-md-6,
+    .admin-header .col-md-7,
+    .admin-header .col-md-5,
+    .vyas-admin-header .col-md-6,
+    .vyas-admin-header .col-md-7,
+    .vyas-admin-header .col-md-5,
+    .status-map-header .col-md-6 {
+        text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    .admin-title,
+    .status-map-title {
+        text-align: center !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+    }
+
+    .admin-subtitle,
+    .status-map-subtitle {
+        text-align: center !important;
+        width: 100% !important;
+    }
+
+    .admin-header .col-md-6.text-md-end,
+    .admin-header .col-md-5.text-md-end,
+    .vyas-admin-header .text-md-end,
+    .status-map-header .text-md-end {
+        text-align: center !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+        margin-top: 0.75rem !important;
     }
 
     .admin-actions {
@@ -7298,9 +7468,7 @@ html[data-theme="dark"] {
    STRICT DARK MODE - SCREENSHOT FIXES 
    ============================================ */
 
-/* Fix 1: Admin Dashboard & Insights Header Banners */
-[data-theme="dark"] .admin-header,
-[data-theme="dark"] .vyas-admin-header,
+/* Fix 1: Page Header Banners */
 [data-theme="dark"] .page-header {
     background: var(--surface) !important;
     background-image: none !important;

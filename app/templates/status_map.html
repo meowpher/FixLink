@@ -428,6 +428,176 @@
             display: none;
         }
     }
+
+    /* Status Map Header Base & Dark Mode Gradient */
+    .status-map-header {
+        background: linear-gradient(135deg, var(--mitwpu-blue, #0b4d8c) 0%, var(--mitwpu-blue-dark, #07325a) 100%);
+        color: #ffffff;
+        padding: 2.25rem 0 !important;
+    }
+
+    .status-map-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        color: #ffffff;
+    }
+
+    .status-map-subtitle {
+        opacity: 0.85;
+        margin-bottom: 0;
+        color: rgba(255, 255, 255, 0.85);
+    }
+
+    /* Status Map Header in Dark Mode - Shiny & Grainy Blue-to-Green Gradient */
+    [data-theme="dark"] .status-map-header,
+    [data-bs-theme="dark"] .status-map-header,
+    body[data-theme="dark"] .status-map-header {
+        position: relative !important;
+        isolation: isolate !important;
+        padding: 2.25rem 0 !important;
+        background: 
+            radial-gradient(ellipse 80% 90% at 15% -10%, rgba(59, 130, 246, 0.32) 0%, transparent 65%),
+            radial-gradient(ellipse 70% 85% at 85% 110%, rgba(16, 185, 129, 0.28) 0%, transparent 65%),
+            linear-gradient(135deg, #0b437e 0%, #09405b 48%, #07473a 100%) !important;
+        border-bottom: 1px solid rgba(59, 130, 246, 0.35) !important;
+        box-shadow: 0 10px 30px -5px rgba(6, 69, 59, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+        overflow: hidden !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .status-map-header::before,
+    [data-bs-theme="dark"] .status-map-header::before,
+    body[data-theme="dark"] .status-map-header::before {
+        content: "" !important;
+        position: absolute !important;
+        inset: 0 !important;
+        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.045'/%3E%3C/svg%3E") !important;
+        pointer-events: none !important;
+        mix-blend-mode: overlay !important;
+        z-index: 0 !important;
+    }
+
+    [data-theme="dark"] .status-map-header::after,
+    [data-bs-theme="dark"] .status-map-header::after,
+    body[data-theme="dark"] .status-map-header::after {
+        content: "" !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 48% !important;
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.09) 0%, rgba(255, 255, 255, 0) 100%) !important;
+        pointer-events: none !important;
+        z-index: 0 !important;
+    }
+
+    [data-theme="dark"] .status-map-header .container,
+    [data-bs-theme="dark"] .status-map-header .container,
+    body[data-theme="dark"] .status-map-header .container {
+        position: relative !important;
+        z-index: 1 !important;
+    }
+
+    [data-theme="dark"] .status-map-header .status-map-title,
+    [data-bs-theme="dark"] .status-map-header .status-map-title,
+    body[data-theme="dark"] .status-map-header .status-map-title {
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .status-map-header .status-map-subtitle,
+    [data-bs-theme="dark"] .status-map-header .status-map-subtitle,
+    body[data-theme="dark"] .status-map-header .status-map-subtitle {
+        color: rgba(255, 255, 255, 0.85) !important;
+        opacity: 0.9 !important;
+    }
+
+    [data-theme="dark"] .status-map-header .btn-outline-light,
+    [data-bs-theme="dark"] .status-map-header .btn-outline-light,
+    body[data-theme="dark"] .status-map-header .btn-outline-light {
+        border-color: rgba(255, 255, 255, 0.35) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #ffffff !important;
+        backdrop-filter: blur(4px) !important;
+    }
+    [data-theme="dark"] .status-map-header .btn-outline-light:hover,
+    [data-bs-theme="dark"] .status-map-header .btn-outline-light:hover,
+    body[data-theme="dark"] .status-map-header .btn-outline-light:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.6) !important;
+        color: #ffffff !important;
+    }
+
+    .status-map-header .btn-outline-light {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 0.5rem !important;
+        padding: 0.45rem 1.15rem !important;
+        border-radius: 10px !important;
+        font-weight: 500 !important;
+        line-height: 1.4 !important;
+        text-align: center !important;
+    }
+    .status-map-header .btn-outline-light i {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin: 0 !important;
+        line-height: 1 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* Floor Map Section & Header Spacing */
+    .status-map-header {
+        margin-bottom: 2.25rem !important;
+    }
+
+    .floor-map-section {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+        margin-top: 0.5rem !important;
+    }
+
+    /* Mobile Center Alignment */
+    @media (max-width: 767.98px) {
+        .status-map-header {
+            text-align: center !important;
+            padding: 1.75rem 1rem !important;
+        }
+
+        .status-map-header .row {
+            justify-content: center !important;
+            text-align: center !important;
+        }
+
+        .status-map-header .col-md-6 {
+            text-align: center !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+
+        .status-map-title {
+            text-align: center !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 100% !important;
+        }
+
+        .status-map-subtitle {
+            text-align: center !important;
+            width: 100% !important;
+            margin-bottom: 0.85rem !important;
+        }
+
+        .status-map-header .col-md-6.text-md-end {
+            margin-top: 0.85rem !important;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -435,16 +605,17 @@
 <!-- Status Map Header -->
 <section class="status-map-header">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <h1 class="status-map-title">
+        <div class="row align-items-center text-center text-md-start">
+            <div class="col-md-6 text-center text-md-start">
+                <h1 class="status-map-title d-flex align-items-center justify-content-center justify-content-md-start">
                     <i class="bi bi-map me-2"></i>Live Status Map
                 </h1>
-                <p class="status-map-subtitle">Real-time view of room status across Vyas Building</p>
+                <p class="status-map-subtitle mb-0">Real-time view of room status across Vyas Building</p>
             </div>
-            <div class="col-md-6 text-md-end d-none d-md-block">
-                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light">
-                    <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+            <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light d-inline-flex align-items-center justify-content-center">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Back to Dashboard</span>
                 </a>
             </div>
         </div>

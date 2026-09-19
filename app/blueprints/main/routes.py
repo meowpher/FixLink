@@ -548,7 +548,7 @@ def report_bug():
             origin = url_for('main.index')
         return redirect(origin if origin else url_for('main.index'))
         
-    return render_template('report_bug.html')
+    return redirect(url_for('main.index'))
 
 @main_bp.route('/api/chat/unread_total')
 @handle_api_errors

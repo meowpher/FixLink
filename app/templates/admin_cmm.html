@@ -507,14 +507,32 @@
        MOBILE CMM TOOLBAR (< 768px)
        ========================================================= */
     .cmm-toolbar {
-        background-color: transparent;
-        border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.07));
-        padding: 0.85rem 1rem;
+        background-color: var(--bg-surface-elevated, rgba(255, 255, 255, 0.035));
+        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+        border-radius: 14px;
+        padding: 12px;
+        margin: 14px 14px 16px 14px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     [data-theme="dark"] .cmm-toolbar,
     [data-bs-theme="dark"] .cmm-toolbar {
-        border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+        background-color: rgba(255, 255, 255, 0.035) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+
+    [data-theme="light"] .cmm-toolbar,
+    [data-bs-theme="light"] .cmm-toolbar {
+        background-color: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+    }
+
+    .cmm-select-all-bar {
+        background: transparent;
+        border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.07));
+        border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.07));
+        margin: 0 0 10px 0;
+        padding: 9px 14px !important;
     }
 
     /* Custom seamless search box */
@@ -1582,8 +1600,8 @@
                              MOBILE CARD LIST VIEW (< 768px: Mobile Cards)
                         ══════════════════════════════════════════════════════ -->
                         <div class="d-md-none" id="unassignedMobileContainer">
-                            <!-- Mobile Select All Bar -->
-                            <div class="d-flex justify-content-between align-items-center px-3 py-2 cmm-select-all-bar">
+                            <!-- Mobile Select All Bar & Results Container Divider -->
+                            <div class="d-flex justify-content-between align-items-center cmm-select-all-bar">
                                 <div class="form-check mb-0 d-flex align-items-center gap-2">
                                     <input class="form-check-input mt-0" type="checkbox" id="mobileSelectAllCheckbox" aria-label="Select all classes on mobile">
                                     <label class="form-check-label fw-semibold text-body" for="mobileSelectAllCheckbox" style="font-size:0.82rem;">Select All</label>
@@ -1591,7 +1609,7 @@
                                 <span class="text-muted" id="mobileSelectedCounter" style="font-size:0.78rem;">0 selected</span>
                             </div>
 
-                            <div class="d-flex flex-column gap-2 p-2" id="unassignedMobileCards">
+                            <div class="d-flex flex-column gap-2 px-3 pb-3" id="unassignedMobileCards">
                                 {% if unassigned_classes %}
                                     {% for cls in unassigned_classes %}
                                     <div id="mobile-class-card-{{ cls.id }}" class="cmm-mobile-card unassigned-row-item"

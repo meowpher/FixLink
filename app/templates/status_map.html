@@ -2,6 +2,10 @@
 
 {% block title %}Status Map - MIT-WPU Vyas Tracker{% endblock %}
 {% block extra_css %}
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/admin_map.js') }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/render.js') }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/ui.js') }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/api.js') }}">
 <style>
 @media (max-width: 767px) {
     /* ── Legend: split into two clean pill rows ── */
@@ -773,13 +777,13 @@
 <script id="currentFloorLevelJson" type="application/json">{{ (selected_floor.level if selected_floor else '')|tojson }}</script>
 <script id="initialRoomsDataJson" type="application/json">{{ (rooms_data if rooms_data else None)|tojson }}</script>
 <script type="module">
-    document.addEventListener('DOMContentLoaded', async () => {
-        const { initializeAdminMap, highlightRoom, showRoomDetails } = await import("{{ url_for('static', filename='js/modules/admin_map.js') }}");
-        
+    import { initializeAdminMap, highlightRoom, showRoomDetails } from "{{ url_for('static', filename='js/modules/admin_map.js') }}";
+
+    function initMap() {
         // Global floor data from server parsed from JSON blocks
-        const currentFloorId = JSON.parse(document.getElementById('currentFloorIdJson').textContent);
-        const currentFloorLevel = JSON.parse(document.getElementById('currentFloorLevelJson').textContent);
-        const initialRoomsData = JSON.parse(document.getElementById('initialRoomsDataJson').textContent);
+        const currentFloorId = JSON.parse(document.getElementById('currentFloorIdJson')?.textContent || 'null');
+        const currentFloorLevel = JSON.parse(document.getElementById('currentFloorLevelJson')?.textContent || '""');
+        const initialRoomsData = JSON.parse(document.getElementById('initialRoomsDataJson')?.textContent || 'null');
         
         // Auto-initialize if floor is selected
         if (currentFloorId) {
@@ -791,10 +795,12 @@
             highlightRoom(roomNumber);
             
             const panel = document.getElementById('roomDetailsPanel');
-            panel.style.display = 'block';
-            
-            // Static Slide Animation
-            gsap.fromTo(panel, { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.3 });
+            if (panel) {
+                panel.style.display = 'block';
+                if (window.gsap) {
+                    gsap.fromTo(panel, { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.3 });
+                }
+            }
 
             showRoomDetails(roomNumber, roomId);
         };
@@ -802,13 +808,23 @@
         window.closeRoomDetails = () => {
             const panel = document.getElementById('roomDetailsPanel');
             if (panel) {
-                gsap.to(panel, { opacity: 0, x: 50, duration: 0.2, onComplete: () => {
+                if (window.gsap) {
+                    gsap.to(panel, { opacity: 0, x: 50, duration: 0.2, onComplete: () => {
+                        panel.style.display = 'none';
+                    }});
+                } else {
                     panel.style.display = 'none';
-                }});
+                }
             }
             document.querySelectorAll('.room-group, .room-poly').forEach(el => el.classList.remove('selected'));
         };
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMap);
+    } else {
+        initMap();
+    }
 
 
     // Handle room deep-linking and focus

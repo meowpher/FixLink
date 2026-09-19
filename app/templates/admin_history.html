@@ -134,27 +134,140 @@
             margin-bottom: 1.25rem;
             padding: 1rem;
         }
+        .mobile-card-list {
+            padding: 8px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+        }
+        .mc-card {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 9px 12px !important;
+            gap: 10px !important;
+            background: var(--bg-card, #1c1c21) !important;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+            border-radius: 10px !important;
+            margin-bottom: 0 !important;
+            cursor: pointer !important;
+            transition: background 0.15s ease, transform 0.1s ease !important;
+            text-align: left !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+        }
+        .mc-card:active {
+            transform: scale(0.99) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+        .mc-left-col {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 2px !important;
+            min-width: 0 !important;
+            flex: 1 !important;
+        }
+        .mc-primary-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            flex-wrap: nowrap !important;
+            overflow: hidden !important;
+        }
+        .mc-id {
+            font-size: 0.78rem !important;
+            font-weight: 700 !important;
+            color: var(--mitwpu-blue, #3b82f6) !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-title {
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            color: var(--text-main, #ffffff) !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            flex-shrink: 1 !important;
+        }
+        .mc-room-badge {
+            font-size: 0.68rem !important;
+            font-weight: 600 !important;
+            padding: 1px 5px !important;
+            border-radius: 4px !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: var(--text-muted, #9ca3af) !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-secondary-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            font-size: 0.75rem !important;
+            color: var(--text-muted, #9ca3af) !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+        }
+        .mc-reporter-text {
+            font-weight: 500 !important;
+            color: var(--text-main, #d1d5db) !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-meta-prn {
+            font-size: 0.7rem !important;
+            opacity: 0.7 !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-desc-snippet {
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            opacity: 0.75 !important;
+        }
+        .mc-meta-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            font-size: 0.68rem !important;
+            color: var(--text-muted, #6b7280) !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+        }
+        .mc-sep {
+            opacity: 0.4 !important;
+            font-size: 0.6rem !important;
+        }
+        .mc-right-col {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-status-wrap .badge {
+            font-size: 0.68rem !important;
+            font-weight: 600 !important;
+            padding: 3px 6px !important;
+            border-radius: 5px !important;
+        }
+        .mc-view-indicator {
+            font-size: 0.75rem !important;
+            color: var(--text-muted, #71717a) !important;
+            opacity: 0.6 !important;
+        }
     }
 </style>
 <!-- Admin Header -->
 <section class="admin-header vyas-admin-header">
     <div class="container">
         <div class="row align-items-center">
-            <div class="col-md-6">
+            <div class="col-12">
                 <h1 class="admin-title">
                     <i class="bi bi-clock-history me-2"></i>History
                 </h1>
                 <p class="admin-subtitle">Past Fixed Maintenance Tickets</p>
-            </div>
-            <div class="col-md-6 text-md-end">
-                <div class="admin-actions">
-                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light me-2">
-                        <i class="bi bi-speedometer2 me-1"></i>Dashboard
-                    </a>
-                    <a href="{{ url_for('admin.status_map') }}" class="btn btn-outline-light me-2">
-                        <i class="bi bi-map me-1"></i>Status Map
-                    </a>
-                </div>
             </div>
         </div>
     </div>
@@ -164,23 +277,16 @@
 <section class="tickets-section py-4">
     <div class="container">
         <div class="row g-4">
-            <!-- Left Side: Filter Sidebar Panel -->
+            <!-- Left Side: Search Sidebar Panel -->
             <div class="col-xl-3 col-lg-4 col-md-4">
                 <aside class="filter-sidebar-panel">
-                    <div class="filter-sidebar-title">
-                        <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
-                        {% if search_query %}
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
-                        {% endif %}
-                    </div>
                     <form action="{{ url_for('admin.history') }}" method="GET" class="filter-sidebar-form">
                         <div class="mb-3">
-                            <label for="search" class="form-label">Search</label>
                             <div class="input-group flex-nowrap">
-                                <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted ps-3 pe-2" style="border-radius: 8px 0 0 8px;">
                                     <i class="bi bi-search"></i>
                                 </span>
-                                <input type="text" name="search" class="form-control border-start-0 ps-0" id="search" 
+                                <input type="text" name="search" class="form-control border-start-0 ps-2" id="search" 
                                        value="{{ search_query }}" placeholder="Name, PRN, or Email..." style="border-radius: 0 8px 8px 0; height: 42px;">
                             </div>
                         </div>
@@ -287,41 +393,47 @@
             </div>
 
             <!-- Mobile Card Wrapper -->
-            <div class="mobile-card-list d-md-none p-3">
+            <div class="mobile-card-list d-md-none p-2 p-sm-3">
                 {% for ticket in tickets %}
-                <div class="mc-card" onclick="viewTicket({{ ticket.id }})">
-                    <div class="mc-top">
-                        <div class="mc-id-title">
+                <div class="mc-card" onclick="viewTicket({{ ticket.id }})" data-ticket-id="{{ ticket.id }}">
+                    <div class="mc-left-col">
+                        <div class="mc-primary-row">
                             <span class="mc-id">#{{ ticket.id }}</span>
                             <span class="mc-title">{{ ticket.issue_type|title }}</span>
+                            <span class="mc-room-badge"><i class="bi bi-geo-alt"></i> {{ ticket.room.number }}</span>
                         </div>
-                        <div class="mc-status">
-                            <span class="badge bg-success">{{ ticket.status|title }}</span>
-                        </div>
-                    </div>
-                    <div class="mc-desc">{{ ticket.description }}</div>
-                    <div class="mc-person-row">
-                        <div class="mc-person-left">
-                            <div class="mc-avatar">{{ ticket.reporter_name[:2]|upper if ticket.reporter_name else '?' }}</div>
-                            <div class="mc-person-info">
-                                <span class="mc-name">{{ ticket.reporter_name }}</span>
-                                <span class="mc-meta">PRN: {{ ticket.prn }}</span>
-                            </div>
-                        </div>
-                        <span class="mc-pill">{{ ticket.room.number }}</span>
-                    </div>
-                    <div class="mc-bottom">
-                        <div class="mc-date">
-                            <i class="bi bi-calendar"></i>
-                            {% if ticket.fixed_at %}
-                                {{ ticket.fixed_at.strftime('%d %b %Y') }}
-                            {% else %}
-                                {{ ticket.updated_at.strftime('%d %b %Y') }}
+                        <div class="mc-secondary-row">
+                            <span class="mc-reporter-text">{{ ticket.reporter_name }}</span>
+                            {% if ticket.prn %}
+                            <span class="mc-meta-prn">({{ ticket.prn }})</span>
+                            {% endif %}
+                            {% if ticket.description %}
+                            <span class="mc-sep">&bull;</span>
+                            <span class="mc-desc-snippet">{{ ticket.description }}</span>
                             {% endif %}
                         </div>
-                        <div class="mc-actions">
-                            <button class="btn mc-btn mc-btn-view" title="View"><i class="bi bi-eye"></i></button>
+                        <div class="mc-meta-row">
+                            <span class="mc-date-text">
+                                <i class="bi bi-calendar3"></i>
+                                {% if ticket.fixed_at %}
+                                    {{ ticket.fixed_at.strftime('%d %b %Y') }}
+                                {% else %}
+                                    {{ ticket.updated_at.strftime('%d %b %Y') }}
+                                {% endif %}
+                            </span>
+                            {% if ticket.assigned_professional %}
+                            <span class="mc-sep">&bull;</span>
+                            <span class="mc-assigned-text"><i class="bi bi-person"></i> {{ ticket.assigned_professional.name }}</span>
+                            {% endif %}
                         </div>
+                    </div>
+                    <div class="mc-right-col">
+                        <div class="mc-status-wrap">
+                            <span class="badge bg-success">{{ ticket.status|title }}</span>
+                        </div>
+                        <span class="mc-view-indicator">
+                            <i class="bi bi-chevron-right"></i>
+                        </span>
                     </div>
                 </div>
                 {% else %}

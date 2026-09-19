@@ -3,22 +3,193 @@
 {% block title %}Help Requests - FixLink Admin{% endblock %}
 
 {% block content %}
+<style>
+    .help-req-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 14px;
+        padding: 1rem 1.15rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        position: relative;
+    }
+
+    .help-req-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08));
+    }
+
+    .help-req-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .help-req-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.88rem;
+        color: #ffffff;
+        background: #0284c7;
+        flex-shrink: 0;
+    }
+
+    .help-req-id {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--mitwpu-blue, #3b82f6);
+        background: rgba(59, 130, 246, 0.1);
+        padding: 1px 6px;
+        border-radius: 4px;
+        letter-spacing: 0.3px;
+        flex-shrink: 0;
+    }
+
+    .help-req-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--text-main, #0f172a);
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .help-req-category {
+        font-size: 0.72rem;
+        color: var(--text-muted, #64748b);
+        display: block;
+    }
+
+    .help-req-pills {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .help-req-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: var(--bg-input, #f8fafc);
+        border: 1px solid var(--border-color, #e2e8f0);
+        color: var(--text-main, #334155);
+    }
+
+    .help-req-msg {
+        font-size: 0.8rem;
+        font-style: italic;
+        color: var(--text-main, #334155);
+        background: rgba(0, 0, 0, 0.02);
+        padding: 0.45rem 0.7rem;
+        border-radius: 6px;
+        border-left: 3px solid var(--mitwpu-blue, #3b82f6);
+        line-height: 1.4;
+    }
+
+    .help-req-meta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        font-size: 0.74rem;
+        margin-top: auto;
+        padding-top: 0.25rem;
+    }
+
+    .help-req-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 0.55rem;
+        border-top: 1px solid var(--border-color, #e2e8f0);
+    }
+
+    .help-req-btn {
+        height: 34px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 0 0.75rem;
+        transition: all 0.15s ease;
+    }
+
+    /* Dark Mode */
+    [data-theme="dark"] .help-req-card,
+    [data-bs-theme="dark"] .help-req-card {
+        background: var(--bg-surface, #1e293b);
+        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    }
+
+    [data-theme="dark"] .help-req-pill,
+    [data-bs-theme="dark"] .help-req-pill {
+        background: rgba(15, 23, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.1);
+        color: #f1f5f9;
+    }
+
+    [data-theme="dark"] .help-req-msg,
+    [data-bs-theme="dark"] .help-req-msg {
+        background: rgba(255, 255, 255, 0.04);
+        color: #cbd5e1;
+    }
+
+    [data-theme="dark"] .help-req-actions,
+    [data-bs-theme="dark"] .help-req-actions {
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Stat Card Styling for Help Requests */
+    .stat-card.cancelled .stat-icon,
+    .stat-card.rejected .stat-icon {
+        background: #ef4444 !important;
+    }
+    .stat-card.cancelled .stat-icon i,
+    .stat-card.rejected .stat-icon i {
+        color: #ffffff !important;
+    }
+    .stat-card.cancelled .stat-label,
+    .stat-card.rejected .stat-label {
+        color: #dc2626 !important;
+    }
+    [data-theme="dark"] .stat-card.cancelled .stat-label,
+    [data-bs-theme="dark"] .stat-card.cancelled .stat-label,
+    body[data-theme="dark"] .stat-card.cancelled .stat-label {
+        color: #f87171 !important;
+    }
+
+    @media (max-width: 767px) {
+        .help-req-card {
+            padding: 0.85rem 1rem;
+            border-radius: 12px;
+            gap: 0.55rem;
+        }
+    }
+</style>
 <div class="container py-4">
     <!-- Header -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-4">
-        <div>
-            <h2 class="fw-bold mb-1">Help Requests</h2>
-            <p class="text-muted mb-0">Review and respond to assistance requests from field technicians</p>
-        </div>
-        <div class="filter-tabs shadow-sm w-100 w-md-auto">
-            <a href="{{ url_for('admin.help_requests', status='pending') }}" class="filter-tab {% if status_filter == 'pending' %}active-pending{% else %}inactive inactive-pending{% endif %}">Pending</a>
-            <a href="{{ url_for('admin.help_requests', status='approved') }}" class="filter-tab {% if status_filter == 'approved' %}active-approved{% else %}inactive inactive-approved{% endif %}">Approved</a>
-            <a href="{{ url_for('admin.help_requests', status='rejected') }}" class="filter-tab {% if status_filter == 'rejected' %}active-rejected{% else %}inactive inactive-rejected{% endif %}">Rejected</a>
-            <a href="{{ url_for('admin.help_requests', status='all') }}" class="filter-tab {% if status_filter == 'all' %}active-all{% else %}inactive inactive-all{% endif %}">All</a>
-        </div>
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1">Help Requests</h2>
+        <p class="text-muted mb-0">Review and respond to assistance requests from field technicians</p>
     </div>
 
-    <!-- Stats Bar -->
+    <!-- Stats Bar (4 Blocks Above) -->
     <div class="row g-3 g-md-4 mb-4">
         <div class="col-6 col-md-3">
             <div class="stat-card total prof-stats-card">
@@ -57,59 +228,78 @@
             </div>
         </div>
     </div>
+
+    <!-- Filter Tabs (Buttons Section Below Stats) -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="filter-tabs shadow-sm w-100 w-md-auto">
+            <a href="{{ url_for('admin.help_requests', status='pending') }}" class="filter-tab {% if status_filter == 'pending' %}active-pending{% else %}inactive inactive-pending{% endif %}">Pending</a>
+            <a href="{{ url_for('admin.help_requests', status='approved') }}" class="filter-tab {% if status_filter == 'approved' %}active-approved{% else %}inactive inactive-approved{% endif %}">Approved</a>
+            <a href="{{ url_for('admin.help_requests', status='rejected') }}" class="filter-tab {% if status_filter == 'rejected' %}active-rejected{% else %}inactive inactive-rejected{% endif %}">Rejected</a>
+            <a href="{{ url_for('admin.help_requests', status='all') }}" class="filter-tab {% if status_filter == 'all' %}active-all{% else %}inactive inactive-all{% endif %}">All</a>
+        </div>
+    </div>
     
     {% if help_requests %}
-    <div class="row g-4">
+    <div class="row g-3 g-md-4">
         {% for req in help_requests %}
         <div class="col-md-6 col-lg-4">
-            <div class="tickets-card h-100 border-0 shadow-sm" style="transition: transform 0.2s ease; border-radius: 16px; overflow: hidden;">
-                <div class="card-header bg-transparent border-bottom-0 pt-3 px-3 pb-0 d-flex justify-content-between align-items-center">
-                    <span class="prof-id">REQ #{{ req.id }}</span>
-                    <span class="status-badge {% if req.status == 'pending' %}status-progress{% elif req.status == 'approved' %}status-fixed{% else %}status-cancelled{% endif %} shadow-sm">
+            <div class="help-req-card h-100 shadow-sm">
+                <!-- Top Row: Requester Info + Status Badge -->
+                <div class="help-req-header">
+                    <div class="d-flex align-items-center gap-2 min-width-0">
+                        <div class="help-req-avatar">{{ req.requester.name[0]|upper if req.requester else '?' }}</div>
+                        <div class="min-width-0">
+                            <div class="d-flex align-items-center gap-1.5 flex-nowrap">
+                                <span class="help-req-id">REQ #{{ req.id }}</span>
+                                <span class="help-req-name">{{ req.requester.name if req.requester else 'Unknown Requester' }}</span>
+                            </div>
+                            <span class="help-req-category">{{ req.requester.category.replace('_', ' ').title() if req.requester else 'Staff' }}</span>
+                        </div>
+                    </div>
+                    <span class="status-badge {% if req.status == 'pending' %}status-progress{% elif req.status == 'approved' %}status-fixed{% else %}status-cancelled{% endif %} shadow-sm flex-shrink-0">
                         {{ req.status.upper() }}
                     </span>
                 </div>
-                <div class="card-body px-3 pb-3 pt-2">
-                    <div class="d-flex align-items-center mb-2.5">
-                        <div class="prof-avatar bg-info">{{ req.requester.name[0]|upper if req.requester else '?' }}</div>
-                        <div>
-                            <div class="fw-bold text-main" style="font-size: 0.95rem;">{{ req.requester.name if req.requester else 'Unknown Requester' }}</div>
-                            <div class="small text-muted" style="font-size: 0.78rem;">{{ req.requester.category.replace('_', ' ').title() if req.requester else 'Staff' }}</div>
-                        </div>
+
+                <!-- Ticket & Location Pill Strip -->
+                <div class="help-req-pills">
+                    <span class="help-req-pill">
+                        <i class="bi bi-ticket-perforated-fill text-primary"></i>
+                        <span>Ticket #{{ req.ticket_id }}</span>
+                    </span>
+                    <span class="help-req-pill">
+                        <i class="bi bi-geo-alt-fill text-danger"></i>
+                        <span>Room {{ req.ticket.room.number if req.ticket and req.ticket.room else 'N/A' }}</span>
+                    </span>
+                </div>
+
+                <!-- Request Message -->
+                {% if req.message %}
+                <div class="help-req-msg">
+                    <i class="bi bi-chat-quote me-1 text-primary"></i>"{{ req.message }}"
+                </div>
+                {% endif %}
+
+                <!-- Footer: Timestamp & Helper -->
+                <div class="help-req-meta">
+                    <div class="text-muted">
+                        <i class="bi bi-clock me-1"></i>{{ req.requested_at|ist('%b %d, %H:%M') }}
                     </div>
-                    
-                    <div class="p-2 px-3 bg-light rounded-3 mb-2 border">
-                        <div class="small text-muted mb-1 text-uppercase fw-bold letter-spacing-1" style="font-size: 0.62rem;">Related Ticket</div>
-                        <div class="fw-bold" style="font-size: 0.9rem;">Ticket #{{ req.ticket_id }}</div>
-                        <div class="small text-muted" style="font-size: 0.8rem;"><i class="bi bi-geo-alt-fill me-1"></i>Room: {{ req.ticket.room.number if req.ticket and req.ticket.room else 'N/A' }}</div>
-                    </div>
-                    
-                    {% if req.message %}
-                    <div class="mb-2">
-                        <div class="small text-muted mb-1 text-uppercase fw-bold letter-spacing-1" style="font-size: 0.62rem;">Request Message</div>
-                        <p class="small mb-0 fst-italic text-secondary" style="line-height: 1.4; font-size: 0.82rem;">"{{ req.message }}"</p>
+                    {% if req.status == 'approved' and req.helper %}
+                    <div class="text-success fw-semibold">
+                        <i class="bi bi-person-check-fill me-1"></i>{{ req.helper.name }}
                     </div>
                     {% endif %}
-                    
-                    <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
-                        <div class="small text-muted" style="font-size: 0.78rem;">
-                            <i class="bi bi-clock me-1"></i>{{ req.requested_at|ist('%b %d, %H:%M') }}
-                        </div>
-                        {% if req.status == 'approved' and req.helper %}
-                        <div class="small text-success fw-bold" style="font-size: 0.78rem;">
-                            <i class="bi bi-person-check-fill me-1"></i>{{ req.helper.name }}
-                        </div>
-                        {% endif %}
-                    </div>
                 </div>
-                
+
+                <!-- Action Buttons (for pending) -->
                 {% if req.status == 'pending' %}
-                <div class="card-footer bg-transparent border-top p-2 px-3 d-flex gap-2">
-                    <button class="btn btn-success w-100 shadow-sm d-flex align-items-center justify-content-center py-2" onclick="approveRequest({{ req.id }})" style="border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
-                        <i class="bi bi-check-lg me-1"></i> Approve
+                <div class="help-req-actions">
+                    <button class="btn btn-sm btn-success help-req-btn flex-fill" onclick="approveRequest({{ req.id }})">
+                        <i class="bi bi-check-lg"></i><span>Approve</span>
                     </button>
-                    <button class="btn btn-outline-danger w-100 shadow-sm d-flex align-items-center justify-content-center py-2" onclick="rejectRequest({{ req.id }})" style="border-radius: 8px; font-size: 0.85rem; font-weight: 600;">
-                        <i class="bi bi-x-lg me-1"></i> Reject
+                    <button class="btn btn-sm btn-outline-danger help-req-btn flex-fill" onclick="rejectRequest({{ req.id }})">
+                        <i class="bi bi-x-lg"></i><span>Reject</span>
                     </button>
                 </div>
                 {% endif %}

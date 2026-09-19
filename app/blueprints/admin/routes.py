@@ -51,7 +51,9 @@ def dashboard():
     
     if status_filter != 'all':
         if status_filter == 'open':
-            query = query.filter(Ticket.status.in_([Ticket.STATUS_OPEN, Ticket.STATUS_CANCELLED]))
+            query = query.filter(Ticket.status == Ticket.STATUS_OPEN)
+        elif status_filter == 'cancelled':
+            query = query.filter(Ticket.status == Ticket.STATUS_CANCELLED)
         else:
             query = query.filter(Ticket.status == status_filter)
     
@@ -71,7 +73,24 @@ def dashboard():
         elif category_filter == 'other':
             query = query.filter(Ticket.issue_type.in_(['cleaning', 'other']))
     
-    # Paginate instead of loading all tickets into memory
+    # Helper to apply floor and category filters
+    def apply_dashboard_filters(q):
+        if floor_filter != 'all':
+            q = q.join(Room).filter(Room.floor_id == int(floor_filter))
+        if category_filter != 'all':
+            if category_filter == 'electrician':
+                q = q.filter(Ticket.issue_type.in_(['electrical', 'ac', 'lighting', 'lift_breakdown', 'light_broken']))
+            elif category_filter == 'plumber':
+                q = q.filter(Ticket.issue_type == 'plumbing')
+            elif category_filter == 'it_technician':
+                q = q.filter(Ticket.issue_type.in_(['projector', 'computer']))
+            elif category_filter == 'carpenter':
+                q = q.filter(Ticket.issue_type.in_(['furniture', 'door_error']))
+            elif category_filter == 'other':
+                q = q.filter(Ticket.issue_type.in_(['cleaning', 'other']))
+        return q
+
+    # Paginate filtered tickets list
     pagination = query.order_by(Ticket.created_at.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
@@ -115,25 +134,56 @@ def dashboard():
         {'id': 'other', 'name': 'Others'}
     ]
     
-    # Separate full-list queries for the three status boxes (not affected by filter/pagination)
+    # Filtered queries for the status boxes on the dashboard
     from sqlalchemy.orm import joinedload
-    open_tickets = Ticket.query.options(joinedload(Ticket.room), joinedload(Ticket.assigned_professional)).filter(
-        Ticket.status.in_([Ticket.STATUS_OPEN, Ticket.STATUS_CANCELLED])
-    ).order_by(Ticket.created_at.desc()).all()
+    
+    base_box_query = Ticket.query.options(joinedload(Ticket.room), joinedload(Ticket.assigned_professional))
+    base_box_query = apply_dashboard_filters(base_box_query)
 
-    assigned_tickets = Ticket.query.options(joinedload(Ticket.room), joinedload(Ticket.assigned_professional)).filter(
-        Ticket.status == Ticket.STATUS_ASSIGNED
-    ).order_by(Ticket.created_at.desc()).all()
-
-    in_progress_tickets = Ticket.query.options(joinedload(Ticket.room), joinedload(Ticket.assigned_professional)).filter(
-        Ticket.status == Ticket.STATUS_IN_PROGRESS
-    ).order_by(Ticket.created_at.desc()).all()
+    if status_filter == 'all':
+        open_tickets = base_box_query.filter(
+            Ticket.status.in_([Ticket.STATUS_OPEN, Ticket.STATUS_CANCELLED])
+        ).order_by(Ticket.created_at.desc()).all()
+        assigned_tickets = base_box_query.filter(Ticket.status == Ticket.STATUS_ASSIGNED).order_by(Ticket.created_at.desc()).all()
+        in_progress_tickets = base_box_query.filter(Ticket.status == Ticket.STATUS_IN_PROGRESS).order_by(Ticket.created_at.desc()).all()
+        fixed_tickets = []
+    elif status_filter == 'open':
+        open_tickets = base_box_query.filter(Ticket.status == Ticket.STATUS_OPEN).order_by(Ticket.created_at.desc()).all()
+        assigned_tickets = []
+        in_progress_tickets = []
+        fixed_tickets = []
+    elif status_filter == 'cancelled':
+        open_tickets = base_box_query.filter(Ticket.status == Ticket.STATUS_CANCELLED).order_by(Ticket.created_at.desc()).all()
+        assigned_tickets = []
+        in_progress_tickets = []
+        fixed_tickets = []
+    elif status_filter == 'assigned':
+        open_tickets = []
+        assigned_tickets = base_box_query.filter(Ticket.status == Ticket.STATUS_ASSIGNED).order_by(Ticket.created_at.desc()).all()
+        in_progress_tickets = []
+        fixed_tickets = []
+    elif status_filter == 'in-progress':
+        open_tickets = []
+        assigned_tickets = []
+        in_progress_tickets = base_box_query.filter(Ticket.status == Ticket.STATUS_IN_PROGRESS).order_by(Ticket.created_at.desc()).all()
+        fixed_tickets = []
+    elif status_filter == 'fixed':
+        open_tickets = []
+        assigned_tickets = []
+        in_progress_tickets = []
+        fixed_tickets = base_box_query.filter(Ticket.status == Ticket.STATUS_FIXED).order_by(Ticket.created_at.desc()).all()
+    else:
+        open_tickets = []
+        assigned_tickets = []
+        in_progress_tickets = []
+        fixed_tickets = []
 
     return render_template('admin.html',
                          tickets=tickets,
                          open_tickets=open_tickets,
                          assigned_tickets=assigned_tickets,
                          in_progress_tickets=in_progress_tickets,
+                         fixed_tickets=fixed_tickets,
                          pagination=pagination,
                          stats=stats,
                          floors=floors,
@@ -297,12 +347,29 @@ def booking_history():
     """Admin view for faculty classroom bookings."""
     from ...models import RoomBooking
     page = request.args.get('page', 1, type=int)
+    search_query = request.args.get('search', '').strip()
     per_page = 20
-    query = RoomBooking.query.order_by(RoomBooking.slot_start.desc())
+    query = RoomBooking.query.join(RoomBooking.faculty).join(RoomBooking.room)
+    
+    if search_query:
+        search = f"%{search_query}%"
+        query = query.filter(
+            or_(
+                User.name.ilike(search),
+                User.email.ilike(search),
+                Room.number.ilike(search),
+                RoomBooking.subject.ilike(search),
+                RoomBooking.division.ilike(search),
+                RoomBooking.course.ilike(search)
+            )
+        )
+        
+    query = query.order_by(RoomBooking.slot_start.desc())
     pagination = query.paginate(page=page, per_page=per_page, error_out=False)
     return render_template('admin_booking_history.html', 
                           bookings=pagination.items, 
-                          pagination=pagination)
+                          pagination=pagination,
+                          search_query=search_query)
 
 
 @admin_bp.route('/users')

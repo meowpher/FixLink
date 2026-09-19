@@ -24,11 +24,11 @@
 
     <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.0" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.2" as="style">
 
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.2">
 
     <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -303,31 +303,31 @@
         </div>
         <div class="offcanvas-body px-3 pb-4">
             <div class="d-grid gap-2">
-                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.professionals') }}">
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.professionals') }}">
                     <i class="bi bi-people fs-5"></i>
-                    <div><div class="fw-semibold">Professionals</div><div class="text-muted small">View & manage staff</div></div>
+                    <div><div class="manage-item-title">Professionals</div><div class="manage-item-desc">View & manage staff</div></div>
                 </a>
-                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.help_requests') }}">
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.help_requests') }}">
                     <i class="bi bi-hand-thumbs-up fs-5"></i>
-                    <div><div class="fw-semibold">Help Requests</div><div class="text-muted small">Pending assistance requests</div></div>
+                    <div><div class="manage-item-title">Help Requests</div><div class="manage-item-desc">Pending assistance requests</div></div>
                 </a>
-                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.history') }}">
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.history') }}">
                     <i class="bi bi-clock-history fs-5"></i>
-                    <div><div class="fw-semibold">Full History</div><div class="text-muted small">All resolved tickets</div></div>
+                    <div><div class="manage-item-title">Full History</div><div class="manage-item-desc">All resolved tickets</div></div>
                 </a>
-                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.booking_history') }}">
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.booking_history') }}">
                     <i class="bi bi-calendar3-range fs-5"></i>
-                    <div><div class="fw-semibold">Booking History</div><div class="text-muted small">Room booking records</div></div>
+                    <div><div class="manage-item-title">Booking History</div><div class="manage-item-desc">Room booking records</div></div>
                 </a>
                 {% if session.get('is_admin') %}
-                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.classroom_management') }}">
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.classroom_management') }}">
                     <i class="bi bi-building-gear fs-5"></i>
-                    <div><div class="fw-semibold">Classroom Management</div><div class="text-muted small">CMM, CSV import & schedules</div></div>
+                    <div><div class="manage-item-title">Classroom Management</div><div class="manage-item-desc">CMM, CSV import & schedules</div></div>
                 </a>
                 {% elif session.get('user_role') == 'faculty' %}
-                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('faculty.dashboard') }}">
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('faculty.dashboard') }}">
                     <i class="bi bi-calendar-check fs-5"></i>
-                    <div><div class="fw-semibold">Faculty Portal</div><div class="text-muted small">Room bookings & schedules</div></div>
+                    <div><div class="manage-item-title">Faculty Portal</div><div class="manage-item-desc">Room bookings & schedules</div></div>
                 </a>
                 {% endif %}
             </div>
@@ -335,7 +335,7 @@
     </div>
     {% endif %}
     
-    {% if session.get('is_admin') and request.endpoint != 'main.report_form' and request.endpoint != 'admin.add_professional' and request.endpoint != 'admin.professional_history' and request.endpoint != 'admin.professionals' %}
+    {% if session.get('is_admin') and request.endpoint not in ['main.report_form', 'admin.add_professional', 'admin.professional_history', 'admin.professionals', 'admin.chat', 'professional.chat'] and 'chat' not in (request.endpoint or '') %}
     <a href="{{ url_for('main.report_form') }}" id="mobile-fab" class="d-md-none" aria-label="Report a new issue">
         <i class="bi bi-plus" aria-hidden="true"></i>
     </a>
@@ -1728,22 +1728,6 @@
             filter: invert(1) grayscale(1) brightness(1.2) !important;
         }
     </style>
-
-    {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login') or request.endpoint == 'main.report_bug' or request.endpoint in ['main.privacy', 'main.terms', 'main.cookies'])) %}
-    <button type="button" 
-            class="floating-bug-trigger" 
-            id="floatingBugTrigger" 
-            data-bs-toggle="modal" 
-            data-bs-target="#globalBugReportModal" 
-            aria-label="Report a bug" 
-            title="Report a bug"
-            style="position: fixed !important; bottom: 24px !important; right: 24px !important; left: auto !important; top: auto !important; width: auto !important; max-width: fit-content !important; z-index: 1045 !important;">
-        <span class="bug-icon-bubble">
-            <i class="bi bi-bug-fill"></i>
-        </span>
-        <span>Report Bug</span>
-    </button>
-    {% endif %}
 
     <!-- Global Bug Report Modal -->
     <div class="modal fade" id="globalBugReportModal" tabindex="-1" aria-labelledby="globalBugReportModalLabel" aria-hidden="true" style="z-index: 1060;">

@@ -47,6 +47,93 @@
         width: 100%;
         flex-grow: 1;
     }
+
+    /* Compact Analytics Filter Toolbar */
+    .analytics-filter-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted, #64748b);
+        margin-bottom: 2px;
+        display: block;
+    }
+
+    .analytics-filter-input {
+        height: 34px !important;
+        font-size: 0.78rem !important;
+        padding: 0.25rem 0.5rem !important;
+        border-radius: 8px !important;
+        background-color: var(--bg-input, #f8fafc);
+        border: 1px solid var(--border-color, #e2e8f0);
+        color: var(--text-main, #0f172a);
+    }
+
+    [data-theme="dark"] .analytics-filter-input,
+    [data-bs-theme="dark"] .analytics-filter-input {
+        background-color: rgba(15, 23, 42, 0.6);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #f1f5f9;
+    }
+
+    .analytics-period-group .analytics-period-btn {
+        height: 34px;
+        font-size: 0.76rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.4rem;
+        border-radius: 0;
+    }
+
+    .analytics-period-group > .btn-check:first-child + .analytics-period-btn {
+        border-top-left-radius: 8px;
+        border-bottom-left-radius: 8px;
+    }
+
+    .analytics-period-group > label:last-child {
+        border-top-right-radius: 8px;
+        border-bottom-right-radius: 8px;
+    }
+
+    .analytics-submit-btn {
+        height: 34px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 0 0.5rem;
+        background-color: #0b4d8c;
+        border-color: #0b4d8c;
+    }
+
+    .analytics-submit-btn:hover {
+        background-color: #083866;
+        border-color: #083866;
+    }
+
+    [data-theme="dark"] .analytics-submit-btn,
+    [data-bs-theme="dark"] .analytics-submit-btn {
+        background-color: #1d4ed8;
+        border-color: #2563eb;
+    }
+
+    @media (max-width: 767px) {
+        .analytics-card {
+            padding: 0.85rem !important;
+            border-radius: 12px !important;
+        }
+        .analytics-card h5 {
+            font-size: 0.95rem !important;
+        }
+        .chart-container {
+            height: 230px !important;
+        }
+    }
 </style>
 {% endblock %}
 
@@ -118,10 +205,10 @@
     <div class="row g-4">
         <!-- Trend Chart -->
         <div class="col-lg-8">
-            <div class="analytics-card p-4">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="mb-0 fw-bold">Ticket Volume Trend ({{ period|title }})</h5>
-                    <span class="badge bg-primary-subtle text-primary py-2 px-3">
+            <div class="analytics-card p-3 p-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0 fw-bold">Ticket Volume Trend <span class="text-muted fw-normal">({{ period|title }})</span></h5>
+                    <span class="badge bg-primary-subtle text-primary py-1 px-2.5" style="font-size: 0.72rem; border-radius: 6px;">
                         {% if start_date and end_date %}
                         {{ start_date }} to {{ end_date }}
                         {% else %}
@@ -131,38 +218,39 @@
                 </div>
 
                 <!-- Integrated Filter Bar -->
-                <div class="pb-3 mb-3 border-bottom">
+                <div class="analytics-filter-toolbar pb-3 mb-3 border-bottom">
                     <form action="{{ url_for('admin.analytics') }}" method="GET" class="row g-2 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label smallest fw-bold text-uppercase mb-1">From</label>
-                            <input type="date" name="start_date" class="form-control form-control-sm"
+                        <div class="col-6 col-md-3">
+                            <label class="analytics-filter-label">From</label>
+                            <input type="date" name="start_date" class="form-control analytics-filter-input"
                                 value="{{ start_date or '' }}">
                         </div>
-                        <div class="col-md-3">
-                            <label class="form-label smallest fw-bold text-uppercase mb-1">To</label>
-                            <input type="date" name="end_date" class="form-control form-control-sm"
+                        <div class="col-6 col-md-3">
+                            <label class="analytics-filter-label">To</label>
+                            <input type="date" name="end_date" class="form-control analytics-filter-input"
                                 value="{{ end_date or '' }}">
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label smallest fw-bold text-uppercase mb-1">Period</label>
-                            <div class="btn-group btn-group-sm w-100" role="group">
+                        <div class="col-8 col-sm-9 col-md-4">
+                            <label class="analytics-filter-label">Period</label>
+                            <div class="btn-group btn-group-sm w-100 analytics-period-group" role="group">
                                 <input type="radio" class="btn-check" name="period" id="pd_daily" value="daily" {% if
                                     period=='daily' %}checked{% endif %} onchange="this.form.submit()">
-                                <label class="btn btn-outline-primary" for="pd_daily">Daily</label>
+                                <label class="btn btn-outline-primary analytics-period-btn" for="pd_daily">Daily</label>
 
                                 <input type="radio" class="btn-check" name="period" id="pd_weekly" value="weekly" {% if
                                     period=='weekly' %}checked{% endif %} onchange="this.form.submit()">
-                                <label class="btn btn-outline-primary" for="pd_weekly">Weekly</label>
+                                <label class="btn btn-outline-primary analytics-period-btn" for="pd_weekly">Weekly</label>
 
                                 <input type="radio" class="btn-check" name="period" id="pd_monthly" value="monthly" {%
                                     if period=='monthly' or not period %}checked{% endif %}
                                     onchange="this.form.submit()">
-                                <label class="btn btn-outline-primary" for="pd_monthly">Monthly</label>
+                                <label class="btn btn-outline-primary analytics-period-btn" for="pd_monthly">Monthly</label>
                             </div>
                         </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary btn-sm w-100">
+                        <div class="col-4 col-sm-3 col-md-2">
+                            <button type="submit" class="btn btn-primary analytics-submit-btn w-100" title="Apply Filter">
                                 <i class="bi bi-arrow-repeat"></i>
+                                <span class="d-none d-sm-inline ms-1">Apply</span>
                             </button>
                         </div>
                     </form>

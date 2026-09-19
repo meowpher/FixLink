@@ -57,88 +57,98 @@
         background-color: #ffffff;
     }
 
-    .filter-sidebar-panel .btn-apply-filters {
-        height: 42px;
+    .filter-sidebar-panel .btn-filter-action {
+        height: 38px;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 0.9rem;
-        display: flex;
+        font-size: 0.85rem;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        background-color: #0b4d8c;
-        border-color: #0b4d8c;
+        gap: 6px;
+        padding: 0.35rem 0.75rem;
         box-shadow: none !important;
-        transition: background-color 0.15s ease, border-color 0.15s ease;
+        transition: all 0.15s ease;
+        white-space: nowrap;
     }
 
-    .filter-sidebar-panel .btn-apply-filters:hover {
+    .filter-sidebar-panel .btn-primary.btn-filter-action {
+        background-color: #0b4d8c;
+        border-color: #0b4d8c;
+        color: #ffffff;
+    }
+
+    .filter-sidebar-panel .btn-primary.btn-filter-action:hover {
         background-color: #083866;
         border-color: #083866;
         transform: none !important;
         box-shadow: none !important;
     }
 
-    /* Dark Mode Support for Filter Sidebar */
-    [data-theme="dark"] .filter-sidebar-panel,
-    [data-bs-theme="dark"] .filter-sidebar-panel {
-        background: var(--bg-surface, #1e293b);
-        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    .filter-sidebar-panel .btn-outline-secondary.btn-filter-action {
+        color: var(--text-main, #475569);
+        border-color: var(--border-color, #cbd5e1);
+        background-color: transparent;
     }
 
-    [data-theme="dark"] .filter-sidebar-title,
-    [data-bs-theme="dark"] .filter-sidebar-title {
-        color: var(--text-muted, #94a3b8);
-        border-color: var(--border-subtle, rgba(255, 255, 255, 0.1));
+    .filter-sidebar-panel .btn-outline-secondary.btn-filter-action:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-main, #1e293b);
+        border-color: var(--border-color, #94a3b8);
     }
 
-    [data-theme="dark"] .filter-sidebar-panel .form-label,
-    [data-bs-theme="dark"] .filter-sidebar-panel .form-label {
-        color: var(--text-body, #cbd5e1);
+    [data-theme="dark"] .filter-sidebar-panel .btn-filter-action.btn-outline-secondary,
+    [data-bs-theme="dark"] .filter-sidebar-panel .btn-filter-action.btn-outline-secondary {
+        color: #cbd5e1;
+        border-color: rgba(255, 255, 255, 0.15);
     }
 
-    [data-theme="dark"] .filter-sidebar-panel .form-control,
-    [data-theme="dark"] .filter-sidebar-panel .form-select,
-    [data-bs-theme="dark"] .filter-sidebar-panel .form-control,
-    [data-bs-theme="dark"] .filter-sidebar-panel .form-select {
-        background-color: rgba(15, 23, 42, 0.6);
-        border-color: rgba(255, 255, 255, 0.12);
-        color: #f1f5f9;
-    }
-
-    [data-theme="dark"] .filter-sidebar-panel .input-group-text,
-    [data-bs-theme="dark"] .filter-sidebar-panel .input-group-text {
-        border-color: rgba(255, 255, 255, 0.12) !important;
-        color: #94a3b8 !important;
-    }
-
-    [data-theme="dark"] .filter-sidebar-panel .form-control:focus,
-    [data-theme="dark"] .filter-sidebar-panel .form-select:focus,
-    [data-bs-theme="dark"] .filter-sidebar-panel .form-control:focus,
-    [data-bs-theme="dark"] .filter-sidebar-panel .form-select:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-        background-color: #0f172a;
-    }
-
-    [data-theme="dark"] .filter-sidebar-panel .btn-apply-filters,
-    [data-bs-theme="dark"] .filter-sidebar-panel .btn-apply-filters {
-        background-color: #1d4ed8;
-        border-color: #2563eb;
-        color: #ffffff;
-        box-shadow: none !important;
-    }
-
-    [data-theme="dark"] .filter-sidebar-panel .btn-apply-filters:hover,
-    [data-bs-theme="dark"] .filter-sidebar-panel .btn-apply-filters:hover {
-        background-color: #1e40af;
-        border-color: #1d4ed8;
-    }
-
-    @media (max-width: 767px) {
+    @media (max-width: 767.98px) {
         .filter-sidebar-panel {
             position: static;
-            margin-bottom: 1.25rem;
-            padding: 1rem;
+            margin-bottom: 0.85rem !important;
+            padding: 0.65rem 0.85rem !important;
+            border-radius: 12px !important;
+        }
+        .filter-sidebar-title {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+            border-bottom: none !important;
+            font-size: 0.82rem !important;
+            cursor: pointer !important;
+            user-select: none !important;
+        }
+        .filter-sidebar-panel .collapse.show,
+        .filter-sidebar-panel .collapsing {
+            margin-top: 0.5rem !important;
+            padding-top: 0.5rem !important;
+            border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+        }
+        .filter-sidebar-panel .form-label {
+            font-size: 0.72rem !important;
+            margin-bottom: 0.2rem !important;
+            font-weight: 500 !important;
+        }
+        .filter-sidebar-panel .form-control,
+        .filter-sidebar-panel .form-select {
+            height: 34px !important;
+            font-size: 0.78rem !important;
+            padding: 0.25rem 0.6rem !important;
+            border-radius: 8px !important;
+        }
+        .filter-sidebar-panel .btn-filter-action {
+            height: 34px !important;
+            font-size: 0.78rem !important;
+            border-radius: 8px !important;
+            padding: 0.25rem 0.6rem !important;
+        }
+        .filter-collapse-icon {
+            transition: transform 0.2s ease;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .filter-sidebar-title:not(.collapsed) .filter-collapse-icon {
+            transform: rotate(180deg);
         }
     }
 
@@ -161,6 +171,146 @@
     .prof-profile-link:hover .mc-avatar {
         transform: scale(1.08);
         box-shadow: 0 4px 12px rgba(13, 110, 253, 0.35);
+    }
+
+    /* Mobile Card Format - Compact Dashboard Style */
+    @media (max-width: 767px) {
+        .mobile-card-list {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 8px !important;
+        }
+        .mc-card {
+            display: flex !important;
+            flex-direction: column !important;
+            padding: 10px 12px !important;
+            gap: 8px !important;
+            background: var(--bg-card, #1c1c21) !important;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+            border-radius: 12px !important;
+            margin-bottom: 0 !important;
+            transition: background 0.15s ease, transform 0.1s ease !important;
+            text-align: left !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+        }
+        .mc-card:active {
+            transform: scale(0.99) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+        .mc-top-row {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: flex-start !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+            width: 100% !important;
+        }
+        .mc-left-col {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 3px !important;
+            min-width: 0 !important;
+            flex: 1 !important;
+        }
+        .mc-primary-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            flex-wrap: nowrap !important;
+            overflow: hidden !important;
+        }
+        .mc-id {
+            font-size: 0.78rem !important;
+            font-weight: 700 !important;
+            color: var(--mitwpu-blue, #3b82f6) !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-title {
+            font-size: 0.88rem !important;
+            font-weight: 600 !important;
+            color: var(--text-main, #ffffff) !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            flex-shrink: 1 !important;
+        }
+        .mc-room-badge {
+            font-size: 0.68rem !important;
+            font-weight: 600 !important;
+            padding: 1px 6px !important;
+            border-radius: 4px !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: var(--text-muted, #9ca3af) !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-secondary-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            font-size: 0.75rem !important;
+            color: var(--text-muted, #9ca3af) !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+        }
+        .mc-reporter-text {
+            font-weight: 500 !important;
+            color: var(--text-main, #d1d5db) !important;
+            flex-shrink: 0 !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+        }
+        .mc-desc-snippet {
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            opacity: 0.85 !important;
+        }
+        .mc-meta-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            font-size: 0.7rem !important;
+            color: var(--text-muted, #6b7280) !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+        }
+        .mc-sep {
+            opacity: 0.4 !important;
+            font-size: 0.6rem !important;
+        }
+        .mc-status-wrap {
+            flex-shrink: 0 !important;
+        }
+        .mc-status-wrap .badge {
+            font-size: 0.68rem !important;
+            font-weight: 600 !important;
+            padding: 3px 7px !important;
+            border-radius: 5px !important;
+        }
+        .mc-actions-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            width: 100% !important;
+            padding-top: 8px !important;
+            border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+        }
+        .mc-action-btn {
+            flex: 1 1 0 !important;
+            height: 32px !important;
+            padding: 0 0.5rem !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 5px !important;
+            font-size: 0.76rem !important;
+            font-weight: 600 !important;
+            border-radius: 7px !important;
+            white-space: nowrap !important;
+        }
     }
 </style>
 <div class="container py-4">
@@ -222,91 +372,101 @@
         <!-- Left Side: Filter Sidebar Panel -->
         <div class="col-xl-3 col-lg-4 col-md-4">
             <aside class="filter-sidebar-panel">
-                <div class="filter-sidebar-title">
-                    <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
-                    {% if (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') %}
-                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
-                    {% endif %}
-                </div>
-                <form method="GET" action="{{ url_for('admin.professionals') }}" class="filter-sidebar-form">
-                    {% if search_query %}
-                    <input type="hidden" name="q" value="{{ search_query }}">
-                    {% endif %}
-                    
-                    <div class="mb-3">
-                        <label for="categoryFilter" class="form-label">Category</label>
-                        <select id="categoryFilter" name="category" class="form-select" style="height: 42px; border-radius: 8px;">
-                            <option value="all">All Categories</option>
-                            {% for cat in categories %}
-                            <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>
-                                {{ category_names.get(cat, cat) }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="statusFilter" class="form-label">Status</label>
-                        <select id="statusFilter" name="status" class="form-select" style="height: 42px; border-radius: 8px;">
-                            <option value="all">All Status</option>
-                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
-                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
-                        </select>
-                    </div>
-                    <div class="pt-1 d-grid gap-2">
-                        <button type="submit" class="btn btn-primary btn-apply-filters">
-                            <i class="bi bi-funnel me-1"></i>Apply Filters
-                        </button>
-                        {% if (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') or search_query %}
-                        <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary btn-sm text-decoration-none text-center" style="border-radius: 8px; height: 38px; display: inline-flex; align-items: center; justify-content: center;">
-                            <i class="bi bi-x-circle me-1"></i>Reset All
-                        </a>
+                <div class="filter-sidebar-title" data-bs-toggle="collapse" data-bs-target="#filterSidebarCollapse" role="button" aria-expanded="false" aria-controls="filterSidebarCollapse">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-funnel-fill text-primary"></i>
+                        <span>Filters</span>
+                        {% if (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') %}
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
                         {% endif %}
                     </div>
-                </form>
+                    <i class="bi bi-chevron-down d-md-none filter-collapse-icon"></i>
+                </div>
+                
+                <div class="collapse {% if (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') %}show{% endif %} d-md-block" id="filterSidebarCollapse">
+                    <form method="GET" action="{{ url_for('admin.professionals') }}" class="filter-sidebar-form pt-2 pt-md-0">
+                        {% if search_query %}
+                        <input type="hidden" name="q" value="{{ search_query }}">
+                        {% endif %}
+                        <div class="row g-2 filter-form-grid">
+                            <div class="col-6 col-md-12">
+                                <label for="categoryFilter" class="form-label">Category</label>
+                                <select id="categoryFilter" name="category" class="form-select form-select-sm">
+                                    <option value="all">All Categories</option>
+                                    {% for cat in categories %}
+                                    <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>
+                                        {{ category_names.get(cat, cat) }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-12">
+                                <label for="statusFilter" class="form-label">Status</label>
+                                <select id="statusFilter" name="status" class="form-select form-select-sm">
+                                    <option value="all">All Status</option>
+                                    <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                                    <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                                </select>
+                            </div>
+                            <div class="col-12 filter-btn-col pt-1">
+                                <div class="d-flex gap-2 w-100">
+                                    <button type="submit" class="btn btn-primary btn-filter-action flex-fill">
+                                        <i class="bi bi-funnel me-1"></i>Apply
+                                    </button>
+                                    {% if (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') or search_query %}
+                                    <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary btn-filter-action flex-fill text-decoration-none">
+                                        <i class="bi bi-x-circle me-1"></i>Clear
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </aside>
         </div>
 
-        <!-- Right Side: Professionals List Table & Cards -->
-        <div class="col-xl-9 col-lg-8 col-md-8">
-            <!-- Horizontal Search Bar -->
-            <div class="card shadow-sm mb-3 border-0" style="background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color) !important;">
-                <div class="card-body p-2.5">
-                    <form method="GET" action="{{ url_for('admin.professionals') }}" class="d-flex align-items-center gap-2" id="profSearchForm">
-                        {% if category_filter and category_filter != 'all' %}
-                        <input type="hidden" name="category" value="{{ category_filter }}">
-                        {% endif %}
-                        {% if status_filter and status_filter != 'all' %}
-                        <input type="hidden" name="status" value="{{ status_filter }}">
-                        {% endif %}
-                        
-                        <div class="input-group flex-grow-1">
-                            <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+            <!-- Right Side: Professionals List Table & Cards -->
+            <div class="col-xl-9 col-lg-8 col-md-8">
+                <!-- Sleek Responsive Search Bar -->
+                <div class="card shadow-sm mb-3 border-0" style="background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color) !important;">
+                    <div class="card-body p-2 p-sm-2.5">
+                        <form method="GET" action="{{ url_for('admin.professionals') }}" class="d-flex align-items-center gap-2" id="profSearchForm">
+                            {% if category_filter and category_filter != 'all' %}
+                            <input type="hidden" name="category" value="{{ category_filter }}">
+                            {% endif %}
+                            {% if status_filter and status_filter != 'all' %}
+                            <input type="hidden" name="status" value="{{ status_filter }}">
+                            {% endif %}
+                            
+                            <div class="input-group flex-nowrap flex-grow-1" style="min-width: 0;">
+                                <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px; border-color: var(--border-color);">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" 
+                                       id="searchQuery" 
+                                       name="q" 
+                                       class="form-control border-start-0 ps-1" 
+                                       placeholder="Search professionals by name, email, phone..." 
+                                       value="{{ search_query }}" 
+                                       autocomplete="off"
+                                       style="height: 38px; font-size: 0.85rem; border-color: var(--border-color);">
+                                <button type="button" 
+                                        id="clearSearchQueryBtn" 
+                                        class="btn btn-outline-secondary border-start-0 text-muted px-2.5" 
+                                        style="border-radius: 0 8px 8px 0; display: {{ 'inline-flex' if search_query else 'none' }}; align-items: center; border-color: var(--border-color);"
+                                        title="Clear search">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                </button>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary px-3 fw-semibold d-inline-flex align-items-center gap-1.5" style="border-radius: 8px; height: 38px; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0;">
                                 <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" 
-                                   id="searchQuery" 
-                                   name="q" 
-                                   class="form-control border-start-0 border-end-0 ps-1" 
-                                   placeholder="Search professionals by name, email, phone..." 
-                                   value="{{ search_query }}" 
-                                   autocomplete="off"
-                                   style="height: 42px; font-size: 0.92rem;">
-                            <button type="button" 
-                                    id="clearSearchQueryBtn" 
-                                    class="btn btn-outline-secondary border-start-0 text-muted px-2.5" 
-                                    style="border-radius: 0 8px 8px 0; display: {{ 'inline-flex' if search_query else 'none' }}; align-items: center; border-color: inherit;"
-                                    title="Clear search">
-                                <i class="bi bi-x-circle-fill"></i>
+                                <span class="d-none d-sm-inline">Search</span>
                             </button>
-                        </div>
-                        
-                        <button type="submit" class="btn btn-primary px-3 fw-semibold d-flex align-items-center gap-1.5" style="border-radius: 8px; height: 42px; white-space: nowrap;">
-                            <i class="bi bi-search"></i>
-                            <span>Search</span>
-                        </button>
-                    </form>
+                        </form>
+                    </div>
                 </div>
-            </div>
 
             <div class="tickets-card border-0">
         <div class="desktop-table-container d-none d-md-block">
@@ -403,15 +563,35 @@
         </div>
 
         <!-- Mobile Card Wrapper -->
-        <div class="mobile-card-list d-md-none p-3">
+        <div class="mobile-card-list d-md-none p-2 p-sm-3">
             {% for prof in professionals %}
             <div class="mc-card" id="professional-mc-{{ prof.id }}" data-category="{{ prof.category }}">
-                <div class="mc-top">
-                    <div class="mc-id-title">
-                        <span class="mc-id">#{{ prof.id }}</span>
-                        <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" class="prof-profile-link mc-title text-decoration-none" title="View {{ prof.name }}'s Profile">{{ prof.name }}</a>
+                <div class="mc-top-row">
+                    <div class="mc-left-col">
+                        <div class="mc-primary-row">
+                            <span class="mc-id">#{{ prof.id }}</span>
+                            <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" class="mc-title text-decoration-none" title="View {{ prof.name }}'s Profile">{{ prof.name }}</a>
+                            <span class="mc-room-badge">
+                                {% if prof.category == 'it_technician' %}<i class="bi bi-pc-display"></i>
+                                {% elif prof.category == 'electrician' %}<i class="bi bi-lightning-fill"></i>
+                                {% elif prof.category == 'plumber' %}<i class="bi bi-water"></i>
+                                {% elif prof.category == 'carpenter' %}<i class="bi bi-hammer"></i>
+                                {% endif %}
+                                {{ category_names.get(prof.category, prof.category) }}
+                            </span>
+                        </div>
+                        <div class="mc-secondary-row">
+                            <span class="mc-reporter-text"><i class="bi bi-envelope me-1"></i>{{ prof.email }}</span>
+                            {% if prof.phone %}
+                            <span class="mc-sep">&bull;</span>
+                            <span class="mc-desc-snippet"><i class="bi bi-telephone me-1"></i>{{ prof.phone }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="mc-meta-row">
+                            <span class="mc-date-text"><i class="bi bi-calendar3"></i> Joined {{ prof.created_at.strftime('%b %d, %Y') if prof.created_at else '-' }}</span>
+                        </div>
                     </div>
-                    <div class="mc-status">
+                    <div class="mc-status-wrap">
                         {% if prof.is_active %}
                         <span class="badge bg-success-subtle text-success">ACTIVE</span>
                         {% else %}
@@ -419,31 +599,19 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="mc-desc"><i class="bi bi-envelope me-1"></i>{{ prof.email }} | <i class="bi bi-telephone me-1"></i>{{ prof.phone or '-' }}</div>
-                <div class="mc-person-row">
-                    <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" class="prof-profile-link mc-person-left text-decoration-none" title="View {{ prof.name }}'s Profile">
-                        <div class="mc-avatar">{{ prof.name[0]|upper }}</div>
-                        <div class="mc-person-info">
-                            <span class="mc-name">{{ prof.name }}</span>
-                            <span class="mc-meta">Joined: {{ prof.created_at.strftime('%b %d, %Y') if prof.created_at else '-' }}</span>
-                        </div>
+                <div class="mc-actions-row">
+                    <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" class="btn btn-outline-primary mc-action-btn" title="View History">
+                        <i class="bi bi-clock-history"></i>
+                        <span>History</span>
                     </a>
-                    <span class="mc-pill">
-                        {% if prof.category == 'it_technician' %}<i class="bi bi-pc-display me-1"></i>
-                        {% elif prof.category == 'electrician' %}<i class="bi bi-lightning-fill me-1"></i>
-                        {% elif prof.category == 'plumber' %}<i class="bi bi-water me-1"></i>
-                        {% elif prof.category == 'carpenter' %}<i class="bi bi-hammer me-1"></i>
-                        {% endif %}
-                        {{ category_names.get(prof.category, prof.category) }}
-                    </span>
-                </div>
-                <div class="mc-bottom">
-                    <div class="mc-date"></div>
-                    <div class="mc-actions">
-                        <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" class="btn mc-btn mc-btn-view" title="View History"><i class="bi bi-clock-history"></i></a>
-                        <button class="btn mc-btn mc-btn-update" onclick="editProfessional({{ prof.id }})" title="Edit Profile"><i class="bi bi-pencil-square"></i></button>
-                        <button class="btn mc-btn mc-btn-delete" onclick="deleteProfessional({{ prof.id }})" title="Delete Professional"><i class="bi bi-trash"></i></button>
-                    </div>
+                    <button class="btn btn-outline-info mc-action-btn" onclick="editProfessional({{ prof.id }})" title="Edit Profile">
+                        <i class="bi bi-pencil-square"></i>
+                        <span>Edit</span>
+                    </button>
+                    <button class="btn btn-outline-danger mc-action-btn" onclick="deleteProfessional({{ prof.id }})" title="Delete Professional">
+                        <i class="bi bi-trash"></i>
+                        <span>Delete</span>
+                    </button>
                 </div>
             </div>
             {% else %}

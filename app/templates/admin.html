@@ -19,6 +19,142 @@
         color: #94a3b8 !important;
     }
 
+    /* Compressed Horizontal Mobile Ticket Cards */
+    @media (max-width: 767.98px) {
+        .mobile-card-list {
+            padding: 8px !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 6px !important;
+        }
+        .mc-card {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 9px 12px !important;
+            gap: 10px !important;
+            background: var(--bg-card, #1c1c21) !important;
+            border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+            border-radius: 10px !important;
+            margin-bottom: 0 !important;
+            cursor: pointer !important;
+            transition: background 0.15s ease, transform 0.1s ease !important;
+            text-align: left !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+        }
+        .mc-card:active {
+            transform: scale(0.99) !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+        .mc-left-col {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 2px !important;
+            min-width: 0 !important;
+            flex: 1 !important;
+        }
+        .mc-primary-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            flex-wrap: nowrap !important;
+            overflow: hidden !important;
+        }
+        .mc-id {
+            font-size: 0.78rem !important;
+            font-weight: 700 !important;
+            color: var(--mitwpu-blue, #3b82f6) !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-title {
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            color: var(--text-main, #ffffff) !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            flex-shrink: 1 !important;
+        }
+        .mc-room-badge {
+            font-size: 0.68rem !important;
+            font-weight: 600 !important;
+            padding: 1px 5px !important;
+            border-radius: 4px !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: var(--text-muted, #9ca3af) !important;
+            white-space: nowrap !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-secondary-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            font-size: 0.75rem !important;
+            color: var(--text-muted, #9ca3af) !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+        }
+        .mc-reporter-text {
+            font-weight: 500 !important;
+            color: var(--text-main, #d1d5db) !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-meta-prn {
+            font-size: 0.7rem !important;
+            opacity: 0.7 !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-desc-snippet {
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            opacity: 0.75 !important;
+        }
+        .mc-meta-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            font-size: 0.68rem !important;
+            color: var(--text-muted, #6b7280) !important;
+            overflow: hidden !important;
+            white-space: nowrap !important;
+        }
+        .mc-sep {
+            opacity: 0.4 !important;
+            font-size: 0.6rem !important;
+        }
+        .mc-right-col {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: flex-end !important;
+            justify-content: center !important;
+            gap: 4px !important;
+            flex-shrink: 0 !important;
+        }
+        .mc-status-wrap .badge {
+            font-size: 0.68rem !important;
+            font-weight: 600 !important;
+            padding: 3px 6px !important;
+            border-radius: 5px !important;
+        }
+        .mc-view-indicator {
+            font-size: 0.75rem !important;
+            color: var(--text-muted, #71717a) !important;
+            opacity: 0.6 !important;
+        }
+        .mc-cancel-btn {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #ef4444 !important;
+            border: 1px solid rgba(239, 68, 68, 0.3) !important;
+            border-radius: 4px !important;
+            padding: 2px 5px !important;
+            font-size: 0.68rem !important;
+            cursor: pointer !important;
+        }
+    }
+
     /* Filter Sidebar Panel */
     .filter-sidebar-panel {
         background: var(--bg-card, #ffffff);
@@ -69,25 +205,44 @@
         background-color: #ffffff;
     }
 
-    .filter-sidebar-panel .btn-apply-filters {
-        height: 42px;
+    .filter-sidebar-panel .btn-filter-action {
+        height: 38px;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 0.9rem;
-        display: flex;
+        font-size: 0.85rem;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
-        background-color: #0b4d8c;
-        border-color: #0b4d8c;
+        gap: 6px;
+        padding: 0.35rem 0.75rem;
         box-shadow: none !important;
-        transition: background-color 0.15s ease, border-color 0.15s ease;
+        transition: all 0.15s ease;
+        white-space: nowrap;
     }
 
-    .filter-sidebar-panel .btn-apply-filters:hover {
+    .filter-sidebar-panel .btn-primary.btn-filter-action {
+        background-color: #0b4d8c;
+        border-color: #0b4d8c;
+        color: #ffffff;
+    }
+
+    .filter-sidebar-panel .btn-primary.btn-filter-action:hover {
         background-color: #083866;
         border-color: #083866;
         transform: none !important;
         box-shadow: none !important;
+    }
+
+    .filter-sidebar-panel .btn-outline-secondary.btn-filter-action {
+        color: var(--text-main, #475569);
+        border-color: var(--border-color, #cbd5e1);
+        background-color: transparent;
+    }
+
+    .filter-sidebar-panel .btn-outline-secondary.btn-filter-action:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+        color: var(--text-main, #1e293b);
+        border-color: var(--border-color, #94a3b8);
     }
 
     /* Dark Mode Support for Filter Sidebar */
@@ -122,12 +277,65 @@
         background-color: #0f172a;
     }
 
-    @media (max-width: 767px) {
+    @media (max-width: 767.98px) {
         .filter-sidebar-panel {
             position: static;
-            margin-bottom: 1.25rem;
-            padding: 1rem;
+            margin-bottom: 0.85rem !important;
+            padding: 0.65rem 0.85rem !important;
+            border-radius: 12px !important;
         }
+        .filter-sidebar-title {
+            margin-bottom: 0 !important;
+            padding-bottom: 0 !important;
+            border-bottom: none !important;
+            font-size: 0.82rem !important;
+            cursor: pointer !important;
+            user-select: none !important;
+        }
+        .filter-sidebar-panel .collapse.show,
+        .filter-sidebar-panel .collapsing {
+            margin-top: 0.5rem !important;
+            padding-top: 0.5rem !important;
+            border-top: 1px solid var(--border-color, rgba(255, 255, 255, 0.08)) !important;
+        }
+        .filter-sidebar-panel .form-label {
+            font-size: 0.72rem !important;
+            margin-bottom: 0.2rem !important;
+            font-weight: 500 !important;
+        }
+        .filter-sidebar-panel .form-select {
+            height: 34px !important;
+            font-size: 0.78rem !important;
+            padding: 0.25rem 0.6rem !important;
+            border-radius: 8px !important;
+        }
+        .filter-sidebar-panel .btn-filter-action {
+            height: 34px !important;
+            font-size: 0.78rem !important;
+            border-radius: 8px !important;
+            padding: 0.25rem 0.6rem !important;
+        }
+        .filter-collapse-icon {
+            transition: transform 0.2s ease;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .filter-sidebar-title:not(.collapsed) .filter-collapse-icon {
+            transform: rotate(180deg);
+        }
+    }
+
+    [data-theme="dark"] .filter-sidebar-panel .btn-filter-action.btn-outline-secondary,
+    [data-bs-theme="dark"] .filter-sidebar-panel .btn-filter-action.btn-outline-secondary {
+        color: #cbd5e1;
+        border-color: rgba(255, 255, 255, 0.16);
+        background: rgba(255, 255, 255, 0.04);
+    }
+    [data-theme="dark"] .filter-sidebar-panel .btn-filter-action.btn-outline-secondary:hover,
+    [data-bs-theme="dark"] .filter-sidebar-panel .btn-filter-action.btn-outline-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        border-color: rgba(255, 255, 255, 0.25);
     }
 
     /* Unassigned Classes Section Styles */
@@ -262,56 +470,68 @@
             <!-- Left Side: Filter Sidebar Panel -->
             <div class="col-xl-3 col-lg-4 col-md-4">
                 <aside class="filter-sidebar-panel">
-                    <div class="filter-sidebar-title">
-                        <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
-                        {% if (status_filter and status_filter != 'all') or (floor_filter and floor_filter != 'all') or (category_filter and category_filter != 'all') %}
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
-                        {% endif %}
-                    </div>
-                    <form method="GET" action="{{ url_for('admin.dashboard') }}" class="filter-sidebar-form">
-                        <div class="mb-3">
-                            <label for="status" class="form-label">Status</label>
-                            <select class="form-select" id="status" name="status">
-                                <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
-                                <option value="open" {% if status_filter == 'open' %}selected{% endif %}>Open / Cancelled</option>
-                                <option value="assigned" {% if status_filter == 'assigned' %}selected{% endif %}>Assigned</option>
-                                <option value="in-progress" {% if status_filter == 'in-progress' %}selected{% endif %}>In Progress</option>
-                                <option value="fixed" {% if status_filter == 'fixed' %}selected{% endif %}>Fixed</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="floor" class="form-label">Floor</label>
-                            <select class="form-select" id="floor" name="floor">
-                                <option value="all" {% if floor_filter == 'all' %}selected{% endif %}>All Floors</option>
-                                {% for floor in floors %}
-                                <option value="{{ floor.id }}" {% if floor_filter == floor.id|string %}selected{% endif %}>
-                                    {{ floor.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="category" class="form-label">Category</label>
-                            <select class="form-select" id="category" name="category">
-                                <option value="all" {% if category_filter == 'all' %}selected{% endif %}>All Categories</option>
-                                {% for cat in categories %}
-                                <option value="{{ cat.id }}" {% if category_filter == cat.id %}selected{% endif %}>
-                                    {{ cat.name }}
-                                </option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="pt-1 d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-apply-filters">
-                                <i class="bi bi-funnel me-1"></i>Apply Filters
-                            </button>
+                    <div class="filter-sidebar-title" data-bs-toggle="collapse" data-bs-target="#filterSidebarCollapse" role="button" aria-expanded="false" aria-controls="filterSidebarCollapse">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-funnel-fill text-primary"></i>
+                            <span>Filters</span>
                             {% if (status_filter and status_filter != 'all') or (floor_filter and floor_filter != 'all') or (category_filter and category_filter != 'all') %}
-                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-sm text-decoration-none" style="border-radius: 10px;">
-                                <i class="bi bi-x-circle me-1"></i>Clear Filters
-                            </a>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
                             {% endif %}
                         </div>
-                    </form>
+                        <i class="bi bi-chevron-down d-md-none filter-collapse-icon"></i>
+                    </div>
+                    
+                    <div class="collapse {% if (status_filter and status_filter != 'all') or (floor_filter and floor_filter != 'all') or (category_filter and category_filter != 'all') %}show{% endif %} d-md-block" id="filterSidebarCollapse">
+                        <form method="GET" action="{{ url_for('admin.dashboard') }}" class="filter-sidebar-form pt-2 pt-md-0">
+                            <div class="row g-2 filter-form-grid">
+                                <div class="col-12 col-sm-4 col-md-12">
+                                    <label for="status" class="form-label">Status</label>
+                                    <select class="form-select form-select-sm" id="status" name="status">
+                                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All Statuses</option>
+                                        <option value="open" {% if status_filter == 'open' %}selected{% endif %}>Open</option>
+                                        <option value="assigned" {% if status_filter == 'assigned' %}selected{% endif %}>Assigned</option>
+                                        <option value="in-progress" {% if status_filter == 'in-progress' %}selected{% endif %}>In Progress</option>
+                                        <option value="fixed" {% if status_filter == 'fixed' %}selected{% endif %}>Fixed</option>
+                                        <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                    </select>
+                                </div>
+                                <div class="col-6 col-sm-4 col-md-12">
+                                    <label for="floor" class="form-label">Floor</label>
+                                    <select class="form-select form-select-sm" id="floor" name="floor">
+                                        <option value="all" {% if floor_filter == 'all' %}selected{% endif %}>All Floors</option>
+                                        {% for floor in floors %}
+                                        <option value="{{ floor.id }}" {% if floor_filter == floor.id|string %}selected{% endif %}>
+                                            {{ floor.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-6 col-sm-4 col-md-12">
+                                    <label for="category" class="form-label">Category</label>
+                                    <select class="form-select form-select-sm" id="category" name="category">
+                                        <option value="all" {% if category_filter == 'all' %}selected{% endif %}>All Categories</option>
+                                        {% for cat in categories %}
+                                        <option value="{{ cat.id }}" {% if category_filter == cat.id %}selected{% endif %}>
+                                            {{ cat.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-12 filter-btn-col pt-1">
+                                    <div class="d-flex gap-2 w-100">
+                                        <button type="submit" class="btn btn-primary btn-filter-action flex-fill">
+                                            <i class="bi bi-funnel me-1"></i>Apply
+                                        </button>
+                                        {% if (status_filter and status_filter != 'all') or (floor_filter and floor_filter != 'all') or (category_filter and category_filter != 'all') %}
+                                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary btn-filter-action flex-fill text-decoration-none">
+                                            <i class="bi bi-x-circle me-1"></i>Clear
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </aside>
             </div>
 
@@ -399,63 +619,63 @@
                 </div>
 
                 <!-- Mobile Cards — hidden on tablet/desktop -->
-                <div class="mobile-card-list d-md-none p-3">
+                <div class="mobile-card-list d-md-none p-2 p-sm-3">
                     {% for ticket in filtered_tickets %}
-                    <div class="mc-card" onclick="viewTicket('{{ ticket.id }}')">
-                        <div class="mc-top">
-                            <div class="mc-id-title">
+                    <div class="mc-card" onclick="viewTicket('{{ ticket.id }}')" data-ticket-id="{{ ticket.id }}">
+                        <div class="mc-left-col">
+                            <div class="mc-primary-row">
                                 <span class="mc-id">#{{ ticket.id }}</span>
                                 <span class="mc-title">{{ ticket.issue_type|title }}</span>
+                                <span class="mc-room-badge"><i class="bi bi-geo-alt"></i> {{ ticket.room.number }}</span>
                             </div>
-                            <div class="mc-status">
+                            <div class="mc-secondary-row">
+                                <span class="mc-reporter-text">{{ ticket.reporter_name }}</span>
+                                {% if ticket.prn %}
+                                <span class="mc-meta-prn">({{ ticket.prn }})</span>
+                                {% endif %}
+                                {% if ticket.description %}
+                                <span class="mc-sep">&bull;</span>
+                                <span class="mc-desc-snippet">{{ ticket.description }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="mc-meta-row">
+                                <span class="mc-date-text"><i class="bi bi-calendar3"></i> {{ ticket.created_at.strftime('%d %b %Y') }}</span>
+                                {% if ticket.assigned_professional_id %}
+                                <span class="mc-sep">&bull;</span>
+                                <span class="mc-assigned-text"><i class="bi bi-person"></i> {{ ticket.assigned_professional.name }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mc-right-col">
+                            <div class="mc-status-wrap">
                                 {% if ticket.status == 'cancelled' %}
                                 <span class="badge bg-danger">Cancelled</span>
                                 {% elif ticket.status == 'open' %}
-                                <span class="badge bg-warning">Open</span>
+                                <span class="badge bg-warning text-dark">Open</span>
                                 {% elif ticket.status == 'assigned' %}
-                                <span class="badge bg-info">Assigned</span>
+                                <span class="badge bg-info text-dark">Assigned</span>
                                 {% elif ticket.status == 'in-progress' %}
                                 <span class="badge bg-primary">In Progress</span>
                                 {% else %}
                                 <span class="badge bg-success">{{ ticket.status|title }}</span>
                                 {% endif %}
                             </div>
-                        </div>
-                        <div class="mc-desc">{{ ticket.description[:80] }}{% if ticket.description|length > 80 %}…{% endif %}</div>
-                        <div class="mc-person-row">
-                            <div class="mc-person-left">
-                                <div class="mc-avatar" style="background:var(--mitwpu-blue,#0b4d8c);">
-                                    {{ ticket.reporter_name[:1]|upper if ticket.reporter_name else '?' }}
-                                </div>
-                                <div class="mc-person-info">
-                                    <span class="mc-name">{{ ticket.reporter_name }}</span>
-                                    <span class="mc-meta">PRN: {{ ticket.prn }} · {{ ticket.room.number }}</span>
-                                </div>
-                            </div>
                             {% if ticket.status == 'cancelled' %}
-                            <button class="mc-btn" style="background:#ef444420;color:#ef4444;"
-                                    onclick="event.stopPropagation(); viewCancellationReport('{{ ticket.id }}')">
+                            <button class="mc-cancel-btn"
+                                    onclick="event.stopPropagation(); viewCancellationReport('{{ ticket.id }}')" title="Cancellation Report">
                                 <i class="bi bi-exclamation-triangle-fill"></i>
                             </button>
+                            {% else %}
+                            <span class="mc-view-indicator">
+                                <i class="bi bi-chevron-right"></i>
+                            </span>
                             {% endif %}
-                        </div>
-                        <div class="mc-bottom">
-                            <div class="mc-date">
-                                <i class="bi bi-calendar"></i>
-                                {{ ticket.created_at.strftime('%d %b %Y') }}
-                                {% if ticket.assigned_professional_id %}
-                                · <i class="bi bi-person"></i> {{ ticket.assigned_professional.name }}
-                                {% endif %}
-                            </div>
-                            <button class="mc-btn mc-btn-view">
-                                <i class="bi bi-eye"></i>
-                            </button>
                         </div>
                     </div>
                     {% else %}
-                    <div class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox display-4 opacity-25 d-block mb-3"></i>
-                        <p>No tickets found</p>
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-inbox display-6 opacity-25 d-block mb-2"></i>
+                        <p class="small mb-0">No tickets found</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -470,17 +690,20 @@
             </div>
 
             <div class="d-flex flex-column gap-4">
-                <!-- OPEN TICKETS BOX -->
+                {% if status_filter in ['all', 'open', 'cancelled'] %}
+                <!-- OPEN / CANCELLED TICKETS BOX -->
                 <div class="tickets-card">
                     <div class="tickets-header bg-danger bg-opacity-10 border-bottom border-danger">
                         <h5 class="mb-0 text-danger">
-                            <i class="bi bi-exclamation-circle me-2"></i>Open Tickets
+                            <i class="bi bi-exclamation-circle me-2"></i>{% if status_filter == 'cancelled' %}Cancelled Tickets{% else %}Open Tickets{% endif %}
                         </h5>
                         <span class="badge bg-danger">{{ open_tickets | length }}</span>
                     </div>
                     {{ ticket_table_from(open_tickets) }}
                 </div>
+                {% endif %}
                 
+                {% if status_filter in ['all', 'assigned'] %}
                 <!-- ASSIGNED TICKETS BOX -->
                 <div class="tickets-card">
                     <div class="tickets-header bg-info bg-opacity-10 border-bottom border-info">
@@ -491,7 +714,9 @@
                     </div>
                     {{ ticket_table_from(assigned_tickets) }}
                 </div>
+                {% endif %}
                 
+                {% if status_filter in ['all', 'in-progress'] %}
                 <!-- IN-PROGRESS TICKETS BOX -->
                 <div class="tickets-card">
                     <div class="tickets-header bg-warning bg-opacity-10 border-bottom border-warning">
@@ -502,6 +727,20 @@
                     </div>
                     {{ ticket_table_from(in_progress_tickets) }}
                 </div>
+                {% endif %}
+
+                {% if status_filter == 'fixed' %}
+                <!-- FIXED TICKETS BOX -->
+                <div class="tickets-card">
+                    <div class="tickets-header bg-success bg-opacity-10 border-bottom border-success">
+                        <h5 class="mb-0 text-success">
+                            <i class="bi bi-check-circle me-2"></i>Fixed Tickets
+                        </h5>
+                        <span class="badge bg-success">{{ fixed_tickets | length }}</span>
+                    </div>
+                    {{ ticket_table_from(fixed_tickets) }}
+                </div>
+                {% endif %}
 
                 </div>
             </div>

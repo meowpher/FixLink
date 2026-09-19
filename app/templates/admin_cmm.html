@@ -4,67 +4,69 @@
 
 {% block extra_css %}
 <style>
-    /* Filter Sidebar Panel Styles */
+    /* Filter Sidebar Panel Styles - Compressed & Compact */
     .filter-sidebar-panel {
         background: var(--bg-card, #ffffff);
         border: 1px solid var(--border-color, #e2e8f0);
-        border-radius: 16px;
+        border-radius: 14px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        padding: 1.25rem 1.1rem;
+        padding: 0.85rem 0.95rem;
         position: sticky;
         top: 90px;
         transition: all 0.25s ease;
     }
 
     .filter-sidebar-title {
-        font-size: 0.85rem;
+        font-size: 0.78rem;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.75px;
+        letter-spacing: 0.6px;
         color: var(--text-muted, #64748b);
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid var(--border-color, #e2e8f0);
-        margin-bottom: 1.1rem;
+        padding-bottom: 0.5rem;
+        margin-bottom: 0.65rem;
         display: flex;
         align-items: center;
-        justify-content: space-between;
+        justify-content: flex-start;
+        gap: 6px;
     }
 
     .filter-sidebar-panel .form-label {
-        font-size: 0.82rem;
+        font-size: 0.72rem;
         font-weight: 600;
-        color: var(--text-main, #334155);
-        margin-bottom: 0.4rem;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: var(--text-main, #475569);
+        margin-bottom: 0.2rem;
     }
 
     .filter-sidebar-panel .form-select,
     .filter-sidebar-panel .form-control {
-        border-radius: 10px;
+        border-radius: 8px;
         border: 1px solid var(--border-color, #e2e8f0);
-        font-size: 0.9rem;
-        height: 42px;
-        padding: 0.5rem 0.85rem;
+        font-size: 0.82rem;
+        height: 35px;
+        padding: 0.35rem 0.65rem;
         background-color: var(--bg-input, #f8fafc);
         color: var(--text-main, #0f172a);
         transition: all 0.2s ease;
     }
 
     .filter-sidebar-panel .input-group-text {
-        border-radius: 10px 0 0 10px;
+        border-radius: 8px 0 0 8px;
         border: 1px solid var(--border-color, #e2e8f0);
         border-right: none;
         background-color: var(--bg-input, #f8fafc);
     }
 
     .filter-sidebar-panel .input-group .form-control {
-        border-radius: 0 10px 10px 0;
+        border-radius: 0 8px 8px 0;
         border-left: none;
     }
 
     .filter-sidebar-panel .form-select:focus,
     .filter-sidebar-panel .form-control:focus {
         border-color: var(--mitwpu-blue, #0b4d8c);
-        box-shadow: 0 0 0 3px rgba(11, 77, 140, 0.15);
+        box-shadow: 0 0 0 2px rgba(11, 77, 140, 0.15);
         background-color: #ffffff;
     }
 
@@ -78,7 +80,6 @@
     [data-theme="dark"] .filter-sidebar-title,
     [data-bs-theme="dark"] .filter-sidebar-title {
         color: var(--sub-text, #8A8A96) !important;
-        border-color: var(--border, rgba(255, 255, 255, 0.06)) !important;
     }
 
     [data-theme="dark"] .filter-sidebar-panel .form-label,
@@ -102,15 +103,15 @@
     [data-bs-theme="dark"] .filter-sidebar-panel .form-select:focus,
     [data-bs-theme="dark"] .filter-sidebar-panel .form-control:focus {
         border-color: var(--ice-hint, #C8D8E8) !important;
-        box-shadow: 0 0 0 3px rgba(200, 216, 232, 0.2) !important;
+        box-shadow: 0 0 0 2px rgba(200, 216, 232, 0.2) !important;
         background-color: var(--raised, #222226) !important;
     }
 
     @media (max-width: 767px) {
         .filter-sidebar-panel {
             position: static;
-            margin-bottom: 1.25rem;
-            padding: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem 0.85rem;
         }
     }
 
@@ -259,42 +260,341 @@
 
     /* CMM Hero Banner */
     .cmm-hero-card {
-        background: linear-gradient(135deg, rgba(11,77,140,0.10) 0%, rgba(32,201,151,0.10) 100%) !important;
+        background: linear-gradient(135deg, rgba(11,77,140,0.08) 0%, rgba(32,201,151,0.06) 100%) !important;
         border: 1px solid var(--border-color, #e2e8f0) !important;
+        border-radius: 16px !important;
     }
+
     [data-theme="dark"] .cmm-hero-card,
     [data-bs-theme="dark"] .cmm-hero-card {
-        background: linear-gradient(135deg, rgba(37,99,235,0.18) 0%, rgba(16,185,129,0.15) 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%), var(--surface, #0F0F11) !important;
+        border-color: var(--border, rgba(255, 255, 255, 0.08)) !important;
+    }
+    /* CMM Unassigned Classes Toolbar */
+    .cmm-toolbar {
+        background-color: transparent;
+        border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.07));
+        padding: 0.85rem 1rem;
+    }
+
+    [data-theme="dark"] .cmm-toolbar,
+    [data-bs-theme="dark"] .cmm-toolbar {
+        border-bottom-color: rgba(255, 255, 255, 0.07) !important;
+    }
+
+    /* Custom seamless search box */
+    .cmm-search-box {
+        display: flex;
+        align-items: center;
+        height: 40px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 8px;
+        background-color: var(--bg-input, #ffffff);
+        overflow: hidden;
+        width: 100%;
+        margin-bottom: 8px;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .cmm-search-box:focus-within {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+    }
+    .cmm-search-box .search-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        flex-shrink: 0;
+        color: var(--text-muted, #9ca3af);
+        font-size: 0.88rem;
+    }
+    .cmm-search-box input {
+        flex: 1;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: 0.84rem;
+        color: var(--text-main, #0f172a);
+        height: 100%;
+        padding: 0 0.75rem 0 0;
+    }
+    .cmm-search-box input::placeholder {
+        color: var(--text-muted, #9ca3af);
+    }
+
+    /* Faculty select */
+    .cmm-toolbar .cmm-select {
+        height: 40px;
+        width: 100%;
+        font-size: 0.84rem;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 8px;
+        background-color: var(--bg-input, #ffffff);
+        color: var(--text-main, #0f172a);
+        padding: 0 2.5rem 0 0.75rem;
+        margin-bottom: 8px;
+        transition: border-color 0.15s ease;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%239ca3af' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.85rem center;
+        background-size: 12px;
+    }
+    .cmm-toolbar .cmm-select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.18);
+    }
+
+    /* Bulk assign button */
+    .cmm-toolbar .btn-bulk-assign {
+        height: 40px;
+        width: 100%;
+        font-size: 0.84rem;
+        font-weight: 600;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        letter-spacing: 0.2px;
+    }
+
+    /* Dark mode — inputs blend with card, not float as dark blocks */
+    [data-theme="dark"] .cmm-search-box,
+    [data-bs-theme="dark"] .cmm-search-box {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    [data-theme="dark"] .cmm-search-box input,
+    [data-bs-theme="dark"] .cmm-search-box input {
+        color: #EDEDF0 !important;
+    }
+    [data-theme="dark"] .cmm-toolbar .cmm-select,
+    [data-bs-theme="dark"] .cmm-toolbar .cmm-select {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+        color: #EDEDF0 !important;
+    }
+
+    /* Mobile Unassigned Classes Cards — Premium Redesign */
+    .cmm-mobile-card {
+        background: var(--bg-card, #1c1c21);
+        border: 1px solid var(--border-color, rgba(255,255,255,0.08)) !important;
+        border-radius: 14px !important;
+        padding: 0.85rem 0.95rem !important;
+        transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.18);
+    }
+    .cmm-mobile-card:hover {
+        border-color: rgba(99, 160, 255, 0.35) !important;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+    }
+
+    /* Top row of the card */
+    .cmm-mobile-card .card-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    /* Room pill accent */
+    .cmm-mobile-card .room-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        font-family: ui-monospace, 'Roboto Mono', monospace;
+        padding: 3px 9px;
+        border-radius: 6px;
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        flex-shrink: 0;
+    }
+
+    /* Div badge */
+    .cmm-mobile-card .div-pill {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 5px;
+        background: rgba(255,255,255,0.06);
+        color: var(--text-muted, #9ca3af);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* Course label (top-right) */
+    .cmm-mobile-card .course-label {
+        font-size: 0.68rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 5px;
+        background: rgba(255,255,255,0.05);
+        color: var(--text-muted, #6b7280);
+        border: 1px solid rgba(255,255,255,0.07);
+        letter-spacing: 0.3px;
+    }
+
+    /* Subject name */
+    .cmm-mobile-card .subject-name {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text-primary, #EDEDF0);
+        letter-spacing: -0.1px;
+        line-height: 1.25;
+        margin-bottom: 4px;
+    }
+
+    /* Meta row: day + time */
+    .cmm-mobile-card .meta-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.74rem;
+        color: var(--sub-text, #8a8a96);
+        margin-bottom: 10px;
+    }
+    .cmm-mobile-card .meta-row i {
+        font-size: 0.7rem;
+        color: #60a5fa;
+        opacity: 0.85;
+    }
+    .cmm-mobile-card .meta-sep {
+        font-size: 0.55rem;
+        opacity: 0.3;
+    }
+
+    /* Bottom action row */
+    .cmm-mobile-card .action-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding-top: 9px;
+        border-top: 1px solid rgba(255,255,255,0.07);
+    }
+    .cmm-mobile-card .action-row .faculty-select {
+        flex: 1 1 0;
+        min-width: 0;
+        height: 36px;
+        font-size: 0.8rem;
+        border-radius: 8px;
+        border: 1px solid rgba(255,255,255,0.1);
+        background-color: rgba(255,255,255,0.05);
+        color: var(--text-primary, #EDEDF0);
+        padding: 0 2.2rem 0 0.65rem;
+        appearance: none;
+        -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='11' viewBox='0 0 16 16'%3E%3Cpath fill='%236b7280' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 11px;
+    }
+    .cmm-mobile-card .action-row .faculty-select:focus {
+        outline: none;
+        border-color: rgba(99,160,255,0.5);
+        box-shadow: 0 0 0 2px rgba(99,160,255,0.15);
+    }
+    .cmm-mobile-card .action-row .btn-assign {
+        flex-shrink: 0;
+        height: 36px;
+        padding: 0 14px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        white-space: nowrap;
+        background: #3b82f6;
+        border: none;
+        color: #fff;
+        transition: background 0.15s ease;
+    }
+    .cmm-mobile-card .action-row .btn-assign:hover {
+        background: #2563eb;
+    }
+
+    /* Light theme overrides */
+    [data-theme="light"] .cmm-mobile-card,
+    [data-bs-theme="light"] .cmm-mobile-card {
+        background: #ffffff;
+        border-color: #e2e8f0 !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    [data-theme="light"] .cmm-mobile-card .room-pill,
+    [data-bs-theme="light"] .cmm-mobile-card .room-pill {
+        background: rgba(37,99,235,0.08);
+        color: #2563eb;
+        border-color: rgba(37,99,235,0.2);
+    }
+    [data-theme="light"] .cmm-mobile-card .subject-name,
+    [data-bs-theme="light"] .cmm-mobile-card .subject-name { color: #0f172a; }
+    [data-theme="light"] .cmm-mobile-card .meta-row,
+    [data-bs-theme="light"] .cmm-mobile-card .meta-row { color: #64748b; }
+    [data-theme="light"] .cmm-mobile-card .div-pill,
+    [data-bs-theme="light"] .cmm-mobile-card .div-pill {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #e2e8f0;
+    }
+    [data-theme="light"] .cmm-mobile-card .course-label,
+    [data-bs-theme="light"] .cmm-mobile-card .course-label {
+        background: #f8fafc;
+        color: #64748b;
+        border-color: #e2e8f0;
+    }
+    [data-theme="light"] .cmm-mobile-card .action-row { border-top-color: #e2e8f0; }
+    [data-theme="light"] .cmm-mobile-card .action-row .faculty-select {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        color: #0f172a;
+    }
+
+    /* Select All bar — explicit dark bg to prevent white flash */
+    .cmm-select-all-bar {
+        background-color: #141414;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    [data-theme="light"] .cmm-select-all-bar,
+    [data-bs-theme="light"] .cmm-select-all-bar {
+        background-color: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4 py-4 mb-5">
+<div class="container-fluid px-3 px-md-4 py-3 py-md-4 mb-5">
     
     <!-- Hero Header Banner -->
-    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden cmm-hero-card">
-        <div class="card-body p-4 p-md-5">
-            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-4">
-                <div>
+    <div class="card border-0 shadow-sm rounded-4 mb-3 mb-md-4 overflow-hidden cmm-hero-card">
+        <div class="card-body p-3.5 p-md-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-start align-items-lg-center gap-3">
+                <div class="pe-lg-3">
                     <div class="d-flex align-items-center gap-2 mb-2">
-                        <span class="badge bg-primary px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.8rem;">ADMIN CONTROL CENTER</span>
-                        <span class="badge bg-secondary-subtle text-secondary px-3 py-2 rounded-pill fw-semibold" style="font-size: 0.8rem;">CMM ENGINE</span>
+                        <span class="badge bg-primary px-2.5 py-1 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">ADMIN CONTROL</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">CMM ENGINE</span>
                     </div>
-                    <h1 class="h2 fw-bold mb-2 text-body">Classroom Management Module (CMM)</h1>
-                    <p class="text-muted mb-0 lead" style="font-size: 1rem; max-width: 720px;">
-                        Centralized portal for managing room timetables, batch importing CSV schedules, clearing floor schedules, and allocating faculty members to unassigned classes.
+                    <h1 class="h3 fw-bold mb-1.5 text-body">Classroom Management Module (CMM)</h1>
+                    <p class="text-muted small mb-0" style="max-width: 720px; line-height: 1.5;">
+                        Centralized portal for managing room timetables, CSV batch imports, schedule clearing, and faculty allocations.
                     </p>
                 </div>
                 
-                <div class="d-flex flex-wrap align-items-center gap-2">
-                    <button class="btn btn-success rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#importTimetableModal">
-                        <i class="bi bi-file-earmark-spreadsheet-fill fs-5"></i>
-                        <span>Mass Import Timetable</span>
+                <div class="d-flex flex-row align-items-center gap-2 w-100 w-lg-auto flex-shrink-0 pt-1 pt-lg-0">
+                    <button class="btn btn-primary rounded-3 px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 fw-semibold flex-fill flex-lg-grow-0" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="height: 38px; font-size: 0.82rem; white-space: nowrap;">
+                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                        <span>Mass Import</span>
                     </button>
-                    <button class="btn btn-outline-danger rounded-pill px-4 py-2 shadow-sm d-flex align-items-center gap-2 fw-semibold" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
-                        <i class="bi bi-trash3-fill fs-5"></i>
+                    <button class="btn btn-outline-danger rounded-3 px-3 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-2 fw-semibold flex-fill flex-lg-grow-0" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" style="height: 38px; font-size: 0.82rem; white-space: nowrap;">
+                        <i class="bi bi-trash3-fill"></i>
                         <span>Delete Timetables</span>
                     </button>
                 </div>
@@ -303,42 +603,42 @@
     </div>
 
     <!-- Quick Stats Cards Row -->
-    <div class="row g-3 mb-4">
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-4 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
-                        <i class="bi bi-calendar-week fs-3"></i>
+    <div class="row g-2 g-md-3 mb-3 mb-md-4">
+        <div class="col-4 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3">
+                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-center gap-2 gap-sm-3 text-center text-sm-start">
+                    <div class="p-2 p-md-3 rounded-3 rounded-md-4 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                        <i class="bi bi-calendar-week fs-4 fs-md-3"></i>
                     </div>
-                    <div>
-                        <div class="text-muted small fw-semibold text-uppercase">Total Timetable Slots</div>
-                        <div class="fs-3 fw-bold text-body" id="statTotalSlots">{{ total_timetables_count }}</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-4 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
-                        <i class="bi bi-person-check-fill fs-3"></i>
-                    </div>
-                    <div>
-                        <div class="text-muted small fw-semibold text-uppercase">Allocated Classes</div>
-                        <div class="fs-3 fw-bold text-body" id="statAllocatedSlots">{{ assigned_count }}</div>
+                    <div class="min-w-0">
+                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.68rem; letter-spacing: 0.4px;">Total Slots</div>
+                        <div class="fs-4 fs-md-3 fw-bold text-body lh-1 mt-1" id="statTotalSlots">{{ total_timetables_count }}</div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-12 col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 p-3">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="p-3 rounded-4 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
-                        <i class="bi bi-person-exclamation fs-3"></i>
+        <div class="col-4 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3">
+                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-center gap-2 gap-sm-3 text-center text-sm-start">
+                    <div class="p-2 p-md-3 rounded-3 rounded-md-4 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                        <i class="bi bi-person-check-fill fs-4 fs-md-3"></i>
                     </div>
-                    <div>
-                        <div class="text-muted small fw-semibold text-uppercase">Requiring Allocation</div>
-                        <div class="fs-3 fw-bold text-warning" id="statUnassignedSlots">{{ unassigned_count }}</div>
+                    <div class="min-w-0">
+                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.68rem; letter-spacing: 0.4px;">Allocated</div>
+                        <div class="fs-4 fs-md-3 fw-bold text-body lh-1 mt-1" id="statAllocatedSlots">{{ assigned_count }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-4 col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3">
+                <div class="d-flex flex-column flex-sm-row align-items-center align-items-sm-center gap-2 gap-sm-3 text-center text-sm-start">
+                    <div class="p-2 p-md-3 rounded-3 rounded-md-4 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 42px; height: 42px;">
+                        <i class="bi bi-person-exclamation fs-4 fs-md-3"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.68rem; letter-spacing: 0.4px;">Unassigned</div>
+                        <div class="fs-4 fs-md-3 fw-bold text-warning lh-1 mt-1" id="statUnassignedSlots">{{ unassigned_count }}</div>
                     </div>
                 </div>
             </div>
@@ -351,118 +651,126 @@
             <!-- Left Side: Filter Sidebar Panel (Course, Subject, Day, Room) -->
             <div class="col-xl-3 col-lg-4 col-md-4">
                 <aside class="filter-sidebar-panel">
-                    <div class="filter-sidebar-title">
-                        <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
+                    <div class="filter-sidebar-title" data-bs-toggle="collapse" data-bs-target="#cmmFilterSidebarCollapse" role="button" aria-expanded="false" aria-controls="cmmFilterSidebarCollapse">
+                        <i class="bi bi-funnel-fill text-primary"></i>
+                        <span>Filters</span>
                         <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" id="activeFilterBadge" style="display: none; font-size: 0.72rem;">Filtered</span>
+                        <i class="bi bi-chevron-down d-md-none filter-collapse-icon" style="margin-left: 2px; font-size: 0.75rem;"></i>
                     </div>
-                    <div class="filter-sidebar-form">
-                        <!-- 1. Course Filter -->
-                        <div class="mb-3">
-                            <label for="courseFilter" class="form-label">Course</label>
-                            <select class="form-select" id="courseFilter" aria-label="Filter by Course">
-                                <option value="">All Courses</option>
-                                <option value="BCA">BCA</option>
-                                <option value="MCA">MCA</option>
-                                <option value="BSC">BSC</option>
-                                <option value="MSC">MSC</option>
-                            </select>
-                        </div>
+                    
+                    <div class="collapse d-md-block" id="cmmFilterSidebarCollapse">
+                        <div class="filter-sidebar-form pt-1 pt-md-0">
+                            <div class="row g-2 filter-form-grid">
+                                <!-- 1. Course Filter -->
+                                <div class="col-6">
+                                    <label for="courseFilter" class="form-label">Course</label>
+                                    <select class="form-select form-select-sm" id="courseFilter" aria-label="Filter by Course">
+                                        <option value="">All Courses</option>
+                                        <option value="BCA">BCA</option>
+                                        <option value="MCA">MCA</option>
+                                        <option value="BSC">BSC</option>
+                                        <option value="MSC">MSC</option>
+                                    </select>
+                                </div>
 
-                        <!-- 2. Year Filter -->
-                        <div class="mb-3">
-                            <label for="yearFilter" class="form-label">Year</label>
-                            <select class="form-select" id="yearFilter" aria-label="Filter by Year">
-                                <option value="">All Years</option>
-                                <option value="FY">FY</option>
-                                <option value="SY">SY</option>
-                                <option value="TY">TY</option>
-                                <option value="HONS">HONS</option>
-                            </select>
-                        </div>
+                                <!-- 2. Year Filter -->
+                                <div class="col-6">
+                                    <label for="yearFilter" class="form-label">Year</label>
+                                    <select class="form-select form-select-sm" id="yearFilter" aria-label="Filter by Year">
+                                        <option value="">All Years</option>
+                                        <option value="FY">FY</option>
+                                        <option value="SY">SY</option>
+                                        <option value="TY">TY</option>
+                                        <option value="HONS">HONS</option>
+                                    </select>
+                                </div>
 
-                        <!-- 3. Division Filter -->
-                        <div class="mb-3">
-                            <label for="divFilter" class="form-label">Division</label>
-                            <select class="form-select" id="divFilter" aria-label="Filter by Division">
-                                <option value="">All Divisions</option>
-                                <option value="A">Division A</option>
-                                <option value="B">Division B</option>
-                                <option value="C">Division C</option>
-                                <option value="D">Division D</option>
-                                <option value="E">Division E</option>
-                            </select>
-                        </div>
+                                <!-- 3. Division Filter -->
+                                <div class="col-6">
+                                    <label for="divFilter" class="form-label">Division</label>
+                                    <select class="form-select form-select-sm" id="divFilter" aria-label="Filter by Division">
+                                        <option value="">All Divisions</option>
+                                        <option value="A">Division A</option>
+                                        <option value="B">Division B</option>
+                                        <option value="C">Division C</option>
+                                        <option value="D">Division D</option>
+                                        <option value="E">Division E</option>
+                                    </select>
+                                </div>
 
-                        <!-- 4. Day Filter -->
-                        <div class="mb-3">
-                            <label for="dayFilter" class="form-label">Day</label>
-                            <select class="form-select" id="dayFilter" aria-label="Filter by Day">
-                                <option value="">All Days</option>
-                                <option value="Monday">Monday</option>
-                                <option value="Tuesday">Tuesday</option>
-                                <option value="Wednesday">Wednesday</option>
-                                <option value="Thursday">Thursday</option>
-                                <option value="Friday">Friday</option>
-                                <option value="Saturday">Saturday</option>
-                                <option value="Sunday">Sunday</option>
-                            </select>
-                        </div>
+                                <!-- 4. Day Filter -->
+                                <div class="col-6">
+                                    <label for="dayFilter" class="form-label">Day</label>
+                                    <select class="form-select form-select-sm" id="dayFilter" aria-label="Filter by Day">
+                                        <option value="">All Days</option>
+                                        <option value="Monday">Monday</option>
+                                        <option value="Tuesday">Tuesday</option>
+                                        <option value="Wednesday">Wednesday</option>
+                                        <option value="Thursday">Thursday</option>
+                                        <option value="Friday">Friday</option>
+                                        <option value="Saturday">Saturday</option>
+                                        <option value="Sunday">Sunday</option>
+                                    </select>
+                                </div>
 
-                        <!-- 5. Room Filter (Collapsible Floor Accordion with Dropdown Arrows) -->
-                        <div class="mb-3 position-relative room-accordion-dropdown">
-                            <label class="form-label d-flex justify-content-between align-items-center">
-                                <span>Room</span>
-                                <small class="text-muted" style="font-size: 0.72rem;">By Floor</small>
-                            </label>
-                            <div class="dropdown">
-                                <button class="form-select text-start d-flex justify-content-between align-items-center" type="button" id="roomDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                                    <span id="selectedRoomLabel" class="text-truncate">All Rooms</span>
-                                    <i class="bi bi-chevron-down ms-2 text-muted" style="font-size: 0.75rem;"></i>
-                                </button>
-                                <input type="hidden" id="roomFilter" value="">
+                                <!-- 5. Room Filter (Collapsible Floor Accordion with Dropdown Arrows) -->
+                                <div class="col-12 position-relative room-accordion-dropdown">
+                                    <label class="form-label d-flex justify-content-between align-items-center mb-1">
+                                        <span>Room</span>
+                                        <small class="text-muted text-capitalize" style="font-size: 0.68rem; letter-spacing: 0;">By Floor</small>
+                                    </label>
+                                    <div class="dropdown">
+                                        <button class="form-select form-select-sm text-start d-flex justify-content-between align-items-center" type="button" id="roomDropdownBtn" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                            <span id="selectedRoomLabel" class="text-truncate">All Rooms</span>
+                                            <i class="bi bi-chevron-down ms-1 text-muted" style="font-size: 0.72rem;"></i>
+                                        </button>
+                                        <input type="hidden" id="roomFilter" value="">
 
-                                <div class="dropdown-menu p-2 shadow-lg rounded-3 w-100" style="max-height: 380px; overflow-y: auto; min-width: 250px; z-index: 1050;">
-                                    <!-- All Rooms Option -->
-                                    <button type="button" class="dropdown-item py-1.5 px-2 rounded-2 fw-semibold mb-1 room-option-item active" data-room-value="">
-                                        <i class="bi bi-grid-fill me-2 text-primary"></i>All Rooms
-                                    </button>
-                                    <div class="dropdown-divider my-1"></div>
+                                        <div class="dropdown-menu p-2 shadow-lg rounded-3 w-100" style="max-height: 380px; overflow-y: auto; min-width: 240px; z-index: 1050;">
+                                            <!-- All Rooms Option -->
+                                            <button type="button" class="dropdown-item py-1 px-2 rounded-2 fw-semibold mb-1 room-option-item active" data-room-value="" style="font-size: 0.8rem;">
+                                                <i class="bi bi-grid-fill me-2 text-primary"></i>All Rooms
+                                            </button>
+                                            <div class="dropdown-divider my-1"></div>
 
-                                    <!-- Floor Accordion with Dropdown Arrows -->
-                                    <div class="accordion accordion-flush" id="floorRoomAccordion">
-                                        {% for af in academic_floors %}
-                                        <div class="accordion-item border-0 mb-1 bg-transparent">
-                                            <h3 class="accordion-header" id="headingFloor{{ af.level }}">
-                                                <button class="accordion-button collapsed py-1.5 px-2.5 rounded-2 fw-semibold d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFloor{{ af.level }}" aria-expanded="false" aria-controls="collapseFloor{{ af.level }}" style="font-size: 0.82rem;">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span>{{ af.name }}</span>
-                                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill" style="font-size: 0.68rem;">{{ af.rooms|length }}</span>
-                                                    </div>
-                                                </button>
-                                            </h3>
-                                            <div id="collapseFloor{{ af.level }}" class="accordion-collapse collapse" aria-labelledby="headingFloor{{ af.level }}" data-bs-parent="#floorRoomAccordion">
-                                                <div class="accordion-body p-2 pt-1 pb-2">
-                                                    <div class="room-grid">
-                                                        {% for r in af.rooms %}
-                                                        <button type="button" class="btn btn-sm room-chip-btn" data-room-value="{{ r.number }}">
-                                                            {{ r.number }}
+                                            <!-- Floor Accordion with Dropdown Arrows -->
+                                            <div class="accordion accordion-flush" id="floorRoomAccordion">
+                                                {% for af in academic_floors %}
+                                                <div class="accordion-item border-0 mb-1 bg-transparent">
+                                                    <h3 class="accordion-header" id="headingFloor{{ af.level }}">
+                                                        <button class="accordion-button collapsed py-1 px-2 rounded-2 fw-semibold d-flex align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFloor{{ af.level }}" aria-expanded="false" aria-controls="collapseFloor{{ af.level }}" style="font-size: 0.78rem;">
+                                                            <div class="d-flex align-items-center gap-1.5">
+                                                                <span>{{ af.name }}</span>
+                                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill" style="font-size: 0.65rem; padding: 2px 6px;">{{ af.rooms|length }}</span>
+                                                            </div>
                                                         </button>
-                                                        {% endfor %}
+                                                    </h3>
+                                                    <div id="collapseFloor{{ af.level }}" class="accordion-collapse collapse" aria-labelledby="headingFloor{{ af.level }}" data-bs-parent="#floorRoomAccordion">
+                                                        <div class="accordion-body p-1.5 pt-1 pb-1.5">
+                                                            <div class="room-grid">
+                                                                {% for r in af.rooms %}
+                                                                <button type="button" class="btn btn-sm room-chip-btn" data-room-value="{{ r.number }}" style="height: 28px; font-size: 0.72rem;">
+                                                                    {{ r.number }}
+                                                                </button>
+                                                                {% endfor %}
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
+                                                {% endfor %}
                                             </div>
                                         </div>
-                                        {% endfor %}
                                     </div>
                                 </div>
-                            </div>
-                        </div>
 
-                        <!-- Reset Filters Button -->
-                        <div class="pt-1 d-grid gap-2">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnResetFilters" style="border-radius: 10px;">
-                                <i class="bi bi-arrow-counterclockwise me-1"></i>Reset Filters
-                            </button>
+                                <!-- Reset Filters Button -->
+                                <div class="col-12 pt-1">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm w-100 d-flex align-items-center justify-content-center gap-1.5" id="btnResetFilters" style="border-radius: 8px; height: 32px; font-size: 0.78rem; font-weight: 500;">
+                                        <i class="bi bi-arrow-counterclockwise"></i>
+                                        <span>Reset Filters</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </aside>
@@ -471,62 +779,54 @@
             <!-- Right Side: Unassigned Classes Table Card -->
             <div class="col-xl-9 col-lg-8 col-md-8">
                 <div class="card shadow-sm border-0 rounded-4 overflow-hidden mb-4">
-                    <div class="card-header py-3 px-4 d-flex flex-wrap justify-content-between align-items-center gap-3" style="background-color: var(--bg-card);">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="p-2.5 rounded-3 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
-                                <i class="bi bi-calendar-x-fill fs-5"></i>
+                    <div class="card-header px-3 px-md-4 d-flex align-items-center justify-content-between gap-2" style="background-color: var(--bg-card); border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-top: 0.65rem; padding-bottom: 0.65rem; min-height: 52px;">
+                        <div class="d-flex align-items-center gap-2" style="min-width: 0; flex: 1;">
+                            <div class="d-flex align-items-center justify-content-center flex-shrink-0 bg-warning bg-opacity-10 text-warning rounded-3" style="width: 32px; height: 32px;">
+                                <i class="bi bi-calendar-x-fill" style="font-size: 1rem;"></i>
                             </div>
-                            <div>
-                                <h4 class="h5 fw-bold mb-0 text-body">Unassigned Classes Requiring Faculty Allocation</h4>
-                                <p class="text-muted small mb-0">Imported timetable sessions missing instructor assignments. Select a faculty member to allocate instantly.</p>
+                            <div style="min-width: 0; flex: 1;">
+                                <div class="d-flex align-items-center gap-2" style="flex-wrap: nowrap; overflow: hidden;">
+                                    <span class="fw-bold text-body text-truncate" style="font-size: 0.9rem;">Unassigned Classes</span>
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill fw-semibold flex-shrink-0" id="unassignedCountBadge" style="font-size: 0.68rem; padding: 2px 8px; white-space: nowrap;">
+                                        {{ unassigned_classes|length }} Unassigned
+                                    </span>
+                                </div>
+                                <p class="text-muted mb-0 d-none d-md-block" style="font-size: 0.75rem; margin-top: 1px;">Timetable sessions missing instructor assignments.</p>
                             </div>
-                        </div>
-
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle rounded-pill px-3 py-2 fw-semibold" id="unassignedCountBadge">
-                                {{ unassigned_classes|length }} Unassigned
-                            </span>
                         </div>
                     </div>
                     
                     <div class="card-body p-0">
-                        <!-- Search Bar & Bulk Actions Toolbar -->
-                        <div class="p-3 bg-body-tertiary border-bottom">
-                            <!-- Real-Time Text Search directly above the table -->
-                            <div class="row g-3 align-items-center mb-2">
-                                <div class="col-12">
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-body border-end-0">
-                                            <i class="bi bi-search text-muted"></i>
-                                        </span>
-                                        <input type="text" class="form-control border-start-0" id="tableSearchInput" placeholder="Filter by Subject, Day, or Room..." aria-label="Filter by Subject, Day, or Room">
-                                    </div>
-                                </div>
+                        <!-- Search Bar & Bulk Actions Toolbar — all 3 blocks equal width, equal height -->
+                        <div class="cmm-toolbar">
+                            <!-- 1. Search Box — custom seamless flex -->
+                            <div class="cmm-search-box">
+                                <span class="search-icon">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="tableSearchInput"
+                                    placeholder="Filter by Subject, Day, or Room..."
+                                    aria-label="Filter by Subject, Day, or Room">
                             </div>
-                            <!-- Phase 1: Bulk Action UI Row -->
-                            <div class="row g-2 align-items-center" id="bulkActionRow">
-                                <div class="col-md-7 col-lg-8">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <label for="bulkFacultySelect" class="form-label mb-0 fw-semibold text-body small text-nowrap">
-                                            <i class="bi bi-person-check text-primary me-1"></i>Bulk Faculty:
-                                        </label>
-                                        <select class="form-select form-select-sm rounded-3" id="bulkFacultySelect" aria-label="Select Faculty for Bulk Assignment">
-                                            <option value="" selected disabled>Choose Faculty for Bulk Assignment...</option>
-                                            {% for fac in all_faculties %}
-                                            <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-5 col-lg-4 text-md-end">
-                                    <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm fw-semibold w-100 w-md-auto" id="bulkAssignBtn">
-                                        <i class="bi bi-people-fill me-1.5"></i>Bulk Assign Selected
-                                    </button>
-                                </div>
-                            </div>
+
+                            <!-- 2. Faculty Select — full width -->
+                            <select class="cmm-select" id="bulkFacultySelect"
+                                aria-label="Select Faculty for Bulk Assignment">
+                                <option value="" selected disabled>Choose Faculty</option>
+                                {% for fac in all_faculties %}
+                                <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- 3. Bulk Assign Button — full width -->
+                            <button type="button" class="btn btn-primary btn-bulk-assign shadow-sm" id="bulkAssignBtn">
+                                <i class="bi bi-people-fill"></i>
+                                <span>Bulk Assign Selected</span>
+                            </button>
                         </div>
 
-                        <div class="table-responsive">
+                        <!-- Desktop Table Wrapper -->
+                        <div class="table-responsive d-none d-md-block">
                             <table class="table table-hover align-middle mb-0" id="unassignedClassesTable">
                                 <thead class="table-light">
                                     <tr>
@@ -631,6 +931,82 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Mobile Card List View -->
+                        <div class="d-md-none" id="unassignedMobileContainer">
+                            <!-- Mobile Select All Bar -->
+                            <div class="d-flex justify-content-between align-items-center px-3 py-2 cmm-select-all-bar">
+                                <div class="form-check mb-0 d-flex align-items-center gap-2">
+                                    <input class="form-check-input mt-0" type="checkbox" id="mobileSelectAllCheckbox" aria-label="Select all classes on mobile">
+                                    <label class="form-check-label fw-semibold text-body" for="mobileSelectAllCheckbox" style="font-size:0.82rem;">Select All</label>
+                                </div>
+                                <span class="text-muted" id="mobileSelectedCounter" style="font-size:0.78rem;">0 selected</span>
+                            </div>
+
+                            <div class="d-flex flex-column gap-2 p-2" id="unassignedMobileCards">
+                                {% if unassigned_classes %}
+                                    {% for cls in unassigned_classes %}
+                                    <div id="mobile-class-card-{{ cls.id }}" class="cmm-mobile-card unassigned-row-item"
+                                        data-course="{{ cls.course or '' }}" 
+                                        data-subject="{{ cls.subject or '' }}" 
+                                        data-division="{{ cls.division or '' }}" 
+                                        data-room="{{ cls.room.number if cls.room else (cls.room_id|string) }}" 
+                                        data-day="{% if cls.day_of_week == 0 %}Monday{% elif cls.day_of_week == 1 %}Tuesday{% elif cls.day_of_week == 2 %}Wednesday{% elif cls.day_of_week == 3 %}Thursday{% elif cls.day_of_week == 4 %}Friday{% elif cls.day_of_week == 5 %}Saturday{% elif cls.day_of_week == 6 %}Sunday{% endif %}">
+                                        
+                                        <!-- Top Row: checkbox + room pill + div badge + course label -->
+                                        <div class="card-top-row">
+                                            <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                                <input class="form-check-input row-checkbox row-select-checkbox mt-0" type="checkbox" value="{{ cls.id }}" data-class-id="{{ cls.id }}" aria-label="Select class #{{ cls.id }}" style="width:15px;height:15px;">
+                                                <span class="room-pill">{{ cls.room.number if cls.room else ('R-' ~ cls.room_id) }}</span>
+                                                {% if cls.division %}
+                                                <span class="div-pill">Div {{ cls.division }}</span>
+                                                {% endif %}
+                                            </div>
+                                            {% if cls.course %}
+                                            <span class="course-label">{{ cls.course }}</span>
+                                            {% endif %}
+                                        </div>
+
+                                        <!-- Subject Name -->
+                                        <div class="subject-name">{{ cls.subject }}</div>
+
+                                        <!-- Meta: Day · Time -->
+                                        <div class="meta-row">
+                                            <i class="bi bi-calendar3"></i>
+                                            <span>{% if cls.day_of_week == 0 %}Mon{% elif cls.day_of_week == 1 %}Tue{% elif cls.day_of_week == 2 %}Wed{% elif cls.day_of_week == 3 %}Thu{% elif cls.day_of_week == 4 %}Fri{% elif cls.day_of_week == 5 %}Sat{% elif cls.day_of_week == 6 %}Sun{% else %}Day {{ cls.day_of_week }}{% endif %}</span>
+                                            <i class="bi bi-clock" style="margin-left: 4px;"></i>
+                                            <span>{{ cls.start_time.strftime('%I:%M %p') if cls.start_time else '' }} – {{ cls.end_time.strftime('%I:%M %p') if cls.end_time else '' }}</span>
+                                        </div>
+
+                                        <!-- Faculty Allocation Action Row -->
+                                        <div class="action-row">
+                                            <select class="faculty-select faculty-select-input" id="mobile-faculty-select-{{ cls.id }}" aria-label="Select Faculty">
+                                                <option value="" selected disabled>Choose Faculty</option>
+                                                {% for fac in all_faculties %}
+                                                <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
+                                                {% endfor %}
+                                            </select>
+                                            <button type="button" class="btn-assign btn-assign-faculty" data-class-id="{{ cls.id }}">
+                                                <i class="bi bi-person-check-fill"></i>
+                                                <span>Assign</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="text-center py-5 text-muted" id="mobileNoUnassigned">
+                                        <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
+                                        <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
+                                        <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
+                                    </div>
+                                {% endif %}
+                                <div id="mobileNoFilterMatch" class="text-center py-5 text-muted" style="display: none;">
+                                    <i class="bi bi-funnel text-secondary display-6 d-block mb-3"></i>
+                                    <p class="mb-1 fw-bold fs-5 text-body">No classes match the selected filters</p>
+                                    <small class="text-muted">Try resetting or adjusting your filter criteria.</small>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -753,82 +1129,73 @@ function applyFilters() {
     const roomVal = (roomFilter ? roomFilter.value : '').toLowerCase().trim();
     const searchVal = (searchInput ? searchInput.value : '').toLowerCase().trim();
 
-    const tableBody = document.getElementById('unassignedClassesBody') || document.querySelector('#unassignedClassesTable tbody');
-    if (!tableBody) return;
-
-    // Phase 2: Grab all the table rows inside the table body
-    const rows = tableBody.querySelectorAll('tr');
+    // Query all unassigned row items (matches desktop tr.unassigned-row-item and mobile .cmm-mobile-card.unassigned-row-item)
+    const allItems = document.querySelectorAll('.unassigned-row-item');
     
-    // Set up a visibleCount variable starting at 0
     let visibleCount = 0;
-    let totalCount = 0;
+    const countedIds = new Set();
+    const totalIds = new Set();
 
-    // Loop through each row
-    rows.forEach(row => {
-        if (row.id === 'noUnassignedRow' || row.id === 'noFilterMatchRow') return;
-        totalCount++;
+    allItems.forEach(item => {
+        const itemId = item.getAttribute('data-class-id') || item.id.replace(/^(class-row-|mobile-class-card-)/, '');
+        totalIds.add(itemId);
 
-        // Grab text and metadata attributes of the row
-        const rowText = (row.textContent || '').toLowerCase();
-        const rowCourse = (row.getAttribute('data-course') || row.dataset.course || '').toLowerCase().trim();
-        const rowDay = (row.getAttribute('data-day') || row.dataset.day || '').toLowerCase().trim();
-        const rowRoom = (row.getAttribute('data-room') || row.dataset.room || '').toLowerCase().trim();
-        const rowDivRaw = (row.getAttribute('data-division') || row.dataset.division || (row.cells && row.cells[4] ? row.cells[4].textContent : '')).trim();
+        // Grab text and metadata attributes of the item
+        const itemText = (item.textContent || '').toLowerCase();
+        const itemCourse = (item.getAttribute('data-course') || item.dataset.course || '').toLowerCase().trim();
+        const itemDay = (item.getAttribute('data-day') || item.dataset.day || '').toLowerCase().trim();
+        const itemRoom = (item.getAttribute('data-room') || item.dataset.room || '').toLowerCase().trim();
+        const itemDivRaw = (item.getAttribute('data-division') || item.dataset.division || '').trim();
 
         // 1. Course Match (e.g. 'BCA', 'MCA', 'BSC', 'MSC')
-        const courseMatch = !courseVal || (rowCourse ? rowCourse.includes(courseVal) : rowText.includes(courseVal));
+        const courseMatch = !courseVal || (itemCourse ? itemCourse.includes(courseVal) : itemText.includes(courseVal));
 
         // 2. Year Match (FY, SY, TY, HONS / HONOURS)
         let yearMatch = !yearVal;
         if (yearVal) {
             if (yearVal === 'hons' || yearVal === 'honours') {
-                yearMatch = rowCourse.includes('hon') || rowText.includes('hon');
+                yearMatch = itemCourse.includes('hon') || itemText.includes('hon');
             } else {
-                yearMatch = rowCourse.includes(yearVal) || rowText.includes(yearVal);
+                yearMatch = itemCourse.includes(yearVal) || itemText.includes(yearVal);
             }
         }
 
-        // 3. Division Match (Accurately matches 'A', 'Div A', 'Division A' without false-matching 'a' in entire row text)
+        // 3. Division Match
         let divMatch = !divVal;
         if (divVal) {
             const targetDivLetter = divVal.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
-            const rowDivLetter = rowDivRaw.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
-            divMatch = rowDivLetter !== '' && (rowDivLetter === targetDivLetter || rowDivRaw.toLowerCase() === divVal);
+            const itemDivLetter = itemDivRaw.replace(/^(div(ision)?\s*)/i, '').trim().toLowerCase();
+            divMatch = itemDivLetter !== '' && (itemDivLetter === targetDivLetter || itemDivRaw.toLowerCase() === divVal);
         }
 
         // 4. Day Match (Monday through Sunday)
-        const dayMatch = !dayVal || (rowDay ? rowDay === dayVal : rowText.includes(dayVal));
+        const dayMatch = !dayVal || (itemDay ? itemDay === dayVal : itemText.includes(dayVal));
 
         // 5. Room Match
-        const roomMatch = !roomVal || (rowRoom ? rowRoom === roomVal : rowText.includes(roomVal));
+        const roomMatch = !roomVal || (itemRoom ? itemRoom === roomVal : itemText.includes(roomVal));
 
         // 6. Text Search Match
-        const searchMatch = !searchVal || rowText.includes(searchVal);
+        const searchMatch = !searchVal || itemText.includes(searchVal);
 
-        // Evaluate: IF (courseMatch AND yearMatch AND divMatch AND dayMatch AND roomMatch AND searchMatch) is true,
-        // set the row display to an empty string (visible) and increment visibleCount. ELSE, set the row display to "none" (hidden).
         if (courseMatch && yearMatch && divMatch && dayMatch && roomMatch && searchMatch) {
-            row.style.display = '';
-            visibleCount++;
+            item.style.display = '';
+            countedIds.add(itemId);
         } else {
-            row.style.display = 'none';
+            item.style.display = 'none';
         }
     });
 
-    // Toggle "No matches" empty state if active filters hide all rows
+    visibleCount = countedIds.size;
+    const totalCount = totalIds.size;
+
+    // Toggle "No matches" empty state
     const noMatchRow = document.getElementById('noFilterMatchRow');
     if (noMatchRow) {
         noMatchRow.style.display = (totalCount > 0 && visibleCount === 0) ? '' : 'none';
     }
-
-    // Uncheck master checkbox if visible selection changes
-    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-    if (selectAllCheckbox) {
-        const visibleCheckboxes = Array.from(document.querySelectorAll('.row-checkbox')).filter(c => {
-            const r = c.closest('tr');
-            return r && r.style.display !== 'none';
-        });
-        selectAllCheckbox.checked = visibleCheckboxes.length > 0 && visibleCheckboxes.every(c => c.checked);
+    const mobileNoMatch = document.getElementById('mobileNoFilterMatch');
+    if (mobileNoMatch) {
+        mobileNoMatch.style.display = (totalCount > 0 && visibleCount === 0) ? '' : 'none';
     }
 
     // Update active filter badge and count badge
@@ -838,7 +1205,6 @@ function applyFilters() {
         activeBadge.style.display = isFiltered ? 'inline-block' : 'none';
     }
 
-    // Phase 3: Update the text of the results badge (the "X of 882 Shown" element) using visibleCount
     const countBadge = document.getElementById('unassignedCountBadge');
     if (countBadge) {
         countBadge.textContent = `${visibleCount} of ${totalCount} Shown`;
@@ -850,7 +1216,7 @@ window.filterTable = applyFilters;
 document.addEventListener('DOMContentLoaded', function() {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
 
-    // Phase 1: Attach event listeners to all dropdowns and text search input
+    // Attach filter listeners
     const courseFilter = document.getElementById('courseFilter');
     const yearFilter = document.getElementById('yearFilter');
     const divFilter = document.getElementById('divFilter');
@@ -865,60 +1231,57 @@ document.addEventListener('DOMContentLoaded', function() {
     if (roomFilter) roomFilter.addEventListener('change', applyFilters);
     if (tableSearchInput) tableSearchInput.addEventListener('input', applyFilters);
 
-    // ==================== PHASE 2: CHECKBOX TOGGLE LOGIC ====================
+    // ==================== CHECKBOX TOGGLE & SYNC LOGIC ====================
     const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-    const tableBody = document.getElementById('unassignedClassesBody');
+    const mobileSelectAllCheckbox = document.getElementById('mobileSelectAllCheckbox');
+    const mobileSelectedCounter = document.getElementById('mobileSelectedCounter');
+
+    function updateSelectedCounter() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        const uniqueIds = new Set(Array.from(checkedBoxes).map(cb => cb.dataset.classId || cb.value));
+        const count = uniqueIds.size;
+        if (mobileSelectedCounter) {
+            mobileSelectedCounter.textContent = `${count} selected`;
+        }
+    }
+
+    function toggleAllCheckboxes(isChecked) {
+        const allRowCheckboxes = document.querySelectorAll('.row-checkbox');
+        allRowCheckboxes.forEach(cb => {
+            const container = cb.closest('tr, .cmm-mobile-card');
+            if (container && container.style.display !== 'none') {
+                cb.checked = isChecked;
+            }
+        });
+        if (selectAllCheckbox) selectAllCheckbox.checked = isChecked;
+        if (mobileSelectAllCheckbox) mobileSelectAllCheckbox.checked = isChecked;
+        updateSelectedCounter();
+    }
 
     if (selectAllCheckbox) {
-        // When checked, finds all checkboxes with class "row-checkbox" that are currently VISIBLE on the screen and checks them. When unchecked, unchecks them.
         selectAllCheckbox.addEventListener('change', function() {
-            const isChecked = this.checked;
-            const allRowCheckboxes = document.querySelectorAll('.row-checkbox');
-            allRowCheckboxes.forEach(cb => {
-                const row = cb.closest('tr');
-                // Ignore rows hidden by text/course filters
-                if (row && row.style.display !== 'none') {
-                    cb.checked = isChecked;
-                }
+            toggleAllCheckboxes(this.checked);
+        });
+    }
+
+    if (mobileSelectAllCheckbox) {
+        mobileSelectAllCheckbox.addEventListener('change', function() {
+            toggleAllCheckboxes(this.checked);
+        });
+    }
+
+    // Sync row checkboxes between desktop table & mobile cards
+    document.addEventListener('change', function(e) {
+        if (e.target && e.target.classList.contains('row-checkbox')) {
+            const classId = e.target.dataset.classId || e.target.value;
+            const isChecked = e.target.checked;
+            // Sync all checkboxes matching this classId
+            document.querySelectorAll(`.row-checkbox[data-class-id="${classId}"], .row-checkbox[value="${classId}"]`).forEach(cb => {
+                cb.checked = isChecked;
             });
-        });
-    }
-
-    // Add listeners to the individual row checkboxes so that if one is manually unchecked, master selectAllCheckbox unchecks
-    document.querySelectorAll('.row-checkbox').forEach(cb => {
-        cb.addEventListener('change', function() {
-            if (!this.checked && selectAllCheckbox) {
-                selectAllCheckbox.checked = false;
-            } else if (this.checked && selectAllCheckbox) {
-                // If all visible row checkboxes are checked, set master selectAllCheckbox to checked
-                const visibleCheckboxes = Array.from(document.querySelectorAll('.row-checkbox')).filter(c => {
-                    const r = c.closest('tr');
-                    return r && r.style.display !== 'none';
-                });
-                if (visibleCheckboxes.length > 0 && visibleCheckboxes.every(c => c.checked)) {
-                    selectAllCheckbox.checked = true;
-                }
-            }
-        });
+            updateSelectedCounter();
+        }
     });
-
-    if (tableBody) {
-        tableBody.addEventListener('change', function(e) {
-            if (e.target && e.target.classList.contains('row-checkbox')) {
-                if (!e.target.checked && selectAllCheckbox) {
-                    selectAllCheckbox.checked = false;
-                } else if (e.target.checked && selectAllCheckbox) {
-                    const visibleCheckboxes = Array.from(document.querySelectorAll('.row-checkbox')).filter(c => {
-                        const r = c.closest('tr');
-                        return r && r.style.display !== 'none';
-                    });
-                    if (visibleCheckboxes.length > 0 && visibleCheckboxes.every(c => c.checked)) {
-                        selectAllCheckbox.checked = true;
-                    }
-                }
-            }
-        });
-    }
 
     const btnResetFilters = document.getElementById('btnResetFilters');
 
@@ -930,7 +1293,6 @@ document.addEventListener('DOMContentLoaded', function() {
             selectedLabel.textContent = roomVal ? `Room ${roomVal}` : 'All Rooms';
         }
 
-        // Update active class on chips & items
         document.querySelectorAll('.room-option-item, .room-chip-btn').forEach(el => {
             if ((el.getAttribute('data-room-value') || '') === roomVal) {
                 el.classList.add('active');
@@ -939,7 +1301,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Close dropdown
         const dropdownBtn = document.getElementById('roomDropdownBtn');
         if (dropdownBtn && window.bootstrap && bootstrap.Dropdown) {
             const dd = bootstrap.Dropdown.getInstance(dropdownBtn) || new bootstrap.Dropdown(dropdownBtn);
@@ -949,7 +1310,6 @@ document.addEventListener('DOMContentLoaded', function() {
         applyFilters();
     }
 
-    // Room dropdown menu click delegation
     const roomDropdownContainer = document.querySelector('.room-accordion-dropdown');
     if (roomDropdownContainer) {
         roomDropdownContainer.addEventListener('click', function(e) {
@@ -963,14 +1323,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Phase 3: Wire up the "Reset Filters" button in the sidebar
+    // Reset Filters
     if (btnResetFilters) {
         btnResetFilters.addEventListener('click', function() {
-            // 1. Clear the text search
             const searchInput = document.getElementById('tableSearchInput');
             if (searchInput) searchInput.value = '';
 
-            // 2. Reset all select dropdowns to their default (empty) index
             const selectDropdowns = [
                 document.getElementById('courseFilter'),
                 document.getElementById('yearFilter'),
@@ -978,27 +1336,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('dayFilter')
             ];
             selectDropdowns.forEach(dropdown => {
-                if (dropdown) {
-                    dropdown.selectedIndex = 0;
-                    dropdown.value = '';
-                }
+                if (dropdown) dropdown.selectedIndex = 0;
             });
 
-            // Reset room filter
-            selectRoom('');
+            if (roomFilter) roomFilter.value = '';
+            const selectedLabel = document.getElementById('selectedRoomLabel');
+            if (selectedLabel) selectedLabel.textContent = 'All Rooms';
+            document.querySelectorAll('.room-option-item, .room-chip-btn').forEach(el => el.classList.remove('active'));
 
-            // 3. Call applyFilters() to reveal all rows again
             applyFilters();
         });
     }
 
-    // ==================== PHASE 3: THE BULK FETCH REQUEST ====================
+    // ==================== BULK ASSIGN HANDLER ====================
     const bulkAssignBtn = document.getElementById('bulkAssignBtn');
     const bulkFacultySelect = document.getElementById('bulkFacultySelect');
 
     if (bulkAssignBtn) {
         bulkAssignBtn.addEventListener('click', async function() {
-            // 1. Validate that bulkFacultySelect has a valid faculty ID selected
             if (!bulkFacultySelect || !bulkFacultySelect.value || bulkFacultySelect.value.trim() === '') {
                 alert('Please select a faculty member from the dropdown before bulk assigning.');
                 if (bulkFacultySelect) bulkFacultySelect.focus();
@@ -1011,21 +1366,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
 
-            // 2. Query all checked row-checkbox elements
             const checkedBoxes = Array.from(document.querySelectorAll('.row-checkbox:checked'));
-            if (checkedBoxes.length === 0) {
-                alert('Please select at least one class checkbox to assign.');
-                return;
-            }
-
-            // 3. Map through checked checkboxes to extract array of class_ids
-            const classIds = checkedBoxes.map(cb => {
+            const classIds = Array.from(new Set(checkedBoxes.map(cb => {
                 const idVal = cb.getAttribute('data-class-id') || cb.value;
                 return parseInt(idVal, 10);
-            }).filter(id => !isNaN(id));
+            }).filter(id => !isNaN(id))));
 
             if (classIds.length === 0) {
-                alert('No valid class IDs found in the selected rows.');
+                alert('Please select at least one class checkbox to assign.');
                 return;
             }
 
@@ -1034,7 +1382,6 @@ document.addEventListener('DOMContentLoaded', function() {
             bulkAssignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span> Assigning...';
 
             try {
-                // 4. Send POST request via fetch() to /admin/api/bulk_assign_faculty
                 const response = await fetch('/admin/api/bulk_assign_faculty', {
                     method: 'POST',
                     headers: {
@@ -1051,47 +1398,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 const data = await response.json().catch(() => null);
 
                 if (response.ok && data && (data.success !== false)) {
-                    // 5. On successful 200 response, dynamically remove checked rows from DOM
-                    checkedBoxes.forEach(cb => {
-                        const row = cb.closest('tr');
-                        if (row) {
-                            row.remove();
-                        }
+                    classIds.forEach(id => {
+                        const row = document.getElementById(`class-row-${id}`);
+                        if (row) row.remove();
+                        const card = document.getElementById(`mobile-class-card-${id}`);
+                        if (card) card.remove();
                     });
 
-                    // Reset master checkbox
-                    if (selectAllCheckbox) {
-                        selectAllCheckbox.checked = false;
-                    }
-
-                    // Update the "X of 882 Shown" counter without reloading the page
+                    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+                    if (mobileSelectAllCheckbox) mobileSelectAllCheckbox.checked = false;
+                    updateSelectedCounter();
                     applyFilters();
 
-                    const tbody = document.getElementById('unassignedClassesBody');
-                    if (tbody) {
-                        const remainingRows = tbody.querySelectorAll('tr:not(#noUnassignedRow)');
-                        const statUnassigned = document.getElementById('statUnassignedSlots');
-                        if (statUnassigned) statUnassigned.textContent = remainingRows.length;
-
-                        if (remainingRows.length === 0) {
-                            tbody.innerHTML = `
-                                <tr id="noUnassignedRow">
-                                    <td colspan="7" class="text-center py-5 text-muted">
-                                        <div class="py-4">
-                                            <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
-                                            <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
-                                            <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
-                                        </div>
-                                    </td>
-                                </tr>
-                            `;
-                        }
-                    }
-
-                    // Reset the faculty dropdown
-                    if (bulkFacultySelect) {
-                        bulkFacultySelect.selectedIndex = 0;
-                    }
+                    if (bulkFacultySelect) bulkFacultySelect.selectedIndex = 0;
                 } else {
                     const errorMsg = (data && (data.error || data.message)) || `Server returned status ${response.status}`;
                     alert('Failed to bulk assign classes: ' + errorMsg);
@@ -1105,86 +1424,69 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    const unassignedTable = document.getElementById('unassignedClassesTable');
-    if (unassignedTable) {
-        unassignedTable.addEventListener('click', function(e) {
-            const assignBtn = e.target.closest('.btn-assign-faculty');
-            if (!assignBtn) return;
+    // ==================== SINGLE ASSIGN HANDLER ====================
+    document.addEventListener('click', function(e) {
+        const assignBtn = e.target.closest('.btn-assign-faculty');
+        if (!assignBtn) return;
 
-            const classId = assignBtn.dataset.classId;
-            if (!classId) return;
+        const classId = assignBtn.dataset.classId;
+        if (!classId) return;
 
-            const row = document.getElementById(`class-row-${classId}`) || assignBtn.closest('tr');
-            const select = document.getElementById(`faculty-select-${classId}`) || (row ? row.querySelector('.faculty-select') : null);
+        const container = assignBtn.closest('tr, .cmm-mobile-card');
+        const select = document.getElementById(`faculty-select-${classId}`) || 
+                       document.getElementById(`mobile-faculty-select-${classId}`) || 
+                       (container ? container.querySelector('.faculty-select') : null);
 
-            if (!select || !select.value || select.value.trim() === '') {
-                alert('Please select a faculty member from the dropdown before assigning.');
-                if (select) select.focus();
-                return;
-            }
+        if (!select || !select.value || select.value.trim() === '') {
+            alert('Please select a faculty member from the dropdown before assigning.');
+            if (select) select.focus();
+            return;
+        }
 
-            const facultyId = parseInt(select.value, 10);
-            if (isNaN(facultyId)) {
-                alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
-                return;
-            }
+        const facultyId = parseInt(select.value, 10);
+        if (isNaN(facultyId)) {
+            alert('Selected faculty ID is invalid. Please choose a valid faculty member.');
+            return;
+        }
 
-            const originalBtnHtml = assignBtn.innerHTML;
-            assignBtn.disabled = true;
-            assignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Assigning...';
+        const originalBtnHtml = assignBtn.innerHTML;
+        assignBtn.disabled = true;
+        assignBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Assigning...';
 
-            fetch(`/admin/api/assign_faculty/${classId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': csrfToken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                body: JSON.stringify({ faculty_id: facultyId })
-            })
-            .then(async (response) => {
-                const data = await response.json().catch(() => null);
-                if (response.ok && data && data.success) {
-                    if (row) {
-                        row.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
-                        row.style.opacity = '0';
-                        row.style.transform = 'translateX(20px)';
-                        setTimeout(() => {
-                            row.remove();
-                            const tbody = document.getElementById('unassignedClassesBody');
-                            if (tbody) {
-                                const remainingRows = tbody.querySelectorAll('tr:not(#noUnassignedRow)');
-                                const countBadge = document.getElementById('unassignedCountBadge');
-                                if (countBadge) countBadge.textContent = `${remainingRows.length} Unassigned`;
-                                
-                                const statUnassigned = document.getElementById('statUnassignedSlots');
-                                if (statUnassigned) statUnassigned.textContent = remainingRows.length;
-
-                                if (remainingRows.length === 0) {
-                                    tbody.innerHTML = `
-                                        <tr id="noUnassignedRow">
-                                            <td colspan="7" class="text-center py-5 text-muted">
-                                                <div class="py-4">
-                                                    <i class="bi bi-check-circle-fill text-success display-5 d-block mb-3"></i>
-                                                    <p class="mb-1 fw-bold fs-5 text-body">No unassigned classes found!</p>
-                                                    <small class="text-muted">All timetable classes across the Vyas building have faculty assigned.</small>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    `;
-                                }
-                            }
-                        }, 350);
-                    }
-                } else {
-                    const errorMsg = (data && (data.error || data.message)) || `Server error ${response.status}`;
-                    alert('Failed to allocate faculty: ' + errorMsg);
-                    assignBtn.disabled = false;
-                    assignBtn.innerHTML = originalBtnHtml;
+        fetch(`/admin/api/assign_faculty/${classId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({ faculty_id: facultyId })
+        })
+        .then(async (response) => {
+            const data = await response.json().catch(() => null);
+            if (response.ok && data && data.success) {
+                const row = document.getElementById(`class-row-${classId}`);
+                const card = document.getElementById(`mobile-class-card-${classId}`);
+                
+                if (row) {
+                    row.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'translateX(20px)';
+                    setTimeout(() => row.remove(), 250);
                 }
-            })
-            .catch((err) => {
-                alert('Network error while assigning faculty: ' + (err.message || 'Please try again.'));
+                if (card) {
+                    card.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateX(20px)';
+                    setTimeout(() => card.remove(), 250);
+                }
+                setTimeout(() => {
+                    applyFilters();
+                    updateSelectedCounter();
+                }, 300);
+            } else {
+                const errorMsg = (data && (data.error || data.message)) || `Server error ${response.status}`;
+                alert('Failed to allocate faculty: ' + errorMsg);
                 assignBtn.disabled = false;
                 assignBtn.innerHTML = originalBtnHtml;
             });

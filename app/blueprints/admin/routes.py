@@ -213,17 +213,17 @@ def classroom_management():
     floors = []
     rooms = []
     if vyas:
-        floors = Floor.query.filter_by(building_id=vyas.id).order_by(Floor.level).all()
+        floors = Floor.query.options(joinedload(Floor.rooms)).filter_by(building_id=vyas.id).order_by(Floor.level).all()
         rooms = Room.query.join(Floor).filter(Floor.building_id == vyas.id).order_by(Room.number).all()
     else:
-        floors = Floor.query.order_by(Floor.level).all()
+        floors = Floor.query.options(joinedload(Floor.rooms)).order_by(Floor.level).all()
         rooms = Room.query.order_by(Room.number).all()
 
     # Prepare floor-grouped academic rooms for Room filter (exclude lifts, washrooms, MR, ENCAVE)
     academic_floors = []
     for f in floors:
         floor_rooms = []
-        for r in sorted(f.rooms, key=lambda x: x.number):
+        for r in sorted(f.rooms, key=lambda x: x.number or ''):
             num = (r.number or '').strip()
             name = (r.name or '').strip().lower()
             rtype = (r.room_type or '').strip().lower()
@@ -274,9 +274,7 @@ def classroom_management():
 
     return render_template(
         'admin_cmm.html',
-        unassigned_classes=unassigned_classes,
         unassigned_classes_data=unassigned_classes_data,
-        all_faculties=all_faculties,
         all_faculties_data=all_faculties_data,
         floors=floors,
         academic_floors=academic_floors,

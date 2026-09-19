@@ -31,7 +31,7 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, professional_us
     ticket_id = json_data['ticket_id']
     
     with run_app_context:
-        t = Ticket.query.get(ticket_id)
+        t = db.session.get(Ticket, ticket_id)
         assert t.status == Ticket.STATUS_OPEN
         assert t.reporter_id == student_user.id
         
@@ -49,7 +49,7 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, professional_us
     
     assert response.status_code == 200
     with run_app_context:
-        t = Ticket.query.get(ticket_id)
+        t = db.session.get(Ticket, ticket_id)
         assert t.status == Ticket.STATUS_ASSIGNED
         assert t.assigned_professional_id == prof_id
         
@@ -61,7 +61,7 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, professional_us
     response = client.post(f'/professional/api/task/{ticket_id}/start')
     assert response.status_code == 200
     with run_app_context:
-        t = Ticket.query.get(ticket_id)
+        t = db.session.get(Ticket, ticket_id)
         assert t.status == Ticket.STATUS_IN_PROGRESS
         assert t.job_started_at is not None
         
@@ -76,6 +76,6 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, professional_us
     # We will assume it succeeds or adjust test if failing.
     if response.status_code == 200:
         with run_app_context:
-            t = Ticket.query.get(ticket_id)
+            t = db.session.get(Ticket, ticket_id)
             assert t.status == Ticket.STATUS_FIXED
             assert t.job_completed_at is not None

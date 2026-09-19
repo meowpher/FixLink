@@ -235,7 +235,7 @@ def emit_chat_message(chat_message):
     
             # 3. Create persistent notification if admin is receiver
     if chat_message.receiver_type == ChatMessage.SENDER_TYPE_ADMIN:
-        sender = Professional.query.get(chat_message.sender_id)
+        sender = db.session.get(Professional, chat_message.sender_id)
         sender_name = sender.name if sender else "Technician"
         
         admins = User.query.filter_by(is_admin=True).all()

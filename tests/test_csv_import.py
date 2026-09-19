@@ -209,7 +209,7 @@ class TestCSVTimetableImport(unittest.TestCase):
         self.assertEqual(data['data']['faculty_name'], 'Prof. Sharma')
 
         with self.app.app_context():
-            updated = Timetable.query.get(tt_id)
+            updated = db.session.get(Timetable, tt_id)
             self.assertEqual(updated.faculty_id, fac_id)
 
         # 7. Successful unassignment (passing None/null)
@@ -221,7 +221,7 @@ class TestCSVTimetableImport(unittest.TestCase):
         self.assertEqual(data_unassign['data']['faculty_name'], 'Unassigned')
 
         with self.app.app_context():
-            updated = Timetable.query.get(tt_id)
+            updated = db.session.get(Timetable, tt_id)
             self.assertIsNone(updated.faculty_id)
 
     def test_admin_dashboard_unassigned_classes_render(self):

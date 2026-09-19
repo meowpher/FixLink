@@ -309,7 +309,7 @@ def status_map():
         floors = Floor.query.filter(Floor.building_id == vyas.id).order_by(Floor.level).all()
         
         if floor_id:
-            selected_floor = Floor.query.get(floor_id)
+            selected_floor = db.session.get(Floor, floor_id)
         elif floors:
             selected_floor = floors[0]
         
@@ -861,7 +861,7 @@ def update_ticket_status(ticket_id):
     if new_status == Ticket.STATUS_FIXED:
         ticket.fixed_at = datetime.utcnow()
         if ticket.asset_id:
-            asset = Asset.query.get(ticket.asset_id)
+            asset = db.session.get(Asset, ticket.asset_id)
             if asset:
                 asset.status = Asset.STATUS_WORKING
     
@@ -869,7 +869,7 @@ def update_ticket_status(ticket_id):
     
     # Invalidate map cache for affected floor
     if ticket.room_id:
-        room = Room.query.get(ticket.room_id)
+        room = db.session.get(Room, ticket.room_id)
         if room:
             from ...cache import invalidate_floor_cache
             invalidate_floor_cache(room.floor_id)
@@ -1001,7 +1001,7 @@ def api_assign_ticket(ticket_id):
     if not professional_id:
         return api_response(success=False, error="Please select a professional", status=400)
         
-    professional = Professional.query.get(professional_id)
+    professional = db.session.get(Professional, professional_id)
     if not professional or not professional.is_active:
         return api_response(success=False, error="Selected professional is not available", status=400)
         
@@ -1295,7 +1295,7 @@ def assign_ticket(ticket_id):
             flash('Please enter a valid time limit (minimum 1 hour).', 'error')
             return redirect(url_for('admin.assign_ticket', ticket_id=ticket_id))
         
-        professional = Professional.query.get(professional_id)
+        professional = db.session.get(Professional, professional_id)
         if not professional or not professional.is_active:
             flash('Selected professional is not available.', 'error')
             return redirect(url_for('admin.assign_ticket', ticket_id=ticket_id))
@@ -1366,7 +1366,7 @@ def assign_ticket(ticket_id):
             best_rating = p.overall_rating
             suggested_professional_id = p.id
             
-    suggested_professional = Professional.query.get(suggested_professional_id) if suggested_professional_id else None
+    suggested_professional = db.session.get(Professional, suggested_professional_id) if suggested_professional_id else None
             
     return render_template('admin/assign_ticket.html',
                          ticket=ticket,
@@ -1424,10 +1424,10 @@ def respond_to_help_request(help_request_id):
     if action == 'approve' and not helper_professional_id:
         return api_response(success=False, data={'error': "Helper professional required for approval"}), 400
     
-    admin = User.query.get(session['user_id'])
+    admin = db.session.get(User, session['user_id'])
     
     if action == 'approve':
-        helper = Professional.query.get(helper_professional_id)
+        helper = db.session.get(Professional, helper_professional_id)
         if not helper or not helper.is_active:
             return api_response(success=False, data={'error': "Helper professional not available"}), 400
         
@@ -1820,7 +1820,7 @@ def get_professionals_for_chat():
 def get_chat_history_with_professional(professional_id):
     """Get chat history with a specific professional."""
     from ...models import ChatMessage
-    admin = User.query.get(session['user_id'])
+    admin = db.session.get(User, session['user_id'])
     professional = Professional.query.get_or_404(professional_id)
     
     messages = ChatMessage.query.filter(
@@ -1852,14 +1852,14 @@ def admin_send_chat_message():
     from ...models import ChatMessage
     from ...api_utils import validate_json
     
-    admin = User.query.get(session['user_id'])
+    admin = db.session.get(User, session['user_id'])
     data, error = validate_json(['professional_id', 'message'])
     if error: return error
     
     professional_id = data.get('professional_id')
     message_text = data.get('message', '').strip()
     
-    professional = Professional.query.get(professional_id)
+    professional = db.session.get(Professional, professional_id)
     if not professional:
         return api_response(success=False, error="Professional not found", status=404)
     
@@ -2091,7 +2091,7 @@ def delete_timetable_scoped():
         room_id = data.get('room_id')
         if not room_id:
             return api_response(success=False, error="Room ID is required for 'room' scope.", status=400)
-        room = Room.query.get(room_id)
+        room = db.session.get(Room, room_id)
         if not room:
             return api_response(success=False, error="Room not found.", status=404)
             
@@ -2103,7 +2103,7 @@ def delete_timetable_scoped():
         floor_id = data.get('floor_id')
         if not floor_id:
             return api_response(success=False, error="Floor ID is required for 'floor' scope.", status=400)
-        floor = Floor.query.get(floor_id)
+        floor = db.session.get(Floor, floor_id)
         if not floor:
             return api_response(success=False, error="Floor not found.", status=404)
 
@@ -2142,7 +2142,7 @@ def assign_faculty(class_id):
     if 'faculty_id' not in data:
         return api_response(success=False, error="'faculty_id' is required in JSON payload.", status=400)
 
-    tt = Timetable.query.get(class_id)
+    tt = db.session.get(Timetable, class_id)
     if not tt:
         return api_response(success=False, error=f"Class with ID {class_id} not found.", status=404)
 
@@ -2156,7 +2156,7 @@ def assign_faculty(class_id):
         except (ValueError, TypeError):
             return api_response(success=False, error="Invalid faculty_id. Must be an integer ID or null.", status=400)
 
-        faculty = User.query.get(target_faculty_id)
+        faculty = db.session.get(User, target_faculty_id)
         if not faculty:
             return api_response(success=False, error=f"Faculty with ID {target_faculty_id} not found.", status=404)
 
@@ -2216,7 +2216,7 @@ def bulk_assign_faculty():
     except (ValueError, TypeError):
         return api_response(success=False, error="Invalid 'faculty_id'. Must be an integer ID.", status=400)
 
-    faculty = User.query.get(faculty_id)
+    faculty = db.session.get(User, faculty_id)
     if not faculty:
         return api_response(success=False, error=f"Faculty with ID {faculty_id} not found.", status=404)
 
@@ -2248,7 +2248,7 @@ def bulk_assign_faculty():
             for (rid,) in rooms_to_update:
                 if rid:
                     from ...models import Room
-                    room = Room.query.get(rid)
+                    room = db.session.get(Room, rid)
                     if room:
                         emit_room_status_change(room, room.current_occupancy_status)
         except Exception:

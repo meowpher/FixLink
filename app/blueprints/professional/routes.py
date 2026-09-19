@@ -45,7 +45,7 @@ def logout():
 @professional_login_required
 def dashboard():
     """Professional dashboard - view assigned tasks."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     if not professional:
         session.pop('professional_id', None)
         session.pop('professional_name', None)
@@ -113,7 +113,7 @@ def dashboard():
 @professional_login_required
 def chat():
     """Professional chat page."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     if not professional:
         session.pop('professional_id', None)
         session.pop('professional_name', None)
@@ -137,7 +137,7 @@ def chat():
 @professional_login_required
 def history():
     """Professional task history."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     if not professional:
         session.pop('professional_id', None)
         session.pop('professional_name', None)
@@ -160,7 +160,7 @@ def history():
 @professional_login_required
 def profile():
     """Professional profile section."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     if not professional:
         flash('Professional account not found.', 'error')
         return redirect(url_for('professional.login'))
@@ -202,7 +202,7 @@ def profile():
 @professional_login_required
 def update_profile_picture():
     """Upload or remove professional profile picture."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     if not professional:
         return jsonify({'success': False, 'error': 'Professional account not found'}), 404
 
@@ -252,7 +252,7 @@ def update_profile_picture():
 @professional_login_required
 def task_detail(ticket_id):
     """View detailed task information."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     ticket = Ticket.query.get_or_404(ticket_id)
     
     # Ensure this ticket is assigned to this professional
@@ -283,7 +283,7 @@ def task_detail(ticket_id):
 @handle_api_errors
 def start_task(ticket_id):
     """Start a task - update status and notify admin."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     ticket = Ticket.query.get_or_404(ticket_id)
     
     if ticket.assigned_professional_id != professional.id:
@@ -328,7 +328,7 @@ def start_task(ticket_id):
 @handle_api_errors
 def complete_task(ticket_id):
     """Complete a task - upload photo and notify admin."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     ticket = Ticket.query.get_or_404(ticket_id)
     
     if ticket.assigned_professional_id != professional.id:
@@ -356,7 +356,7 @@ def complete_task(ticket_id):
     
     # Mark asset as working if applicable
     if ticket.asset_id:
-        asset = Asset.query.get(ticket.asset_id)
+        asset = db.session.get(Asset, ticket.asset_id)
         if asset:
             asset.status = Asset.STATUS_WORKING
     
@@ -378,7 +378,7 @@ def complete_task(ticket_id):
 @handle_api_errors
 def cancel_task(ticket_id):
     """Cancel a task with reason - limited tracking per day."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     ticket = Ticket.query.get_or_404(ticket_id)
     
     if ticket.assigned_professional_id != professional.id:
@@ -413,7 +413,7 @@ def cancel_task(ticket_id):
 @handle_api_errors
 def set_complexity(ticket_id):
     """Set task complexity (Low/Medium/High)."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     ticket = Ticket.query.get_or_404(ticket_id)
     
     if ticket.assigned_professional_id != professional.id:
@@ -437,7 +437,7 @@ def set_complexity(ticket_id):
 @handle_api_errors
 def request_help(ticket_id):
     """Request help from another professional - goes to admin for approval."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     ticket = Ticket.query.get_or_404(ticket_id)
     
     if ticket.assigned_professional_id != professional.id:
@@ -470,7 +470,7 @@ def request_help(ticket_id):
 @professional_login_required
 def get_chat_history():
     """Get chat history with admin."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     
     # Get messages where professional is sender or receiver
     messages = ChatMessage.query.filter(
@@ -493,7 +493,7 @@ def get_chat_history():
 @professional_login_required
 def send_chat_message():
     """Send a chat message to admin."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     
     data = request.get_json()
     message_text = data.get('message', '').strip()
@@ -536,7 +536,7 @@ def send_chat_message():
 @handle_api_errors
 def get_task_detail_api(ticket_id):
     """Get task details via API."""
-    professional = Professional.query.get(session['professional_id'])
+    professional = db.session.get(Professional, session['professional_id'])
     ticket = Ticket.query.get_or_404(ticket_id)
     
     if ticket.assigned_professional_id != professional.id:

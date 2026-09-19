@@ -172,7 +172,7 @@ def report_form():
         ('other', 'Other')
     ]
     
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     
     return render_template('report.html',
                          user=user,
@@ -193,7 +193,7 @@ def submit_report():
     Submit a new maintenance ticket.
     Handles both AJAX and form submissions.
     """
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     reporter_name = user.name
     prn = user.prn or 'Admin'
     reporter_email = user.email
@@ -243,7 +243,7 @@ def submit_report():
         if errors:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return api_response(success=False, error='; '.join(errors), status=400)
-            user = User.query.get(session['user_id'])
+            user = db.session.get(User, session['user_id'])
             building = Building.query.filter_by(name='Vyas').first()
             return render_template('report.html', user=user, building=building, errors=errors), 400
 
@@ -264,7 +264,7 @@ def submit_report():
         db.session.commit()
         
         # Invalidate map cache for this floor
-        room_obj = Room.query.get(r_id)
+        room_obj = db.session.get(Room, r_id)
         if room_obj:
             from app.cache import invalidate_floor_cache
             invalidate_floor_cache(room_obj.floor_id)
@@ -297,7 +297,7 @@ def submit_report():
         current_app.logger.error(f"Error submitting report: {error_msg}")
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return api_response(success=False, error=error_msg, status=500)
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         building = Building.query.filter_by(name='Vyas').first()
         return render_template('report.html', user=user, building=building, errors=[error_msg]), 500
 
@@ -362,7 +362,7 @@ def get_buildings():
 def get_me():
     """Return current profile info (user or professional) for the navbar avatar."""
     if 'user_id' in session:
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         if user:
             photo_url = (
                 url_for('static', filename=f'uploads/{user.profile_photo}')
@@ -377,7 +377,7 @@ def get_me():
             })
     
     if 'professional_id' in session:
-        professional = Professional.query.get(session['professional_id'])
+        professional = db.session.get(Professional, session['professional_id'])
         if professional:
             photo_url = None
             if hasattr(professional, 'profile_photo') and professional.profile_photo:

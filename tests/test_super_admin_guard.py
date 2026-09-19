@@ -38,9 +38,9 @@ class TestSuperAdminGuard(unittest.TestCase):
 
     def test_is_super_admin_property(self):
         with self.app.app_context():
-            taha = User.query.get(self.sa_taha_id)
-            om = User.query.get(self.sa_om_id)
-            regular = User.query.get(self.regular_admin_id)
+            taha = db.session.get(User, self.sa_taha_id)
+            om = db.session.get(User, self.sa_om_id)
+            regular = db.session.get(User, self.regular_admin_id)
 
             self.assertTrue(taha.is_super_admin)
             self.assertTrue(om.is_super_admin)
@@ -90,7 +90,7 @@ class TestSuperAdminGuard(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         with self.app.app_context():
-            updated = User.query.get(self.sa_taha_id)
+            updated = db.session.get(User, self.sa_taha_id)
             self.assertEqual(updated.name, 'Taha Piplodwala (Updated)')
 
     def test_regular_admin_can_edit_non_super_admin(self):

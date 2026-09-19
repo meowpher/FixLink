@@ -18,7 +18,7 @@ faculty_bp = Blueprint('faculty', __name__)
 def dashboard():
     """Faculty combined dashboard (My Schedule & Room Utilization Tracker)."""
     user_id = session.get('user_id')
-    faculty = User.query.get(user_id)
+    faculty = db.session.get(User, user_id)
     
     # Time context
     current_dt = datetime.utcnow() + timedelta(hours=5, minutes=30)
@@ -127,7 +127,7 @@ def claim_room():
                 return api_response(success=False, error=f"Time conflict. A scheduled class for {sched.subject} starts at {sched.start_time.strftime('%I:%M %p')}.", status=400)
     
     user_id = session.get('user_id')
-    faculty = User.query.get(user_id)
+    faculty = db.session.get(User, user_id)
     
     booking = AdHocBooking(
         room_id=room.id,
@@ -238,7 +238,7 @@ def create_booking():
         db.session.commit()
         
         # Emit status change via pusher
-        room = Room.query.get(room_id)
+        room = db.session.get(Room, room_id)
         emit_room_status_change(room, room.current_occupancy_status)
         
         return api_response(success=True, message=f"Successfully reserved for {duration_hours} hour(s).")

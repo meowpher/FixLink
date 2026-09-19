@@ -29,8 +29,9 @@ def admin_required(f):
             flash('Admin access required.', 'error')
             return redirect(url_for('auth.login'))
         
+        from . import db
         from .models import User
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         if not user or not user.is_admin:
             session.pop('user_id', None)
             session.pop('is_admin', None)
@@ -53,8 +54,9 @@ def user_login_required(f):
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
             return redirect(url_for('auth.login'))
         
+        from . import db
         from .models import User
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         if not user:
             session.pop('user_id', None)
             session.pop('is_admin', None)
@@ -96,8 +98,9 @@ def professional_login_required(f):
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
             return redirect(url_for('auth.login', pro=1))
         
+        from . import db
         from .models import Professional
-        prof = Professional.query.get(session['professional_id'])
+        prof = db.session.get(Professional, session['professional_id'])
         if not prof:
             session.pop('professional_id', None)
             session.pop('professional_name', None)
@@ -154,7 +157,16 @@ def require_ownership(model_class, id_param='id', owner_field='user_id', allow_a
                 return api_response(success=False, error=f'Missing parameter {id_param}', status=400)
 
             # 3. Retrieve target record from database
-            record = model_class.query.get(record_id)
+            from . import db
+            try:
+                record = db.session.get(model_class, record_id)
+            except Exception:
+                if hasattr(model_class, 'query') and hasattr(model_class.query, 'filter_by'):
+                    record = model_class.query.filter_by(id=record_id).first()
+                elif hasattr(model_class, 'query') and hasattr(model_class.query, 'get'):
+                    record = model_class.query.get(record_id)
+                else:
+                    record = None
             if not record:
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                     return api_response(success=False, error='Resource not found.', status=404)

@@ -11,7 +11,7 @@ def calculate_asset_health(asset_id):
     Calculate a health score (0-100) for a specific asset.
     (Individual calculation - uses DB)
     """
-    asset = Asset.query.get(asset_id)
+    asset = db.session.get(Asset, asset_id)
     if not asset:
         return 0
     

@@ -77,7 +77,7 @@ def login():
     """Unified login for students, admins, and Job Certified Professionals."""
     # Redirect if already logged in
     if 'user_id' in session:
-        user = User.query.get(session['user_id'])
+        user = db.session.get(User, session['user_id'])
         if user:
             return redirect(url_for('admin.dashboard')) if user.is_admin else redirect(url_for('main.report_form'))
         else:
@@ -87,7 +87,7 @@ def login():
             session.pop('user_role', None)
 
     if 'professional_id' in session:
-        prof = Professional.query.get(session['professional_id'])
+        prof = db.session.get(Professional, session['professional_id'])
         if prof:
             return redirect(url_for('professional.dashboard'))
         else:
@@ -394,7 +394,7 @@ def upload_profile_photo():
     if not allowed_file(file.filename):
         return api_response(success=False, error="Invalid file type. Use PNG, JPG, GIF or WebP.", status=400)
 
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
 
     # Delete old photo if it exists
     if user.profile_photo:
@@ -420,7 +420,7 @@ def upload_profile_photo():
 def remove_profile_photo():
     """Remove user profile photo."""
     import os
-    user = User.query.get(session['user_id'])
+    user = db.session.get(User, session['user_id'])
     if user.profile_photo:
         old_path = os.path.join(current_app.config['UPLOAD_FOLDER'], user.profile_photo)
         remove_webapp_file(old_path)

@@ -24,11 +24,11 @@
 
     <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=12.0" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.0" as="style">
 
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=12.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.0">
 
     <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -80,7 +80,7 @@
                 request.endpoint == 'admin.dashboard' or 
                 request.endpoint == 'admin.status_map' or 
                 request.endpoint == 'admin.analytics' or
-                request.endpoint in ['admin.chat', 'professional.chat', 'main.report_form', 'main.index', 'admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history', 'admin.add_professional', 'admin.professional_history', 'admin.professional_analytics', 'main.report_bug']
+                request.endpoint in ['admin.chat', 'professional.chat', 'main.report_form', 'main.index', 'admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history', 'admin.add_professional', 'admin.professional_history', 'main.report_bug']
             ))) %}
             <button class="top-bar-btn" id="mobile-topbar-back-btn" onclick="handleTopbarBack()" aria-label="Go back to previous page">
                 <i class="bi bi-chevron-left"></i> Back
@@ -281,10 +281,6 @@
                     <i class="bi bi-people fs-5"></i>
                     <div><div class="fw-semibold">Professionals</div><div class="text-muted small">View & manage staff</div></div>
                 </a>
-                <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.professional_rating_analytics') if false else url_for('admin.professional_analytics') }}">
-                    <i class="bi bi-bar-chart-line fs-5"></i>
-                    <div><div class="fw-semibold">Staff Analytics</div><div class="text-muted small">View performance & ratings</div></div>
-                </a>
                 <a class="btn btn-outline-secondary text-start d-flex align-items-center gap-3 py-3" href="{{ url_for('admin.help_requests') }}">
                     <i class="bi bi-hand-thumbs-up fs-5"></i>
                     <div><div class="fw-semibold">Help Requests</div><div class="text-muted small">Pending assistance requests</div></div>
@@ -313,7 +309,7 @@
     </div>
     {% endif %}
     
-    {% if session.get('is_admin') and request.endpoint != 'main.report_form' and request.endpoint != 'admin.add_professional' and request.endpoint != 'admin.professional_history' and request.endpoint != 'admin.professional_analytics' and request.endpoint != 'admin.professionals' %}
+    {% if session.get('is_admin') and request.endpoint != 'main.report_form' and request.endpoint != 'admin.add_professional' and request.endpoint != 'admin.professional_history' and request.endpoint != 'admin.professionals' %}
     <a href="{{ url_for('main.report_form') }}" id="mobile-fab" class="d-md-none" aria-label="Report a new issue">
         <i class="bi bi-plus" aria-hidden="true"></i>
     </a>
@@ -393,7 +389,6 @@
                     </button>
                     <ul id="msb-manage-sub" class="msb-sub" aria-hidden="true">
                         <li><a class="msb-subitem" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people"></i>Professionals</a></li>
-                        <li><a class="msb-subitem" href="{{ url_for('admin.professional_analytics') }}"><i class="bi bi-bar-chart-line"></i>Staff Analytics</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up"></i>Help Requests</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history"></i>Full History</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.booking_history') }}"><i class="bi bi-calendar3-range"></i>Bookings</a></li>
@@ -631,7 +626,6 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
                         <ul class="dropdown-menu shadow rounded-4 border-0">
                             <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin.professional_analytics') }}"><i class="bi bi-bar-chart-line me-2"></i>Staff Analytics</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history me-2"></i>Full History</a></li>

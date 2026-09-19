@@ -510,7 +510,7 @@
 
 <!-- Ticket Detail Modal -->
 <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="ticketModalLabel">
@@ -757,123 +757,184 @@
         .then(data => {
             if (data.success) {
                 const ticket = (data.data && data.data.ticket) || data.ticket;
+                const modalEl = document.getElementById('ticketModal');
                 const modalBody = document.getElementById('ticketModalBody');
                 
-                let imageHtml = '';
                 if (ticket.image_filename) {
-                    imageHtml = `
-                        <div class="mb-3">
-                            <label class="form-label fw-bold">Attached Image:</label>
-                            <div class="ticket-image-container">
-                                <img src="/static/uploads/${ticket.image_filename}" loading="lazy"
-                                     alt="Ticket Image" class="img-fluid rounded" 
-                                     style="max-height: 300px;">
+                    modalEl.classList.add('has-image');
+                } else {
+                    modalEl.classList.remove('has-image');
+                }
+                
+                let bodyContentHtml = '';
+                
+                if (ticket.image_filename) {
+                    bodyContentHtml = `
+                        <div class="row g-2 align-items-stretch">
+                            <div class="col-md-7 d-flex flex-column justify-content-between">
+                                <div class="ticket-info-grid mb-2">
+                                    <div class="info-item">
+                                        <span class="info-label"><i class="bi bi-person me-1"></i>Reporter</span>
+                                        <span class="info-value text-truncate" title="${ticket.reporter_name}">${ticket.reporter_name}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label"><i class="bi bi-card-text me-1"></i>PRN</span>
+                                        <span class="info-value font-monospace">${ticket.prn || 'N/A'}</span>
+                                    </div>
+                                    <div class="info-item col-span-2">
+                                        <span class="info-label"><i class="bi bi-envelope me-1"></i>Email</span>
+                                        <span class="info-value text-truncate" title="${ticket.reporter_email}">${ticket.reporter_email}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label"><i class="bi bi-geo-alt me-1"></i>Location</span>
+                                        <span class="info-value text-truncate">${ticket.room_number} <small class="text-muted">(${ticket.floor_name})</small></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="info-label"><i class="bi bi-tools me-1"></i>Issue Type</span>
+                                        <span class="info-value text-capitalize">${ticket.issue_type}</span>
+                                    </div>
+                                    <div class="info-item ${ticket.fixed_at ? '' : 'col-span-2'}">
+                                        <span class="info-label"><i class="bi bi-calendar-event me-1"></i>Created At</span>
+                                        <span class="info-value">${new Date(ticket.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                                    </div>
+                                    ${ticket.fixed_at ? `
+                                    <div class="info-item">
+                                        <span class="info-label"><i class="bi bi-check2-circle me-1"></i>Fixed At</span>
+                                        <span class="info-value">${new Date(ticket.fixed_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                                <div class="description-section">
+                                    <span class="info-label"><i class="bi bi-chat-left-text me-1"></i>Description</span>
+                                    <p class="description-text">${ticket.description || '<span class="text-muted fst-italic">No description provided.</span>'}</p>
+                                </div>
                             </div>
+                            <div class="col-md-5">
+                                <div class="ticket-image-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span class="info-label"><i class="bi bi-image me-1"></i>Attached Image</span>
+                                        <a href="/static/uploads/${ticket.image_filename}" target="_blank" class="text-decoration-none small text-primary fw-semibold" style="font-size: 0.72rem;">
+                                            <i class="bi bi-box-arrow-up-right"></i> Full Size
+                                        </a>
+                                    </div>
+                                    <div class="ticket-image-preview-wrapper" onclick="window.open('/static/uploads/${ticket.image_filename}', '_blank')">
+                                        <img src="/static/uploads/${ticket.image_filename}" loading="lazy" alt="Ticket Image" class="ticket-thumbnail">
+                                        <div class="image-hover-hint"><i class="bi bi-zoom-in me-1"></i> Zoom</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    bodyContentHtml = `
+                        <div class="ticket-info-grid mb-2">
+                            <div class="info-item">
+                                <span class="info-label"><i class="bi bi-person me-1"></i>Reporter</span>
+                                <span class="info-value text-truncate" title="${ticket.reporter_name}">${ticket.reporter_name}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label"><i class="bi bi-card-text me-1"></i>PRN</span>
+                                <span class="info-value font-monospace">${ticket.prn || 'N/A'}</span>
+                            </div>
+                            <div class="info-item col-span-2">
+                                <span class="info-label"><i class="bi bi-envelope me-1"></i>Email</span>
+                                <span class="info-value text-truncate" title="${ticket.reporter_email}">${ticket.reporter_email}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label"><i class="bi bi-geo-alt me-1"></i>Location</span>
+                                <span class="info-value text-truncate">${ticket.room_number} <small class="text-muted">(${ticket.floor_name})</small></span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label"><i class="bi bi-tools me-1"></i>Issue Type</span>
+                                <span class="info-value text-capitalize">${ticket.issue_type}</span>
+                            </div>
+                            <div class="info-item ${ticket.fixed_at ? '' : 'col-span-2'}">
+                                <span class="info-label"><i class="bi bi-calendar-event me-1"></i>Created At</span>
+                                <span class="info-value">${new Date(ticket.created_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                            </div>
+                            ${ticket.fixed_at ? `
+                            <div class="info-item">
+                                <span class="info-label"><i class="bi bi-check2-circle me-1"></i>Fixed At</span>
+                                <span class="info-value">${new Date(ticket.fixed_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        <div class="description-section mb-2">
+                            <span class="info-label"><i class="bi bi-chat-left-text me-1"></i>Description</span>
+                            <p class="description-text">${ticket.description || '<span class="text-muted fst-italic">No description provided.</span>'}</p>
                         </div>
                     `;
                 }
                 
                 modalBody.innerHTML = `
-                    <div class="ticket-info-grid mb-3">
-                        <div class="info-item">
+                    <!-- Top Section: Ticket ID & Status -->
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div class="d-flex align-items-center gap-2">
                             <span class="info-label">Ticket ID</span>
-                            <span class="info-value">#${ticket.id}</span>
+                            <span class="fs-5 fw-bold text-primary">#${ticket.id}</span>
                         </div>
-                        <div class="info-item">
+                        <div class="d-flex align-items-center gap-2">
                             <span class="info-label">Status</span>
-                            <span class="info-value">
-                                <span class="status-badge status-${ticket.status}">
-                                    ${ticket.status === 'cancelled' ? '<i class="bi bi-exclamation-triangle-fill me-1"></i> CANCELLED' : ticket.status}
-                                </span>
+                            <span class="status-badge status-${ticket.status}">
+                                ${ticket.status === 'cancelled' ? '<i class="bi bi-exclamation-triangle-fill me-1"></i> CANCELLED' : ticket.status.toUpperCase()}
                             </span>
                         </div>
-                        <div class="info-item">
-                            <span class="info-label">Reporter</span>
-                            <span class="info-value text-truncate">${ticket.reporter_name}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">PRN</span>
-                            <span class="info-value">${ticket.prn}</span>
-                        </div>
-                        <div class="info-item col-span-2">
-                            <span class="info-label">Email</span>
-                            <span class="info-value text-truncate">${ticket.reporter_email}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Location</span>
-                            <span class="info-value text-truncate">${ticket.room_number} - ${ticket.floor_name}</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Issue Type</span>
-                            <span class="info-value">${ticket.issue_type}</span>
-                        </div>
-                        <div class="info-item ${ticket.fixed_at ? '' : 'col-span-2'}">
-                            <span class="info-label">Created At</span>
-                            <span class="info-value">${new Date(ticket.created_at).toLocaleString()}</span>
-                        </div>
-                        ${ticket.fixed_at ? `
-                        <div class="info-item">
-                            <span class="info-label">Fixed At</span>
-                            <span class="info-value">${new Date(ticket.fixed_at).toLocaleString()}</span>
-                        </div>
-                        ` : ''}
                     </div>
-                    
-                    <div class="description-section mb-3">
-                        <span class="info-label">Description</span>
-                        <p class="description-text">${ticket.description || 'No description provided.'}</p>
-                    </div>
-                    
-                    ${imageHtml}
+
+                    <!-- Horizontal Divider -->
+                    <hr class="ticket-modal-divider my-2">
+
+                    <!-- Main Body Content (2-Column if Image, 1-Column if no Image) -->
+                    ${bodyContentHtml}
                     
                     ${(ticket.status === 'fixed' && !ticket.rating && ticket.assigned_professional_id) ? `
-                        <div class="w-100 mt-4 p-4 bg-light rounded border text-center" id="ratingSection">
-                            <h6 class="fw-bold mb-2">Rate ${ticket.assigned_professional_name || 'Professional'}'s Work</h6>
-                            <div class="mb-3">
-                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(1)"><i class="bi bi-star" id="star1"></i></span>
-                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(2)"><i class="bi bi-star" id="star2"></i></span>
-                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(3)"><i class="bi bi-star" id="star3"></i></span>
-                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(4)"><i class="bi bi-star" id="star4"></i></span>
-                                <span class="fs-3 text-warning cursor-pointer" onclick="setRating(5)"><i class="bi bi-star" id="star5"></i></span>
+                        <div class="w-100 mt-2 p-2.5 bg-light rounded-3 border text-center" id="ratingSection">
+                            <h6 class="fw-bold mb-1 small">Rate ${ticket.assigned_professional_name || 'Professional'}'s Work</h6>
+                            <div class="mb-2">
+                                <span class="fs-4 text-warning cursor-pointer" onclick="setRating(1)"><i class="bi bi-star" id="star1"></i></span>
+                                <span class="fs-4 text-warning cursor-pointer" onclick="setRating(2)"><i class="bi bi-star" id="star2"></i></span>
+                                <span class="fs-4 text-warning cursor-pointer" onclick="setRating(3)"><i class="bi bi-star" id="star3"></i></span>
+                                <span class="fs-4 text-warning cursor-pointer" onclick="setRating(4)"><i class="bi bi-star" id="star4"></i></span>
+                                <span class="fs-4 text-warning cursor-pointer" onclick="setRating(5)"><i class="bi bi-star" id="star5"></i></span>
                             </div>
                             <input type="hidden" id="currentRating" value="0">
-                            <textarea class="form-control mb-3" id="ratingComment" placeholder="Optional comment about the work..." rows="2"></textarea>
-                            <button class="btn btn-warning px-4" onclick="submitRating(${ticket.id})">Submit Rating</button>
+                            <textarea class="form-control form-control-sm mb-2" id="ratingComment" placeholder="Optional comment..." rows="1"></textarea>
+                            <button class="btn btn-warning btn-sm px-3 fw-semibold" onclick="submitRating(${ticket.id})">Submit Rating</button>
                         </div>
                     ` : (ticket.status === 'fixed' && ticket.rating) ? `
-                        <div class="w-100 mt-4 p-4 bg-light rounded border text-center">
-                            <h6 class="fw-bold mb-2 text-muted">Job Rating</h6>
-                            <div class="text-warning fs-4 mb-2">
-                                ${'<i class="bi bi-star-fill mx-1"></i>'.repeat(ticket.rating)}${'<i class="bi bi-star mx-1"></i>'.repeat(5 - ticket.rating)}
+                        <div class="w-100 mt-2 p-2 bg-light rounded-3 border text-center">
+                            <h6 class="fw-bold mb-1 small text-muted">Job Rating</h6>
+                            <div class="text-warning fs-5 mb-1">
+                                ${'<i class="bi bi-star-fill mx-0.5"></i>'.repeat(ticket.rating)}${'<i class="bi bi-star mx-0.5"></i>'.repeat(5 - ticket.rating)}
                             </div>
-                            ${ticket.rating_comment ? `<p class="fst-italic text-muted mb-0">"${ticket.rating_comment}"</p>` : ''}
+                            ${ticket.rating_comment ? `<p class="fst-italic text-muted mb-0 small">"${ticket.rating_comment}"</p>` : ''}
                         </div>
                     ` : ''}
 
-                    <div class="modal-actions-grid mt-4 pt-3 border-top">
+                    <div class="modal-actions-grid mt-3 pt-2">
                         <a href="/admin/ticket/${ticket.id}/assign" 
                            class="action-btn btn-assign ${(!ticket.assigned_professional_id && ['open', 'cancelled'].includes(ticket.status)) ? '' : 'disabled'}">
-                            <i class="bi bi-person-plus-fill"></i> Assign Tech
+                            <i class="bi bi-person-plus-fill"></i> <span>Assign Tech</span>
                         </a>
                         
                         <button onclick="updateStatus(${ticket.id}, 'fixed')" 
                                 class="action-btn btn-resolve ${(ticket.status !== 'fixed') ? '' : 'disabled'}">
-                            <i class="bi bi-check-lg"></i> Resolve
+                            <i class="bi bi-check-lg"></i> <span>Resolve</span>
                         </button>
                         
                         <a href="/admin/map?floor=${ticket.room_floor_id}&room=${ticket.room_number}" 
                            class="action-btn btn-map">
-                            <i class="bi bi-geo-alt-fill"></i> View Map
+                            <i class="bi bi-geo-alt-fill"></i> <span>View Map</span>
                         </a>
                         
                         <button onclick="deleteTicket(${ticket.id})" 
                                 class="action-btn btn-delete">
-                            <i class="bi bi-trash-fill"></i> Delete
+                            <i class="bi bi-trash-fill"></i> <span>Delete</span>
                         </button>
                     </div>
                 `;
                 
-                const modal = new bootstrap.Modal(document.getElementById('ticketModal'));
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                 modal.show();
             }
         })
@@ -889,6 +950,7 @@
         .then(data => {
             if (data.success) {
                 const ticket = (data.data && data.data.ticket) || data.ticket;
+                const modalEl = document.getElementById('cancellationModal');
                 const modalBody = document.getElementById('cancellationModalBody');
                 modalBody.innerHTML = `
                     <div class="text-center mb-4">
@@ -915,7 +977,7 @@
                         </div>
                     </div>
                 `;
-                const modal = new bootstrap.Modal(document.getElementById('cancellationModal'));
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
                 modal.show();
             } else {
                 alert('Error: ' + (data.error || 'Failed to load details'));
@@ -926,6 +988,42 @@
             alert('Failed to load cancellation details');
         });
     }
+
+    // Attach to global window scope to ensure inline onclick handlers always work
+    window.viewTicket = viewTicket;
+    window.viewCancellationReport = viewCancellationReport;
+    window.updateStatus = updateStatus;
+    window.deleteTicket = deleteTicket;
+    window.setRating = setRating;
+    window.submitRating = submitRating;
+
+    // Direct event delegation fallback for tickets table and mobile cards
+    document.addEventListener('DOMContentLoaded', function() {
+        document.body.addEventListener('click', function(e) {
+            // Ignore if clicked on button, link, or badge with its own action
+            if (e.target.closest('button, a, .clickable-badge, .btn-close')) {
+                return;
+            }
+
+            const row = e.target.closest('tr.clickable-row');
+            if (row && row.dataset.ticketId) {
+                viewTicket(row.dataset.ticketId);
+                return;
+            }
+
+            const mcCard = e.target.closest('.mc-card');
+            if (mcCard) {
+                const idEl = mcCard.querySelector('.mc-id');
+                if (idEl) {
+                    const ticketId = idEl.textContent.replace('#', '').trim();
+                    if (ticketId) {
+                        viewTicket(ticketId);
+                    }
+                }
+            }
+        });
+    });
+
     // Check for ticket_id in URL to auto-open modal
     window.addEventListener('load', function() {
         const urlParams = new URLSearchParams(window.location.search);

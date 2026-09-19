@@ -141,6 +141,27 @@
             padding: 1rem;
         }
     }
+
+    /* Professional Profile Link */
+    .prof-profile-link {
+        color: inherit;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .prof-profile-link:hover .prof-name,
+    .prof-profile-link:hover .mc-title,
+    .prof-profile-link:hover .mc-name {
+        color: var(--bs-primary, #0d6efd) !important;
+        text-decoration: underline;
+    }
+
+    .prof-profile-link:hover .prof-avatar,
+    .prof-profile-link:hover .mc-avatar {
+        transform: scale(1.08);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.35);
+    }
 </style>
 <div class="container py-4">
     <!-- Header -->
@@ -149,11 +170,8 @@
             <h2 class="fw-bold mb-1">Professional Management</h2>
             <p class="text-muted mb-0">Manage maintenance staff, categories, and account status</p>
         </div>
-        <div class="d-flex gap-2 w-100 w-md-auto flex-wrap">
-            <a href="{{ url_for('admin.professional_analytics') }}" class="btn btn-outline-primary shadow-sm d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0 px-3" style="border-radius: 12px; height: 48px; min-width: 140px;">
-                <i class="bi bi-bar-chart-line-fill me-2"></i> View Analytics
-            </a>
-            <a href="{{ url_for('admin.add_professional') }}" class="btn btn-primary shadow-sm d-flex align-items-center justify-content-center flex-grow-1 flex-md-grow-0 px-3" style="border-radius: 12px; height: 48px; min-width: 140px;">
+        <div class="w-100 w-md-auto">
+            <a href="{{ url_for('admin.add_professional') }}" class="btn btn-primary shadow-sm d-flex align-items-center justify-content-center px-4" style="border-radius: 12px; height: 48px;">
                 <i class="bi bi-person-plus-fill me-2"></i> Add Professional
             </a>
         </div>
@@ -206,20 +224,15 @@
             <aside class="filter-sidebar-panel">
                 <div class="filter-sidebar-title">
                     <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
-                    {% if search_query or (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') %}
+                    {% if (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') %}
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" style="font-size: 0.72rem;">Active</span>
                     {% endif %}
                 </div>
                 <form method="GET" action="{{ url_for('admin.professionals') }}" class="filter-sidebar-form">
-                    <div class="mb-3">
-                        <label for="searchQuery" class="form-label">Search</label>
-                        <div class="input-group flex-nowrap">
-                            <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
-                                <i class="bi bi-search"></i>
-                            </span>
-                            <input type="text" id="searchQuery" name="q" class="form-control border-start-0 ps-0" placeholder="Name, email, phone..." value="{{ search_query }}" style="border-radius: 0 8px 8px 0; height: 42px;">
-                        </div>
-                    </div>
+                    {% if search_query %}
+                    <input type="hidden" name="q" value="{{ search_query }}">
+                    {% endif %}
+                    
                     <div class="mb-3">
                         <label for="categoryFilter" class="form-label">Category</label>
                         <select id="categoryFilter" name="category" class="form-select" style="height: 42px; border-radius: 8px;">
@@ -243,9 +256,9 @@
                         <button type="submit" class="btn btn-primary btn-apply-filters">
                             <i class="bi bi-funnel me-1"></i>Apply Filters
                         </button>
-                        {% if search_query or (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') %}
-                        <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary btn-sm text-decoration-none" style="border-radius: 8px;">
-                            <i class="bi bi-x-circle me-1"></i>Clear Filters
+                        {% if (category_filter and category_filter != 'all') or (status_filter and status_filter != 'all') or search_query %}
+                        <a href="{{ url_for('admin.professionals') }}" class="btn btn-outline-secondary btn-sm text-decoration-none text-center" style="border-radius: 8px; height: 38px; display: inline-flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-x-circle me-1"></i>Reset All
                         </a>
                         {% endif %}
                     </div>
@@ -255,6 +268,46 @@
 
         <!-- Right Side: Professionals List Table & Cards -->
         <div class="col-xl-9 col-lg-8 col-md-8">
+            <!-- Horizontal Search Bar -->
+            <div class="card shadow-sm mb-3 border-0" style="background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border-color) !important;">
+                <div class="card-body p-2.5">
+                    <form method="GET" action="{{ url_for('admin.professionals') }}" class="d-flex align-items-center gap-2" id="profSearchForm">
+                        {% if category_filter and category_filter != 'all' %}
+                        <input type="hidden" name="category" value="{{ category_filter }}">
+                        {% endif %}
+                        {% if status_filter and status_filter != 'all' %}
+                        <input type="hidden" name="status" value="{{ status_filter }}">
+                        {% endif %}
+                        
+                        <div class="input-group flex-grow-1">
+                            <span class="input-group-text bg-transparent border-end-0 text-muted" style="border-radius: 8px 0 0 8px;">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" 
+                                   id="searchQuery" 
+                                   name="q" 
+                                   class="form-control border-start-0 border-end-0 ps-1" 
+                                   placeholder="Search professionals by name, email, phone..." 
+                                   value="{{ search_query }}" 
+                                   autocomplete="off"
+                                   style="height: 42px; font-size: 0.92rem;">
+                            <button type="button" 
+                                    id="clearSearchQueryBtn" 
+                                    class="btn btn-outline-secondary border-start-0 text-muted px-2.5" 
+                                    style="border-radius: 0 8px 8px 0; display: {{ 'inline-flex' if search_query else 'none' }}; align-items: center; border-color: inherit;"
+                                    title="Clear search">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary px-3 fw-semibold d-flex align-items-center gap-1.5" style="border-radius: 8px; height: 42px; white-space: nowrap;">
+                            <i class="bi bi-search"></i>
+                            <span>Search</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             <div class="tickets-card border-0">
         <div class="desktop-table-container d-none d-md-block">
             <div class="table-responsive">
@@ -278,13 +331,15 @@
                                 <span class="prof-id">#{{ prof.id }}</span>
                             </td>
                             <td>
-                                <div class="d-flex align-items-center">
+                                <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" 
+                                   class="prof-profile-link d-inline-flex align-items-center"
+                                   title="View {{ prof.name }}'s Profile & History">
                                     <span class="prof-avatar">{{ prof.name[0]|upper }}</span>
                                     <div>
                                         <div class="prof-name">{{ prof.name }}</div>
                                         <div class="small text-muted">Joined: {{ prof.created_at.strftime('%b %d, %Y') if prof.created_at else '-' }}</div>
                                     </div>
-                                </div>
+                                </a>
                             </td>
                             <td>
                                 <div class="small fw-semibold"><i class="bi bi-envelope me-1"></i>{{ prof.email }}</div>
@@ -316,7 +371,7 @@
                                     <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" 
                                        class="btn btn-sm btn-outline-primary d-inline-flex align-items-center justify-content-center"
                                        style="width: 32px; height: 32px; border-radius: 8px;"
-                                       title="View History">
+                                       title="View Profile & History">
                                         <i class="bi bi-clock-history"></i>
                                     </a>
                                     <button class="btn btn-sm btn-outline-info d-inline-flex align-items-center justify-content-center" 
@@ -354,7 +409,7 @@
                 <div class="mc-top">
                     <div class="mc-id-title">
                         <span class="mc-id">#{{ prof.id }}</span>
-                        <span class="mc-title">{{ prof.name }}</span>
+                        <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" class="prof-profile-link mc-title text-decoration-none" title="View {{ prof.name }}'s Profile">{{ prof.name }}</a>
                     </div>
                     <div class="mc-status">
                         {% if prof.is_active %}
@@ -366,13 +421,13 @@
                 </div>
                 <div class="mc-desc"><i class="bi bi-envelope me-1"></i>{{ prof.email }} | <i class="bi bi-telephone me-1"></i>{{ prof.phone or '-' }}</div>
                 <div class="mc-person-row">
-                    <div class="mc-person-left">
+                    <a href="{{ url_for('admin.professional_history', prof_id=prof.id) }}" class="prof-profile-link mc-person-left text-decoration-none" title="View {{ prof.name }}'s Profile">
                         <div class="mc-avatar">{{ prof.name[0]|upper }}</div>
                         <div class="mc-person-info">
                             <span class="mc-name">{{ prof.name }}</span>
                             <span class="mc-meta">Joined: {{ prof.created_at.strftime('%b %d, %Y') if prof.created_at else '-' }}</span>
                         </div>
-                    </div>
+                    </a>
                     <span class="mc-pill">
                         {% if prof.category == 'it_technician' %}<i class="bi bi-pc-display me-1"></i>
                         {% elif prof.category == 'electrician' %}<i class="bi bi-lightning-fill me-1"></i>
@@ -583,5 +638,84 @@
             }
         });
     }
+
+    // ==================== LIVE SEARCH ON PROFESSIONALS ====================
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('searchQuery');
+        const clearBtn = document.getElementById('clearSearchQueryBtn');
+        const searchForm = document.getElementById('profSearchForm');
+        let debounceTimer = null;
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                if (clearBtn) {
+                    clearBtn.style.display = this.value.length > 0 ? 'inline-flex' : 'none';
+                }
+
+                // Instant live filtering of visible table rows
+                const tableRows = document.querySelectorAll('tbody tr[id^="professional-row-"]');
+                const mobileCards = document.querySelectorAll('.mobile-card-list .mc-card[id^="professional-mc-"]');
+                let visibleCount = 0;
+
+                tableRows.forEach(row => {
+                    const text = row.textContent.toLowerCase();
+                    if (!query || text.includes(query)) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+
+                mobileCards.forEach(card => {
+                    const text = card.textContent.toLowerCase();
+                    if (!query || text.includes(query)) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Show/hide no results row if all on current page are hidden
+                let noMatchRow = document.getElementById('noSearchMatchRow');
+                const tbody = document.querySelector('tbody');
+                if (visibleCount === 0 && tableRows.length > 0) {
+                    if (!noMatchRow && tbody) {
+                        noMatchRow = document.createElement('tr');
+                        noMatchRow.id = 'noSearchMatchRow';
+                        noMatchRow.innerHTML = `
+                            <td colspan="6" class="text-center py-5">
+                                <i class="bi bi-search display-6 text-muted opacity-50 d-block mb-3"></i>
+                                <h6 class="fw-bold text-body mb-1">No matches on this page</h6>
+                                <p class="text-muted small mb-0">Press Enter or click Search for a full database search</p>
+                            </td>
+                        `;
+                        tbody.appendChild(noMatchRow);
+                    }
+                } else if (noMatchRow) {
+                    noMatchRow.remove();
+                }
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', function() {
+                if (searchInput) {
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                    searchInput.focus();
+
+                    // If a server-side search query was in the URL, reload without it
+                    const url = new URL(window.location);
+                    if (url.searchParams.has('q') || url.searchParams.has('search')) {
+                        url.searchParams.delete('q');
+                        url.searchParams.delete('search');
+                        window.location.href = url.toString();
+                    }
+                }
+            });
+        }
+    });
 </script>
 {% endblock %}

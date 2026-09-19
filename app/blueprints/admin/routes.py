@@ -984,7 +984,7 @@ def professionals():
     """Professional Management page."""
     category_filter = request.args.get('category', 'all')
     status_filter = request.args.get('status', 'all')
-    search_query = request.args.get('q', '').strip()
+    search_query = request.args.get('q', request.args.get('search', '')).strip()
     page = request.args.get('page', 1, type=int)
     per_page = 20
     
@@ -996,7 +996,9 @@ def professionals():
             or_(
                 Professional.name.ilike(search),
                 Professional.email.ilike(search),
-                Professional.phone.ilike(search)
+                Professional.phone.ilike(search),
+                Professional.username.ilike(search),
+                Professional.category.ilike(search)
             )
         )
     
@@ -1033,42 +1035,6 @@ def professionals():
                          category_names=category_names)
 
 
-@admin_bp.route('/professionals/analytics')
-@admin_required
-def professional_analytics():
-    """Professional Analytics page (Lazy loaded/Paginated)."""
-    category_filter = request.args.get('category', 'all')
-    page = request.args.get('page', 1, type=int)
-    per_page = 10
-    
-    query = Professional.query
-    if category_filter != 'all' and category_filter in Professional.CATEGORIES:
-        query = query.filter_by(category=category_filter)
-        
-    query = query.order_by(Professional.name.asc())
-    professionals_paginated = query.paginate(page=page, per_page=per_page, error_out=False)
-    
-    category_names = {
-        Professional.CATEGORY_IT: 'IT Technician',
-        Professional.CATEGORY_ELECTRICIAN: 'Electrician',
-        Professional.CATEGORY_PLUMBER: 'Plumber',
-        Professional.CATEGORY_CARPENTER: 'Carpenter',
-        Professional.CATEGORY_OTHER: 'Other'
-    }
-    
-    # Check if this is an AJAX request for lazy loading
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        return jsonify({
-            'success': True,
-            'data': [p.to_dict() for p in professionals_paginated.items],
-            'has_next': professionals_paginated.has_next,
-            'page': page
-        })
-        
-    return render_template('admin/professional_analytics.html',
-                         categories=Professional.CATEGORIES,
-                         category_names=category_names,
-                         category_filter=category_filter)
 @admin_bp.route('/professionals/<int:prof_id>/history')
 @admin_required
 def professional_history(prof_id):

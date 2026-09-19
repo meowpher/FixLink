@@ -1,8 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Faculty Dashboard - MIT-WPU Vyas Tracker{% endblock %}
+{% block title %}Faculty Dashboard - Smart Schedule & Room Tracker | MIT-WPU FixLink{% endblock %}
+{% block meta_description %}Faculty portal for MIT World Peace University. Manage schedules, claim empty classrooms, reserve smart lecture rooms, and monitor live room occupancy across Vyas Hall.{% endblock %}
+
+{% block og_title %}Faculty Portal — Smart Classroom Scheduling & Tracking | FixLink{% endblock %}
+{% block og_description %}Instant room booking, personal timetable sync, and live floor occupancy tracking for MIT-WPU faculty.{% endblock %}
 
 {% block extra_css %}
+<!-- Module Preload for zero waterfall delay -->
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/render.js') }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/ui.js') }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/api.js') }}">
+
 <meta name="current-user-id" content="{{ current_user_id | tojson }}">
 <style>
     .faculty-dashboard {

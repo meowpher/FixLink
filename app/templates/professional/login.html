@@ -16,7 +16,7 @@
         <div class="col-md-6 col-lg-4">
             <div class="card shadow border-0 rounded-4">
                 <div class="card-body p-4 p-sm-5 text-start">
-                    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo d-block mx-auto mb-4" loading="eager" fetchpriority="high" width="180">
+                    <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU FixLink Logo" class="form-logo mitwpu-logo d-block mx-auto mb-4" loading="eager" fetchpriority="high" width="180" height="51">
                     <h2 class="fs-4 fw-bold text-start mb-1">Technician Portal</h2>
                     <p class="text-muted text-start small mb-4">Sign in to access your jobs</p>
                     
@@ -25,7 +25,7 @@
                             {% for category, message in messages %}
                                 <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show mb-4" role="alert">
                                     {{ message }}
-                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                 </div>
                             {% endfor %}
                         {% endif %}

@@ -3,6 +3,9 @@
 {% block title %}Developer Dashboard - FixLink{% endblock %}
 
 {% block extra_css %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap">
 <style>
     :root {
         --dev-gradient: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
@@ -110,8 +113,6 @@
         font-size: 1.05rem;
         font-weight: 400;
     }
-
-    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&display=swap');
 
     .dev-hero-title {
         display: inline-flex;
@@ -1843,7 +1844,7 @@
                             <td class="text-center">
                                 <div class="btn-group">
                                     {% if bug.file_path %}
-                                    <a href="{{ url_for('superadmin.view_bug_attachment', bug_id=bug.id) }}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill me-1 px-2.5" title="View Attachment">
+                                    <a href="{{ url_for('superadmin.view_bug_attachment', bug_id=bug.id) }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-info rounded-pill me-1 px-2.5" title="View Attachment" aria-label="View Attachment for Bug #{{ bug.id }}">
                                         <i class="bi bi-paperclip"></i>
                                     </a>
                                     {% endif %}

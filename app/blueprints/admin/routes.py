@@ -46,8 +46,14 @@ def dashboard():
     page = request.args.get('page', 1, type=int)
     per_page = 20
     
-    # Base query
-    query = Ticket.query
+    # Base query with eager loading to prevent N+1 query overhead
+    from sqlalchemy.orm import joinedload
+    query = Ticket.query.options(
+        joinedload(Ticket.room).joinedload(Room.floor),
+        joinedload(Ticket.assigned_professional),
+        joinedload(Ticket.asset),
+        joinedload(Ticket.reporter)
+    )
     
     if status_filter != 'all':
         if status_filter == 'open':
@@ -366,8 +372,11 @@ def booking_history():
     from ...models import RoomBooking
     page = request.args.get('page', 1, type=int)
     search_query = request.args.get('search', '').strip()
-    per_page = 20
-    query = RoomBooking.query.join(RoomBooking.faculty).join(RoomBooking.room)
+    from sqlalchemy.orm import joinedload
+    query = RoomBooking.query.options(
+        joinedload(RoomBooking.faculty),
+        joinedload(RoomBooking.room).joinedload(Room.floor)
+    ).join(RoomBooking.faculty).join(RoomBooking.room)
     
     if search_query:
         search = f"%{search_query}%"

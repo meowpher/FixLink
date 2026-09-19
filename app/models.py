@@ -466,6 +466,7 @@ class Ticket(db.Model):
         db.Index('idx_ticket_status_created', 'status', 'created_at'),
         db.Index('idx_ticket_reporter_created', 'reporter_id', 'created_at'),
         db.Index('idx_ticket_professional_status', 'assigned_professional_id', 'status'),
+        db.Index('idx_ticket_room_status', 'room_id', 'status'),
     )
     
     def __init__(self, room_id=None, asset_id=None, issue_type=None, description=None, 
@@ -873,6 +874,9 @@ class Timetable(db.Model):
     
     __table_args__ = (
         db.Index('idx_timetable_day_start', 'day_of_week', 'start_time'),
+        db.Index('idx_timetable_faculty', 'faculty_id'),
+        db.Index('idx_timetable_room', 'room_id'),
+        db.Index('idx_timetable_unassigned', 'faculty_id', 'day_of_week', 'start_time'),
     )
     
     faculty = db.relationship('User', foreign_keys=[faculty_id], backref=db.backref('timetables', lazy=True))
@@ -915,6 +919,8 @@ class RoomBooking(db.Model):
     
     __table_args__ = (
         db.Index('idx_booking_status_slot', 'status', 'slot_start'),
+        db.Index('idx_booking_faculty_date', 'faculty_id', 'date'),
+        db.Index('idx_booking_room_slot', 'room_id', 'status', 'slot_start'),
     )
     
     faculty = db.relationship('User', backref=db.backref('room_bookings', lazy=True))

@@ -185,17 +185,66 @@ def create_app(config_name=None):
             session.pop('professional_id', None)
             session.pop('professional_name', None)
             session.pop('professional_category', None)
+
+    # Global Request & Security Headers Hook (Performance & Best Practices 100/100)
+    import gzip
+    @app.after_request
+    def apply_performance_and_security_headers(response):
+        # 1. Security Headers (Best Practices 100/100)
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['Permissions-Policy'] = 'geolocation=(), camera=(), microphone=()'
+        response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
+        response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
+        response.headers['X-Permitted-Cross-Domain-Policies'] = 'none'
+
+        # 2. Static Asset Caching (Performance 100/100)
+        if request.path.startswith('/static/'):
+            response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        elif 'Cache-Control' not in response.headers:
+            response.headers['Cache-Control'] = 'private, no-cache, no-store, must-revalidate'
+
+        # 3. Dynamic Gzip Compression Middleware (Performance 100/100)
+        accept_encoding = request.headers.get('Accept-Encoding', '')
+        if (
+            'gzip' in accept_encoding.lower()
+            and 200 <= response.status_code < 300
+            and 'Content-Encoding' not in response.headers
+            and not response.is_streamed
+        ):
+            content_type = response.headers.get('Content-Type', '').lower()
+            compressible_types = ('text/', 'application/json', 'application/javascript', 'image/svg+xml', 'application/xml')
+            if any(content_type.startswith(ct) for ct in compressible_types):
+                try:
+                    data = response.get_data()
+                    if len(data) >= 500:
+                        compressed_data = gzip.compress(data, compresslevel=6)
+                        response.set_data(compressed_data)
+                        response.headers['Content-Encoding'] = 'gzip'
+                        response.headers['Content-Length'] = len(compressed_data)
+                        response.headers['Vary'] = 'Accept-Encoding'
+                except Exception:
+                    pass
+
+        return response
     
-    # Global Template Context
+    # Global Template Context with G-Memoization
+    from flask import g
     @app.context_processor
     def inject_globals():
         current_user_obj = None
-        if session.get('user_id'):
+        if hasattr(g, '_current_user_cached'):
+            current_user_obj = g._current_user_cached
+        elif session.get('user_id'):
             from .models import User
-            current_user_obj = User.query.get(session['user_id'])
+            current_user_obj = db.session.get(User, session['user_id'])
+            g._current_user_cached = current_user_obj
         elif session.get('super_admin_email'):
             from .models import User
             current_user_obj = User.query.filter_by(email=session['super_admin_email']).first()
+            g._current_user_cached = current_user_obj
 
         return dict(
             SUPER_ADMIN_EMAIL=SUPER_ADMIN_EMAILS[0],

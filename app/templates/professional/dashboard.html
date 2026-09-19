@@ -307,7 +307,7 @@
                                 <td class="px-4 py-3 text-end">
                                     {% if ticket.completion_photo_filename %}
                                     <a href="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}"
-                                        target="_blank" class="text-primary"><i class="bi bi-image fs-5"></i></a>
+                                        target="_blank" rel="noopener noreferrer" class="text-primary" aria-label="View completion photo for ticket #{{ ticket.id }}"><i class="bi bi-image fs-5"></i></a>
                                     {% else %}
                                     <span class="text-muted small">None</span>
                                     {% endif %}
@@ -343,7 +343,7 @@
                         </div>
                         {% if ticket.completion_photo_filename %}
                         <a href="{{ url_for('static', filename='uploads/' + ticket.completion_photo_filename) }}"
-                            target="_blank" class="text-primary"><i class="bi bi-image fs-5"></i></a>
+                            target="_blank" rel="noopener noreferrer" class="text-primary" aria-label="View completion photo for ticket #{{ ticket.id }}"><i class="bi bi-image fs-5"></i></a>
                         {% endif %}
                     </div>
                 </div>

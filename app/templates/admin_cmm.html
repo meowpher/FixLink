@@ -307,14 +307,24 @@
                              DESKTOP TABLE (≥ 768px: Original Table Structure)
                         ══════════════════════════════════════════════════════ -->
                         <div class="table-responsive d-none d-md-block">
-                            <table class="table table-hover align-middle mb-0" id="unassignedClassesTable">
+                            <table class="table table-hover align-middle mb-0" id="unassignedClassesTable" aria-label="Unassigned Classes Table">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="ps-4 py-3" style="width: 85px;">
+                                        <th class="ps-4 py-3" scope="col" style="width: 85px;">
                                             <div class="d-flex align-items-center gap-2">
                                                 <input class="form-check-input mt-0" type="checkbox" id="selectAllCheckbox" aria-label="Select all classes">
                                                 <span class="small fw-semibold text-body">Select</span>
-                                                                        <tbody id="unassignedClassesBody">
+                                            </div>
+                                        </th>
+                                        <th class="py-3" scope="col">Room</th>
+                                        <th class="py-3" scope="col">Day &amp; Time</th>
+                                        <th class="py-3" scope="col">Subject / Course</th>
+                                        <th class="py-3" scope="col">Division</th>
+                                        <th class="py-3" scope="col" style="min-width: 200px;">Assign Faculty</th>
+                                        <th class="py-3 pe-4 text-end" scope="col" style="width: 110px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="unassignedClassesBody">
                                     <!-- Dynamic High-Speed Paginated Render (25 items per page) -->
                                 </tbody>
                             </table>
@@ -534,6 +544,9 @@
                 <button type="button" class="btn cmm-btn-danger" id="btnConfirmDeleteTimetable">
                     <i class="bi bi-trash3-fill me-1"></i>Yes, Wipe All Timetables
                 </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Embedded Compact JSON Data for Lightning-Fast Virtualized Client Rendering -->

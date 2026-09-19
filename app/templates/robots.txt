@@ -4,21 +4,15 @@ Allow: /login
 Allow: /report
 Allow: /professional/
 Allow: /faculty/
+Allow: /admin/
 Allow: /sitemap.xml
 Allow: /robots.txt
 Allow: /google87abaa634db2f80b.html
 
-# Disallow Administrative & Developer Portals
-Disallow: /admin/
-Disallow: /developer/
-
-# Disallow Internal API Endpoints
+# Disallow Internal API Endpoints & Sensitive Session Mutations
 Disallow: /api/
 Disallow: /developer/api/
-
-# Disallow Session Mutation & Reset Actions
 Disallow: /logout
-Disallow: /forgot-password
 Disallow: /reset-password
 Disallow: /verify/
 

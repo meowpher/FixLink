@@ -1095,6 +1095,12 @@
             return;
         }
 
+        const modalEl = document.getElementById('ticketModal');
+        if (modalEl) {
+            const bsModal = bootstrap.Modal.getInstance(modalEl);
+            if (bsModal) bsModal.hide();
+        }
+
         fetch(`/admin/tickets/${ticketId}/delete`, {
             method: 'POST',
             headers: {
@@ -1369,29 +1375,17 @@
     window.setRating = setRating;
     window.submitRating = submitRating;
 
-    // Direct event delegation fallback for tickets table and mobile cards
+    // Modal backdrop cleanup to prevent screen freeze
     document.addEventListener('DOMContentLoaded', function() {
-        document.body.addEventListener('click', function(e) {
-            // Ignore if clicked on button, link, or badge with its own action
-            if (e.target.closest('button, a, .clickable-badge, .btn-close')) {
-                return;
-            }
-
-            const row = e.target.closest('tr.clickable-row');
-            if (row && row.dataset.ticketId) {
-                viewTicket(row.dataset.ticketId);
-                return;
-            }
-
-            const mcCard = e.target.closest('.mc-card');
-            if (mcCard) {
-                const idEl = mcCard.querySelector('.mc-id');
-                if (idEl) {
-                    const ticketId = idEl.textContent.replace('#', '').trim();
-                    if (ticketId) {
-                        viewTicket(ticketId);
-                    }
-                }
+        ['ticketModal', 'cancellationModal'].forEach(id => {
+            const modalEl = document.getElementById(id);
+            if (modalEl) {
+                modalEl.addEventListener('hidden.bs.modal', function() {
+                    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
             }
         });
     });

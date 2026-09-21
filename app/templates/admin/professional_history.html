@@ -444,8 +444,20 @@
     let ticketModal;
     
     document.addEventListener('DOMContentLoaded', function() {
-        photoModal = new bootstrap.Modal(document.getElementById('photoModal'));
-        ticketModal = new bootstrap.Modal(document.getElementById('ticketModal'));
+        photoModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('photoModal'));
+        ticketModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('ticketModal'));
+
+        ['photoModal', 'ticketModal'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('hidden.bs.modal', function() {
+                    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
+            }
+        });
     });
     
     window.showPhoto = function(url) {

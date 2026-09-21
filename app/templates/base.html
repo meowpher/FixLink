@@ -2184,6 +2184,18 @@
             }
         });
     });
+
+    // Global Modal Backdrop Lockdown Prevention Failsafe
+    document.addEventListener('hidden.bs.modal', function() {
+        setTimeout(() => {
+            if (!document.querySelector('.modal.show')) {
+                document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
+        }, 50);
+    });
     </script>
 
     </body>

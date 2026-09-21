@@ -1129,7 +1129,11 @@
     }
 
     // View ticket details
+    let isTicketModalLoading = false;
     function viewTicket(ticketId) {
+        if (isTicketModalLoading) return;
+        isTicketModalLoading = true;
+
         fetch(`/admin/ticket/${ticketId}`)
         .then(response => response.json())
         .then(data => {
@@ -1319,10 +1323,16 @@
         .catch(error => {
             console.error('Error:', error);
             alert('Failed to load ticket details');
+        })
+        .finally(() => {
+            isTicketModalLoading = false;
         });
     }
 
     function viewCancellationReport(ticketId) {
+        if (isTicketModalLoading) return;
+        isTicketModalLoading = true;
+
         fetch(`/admin/ticket/${ticketId}`)
         .then(response => response.json())
         .then(data => {
@@ -1364,6 +1374,9 @@
         .catch(error => {
             console.error('Error:', error);
             alert('Failed to load cancellation details');
+        })
+        .finally(() => {
+            isTicketModalLoading = false;
         });
     }
 

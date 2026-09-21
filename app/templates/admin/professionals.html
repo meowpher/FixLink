@@ -598,8 +598,8 @@
                                        style="height: 38px; font-size: 0.85rem; border-color: var(--border-color);">
                                 <button type="button" 
                                         id="clearSearchQueryBtn" 
-                                        class="btn btn-outline-secondary border-start-0 text-muted px-2.5" 
-                                        style="border-radius: 0 8px 8px 0; display: {{ 'inline-flex' if search_query else 'none' }}; align-items: center; border-color: var(--border-color);"
+                                        class="btn btn-outline-secondary border-start-0 text-muted px-2.5 {% if not search_query %}d-none{% endif %}" 
+                                        style="border-radius: 0 8px 8px 0; align-items: center; border-color: var(--border-color);"
                                         title="Clear search">
                                     <i class="bi bi-x-circle-fill"></i>
                                 </button>
@@ -681,13 +681,13 @@
                                     </a>
                                     <button class="btn btn-sm btn-outline-info d-inline-flex align-items-center justify-content-center" 
                                             style="width: 32px; height: 32px; border-radius: 8px;"
-                                            onclick="editProfessional({{ prof.id }})"
+                                            onclick="editProfessional('{{ prof.id }}')"
                                             title="Edit Profile">
                                         <i class="bi bi-pencil-square"></i>
                                     </button>
                                     <button class="btn btn-sm btn-outline-danger d-inline-flex align-items-center justify-content-center" 
                                             style="width: 32px; height: 32px; border-radius: 8px;"
-                                            onclick="deleteProfessional({{ prof.id }})"
+                                            onclick="deleteProfessional('{{ prof.id }}')"
                                             title="Delete Professional">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -749,11 +749,11 @@
                         <i class="bi bi-clock-history"></i>
                         <span>History</span>
                     </a>
-                    <button class="btn btn-outline-info mc-action-btn" onclick="editProfessional({{ prof.id }})" title="Edit Profile">
+                    <button class="btn btn-outline-info mc-action-btn" onclick="editProfessional('{{ prof.id }}')" title="Edit Profile">
                         <i class="bi bi-pencil-square"></i>
                         <span>Edit</span>
                     </button>
-                    <button class="btn btn-outline-danger mc-action-btn" onclick="deleteProfessional({{ prof.id }})" title="Delete Professional">
+                    <button class="btn btn-outline-danger mc-action-btn" onclick="deleteProfessional('{{ prof.id }}')" title="Delete Professional">
                         <i class="bi bi-trash"></i>
                         <span>Delete</span>
                     </button>

@@ -741,6 +741,16 @@ class ChatMessage(db.Model):
         db.Index('idx_chat_receiver_read', 'receiver_type', 'receiver_id', 'is_read'),
     )
     
+    def __init__(self, sender_type=None, sender_id=None, receiver_type=None, receiver_id=None, message=None, **kwargs):
+        super().__init__(**kwargs)
+        if sender_type is not None: self.sender_type = sender_type
+        if sender_id is not None: self.sender_id = sender_id
+        if receiver_type is not None: self.receiver_type = receiver_type
+        if receiver_id is not None: self.receiver_id = receiver_id
+        if message is not None: self.message = message
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+    
     def __repr__(self):
         return f'<ChatMessage #{self.id}>'
     
@@ -782,6 +792,16 @@ class Notification(db.Model):
     # Relationship
     user = db.relationship('User', backref=db.backref('notifications', lazy=True, cascade='all, delete-orphan'))
     
+    def __init__(self, user_id=None, title=None, message=None, type=TYPE_SYSTEM, link=None, **kwargs):
+        super().__init__(**kwargs)
+        if user_id is not None: self.user_id = user_id
+        if title is not None: self.title = title
+        if message is not None: self.message = message
+        if type is not None: self.type = type
+        if link is not None: self.link = link
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def __repr__(self):
         return f'<Notification #{self.id} for User {self.user_id} - {self.title}>'
     
@@ -845,6 +865,16 @@ class AdHocBooking(db.Model):
     
     faculty = db.relationship('User', backref='adhoc_bookings', lazy=True)
     
+    def __init__(self, room_id=None, faculty_id=None, subject=None, start_datetime=None, end_datetime=None, **kwargs):
+        super().__init__(**kwargs)
+        if room_id is not None: self.room_id = room_id
+        if faculty_id is not None: self.faculty_id = faculty_id
+        if subject is not None: self.subject = subject
+        if start_datetime is not None: self.start_datetime = start_datetime
+        if end_datetime is not None: self.end_datetime = end_datetime
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -882,6 +912,20 @@ class Timetable(db.Model):
     faculty = db.relationship('User', foreign_keys=[faculty_id], backref=db.backref('timetables', lazy=True))
     collaborator = db.relationship('User', foreign_keys=[collaborator_id], backref=db.backref('collab_timetables', lazy=True))
     
+    def __init__(self, room_id=None, faculty_id=None, collaborator_id=None, day_of_week=None, start_time=None, end_time=None, subject=None, course=None, division=None, **kwargs):
+        super().__init__(**kwargs)
+        if room_id is not None: self.room_id = room_id
+        if faculty_id is not None: self.faculty_id = faculty_id
+        if collaborator_id is not None: self.collaborator_id = collaborator_id
+        if day_of_week is not None: self.day_of_week = day_of_week
+        if start_time is not None: self.start_time = start_time
+        if end_time is not None: self.end_time = end_time
+        if subject is not None: self.subject = subject
+        if course is not None: self.course = course
+        if division is not None: self.division = division
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -924,6 +968,19 @@ class RoomBooking(db.Model):
     )
     
     faculty = db.relationship('User', backref=db.backref('room_bookings', lazy=True))
+
+    def __init__(self, room_id=None, faculty_id=None, date=None, slot_start=None, status=STATUS_ACTIVE, subject=None, division=None, course=None, **kwargs):
+        super().__init__(**kwargs)
+        if room_id is not None: self.room_id = room_id
+        if faculty_id is not None: self.faculty_id = faculty_id
+        if date is not None: self.date = date
+        if slot_start is not None: self.slot_start = slot_start
+        if status is not None: self.status = status
+        if subject is not None: self.subject = subject
+        if division is not None: self.division = division
+        if course is not None: self.course = course
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     @property
     def slot_end(self):

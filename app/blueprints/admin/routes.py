@@ -3,7 +3,7 @@ Admin Routes Blueprint - Maintenance Dashboard
 """
 from functools import wraps
 from datetime import datetime, timedelta
-from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, abort
+from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, abort, current_app
 from sqlalchemy import or_, func, case
 from ... import db
 from ...models import Building, Floor, Room, Asset, Ticket, User, Professional, HelpRequest, ChatMessage
@@ -371,6 +371,7 @@ def booking_history():
     """Admin view for faculty classroom bookings."""
     from ...models import RoomBooking
     page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 20, type=int)
     search_query = request.args.get('search', '').strip()
     from sqlalchemy.orm import joinedload
     query = RoomBooking.query.options(
@@ -746,14 +747,7 @@ def analytics():
 def edit_user(user_id):
     """Edit user details (AJAX)."""
     target_user = User.query.get_or_404(user_id)
-    
     current_user_id = session.get('user_id')
-    try:
-        from flask_login import current_user
-        if current_user and hasattr(current_user, 'id'):
-            current_user_id = current_user.id
-    except Exception:
-        pass
 
     if target_user.is_super_admin and current_user_id != target_user.id:
         flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
@@ -794,14 +788,7 @@ def edit_user(user_id):
 def delete_user(user_id):
     """Delete a user (AJAX)."""
     target_user = User.query.get_or_404(user_id)
-    
     current_user_id = session.get('user_id')
-    try:
-        from flask_login import current_user
-        if current_user and hasattr(current_user, 'id'):
-            current_user_id = current_user.id
-    except Exception:
-        pass
 
     if target_user.is_super_admin and current_user_id != target_user.id:
         flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
@@ -822,14 +809,7 @@ def delete_user(user_id):
 def verify_user_manual(user_id):
     """Manually verify a user (AJAX)."""
     target_user = User.query.get_or_404(user_id)
-    
     current_user_id = session.get('user_id')
-    try:
-        from flask_login import current_user
-        if current_user and hasattr(current_user, 'id'):
-            current_user_id = current_user.id
-    except Exception:
-        pass
 
     if target_user.is_super_admin and current_user_id != target_user.id:
         flash("Unauthorized: Cannot modify Super Admin accounts.", "error")

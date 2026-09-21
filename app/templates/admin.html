@@ -10,6 +10,22 @@
         opacity: 1 !important;
         transform: none !important;
     }
+
+    /* Phase 2: Guarantee .main-content never gets overflow:hidden when a modal is open.
+       Bootstrap adds .modal-open to <body>, which sets overflow:hidden on body — not on main.
+       This rule is a defensive guard against any inherited overflow clipping. */
+    body.modal-open .main-content {
+        overflow: visible !important;
+    }
+
+    /* Phase 2: Standardize modal z-index — backdrop at 1050, dialog at 1055, enforce via CSS. */
+    #ticketModal,
+    #cancellationModal {
+        z-index: 1055 !important;
+    }
+    .modal-backdrop {
+        z-index: 1050 !important;
+    }
     [data-theme="dark"] .stat-number,
     [data-bs-theme="dark"] .stat-number,
     body[data-theme="dark"] .stat-number {
@@ -880,8 +896,11 @@
         </div>
 </section>
 
-<!-- Ticket Detail Modal -->
-<div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true">
+{% endblock %}
+
+{% block extra_modals %}
+<!-- Ticket Detail Modal — Direct <body> child, z-index:1055 (Phase 1+2 Fix) -->
+<div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:1055;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -900,8 +919,8 @@
     </div>
 </div>
 
-<!-- Cancellation Report Modal -->
-<div class="modal fade" id="cancellationModal" tabindex="-1" aria-labelledby="cancellationModalLabel" aria-hidden="true">
+<!-- Cancellation Report Modal — Direct <body> child, z-index:1055 (Phase 1+2 Fix) -->
+<div class="modal fade" id="cancellationModal" tabindex="-1" aria-labelledby="cancellationModalLabel" aria-hidden="true" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:1055;">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
             <div class="modal-header border-0 bg-danger text-white py-3" style="border-radius: 16px 16px 0 0;">
@@ -1128,28 +1147,96 @@
         });
     }
 
-    // View ticket details
-    let isTicketModalLoading = false;
+    // ============================================================
+    // PHASE 3: MODAL MANAGER — single source of truth for modals
+    // Instances are cached ONCE at DOMContentLoaded, before any
+    // innerHTML replacement can orphan the Bootstrap reference.
+    // This is the root fix: getOrCreateInstance() after innerHTML
+    // replacement silently creates a NEW detached instance, making
+    // hide() a no-op and stranding the backdrop forever.
+    // ============================================================
+    const ModalManager = (() => {
+        let _ticketModal = null;
+        let _cancellationModal = null;
+        let _loading = false;
+
+        function _getInstance(id) {
+            const el = document.getElementById(id);
+            if (!el) return null;
+            // getInstance() returns existing; getOrCreateInstance() only
+            // on first call when the element is fresh and unmodified.
+            return bootstrap.Modal.getInstance(el) || bootstrap.Modal.getOrCreateInstance(el, { backdrop: true, keyboard: true });
+        }
+
+        function init() {
+            // Cache instances BEFORE any innerHTML is ever written to modal bodies.
+            _ticketModal = _getInstance('ticketModal');
+            _cancellationModal = _getInstance('cancellationModal');
+
+            // Attach hidden listeners to guarantee backdrop+body cleanup.
+            ['ticketModal', 'cancellationModal'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.addEventListener('hidden.bs.modal', () => {
+                    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
+            });
+        }
+
+        function showTicket() {
+            // Re-acquire in case Bootstrap lost the instance (e.g., after hot-reload)
+            if (!_ticketModal) _ticketModal = _getInstance('ticketModal');
+            if (_ticketModal) _ticketModal.show();
+        }
+
+        function hideTicket() {
+            if (!_ticketModal) _ticketModal = _getInstance('ticketModal');
+            if (_ticketModal) _ticketModal.hide();
+        }
+
+        function showCancellation() {
+            if (!_cancellationModal) _cancellationModal = _getInstance('cancellationModal');
+            if (_cancellationModal) _cancellationModal.show();
+        }
+
+        function hideCancellation() {
+            if (!_cancellationModal) _cancellationModal = _getInstance('cancellationModal');
+            if (_cancellationModal) _cancellationModal.hide();
+        }
+
+        function isLoading() { return _loading; }
+        function setLoading(v) { _loading = v; }
+
+        return { init, showTicket, hideTicket, showCancellation, hideCancellation, isLoading, setLoading };
+    })();
+
+    document.addEventListener('DOMContentLoaded', () => ModalManager.init());
+
+    // -------------------------------------------------------------------
+    // viewTicket — fetch data, write into stable modal body, then show()
+    // -------------------------------------------------------------------
     function viewTicket(ticketId) {
-        if (isTicketModalLoading) return;
-        isTicketModalLoading = true;
+        if (ModalManager.isLoading()) return;
+        ModalManager.setLoading(true);
 
         fetch(`/admin/ticket/${ticketId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 const ticket = (data.data && data.data.ticket) || data.ticket;
-                const modalEl = document.getElementById('ticketModal');
+                const modalEl  = document.getElementById('ticketModal');
                 const modalBody = document.getElementById('ticketModalBody');
-                
+
                 if (ticket.image_filename) {
                     modalEl.classList.add('has-image');
                 } else {
                     modalEl.classList.remove('has-image');
                 }
-                
+
                 let bodyContentHtml = '';
-                
                 if (ticket.image_filename) {
                     bodyContentHtml = `
                         <div class="row g-2 align-items-stretch">
@@ -1183,8 +1270,7 @@
                                     <div class="info-item">
                                         <span class="info-label"><i class="bi bi-check2-circle me-1"></i>Fixed At</span>
                                         <span class="info-value">${new Date(ticket.fixed_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
-                                    </div>
-                                    ` : ''}
+                                    </div>` : ''}
                                 </div>
                                 <div class="description-section">
                                     <span class="info-label"><i class="bi bi-chat-left-text me-1"></i>Description</span>
@@ -1195,11 +1281,11 @@
                                 <div class="ticket-image-card">
                                     <div class="d-flex justify-content-between align-items-center mb-1">
                                         <span class="info-label"><i class="bi bi-image me-1"></i>Attached Image</span>
-                                        <a href="/static/uploads/${ticket.image_filename}" target="_blank" class="text-decoration-none small text-primary fw-semibold" style="font-size: 0.72rem;">
+                                        <a href="/static/uploads/${ticket.image_filename}" target="_blank" class="text-decoration-none small text-primary fw-semibold" style="font-size:0.72rem;">
                                             <i class="bi bi-box-arrow-up-right"></i> Full Size
                                         </a>
                                     </div>
-                                    <div class="ticket-image-preview-wrapper" onclick="window.open('/static/uploads/${ticket.image_filename}', '_blank')">
+                                    <div class="ticket-image-preview-wrapper" onclick="window.open('/static/uploads/${ticket.image_filename}','_blank')">
                                         <img src="/static/uploads/${ticket.image_filename}" loading="lazy" alt="Ticket Image" class="ticket-thumbnail">
                                         <div class="image-hover-hint"><i class="bi bi-zoom-in me-1"></i> Zoom</div>
                                     </div>
@@ -1238,8 +1324,7 @@
                             <div class="info-item">
                                 <span class="info-label"><i class="bi bi-check2-circle me-1"></i>Fixed At</span>
                                 <span class="info-value">${new Date(ticket.fixed_at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
-                            </div>
-                            ` : ''}
+                            </div>` : ''}
                         </div>
                         <div class="description-section mb-2">
                             <span class="info-label"><i class="bi bi-chat-left-text me-1"></i>Description</span>
@@ -1247,9 +1332,9 @@
                         </div>
                     `;
                 }
-                
+
+                // Write body HTML — the cached Modal instance is unaffected by this.
                 modalBody.innerHTML = `
-                    <!-- Top Section: Ticket ID & Status -->
                     <div class="d-flex justify-content-between align-items-center mb-1">
                         <div class="d-flex align-items-center gap-2">
                             <span class="info-label">Ticket ID</span>
@@ -1262,13 +1347,8 @@
                             </span>
                         </div>
                     </div>
-
-                    <!-- Horizontal Divider -->
                     <hr class="ticket-modal-divider my-2">
-
-                    <!-- Main Body Content (2-Column if Image, 1-Column if no Image) -->
                     ${bodyContentHtml}
-                    
                     ${(ticket.status === 'fixed' && !ticket.rating && ticket.assigned_professional_id) ? `
                         <div class="w-100 mt-2 p-2.5 bg-light rounded-3 border text-center" id="ratingSection">
                             <h6 class="fw-bold mb-1 small">Rate ${ticket.assigned_professional_name || 'Professional'}'s Work</h6>
@@ -1292,59 +1372,53 @@
                             ${ticket.rating_comment ? `<p class="fst-italic text-muted mb-0 small">"${ticket.rating_comment}"</p>` : ''}
                         </div>
                     ` : ''}
-
                     <div class="modal-actions-grid mt-3 pt-2">
-                        <a href="/admin/ticket/${ticket.id}/assign" 
-                           class="action-btn btn-assign ${(!ticket.assigned_professional_id && ['open', 'cancelled'].includes(ticket.status)) ? '' : 'disabled'}">
+                        <a href="/admin/ticket/${ticket.id}/assign"
+                           class="action-btn btn-assign ${(!ticket.assigned_professional_id && ['open','cancelled'].includes(ticket.status)) ? '' : 'disabled'}">
                             <i class="bi bi-person-plus-fill"></i> <span>Assign Tech</span>
                         </a>
-                        
-                        <button onclick="updateStatus(${ticket.id}, 'fixed')" 
-                                class="action-btn btn-resolve ${(ticket.status !== 'fixed') ? '' : 'disabled'}">
+                        <button onclick="updateStatus(${ticket.id}, 'fixed')"
+                                class="action-btn btn-resolve ${ticket.status !== 'fixed' ? '' : 'disabled'}">
                             <i class="bi bi-check-lg"></i> <span>Resolve</span>
                         </button>
-                        
-                        <a href="/admin/map?floor=${ticket.room_floor_id}&room=${ticket.room_number}" 
+                        <a href="/admin/map?floor=${ticket.room_floor_id}&room=${ticket.room_number}"
                            class="action-btn btn-map">
                             <i class="bi bi-geo-alt-fill"></i> <span>View Map</span>
                         </a>
-                        
-                        <button onclick="deleteTicket(${ticket.id})" 
+                        <button onclick="deleteTicket(${ticket.id})"
                                 class="action-btn btn-delete">
                             <i class="bi bi-trash-fill"></i> <span>Delete</span>
                         </button>
                     </div>
                 `;
-                
-                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                modal.show();
+
+                // Use the CACHED instance — not getOrCreateInstance() after innerHTML change.
+                ModalManager.showTicket();
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error loading ticket:', error);
             alert('Failed to load ticket details');
         })
-        .finally(() => {
-            isTicketModalLoading = false;
-        });
+        .finally(() => ModalManager.setLoading(false));
     }
 
+    // -------------------------------------------------------------------
+    // viewCancellationReport
+    // -------------------------------------------------------------------
     function viewCancellationReport(ticketId) {
-        if (isTicketModalLoading) return;
-        isTicketModalLoading = true;
+        if (ModalManager.isLoading()) return;
+        ModalManager.setLoading(true);
 
         fetch(`/admin/ticket/${ticketId}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
                 const ticket = (data.data && data.data.ticket) || data.ticket;
-                const modalEl = document.getElementById('cancellationModal');
                 const modalBody = document.getElementById('cancellationModalBody');
                 modalBody.innerHTML = `
                     <div class="text-center mb-4">
-                        <div class="display-4 text-danger mb-2">
-                            <i class="bi bi-person-x-fill"></i>
-                        </div>
+                        <div class="display-4 text-danger mb-2"><i class="bi bi-person-x-fill"></i></div>
                         <h4>Job Cancelled</h4>
                         <p class="text-muted">Ticket #${ticket.id}</p>
                     </div>
@@ -1356,7 +1430,7 @@
                         </div>
                         <div class="mb-3 p-3 bg-danger-subtle rounded-3 border border-danger shadow-sm">
                             <label class="form-label fw-bold text-danger d-block">Reason for Cancellation:</label>
-                            <p class="mb-0 text-body" style="font-size: 1.1rem; line-height: 1.5;">
+                            <p class="mb-0 text-body" style="font-size:1.1rem;line-height:1.5;">
                                 "${ticket.cancellation_reason || 'No reason provided.'}"
                             </p>
                         </div>
@@ -1365,22 +1439,19 @@
                         </div>
                     </div>
                 `;
-                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                modal.show();
+                ModalManager.showCancellation();
             } else {
                 alert('Error: ' + (data.error || 'Failed to load details'));
             }
         })
         .catch(error => {
-            console.error('Error:', error);
+            console.error('Error loading cancellation report:', error);
             alert('Failed to load cancellation details');
         })
-        .finally(() => {
-            isTicketModalLoading = false;
-        });
+        .finally(() => ModalManager.setLoading(false));
     }
 
-    // Attach to global window scope to ensure inline onclick handlers always work
+    // Expose to global scope for inline onclick handlers
     window.viewTicket = viewTicket;
     window.viewCancellationReport = viewCancellationReport;
     window.updateStatus = updateStatus;
@@ -1388,28 +1459,10 @@
     window.setRating = setRating;
     window.submitRating = submitRating;
 
-    // Modal backdrop cleanup to prevent screen freeze
-    document.addEventListener('DOMContentLoaded', function() {
-        ['ticketModal', 'cancellationModal'].forEach(id => {
-            const modalEl = document.getElementById(id);
-            if (modalEl) {
-                modalEl.addEventListener('hidden.bs.modal', function() {
-                    document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
-                });
-            }
-        });
-    });
-
-    // Check for ticket_id in URL to auto-open modal
+    // Check for ticket_id in URL to auto-open modal on load
     window.addEventListener('load', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const ticketId = urlParams.get('ticket_id');
-        if (ticketId) {
-            viewTicket(parseInt(ticketId));
-        }
+        const ticketId = new URLSearchParams(window.location.search).get('ticket_id');
+        if (ticketId) viewTicket(parseInt(ticketId));
     });
 
     // ==================== UNASSIGNED CLASSES FACULTY ALLOCATION ====================

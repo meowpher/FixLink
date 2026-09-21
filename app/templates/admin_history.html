@@ -737,5 +737,34 @@
             }
         });
     });
+
+    // BULLETPROOF MODAL CLEANUP (Root Cause Fix for Screen Freeze)
+    document.addEventListener('click', function(e) {
+        const closeBtn = e.target.closest('[data-bs-dismiss="modal"]');
+        if (closeBtn) {
+            const modalEl = closeBtn.closest('.modal');
+            if (modalEl) {
+                const bsModal = bootstrap.Modal.getInstance(modalEl);
+                if (bsModal) bsModal.hide();
+                setTimeout(() => forceModalCleanup(modalEl), 100);
+            }
+        }
+        if (e.target.classList.contains('modal')) {
+            const bsModal = bootstrap.Modal.getInstance(e.target);
+            if (bsModal) bsModal.hide();
+            setTimeout(() => forceModalCleanup(e.target), 100);
+        }
+    });
+
+    function forceModalCleanup(modalEl) {
+        if (modalEl) {
+            modalEl.classList.remove('show');
+            modalEl.style.display = 'none';
+        }
+        document.querySelectorAll('.modal-backdrop').forEach(b => b.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+    }
 </script>
 {% endblock %}

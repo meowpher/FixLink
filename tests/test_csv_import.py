@@ -250,7 +250,7 @@ class TestCSVTimetableImport(unittest.TestCase):
             sess['user_role'] = User.ROLE_ADMIN
             sess['is_admin'] = True
 
-        res = self.client.get('/admin/classroom-management')
+        res = self.client.get('/admin/classroom-management', follow_redirects=True)
         self.assertEqual(res.status_code, 200)
         content = res.data.decode('utf-8')
 

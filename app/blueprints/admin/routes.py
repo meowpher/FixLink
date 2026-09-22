@@ -200,25 +200,32 @@ def dashboard():
                          category_filter=category_filter)
 
 
-@admin_bp.route('/classroom-management')
-@admin_bp.route('/cmm')
-@admin_required
-def classroom_management():
-    """Classroom Management Module (CMM) - Manage timetables, CSV import, deletion & faculty allocations."""
+def _get_faculty_handle_context():
+    """Build unified dataset required by the Faculty Admin Handle console."""
     from sqlalchemy.orm import joinedload
-    from ...models import Timetable, Floor, Room, User, Building
+    from ...models import Timetable, Floor, Room, User, Building, NoShowStrike, SuspensionLog, EventBooking
+    from datetime import date, datetime, timedelta
+    import pytz
 
-    # Unassigned classes requiring faculty allocation
+    # 1. Event Approvals Data
+    pending_events = EventBooking.query.filter_by(status='Pending').order_by(EventBooking.start_date.asc()).all()
+    upcoming_events = EventBooking.query.filter(
+        EventBooking.status == 'Approved',
+        EventBooking.end_date >= date.today()
+    ).order_by(EventBooking.start_date.asc()).all()
+    history_events = EventBooking.query.filter(
+        (EventBooking.status.in_(['Rejected', 'Cancelled'])) | 
+        ((EventBooking.status == 'Approved') & (EventBooking.end_date < date.today()))
+    ).order_by(EventBooking.created_at.desc()).limit(50).all()
+
+    # 2. CMM Data
     unassigned_classes = Timetable.query.options(joinedload(Timetable.room)).filter(
         Timetable.faculty_id.is_(None)
     ).order_by(Timetable.day_of_week, Timetable.start_time).all()
 
     all_faculties = User.query.filter_by(role=User.ROLE_FACULTY).order_by(User.name).all()
 
-    # Get floors and rooms for Delete Timetable Modal scope filters
     vyas = Building.query.filter_by(name='Vyas').first()
-    floors = []
-    rooms = []
     if vyas:
         floors = Floor.query.options(joinedload(Floor.rooms)).filter_by(building_id=vyas.id).order_by(Floor.level).all()
         rooms = Room.query.join(Floor).filter(Floor.building_id == vyas.id).order_by(Room.number).all()
@@ -226,7 +233,6 @@ def classroom_management():
         floors = Floor.query.options(joinedload(Floor.rooms)).order_by(Floor.level).all()
         rooms = Room.query.order_by(Room.number).all()
 
-    # Prepare floor-grouped academic rooms for Room filter (exclude lifts, washrooms, MR, ENCAVE)
     academic_floors = []
     for f in floors:
         floor_rooms = []
@@ -279,18 +285,160 @@ def classroom_management():
     ]
     all_faculties_data = [{'id': fac.id, 'name': fac.name} for fac in all_faculties]
 
-    return render_template(
-        'admin_cmm.html',
-        unassigned_classes_data=unassigned_classes_data,
-        all_faculties_data=all_faculties_data,
-        all_faculties=all_faculties,
-        floors=floors,
-        academic_floors=academic_floors,
-        rooms=rooms,
-        total_timetables_count=total_timetables_count,
-        assigned_count=assigned_count,
-        unassigned_count=unassigned_count
+    # 3. Ghost Protocol Data
+    IST = pytz.timezone('Asia/Kolkata')
+    now_utc = datetime.utcnow()
+    cutoff_30d = now_utc - timedelta(days=30)
+
+    strike_counts = (
+        db.session.query(
+            NoShowStrike.faculty_id,
+            func.count(NoShowStrike.id).label('total_strikes'),
+            func.max(NoShowStrike.created_at).label('last_strike_at')
+        )
+        .filter(NoShowStrike.created_at >= cutoff_30d)
+        .group_by(NoShowStrike.faculty_id)
+        .order_by(func.count(NoShowStrike.id).desc())
+        .all()
     )
+
+    flagged_faculty = []
+    seen_ids = set()
+    for row in strike_counts:
+        user = db.session.get(User, row.faculty_id)
+        if not user:
+            continue
+        seen_ids.add(user.id)
+        all_time = NoShowStrike.query.filter_by(faculty_id=row.faculty_id).count()
+        recent_strikes = NoShowStrike.query.filter(
+            NoShowStrike.faculty_id == row.faculty_id,
+            NoShowStrike.created_at >= cutoff_30d
+        ).order_by(NoShowStrike.created_at.desc()).all()
+
+        suspended = user.adhoc_suspended_until and user.adhoc_suspended_until > now_utc
+        suspended_until_ist = None
+        if user.adhoc_suspended_until:
+            dt = user.adhoc_suspended_until
+            suspended_until_ist = IST.localize(dt) if dt.tzinfo is None else dt.astimezone(IST)
+
+        flagged_faculty.append({
+            'user': user,
+            'strikes_30d': row.total_strikes,
+            'all_time_strikes': all_time,
+            'last_strike_at': row.last_strike_at,
+            'is_suspended': suspended,
+            'suspended_until': suspended_until_ist,
+            'suspension_reason': getattr(user, 'adhoc_suspension_reason', None),
+            'recent_strikes': recent_strikes
+        })
+
+    suspended_extra = User.query.filter(
+        User.adhoc_suspended_until > now_utc,
+        User.role == User.ROLE_FACULTY
+    ).all()
+    for user in suspended_extra:
+        if user.id not in seen_ids:
+            all_time = NoShowStrike.query.filter_by(faculty_id=user.id).count()
+            dt = user.adhoc_suspended_until
+            suspended_until_ist = IST.localize(dt) if dt.tzinfo is None else dt.astimezone(IST)
+            flagged_faculty.append({
+                'user': user,
+                'strikes_30d': 0,
+                'all_time_strikes': all_time,
+                'last_strike_at': None,
+                'is_suspended': True,
+                'suspended_until': suspended_until_ist,
+                'suspension_reason': getattr(user, 'adhoc_suspension_reason', None),
+                'recent_strikes': []
+            })
+
+    total_strikes_ever = NoShowStrike.query.count()
+    strikes_30d_total = NoShowStrike.query.filter(NoShowStrike.created_at >= cutoff_30d).count()
+    currently_suspended_count = User.query.filter(
+        User.adhoc_suspended_until > now_utc,
+        User.role == User.ROLE_FACULTY
+    ).count()
+    red_flag_count = len([f for f in flagged_faculty if f['strikes_30d'] >= 3])
+
+    suspension_history = (
+        SuspensionLog.query
+        .options(joinedload(SuspensionLog.faculty), joinedload(SuspensionLog.lifted_by))
+        .order_by(SuspensionLog.created_at.desc())
+        .limit(200)
+        .all()
+    )
+    history_display = []
+    for entry in suspension_history:
+        created_ist = IST.localize(entry.created_at) if entry.created_at.tzinfo is None else entry.created_at.astimezone(IST)
+        until_ist = None
+        if entry.suspended_until:
+            until_ist = IST.localize(entry.suspended_until) if entry.suspended_until.tzinfo is None else entry.suspended_until.astimezone(IST)
+        history_display.append({
+            'entry': entry,
+            'created_ist': created_ist,
+            'suspended_until_ist': until_ist,
+        })
+
+    # 4. Room Booking History Data
+    from ...models import RoomBooking
+    booking_history_list = RoomBooking.query.options(
+        joinedload(RoomBooking.faculty),
+        joinedload(RoomBooking.room).joinedload(Room.floor)
+    ).order_by(RoomBooking.slot_start.desc()).limit(150).all()
+    total_bookings_count = RoomBooking.query.count()
+
+    return {
+        'pending_events': pending_events,
+        'upcoming_events': upcoming_events,
+        'history_events': history_events,
+        'unassigned_classes_data': unassigned_classes_data,
+        'all_faculties_data': all_faculties_data,
+        'all_faculties': all_faculties,
+        'floors': floors,
+        'academic_floors': academic_floors,
+        'rooms': rooms,
+        'total_timetables_count': total_timetables_count,
+        'assigned_count': assigned_count,
+        'unassigned_count': unassigned_count,
+        'flagged_faculty': flagged_faculty,
+        'total_strikes_ever': total_strikes_ever,
+        'strikes_30d_total': strikes_30d_total,
+        'currently_suspended_count': currently_suspended_count,
+        'red_flag_count': red_flag_count,
+        'now_utc': now_utc,
+        'suspension_history': history_display,
+        'booking_history_list': booking_history_list,
+        'total_bookings_count': total_bookings_count
+    }
+
+
+@admin_bp.route('/faculty-admin-handle')
+@admin_bp.route('/faculty-handle')
+@admin_required
+def faculty_admin_handle():
+    """Unified Faculty Admin Handle console combining Event Approvals, CMM, Ghost Protocol, and Booking History."""
+    raw_tab = request.args.get('tab', 'events').strip().lower()
+    if raw_tab in ['events', 'event', 'approvals']:
+        active_tab = 'events'
+    elif raw_tab in ['cmm', 'classroom', 'timetables', 'timetable', 'classes']:
+        active_tab = 'cmm'
+    elif raw_tab in ['ghost', 'ghost_protocol', 'ghost-protocol', 'strikes']:
+        active_tab = 'ghost'
+    elif raw_tab in ['bookings', 'booking', 'booking_history', 'booking-history', 'reservations']:
+        active_tab = 'bookings'
+    else:
+        active_tab = 'events'
+
+    ctx = _get_faculty_handle_context()
+    return render_template('admin/faculty_handle.html', active_tab=active_tab, **ctx)
+
+
+@admin_bp.route('/classroom-management')
+@admin_bp.route('/cmm')
+@admin_required
+def classroom_management():
+    """Redirect to unified Faculty Admin Handle CMM tab."""
+    return redirect(url_for('admin.faculty_admin_handle', tab='cmm'))
 
 
 
@@ -2258,445 +2406,6 @@ def bulk_assign_faculty():
 # PHASE 3: WIDE SUMMARY BULK APPROVAL PIPELINE
 # =========================================================================
 
-@admin_bp.route('/department-approvals')
-@admin_required
-def department_approvals():
-    """Admin Department Approvals view - Wide Summary grouped data table and bulk approval."""
-    pending_submissions = ScheduleSubmission.query.filter_by(
-        status=ScheduleSubmission.STATUS_PENDING
-    ).order_by(ScheduleSubmission.submitted_at.asc()).all()
-    
-    total_hours_in_queue = sum(s.total_hours for s in pending_submissions)
-    
-    # Check for any clashes among pending submissions
-    # (Pre-validated by Phase 2, but verified for absolute guarantee)
-    enriched_submissions = []
-    for sub in pending_submissions:
-        slots = sub.schedule_data if isinstance(sub.schedule_data, list) else []
-        subjects = list(set(s.get('subject') for s in slots if s.get('subject')))
-        courses = list(set(s.get('course') for s in slots if s.get('course')))
-        divisions = list(set(s.get('division') for s in slots if s.get('division')))
-        rooms = list(set(s.get('room_number') for s in slots if s.get('room_number')))
-        
-        # Primary department classification
-        dept_name = "Computer Science & Engineering"
-        if any('BCA' in str(c) for c in courses):
-            dept_name = "Department of Computer Applications (BCA/MCA)"
-        elif any('BSc' in str(c) or 'MSc' in str(c) for c in courses):
-            dept_name = "Department of Science & Data Tech"
-            
-        enriched_submissions.append({
-            'submission': sub,
-            'faculty': sub.faculty,
-            'department': dept_name,
-            'subjects_summary': ", ".join(subjects[:3]) + (f" (+{len(subjects)-3} more)" if len(subjects) > 3 else ""),
-            'rooms_summary': ", ".join(rooms[:4]) + (f" (+{len(rooms)-4} more)" if len(rooms) > 4 else ""),
-            'courses_summary': ", ".join(courses[:2]),
-            'divisions_summary': ", ".join(divisions[:3]),
-            'is_workload_met': sub.total_hours >= (sub.faculty.minimum_required_hours if sub.faculty else 12)
-        })
-
-    return render_template(
-        'admin/department_approvals.html',
-        submissions=enriched_submissions,
-        pending_count=len(pending_submissions),
-        total_hours=total_hours_in_queue
-    )
-
-
-@admin_bp.route('/api/approvals/pending', methods=['GET'])
-@admin_bp.route('/api/submissions/pending', methods=['GET'])
-@admin_required
-@handle_api_errors
-def get_pending_submissions_api():
-    """Returns enriched JSON payload of all pending schedule submissions with connection safety."""
-    try:
-        pending = ScheduleSubmission.query.filter_by(
-            status=ScheduleSubmission.STATUS_PENDING
-        ).order_by(ScheduleSubmission.submitted_at.asc()).all()
-        
-        data = []
-        for sub in pending:
-            d = sub.to_dict()
-            slots = sub.schedule_data if isinstance(sub.schedule_data, list) else []
-            subjects = list(set(s.get('subject') for s in slots if s.get('subject')))
-            courses = list(set(s.get('course') for s in slots if s.get('course')))
-            divisions = list(set(s.get('division') for s in slots if s.get('division')))
-            rooms = list(set(s.get('room_number') for s in slots if s.get('room_number')))
-            
-            dept_name = "Computer Science & Engineering"
-            if any('BCA' in str(c) for c in courses):
-                dept_name = "Department of Computer Applications (BCA/MCA)"
-            elif any('BSc' in str(c) or 'MSc' in str(c) for c in courses):
-                dept_name = "Department of Science & Data Tech"
-                
-            d['department'] = dept_name
-            d['faculty_name'] = sub.faculty.name if sub.faculty else 'Faculty'
-            d['faculty_email'] = sub.faculty.email if sub.faculty else ''
-            d['faculty_avatar'] = sub.faculty.name[0].upper() if (sub.faculty and sub.faculty.name) else 'F'
-            d['subjects_summary'] = ", ".join(subjects[:3]) + (f" (+{len(subjects)-3} more)" if len(subjects) > 3 else "")
-            d['rooms_summary'] = ", ".join(rooms[:4]) + (f" (+{len(rooms)-4} more)" if len(rooms) > 4 else "")
-            d['courses_summary'] = ", ".join(courses[:2])
-            d['divisions_summary'] = ", ".join(divisions[:3])
-            d['is_workload_met'] = sub.total_hours >= (sub.faculty.minimum_required_hours if sub.faculty else 12)
-            d['min_hours'] = sub.faculty.minimum_required_hours if sub.faculty else 12
-            d['submitted_time_ago'] = sub.submitted_at.strftime('%b %d, %I:%M %p') if sub.submitted_at else ''
-            data.append(d)
-            
-        return api_response(
-            success=True,
-            data=data,
-            count=len(data),
-            total_hours=sum(s.total_hours for s in pending)
-        )
-    finally:
-        db.session.close()
-
-
-@admin_bp.route('/api/submissions/bulk-approve', methods=['POST'])
-@admin_required
-@handle_api_errors
-def bulk_approve_submissions():
-    """
-    Phase 3: Bulk Approves all pending faculty schedule submissions in a single atomic transaction.
-    Commits slots into live timetables table, instantly updating SVG floor plans & Ad-Hoc room availability.
-    Uses strict row-level locking (with_for_update(nowait=True)) to prevent concurrent approval collisions.
-    """
-    from sqlalchemy.exc import OperationalError, DBAPIError
-    
-    admin_id = session.get('user_id')
-    data = request.get_json() or {}
-    submission_ids = data.get('submission_ids')  # Optional list of specific IDs; if None, approves all pending
-    
-    try:
-        query = ScheduleSubmission.query.filter_by(status=ScheduleSubmission.STATUS_PENDING)
-        if submission_ids and isinstance(submission_ids, list) and len(submission_ids) > 0:
-            query = query.filter(ScheduleSubmission.id.in_(submission_ids))
-            
-        try:
-            submissions_to_approve = query.with_for_update(nowait=True).all()
-        except (OperationalError, DBAPIError):
-            db.session.rollback()
-            return api_response(
-                success=False,
-                error="Conflict: Another administrator is currently processing one or more selected schedule submissions. Please refresh.",
-                status=409
-            )
-        
-        if not submissions_to_approve:
-            return api_response(
-                success=False,
-                error="No pending submissions found to approve (records may have already been approved or returned).",
-                status=409
-            )
-            
-        # Verify strict pending status across batch
-        for s in submissions_to_approve:
-            if s.status != ScheduleSubmission.STATUS_PENDING:
-                db.session.rollback()
-                return api_response(
-                    success=False,
-                    error=f"Conflict: Submission #{s.id} is no longer pending review.",
-                    status=409
-                )
-            
-        approved_faculty_names = []
-        affected_room_ids = set()
-        total_slots_created = 0
-        now_utc = datetime.utcnow()
-        
-        for sub in submissions_to_approve:
-            faculty = sub.faculty
-            if not faculty:
-                continue
-                
-            # 1. Clear existing live timetables for this faculty to ensure clean replacement
-            Timetable.query.filter_by(faculty_id=faculty.id).delete()
-            
-            # 2. Insert approved slots into live Timetable table
-            slots = sub.schedule_data if isinstance(sub.schedule_data, list) else []
-            for s in slots:
-                room_id = s.get('room_id')
-                if not room_id and s.get('room_number'):
-                    r_obj = Room.query.filter(Room.number.ilike(str(s.get('room_number')).strip())).first()
-                    if r_obj:
-                        room_id = r_obj.id
-                try:
-                    day_of_week = int(s.get('day_of_week', 0))
-                except (ValueError, TypeError):
-                    day_of_week = 0
-                    
-                start_str = s.get('start_time')
-                if not start_str and s.get('time_slot'):
-                    ts = str(s.get('time_slot'))
-                    start_str = ts.split('-')[0].strip() if '-' in ts else ts.strip()
-                    
-                if not start_str:
-                    start_str = '09:00'
-                else:
-                    start_str = str(start_str).strip()
-                    if ':' in start_str:
-                        parts = start_str.split(':')
-                        start_str = f"{int(parts[0]):02d}:{int(parts[1]):02d}"
-                        
-                    try:
-                        duration = int(s.get('duration', 1) or 1)
-                    except (ValueError, TypeError):
-                        duration = 1
-                        
-                    subject = s.get('subject', 'Assigned Lecture')
-                    course = s.get('course')
-                    division = s.get('division')
-                    
-                    if not room_id:
-                        continue
-                        
-                    try:
-                        start_dt = datetime.strptime(start_str, '%H:%M')
-                    except Exception:
-                        start_dt = datetime.strptime('09:00', '%H:%M')
-                        
-                    start_t = start_dt.time()
-                    end_t = (start_dt + timedelta(hours=duration)).time()
-                    
-                    new_tt = Timetable(
-                        faculty_id=faculty.id,
-                        room_id=room_id,
-                        day_of_week=day_of_week,
-                        start_time=start_t,
-                        end_time=end_t,
-                        subject=subject,
-                        course=course,
-                        division=division
-                    )
-                    db.session.add(new_tt)
-                    affected_room_ids.add(room_id)
-                    total_slots_created += 1
-                    
-            # 3. Update submission record to approved
-            sub.status = ScheduleSubmission.STATUS_APPROVED
-            sub.reviewed_at = now_utc
-            sub.reviewed_by_id = admin_id
-            sub.admin_notes = None
-            
-            # 4. Notify Faculty
-            notif = Notification(
-                user_id=faculty.id,
-                title="Timetable Approved",
-                message=f"Your weekly semester schedule ({sub.total_hours} hrs) has been officially approved and published to the live university grid.",
-                type=Notification.TYPE_SYSTEM,
-                link="/faculty/dashboard"
-            )
-            db.session.add(notif)
-            approved_faculty_names.append(faculty.name)
-            
-        db.session.commit()
-        
-        # 5. Broadcast real-time room status updates to live SVG map clients
-        for rid in affected_room_ids:
-            try:
-                r = db.session.get(Room, rid)
-                if r:
-                    emit_room_status_change(r, r.current_occupancy_status)
-            except Exception:
-                pass
-                
-        return api_response(
-            success=True,
-            message=f"Successfully bulk-approved {len(approved_faculty_names)} faculty schedules ({total_slots_created} total class slots committed). Live maps and availability engine updated.",
-            data={
-                "approved_count": len(approved_faculty_names),
-                "approved_faculty": approved_faculty_names,
-                "total_slots_committed": total_slots_created
-            }
-        )
-    except Exception as e:
-        db.session.rollback()
-        raise e
-    finally:
-        db.session.close()
-
-
-@admin_bp.route('/api/submissions/<int:submission_id>/approve', methods=['POST'])
-@admin_required
-@handle_api_errors
-def approve_single_submission(submission_id):
-    """Approve a single faculty schedule submission with row-level lock and connection safety."""
-    from sqlalchemy.exc import OperationalError, DBAPIError
-    try:
-        try:
-            sub = ScheduleSubmission.query.filter_by(id=submission_id).with_for_update(nowait=True).first()
-        except (OperationalError, DBAPIError):
-            db.session.rollback()
-            return api_response(
-                success=False,
-                error="Conflict: Another administrator is currently modifying this submission. Please refresh.",
-                status=409
-            )
-            
-        if not sub or sub.status != ScheduleSubmission.STATUS_PENDING:
-            return api_response(
-                success=False,
-                error="Submission is no longer pending review or has already been processed.",
-                status=409
-            )
-            
-        admin_id = session.get('user_id')
-        faculty = sub.faculty
-        now_utc = datetime.utcnow()
-        
-        # Clear previous timetables
-        Timetable.query.filter_by(faculty_id=faculty.id).delete()
-        
-        # Insert slots
-        slots = sub.schedule_data if isinstance(sub.schedule_data, list) else []
-        affected_room_ids = set()
-        for s in slots:
-            room_id = s.get('room_id')
-            if not room_id and s.get('room_number'):
-                r_obj = Room.query.filter(Room.number.ilike(str(s.get('room_number')).strip())).first()
-                if r_obj:
-                    room_id = r_obj.id
-                    
-            try:
-                day_of_week = int(s.get('day_of_week', 0))
-            except (ValueError, TypeError):
-                day_of_week = 0
-                
-            start_str = s.get('start_time')
-            if not start_str and s.get('time_slot'):
-                ts = str(s.get('time_slot'))
-                start_str = ts.split('-')[0].strip() if '-' in ts else ts.strip()
-                
-            if not start_str:
-                start_str = '09:00'
-            else:
-                start_str = str(start_str).strip()
-                if ':' in start_str:
-                    parts = start_str.split(':')
-                    start_str = f"{int(parts[0]):02d}:{int(parts[1]):02d}"
-                    
-            try:
-                duration = int(s.get('duration', 1) or 1)
-            except (ValueError, TypeError):
-                duration = 1
-                
-            if not room_id:
-                continue
-                
-            try:
-                start_dt = datetime.strptime(start_str, '%H:%M')
-            except Exception:
-                start_dt = datetime.strptime('09:00', '%H:%M')
-                
-            start_t = start_dt.time()
-            end_t = (start_dt + timedelta(hours=duration)).time()
-            
-            new_tt = Timetable(
-                faculty_id=faculty.id,
-                room_id=room_id,
-                day_of_week=day_of_week,
-                start_time=start_t,
-                end_time=end_t,
-                subject=s.get('subject', 'Assigned Lecture'),
-                course=s.get('course'),
-                division=s.get('division')
-            )
-            db.session.add(new_tt)
-            affected_room_ids.add(room_id)
-            
-        sub.status = ScheduleSubmission.STATUS_APPROVED
-        sub.reviewed_at = now_utc
-        sub.reviewed_by_id = admin_id
-        
-        notif = Notification(
-            user_id=faculty.id,
-            title="Timetable Approved",
-            message=f"Your weekly semester schedule ({sub.total_hours} hrs) has been officially approved and published to the live university grid.",
-            type=Notification.TYPE_SYSTEM,
-            link="/faculty/dashboard"
-        )
-        db.session.add(notif)
-        db.session.commit()
-        
-        for rid in affected_room_ids:
-            try:
-                r = db.session.get(Room, rid)
-                if r:
-                    emit_room_status_change(r, r.current_occupancy_status)
-            except Exception:
-                pass
-                
-        return api_response(
-            success=True,
-            message=f"Schedule for {faculty.name} approved successfully.",
-            data=sub.to_dict()
-        )
-    except Exception as e:
-        db.session.rollback()
-        raise e
-    finally:
-        db.session.close()
-
-
-@admin_bp.route('/api/submissions/<int:submission_id>/reject', methods=['POST'])
-@admin_required
-@handle_api_errors
-def reject_single_submission(submission_id):
-    """Rejects a faculty schedule submission with feedback notes for correction with row-lock and connection safety."""
-    from sqlalchemy.exc import OperationalError, DBAPIError
-    try:
-        try:
-            sub = ScheduleSubmission.query.filter_by(id=submission_id).with_for_update(nowait=True).first()
-        except (OperationalError, DBAPIError):
-            db.session.rollback()
-            return api_response(
-                success=False,
-                error="Conflict: Another administrator is currently modifying this submission. Please refresh.",
-                status=409
-            )
-            
-        if not sub or sub.status != ScheduleSubmission.STATUS_PENDING:
-            return api_response(
-                success=False,
-                error="Submission is no longer pending review or has already been processed.",
-                status=409
-            )
-            
-        admin_id = session.get('user_id')
-        data = request.get_json() or {}
-        admin_notes = data.get('admin_notes', 'Please revise your schedule allocations and re-submit.')
-        
-        sub.status = ScheduleSubmission.STATUS_REJECTED
-        sub.reviewed_at = datetime.utcnow()
-        sub.reviewed_by_id = admin_id
-        sub.admin_notes = admin_notes
-        
-        # Notify faculty
-        if sub.faculty:
-            notif = Notification(
-                user_id=sub.faculty.id,
-                title="Timetable Submission Needs Revision",
-                message=f"Your schedule submission was returned for revision by the Department Administrator: \"{admin_notes}\"",
-                type=Notification.TYPE_SYSTEM,
-                link="/faculty/dashboard"
-            )
-            db.session.add(notif)
-            
-        db.session.commit()
-        
-        return api_response(
-            success=True,
-            message=f"Submission returned to {sub.faculty.name if sub.faculty else 'faculty'} for revision.",
-            data=sub.to_dict()
-        )
-    except Exception as e:
-        db.session.rollback()
-        raise e
-    finally:
-        db.session.close()
-
-
 # =========================================================================
 # GHOST PROTOCOL MANAGEMENT CONSOLE
 # =========================================================================
@@ -2704,119 +2413,8 @@ def reject_single_submission(submission_id):
 @admin_bp.route('/ghost-protocol')
 @admin_required
 def ghost_protocol():
-    """Ghost Protocol Management Console — view flagged faculty, strike history, and manage suspensions."""
-    from ...models import NoShowStrike, SuspensionLog
-    from sqlalchemy.orm import joinedload
-
-    import pytz
-    IST = pytz.timezone('Asia/Kolkata')
-    now_utc = datetime.utcnow()
-    cutoff_30d = now_utc - timedelta(days=30)
-
-    # 1. All faculty with strikes in last 30 days, grouped by faculty
-    strike_counts = (
-        db.session.query(
-            NoShowStrike.faculty_id,
-            func.count(NoShowStrike.id).label('total_strikes'),
-            func.max(NoShowStrike.created_at).label('last_strike_at')
-        )
-        .filter(NoShowStrike.created_at >= cutoff_30d)
-        .group_by(NoShowStrike.faculty_id)
-        .order_by(func.count(NoShowStrike.id).desc())
-        .all()
-    )
-
-    flagged_faculty = []
-    seen_ids = set()
-    for row in strike_counts:
-        user = db.session.get(User, row.faculty_id)
-        if not user:
-            continue
-        seen_ids.add(user.id)
-        all_time = NoShowStrike.query.filter_by(faculty_id=row.faculty_id).count()
-        recent_strikes = NoShowStrike.query.filter(
-            NoShowStrike.faculty_id == row.faculty_id,
-            NoShowStrike.created_at >= cutoff_30d
-        ).order_by(NoShowStrike.created_at.desc()).all()
-
-        suspended = user.adhoc_suspended_until and user.adhoc_suspended_until > now_utc
-        suspended_until_ist = None
-        if user.adhoc_suspended_until:
-            dt = user.adhoc_suspended_until
-            suspended_until_ist = IST.localize(dt) if dt.tzinfo is None else dt.astimezone(IST)
-
-        flagged_faculty.append({
-            'user': user,
-            'strikes_30d': row.total_strikes,
-            'all_time_strikes': all_time,
-            'last_strike_at': row.last_strike_at,
-            'is_suspended': suspended,
-            'suspended_until': suspended_until_ist,
-            'suspension_reason': getattr(user, 'adhoc_suspension_reason', None),
-            'recent_strikes': recent_strikes
-        })
-
-    # 2. Faculty currently suspended but outside 30d window (no recent strikes)
-    suspended_extra = User.query.filter(
-        User.adhoc_suspended_until > now_utc,
-        User.role == User.ROLE_FACULTY
-    ).all()
-    for user in suspended_extra:
-        if user.id not in seen_ids:
-            all_time = NoShowStrike.query.filter_by(faculty_id=user.id).count()
-            dt = user.adhoc_suspended_until
-            suspended_until_ist = IST.localize(dt) if dt.tzinfo is None else dt.astimezone(IST)
-            flagged_faculty.append({
-                'user': user,
-                'strikes_30d': 0,
-                'all_time_strikes': all_time,
-                'last_strike_at': None,
-                'is_suspended': True,
-                'suspended_until': suspended_until_ist,
-                'suspension_reason': getattr(user, 'adhoc_suspension_reason', None),
-                'recent_strikes': []
-            })
-
-    # 3. System-wide stats
-    total_strikes_ever = NoShowStrike.query.count()
-    strikes_30d_total = NoShowStrike.query.filter(NoShowStrike.created_at >= cutoff_30d).count()
-    currently_suspended_count = User.query.filter(
-        User.adhoc_suspended_until > now_utc,
-        User.role == User.ROLE_FACULTY
-    ).count()
-    red_flag_count = len([f for f in flagged_faculty if f['strikes_30d'] >= 3])
-
-    # 4. Permanent suspension history log (all events, newest first)
-    suspension_history = (
-        SuspensionLog.query
-        .options(joinedload(SuspensionLog.faculty), joinedload(SuspensionLog.lifted_by))
-        .order_by(SuspensionLog.created_at.desc())
-        .limit(200)
-        .all()
-    )
-    # Convert timestamps to IST for display
-    history_display = []
-    for entry in suspension_history:
-        created_ist = IST.localize(entry.created_at) if entry.created_at.tzinfo is None else entry.created_at.astimezone(IST)
-        until_ist = None
-        if entry.suspended_until:
-            until_ist = IST.localize(entry.suspended_until) if entry.suspended_until.tzinfo is None else entry.suspended_until.astimezone(IST)
-        history_display.append({
-            'entry': entry,
-            'created_ist': created_ist,
-            'suspended_until_ist': until_ist,
-        })
-
-    return render_template(
-        'admin/ghost_protocol.html',
-        flagged_faculty=flagged_faculty,
-        total_strikes_ever=total_strikes_ever,
-        strikes_30d_total=strikes_30d_total,
-        currently_suspended_count=currently_suspended_count,
-        red_flag_count=red_flag_count,
-        now_utc=now_utc,
-        suspension_history=history_display
-    )
+    """Redirect to unified Faculty Admin Handle Ghost Protocol tab."""
+    return redirect(url_for('admin.faculty_admin_handle', tab='ghost'))
 
 
 @admin_bp.route('/api/ghost-protocol/lift-suspension/<int:faculty_id>', methods=['POST'])
@@ -2901,26 +2499,8 @@ def clear_faculty_strikes(faculty_id):
 @admin_bp.route('/events', methods=['GET'])
 @admin_required
 def manage_events():
-    from ...models import EventBooking
-    from datetime import date
-    
-    pending_events = EventBooking.query.filter_by(status='Pending').order_by(EventBooking.start_date.asc()).all()
-    
-    upcoming_events = EventBooking.query.filter(
-        EventBooking.status == 'Approved',
-        EventBooking.end_date >= date.today()
-    ).order_by(EventBooking.start_date.asc()).all()
-    
-    history_events = EventBooking.query.filter(
-        (EventBooking.status == 'Rejected') | 
-        ((EventBooking.status == 'Approved') & (EventBooking.end_date < date.today()))
-    ).order_by(EventBooking.created_at.desc()).limit(50).all()
-    
-    return render_template('admin/events.html', 
-        pending_events=pending_events, 
-        upcoming_events=upcoming_events, 
-        history_events=history_events
-    )
+    """Redirect to unified Faculty Admin Handle Event Approvals tab."""
+    return redirect(url_for('admin.faculty_admin_handle', tab='events'))
 
 @admin_bp.route('/events/<int:event_id>/approve', methods=['POST'])
 @admin_required
@@ -3007,24 +2587,27 @@ def reject_event(event_id):
     from ...realtime import trigger_event
     
     data = request.json or {}
-    reason = data.get('reason', 'No reason provided.')
+    reason = data.get('reason', 'No reason provided.').strip()
     
     event = EventBooking.query.get(event_id)
     if not event:
         return api_response(success=False, error="Event not found.", status=404)
         
-    if event.status != 'Pending':
+    if event.status not in ['Pending', 'Approved']:
         return api_response(success=False, error=f"Event is already {event.status}.", status=400)
         
+    was_approved = (event.status == 'Approved')
     event.status = 'Rejected'
     event.rejection_reason = reason
     
     if event.faculty_id:
+        title = "Event Revoked / Rejected" if was_approved else "Event Rejected"
+        msg = f"Your approved event '{event.title}' was revoked/rejected by administration. Reason: {reason}" if was_approved else f"Your event request '{event.title}' was rejected. Reason: {reason}"
         notif = Notification(
             user_id=event.faculty_id,
             recipient_role='faculty',
-            title="Event Rejected",
-            message=f"Your event '{event.title}' was rejected. Reason: {reason}",
+            title=title,
+            message=msg,
             type='event_rejected'
         )
         db.session.add(notif)
@@ -3032,7 +2615,10 @@ def reject_event(event_id):
     
     db.session.commit()
     
-    return api_response(success=True, message="Event rejected successfully.")
+    if was_approved:
+        trigger_event('live-map', 'refresh-grid', {})
+    
+    return api_response(success=True, message="Event rejected successfully." if not was_approved else "Event revoked and rejected successfully.")
 
 
 

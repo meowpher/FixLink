@@ -1402,4 +1402,21 @@ class EventBooking(db.Model):
             return [r.id for r in rooms]
         else:
             return [r.id for r in self.rooms]
+
+    def get_target_rooms(self):
+        """Return list of Room objects targeted by this event booking."""
+        if self.booking_type == 'floors':
+            from sqlalchemy import select
+            floor_levels = [row.floor_number for row in db.session.execute(select(event_floors.c.floor_number).where(event_floors.c.event_id == self.id)).fetchall()]
+            from .models import Room, Floor
+            return Room.query.join(Floor).filter(Floor.level.in_(floor_levels)).all()
+        return self.rooms or []
+
+    def get_target_floors(self):
+        """Return list of floor levels targeted by this event booking."""
+        if self.booking_type == 'floors':
+            from sqlalchemy import select
+            return [row.floor_number for row in db.session.execute(select(event_floors.c.floor_number).where(event_floors.c.event_id == self.id)).fetchall()]
+        return []
+
 

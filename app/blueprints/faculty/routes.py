@@ -1649,3 +1649,58 @@ def book_event():
         logger.error(f"Event booking error: {e}")
         db.session.rollback()
         return api_response(success=False, error="Internal server error", status=500)
+
+
+@faculty_bp.route('/events/<int:event_id>/cancel', methods=['POST'])
+@faculty_login_required
+@handle_api_errors
+def cancel_event(event_id):
+    """Allow faculty to cancel their pending or approved events anytime."""
+    from ...models import EventBooking, Notification, User
+    from ...realtime import trigger_event
+    
+    faculty_id = session.get('user_id')
+    event = EventBooking.query.get(event_id)
+    if not event:
+        return api_response(success=False, error="Event not found.", status=404)
+        
+    if event.faculty_id != faculty_id:
+        return api_response(success=False, error="Unauthorized: You can only cancel your own events.", status=403)
+        
+    if event.status not in ['Pending', 'Approved']:
+        return api_response(success=False, error=f"Event cannot be cancelled as it is currently {event.status}.", status=400)
+        
+    was_approved = (event.status == 'Approved')
+    data = request.json or {}
+    reason = data.get('reason', '').strip()
+    
+    event.status = 'Cancelled'
+    event.rejection_reason = f"Cancelled by organizer: {reason}" if reason else "Cancelled by faculty organizer."
+    
+    # Notify administrators
+    admins = User.query.filter_by(role=User.ROLE_ADMIN).all()
+    faculty_name = session.get('user_name', 'Organizer')
+    for admin in admins:
+        notif = Notification(
+            user_id=admin.id,
+            recipient_role='admin',
+            title="Event Cancelled by Faculty",
+            message=f"Faculty {faculty_name} cancelled {('approved ' if was_approved else '')}event '{event.title}'.",
+            type='event_cancelled',
+            link='/admin/faculty-admin-handle?tab=events'
+        )
+        db.session.add(notif)
+        
+    db.session.commit()
+    
+    trigger_event('admin-notifications', 'event-cancelled', {
+        'title': event.title,
+        'faculty': faculty_name,
+        'was_approved': was_approved
+    })
+    
+    if was_approved:
+        trigger_event('live-map', 'refresh-grid', {})
+        
+    return api_response(success=True, message="Event has been successfully cancelled.")
+

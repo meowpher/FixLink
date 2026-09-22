@@ -1554,8 +1554,8 @@
                         <i class="bi bi-check2-circle me-1"></i>0 Stale Batches (All Within SLA)
                     </span>
                 {% endif %}
-                <a href="{{ url_for('admin.department_approvals') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                    <i class="bi bi-layout-text-window-reverse me-1"></i>Wide Summary Queue
+                <a href="{{ url_for('admin.classroom_management') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                    <i class="bi bi-building-gear me-1"></i>Classroom Management
                 </a>
             </div>
         </div>
@@ -1750,13 +1750,13 @@
                     <i class="bi bi-chevron-right"></i>
                 </div>
             </a>
-            <a href="{{ url_for('admin.department_approvals') }}" class="dev-tile tile-staff">
+            <a href="{{ url_for('admin.manage_events') }}" class="dev-tile tile-staff">
                 <div class="dev-tile-icon">
-                    <i class="bi bi-check2-all text-success"></i>
+                    <i class="bi bi-calendar-event text-primary"></i>
                 </div>
                 <div class="dev-tile-info">
-                    <div class="dev-tile-title">Department Approvals</div>
-                    <div class="dev-tile-desc">Bulk schedule approvals</div>
+                    <div class="dev-tile-title">Event Approvals</div>
+                    <div class="dev-tile-desc">Multi-room & floor events</div>
                 </div>
                 <div class="tile-arrow-box">
                     <i class="bi bi-chevron-right"></i>

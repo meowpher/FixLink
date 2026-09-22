@@ -7,16 +7,59 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.10** | 2026-09-22 | **Deployed** | Faculty Event Self-Cancellation & Admin Approved Event Revocation / Rejection (Allows faculty to cancel pending or approved events anytime with instant room deallocation and admin notifications; allows administrators to reject/revoke approved events anytime with live map refresh and faculty alerts). |
+| **v1.7.9** | 2026-09-22 | **Deployed** | Unified Faculty Admin Handle Console, UI Color System Harmonization & Booking History Integration (Consolidated Event Approvals, Classroom Management Module / CMM, Ghost Protocol, and Classroom Booking History into a unified portal with 4-tab navigation, adaptive Light/Dark mode color variables, fixed room number badges, and navbar Manage dropdown shortcuts). |
 | **v1.7.8** | 2026-09-22 | **Deployed** | FixLink-F Event Booking, Multi-Room Allocation, Admin Approval & Real-Time Notifications (Comprehensive faculty multi-room/floor reservation system, admin conflict-resolving approval panel with automatic lecture displacement detection, interactive navigation shortcuts, and global WebSocket notification bell). |
 | **v1.7.7** | 2026-09-22 | **Deployed** | Faculty Digital Twin Classroom Flashlight, Ad-Hoc Booking Highlighting & Tech Debt Cleanup (Interactive class locator with spotlight pulse on map, available-only green highlighting during ad-hoc booking, fixed duration dropdown, and purged obsolete timetable builder buttons/routes). |
-| **v1.7.6** | 2026-09-16 | **Deployed** | Admin CMM UX Architecture & Safety Hardening (Secured destructive timetable deletion with a warning modal; unified filter architecture by migrating course selector into sidebar; implemented Select column with bulk master checkbox; optimized Assign action buttons). |
 
 ---
 
 ## 2. Chronological Log of Pushed Updates
  
+### Release v1.7.10 (2026-09-22)
+- `feat(events)`: **Faculty Event Self-Cancellation & Admin Approved Event Revocation / Rejection**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Faculty Event Self-Cancellation (`/faculty/events/<id>/cancel`)**:
+     - Added endpoint `@faculty_bp.route('/events/<int:event_id>/cancel', methods=['POST'])` with strict authentication and ownership checks.
+     - Permits faculty to cancel their event requests both when `Pending` AND even after being `Approved`.
+     - Releases all reserved rooms/floors, records cancellation audit reasons, dispatches real-time alerts to administrators, and emits `live-map:refresh-grid`.
+  2. **Phase 2: Faculty Dashboard Interactive Cancellation**:
+     - Added a **Cancel Event** button on all `Pending` and `Approved` cards in the **My Event Requests & Allocations** section on the Faculty Dashboard.
+     - Added SweetAlert2 modal prompting faculty for an optional reason and confirming immediate room release.
+     - Added `Cancelled` badge support with custom status pills and notes.
+  3. **Phase 3: Admin Anytime Rejection & Revocation (`/admin/events/<id>/reject`)**:
+     - Updated `@admin_bp.route('/events/<int:event_id>/reject', methods=['POST'])` to accept rejection for both `Pending` AND `Approved` events.
+     - Added **Reject / Revoke Event** buttons on all approved and upcoming event cards in **Faculty Admin Handle** (`/admin/faculty-admin-handle?tab=events`) and the admin events template (`/admin/events`).
+     - Includes SweetAlert2 input prompt for rejection reason, updates the status to `Rejected`, notifies the organizer with explicit revocation context, and triggers immediate live map grid refresh.
+     - Updated the Admin History table to display both `Rejected` and `Cancelled` events with distinct badges and reasons.
+  4. **Phase 4: Automated Testing & Zero Regression Verification**:
+     - Created dedicated test suite in `tests/test_event_cancellation.py` covering faculty cancellation of pending/approved events, admin revocation of approved events, and authorization barrier enforcement.
+     - Executed the full automated test suite: 51/51 tests passing (100% success rate, 0 errors, 0 regressions).
+
+### Release v1.7.9 (2026-09-22)
+- `feat(faculty-admin-handle)`: **Unified Faculty Admin Handle Consolidation, Color System Fix & Booking History**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Master Navigation Consolidation & Booking History**:
+     - Consolidated admin subpages into a master portal titled **Faculty Admin Handle** (`/admin/faculty-admin-handle`).
+     - Added **Booking History** (`/admin/booking-history`) explicitly to the top navbar **Manage** dropdown, offcanvas drawer, and sidebar.
+  2. **Phase 2: UI Color System Harmonization (Light & Dark Themes)**:
+     - Fixed dark background mismatches in Light Mode by binding all hero cards, stat panels, table cards, modal dialogs, and filter sidebars to standard `var(--bg-card, #ffffff)` / `var(--border-color, #e2e8f0)` in light mode and `var(--bg-card, #141414)` in dark mode.
+     - Fixed room badge string formatting in the CMM table to prevent duplicate prefixes (e.g. `VYVY502` -> `VY502`).
+     - Added `get_target_rooms()` and `get_target_floors()` helper methods on the `EventBooking` model to guarantee safe rendering across templates.
+  3. **Phase 3: 4-Subpage Segregation with High-Performance Tab Switcher**:
+     - **Event Approvals Tab** (`?tab=events`): Approval/rejection pipeline with live overlap checks, displaced professor notifications, and historical audit table.
+     - **Classroom Management (CMM) Tab** (`?tab=cmm`): Room chip/floor accordion filters, search filters, bulk/single faculty allocation modals, CSV mass importer, and timetable wipe safety modals.
+     - **Ghost Protocol Tab** (`?tab=ghost`): 30-day strikes monitoring, active suspension tables, permanent suspension audit trail, and instant Lift Suspension / Clear Strikes actions.
+     - **Booking History Tab** (`?tab=bookings`): Filterable log of all faculty classroom reservations with live keyword search, status filter, and room/floor tags.
+  4. **Phase 4: Backward Compatibility & Route Aliasing**:
+     - Configured `/admin/events`, `/admin/classroom-management`, `/admin/cmm`, and `/admin/ghost-protocol` to cleanly redirect to their respective tabs on `/admin/faculty-admin-handle`.
+  5. **Phase 5: Automated Verification & Test Suite Execution**:
+     - Executed full pytest suite with 48/48 tests passing (100% success rate, 0 errors, 0 regressions).
+
 ### Release v1.7.8 (2026-09-22)
-- `feat(event-booking)`: **FixLink-F Event Booking, Multi-Room Allocation & Real-Time Notification Subsystem**
+- `feat(events)`: **FixLink-F Event Booking, Multi-Room Allocation, Admin Approval & Real-Time Notifications**
 
   #### 📖 Plain English / Layman's Summary of What Was Done
   1. **Phase 1: Database Schema & Compatibility Models**:
@@ -36,7 +79,11 @@
   5. **Phase 5: Timezone Alignment & Null-Safety Guardrails**:
      - Fixed `now_ist` comparison in faculty dashboard to enforce timezone-aware localized datetime evaluation, preventing `TypeError` on historical booking checks.
      - Implemented null-safety checks in `approve_event` preventing unassigned timetable slots (`faculty_id is None`) from violating PostgreSQL NOT NULL constraints on notification creation.
-  6. **Phase 6: Rule 7 Strict Verification**:
+  6. **Phase 6: Obsolete Department Approvals Page Purge (Boy Scout Rule)**:
+     - Permanently deleted deprecated `/admin/department-approvals` endpoint and unused bulk submission API routes (`/api/submissions/*`) following schedule ingestion migration to CMM CSV import and Event Booking.
+     - Deleted orphaned `app/templates/admin/department_approvals.html` template.
+     - Cleaned up navigation menus in `base.html` and Developer Hub quick-access tiles in `superadmin/dashboard.html`.
+  7. **Phase 7: Rule 7 Strict Verification**:
      - Executed full test suite with 48/48 tests passing (100% success rate, 0 errors, 0 regressions).
 
 ### Release v1.7.7 (2026-09-22)

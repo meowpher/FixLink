@@ -1,0 +1,1570 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Admin Handle — FixLink Admin Portal{% endblock %}
+{% block meta_robots %}noindex, nofollow{% endblock %}
+{% block meta_description %}Unified Faculty Administration console combining Event Approvals, Classroom Management (CMM), Ghost Protocol, and Classroom Booking History.{% endblock %}
+
+{% block extra_css %}
+<link rel="preload" href="{{ url_for('static', filename='css/admin_cmm.css') }}?v=1.2" as="style">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_cmm.css') }}?v=1.2">
+<style>
+    /* ══════════════════════════════════════════════════════════════════════
+       ROOT & ADAPTIVE COLOR SYSTEM FOR FACULTY ADMIN HANDLE
+       ══════════════════════════════════════════════════════════════════════ */
+    .faculty-handle-container {
+        max-width: 1650px;
+        margin: 0 auto;
+        padding-bottom: 90px;
+    }
+
+    /* ── Hero Master Card ── */
+    .handle-hero-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        position: relative;
+        overflow: hidden;
+    }
+
+    [data-theme="dark"] .handle-hero-card,
+    [data-bs-theme="dark"] .handle-hero-card {
+        background: var(--bg-card, #141414) !important;
+        border-color: var(--border-color, #262626) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    /* ── Unified Master Tab Bar ── */
+    .handle-master-tabs {
+        display: flex;
+        gap: 8px;
+        background: var(--bg-surface, #f1f5f9);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 16px;
+        padding: 6px;
+        margin-bottom: 1.75rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .handle-master-tabs::-webkit-scrollbar { display: none; }
+
+    [data-theme="dark"] .handle-master-tabs,
+    [data-bs-theme="dark"] .handle-master-tabs {
+        background: #18181b !important;
+        border-color: #27272a !important;
+    }
+
+    .handle-tab-btn {
+        flex: 1;
+        min-width: 190px;
+        padding: 10px 18px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.88rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        color: var(--text-muted, #64748b);
+        background: transparent;
+        border: none;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        text-decoration: none !important;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .handle-tab-btn:hover {
+        color: var(--text-main, #0f172a);
+        background: rgba(0, 0, 0, 0.04);
+    }
+
+    [data-theme="dark"] .handle-tab-btn:hover {
+        color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .handle-tab-btn.active {
+        color: #ffffff !important;
+        background: var(--mitwpu-blue, #2563eb) !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    }
+
+    [data-theme="dark"] .handle-tab-btn.active,
+    [data-bs-theme="dark"] .handle-tab-btn.active {
+        background: #2563eb !important;
+        color: #ffffff !important;
+    }
+
+    .tab-counter-badge {
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-weight: 700;
+        background: rgba(0, 0, 0, 0.08);
+        color: inherit;
+    }
+
+    .handle-tab-btn.active .tab-counter-badge {
+        background: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+    }
+
+    /* ── Metric / Stat Cards ── */
+    .handle-stat-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .handle-stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    [data-theme="dark"] .handle-stat-card,
+    [data-bs-theme="dark"] .handle-stat-card {
+        background: var(--bg-card, #141414) !important;
+        border-color: var(--border-color, #262626) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    /* ── Generic Panel Cards ── */
+    .handle-panel-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    }
+
+    [data-theme="dark"] .handle-panel-card,
+    [data-bs-theme="dark"] .handle-panel-card {
+        background: var(--bg-card, #141414) !important;
+        border-color: var(--border-color, #262626) !important;
+    }
+
+    /* ── Event Approvals Cards ── */
+    .event-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 16px;
+        padding: 1.4rem 1.6rem;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .event-card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(37, 99, 235, 0.4);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+    [data-theme="dark"] .event-card,
+    [data-bs-theme="dark"] .event-card {
+        background: #141414 !important;
+        border-color: #262626 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .target-badge {
+        font-size: 0.78rem;
+        padding: 4px 10px;
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--mitwpu-blue, #2563eb);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 8px;
+        font-weight: 600;
+        margin-right: 6px;
+        margin-bottom: 4px;
+        display: inline-block;
+    }
+
+    /* ── Ghost Protocol Styles ── */
+    .gp-stat-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: border-color 0.25s ease, transform 0.2s ease;
+    }
+    .gp-stat-card:hover { transform: translateY(-2px); }
+    [data-theme="dark"] .gp-stat-card,
+    [data-bs-theme="dark"] .gp-stat-card { background: #141414 !important; border-color: #262626 !important; }
+    .gp-stat-card .stat-value { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+    .gp-stat-card .stat-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-top: 0.35rem; opacity: 0.65; }
+
+    .flag-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+        transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .flag-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+    .flag-card.is-suspended { border-color: rgba(239, 68, 68, 0.4) !important; }
+    [data-theme="dark"] .flag-card,
+    [data-bs-theme="dark"] .flag-card { background: #141414 !important; border-color: #262626 !important; }
+
+    .flag-header { padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--border-color, #e2e8f0); }
+    [data-theme="dark"] .flag-header,
+    [data-bs-theme="dark"] .flag-header { border-color: #262626 !important; }
+
+    .flag-avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
+    .flag-avatar.avatar-red   { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+    .flag-avatar.avatar-amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+    .flag-avatar.avatar-yellow { background: rgba(234, 179, 8, 0.12); color: #eab308; }
+    .flag-avatar.avatar-green  { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
+
+    .strike-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.5); margin-right: 3px; }
+    .strike-dot.empty { background: var(--border-color, #cbd5e1); box-shadow: none; }
+    [data-theme="dark"] .strike-dot.empty,
+    [data-bs-theme="dark"] .strike-dot.empty { background: #333333; }
+
+    .strike-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color, #f1f5f9); font-size: 0.82rem; }
+    [data-theme="dark"] .strike-item,
+    [data-bs-theme="dark"] .strike-item { border-color: #222222; }
+    .strike-item:last-child { border-bottom: none; }
+    .strike-pill { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 0.2rem 0.6rem; font-size: 0.7rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+
+    .btn-lift { background: rgba(34,197,94,0.1); color: #16a34a; border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 700; transition: all 0.2s; cursor: pointer; }
+    .btn-lift:hover { background: rgba(34,197,94,0.2); color: #15803d; }
+    .btn-clear { background: rgba(239,68,68,0.08); color: #dc2626; border: 1px solid rgba(239,68,68,0.18); border-radius: 10px; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 700; transition: all 0.2s; cursor: pointer; }
+    .btn-clear:hover { background: rgba(239,68,68,0.16); color: #b91c1c; }
+
+    .history-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--border-color, #e2e8f0); }
+    [data-theme="dark"] .history-table-wrap,
+    [data-bs-theme="dark"] .history-table-wrap { border-color: #262626 !important; }
+
+    .history-table { border-collapse: collapse; font-size: 0.82rem; min-width: 900px; width: 100%; }
+    .history-table thead tr { background: var(--bg-surface, #f8fafc); }
+    [data-theme="dark"] .history-table thead tr,
+    [data-bs-theme="dark"] .history-table thead tr { background: #1a1a1a !important; }
+
+    .history-table th { padding: 0.75rem 1rem; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted, #64748b); border-bottom: 1px solid var(--border-color, #e2e8f0); white-space: nowrap; }
+    [data-theme="dark"] .history-table th,
+    [data-bs-theme="dark"] .history-table th { color: #94a3b8; border-color: #262626; }
+
+    .history-row { border-bottom: 1px solid var(--border-color, #f1f5f9); transition: background 0.15s; }
+    [data-theme="dark"] .history-row,
+    [data-bs-theme="dark"] .history-row { border-color: #222222; }
+    .history-row:last-child { border-bottom: none; }
+    .history-row:hover { background: rgba(0, 0, 0, 0.02); }
+    [data-theme="dark"] .history-row:hover { background: rgba(255,255,255,0.03); }
+    .history-row td { padding: 0.75rem 1rem; vertical-align: middle; }
+    .history-row.row-suspended td:first-child { border-left: 3px solid rgba(239,68,68,0.6); }
+    .history-row.row-lifted td:first-child { border-left: 3px solid rgba(34,197,94,0.6); }
+
+    .event-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.65rem; border-radius: 8px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+    .badge-suspended { background: rgba(239,68,68,0.1); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
+    .badge-lifted    { background: rgba(34,197,94,0.1); color: #16a34a; border: 1px solid rgba(34,197,94,0.2); }
+    .badge-expired   { background: rgba(100,116,139,0.1); color: #64748b; border: 1px solid rgba(100,116,139,0.2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-md-4 py-3 py-md-4 faculty-handle-container">
+    
+    <!-- Hero Header Banner -->
+    <div class="card border-0 shadow-sm rounded-4 mb-3 mb-md-4 overflow-hidden handle-hero-card">
+        <div class="card-body p-4 p-md-5">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center w-100" style="row-gap: 20px;">
+                <div class="flex-grow-1 pe-md-4">
+                    <div class="d-flex align-items-center gap-2 mb-2.5 mb-md-3">
+                        <span class="badge bg-primary px-2.5 px-md-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">ADMIN CONSOLE</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 px-md-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">FACULTY ADMIN HANDLE</span>
+                    </div>
+                    <h1 class="h3 h2-md fw-bold mb-2 text-body" style="letter-spacing: -0.3px; line-height: 1.3;">Faculty Admin Handle</h1>
+                    <p class="text-muted mb-0 lead small d-none d-md-block" style="font-size: 0.95rem; max-width: 850px; line-height: 1.6;">
+                        Centralized administration portal uniting <strong>Event Approvals</strong>, <strong>Classroom Management (CMM)</strong>, <strong>Ghost Protocol</strong> accountability, and <strong>Room Booking History</strong>.
+                    </p>
+                </div>
+                
+                <!-- Hero Fast Actions -->
+                <div class="d-flex flex-row align-items-center flex-shrink-0 ms-md-auto w-100 w-md-auto gap-2">
+                    <button class="btn btn-success rounded-pill px-3.5 px-md-4 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="height: 40px; font-size: 0.84rem; white-space: nowrap;">
+                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                        <span>Mass Import</span>
+                    </button>
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary rounded-pill px-3.5 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 fw-semibold" style="height: 40px; font-size: 0.84rem; white-space: nowrap;">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Dashboard</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── 4-Subpage Master Tab Switcher ── -->
+    <nav class="handle-master-tabs" id="facultyHandleTabs" aria-label="Faculty Admin Handle Subpages">
+        <button class="handle-tab-btn {% if active_tab == 'events' %}active{% endif %}" id="tab-btn-events" data-target-pane="pane-events" type="button">
+            <i class="bi bi-calendar2-check-fill"></i>
+            <span>Event Approvals</span>
+            {% if pending_events|length > 0 %}
+            <span class="tab-counter-badge bg-warning text-dark">{{ pending_events|length }}</span>
+            {% endif %}
+        </button>
+        <button class="handle-tab-btn {% if active_tab == 'cmm' %}active{% endif %}" id="tab-btn-cmm" data-target-pane="pane-cmm" type="button">
+            <i class="bi bi-building-gear"></i>
+            <span>Classroom Management (CMM)</span>
+            {% if unassigned_count > 0 %}
+            <span class="tab-counter-badge bg-info text-dark">{{ unassigned_count }} unassigned</span>
+            {% endif %}
+        </button>
+        <button class="handle-tab-btn {% if active_tab == 'ghost' or active_tab == 'ghost_protocol' %}active{% endif %}" id="tab-btn-ghost" data-target-pane="pane-ghost" type="button">
+            <i class="bi bi-shield-exclamation text-danger"></i>
+            <span>Ghost Protocol</span>
+            {% if currently_suspended_count > 0 %}
+            <span class="tab-counter-badge bg-danger text-white">{{ currently_suspended_count }} suspended</span>
+            {% endif %}
+        </button>
+        <button class="handle-tab-btn {% if active_tab == 'bookings' or active_tab == 'booking_history' %}active{% endif %}" id="tab-btn-bookings" data-target-pane="pane-bookings" type="button">
+            <i class="bi bi-calendar3-range text-primary"></i>
+            <span>Booking History</span>
+            {% if total_bookings_count > 0 %}
+            <span class="tab-counter-badge bg-primary text-white">{{ total_bookings_count }}</span>
+            {% endif %}
+        </button>
+    </nav>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SUBPAGE 1: EVENT APPROVALS                                             -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="handle-tab-pane {% if active_tab != 'events' %}d-none{% endif %}" id="pane-events">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Event Booking Requests & Allocations</h4>
+                <p class="text-muted small mb-0">Review multi-room reservations and entire floor bookings submitted by faculty.</p>
+            </div>
+            
+            <!-- Event Sub-Tabs -->
+            <ul class="nav nav-pills" id="eventSubTabs" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active rounded-pill px-3 py-1.5 fw-semibold small" id="pending-events-subtab" data-bs-toggle="pill" data-bs-target="#events-pending" type="button">
+                        Pending <span class="badge bg-warning text-dark ms-1.5">{{ pending_events|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link rounded-pill px-3 py-1.5 fw-semibold small" id="upcoming-events-subtab" data-bs-toggle="pill" data-bs-target="#events-upcoming" type="button">
+                        Approved & Upcoming <span class="badge bg-success ms-1.5">{{ upcoming_events|length }}</span>
+                    </button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link rounded-pill px-3 py-1.5 fw-semibold small" id="history-events-subtab" data-bs-toggle="pill" data-bs-target="#events-history" type="button">
+                        History <span class="badge bg-secondary ms-1.5">{{ history_events|length }}</span>
+                    </button>
+                </li>
+            </ul>
+        </div>
+
+        <div class="tab-content" id="eventSubTabsContent">
+            <!-- PENDING EVENTS -->
+            <div class="tab-pane fade show active" id="events-pending" role="tabpanel">
+                {% if pending_events %}
+                    <div class="row g-3">
+                        {% for event in pending_events %}
+                        <div class="col-12 col-xl-6">
+                            <div class="event-card h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                        <div>
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1 small fw-bold mb-2">Pending Review</span>
+                                            <h5 class="fw-bold text-primary mb-1">{{ event.title }}</h5>
+                                            <div class="text-muted small">
+                                                <i class="bi bi-person me-1"></i>Requested by <strong>{{ event.faculty.name }}</strong> ({{ event.faculty.email }})
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row g-2 my-2 small">
+                                        <div class="col-sm-6">
+                                            <div class="p-2 rounded-3 bg-secondary bg-opacity-10">
+                                                <i class="bi bi-calendar3 me-1.5 text-primary"></i><strong>Dates:</strong><br>
+                                                {{ event.start_date.strftime('%b %d, %Y') }} {% if event.start_date != event.end_date %}to {{ event.end_date.strftime('%b %d, %Y') }}{% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="p-2 rounded-3 bg-secondary bg-opacity-10">
+                                                <i class="bi bi-clock me-1.5 text-primary"></i><strong>Time:</strong><br>
+                                                {{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {% if event.description %}
+                                    <p class="text-muted small mb-2 fst-italic">"{{ event.description }}"</p>
+                                    {% endif %}
+
+                                    <div class="mt-3">
+                                        <div class="small fw-semibold text-muted text-uppercase mb-1">Target Allocations:</div>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% if event.booking_type == 'floors' %}
+                                                {% for fl in event.get_target_floors() %}
+                                                <span class="target-badge"><i class="bi bi-layers-fill me-1"></i>Entire Floor: Level {{ fl }}</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                {% for room in event.rooms %}
+                                                <span class="target-badge"><i class="bi bi-door-open-fill me-1"></i>Room {{ room.number }}</span>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="border-top pt-3 mt-3 d-flex justify-content-end gap-2">
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold" onclick="rejectEvent({{ event.id }})">
+                                        <i class="bi bi-x-circle me-1"></i>Reject
+                                    </button>
+                                    <button class="btn btn-success btn-sm rounded-pill px-3.5 py-1.5 fw-semibold" onclick="approveEvent({{ event.id }})">
+                                        <i class="bi bi-check-circle me-1"></i>Approve & Commit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
+                        <i class="bi bi-calendar-check fs-1 text-success mb-2 opacity-50"></i>
+                        <h5 class="fw-bold text-body">No Pending Event Approvals</h5>
+                        <p class="small mb-0">All multi-room faculty reservation requests have been processed.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- UPCOMING APPROVED EVENTS -->
+            <div class="tab-pane fade" id="events-upcoming" role="tabpanel">
+                {% if upcoming_events %}
+                    <div class="row g-3">
+                        {% for event in upcoming_events %}
+                        <div class="col-12 col-xl-6">
+                            <div class="event-card h-100 d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                        <div>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 small fw-bold mb-2">Approved & Active</span>
+                                            <h5 class="fw-bold text-body mb-1">{{ event.title }}</h5>
+                                            <div class="text-muted small">
+                                                <i class="bi bi-person me-1"></i>Organized by <strong>{{ event.faculty.name }}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row g-2 my-2 small">
+                                        <div class="col-sm-6">
+                                            <div class="p-2 rounded-3 bg-secondary bg-opacity-10">
+                                                <i class="bi bi-calendar3 me-1.5 text-success"></i><strong>Dates:</strong><br>
+                                                {{ event.start_date.strftime('%b %d, %Y') }} {% if event.start_date != event.end_date %}to {{ event.end_date.strftime('%b %d, %Y') }}{% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="p-2 rounded-3 bg-secondary bg-opacity-10">
+                                                <i class="bi bi-clock me-1.5 text-success"></i><strong>Time:</strong><br>
+                                                {{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-2">
+                                        <div class="small fw-semibold text-muted text-uppercase mb-1">Allocated Rooms:</div>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% if event.booking_type == 'floors' %}
+                                                {% for fl in event.get_target_floors() %}
+                                                <span class="target-badge"><i class="bi bi-layers-fill me-1"></i>Entire Floor: Level {{ fl }}</span>
+                                                {% endfor %}
+                                            {% else %}
+                                                {% for room in event.rooms %}
+                                                <span class="target-badge"><i class="bi bi-door-open-fill me-1"></i>Room {{ room.number }}</span>
+                                                {% endfor %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 pt-2 border-top d-flex justify-content-end" style="border-color: var(--border-color, rgba(0,0,0,0.08)) !important;">
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold" onclick="rejectEvent({{ event.id }}, true)">
+                                        <i class="bi bi-x-circle me-1"></i>Reject / Revoke Event
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
+                        <i class="bi bi-calendar-event fs-1 text-muted mb-2 opacity-50"></i>
+                        <h5 class="fw-bold text-body">No Upcoming Approved Events</h5>
+                        <p class="small mb-0">No future event reservations are scheduled at this time.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- EVENT HISTORY -->
+            <div class="tab-pane fade" id="events-history" role="tabpanel">
+                {% if history_events %}
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden handle-panel-card">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="ps-4">Event Title</th>
+                                        <th>Faculty</th>
+                                        <th>Dates & Timing</th>
+                                        <th>Target Rooms</th>
+                                        <th>Status</th>
+                                        <th class="pe-4">Notes / Reason</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for event in history_events %}
+                                    <tr>
+                                        <td class="ps-4 fw-semibold text-body">{{ event.title }}</td>
+                                        <td>{{ event.faculty.name if event.faculty else '—' }}</td>
+                                        <td class="small">
+                                            {{ event.start_date.strftime('%b %d, %Y') }}<br>
+                                            <span class="text-muted">{{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}</span>
+                                        </td>
+                                        <td>
+                                            {% if event.booking_type == 'floors' %}
+                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5">Floor(s) Block</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5">{{ event.rooms|length }} rooms</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if event.status == 'Approved' %}
+                                                <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Completed</span>
+                                            {% elif event.status == 'Rejected' %}
+                                                <span class="badge bg-danger-subtle text-danger rounded-pill px-2.5 py-1">Rejected</span>
+                                            {% elif event.status == 'Cancelled' %}
+                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1">Cancelled</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1">{{ event.status }}</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="pe-4 small text-muted">{{ event.rejection_reason or '—' }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
+                        <p class="small mb-0">No historical event records found.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SUBPAGE 2: CLASSROOM MANAGEMENT (CMM)                                  -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="handle-tab-pane {% if active_tab != 'cmm' %}d-none{% endif %}" id="pane-cmm">
+        
+        <!-- CMM Header Metric Counters -->
+        <div class="row g-2 g-md-3 mb-3 mb-md-4">
+            <div class="col-4 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3 handle-stat-card">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-3 text-center text-md-start">
+                        <div class="p-2 p-md-3 rounded-4 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                            <i class="bi bi-calendar3 fs-4 fs-md-3"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.72rem; letter-spacing: 0.4px;">Total Slots</div>
+                            <div class="fs-4 fs-md-3 fw-bold text-body lh-1 mt-1" id="statTotalSlots">{{ total_timetables_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3 handle-stat-card">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-3 text-center text-md-start">
+                        <div class="p-2 p-md-3 rounded-4 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                            <i class="bi bi-person-check-fill fs-4 fs-md-3"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.72rem; letter-spacing: 0.4px;">Allocated</div>
+                            <div class="fs-4 fs-md-3 fw-bold text-body lh-1 mt-1" id="statAllocatedSlots">{{ assigned_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 p-2.5 p-md-3 handle-stat-card">
+                    <div class="d-flex flex-column flex-md-row align-items-center gap-2 gap-md-3 text-center text-md-start">
+                        <div class="p-2 p-md-3 rounded-4 bg-warning bg-opacity-10 text-warning d-flex align-items-center justify-content-center flex-shrink-0" style="width: 48px; height: 48px;">
+                            <i class="bi bi-person-exclamation fs-4 fs-md-3"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-muted fw-semibold text-uppercase text-truncate" style="font-size: 0.72rem; letter-spacing: 0.4px;">Unassigned</div>
+                            <div class="fs-4 fs-md-3 fw-bold text-warning lh-1 mt-1" id="statUnassignedSlots">{{ unassigned_count }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Unassigned Classes Section with Left Sidebar Filters -->
+        <section class="unassigned-classes-section" id="unassignedClassesSection">
+            <div class="row g-4">
+                <!-- Left Side: Filter Sidebar Panel -->
+                <div class="col-xl-3 col-lg-4 col-md-4">
+                    <aside class="filter-sidebar-panel">
+                        <div class="filter-sidebar-title" data-bs-toggle="collapse" data-bs-target="#cmmFilterSidebarCollapse" role="button" aria-expanded="false" aria-controls="cmmFilterSidebarCollapse">
+                            <span><i class="bi bi-funnel-fill me-2 text-primary"></i>Filters</span>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill" id="activeFilterBadge" style="display: none; font-size: 0.72rem;">Filtered</span>
+                            <i class="bi bi-chevron-down d-md-none filter-collapse-icon" style="margin-left: 2px; font-size: 0.75rem;"></i>
+                        </div>
+                        
+                        <div class="collapse d-md-block" id="cmmFilterSidebarCollapse">
+                            <div class="filter-sidebar-form pt-1 pt-md-0">
+                                <div class="row g-2 g-md-3">
+                                    <div class="col-6 col-md-12">
+                                        <label for="courseFilter" class="form-label">Course</label>
+                                        <select class="form-select" id="courseFilter">
+                                            <option value="">All Courses</option>
+                                            <option value="BCA">BCA</option>
+                                            <option value="MCA">MCA</option>
+                                            <option value="BSC">BSC</option>
+                                            <option value="MSC">MSC</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-md-12">
+                                        <label for="yearFilter" class="form-label">Year</label>
+                                        <select class="form-select" id="yearFilter">
+                                            <option value="">All Years</option>
+                                            <option value="FY">FY</option>
+                                            <option value="SY">SY</option>
+                                            <option value="TY">TY</option>
+                                            <option value="HONS">HONS</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-md-12">
+                                        <label for="divFilter" class="form-label">Division</label>
+                                        <select class="form-select" id="divFilter">
+                                            <option value="">All Divisions</option>
+                                            <option value="A">Division A</option>
+                                            <option value="B">Division B</option>
+                                            <option value="C">Division C</option>
+                                            <option value="D">Division D</option>
+                                            <option value="E">Division E</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-6 col-md-12">
+                                        <label for="dayFilter" class="form-label">Day</label>
+                                        <select class="form-select" id="dayFilter">
+                                            <option value="">All Days</option>
+                                            <option value="Monday">Monday</option>
+                                            <option value="Tuesday">Tuesday</option>
+                                            <option value="Wednesday">Wednesday</option>
+                                            <option value="Thursday">Thursday</option>
+                                            <option value="Friday">Friday</option>
+                                            <option value="Saturday">Saturday</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Room Selector Accordion -->
+                                    <div class="col-12">
+                                        <label class="form-label">Room</label>
+                                        <input type="hidden" id="roomFilter" value="">
+                                        <div class="dropdown">
+                                            <button class="form-select text-start d-flex justify-content-between align-items-center" type="button" id="roomFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size: 0.9rem;">
+                                                <span class="text-truncate" id="selectedRoomLabel">All Rooms</span>
+                                            </button>
+                                            <div class="dropdown-menu p-2 shadow rounded-3 room-dropdown-menu" aria-labelledby="roomFilterDropdown" style="width: 100%; max-height: 280px; overflow-y: auto;">
+                                                <button class="dropdown-item rounded-2 room-option-item py-1.5 px-2" type="button" data-room-value="">All Rooms</button>
+                                                {% for f_data in academic_floors %}
+                                                <div class="px-2 py-1 small fw-bold text-uppercase text-muted border-top mt-1 pt-1.5">{{ f_data.name }}</div>
+                                                <div class="d-flex flex-wrap gap-1 px-2 py-1">
+                                                    {% for r in f_data.rooms %}
+                                                    <button class="btn btn-xs btn-outline-secondary room-chip-btn py-0.5 px-1.5" type="button" data-room-value="{{ r.number }}" style="font-size: 0.75rem;">
+                                                        {{ r.number }}
+                                                    </button>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 pt-1">
+                                        <button type="button" class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-center gap-1.5" id="btnResetFilters" style="border-radius: 10px; height: 38px; font-size: 0.85rem; font-weight: 500;">
+                                            <i class="bi bi-arrow-counterclockwise"></i>
+                                            <span>Reset Filters</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+
+                <!-- Right Side: Unassigned Classes Table Panel -->
+                <div class="col-xl-9 col-lg-8 col-md-8">
+                    <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden handle-panel-card">
+                        <!-- Filter & Table Controls Header -->
+                        <div class="card-header border-0 pt-3 pb-2 px-3 px-md-4" style="background: transparent;">
+                            <div class="row g-2 align-items-center">
+                                <div class="col-12 col-md-7">
+                                    <div class="input-group">
+                                        <span class="input-group-text border-end-0 bg-transparent text-muted"><i class="bi bi-search"></i></span>
+                                        <input type="text" class="form-control border-start-0 ps-0" id="tableSearchInput" placeholder="Search subject, course, division, room..." aria-label="Search unassigned classes">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-5 d-flex justify-content-md-end align-items-center gap-2">
+                                    <span class="text-muted small" id="showingCountBadge">Showing <strong>{{ unassigned_count }}</strong> classes</span>
+                                    <button class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-none" id="btnBulkAssignMaster" style="white-space: nowrap;">
+                                        <i class="bi bi-person-plus-fill me-1"></i>Assign Selected (<span id="bulkSelectedCount">0</span>)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Table Container -->
+                        <div class="table-responsive px-3 px-md-4 pb-3">
+                            <table class="table align-middle table-hover mb-0" id="unassignedTable">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" style="width: 40px;">
+                                            <input type="checkbox" class="form-check-input" id="selectAllUnassigned" title="Select all visible classes">
+                                        </th>
+                                        <th scope="col">Course & Subject</th>
+                                        <th scope="col">Division</th>
+                                        <th scope="col">Day & Time</th>
+                                        <th scope="col">Room</th>
+                                        <th scope="col" class="text-end">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="unassignedTableBody">
+                                    {% if unassigned_classes_data %}
+                                        {% for cls in unassigned_classes_data %}
+                                        <tr data-class-id="{{ cls.id }}" data-course="{{ cls.course }}" data-subject="{{ cls.subject }}" data-division="{{ cls.division }}" data-day="{{ cls.day_name }}" data-room="{{ cls.room_number }}">
+                                            <td>
+                                                <input type="checkbox" class="form-check-input row-select-checkbox" data-id="{{ cls.id }}">
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-body">{{ cls.subject or '—' }}</div>
+                                                <div class="text-muted small">{{ cls.course or 'Regular Lecture' }}</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1">{{ cls.division or 'All' }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="small fw-semibold">{{ cls.day_name }}</div>
+                                                <div class="text-muted small">{{ cls.start_time }} - {{ cls.end_time }}</div>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1">
+                                                    {{ cls.room_number if cls.room_number.startswith('VY') else ('VY' ~ cls.room_number if cls.room_number else '—') }}
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold assign-single-btn" data-id="{{ cls.id }}" data-subject="{{ cls.subject }}">
+                                                    Assign
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr id="emptyTableState">
+                                            <td colspan="6" class="text-center py-5 text-muted">
+                                                <i class="bi bi-check-circle fs-1 text-success mb-2 d-block opacity-50"></i>
+                                                <h6 class="fw-bold text-body">All Classes Allocated</h6>
+                                                <p class="small mb-0">No unassigned timetable classes require faculty assignment.</p>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SUBPAGE 3: GHOST PROTOCOL                                              -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="handle-tab-pane {% if active_tab != 'ghost' and active_tab != 'ghost_protocol' %}d-none{% endif %}" id="pane-ghost">
+        
+        <!-- Ghost Protocol Stat Cards Row -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="gp-stat-card">
+                    <div class="stat-value text-danger">{{ red_flag_count }}</div>
+                    <div class="stat-label">Faculty at Risk (3+ Strikes)</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="gp-stat-card">
+                    <div class="stat-value text-warning">{{ currently_suspended_count }}</div>
+                    <div class="stat-label">Currently Suspended</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="gp-stat-card">
+                    <div class="stat-value text-primary">{{ strikes_30d_total }}</div>
+                    <div class="stat-label">Strikes Logged (Last 30 Days)</div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="gp-stat-card">
+                    <div class="stat-value text-muted">{{ total_strikes_ever }}</div>
+                    <div class="stat-label">All-Time Strikes</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flagged Faculty Section -->
+        <div class="mb-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-flag-fill text-danger me-2"></i>Flagged &amp; Suspended Faculty</h5>
+            
+            {% if flagged_faculty %}
+            <div class="row g-3">
+                {% for f in flagged_faculty %}
+                <div class="col-12 col-md-6 col-xl-4">
+                    <div class="flag-card h-100 d-flex flex-column justify-content-between {% if f.is_suspended %}is-suspended{% endif %}">
+                        <div>
+                            <div class="flag-header">
+                                <div class="flag-avatar {% if f.strikes_30d >= 3 or f.is_suspended %}avatar-red{% elif f.strikes_30d == 2 %}avatar-amber{% elif f.strikes_30d == 1 %}avatar-yellow{% else %}avatar-green{% endif %}">
+                                    {{ f.user.name[:2].upper() }}
+                                </div>
+                                <div class="min-w-0 flex-grow-1">
+                                    <div class="fw-bold text-truncate text-body">{{ f.user.name }}</div>
+                                    <div class="text-muted small text-truncate">{{ f.user.email }}</div>
+                                </div>
+                                {% if f.is_suspended %}
+                                <span class="badge bg-danger rounded-pill px-2.5 py-1 small fw-bold">Banned</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="small fw-semibold text-muted">Recent Strikes (30d):</span>
+                                    <div>
+                                        {% for i in range(1, 4) %}
+                                        <span class="strike-dot {% if i > f.strikes_30d %}empty{% endif %}"></span>
+                                        {% endfor %}
+                                        <span class="small fw-bold ms-1 text-body">{{ f.strikes_30d }}/3</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-3 text-muted small">
+                                    <span>All-time strikes:</span>
+                                    <span class="fw-semibold text-body">{{ f.all_time_strikes }}</span>
+                                </div>
+
+                                {% if f.is_suspended %}
+                                <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+                                    <div class="fw-bold"><i class="bi bi-lock-fill me-1"></i>Suspended until:</div>
+                                    <div>{{ f.suspended_until.strftime('%d %b %Y, %I:%M %p') if f.suspended_until else 'Indefinite' }}</div>
+                                    {% if f.suspension_reason %}
+                                    <div class="mt-1 text-muted fst-italic">{{ f.suspension_reason }}</div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+
+                                {% if f.recent_strikes %}
+                                <div class="small fw-semibold text-muted text-uppercase mb-1.5" style="font-size: 0.68rem;">Recent No-Show Incidents:</div>
+                                {% for st in f.recent_strikes[:2] %}
+                                <div class="strike-item">
+                                    <span class="strike-pill">Strike #{{ loop.index }}</span>
+                                    <div class="min-w-0">
+                                        <div class="text-truncate text-body">{{ st.reason or 'No-show detected' }}</div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">{{ st.created_at.strftime('%d %b %Y') }}</div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="p-3 border-top d-flex gap-2 justify-content-end">
+                            {% if f.is_suspended %}
+                            <button class="btn-lift" onclick="liftSuspension({{ f.user.id }}, '{{ f.user.name }}')">
+                                <i class="bi bi-unlock-fill me-1"></i>Lift Suspension
+                            </button>
+                            {% endif %}
+                            {% if f.all_time_strikes > 0 %}
+                            <button class="btn-clear" onclick="clearStrikes({{ f.user.id }}, '{{ f.user.name }}')">
+                                <i class="bi bi-trash3 me-1"></i>Clear Strikes
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
+                <i class="bi bi-shield-check fs-1 text-success mb-2 opacity-50"></i>
+                <h5 class="fw-bold text-body">No Faculty Currently Flagged</h5>
+                <p class="small mb-0">All faculty members are in good standing with zero active no-show strikes.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Historical Suspension Audit Log -->
+        <div class="mb-4">
+            <h5 class="fw-bold mb-3"><i class="bi bi-clock-history text-primary me-2"></i>Suspension Audit Trail</h5>
+            {% if suspension_history %}
+            <div class="history-table-wrap">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Faculty</th>
+                            <th>Event</th>
+                            <th>Timestamp</th>
+                            <th>Strikes</th>
+                            <th>Suspended Until</th>
+                            <th>Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in suspension_history %}
+                        {% set entry = h.entry %}
+                        <tr class="history-row {% if entry.event_type == 'suspended' %}row-suspended{% elif entry.event_type == 'lifted' %}row-lifted{% endif %}">
+                            <td>
+                                <div class="fw-semibold text-body">{{ entry.faculty.name if entry.faculty else 'Unknown' }}</div>
+                                <div class="text-muted small">{{ entry.faculty.email if entry.faculty else '' }}</div>
+                            </td>
+                            <td>
+                                {% if entry.event_type == 'suspended' %}
+                                <span class="event-badge badge-suspended"><i class="bi bi-lock-fill me-1"></i>Suspended</span>
+                                {% elif entry.event_type == 'lifted' %}
+                                <span class="event-badge badge-lifted"><i class="bi bi-unlock-fill me-1"></i>Lifted</span>
+                                {% else %}
+                                <span class="event-badge badge-expired">Expired</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-muted small">
+                                {{ h.created_ist.strftime('%d %b %Y, %I:%M %p') }}
+                            </td>
+                            <td class="fw-bold text-body">{{ entry.strike_count }}</td>
+                            <td class="text-muted small">
+                                {{ h.suspended_until_ist.strftime('%d %b %Y, %I:%M %p') if h.suspended_until_ist else '—' }}
+                            </td>
+                            <td class="text-muted small">{{ entry.reason or '—' }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="card border-0 rounded-4 p-4 text-center text-muted handle-panel-card">
+                <p class="mb-0 small">No suspension history records found.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SUBPAGE 4: BOOKING HISTORY (Audit Trail of Classroom Reservations)     -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="handle-tab-pane {% if active_tab != 'bookings' and active_tab != 'booking_history' %}d-none{% endif %}" id="pane-bookings">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold mb-1">Classroom Reservation &amp; Booking History</h4>
+                <p class="text-muted small mb-0">Audit log of all ad-hoc and timetable classroom bookings across Vyas Hall.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1.5 fw-semibold" id="totalBookingsCounterBadge">
+                    {{ total_bookings_count }} Total Bookings
+                </span>
+            </div>
+        </div>
+
+        <!-- Bookings Filter Bar -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 handle-panel-card">
+            <div class="card-body p-3">
+                <div class="row g-2 align-items-center">
+                    <div class="col-12 col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text border-end-0 bg-transparent text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="bookingSearchInput" placeholder="Search by faculty, room number, subject, course..." aria-label="Search bookings">
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-4 d-flex justify-content-md-end gap-2">
+                        <select class="form-select" id="bookingStatusFilter" style="max-width: 180px;">
+                            <option value="">All Statuses</option>
+                            <option value="Active">Active / Upcoming</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        <a href="{{ url_for('admin.booking_history') }}" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 small text-nowrap">
+                            <i class="bi bi-arrows-fullscreen me-1"></i>Full Log
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bookings List Table -->
+        {% if booking_history_list %}
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden handle-panel-card">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="bookingHistoryTable">
+                    <thead>
+                        <tr>
+                            <th class="ps-4">Faculty Member</th>
+                            <th>Classroom</th>
+                            <th>Subject &amp; Division</th>
+                            <th>Reservation Slot</th>
+                            <th>Status</th>
+                            <th class="pe-4 text-end">Booked At</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingHistoryTableBody">
+                        {% for b in booking_history_list %}
+                        <tr data-faculty="{{ b.faculty.name if b.faculty else '' }}" data-room="{{ b.room.number if b.room else '' }}" data-subject="{{ b.subject or '' }}" data-course="{{ b.course or '' }}" data-status="{{ b.status or 'Active' }}">
+                            <td class="ps-4">
+                                <div class="fw-semibold text-body">{{ b.faculty.name if b.faculty else 'Unknown Faculty' }}</div>
+                                <div class="text-muted small">{{ b.faculty.email if b.faculty else '' }}</div>
+                            </td>
+                            <td>
+                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1">
+                                    {{ b.room.number if b.room else ('Room #' ~ b.room_id) }}
+                                </span>
+                                {% if b.room and b.room.floor %}
+                                <div class="text-muted small" style="font-size: 0.72rem;">{{ b.room.floor.name }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-body">{{ b.subject or 'Ad-Hoc Session' }}</div>
+                                <div class="text-muted small">{{ b.course or 'Regular' }} {% if b.division %}• Div {{ b.division }}{% endif %}</div>
+                            </td>
+                            <td>
+                                <div class="small fw-semibold text-body">{{ b.slot_start.strftime('%d %b %Y') if b.slot_start else '—' }}</div>
+                                <div class="text-muted small">
+                                    {{ b.slot_start.strftime('%I:%M %p') if b.slot_start else '' }} - {{ b.slot_end.strftime('%I:%M %p') if b.slot_end else '' }}
+                                </div>
+                            </td>
+                            <td>
+                                {% if b.status == 'Completed' %}
+                                <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Completed</span>
+                                {% elif b.status == 'Cancelled' %}
+                                <span class="badge bg-danger-subtle text-danger rounded-pill px-2.5 py-1">Cancelled</span>
+                                {% elif b.status == 'No-Show' or b.status == 'Strike' %}
+                                <span class="badge bg-danger text-white rounded-pill px-2.5 py-1">No-Show Strike</span>
+                                {% else %}
+                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1">Active</span>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4 text-end text-muted small">
+                                {{ b.created_at.strftime('%d %b, %I:%M %p') if b.created_at else '—' }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
+            <i class="bi bi-calendar3-range fs-1 text-muted mb-2 opacity-50"></i>
+            <h5 class="fw-bold text-body">No Classroom Bookings Recorded</h5>
+            <p class="small mb-0">No ad-hoc room reservation records were found in the database.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- GLOBAL MODALS: CMM & EVENT HANDLERS                                    -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+
+<!-- Modal 1: Mass Import CSV Modal -->
+<div class="modal fade" id="importTimetableModal" tabindex="-1" aria-labelledby="importTimetableModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden handle-panel-card">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold" id="importTimetableModalLabel"><i class="bi bi-file-earmark-spreadsheet-fill text-success me-2"></i>Mass Import Timetable Matrix</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="importTimetableForm">
+                    <div class="mb-3">
+                        <label for="csvFileInput" class="form-label fw-semibold">Select CSV Spreadsheet</label>
+                        <input class="form-control" type="file" id="csvFileInput" accept=".csv" required>
+                        <div class="form-text small">Upload your MIT-WPU Classroom timetable CSV matrix with room and slot definitions.</div>
+                    </div>
+
+                    <div class="d-none" id="csvPreviewSection">
+                        <div class="alert alert-info py-2 small mb-3">
+                            <i class="bi bi-info-circle me-1"></i><span id="csvPreviewSummary">0 rows ready for import.</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="btnPreviewCsv">Preview</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4" id="btnCommitImport">Import & Commit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 2: Delete Confirm Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 handle-panel-card">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-danger" id="deleteConfirmModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Wipe Timetable Records</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-body mb-3">Are you sure you want to delete timetables? This action will release assigned room allocations across the building.</p>
+                <div class="alert alert-danger py-2 small mb-0">
+                    <i class="bi bi-shield-slash me-1"></i>This action cannot be undone.
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4" id="btnConfirmDeleteTimetable">Wipe Timetables</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 3: Faculty Assign Modal -->
+<div class="modal fade" id="assignFacultyModal" tabindex="-1" aria-labelledby="assignFacultyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 handle-panel-card">
+            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                <h5 class="modal-title fw-bold text-primary" id="assignFacultyModalLabel"><i class="bi bi-person-plus-fill me-2"></i>Assign Faculty Member</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="assignFacultyForm">
+                    <input type="hidden" id="assignClassId" value="">
+                    <input type="hidden" id="assignBulkMode" value="false">
+
+                    <p class="text-muted small mb-3" id="assignClassSummary">Select a faculty member for this timetable slot.</p>
+
+                    <div class="mb-3">
+                        <label for="facultySelectDropdown" class="form-label fw-semibold">Faculty Member</label>
+                        <select class="form-select" id="facultySelectDropdown" required>
+                            <option value="">Choose faculty...</option>
+                            {% for fac in all_faculties %}
+                            <option value="{{ fac.id }}">{{ fac.name }} ({{ fac.email }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4" id="btnSubmitAssign">Save Assignment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Embedded JSON Data for High-Performance Client Interactions -->
+<script id="cmmUnassignedData" type="application/json">{{ unassigned_classes_data|tojson }}</script>
+<script id="cmmFacultiesData" type="application/json">{{ all_faculties_data|tojson }}</script>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+(() => {
+    'use strict';
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    // ── Master Tab Switching with URL state sync ──
+    const masterTabs = document.querySelectorAll('.handle-tab-btn');
+    const tabPanes = document.querySelectorAll('.handle-tab-pane');
+
+    masterTabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-target-pane');
+            masterTabs.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            tabPanes.forEach(p => {
+                if (p.id === targetId) {
+                    p.classList.remove('d-none');
+                    if (window.gsap) gsap.fromTo(p, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.25 });
+                } else {
+                    p.classList.add('d-none');
+                }
+            });
+
+            // Sync URL query param
+            const tabName = targetId.replace('pane-', '');
+            const url = new URL(window.location);
+            url.searchParams.set('tab', tabName);
+            window.history.replaceState({}, '', url);
+        });
+    });
+
+    // ── EVENT APPROVALS ACTIONS ──
+    window.approveEvent = async function(eventId) {
+        const res = await Swal.fire({
+            title: 'Approve Event?',
+            text: "This will commit the requested targets and notify any displaced faculty.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#198754',
+            confirmButtonText: 'Yes, Approve'
+        });
+        if (res.isConfirmed) {
+            try {
+                const response = await fetch(`/admin/events/${eventId}/approve`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken }
+                });
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire('Approved!', data.message, 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('Error', data.error || 'Failed to approve event.', 'error');
+                }
+            } catch (e) {
+                Swal.fire('Error', 'Network error occurred.', 'error');
+            }
+        }
+    };
+
+    window.rejectEvent = async function(eventId, isApproved = false) {
+        const titleText = isApproved ? 'Revoke & Reject Event' : 'Reject Event Request';
+        const labelText = isApproved ? 'Reason for revoking/rejecting approved event' : 'Reason for rejection';
+        const { value: reason } = await Swal.fire({
+            title: titleText,
+            input: 'textarea',
+            inputLabel: labelText,
+            inputPlaceholder: 'Type explanation for faculty organizer...',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: isApproved ? 'Revoke Event' : 'Reject Event',
+            inputValidator: (val) => !val ? 'A reason is required.' : null
+        });
+        if (reason) {
+            try {
+                const response = await fetch(`/admin/events/${eventId}/reject`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                    body: JSON.stringify({ reason })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    Swal.fire(isApproved ? 'Revoked' : 'Rejected', data.message || 'The event has been rejected.', 'success').then(() => location.reload());
+                } else {
+                    Swal.fire('Error', data.error || 'Failed to reject event.', 'error');
+                }
+            } catch (e) {
+                Swal.fire('Error', 'Network error occurred.', 'error');
+            }
+        }
+    };
+
+    // ── GHOST PROTOCOL ACTIONS ──
+    window.liftSuspension = async function(facultyId, name) {
+        const result = await Swal.fire({
+            title: 'Lift Suspension?',
+            html: `Remove Ad-Hoc booking ban for <strong>${name}</strong>?`,
+            icon: 'warning',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: 'Lift Only',
+            denyButtonText: 'Lift & Clear Strikes',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#22c55e',
+            denyButtonColor: '#f59e0b',
+        });
+        if (result.isDismissed) return;
+        const doClearStrikes = result.isDenied;
+        try {
+            const res = await fetch(`/admin/api/ghost-protocol/lift-suspension/${facultyId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ clear_strikes: doClearStrikes })
+            });
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire('Success', data.message, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.error || 'Failed to lift suspension.', 'error');
+            }
+        } catch {
+            Swal.fire('Error', 'Network communication failed.', 'error');
+        }
+    };
+
+    window.clearStrikes = async function(facultyId, name) {
+        const result = await Swal.fire({
+            title: 'Clear Strikes?',
+            html: `Delete all strike records for <strong>${name}</strong>?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, Clear',
+            confirmButtonColor: '#dc2626',
+        });
+        if (!result.isConfirmed) return;
+        try {
+            const res = await fetch(`/admin/api/ghost-protocol/clear-strikes/${facultyId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({})
+            });
+            const data = await res.json();
+            if (data.success) {
+                Swal.fire('Cleared', data.message, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.error || 'Failed to clear strikes.', 'error');
+            }
+        } catch {
+            Swal.fire('Error', 'Network communication failed.', 'error');
+        }
+    };
+
+    // ── CMM SCRIPT LOGIC (Filters, Search, Bulk Select, Modal Handlers) ──
+    const searchInput = document.getElementById('tableSearchInput');
+    const courseFilter = document.getElementById('courseFilter');
+    const yearFilter = document.getElementById('yearFilter');
+    const divFilter = document.getElementById('divFilter');
+    const dayFilter = document.getElementById('dayFilter');
+    const roomFilter = document.getElementById('roomFilter');
+    const selectedRoomLabel = document.getElementById('selectedRoomLabel');
+    const btnResetFilters = document.getElementById('btnResetFilters');
+    const activeFilterBadge = document.getElementById('activeFilterBadge');
+    const tableBody = document.getElementById('unassignedTableBody');
+    const selectAllCheckbox = document.getElementById('selectAllUnassigned');
+    const btnBulkAssignMaster = document.getElementById('btnBulkAssignMaster');
+    const bulkSelectedCount = document.getElementById('bulkSelectedCount');
+    const showingCountBadge = document.getElementById('showingCountBadge');
+
+    function applyCmmFilters() {
+        const query = (searchInput?.value || '').toLowerCase().trim();
+        const course = (courseFilter?.value || '').toLowerCase();
+        const year = (yearFilter?.value || '').toLowerCase();
+        const div = (divFilter?.value || '').toLowerCase();
+        const day = (dayFilter?.value || '').toLowerCase();
+        const room = (roomFilter?.value || '').toLowerCase();
+
+        let visibleCount = 0;
+        const rows = tableBody?.querySelectorAll('tr[data-class-id]') || [];
+        rows.forEach(r => {
+            const rCourse = (r.getAttribute('data-course') || '').toLowerCase();
+            const rSubject = (r.getAttribute('data-subject') || '').toLowerCase();
+            const rDiv = (r.getAttribute('data-division') || '').toLowerCase();
+            const rDay = (r.getAttribute('data-day') || '').toLowerCase();
+            const rRoom = (r.getAttribute('data-room') || '').toLowerCase();
+
+            const matchesQuery = !query || rSubject.includes(query) || rCourse.includes(query) || rDiv.includes(query) || rRoom.includes(query);
+            const matchesCourse = !course || rCourse.includes(course);
+            const matchesYear = !year || rCourse.includes(year);
+            const matchesDiv = !div || rDiv.includes(div);
+            const matchesDay = !day || rDay.includes(day);
+            const matchesRoom = !room || rRoom.includes(room);
+
+            if (matchesQuery && matchesCourse && matchesYear && matchesDiv && matchesDay && matchesRoom) {
+                r.classList.remove('d-none');
+                visibleCount++;
+            } else {
+                r.classList.add('d-none');
+            }
+        });
+
+        const hasFilter = query || course || year || div || day || room;
+        if (activeFilterBadge) activeFilterBadge.style.display = hasFilter ? 'inline-block' : 'none';
+        if (showingCountBadge) showingCountBadge.innerHTML = `Showing <strong>${visibleCount}</strong> classes`;
+    }
+
+    [searchInput, courseFilter, yearFilter, divFilter, dayFilter].forEach(el => {
+        el?.addEventListener('input', applyCmmFilters);
+        el?.addEventListener('change', applyCmmFilters);
+    });
+
+    document.querySelectorAll('.room-chip-btn, .room-option-item').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const val = this.getAttribute('data-room-value') || '';
+            if (roomFilter) roomFilter.value = val;
+            if (selectedRoomLabel) selectedRoomLabel.textContent = val ? `Room ${val}` : 'All Rooms';
+            applyCmmFilters();
+        });
+    });
+
+    btnResetFilters?.addEventListener('click', () => {
+        if (searchInput) searchInput.value = '';
+        if (courseFilter) courseFilter.value = '';
+        if (yearFilter) yearFilter.value = '';
+        if (divFilter) divFilter.value = '';
+        if (dayFilter) dayFilter.value = '';
+        if (roomFilter) roomFilter.value = '';
+        if (selectedRoomLabel) selectedRoomLabel.textContent = 'All Rooms';
+        applyCmmFilters();
+    });
+
+    // Bulk selection
+    selectAllCheckbox?.addEventListener('change', function() {
+        const rows = tableBody?.querySelectorAll('tr[data-class-id]:not(.d-none) .row-select-checkbox') || [];
+        rows.forEach(cb => cb.checked = selectAllCheckbox.checked);
+        updateBulkButton();
+    });
+
+    tableBody?.addEventListener('change', (e) => {
+        if (e.target.classList.contains('row-select-checkbox')) updateBulkButton();
+    });
+
+    function updateBulkButton() {
+        const selected = tableBody?.querySelectorAll('.row-select-checkbox:checked') || [];
+        if (bulkSelectedCount) bulkSelectedCount.textContent = selected.length;
+        if (btnBulkAssignMaster) {
+            btnBulkAssignMaster.classList.toggle('d-none', selected.length === 0);
+        }
+    }
+
+    // Single / Bulk Assign modal trigger
+    const assignModalEl = document.getElementById('assignFacultyModal');
+    const assignModal = assignModalEl ? new bootstrap.Modal(assignModalEl) : null;
+    tableBody?.addEventListener('click', (e) => {
+        const btn = e.target.closest('.assign-single-btn');
+        if (btn && assignModal) {
+            const id = btn.getAttribute('data-id');
+            const subj = btn.getAttribute('data-subject');
+            document.getElementById('assignClassId').value = id;
+            document.getElementById('assignBulkMode').value = 'false';
+            document.getElementById('assignClassSummary').textContent = `Assign faculty to ${subj || 'selected class'}`;
+            assignModal.show();
+        }
+    });
+
+    btnBulkAssignMaster?.addEventListener('click', () => {
+        const selected = Array.from(tableBody.querySelectorAll('.row-select-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
+        if (selected.length === 0 || !assignModal) return;
+        document.getElementById('assignClassId').value = JSON.stringify(selected);
+        document.getElementById('assignBulkMode').value = 'true';
+        document.getElementById('assignClassSummary').textContent = `Assign faculty to ${selected.length} selected timetable slots.`;
+        assignModal.show();
+    });
+
+    document.getElementById('assignFacultyForm')?.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const facultyId = document.getElementById('facultySelectDropdown').value;
+        const isBulk = document.getElementById('assignBulkMode').value === 'true';
+        const classIds = isBulk ? JSON.parse(document.getElementById('assignClassId').value) : [document.getElementById('assignClassId').value];
+
+        try {
+            const res = await fetch('/admin/api/timetable/assign-faculty', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ timetable_ids: classIds, faculty_id: facultyId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (assignModal) assignModal.hide();
+                Swal.fire('Success', data.message || 'Faculty assigned successfully.', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.error || 'Assignment failed.', 'error');
+            }
+        } catch {
+            Swal.fire('Error', 'Network communication failed.', 'error');
+        }
+    });
+
+    // Mass Import CSV handling
+    document.getElementById('btnPreviewCsv')?.addEventListener('click', () => handleCsvUpload(true));
+    document.getElementById('btnCommitImport')?.addEventListener('click', () => handleCsvUpload(false));
+
+    async function handleCsvUpload(isPreview) {
+        const fileInput = document.getElementById('csvFileInput');
+        if (!fileInput.files || fileInput.files.length === 0) {
+            Swal.fire('Select File', 'Please select a CSV file first.', 'warning');
+            return;
+        }
+        const formData = new FormData();
+        formData.append('csv_file', fileInput.files[0]);
+        formData.append('preview_only', isPreview ? 'true' : 'false');
+
+        try {
+            const res = await fetch('/admin/api/timetable/mass-import-csv', {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrfToken },
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (isPreview) {
+                    document.getElementById('csvPreviewSection').classList.remove('d-none');
+                    document.getElementById('csvPreviewSummary').textContent = `Validated! ${data.records_parsed || 0} valid records detected ready for commit.`;
+                } else {
+                    const modalEl = document.getElementById('importTimetableModal');
+                    const modalInst = bootstrap.Modal.getInstance(modalEl);
+                    if (modalInst) modalInst.hide();
+                    Swal.fire('Imported!', `Successfully imported ${data.records_parsed || 0} classes into schedule.`, 'success').then(() => location.reload());
+                }
+            } else {
+                Swal.fire('Import Error', data.error || 'Failed to process CSV file.', 'error');
+            }
+        } catch {
+            Swal.fire('Error', 'Network communication failed.', 'error');
+        }
+    }
+
+    // Delete timetables handling
+    document.getElementById('btnConfirmDeleteTimetable')?.addEventListener('click', async () => {
+        try {
+            const res = await fetch('/admin/api/timetable/delete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ scope: 'building' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                const delModalEl = document.getElementById('deleteConfirmModal');
+                const delModalInst = bootstrap.Modal.getInstance(delModalEl);
+                if (delModalInst) delModalInst.hide();
+                Swal.fire('Cleared', data.message || 'Timetables cleared.', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.error || 'Failed to delete timetables.', 'error');
+            }
+        } catch {
+            Swal.fire('Error', 'Network communication failed.', 'error');
+        }
+    });
+
+    // ── BOOKING HISTORY SCRIPT LOGIC ──
+    const bookingSearchInput = document.getElementById('bookingSearchInput');
+    const bookingStatusFilter = document.getElementById('bookingStatusFilter');
+    const bookingTableBody = document.getElementById('bookingHistoryTableBody');
+
+    function applyBookingFilters() {
+        const query = (bookingSearchInput?.value || '').toLowerCase().trim();
+        const status = (bookingStatusFilter?.value || '').toLowerCase().trim();
+
+        const rows = bookingTableBody?.querySelectorAll('tr') || [];
+        rows.forEach(r => {
+            const faculty = (r.getAttribute('data-faculty') || '').toLowerCase();
+            const room = (r.getAttribute('data-room') || '').toLowerCase();
+            const subject = (r.getAttribute('data-subject') || '').toLowerCase();
+            const course = (r.getAttribute('data-course') || '').toLowerCase();
+            const rStatus = (r.getAttribute('data-status') || '').toLowerCase();
+
+            const matchesQuery = !query || faculty.includes(query) || room.includes(query) || subject.includes(query) || course.includes(query);
+            const matchesStatus = !status || rStatus.includes(status);
+
+            if (matchesQuery && matchesStatus) {
+                r.classList.remove('d-none');
+            } else {
+                r.classList.add('d-none');
+            }
+        });
+    }
+
+    bookingSearchInput?.addEventListener('input', applyBookingFilters);
+    bookingStatusFilter?.addEventListener('change', applyBookingFilters);
+
+})();
+</script>
+{% endblock %}

@@ -7,20 +7,40 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.8** | 2026-09-22 | **Deployed** | FixLink-F Event Booking, Multi-Room Allocation, Admin Approval & Real-Time Notifications (Comprehensive faculty multi-room/floor reservation system, admin conflict-resolving approval panel with automatic lecture displacement detection, interactive navigation shortcuts, and global WebSocket notification bell). |
 | **v1.7.7** | 2026-09-22 | **Deployed** | Faculty Digital Twin Classroom Flashlight, Ad-Hoc Booking Highlighting & Tech Debt Cleanup (Interactive class locator with spotlight pulse on map, available-only green highlighting during ad-hoc booking, fixed duration dropdown, and purged obsolete timetable builder buttons/routes). |
 | **v1.7.6** | 2026-09-16 | **Deployed** | Admin CMM UX Architecture & Safety Hardening (Secured destructive timetable deletion with a warning modal; unified filter architecture by migrating course selector into sidebar; implemented Select column with bulk master checkbox; optimized Assign action buttons). |
-| **v1.7.5** | 2026-09-16 | **Deployed** | Timetable Subject, Course & Division Intelligent Parser & Normalizer (Decomposed combined raw spreadsheet cells into clean Subjects, structured Courses, and Division badges; stripped embedded redundant timestamps; retroactively cleaned 882 database records; upgraded CSV mass importer). |
-| **v1.7.4** | 2026-09-16 | **Deployed** | Root User / Super Admin Security & Immutable Creator Accounts (Permanently secured creator accounts against unauthorized edits, deletions, and password resets; locked down backend routes with 403 Forbidden checks; hardened admin and superadmin Jinja UI templates). |
 
 ---
 
 ## 2. Chronological Log of Pushed Updates
  
-### Release v1.7.7 (2026-09-22)
-- `feat(faculty-map)`: **Faculty Digital Twin Classroom Flashlight, Ad-Hoc Highlighting & UX Refinement**
+### Release v1.7.8 (2026-09-22)
+- `feat(event-booking)`: **FixLink-F Event Booking, Multi-Room Allocation & Real-Time Notification Subsystem**
 
   #### 📖 Plain English / Layman's Summary of What Was Done
-  1. **Phase 1: Interactive Lecture Locator & Map Spotlight (Flashlight Mode)**:
+  1. **Phase 1: Database Schema & Compatibility Models**:
+     - Introduced `EventBooking` model supporting both multiple discrete room selections and entire floor reservations (Level 0–7) with validation against date/time overlaps.
+     - Added `recipient_role` column to the `Notification` model with backward-compatible property aliases (`recipient_id` -> `user_id`, `category` -> `type`).
+  2. **Phase 2: Faculty Booking Portal & Dashboard Integration**:
+     - Built dedicated booking interface at `/faculty/events/book` with interactive multi-floor and multi-room chips, validation, and GSAP micro-animations.
+     - Integrated **"Book Event"** action buttons directly into the Faculty Dashboard header, left-hand sidebar navigation pills, mobile bottom navigation bar, and Quick Manage offcanvas.
+     - Added an **"Event Requests & Allocations"** live card section on the faculty dashboard displaying status pills (Approved, Pending, Rejected), reserved floors/rooms, dates, and rejection reasons.
+  3. **Phase 3: Admin Review & Conflict Resolution**:
+     - Built Admin event management dashboard at `/admin/events` with Pending, Upcoming, and Historical event review lists.
+     - Implemented transactional row-locking (`with_for_update()`) and timetable collision checks that identify and notify displaced professors via Pusher and the database when an event displaces regular lectures.
+     - Linked "Event Approvals" into the Admin navigation bar and offcanvas manage panel.
+  4. **Phase 4: Real-Time Notification Subsystem**:
+     - Added notification bell icon with live badge counter to global header (`base.html`) for Faculty and Admin.
+     - Built `notifications.js` with Pusher WebSocket channel binding, audio/visual toast alerts, and modal history list with unread markers and "Mark all read" controls.
+  5. **Phase 5: Timezone Alignment & Null-Safety Guardrails**:
+     - Fixed `now_ist` comparison in faculty dashboard to enforce timezone-aware localized datetime evaluation, preventing `TypeError` on historical booking checks.
+     - Implemented null-safety checks in `approve_event` preventing unassigned timetable slots (`faculty_id is None`) from violating PostgreSQL NOT NULL constraints on notification creation.
+  6. **Phase 6: Rule 7 Strict Verification**:
+     - Executed full test suite with 48/48 tests passing (100% success rate, 0 errors, 0 regressions).
+
+### Release v1.7.7 (2026-09-22)
+- `feat(faculty-map)`: **Faculty Digital Twin Classroom Flashlight, Ad-Hoc Highlighting & UX Refinement**
      - Enhanced faculty dashboard agenda cards so clicking any upcoming class card smoothly switches to the **Digital Twin Map** tab.
      - Automatically parses room/floor metadata and dynamically loads the matching floor SVG if not already displayed.
      - Implemented Spotlight / Flashlight visual effect: grayscales the rest of the floor map while illuminating and pulsing the targeted classroom in vibrant green (`#22c55e`), centering and zooming onto the room.

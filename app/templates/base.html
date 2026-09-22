@@ -179,8 +179,8 @@
 
             {% if session.get('user_id') or session.get('professional_id') %}
 
-            <!-- Admin Notifications Bell -->
-            {% if session.get('is_admin') %}
+            <!-- Admin & Faculty Notifications Bell -->
+            {% if session.get('is_admin') or session.get('user_role') == 'faculty' %}
             <div class="dropdown">
                 <button class="top-bar-icon-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
                     <i class="bi bi-bell-fill" aria-hidden="true"></i>
@@ -354,6 +354,10 @@
                     <div><div class="manage-item-title">Booking History</div><div class="manage-item-desc">Room booking records</div></div>
                 </a>
                 {% if session.get('is_admin') %}
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.manage_events') }}">
+                    <i class="bi bi-calendar-event fs-5 text-primary"></i>
+                    <div><div class="manage-item-title">Event Approvals</div><div class="manage-item-desc">Multi-room & floor events</div></div>
+                </a>
                 <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.department_approvals') }}">
                     <i class="bi bi-patch-check fs-5 text-success"></i>
                     <div><div class="manage-item-title">Department Approvals</div><div class="manage-item-desc">Bulk verify & publish schedules</div></div>
@@ -370,6 +374,10 @@
                 <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('faculty.dashboard') }}">
                     <i class="bi bi-calendar-check fs-5"></i>
                     <div><div class="manage-item-title">Faculty Portal</div><div class="manage-item-desc">Room bookings & schedules</div></div>
+                </a>
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('faculty.book_event') }}">
+                    <i class="bi bi-calendar2-plus fs-5 text-primary"></i>
+                    <div><div class="manage-item-title">Book Event</div><div class="manage-item-desc">Multi-room & floor allocations</div></div>
                 </a>
                 {% endif %}
             </div>
@@ -569,7 +577,7 @@
                 </div>
             </div>
             <div class="msb-utils">
-                {% if session.get('is_admin') %}
+                {% if session.get('is_admin') or session.get('user_role') == 'faculty' %}
                 <button class="msb-util-btn" id="msbBellBtn" aria-label="Notifications">
                     <i class="bi bi-bell-fill"></i>
                     <span class="msb-notif-dot d-none" id="msbNotifDot"></span>
@@ -694,6 +702,7 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
                         <ul class="dropdown-menu shadow rounded-4 border-0">
+                            <li><a class="dropdown-item {% if request.endpoint == 'admin.manage_events' %}active{% endif %}" href="{{ url_for('admin.manage_events') }}"><i class="bi bi-calendar-event me-2 text-primary"></i>Event Approvals</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.department_approvals') }}"><i class="bi bi-patch-check me-2 text-success"></i>Department Approvals</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
@@ -737,7 +746,7 @@
 
                 {% if session.get('user_id') or session.get('professional_id') %}
                     <!-- Notifications -->
-                    {% if session.get('is_admin') %}
+                    {% if session.get('is_admin') or session.get('user_role') == 'faculty' %}
                         <a class="nav-link position-relative d-flex align-items-center justify-content-center me-2" href="#" role="button" data-bs-toggle="dropdown" id="notificationsDropdown" aria-label="Notifications" aria-expanded="false">
                             <i class="bi bi-bell-fill fs-5 text-muted" aria-hidden="true"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge" style="font-size: 0.6rem;" aria-label="Unread notifications">0</span>
@@ -835,6 +844,10 @@
     <script defer src="{{ url_for('static', filename='js/dashboard_stats.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/carousels.js') }}"></script>
     {% endif %}
+    {% endif %}
+    
+    {% if session.get('is_admin') or session.get('user_role') == 'faculty' %}
+    <script defer src="{{ url_for('static', filename='js/notifications.js') }}"></script>
     {% endif %}
 
     {% block extra_js %}{% endblock %}

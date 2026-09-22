@@ -2898,6 +2898,142 @@ def clear_faculty_strikes(faculty_id):
         data={'faculty_id': faculty_id, 'deleted_count': deleted}
     )
 
+@admin_bp.route('/events', methods=['GET'])
+@admin_required
+def manage_events():
+    from ...models import EventBooking
+    from datetime import date
+    
+    pending_events = EventBooking.query.filter_by(status='Pending').order_by(EventBooking.start_date.asc()).all()
+    
+    upcoming_events = EventBooking.query.filter(
+        EventBooking.status == 'Approved',
+        EventBooking.end_date >= date.today()
+    ).order_by(EventBooking.start_date.asc()).all()
+    
+    history_events = EventBooking.query.filter(
+        (EventBooking.status == 'Rejected') | 
+        ((EventBooking.status == 'Approved') & (EventBooking.end_date < date.today()))
+    ).order_by(EventBooking.created_at.desc()).limit(50).all()
+    
+    return render_template('admin/events.html', 
+        pending_events=pending_events, 
+        upcoming_events=upcoming_events, 
+        history_events=history_events
+    )
+
+@admin_bp.route('/events/<int:event_id>/approve', methods=['POST'])
+@admin_required
+@handle_api_errors
+def approve_event(event_id):
+    from ...models import EventBooking, Timetable, Notification
+    from ...realtime import trigger_event
+    from datetime import timedelta
+    
+    event = EventBooking.query.with_for_update().get(event_id)
+    if not event:
+        return api_response(success=False, error="Event not found.", status=404)
+        
+    if event.status != 'Pending':
+        return api_response(success=False, error=f"Event is already {event.status}.", status=400)
+        
+    # Overlap check
+    overlap_events = EventBooking.query.filter(
+        EventBooking.id != event.id,
+        EventBooking.status == 'Approved',
+        EventBooking.start_date <= event.end_date,
+        EventBooking.end_date >= event.start_date,
+        EventBooking.start_time < event.end_time,
+        EventBooking.end_time > event.start_time
+    ).all()
+    
+    req_room_ids = set(event.get_all_target_room_ids())
+    for ev in overlap_events:
+        ev_room_ids = set(ev.get_all_target_room_ids())
+        if not req_room_ids.isdisjoint(ev_room_ids):
+            return api_response(success=False, error=f"Conflict detected with approved event: {ev.title}", status=409)
+            
+    displaced_faculties = set()
+    
+    delta = event.end_date - event.start_date
+    days_involved = [(event.start_date + timedelta(days=i)).weekday() for i in range(delta.days + 1)]
+    
+    timetables = Timetable.query.filter(Timetable.room_id.in_(req_room_ids)).all()
+    for tt in timetables:
+        if tt.day_of_week in days_involved:
+            if tt.start_time < event.end_time and tt.end_time > event.start_time:
+                if tt.faculty_id:
+                    displaced_faculties.add(tt.faculty_id)
+                if getattr(tt, 'collaborator_id', None):
+                    displaced_faculties.add(tt.collaborator_id)
+                
+    for fac_id in displaced_faculties:
+        if not fac_id or fac_id == event.faculty_id: 
+            continue
+        notif = Notification(
+            user_id=fac_id,
+            recipient_role='faculty',
+            title="Lecture Displaced by Event",
+            message=f"A scheduled lecture has been displaced due to approved event '{event.title}'.",
+            type='lecture_displaced'
+        )
+        db.session.add(notif)
+        trigger_event(f'faculty-{fac_id}-alerts', 'notification-received', {'message': notif.message})
+        
+    event.status = 'Approved'
+    
+    if event.faculty_id:
+        notif = Notification(
+            user_id=event.faculty_id,
+            recipient_role='faculty',
+            title="Event Approved",
+            message=f"Your event '{event.title}' has been approved.",
+            type='event_approved'
+        )
+        db.session.add(notif)
+        trigger_event(f'faculty-{event.faculty_id}-alerts', 'notification-received', {'message': notif.message})
+    
+    db.session.commit()
+    
+    trigger_event('live-map', 'refresh-grid', {})
+    
+    return api_response(success=True, message="Event approved successfully.")
+
+@admin_bp.route('/events/<int:event_id>/reject', methods=['POST'])
+@admin_required
+@handle_api_errors
+def reject_event(event_id):
+    from ...models import EventBooking, Notification
+    from ...realtime import trigger_event
+    
+    data = request.json or {}
+    reason = data.get('reason', 'No reason provided.')
+    
+    event = EventBooking.query.get(event_id)
+    if not event:
+        return api_response(success=False, error="Event not found.", status=404)
+        
+    if event.status != 'Pending':
+        return api_response(success=False, error=f"Event is already {event.status}.", status=400)
+        
+    event.status = 'Rejected'
+    event.rejection_reason = reason
+    
+    if event.faculty_id:
+        notif = Notification(
+            user_id=event.faculty_id,
+            recipient_role='faculty',
+            title="Event Rejected",
+            message=f"Your event '{event.title}' was rejected. Reason: {reason}",
+            type='event_rejected'
+        )
+        db.session.add(notif)
+        trigger_event(f'faculty-{event.faculty_id}-alerts', 'notification-received', {'message': notif.message})
+    
+    db.session.commit()
+    
+    return api_response(success=True, message="Event rejected successfully.")
+
 
 
 

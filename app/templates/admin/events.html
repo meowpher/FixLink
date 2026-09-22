@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}Event Management - Admin Portal | FixLink{% endblock %}
+
+{% block extra_css %}
+<style>
+    .event-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+    .event-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+    }
+    .target-badge {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--mitwpu-blue);
+        border-radius: 12px;
+        margin-right: 5px;
+        display: inline-block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Event Booking Requests</h2>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">Back to Dashboard</a>
+    </div>
+
+    <ul class="nav nav-tabs mb-4" id="eventTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active fw-semibold" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab">Pending Requests</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab">Approved & Upcoming</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link fw-semibold" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">History</button>
+        </li>
+    </ul>
+
+    <div class="tab-content" id="eventTabsContent">
+        <!-- PENDING -->
+        <div class="tab-pane fade show active" id="pending" role="tabpanel">
+            {% if pending_events %}
+                {% for event in pending_events %}
+                <div class="event-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h5 class="fw-bold text-primary mb-1">{{ event.title }}</h5>
+                            <p class="text-muted small mb-2">Requested by <strong>{{ event.faculty.name }}</strong></p>
+                            <p class="mb-2"><i class="bi bi-calendar-event me-2"></i>{{ event.start_date.strftime('%b %d, %Y') }} - {{ event.end_date.strftime('%b %d, %Y') }}</p>
+                            <p class="mb-3"><i class="bi bi-clock me-2"></i>{{ event.start_time.strftime('%I:%M %p') }} to {{ event.end_time.strftime('%I:%M %p') }}</p>
+                            
+                            <div class="mb-3">
+                                <strong>Targets ({{ event.booking_type | title }}):</strong><br>
+                                {% if event.booking_type == 'floors' %}
+                                    <span class="target-badge">Floor(s) Block</span>
+                                {% else %}
+                                    {% for room in event.rooms %}
+                                        <span class="target-badge">{{ room.number }}</span>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            {% if event.description %}
+                                <p class="small text-muted border-start border-3 ps-2">{{ event.description }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="d-flex flex-column gap-2">
+                            <button class="btn btn-success btn-sm action-btn" onclick="approveEvent({{ event.id }})">
+                                <i class="bi bi-check-circle me-1"></i>Approve
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm action-btn" onclick="rejectEvent({{ event.id }})">
+                                <i class="bi bi-x-circle me-1"></i>Reject
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1"></i>
+                    <p class="mt-3">No pending event requests.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- UPCOMING -->
+        <div class="tab-pane fade" id="upcoming" role="tabpanel">
+            {% if upcoming_events %}
+                {% for event in upcoming_events %}
+                <div class="event-card border-success border-opacity-50">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ event.title }} <span class="badge bg-success ms-2">Approved</span></h5>
+                            <p class="text-muted small mb-2">Requested by {{ event.faculty.name }}</p>
+                            <p class="mb-1"><i class="bi bi-calendar-event me-2"></i>{{ event.start_date.strftime('%b %d, %Y') }} to {{ event.end_date.strftime('%b %d, %Y') }}</p>
+                            <p class="mb-0"><i class="bi bi-clock me-2"></i>{{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <p>No upcoming events.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- HISTORY -->
+        <div class="tab-pane fade" id="history" role="tabpanel">
+            {% if history_events %}
+                {% for event in history_events %}
+                <div class="event-card opacity-75">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h5 class="fw-bold mb-1">{{ event.title }} 
+                                {% if event.status == 'Rejected' %}
+                                    <span class="badge bg-danger ms-2">Rejected</span>
+                                {% else %}
+                                    <span class="badge bg-secondary ms-2">Completed</span>
+                                {% endif %}
+                            </h5>
+                            <p class="text-muted small mb-1">{{ event.start_date.strftime('%b %d, %Y') }}</p>
+                            {% if event.rejection_reason %}
+                                <p class="text-danger small mt-2 mb-0">Reason: {{ event.rejection_reason }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 text-muted">
+                    <p>No historical events.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+async function approveEvent(eventId) {
+    const res = await Swal.fire({
+        title: 'Approve Event?',
+        text: "This will book the requested targets and notify displaced faculty if any.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#198754',
+        confirmButtonText: 'Yes, Approve'
+    });
+    
+    if (res.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/events/${eventId}/approve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                }
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire('Approved!', data.message, 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.error || 'Failed to approve event.', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Network error occurred.', 'error');
+        }
+    }
+}
+
+async function rejectEvent(eventId) {
+    const { value: reason } = await Swal.fire({
+        title: 'Reject Event',
+        input: 'textarea',
+        inputLabel: 'Reason for rejection',
+        inputPlaceholder: 'Type your reason here...',
+        showCancelButton: true,
+        inputValidator: (value) => {
+            if (!value) return 'You need to write a reason!'
+        }
+    });
+
+    if (reason) {
+        try {
+            const response = await fetch(`/admin/events/${eventId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ reason })
+            });
+            const data = await response.json();
+            if (data.success) {
+                Swal.fire('Rejected', 'The event has been rejected.', 'success').then(() => location.reload());
+            } else {
+                Swal.fire('Error', data.error || 'Failed to reject event.', 'error');
+            }
+        } catch (e) {
+            Swal.fire('Error', 'Network error occurred.', 'error');
+        }
+    }
+}
+</script>
+{% endblock %}

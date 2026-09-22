@@ -2205,6 +2205,9 @@
                     <button class="btn rounded-3 px-3 py-2 d-flex align-items-center" id="btn-history">
                         <i class="bi bi-clock-history me-2 fs-5"></i>Booking History
                     </button>
+                    <a href="{{ url_for('faculty.book_event') }}" class="btn rounded-3 px-3 py-2 d-flex align-items-center text-decoration-none" id="btn-sidebar-book-event">
+                        <i class="bi bi-calendar2-plus me-2 fs-5"></i>Book Event
+                    </a>
                 </div>
             </div>
         </div>
@@ -2258,11 +2261,63 @@
                         <p class="text-muted mb-0">Your synchronized teaching schedule across the Vyas building.</p>
                     </div>
                     <div class="d-flex gap-2 w-100 w-md-auto dashboard-header-buttons flex-wrap">
+                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" style="font-size: 0.85rem;" id="btnHeaderBookEvent">
+                            <i class="bi bi-calendar2-plus me-1"></i>Book Event
+                        </a>
                         <button class="btn btn-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" id="btnHeaderRequestRoom" style="font-size: 0.85rem;">
                             <i class="bi bi-lightning-charge-fill me-1"></i>Request Room
                         </button>
                     </div>
                 </div>
+
+                <!-- Event Bookings Section -->
+                {% if my_events %}
+                    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+                        <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-0">My Event Requests & Allocations</h5>
+                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1">
+                            <i class="bi bi-plus-lg me-1"></i>New Event
+                        </a>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        {% for ev in my_events %}
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card h-100 border-0 shadow-sm rounded-4 p-3" style="background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, rgba(0,0,0,0.08)) !important;">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold mb-0 text-truncate" title="{{ ev.title }}">{{ ev.title }}</h6>
+                                    {% if ev.status == 'Approved' %}
+                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1">Approved</span>
+                                    {% elif ev.status == 'Pending' %}
+                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1">Pending Approval</span>
+                                    {% else %}
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2.5 py-1">Rejected</span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small mb-2">
+                                    <div><i class="bi bi-calendar3 me-1.5 text-primary"></i>{{ ev.start_date.strftime('%d %b %Y') }} {% if ev.start_date != ev.end_date %}to {{ ev.end_date.strftime('%d %b %Y') }}{% endif %}</div>
+                                    <div><i class="bi bi-clock me-1.5 text-primary"></i>{{ ev.start_time.strftime('%I:%M %p') }} - {{ ev.end_time.strftime('%I:%M %p') }}</div>
+                                    <div>
+                                        <i class="bi bi-geo-alt me-1.5 text-primary"></i>
+                                        {% if ev.booking_type == 'floors' %}
+                                            <span class="fw-semibold">Entire Floor(s):</span>
+                                            {% for f in ev.floors %}Level {{ f.level }}{% if not loop.last %}, {% endif %}{% endfor %}
+                                        {% else %}
+                                            <span class="fw-semibold">Rooms:</span>
+                                            {% for r in ev.rooms %}VY{{ r.number }}{% if not loop.last %}, {% endif %}{% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                {% if ev.status == 'Rejected' and ev.rejection_reason %}
+                                <div class="alert alert-danger py-1.5 px-2.5 small mb-0 mt-auto rounded-3">
+                                    <i class="bi bi-info-circle me-1"></i><strong>Reason:</strong> {{ ev.rejection_reason }}
+                                </div>
+                                {% elif ev.description %}
+                                <p class="text-muted small mb-0 mt-auto text-truncate" title="{{ ev.description }}">{{ ev.description }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
 
                 <!-- Ad-Hoc Section -->
                 {% if my_adhoc %}
@@ -3143,6 +3198,10 @@
         <i class="bi bi-lightning-charge"></i>
         <span>Request</span>
     </button>
+    <a href="{{ url_for('faculty.book_event') }}" class="bottom-nav-btn text-decoration-none" id="btn-bottom-event" aria-label="Book Event">
+        <i class="bi bi-calendar2-plus"></i>
+        <span>Events</span>
+    </a>
     <button class="bottom-nav-btn" id="btn-bottom-history" type="button" aria-label="Booking History View">
         <i class="bi bi-clock-history"></i>
         <span>History</span>

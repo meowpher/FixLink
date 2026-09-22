@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, request, jsonify, session
 from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 from ... import db
-from ...models import User, Building, Floor, Room, AdHocBooking, Timetable, RoomBooking, Notification, NoShowStrike, ScheduleSubmission
+from ...models import User, Building, Floor, Room, AdHocBooking, Timetable, RoomBooking, Notification, NoShowStrike, ScheduleSubmission, EventBooking
 from ...decorators import faculty_login_required
 from ...api_utils import handle_api_errors, api_response
 from ...realtime import emit_room_status_change, emit_faculty_nudge
@@ -37,36 +37,30 @@ def dashboard():
         AdHocBooking.faculty_id == faculty.id,
         AdHocBooking.end_datetime >= datetime.utcnow()
     ).order_by(AdHocBooking.start_datetime).all()
-    
-    # 2. Room Utilization Tracker (Global View)
-    vyas = Building.query.filter_by(name='Vyas').first()
-    floors = []
-    if vyas:
-        floors = Floor.query.filter(Floor.building_id == vyas.id).order_by(Floor.level).all()
-        
-    # Eager load rooms for efficiency
-    all_rooms = Room.query.options(
-        joinedload(Room.timetables),
-        joinedload(Room.adhoc_bookings).joinedload(AdHocBooking.faculty)
-    ).all()
-    
-    rooms_by_floor = {}
-    for room in all_rooms:
-        if room.floor_id not in rooms_by_floor:
-            rooms_by_floor[room.floor_id] = []
-        rooms_by_floor[room.floor_id].append(room)
 
-    # 3. Booking History (Server-Side Paginated, Limit=20)
+    my_events = EventBooking.query.filter_by(
+        faculty_id=faculty.id
+    ).order_by(EventBooking.created_at.desc()).all()
+    
+    # 2. Floors & Rooms for Real-Time Tracker Tab
+    floors = Floor.query.order_by(Floor.level).all()
+    all_rooms = Room.query.all()
+    
+    # Group rooms by floor
+    rooms_by_floor = {}
+    for f in floors:
+        rooms_by_floor[f.level] = [r for r in all_rooms if r.floor_id == f.id]
+        
+    # 3. Booking History (Paginated)
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
     import pytz
     IST = pytz.timezone('Asia/Kolkata')
     now_ist = datetime.now(IST)
-    
-    history_page = request.args.get('history_page', 1, type=int)
     history_pagination = RoomBooking.query.filter_by(
         faculty_id=faculty.id
-    ).order_by(RoomBooking.slot_start.desc()).paginate(page=history_page, per_page=20, error_out=False)
+    ).order_by(RoomBooking.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
     
-    # Calculate timezone-aware historical flag on history records
     for b in history_pagination.items:
         slot_end_dt = b.slot_end
         if slot_end_dt:
@@ -115,6 +109,7 @@ def dashboard():
                            rooms_by_floor=rooms_by_floor,
                            my_schedules=my_schedules,
                            my_adhoc=my_adhoc,
+                           my_events=my_events,
                            booking_history=history_pagination.items,
                            history_pagination=history_pagination,
                            bookings_this_week=bookings_this_week,
@@ -1546,5 +1541,111 @@ def import_timetable_csv():
     return api_response(success=True, message=f"Successfully imported {success_count} timetable records into building schedule.")
 
 
-
-
+@faculty_bp.route('/events/book', methods=['GET', 'POST'])
+@faculty_login_required
+def book_event():
+    from ...models import Floor, Room, EventBooking, Notification
+    from datetime import datetime
+    
+    if request.method == 'GET':
+        floors = Floor.query.order_by(Floor.level).all()
+        for f in floors:
+            f.rooms.sort(key=lambda r: r.number)
+        return render_template('faculty/book_event.html', floors=floors)
+        
+    try:
+        data = request.json
+        title = data.get('title')
+        desc = data.get('description', '')
+        start_date_str = data.get('start_date')
+        end_date_str = data.get('end_date')
+        start_time_str = data.get('start_time')
+        end_time_str = data.get('end_time')
+        b_type = data.get('booking_type', 'rooms')
+        targets = data.get('targets', [])
+        
+        if not title or not start_date_str or not end_date_str or not start_time_str or not end_time_str or not targets:
+            return api_response(success=False, error="Missing required fields", status=400)
+            
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+        start_time = datetime.strptime(start_time_str, '%H:%M').time()
+        end_time = datetime.strptime(end_time_str, '%H:%M').time()
+        
+        if end_date < start_date:
+            return api_response(success=False, error="End date cannot be before start date.", status=400)
+        if start_date == end_date and end_time <= start_time:
+            return api_response(success=False, error="End time must be after start time.", status=400)
+            
+        from sqlalchemy import and_, or_
+        from ... import db
+        
+        overlap_events = EventBooking.query.filter(
+            EventBooking.status == 'Approved',
+            EventBooking.start_date <= end_date,
+            EventBooking.end_date >= start_date,
+            EventBooking.start_time < end_time,
+            EventBooking.end_time > start_time
+        ).all()
+        
+        req_room_ids = set()
+        if b_type == 'floors':
+            rooms = Room.query.join(Floor).filter(Floor.level.in_(targets)).all()
+            req_room_ids.update(r.id for r in rooms)
+        else:
+            req_room_ids.update(targets)
+            
+        for ev in overlap_events:
+            ev_room_ids = set(ev.get_all_target_room_ids())
+            if not req_room_ids.isdisjoint(ev_room_ids):
+                return api_response(success=False, error=f"Conflict detected with approved event: {ev.title}", status=409)
+                
+        new_event = EventBooking(
+            title=title,
+            description=desc,
+            faculty_id=session.get('user_id'),
+            booking_type=b_type,
+            start_date=start_date,
+            end_date=end_date,
+            start_time=start_time,
+            end_time=end_time,
+            status='Pending'
+        )
+        
+        db.session.add(new_event)
+        
+        if b_type == 'floors':
+            db.session.flush() 
+            from ...models import event_floors
+            db.session.execute(event_floors.insert().values([
+                {'event_id': new_event.id, 'floor_number': t} for t in targets
+            ]))
+        else:
+            rooms = Room.query.filter(Room.id.in_(targets)).all()
+            new_event.rooms.extend(rooms)
+            
+        admins = User.query.filter_by(role=User.ROLE_ADMIN).all()
+        for admin in admins:
+            notif = Notification(
+                user_id=admin.id,
+                recipient_role='admin',
+                title="New Event Request",
+                message=f"{session.get('user_name')} requested an event: {title}.",
+                type='event_request',
+                link='/admin/events'
+            )
+            db.session.add(notif)
+            
+        db.session.commit()
+        
+        from ...realtime import trigger_event
+        trigger_event('admin-notifications', 'new-event-request', {
+            'title': title,
+            'faculty': session.get('user_name')
+        })
+        
+        return api_response(success=True, message="Event request submitted successfully.")
+    except Exception as e:
+        logger.error(f"Event booking error: {e}")
+        db.session.rollback()
+        return api_response(success=False, error="Internal server error", status=500)

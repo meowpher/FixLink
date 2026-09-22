@@ -581,3 +581,73 @@ def get_unread_chat_total():
         data={'unread_count': unread_count},
         unread_count=unread_count
     )
+
+@main_bp.route('/api/notifications/recent', methods=['GET'])
+def get_recent_notifications():
+    if not (session.get('user_id') or session.get('professional_id')):
+        return api_response(success=False, error="Unauthorized", status=401)
+        
+    from ...models import Notification
+    
+    is_admin = session.get('is_admin')
+    user_role = session.get('user_role')
+    user_id = session.get('user_id')
+    
+    query = Notification.query
+    if is_admin:
+        query = query.filter_by(recipient_role='admin')
+    elif user_role == 'faculty':
+        query = query.filter_by(user_id=user_id, recipient_role='faculty')
+    else:
+        return api_response(success=True, data=[], unread_count=0)
+        
+    notifications = query.order_by(Notification.created_at.desc()).limit(20).all()
+    unread_count = query.filter_by(is_read=False).count()
+    
+    data = [{
+        'id': n.id,
+        'title': n.title,
+        'message': n.message,
+        'type': n.type,
+        'link': n.link,
+        'is_read': n.is_read,
+        'created_at': n.created_at.isoformat() + 'Z'
+    } for n in notifications]
+    
+    return api_response(success=True, data=data, unread_count=unread_count)
+
+@main_bp.route('/api/notifications/<int:notif_id>/mark-read', methods=['POST'])
+def mark_notification_read(notif_id):
+    if not session.get('user_id'):
+        return api_response(success=False, error="Unauthorized", status=401)
+        
+    from ...models import Notification
+    from ... import db
+    
+    notif = Notification.query.get(notif_id)
+    if notif:
+        notif.is_read = True
+        db.session.commit()
+    return api_response(success=True)
+
+@main_bp.route('/api/notifications/mark-all-read', methods=['POST'])
+def mark_all_notifications_read():
+    if not session.get('user_id'):
+        return api_response(success=False, error="Unauthorized", status=401)
+        
+    from ...models import Notification
+    from ... import db
+    
+    is_admin = session.get('is_admin')
+    user_id = session.get('user_id')
+    
+    query = Notification.query.filter_by(is_read=False)
+    if is_admin:
+        query = query.filter_by(recipient_role='admin')
+    else:
+        query = query.filter_by(user_id=user_id, recipient_role='faculty')
+        
+    query.update({'is_read': True})
+    db.session.commit()
+    
+    return api_response(success=True)

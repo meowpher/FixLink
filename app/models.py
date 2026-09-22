@@ -351,11 +351,27 @@ class Room(db.Model):
                 # to prevent cache poisoning across users.
                 'end_time': (active_booking.slot_end + timedelta(hours=5, minutes=30)).strftime('%I:%M %p') # +5:30 for IST
             }
-            
-        # 2. Check Timetable (Recurring schedule)
+
         now_ist = datetime.utcnow() + timedelta(hours=5, minutes=30)
-        current_day = now_ist.weekday()
+        current_date = now_ist.date()
         current_time = now_ist.time().replace(minute=0, second=0, microsecond=0)
+            
+        # 1.5. Check EventBooking (approved events)
+        for ev in self.booked_events:
+            if ev.status == 'Approved' and ev.start_date <= current_date <= ev.end_date:
+                if ev.start_time <= current_time < ev.end_time:
+                    return {
+                        'status': 'occupied',
+                        'id': ev.id,
+                        'type': 'event',
+                        'subject': f"Event: {ev.title}",
+                        'faculty': ev.faculty.name if ev.faculty else 'Faculty',
+                        'faculty_id': ev.faculty_id,
+                        'end_time': ev.end_time.strftime('%I:%M %p')
+                    }
+                    
+        # 2. Check Timetable (Recurring schedule)
+        current_day = now_ist.weekday()
         
         active_timetable = None
         for tt in self.timetables:
@@ -973,7 +989,8 @@ class Notification(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    title = db.Column(db.String(100), nullable=False)
+    recipient_role = db.Column(db.String(30), nullable=False, server_default='admin')
+    title = db.Column(db.String(120), nullable=False)
     message = db.Column(db.Text, nullable=False)
     type = db.Column(db.String(50), default=TYPE_SYSTEM)
     link = db.Column(db.String(255), nullable=True) # URL or route to follow
@@ -987,13 +1004,39 @@ class Notification(db.Model):
     # Relationship
     user = db.relationship('User', backref=db.backref('notifications', lazy=True, cascade='all, delete-orphan'))
     
-    def __init__(self, user_id=None, title=None, message=None, type=TYPE_SYSTEM, link=None, **kwargs):
+    @property
+    def recipient_id(self):
+        return self.user_id
+        
+    @recipient_id.setter
+    def recipient_id(self, value):
+        self.user_id = value
+        
+    @property
+    def category(self):
+        return self.type
+        
+    @category.setter
+    def category(self, value):
+        self.type = value
+
+    def __init__(self, user_id=None, title=None, message=None, type=TYPE_SYSTEM, link=None, recipient_role='admin', recipient_id=None, category=None, **kwargs):
         super().__init__(**kwargs)
-        if user_id is not None: self.user_id = user_id
+        if recipient_id is not None:
+            self.user_id = recipient_id
+        elif user_id is not None:
+            self.user_id = user_id
+            
+        if category is not None:
+            self.type = category
+        elif type is not None:
+            self.type = type
+            
         if title is not None: self.title = title
         if message is not None: self.message = message
-        if type is not None: self.type = type
         if link is not None: self.link = link
+        if recipient_role is not None: self.recipient_role = recipient_role
+        
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -1316,4 +1359,47 @@ class ScheduleSubmission(db.Model):
             'reviewed_by_name': self.reviewed_by.name if self.reviewed_by else None,
             'created_at': self.created_at.isoformat() + 'Z' if self.created_at else None
         }
+
+event_rooms = db.Table('event_rooms',
+    db.Column('event_id', db.Integer, db.ForeignKey('event_bookings.id', ondelete='CASCADE'), primary_key=True),
+    db.Column('room_id', db.Integer, db.ForeignKey('rooms.id', ondelete='CASCADE'), primary_key=True)
+)
+
+event_floors = db.Table('event_floors',
+    db.Column('event_id', db.Integer, db.ForeignKey('event_bookings.id', ondelete='CASCADE'), primary_key=True),
+    db.Column('floor_number', db.Integer, primary_key=True)
+)
+
+class EventBooking(db.Model):
+    __tablename__ = 'event_bookings'
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    faculty_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    booking_type = db.Column(db.String(20), nullable=False)  # 'rooms' or 'floors'
+    start_date = db.Column(db.Date, nullable=False, index=True)
+    end_date = db.Column(db.Date, nullable=False, index=True)
+    start_time = db.Column(db.Time, nullable=False)
+    end_time = db.Column(db.Time, nullable=False)
+    status = db.Column(db.String(20), default='Pending', nullable=False, index=True)
+    rejection_reason = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    
+    faculty = db.relationship('User', backref='event_bookings')
+    rooms = db.relationship('Room', secondary=event_rooms, backref='booked_events')
+    
+    __table_args__ = (
+        db.Index('idx_event_start_end', 'start_date', 'end_date'),
+        db.Index('idx_event_status', 'status'),
+    )
+
+    def get_all_target_room_ids(self):
+        if self.booking_type == 'floors':
+            from sqlalchemy import select
+            floor_levels = [row.floor_number for row in db.session.execute(select(event_floors.c.floor_number).where(event_floors.c.event_id == self.id)).fetchall()]
+            from .models import Room, Floor
+            rooms = Room.query.join(Floor).filter(Floor.level.in_(floor_levels)).all()
+            return [r.id for r in rooms]
+        else:
+            return [r.id for r in self.rooms]
 

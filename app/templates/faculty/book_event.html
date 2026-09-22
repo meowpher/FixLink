@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+
+{% block title %}Book Event - Faculty Portal | FixLink{% endblock %}
+{% block meta_description %}Submit requests for ad-hoc events, multi-room bookings, or floor reservations across the Vyas building.{% endblock %}
+
+{% block extra_css %}
+<style>
+    .event-booking-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+        border: 1px solid var(--border-color);
+        padding: 2.5rem;
+        margin-top: 2rem;
+    }
+    
+    [data-theme="dark"] .event-booking-card {
+        background: rgba(30, 41, 59, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+
+    .booking-type-toggle {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    .booking-type-btn {
+        flex: 1;
+        padding: 1rem;
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        background: transparent;
+        color: var(--text-color);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-align: center;
+        cursor: pointer;
+    }
+    .booking-type-btn.active {
+        border-color: var(--mitwpu-blue);
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--mitwpu-blue);
+    }
+
+    .room-badge-checkbox {
+        display: none;
+    }
+    .room-badge-label {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        margin: 0.25rem;
+        border-radius: 20px;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .room-badge-checkbox:checked + .room-badge-label {
+        background: var(--mitwpu-blue);
+        color: white;
+        border-color: var(--mitwpu-blue);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-link text-decoration-none ps-0 mb-3 text-muted">
+                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
+            </a>
+            
+            <h2 class="fw-bold mb-1">Book an Event</h2>
+            <p class="text-muted">Reserve multiple classrooms or entire floors for seminars, exams, or guest lectures.</p>
+            
+            <div class="event-booking-card">
+                <form id="eventBookingForm">
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Event Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control form-control-lg" id="eventTitle" required placeholder="e.g., Final Year Project Presentations">
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Description (Optional)</label>
+                        <textarea class="form-control" id="eventDescription" rows="3" placeholder="Additional details for the admin review..."></textarea>
+                    </div>
+
+                    <h5 class="fw-bold mb-3 mt-5">Booking Scope</h5>
+                    <div class="booking-type-toggle">
+                        <div class="booking-type-btn active" data-type="rooms" id="btnTypeRooms">
+                            <i class="bi bi-grid-3x3-gap me-2"></i>Individual Classrooms
+                        </div>
+                        <div class="booking-type-btn" data-type="floors" id="btnTypeFloors">
+                            <i class="bi bi-layers me-2"></i>Full Floor Block
+                        </div>
+                    </div>
+                    
+                    <input type="hidden" id="bookingType" value="rooms">
+
+                    <!-- Rooms Picker -->
+                    <div id="roomsPicker" class="mb-4">
+                        <label class="form-label fw-semibold">Select Target Rooms</label>
+                        <div class="d-flex flex-wrap" id="roomsListContainer">
+                            {% for floor in floors %}
+                                <div class="w-100 mt-2 mb-1"><small class="text-muted fw-bold">{{ floor.name }}</small></div>
+                                {% for room in floor.rooms %}
+                                    <input type="checkbox" class="room-badge-checkbox room-checkbox" id="room_{{ room.id }}" value="{{ room.id }}">
+                                    <label class="room-badge-label" for="room_{{ room.id }}">{{ room.number }}</label>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Floors Picker -->
+                    <div id="floorsPicker" class="mb-4 d-none">
+                        <label class="form-label fw-semibold">Select Target Floors</label>
+                        <div class="d-flex flex-wrap">
+                            {% for floor in floors %}
+                                <input type="checkbox" class="room-badge-checkbox floor-checkbox" id="floor_{{ floor.level }}" value="{{ floor.level }}">
+                                <label class="room-badge-label px-4 py-2" for="floor_{{ floor.level }}">{{ floor.name }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-3 mt-5">Date & Time</h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Start Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="startDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">End Date <span class="text-danger">*</span></label>
+                            <input type="date" class="form-control" id="endDate" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Start Time <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" id="startTime" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">End Time <span class="text-danger">*</span></label>
+                            <input type="time" class="form-control" id="endTime" required>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning d-none" id="dateErrorAlert">
+                        <i class="bi bi-exclamation-triangle me-2"></i><span id="dateErrorMsg">Invalid date/time combination.</span>
+                    </div>
+
+                    <div class="d-grid mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill" id="btnSubmitEvent">
+                            <span class="btn-text">Submit Event for Review</span>
+                            <span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const btnRooms = document.getElementById('btnTypeRooms');
+    const btnFloors = document.getElementById('btnTypeFloors');
+    const bookingTypeInput = document.getElementById('bookingType');
+    const roomsPicker = document.getElementById('roomsPicker');
+    const floorsPicker = document.getElementById('floorsPicker');
+    
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('startDate').min = today;
+    document.getElementById('endDate').min = today;
+    
+    btnRooms.addEventListener('click', () => {
+        btnRooms.classList.add('active');
+        btnFloors.classList.remove('active');
+        bookingTypeInput.value = 'rooms';
+        roomsPicker.classList.remove('d-none');
+        floorsPicker.classList.add('d-none');
+    });
+    
+    btnFloors.addEventListener('click', () => {
+        btnFloors.classList.add('active');
+        btnRooms.classList.remove('active');
+        bookingTypeInput.value = 'floors';
+        floorsPicker.classList.remove('d-none');
+        roomsPicker.classList.add('d-none');
+    });
+    
+    document.getElementById('eventBookingForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const title = document.getElementById('eventTitle').value.trim();
+        const description = document.getElementById('eventDescription').value.trim();
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+        const startTime = document.getElementById('startTime').value;
+        const endTime = document.getElementById('endTime').value;
+        const bType = bookingTypeInput.value;
+        
+        const dateErrorAlert = document.getElementById('dateErrorAlert');
+        const dateErrorMsg = document.getElementById('dateErrorMsg');
+        
+        if (endDate < startDate) {
+            dateErrorMsg.textContent = "End date cannot be before start date.";
+            dateErrorAlert.classList.remove('d-none');
+            return;
+        }
+        
+        if (startDate === endDate && endTime <= startTime) {
+            dateErrorMsg.textContent = "End time must be after start time on the same day.";
+            dateErrorAlert.classList.remove('d-none');
+            return;
+        }
+        
+        dateErrorAlert.classList.add('d-none');
+        
+        let targetIds = [];
+        if (bType === 'rooms') {
+            document.querySelectorAll('#roomsPicker .room-checkbox:checked').forEach(cb => targetIds.push(parseInt(cb.value)));
+        } else {
+            document.querySelectorAll('#floorsPicker .floor-checkbox:checked').forEach(cb => targetIds.push(parseInt(cb.value)));
+        }
+        
+        if (targetIds.length === 0) {
+            dateErrorMsg.textContent = "Please select at least one target room or floor.";
+            dateErrorAlert.classList.remove('d-none');
+            return;
+        }
+        
+        const btnSubmit = document.getElementById('btnSubmitEvent');
+        const spinner = btnSubmit.querySelector('.spinner-border');
+        const btnText = btnSubmit.querySelector('.btn-text');
+        
+        btnSubmit.disabled = true;
+        spinner.classList.remove('d-none');
+        btnText.textContent = "Validating...";
+        
+        gsap.to(btnSubmit, {scale: 0.95, duration: 0.2});
+        
+        try {
+            const res = await fetch('/faculty/events/book', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({
+                    title, description, start_date: startDate, end_date: endDate,
+                    start_time: startTime, end_time: endTime,
+                    booking_type: bType,
+                    targets: targetIds
+                })
+            });
+            
+            const result = await res.json();
+            if (res.ok && result.success) {
+                gsap.to(btnSubmit, {scale: 1, duration: 0.2});
+                btnText.textContent = "Success!";
+                spinner.classList.add('d-none');
+                btnSubmit.classList.replace('btn-primary', 'btn-success');
+                
+                setTimeout(() => {
+                    window.location.href = '/faculty/dashboard';
+                }, 1500);
+            } else {
+                throw new Error(result.error || "Conflict detected or unknown error");
+            }
+        } catch (err) {
+            gsap.to(btnSubmit, {scale: 1, duration: 0.2});
+            btnSubmit.disabled = false;
+            spinner.classList.add('d-none');
+            btnText.textContent = "Submit Event for Review";
+            
+            dateErrorMsg.textContent = err.message;
+            dateErrorAlert.classList.remove('d-none');
+            gsap.fromTo(dateErrorAlert, {y: -10, opacity: 0}, {y: 0, opacity: 1, duration: 0.3});
+        }
+    });
+});
+</script>
+{% endblock %}

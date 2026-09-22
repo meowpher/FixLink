@@ -99,19 +99,38 @@ def check_for_alerts(app):
         except Exception as e:
             print(f"Critical Asset Alert Error: {str(e)}")
 
+def check_ghost_protocol(app):
+    """Run Ghost Protocol check to auto-cancel no-show ad-hoc room bookings."""
+    with app.app_context():
+        try:
+            from .blueprints.faculty.routes import run_ghost_protocol
+            count = run_ghost_protocol()
+            if count > 0:
+                print(f"[Ghost Protocol] Auto-cancelled {count} no-show reservation(s) and freed rooms.")
+        except Exception as e:
+            print(f"[Ghost Protocol] Error in execution: {str(e)}")
+
 def scheduler_loop(app):
     # Minimal wait to let the app start fully
-    time.sleep(10)
-    print("Background scheduler started.")
+    time.sleep(5)
+    print("Background scheduler started (with Ghost Protocol active).")
+    last_alerts_run = 0
+    
     while True:
         try:
-            check_for_alerts(app)
+            # 1. Run Ghost Protocol every cycle (60 seconds)
+            check_ghost_protocol(app)
+            
+            # 2. Run Ticket / Asset Alerts every 30 minutes (1800 seconds)
+            now_ts = time.time()
+            if now_ts - last_alerts_run >= 1800:
+                check_for_alerts(app)
+                last_alerts_run = now_ts
         except Exception as e:
-            # We use print here because we are in a background thread without easy logger access
             print(f"Scheduler error: {str(e)}")
         
-        # Check every 30 minutes (1800 seconds)
-        time.sleep(1800)
+        # Sleep for 60 seconds between Ghost Protocol checks
+        time.sleep(60)
 
 def start_scheduler(app):
     """Start the background scheduler thread."""

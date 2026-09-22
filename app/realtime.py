@@ -262,3 +262,22 @@ def emit_room_status_change(room, status_data):
         'end_time': status_data.get('end_time')
     }
     trigger_event('public-room-updates', 'room_occupancy_changed', data)
+
+def emit_faculty_nudge(target_faculty_id, nudge_data):
+    """
+    Phase 6: The Hallway De-Escalator Nudge.
+    Emits a polite real-time toast ping to the faculty member currently in session.
+    """
+    data = {
+        'target_faculty_id': target_faculty_id,
+        'sender_faculty_id': nudge_data.get('sender_faculty_id'),
+        'sender_faculty_name': nudge_data.get('sender_faculty_name', 'Next Professor'),
+        'room_id': nudge_data.get('room_id'),
+        'room_number': nudge_data.get('room_number', 'Room'),
+        'subject': nudge_data.get('subject', 'Next Scheduled Lecture'),
+        'message': nudge_data.get('message', 'The next instructor is waiting outside and setting up.'),
+        'timestamp': nudge_data.get('timestamp')
+    }
+    # Broadcast to public updates channel for instant client consumption
+    trigger_event('public-room-updates', 'faculty_hallway_nudge', data)
+    trigger_event(f'user-{target_faculty_id}', 'faculty_hallway_nudge', data)

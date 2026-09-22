@@ -111,20 +111,23 @@ def logout():
 @superadmin_bp.route('/developer')
 @super_admin_required
 def dashboard():
-    """Developer dashboard - manage admins and professionals."""
+    """Developer dashboard - manage admins, professionals, and timetable SLA escalations."""
     from ...models import BugReport
+    from ...sla_service import get_pending_batches_sla_status
     admin_count = User.query.filter_by(is_admin=True, role=User.ROLE_ADMIN).count()
     faculty_count = User.query.filter_by(role=User.ROLE_FACULTY).count()
     professional_count = Professional.query.filter_by(is_active=True).count()
     user_count = User.query.count()
     bugs = BugReport.query.order_by(BugReport.created_at.desc()).all()
+    sla_status = get_pending_batches_sla_status()
     
     return render_template('superadmin/dashboard.html',
                          admin_count=admin_count,
                          faculty_count=faculty_count,
                          professional_count=professional_count,
                          user_count=user_count,
-                         bugs=bugs)
+                         bugs=bugs,
+                         sla_status=sla_status)
 
 @superadmin_bp.route('/developer/bugs/<int:bug_id>/resolve', methods=['POST'])
 @super_admin_required
@@ -756,3 +759,79 @@ def bulk_upload_users():
         flash(f"Error parsing CSV: {str(e)}", 'error')
         
     return redirect(url_for('superadmin.dashboard'))
+
+
+# =========================================================================
+# PHASE 4: SLA ESCALATION API (THE ANTI-STAGNATION PROTOCOL)
+# =========================================================================
+
+@superadmin_bp.route('/developer/api/sla/status', methods=['GET'])
+@super_admin_required
+def get_sla_status_api():
+    """Returns JSON payload of real-time SLA metrics across all department batches."""
+    from ...sla_service import get_pending_batches_sla_status
+    status = get_pending_batches_sla_status()
+    # Serialize datetime objects
+    serialized_batches = []
+    for b in status['batches']:
+        batch_dict = {k: v for k, v in b.items() if k not in ('submissions', 'oldest_submitted_at')}
+        batch_dict['oldest_submitted_at'] = b['oldest_submitted_at'].isoformat() + 'Z' if b['oldest_submitted_at'] else None
+        serialized_batches.append(batch_dict)
+        
+    return api_response(
+        success=True,
+        data={
+            'has_stale_batches': status['has_stale_batches'],
+            'stale_batches_count': status['stale_batches_count'],
+            'total_stale_submissions': status['total_stale_submissions'],
+            'total_stale_hours': status['total_stale_hours'],
+            'batches': serialized_batches
+        }
+    )
+
+
+@superadmin_bp.route('/developer/api/sla/ping-department', methods=['POST'])
+@super_admin_required
+def ping_department_head_api():
+    """Trigger an automated email escalation ping to the responsible Department Head."""
+    from ...sla_service import trigger_department_sla_escalation
+    data = request.get_json() or {}
+    dept_name = data.get('department_name', '').strip()
+    target_email = data.get('target_email', '').strip() or None
+    
+    if not dept_name:
+        return api_response(success=False, error="department_name is required.", status=400)
+        
+    result = trigger_department_sla_escalation(
+        department_name=dept_name,
+        target_email=target_email
+    )
+    
+    if result.get('success'):
+        return api_response(success=True, data=result, message=result.get('message'))
+    else:
+        return api_response(success=False, error=result.get('message', 'Failed to dispatch email ping.'), status=400)
+
+
+@superadmin_bp.route('/developer/api/sla/override-approve-batch', methods=['POST'])
+@super_admin_required
+def override_approve_batch_api():
+    """Super Admin high-privilege override to immediately approve a department's pending batch."""
+    from ...sla_service import superadmin_override_bulk_approve
+    data = request.get_json() or {}
+    dept_name = data.get('department_name', '').strip()
+    
+    if not dept_name:
+        return api_response(success=False, error="department_name is required.", status=400)
+        
+    superadmin_id = session.get('user_id')
+    result = superadmin_override_bulk_approve(
+        department_name=dept_name,
+        superadmin_id=superadmin_id
+    )
+    
+    if result.get('success'):
+        return api_response(success=True, data=result, message=result.get('message'))
+    else:
+        return api_response(success=False, error=result.get('message', 'Override bulk approval failed.'), status=400)
+

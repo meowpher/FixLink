@@ -226,7 +226,7 @@
         </div>
     </div>
 
-    {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login') or request.endpoint == 'main.report_bug' or request.endpoint in ['main.privacy', 'main.terms', 'main.cookies'])) %}
+    {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login') or request.endpoint == 'faculty.dashboard' or request.endpoint == 'main.report_bug' or request.endpoint in ['main.privacy', 'main.terms', 'main.cookies'])) %}
     <nav id="mobile-bottom-nav" class="d-md-none" aria-label="Mobile navigation">
         {% if session.get('is_admin') %}
             <a href="{{ url_for('admin.dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">
@@ -354,9 +354,17 @@
                     <div><div class="manage-item-title">Booking History</div><div class="manage-item-desc">Room booking records</div></div>
                 </a>
                 {% if session.get('is_admin') %}
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.department_approvals') }}">
+                    <i class="bi bi-patch-check fs-5 text-success"></i>
+                    <div><div class="manage-item-title">Department Approvals</div><div class="manage-item-desc">Bulk verify & publish schedules</div></div>
+                </a>
                 <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.classroom_management') }}">
                     <i class="bi bi-building-gear fs-5"></i>
                     <div><div class="manage-item-title">Classroom Management</div><div class="manage-item-desc">CMM, CSV import & schedules</div></div>
+                </a>
+                <a class="manage-item-btn text-start d-flex align-items-center gap-3 position-relative" href="{{ url_for('admin.ghost_protocol') }}">
+                    <i class="bi bi-shield-exclamation fs-5 text-danger"></i>
+                    <div><div class="manage-item-title">Ghost Protocol</div><div class="manage-item-desc">No-show flags &amp; strike management</div></div>
                 </a>
                 {% elif session.get('user_role') == 'faculty' %}
                 <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('faculty.dashboard') }}">
@@ -453,6 +461,7 @@
                         <li><a class="msb-subitem" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history"></i>Full History</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.booking_history') }}"><i class="bi bi-calendar3-range"></i>Bookings</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.classroom_management') }}"><i class="bi bi-building-gear"></i>Classroom Management</a></li>
+                        <li><a class="msb-subitem {% if request.endpoint == 'admin.ghost_protocol' %}msb-active{% endif %}" href="{{ url_for('admin.ghost_protocol') }}"><i class="bi bi-shield-exclamation text-danger"></i>Ghost Protocol</a></li>
                     </ul>
                 </li>
                 <li>
@@ -685,11 +694,14 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
                         <ul class="dropdown-menu shadow rounded-4 border-0">
+                            <li><a class="dropdown-item" href="{{ url_for('admin.department_approvals') }}"><i class="bi bi-patch-check me-2 text-success"></i>Department Approvals</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history me-2"></i>Full History</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.classroom_management') }}"><i class="bi bi-building-gear me-2"></i>Classroom Management (CMM)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item {% if request.endpoint == 'admin.ghost_protocol' %}active{% endif %}" href="{{ url_for('admin.ghost_protocol') }}"><i class="bi bi-shield-exclamation me-2 text-danger"></i>Ghost Protocol</a></li>
                         </ul>
                     </li>
 

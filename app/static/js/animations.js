@@ -4,20 +4,22 @@
  * 0 external network requests, hardware-accelerated 60-120fps
  */
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Animate main content on load
+    // 1. Animate main content on load (without persistent transform containing block)
     const mainContent = document.querySelector(".main-content");
     if (mainContent && typeof mainContent.animate === "function") {
-        mainContent.animate(
+        const anim = mainContent.animate(
             [
-                { opacity: 0, transform: "translateY(16px)" },
+                { opacity: 0, transform: "translateY(12px)" },
                 { opacity: 1, transform: "translateY(0)" }
             ],
             {
-                duration: 500,
-                easing: "cubic-bezier(0.16, 1, 0.3, 1)",
-                fill: "forwards"
+                duration: 350,
+                easing: "cubic-bezier(0.16, 1, 0.3, 1)"
             }
         );
+        anim.onfinish = () => {
+            mainContent.style.transform = "none";
+        };
     }
 
     // 2. Animate cards as they enter viewport via IntersectionObserver

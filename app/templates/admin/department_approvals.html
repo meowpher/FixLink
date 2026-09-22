@@ -1,0 +1,1002 @@
+{% extends "base.html" %}
+
+{% block title %}Department Approvals — Bulk Timetable Verification | MIT-WPU FixLink{% endblock %}
+{% block meta_description %}Department-wide bulk schedule verification and approval interface for MIT-WPU Administrators.{% endblock %}
+
+{% block extra_css %}
+<style>
+    body, main.main-content {
+        background-color: #0a0a0a !important;
+        color: #f4f4f5;
+    }
+
+    .approvals-container {
+        max-width: 1650px;
+        margin: 0 auto;
+        padding-bottom: 90px;
+    }
+
+    /* Stat Cards */
+    .metric-card {
+        background: #141414;
+        border: 1px solid #262626;
+        border-radius: 18px;
+        padding: 1.25rem 1.5rem;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .metric-card:hover {
+        transform: translateY(-2px);
+        border-color: #38bdf8;
+    }
+
+    .metric-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+    }
+
+    /* Wide Summary Table Container */
+    .wide-table-card {
+        background: #121212;
+        border: 1px solid #262626;
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+    }
+
+    .wide-table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .wide-table th {
+        background: #181818;
+        color: #a1a1aa;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        padding: 14px 16px;
+        border-bottom: 1px solid #262626;
+        white-space: nowrap;
+    }
+
+    .wide-table td {
+        background: #121212;
+        color: #f4f4f5;
+        padding: 16px;
+        border-bottom: 1px solid #1e1e1e;
+        vertical-align: middle;
+        font-size: 0.88rem;
+    }
+
+    .wide-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .wide-table tr:hover td {
+        background: #171717;
+    }
+
+    /* Primary Bulk Action Button */
+    .btn-bulk-approve {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        border: none;
+        color: #ffffff;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        padding: 0.75rem 1.6rem;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-bulk-approve:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(16, 185, 129, 0.55);
+        color: #ffffff;
+    }
+
+    .btn-bulk-approve:disabled {
+        background: #27272a !important;
+        color: #71717a !important;
+        box-shadow: none !important;
+        cursor: not-allowed;
+    }
+
+    /* Badges */
+    .badge-conflict-free {
+        background: rgba(16, 185, 129, 0.15);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        font-weight: 700;
+        font-size: 0.72rem;
+        padding: 4px 8px;
+        border-radius: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .badge-pass {
+        background: rgba(56, 189, 248, 0.15);
+        color: #38bdf8;
+        border: 1px solid rgba(56, 189, 248, 0.3);
+        font-weight: 700;
+        font-size: 0.72rem;
+        padding: 4px 8px;
+        border-radius: 20px;
+    }
+
+    .badge-dept {
+        background: #1f1f1f;
+        color: #e4e4e7;
+        border: 1px solid #333333;
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 3px 8px;
+        border-radius: 6px;
+    }
+
+    .btn-draft {
+        background: #27272a;
+        color: #e4e4e7;
+        border: 1px solid #3f3f46;
+        font-weight: 600;
+        padding: 0.6rem 1.2rem;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+    }
+
+    .btn-draft:hover {
+        background: #3f3f46;
+        color: #ffffff;
+    }
+
+    /* Mini Grid for Modal Inspection */
+    .modal-content-dark {
+        background: #141414 !important;
+        border: 1px solid #282828 !important;
+        border-radius: 20px !important;
+        color: #f4f4f5;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 approvals-container pt-3">
+    <!-- Breadcrumb & Top Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none text-muted"><i class="bi bi-arrow-left me-1"></i> Admin Dashboard</a></li>
+                    <li class="breadcrumb-item active text-success fw-semibold" aria-current="page">Department Approvals</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-0 text-white d-flex align-items-center gap-2">
+                <i class="bi bi-patch-check-fill text-success"></i>
+                <span>Department Schedule Approvals</span>
+            </h3>
+            <small class="text-muted">Review, conflict-verify, and bulk-publish semester curriculum allocations to the live campus tracker.</small>
+        </div>
+
+        <!-- Bulk Action Button -->
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-bulk-approve d-flex align-items-center gap-2" id="btnBulkApprove" {% if pending_count == 0 %}disabled{% endif %}>
+                <i class="bi bi-check-all fs-5"></i>
+                <span>Bulk Approve Department (<span id="bulkApproveCount">{{ pending_count }}</span>)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Stat Metrics Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="metric-card d-flex align-items-center gap-3">
+                <div class="metric-icon bg-warning bg-opacity-15 text-warning">
+                    <i class="bi bi-hourglass-split"></i>
+                </div>
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Pending Submissions</span>
+                    <h3 class="fw-black mb-0 text-white" id="statPendingCount">{{ pending_count }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="metric-card d-flex align-items-center gap-3">
+                <div class="metric-icon bg-primary bg-opacity-15 text-primary">
+                    <i class="bi bi-calendar-range-fill"></i>
+                </div>
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Lecture Hours in Queue</span>
+                    <h3 class="fw-black mb-0 text-white">{{ total_hours }} <span class="fs-6 text-muted fw-normal">hrs</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="metric-card d-flex align-items-center gap-3">
+                <div class="metric-icon bg-success bg-opacity-15 text-success">
+                    <i class="bi bi-shield-check"></i>
+                </div>
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Collision Shield</span>
+                    <h3 class="fw-black mb-0 text-success">100% <span class="fs-6 text-muted fw-normal">Safe</span></h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="metric-card d-flex align-items-center gap-3">
+                <div class="metric-icon bg-info bg-opacity-15 text-info">
+                    <i class="bi bi-buildings-fill"></i>
+                </div>
+                <div>
+                    <span class="text-muted small fw-bold text-uppercase" style="letter-spacing: 0.5px;">Campus Target</span>
+                    <h3 class="fw-black mb-0 text-white">Vyas Hall</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wide Summary Data Table Card -->
+    <div class="wide-table-card">
+        <div class="p-3 px-4 border-bottom border-light border-opacity-10 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="fw-bold mb-0 text-white">Queue: Pre-Emptive Conflict-Free Submissions</h5>
+                <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 px-2.5 py-1 rounded-pill">
+                    {{ pending_count }} Ready for Publish
+                </span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="text-muted small"><i class="bi bi-info-circle me-1"></i>Bulk approving instantly commits slots into live SVG floor plans & Ad-Hoc finder.</span>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table wide-table align-middle">
+                <thead>
+                    <tr>
+                        <th style="width: 40px;" class="text-center">
+                            <input type="checkbox" class="form-check-input" id="checkSelectAll" checked>
+                        </th>
+                        <th>Faculty Member</th>
+                        <th>Department</th>
+                        <th>Workload</th>
+                        <th>Modules & Classes</th>
+                        <th>Rooms Allocated</th>
+                        <th>Collision Shield</th>
+                        <th>Submitted At</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="approvalsTableBody">
+                    {% if submissions %}
+                        {% for item in submissions %}
+                        {% set sub = item.submission %}
+                        {% set fac = item.faculty %}
+                        <tr id="row-submission-{{ sub.id }}">
+                            <td class="text-center">
+                                <input type="checkbox" class="form-check-input submission-checkbox" value="{{ sub.id }}" checked>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2.5">
+                                    <div class="rounded-circle bg-primary bg-opacity-20 text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px; font-size: 0.85rem;">
+                                        {{ fac.name[0]|upper if fac else 'F' }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold text-white">{{ fac.name if fac else 'Unknown Faculty' }}</div>
+                                        <small class="text-muted">{{ fac.email if fac else '' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge-dept">{{ item.department }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-1.5">
+                                    <span class="fw-bold text-white">{{ sub.total_hours }} hrs</span>
+                                    <span class="badge-pass">PASS</span>
+                                </div>
+                                <small class="text-muted" style="font-size: 0.72rem;">Min: {{ fac.minimum_required_hours if fac else 12 }} hrs</small>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-white" style="font-size: 0.82rem; max-width: 260px;" title="{{ item.subjects_summary }}">
+                                    {{ item.subjects_summary }}
+                                </div>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ item.divisions_summary }}</small>
+                            </td>
+                            <td>
+                                <div class="text-info fw-bold" style="font-size: 0.82rem; max-width: 220px;" title="{{ item.rooms_summary }}">
+                                    <i class="bi bi-geo-alt-fill text-primary me-1"></i>{{ item.rooms_summary }}
+                                </div>
+                                <small class="text-muted" style="font-size: 0.72rem;">{{ sub.schedule_data|length }} scheduled blocks</small>
+                            </td>
+                            <td>
+                                <span class="badge-conflict-free">
+                                    <i class="bi bi-shield-check"></i> Conflict Free
+                                </span>
+                            </td>
+                            <td>
+                                <div class="small text-muted">{{ sub.submitted_at.strftime('%d %b, %H:%M') if sub.submitted_at else 'Just now' }}</div>
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1.5">
+                                    <button type="button" class="btn btn-sm btn-outline-light rounded-2 btn-inspect-sub" title="Inspect weekly grid" data-sub-id="{{ sub.id }}" data-fac-name="{{ fac.name if fac else '' }}" data-slots='{{ sub.schedule_data|tojson }}'>
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-2 btn-approve-single" title="Approve individually" data-sub-id="{{ sub.id }}" data-fac-name="{{ fac.name if fac else '' }}">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-2 btn-reject-single" title="Return for revision" data-sub-id="{{ sub.id }}" data-fac-name="{{ fac.name if fac else '' }}">
+                                        <i class="bi bi-x-lg"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5 text-muted">
+                                <div class="p-4">
+                                    <i class="bi bi-check2-all text-success fs-1 mb-2 d-block"></i>
+                                    <h5 class="fw-bold text-white mb-1">Queue is Clear</h5>
+                                    <p class="small text-muted mb-0">All faculty timetable submissions have been reviewed and approved.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Schedule Inspection Modal -->
+<div class="modal fade" id="inspectScheduleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content modal-content-dark">
+            <div class="modal-header border-bottom border-light border-opacity-10 px-4 py-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="rounded-circle bg-primary bg-opacity-20 text-primary d-flex align-items-center justify-content-center fw-bold fs-5" id="inspectModalAvatar" style="width: 44px; height: 44px;">
+                        F
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold text-white mb-0" id="inspectModalTitle">Weekly Schedule Preview</h5>
+                        <div class="d-flex align-items-center gap-2 mt-0.5">
+                            <small class="text-muted" id="inspectModalSub">Faculty Submission Details</small>
+                            <span class="badge bg-success bg-opacity-20 text-success border border-success border-opacity-25 rounded-pill px-2 py-0.5" id="inspectModalHoursBadge" style="font-size: 0.72rem;">0 hrs</span>
+                            <span class="badge bg-info bg-opacity-20 text-info border border-info border-opacity-25 rounded-pill px-2 py-0.5" id="inspectModalBlocksBadge" style="font-size: 0.72rem;">0 blocks</span>
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Visual Weekly Grid Preview -->
+                <div class="table-responsive mb-4 rounded-3 border border-secondary border-opacity-25 overflow-hidden">
+                    <table class="table table-bordered border-secondary border-opacity-25 table-dark text-center align-middle mb-0" id="inspectGridTable">
+                        <thead>
+                            <tr class="bg-black bg-opacity-50">
+                                <th style="width: 95px; background: #161616;">Time</th>
+                                <th style="background: #161616;">Monday</th>
+                                <th style="background: #161616;">Tuesday</th>
+                                <th style="background: #161616;">Wednesday</th>
+                                <th style="background: #161616;">Thursday</th>
+                                <th style="background: #161616;">Friday</th>
+                                <th style="background: #161616;">Saturday</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inspectGridBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Detailed Slot Breakdown List -->
+                <div>
+                    <h6 class="fw-bold text-white mb-2.5 d-flex align-items-center gap-2">
+                        <i class="bi bi-list-check text-primary"></i>
+                        <span>Detailed Slot Breakdown</span>
+                    </h6>
+                    <div class="row g-2.5" id="inspectSlotCardsContainer"></div>
+                </div>
+            </div>
+            <div class="modal-footer border-top border-light border-opacity-10 px-4 py-3 d-flex justify-content-between align-items-center">
+                <button type="button" class="btn btn-draft" data-bs-dismiss="modal">Close Preview</button>
+                <button type="button" class="btn btn-success d-inline-flex align-items-center gap-2 fw-bold px-4" id="btnInspectApprove" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: none;">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span>Approve This Schedule</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectSubmissionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content modal-content-dark">
+            <div class="modal-header border-bottom border-light border-opacity-10 px-4 py-3">
+                <h5 class="modal-title fw-bold text-danger mb-0"><i class="bi bi-arrow-return-left me-2"></i>Return for Revision</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="rejectForm">
+                <input type="hidden" id="rejectSubId">
+                <div class="modal-body p-4">
+                    <p class="text-muted small mb-3">Provide feedback to the faculty member explaining what adjustments are required.</p>
+                    <label class="form-label text-muted small fw-bold text-uppercase">Admin Feedback / Correction Notes</label>
+                    <textarea class="form-control bg-dark text-white border-secondary rounded-3" id="rejectFeedbackText" rows="4" placeholder="e.g., Please relocate your Tuesday 10:00 AM class to a higher capacity room..." required></textarea>
+                </div>
+                <div class="modal-footer border-top border-light border-opacity-10 px-4 py-3">
+                    <button type="button" class="btn btn-draft" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger fw-bold px-4 rounded-3">Return to Faculty</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '';
+
+    const checkSelectAll = document.getElementById('checkSelectAll');
+    const checkboxes = document.querySelectorAll('.submission-checkbox');
+    const btnBulkApprove = document.getElementById('btnBulkApprove');
+    const bulkApproveCount = document.getElementById('bulkApproveCount');
+
+    // Modal instances
+    const inspectModal = new bootstrap.Modal(document.getElementById('inspectScheduleModal'));
+    const rejectModal = new bootstrap.Modal(document.getElementById('rejectSubmissionModal'));
+
+    // ── Select All / Individual Checkboxes ──
+    if (checkSelectAll) {
+        checkSelectAll.addEventListener('change', () => {
+            checkboxes.forEach(cb => cb.checked = checkSelectAll.checked);
+            updateBulkCount();
+        });
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            updateBulkCount();
+        });
+    });
+
+    function getSelectedIds() {
+        return Array.from(document.querySelectorAll('.submission-checkbox:checked')).map(cb => parseInt(cb.value));
+    }
+
+    function updateBulkCount() {
+        const count = getSelectedIds().length;
+        if (bulkApproveCount) bulkApproveCount.textContent = count;
+        if (btnBulkApprove) btnBulkApprove.disabled = count === 0;
+    }
+
+    // ── Bulk Approve Button ──
+    if (btnBulkApprove) {
+        btnBulkApprove.addEventListener('click', async () => {
+            const selectedIds = getSelectedIds();
+            if (selectedIds.length === 0) return;
+
+            const confirmResult = await Swal.fire({
+                title: 'Bulk Approve Department?',
+                text: `You are approving ${selectedIds.length} faculty timetable submissions. All class allocations will instantly go live on the interactive SVG map and smart room availability engine.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#27272a',
+                confirmButtonText: 'Yes, Bulk Approve Now'
+            });
+
+            if (!confirmResult.isConfirmed) return;
+
+            btnBulkApprove.disabled = true;
+            btnBulkApprove.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Publishing Schedules...';
+
+            try {
+                const res = await fetch('/admin/api/submissions/bulk-approve', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN
+                    },
+                    body: JSON.stringify({ submission_ids: selectedIds })
+                });
+
+                const result = await res.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Department Schedules Published!',
+                        text: result.message,
+                        confirmButtonColor: '#10b981'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    btnBulkApprove.disabled = false;
+                    btnBulkApprove.innerHTML = '<i class="bi bi-check-all fs-5"></i> <span>Bulk Approve Department</span>';
+                    Swal.fire({ icon: 'error', title: 'Approval Failed', text: result.error });
+                }
+            } catch (err) {
+                console.error(err);
+                btnBulkApprove.disabled = false;
+                btnBulkApprove.innerHTML = '<i class="bi bi-check-all fs-5"></i> <span>Bulk Approve Department</span>';
+                Swal.fire({ icon: 'error', title: 'Network Error', text: 'Failed to communicate with server.' });
+            }
+        });
+    }
+
+    // ── Single Approve Button ──
+    document.querySelectorAll('.btn-approve-single').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const subId = btn.getAttribute('data-sub-id');
+            const facName = btn.getAttribute('data-fac-name');
+
+            const confirmResult = await Swal.fire({
+                title: `Approve ${facName}?`,
+                text: `This will commit ${facName}'s schedule into live room timetables.`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#10b981',
+                cancelButtonColor: '#27272a',
+                confirmButtonText: 'Approve Schedule'
+            });
+
+            if (!confirmResult.isConfirmed) return;
+
+            try {
+                const res = await fetch(`/admin/api/submissions/${subId}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN
+                    }
+                });
+                const result = await res.json();
+                if (result.success) {
+                    Swal.fire({ icon: 'success', title: 'Approved', text: result.message, timer: 1500, showConfirmButton: false });
+                    const row = document.getElementById(`row-submission-${subId}`);
+                    if (row) row.remove();
+                    updateBulkCount();
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Failed', text: result.error });
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    });
+
+    // ── Single Reject Button ──
+    document.querySelectorAll('.btn-reject-single').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const subId = btn.getAttribute('data-sub-id');
+            document.getElementById('rejectSubId').value = subId;
+            document.getElementById('rejectFeedbackText').value = '';
+            rejectModal.show();
+        });
+    });
+
+    document.getElementById('rejectForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const subId = document.getElementById('rejectSubId').value;
+        const notes = document.getElementById('rejectFeedbackText').value;
+
+        try {
+            const res = await fetch(`/admin/api/submissions/${subId}/reject`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({ admin_notes: notes })
+            });
+            const result = await res.json();
+            if (result.success) {
+                rejectModal.hide();
+                Swal.fire({ icon: 'info', title: 'Returned for Revision', text: result.message, timer: 1500, showConfirmButton: false });
+                const row = document.getElementById(`row-submission-${subId}`);
+                if (row) row.remove();
+                updateBulkCount();
+            } else {
+                Swal.fire({ icon: 'error', title: 'Failed', text: result.error });
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    // ── Inspect Schedule Modal Helper & Multi-Format Slot Normalizer ──
+    function normalizeSlotForInspect(s) {
+        if (!s) return null;
+        let day = -1;
+        if (s.day_of_week !== undefined && s.day_of_week !== null) {
+            day = parseInt(s.day_of_week);
+        } else if (s.day !== undefined && s.day !== null) {
+            day = parseInt(s.day);
+        } else if (s.day_name) {
+            const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            day = days.indexOf(String(s.day_name).toLowerCase().trim());
+        }
+
+        let startHour = null;
+        let duration = parseInt(s.duration || 1);
+
+        if (s.start_time) {
+            const parts = String(s.start_time).split(':');
+            startHour = parseInt(parts[0], 10);
+        } else if (s.time_slot) {
+            const ts = String(s.time_slot);
+            const startPart = ts.split('-')[0].trim();
+            const hourMatch = startPart.match(/^(\d{1,2})/);
+            if (hourMatch) {
+                startHour = parseInt(hourMatch[1], 10);
+                if (startPart.toLowerCase().includes('pm') && startHour < 12) {
+                    startHour += 12;
+                }
+            }
+            const endPart = ts.split('-')[1]?.trim();
+            if (endPart) {
+                const endMatch = endPart.match(/^(\d{1,2})/);
+                if (endMatch) {
+                    let endHour = parseInt(endMatch[1], 10);
+                    if (endPart.toLowerCase().includes('pm') && endHour < 12) {
+                        endHour += 12;
+                    }
+                    duration = Math.max(1, endHour - startHour);
+                }
+            }
+        }
+
+        if (day < 0 || startHour === null || isNaN(startHour)) return null;
+
+        return {
+            day: day,
+            startHour: startHour,
+            duration: duration,
+            subject: s.subject || s.title || 'Assigned Subject',
+            room_number: s.room_number || s.room || 'Room',
+            course: s.course || '',
+            division: s.division || ''
+        };
+    }
+
+    let currentInspectSubId = null;
+    let currentInspectFacName = '';
+
+    const btnInspectApprove = document.getElementById('btnInspectApprove');
+    if (btnInspectApprove) {
+        btnInspectApprove.onclick = async () => {
+            if (!currentInspectSubId) return;
+            inspectModal.hide();
+            const approveBtn = document.querySelector(`.btn-approve-single[data-sub-id="${currentInspectSubId}"]`);
+            if (approveBtn) approveBtn.click();
+        };
+    }
+
+    function bindInspectButtons() {
+        document.querySelectorAll('.btn-inspect-sub').forEach(btn => {
+            btn.onclick = () => {
+                const subId = btn.getAttribute('data-sub-id');
+                const facName = btn.getAttribute('data-fac-name') || 'Faculty';
+                let rawSlots = [];
+                try {
+                    rawSlots = JSON.parse(btn.getAttribute('data-slots') || '[]');
+                } catch(e) {
+                    rawSlots = [];
+                }
+
+                currentInspectSubId = subId;
+                currentInspectFacName = facName;
+
+                const normSlots = rawSlots.map(normalizeSlotForInspect).filter(Boolean);
+                const totalHours = normSlots.reduce((acc, s) => acc + s.duration, 0);
+
+                const avatarEl = document.getElementById('inspectModalAvatar');
+                if (avatarEl) avatarEl.textContent = facName[0] ? facName[0].toUpperCase() : 'F';
+
+                document.getElementById('inspectModalTitle').textContent = `Weekly Schedule: ${facName}`;
+                document.getElementById('inspectModalSub').textContent = `Department Submission Preview`;
+                document.getElementById('inspectModalHoursBadge').textContent = `${totalHours} hrs mapped`;
+                document.getElementById('inspectModalBlocksBadge').textContent = `${normSlots.length} scheduled blocks`;
+
+                // Render Table Grid
+                const tbody = document.getElementById('inspectGridBody');
+                tbody.innerHTML = '';
+
+                const HOURS = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];
+                const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+                HOURS.forEach(h => {
+                    const timeStr = `${String(h).padStart(2, '0')}:00`;
+                    const displayTime = `${h > 12 ? h - 12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}`;
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td class="fw-bold text-muted small" style="background: #141414; font-size: 0.78rem;">${displayTime}</td>`;
+
+                    for (let day = 0; day < 6; day++) {
+                        // Find if a slot starts at this hour or spans over it
+                        const startingSlot = normSlots.find(s => s.day === day && s.startHour === h);
+                        const coveringSlot = normSlots.find(s => s.day === day && s.startHour < h && h < s.startHour + s.duration);
+
+                        if (startingSlot) {
+                            tr.innerHTML += `
+                                <td class="bg-primary bg-opacity-20 border border-primary border-opacity-40 text-start p-2" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.25) 0%, rgba(30, 64, 175, 0.15) 100%) !important;">
+                                    <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                        <span class="badge bg-info bg-opacity-25 text-info border border-info border-opacity-30 rounded px-1.5 py-0.5 fw-bold" style="font-size: 0.68rem;">
+                                            <i class="bi bi-geo-alt-fill me-0.5"></i>${startingSlot.room_number}
+                                        </span>
+                                        ${startingSlot.duration > 1 ? `<span class="badge bg-warning bg-opacity-25 text-warning border border-warning border-opacity-30 rounded px-1.5 py-0.5 fw-bold" style="font-size: 0.65rem;">${startingSlot.duration} hrs</span>` : ''}
+                                    </div>
+                                    <div class="fw-bold text-white small text-truncate" title="${startingSlot.subject}">${startingSlot.subject}</div>
+                                    ${startingSlot.course || startingSlot.division ? `<div class="text-muted small mt-0.5" style="font-size: 0.7rem;">${startingSlot.course} ${startingSlot.division ? '• ' + startingSlot.division : ''}</div>` : ''}
+                                </td>
+                            `;
+                        } else if (coveringSlot) {
+                            tr.innerHTML += `
+                                <td class="bg-primary bg-opacity-10 border border-primary border-opacity-20 text-start p-1 text-center" style="background: rgba(37, 99, 235, 0.08) !important;">
+                                    <small class="text-info opacity-75" style="font-size: 0.7rem;"><i class="bi bi-arrow-down-short"></i> (Spanned: ${coveringSlot.subject})</small>
+                                </td>
+                            `;
+                        } else {
+                            tr.innerHTML += `<td class="text-muted opacity-25 small" style="background: rgba(255, 255, 255, 0.01);">—</td>`;
+                        }
+                    }
+                    tbody.appendChild(tr);
+                });
+
+                // Render Slot Cards Breakdown
+                const cardsContainer = document.getElementById('inspectSlotCardsContainer');
+                if (cardsContainer) {
+                    cardsContainer.innerHTML = '';
+                    if (normSlots.length === 0) {
+                        cardsContainer.innerHTML = '<div class="col-12 text-muted small">No scheduled slots detected in this submission.</div>';
+                    } else {
+                        normSlots.forEach(s => {
+                            const dayLabel = dayNames[s.day] || 'Day';
+                            const startDisplay = `${s.startHour > 12 ? s.startHour - 12 : s.startHour}:00 ${s.startHour >= 12 ? 'PM' : 'AM'}`;
+                            const endH = s.startHour + s.duration;
+                            const endDisplay = `${endH > 12 ? endH - 12 : endH}:00 ${endH >= 12 ? 'PM' : 'AM'}`;
+
+                            cardsContainer.innerHTML += `
+                                <div class="col-md-6 col-lg-4">
+                                    <div class="p-2.5 rounded-3 border border-secondary border-opacity-25 bg-dark bg-opacity-50 d-flex flex-column gap-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge bg-primary bg-opacity-20 text-primary border border-primary border-opacity-25 fw-bold" style="font-size: 0.72rem;">
+                                                <i class="bi bi-calendar3 me-1"></i>${dayLabel}
+                                            </span>
+                                            <span class="badge bg-light bg-opacity-10 text-white font-monospace" style="font-size: 0.72rem;">
+                                                ${startDisplay} - ${endDisplay}
+                                            </span>
+                                        </div>
+                                        <div class="fw-bold text-white small mt-1 text-truncate" title="${s.subject}">${s.subject}</div>
+                                        <div class="d-flex align-items-center gap-1.5 text-muted small" style="font-size: 0.72rem;">
+                                            <span class="text-info fw-semibold"><i class="bi bi-geo-alt-fill text-primary me-0.5"></i>${s.room_number}</span>
+                                            ${s.course ? `<span>• ${s.course}</span>` : ''}
+                                            ${s.division ? `<span>• ${s.division}</span>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
+                }
+
+                inspectModal.show();
+            };
+        });
+    }
+
+    function bindActionButtons() {
+        // Checkboxes
+        document.querySelectorAll('.submission-checkbox').forEach(cb => {
+            cb.onchange = updateBulkCount;
+        });
+
+        // Single Approve
+        document.querySelectorAll('.btn-approve-single').forEach(btn => {
+            btn.onclick = async () => {
+                const subId = btn.getAttribute('data-sub-id');
+                const facName = btn.getAttribute('data-fac-name');
+
+                const confirmResult = await Swal.fire({
+                    title: `Approve ${facName}?`,
+                    text: `This will commit ${facName}'s schedule into live room timetables.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#10b981',
+                    cancelButtonColor: '#27272a',
+                    confirmButtonText: 'Approve Schedule'
+                });
+
+                if (!confirmResult.isConfirmed) return;
+
+                try {
+                    const res = await fetch(`/admin/api/submissions/${subId}/approve`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': CSRF_TOKEN
+                        }
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                        Swal.fire({ icon: 'success', title: 'Approved', text: result.message, timer: 1500, showConfirmButton: false });
+                        const row = document.getElementById(`row-submission-${subId}`);
+                        if (row) row.remove();
+                        updateBulkCount();
+                        pollPendingApprovals();
+                    } else {
+                        Swal.fire({ icon: 'error', title: 'Failed', text: result.error || 'Conflict error occurred.' });
+                        pollPendingApprovals();
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            };
+        });
+
+        // Single Reject
+        document.querySelectorAll('.btn-reject-single').forEach(btn => {
+            btn.onclick = () => {
+                const subId = btn.getAttribute('data-sub-id');
+                document.getElementById('rejectSubId').value = subId;
+                document.getElementById('rejectFeedbackText').value = '';
+                rejectModal.show();
+            };
+        });
+
+        bindInspectButtons();
+    }
+
+    // Initial binding
+    bindActionButtons();
+
+    // ── Hybrid Active Polling (30s interval + document.hidden check) ──
+    let isPolling = false;
+    async function pollPendingApprovals() {
+        // Avoid background polling if tab is inactive
+        if (document.hidden || isPolling) return;
+        
+        isPolling = true;
+        try {
+            const res = await fetch('/admin/api/submissions/pending', {
+                headers: { 'Cache-Control': 'no-cache' }
+            });
+            if (!res.ok) return;
+            const payload = await res.json();
+            if (!payload.success || !Array.isArray(payload.data)) return;
+
+            const items = payload.data;
+            const tableBody = document.getElementById('approvalsTableBody');
+            const bulkCountEl = document.getElementById('bulkApproveCount');
+            const statPendingEl = document.getElementById('statPendingCount');
+
+            if (statPendingEl) statPendingEl.textContent = items.length;
+
+            if (items.length === 0) {
+                if (btnBulkApprove) btnBulkApprove.disabled = true;
+                if (bulkCountEl) bulkCountEl.textContent = '0';
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="text-center py-5 text-muted">
+                            <div class="p-4">
+                                <i class="bi bi-check2-all text-success fs-1 mb-2 d-block"></i>
+                                <h5 class="fw-bold text-white mb-1">Queue is Clear</h5>
+                                <p class="small text-muted mb-0">All faculty timetable submissions have been reviewed and approved.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Update Table Rows
+            const currentSelected = new Set(getSelectedIds());
+            let html = '';
+            items.forEach(sub => {
+                const isChecked = currentSelected.has(sub.id) || currentSelected.size === 0;
+                const slotsJson = JSON.stringify(sub.schedule_data || []).replace(/'/g, '&apos;');
+                html += `
+                    <tr id="row-submission-${sub.id}">
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input submission-checkbox" value="${sub.id}" ${isChecked ? 'checked' : ''}>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="rounded-circle bg-primary bg-opacity-20 text-primary d-flex align-items-center justify-content-center fw-bold" style="width: 36px; height: 36px; font-size: 0.85rem;">
+                                    ${sub.faculty_avatar || 'F'}
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-white">${sub.faculty_name || 'Faculty'}</div>
+                                    <small class="text-muted">${sub.faculty_email || ''}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge-dept">${sub.department || 'General'}</span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <span class="fw-bold text-white">${sub.total_hours || 0} hrs</span>
+                                <span class="badge-pass">${sub.is_workload_met ? 'PASS' : 'PARTIAL'}</span>
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Min: ${sub.min_hours || 12} hrs</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-white" style="font-size: 0.82rem; max-width: 260px;" title="${sub.subjects_summary || ''}">
+                                ${sub.subjects_summary || 'No subjects assigned'}
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">${sub.divisions_summary || ''}</small>
+                        </td>
+                        <td>
+                            <div class="text-info fw-bold" style="font-size: 0.82rem; max-width: 220px;" title="${sub.rooms_summary || ''}">
+                                <i class="bi bi-geo-alt-fill text-primary me-1"></i>${sub.rooms_summary || 'Rooms'}
+                            </div>
+                            <small class="text-muted" style="font-size: 0.72rem;">${(sub.schedule_data || []).length} scheduled blocks</small>
+                        </td>
+                        <td>
+                            <span class="badge-conflict-free">
+                                <i class="bi bi-shield-check"></i> Conflict Free
+                            </span>
+                        </td>
+                        <td>
+                            <div class="small text-muted">${sub.submitted_time_ago || 'Recently'}</div>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1.5">
+                                <button type="button" class="btn btn-sm btn-outline-light rounded-2 btn-inspect-sub" title="Inspect weekly grid" data-sub-id="${sub.id}" data-fac-name="${sub.faculty_name || ''}" data-slots='${slotsJson}'>
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-success rounded-2 btn-approve-single" title="Approve individually" data-sub-id="${sub.id}" data-fac-name="${sub.faculty_name || ''}">
+                                    <i class="bi bi-check-lg"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-2 btn-reject-single" title="Return for revision" data-sub-id="${sub.id}" data-fac-name="${sub.faculty_name || ''}">
+                                    <i class="bi bi-x-lg"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableBody.innerHTML = html;
+            bindActionButtons();
+            updateBulkCount();
+        } catch (err) {
+            console.debug('Polling background error:', err);
+        } finally {
+            isPolling = false;
+        }
+    }
+
+    // Set 30-second interval
+    const pollingTimer = setInterval(pollPendingApprovals, 30000);
+
+    // Refresh immediately when tab becomes visible
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            pollPendingApprovals();
+        }
+    });
+});
+</script>
+{% endblock %}

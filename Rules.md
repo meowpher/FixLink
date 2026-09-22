@@ -68,6 +68,18 @@ Before outputting any code or completing a task, you MUST silently run through t
 *   [ ] **The Interactive Twin & Pointer Events Check:** Did I ensure SVG digital twin containers maintain `pointer-events: none;` with `pointer-events: auto;` only on interactive elements, preserving room clickability and Flashlight mode?
 *   [ ] **The Automated Pytest Suite Run Check:** Did I execute `./venv/Scripts/pytest.exe` to verify that 100% of test suites pass with zero failures and zero regressions?
 *   [ ] **The Rigorous Testing & Real Assertion Check:** Do test cases rigorously exercise actual route logic, assert real HTTP responses/status codes, verify DB state mutations, and test permission/boundary failures rather than relying on superficial, brittle, or dummy assertions?
+*   [ ] **The Scheduling & Ghost Protocol Check:** Did I ensure all ad-hoc room reservation endpoints respect 15-minute physical dead-zone buffers, require 10-minute check-in validation, and enforce the 3-strike 7-day suspension lockout for penalized users?
 *   [ ] **The Boy Scout Check:** Did I actively delete the dead code, consolidate duplicate logic, or remove legacy technical debt in the surrounding area of my fix?
 *   [ ] **The Constraint Check:** Did I follow the exact tech stack required (HTML, vanilla CSS, vanilla JS, Python/Flask, Bootstrap 5) without hallucinating Next.js, React, or Tailwind solutions?
+
+---
+
+## 8. SMART CLASSROOM SCHEDULING, GHOST PROTOCOL & PHYSICAL CLASH RESOLUTION
+*   **The "Today" Highlight Invariant:** Timetable grids must automatically detect the client's current day of the week, applying a translucent primary accent background (`rgba(37, 99, 235, 0.05)`) and bold header pill badge to focus faculty attention.
+*   **Visual Lecture Differentiation:** Class cards must visually distinguish administrative regular lectures (solid dark background, lock icon, faculty cannot modify) from ad-hoc reservations (outline variant, lightning charge pill, actionable).
+*   **The Ghost Protocol (10-Minute Check-In Timeout):** All Ad-Hoc bookings require explicit check-in. If unconfirmed within 10 minutes past the scheduled start time, the backend scheduler/cron must auto-cancel the reservation and immediately release room occupancy across live SVG digital twins.
+*   **Physical Transition Buffers (15-Min Dead-Zone):** All room availability calculations and instant claim algorithms must inject a 15-minute transition dead-zone after every occupied session to prevent physical hallway bottleneck clashes.
+*   **The 3-Strike Accountability Engine:** The backend must track no-show auto-cancellations in a 30-day rolling window (`NoShowStrike`). If a user hits 3 strikes, their Ad-Hoc booking privileges are automatically suspended for 7 days (`adhoc_suspended_until`). The UI must respond by disabling/greying out quick-add `+` triggers and displaying a prominent countdown suspension notice.
+*   **Hallway De-Escalator (Real-Time Nudges):** Provide courteous real-time websocket/Pusher notifications for waiting professors to notify current room occupants when the next class is queuing outside.
+
 

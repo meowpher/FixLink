@@ -1,0 +1,394 @@
+{% extends "base.html" %}
+
+{% block title %}Ghost Protocol Console — Admin | FixLink{% endblock %}
+{% block meta_description %}Monitor and manage faculty no-show strikes and Ad-Hoc booking suspension flags under the Ghost Protocol accountability engine.{% endblock %}
+
+{% block extra_css %}
+<style>
+    body, main.main-content { background-color: #0a0a0a !important; color: #f4f4f5; }
+    .gp-container { max-width: 1400px; margin: 0 auto; padding-bottom: 80px; }
+    .stat-card { background: #111111; border: 1px solid #1e1e1e; border-radius: 16px; padding: 1.4rem 1.6rem; transition: border-color 0.25s ease, transform 0.2s ease; }
+    .stat-card:hover { border-color: #333; transform: translateY(-2px); }
+    .stat-card .stat-value { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+    .stat-card .stat-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-top: 0.3rem; opacity: 0.55; }
+    .flag-card { background: #111111; border: 1px solid #1e1e1e; border-radius: 18px; overflow: hidden; transition: border-color 0.25s ease, box-shadow 0.25s ease; }
+    .flag-card:hover { border-color: #2a2a2a; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
+    .flag-card.is-suspended { border-color: rgba(220, 38, 38, 0.35) !important; }
+    .flag-card.red-flag { border-color: rgba(239, 68, 68, 0.5) !important; box-shadow: 0 0 0 1px rgba(239,68,68,0.15); }
+    .flag-header { padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid #1e1e1e; }
+    .flag-avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
+    .flag-avatar.avatar-red   { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .flag-avatar.avatar-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .flag-avatar.avatar-yellow { background: rgba(234, 179, 8, 0.15); color: #eab308; }
+    .flag-avatar.avatar-green  { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+    .strike-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.7); margin-right: 3px; }
+    .strike-dot.empty { background: #27272a; box-shadow: none; }
+    .strike-timeline { padding: 0.6rem 0; }
+    .strike-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid #1a1a1a; font-size: 0.82rem; }
+    .strike-item:last-child { border-bottom: none; }
+    .strike-pill { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); border-radius: 8px; padding: 0.2rem 0.6rem; font-size: 0.7rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
+    .suspension-banner { background: rgba(220, 38, 38, 0.08); border-top: 1px solid rgba(220, 38, 38, 0.2); padding: 0.85rem 1.4rem; font-size: 0.83rem; }
+    .btn-lift { background: rgba(34,197,94,0.12); color: #22c55e; border: 1px solid rgba(34,197,94,0.25); border-radius: 10px; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 700; transition: all 0.2s; cursor: pointer; }
+    .btn-lift:hover { background: rgba(34,197,94,0.22); color: #4ade80; }
+    .btn-clear { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 700; transition: all 0.2s; cursor: pointer; }
+    .btn-clear:hover { background: rgba(239,68,68,0.2); color: #ef4444; }
+    .empty-state { text-align: center; padding: 5rem 1rem; }
+    .empty-state-icon { font-size: 4rem; opacity: 0.15; margin-bottom: 1rem; }
+    .breadcrumb-item a { color: #71717a; text-decoration: none; }
+    .breadcrumb-item a:hover { color: #a1a1aa; }
+    .breadcrumb-item.active { color: #a1a1aa; }
+    .breadcrumb-item + .breadcrumb-item::before { color: #3f3f46; }
+    .section-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .section-header-line { flex: 1; height: 1px; background: #1e1e1e; }
+    @keyframes pulse-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+    .pulse-red { animation: pulse-red 1.8s ease-in-out infinite; }
+
+    /* ── History Table ── */
+    .history-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid #1e1e1e; }
+    .history-table { border-collapse: collapse; font-size: 0.82rem; min-width: 900px; }
+    .history-table thead tr { background: #161616; }
+    .history-table th { padding: 0.75rem 1rem; text-align: left; font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: #52525b; border-bottom: 1px solid #1e1e1e; white-space: nowrap; }
+    .history-row { border-bottom: 1px solid #141414; transition: background 0.15s; }
+    .history-row:last-child { border-bottom: none; }
+    .history-row:hover { background: #161616; }
+    .history-row td { padding: 0.7rem 1rem; vertical-align: middle; }
+    .history-row.row-suspended td:first-child { border-left: 3px solid rgba(239,68,68,0.4); }
+    .history-row.row-lifted td:first-child { border-left: 3px solid rgba(34,197,94,0.4); }
+    .event-badge { display: inline-flex; align-items: center; padding: 0.25rem 0.65rem; border-radius: 8px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; }
+    .badge-suspended { background: rgba(239,68,68,0.12); color: #f87171; border: 1px solid rgba(239,68,68,0.25); }
+    .badge-lifted    { background: rgba(34,197,94,0.12); color: #4ade80; border: 1px solid rgba(34,197,94,0.25); }
+    .badge-expired   { background: rgba(161,161,170,0.1); color: #a1a1aa; border: 1px solid rgba(161,161,170,0.2); }
+    .history-reason { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-3 px-lg-4 gp-container pt-3">
+
+    <!-- Breadcrumb & Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}"><i class="bi bi-arrow-left me-1"></i>Admin</a></li>
+                    <li class="breadcrumb-item active">Ghost Protocol Console</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold mb-0 text-white d-flex align-items-center gap-2 flex-wrap">
+                <i class="bi bi-shield-exclamation text-danger"></i>
+                Ghost Protocol Console
+                {% if currently_suspended_count > 0 %}
+                <span class="badge bg-danger rounded-pill fw-bold pulse-red" style="font-size: 0.7rem;">{{ currently_suspended_count }} SUSPENDED</span>
+                {% endif %}
+            </h3>
+            <small class="text-muted">3-Strike Accountability Engine &mdash; No-Show Monitoring &amp; Faculty Flag Management</small>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('admin.booking_history') }}" class="btn btn-sm btn-outline-secondary rounded-3">
+                <i class="bi bi-clock-history me-1"></i>Booking History
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-value text-danger">{{ currently_suspended_count }}</div>
+                <div class="stat-label">Currently Suspended</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-value text-warning">{{ red_flag_count }}</div>
+                <div class="stat-label">Red Flags (3+ / 30d)</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-value text-info">{{ strikes_30d_total }}</div>
+                <div class="stat-label">Strikes (Rolling 30d)</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-card">
+                <div class="stat-value text-muted">{{ total_strikes_ever }}</div>
+                <div class="stat-label">All-Time Strikes</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Flagged Faculty -->
+    {% if flagged_faculty %}
+    <div class="section-header">
+        <span class="small fw-bold text-uppercase text-muted" style="letter-spacing: 0.7px; white-space: nowrap;">
+            <i class="bi bi-flag-fill text-danger me-1"></i>Flagged Faculty ({{ flagged_faculty|length }})
+        </span>
+        <div class="section-header-line"></div>
+    </div>
+
+    <div class="row g-3">
+        {% for f in flagged_faculty %}
+        {% set faculty = f.user %}
+        {% set is_red = f.strikes_30d >= 3 %}
+        <div class="col-12 col-lg-6 col-xl-4">
+            <div class="flag-card {% if f.is_suspended %}is-suspended{% endif %} {% if is_red %}red-flag{% endif %}" id="flag-card-{{ faculty.id }}">
+
+                <!-- Header -->
+                <div class="flag-header">
+                    <div class="flag-avatar {% if f.is_suspended %}avatar-red{% elif is_red %}avatar-amber{% elif f.strikes_30d >= 2 %}avatar-yellow{% else %}avatar-green{% endif %}">
+                        {{ (faculty.name or 'F')[0]|upper }}
+                    </div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
+                            <span class="fw-bold text-white text-truncate" style="font-size: 0.95rem;">{{ faculty.name }}</span>
+                            {% if f.is_suspended %}
+                            <span class="badge bg-danger px-2 py-1 rounded-pill" style="font-size: 0.65rem; font-weight: 700;">
+                                <i class="bi bi-lock-fill"></i> SUSPENDED
+                            </span>
+                            {% endif %}
+                        </div>
+                        <div class="text-muted small text-truncate">{{ faculty.email }}</div>
+                    </div>
+                    <div class="text-end flex-shrink-0">
+                        <div class="fw-black {% if is_red %}text-danger{% elif f.strikes_30d >= 2 %}text-warning{% else %}text-muted{% endif %}" style="font-size: 1.5rem; line-height: 1;">{{ f.strikes_30d }}</div>
+                        <div class="text-muted" style="font-size: 0.63rem; font-weight: 600;">30d strikes</div>
+                    </div>
+                </div>
+
+                <!-- Strike Dots -->
+                <div class="px-4 py-2 d-flex align-items-center gap-2 border-bottom border-dark">
+                    <span class="text-muted small fw-semibold me-1">30d:</span>
+                    {% for i in range(3) %}
+                    <span class="strike-dot {% if i >= f.strikes_30d %}empty{% endif %}" title="Strike {{ i+1 }}"></span>
+                    {% endfor %}
+                    <span class="ms-auto text-muted small">All-time: <strong class="text-white">{{ f.all_time_strikes }}</strong></span>
+                </div>
+
+                <!-- Strike Timeline -->
+                {% if f.recent_strikes %}
+                <div class="px-4 py-2">
+                    <div class="small text-muted fw-bold mb-1" style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.6px;">Recent Strikes</div>
+                    <div class="strike-timeline">
+                        {% for strike in f.recent_strikes[:5] %}
+                        <div class="strike-item">
+                            <span class="strike-pill">Strike #{{ loop.revindex }}</span>
+                            <div>
+                                <div class="text-white" style="font-size: 0.8rem;">{{ strike.strike_reason }}</div>
+                                <div class="text-muted" style="font-size: 0.72rem;">{{ strike.created_at.strftime('%d %b %Y, %I:%M %p') }} IST</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if f.recent_strikes|length > 5 %}
+                        <div class="text-muted small text-center pt-1">+{{ f.recent_strikes|length - 5 }} more hidden</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% else %}
+                <div class="px-4 py-2 text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>No strikes in last 30 days.
+                </div>
+                {% endif %}
+
+                <!-- Suspension Banner -->
+                {% if f.is_suspended and f.suspended_until %}
+                <div class="suspension-banner">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                        <i class="bi bi-lock-fill text-danger"></i>
+                        <span class="fw-bold text-danger">Ad-Hoc Booking Suspended</span>
+                    </div>
+                    <div class="text-muted small">Until: <strong class="text-white">{{ f.suspended_until.strftime('%d %b %Y, %I:%M %p') }} IST</strong></div>
+                    {% if f.suspension_reason %}
+                    <div class="text-muted" style="font-size: 0.72rem; margin-top: 2px;">{{ f.suspension_reason }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <!-- Admin Actions -->
+                <div class="px-4 py-3 border-top border-dark d-flex gap-2 flex-wrap align-items-center">
+                    {% if f.is_suspended %}
+                    <button class="btn-lift" onclick="liftSuspension({{ faculty.id }}, '{{ faculty.name | replace("'", "\\'") }}')" id="lift-btn-{{ faculty.id }}">
+                        <i class="bi bi-unlock me-1"></i>Lift Suspension
+                    </button>
+                    {% endif %}
+                    {% if f.all_time_strikes > 0 %}
+                    <button class="btn-clear" onclick="clearStrikes({{ faculty.id }}, '{{ faculty.name | replace("'", "\\'") }}')" id="clear-btn-{{ faculty.id }}">
+                        <i class="bi bi-trash3 me-1"></i>Clear Strikes
+                    </button>
+                    {% endif %}
+                    {% if not f.is_suspended and f.strikes_30d < 1 %}
+                    <span class="text-muted small d-flex align-items-center gap-1">
+                        <i class="bi bi-check-circle text-success"></i>No active flags
+                    </span>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-shield-check text-success"></i></div>
+        <h5 class="fw-bold text-white mb-1">All Clear</h5>
+        <p class="text-muted">No faculty have been flagged by Ghost Protocol in the last 30 days.<br>The 3-Strike Accountability Engine is operating normally.</p>
+    </div>
+    {% endif %}
+
+    <!-- ── Suspension History Audit Log ── -->
+    <div class="section-header mt-5">
+        <span class="small fw-bold text-uppercase text-muted" style="letter-spacing: 0.7px; white-space: nowrap;">
+            <i class="bi bi-journal-text me-1 text-info"></i>Suspension History — Permanent Audit Log
+        </span>
+        <div class="section-header-line"></div>
+        <span class="text-muted small" style="white-space: nowrap;">last 200 events</span>
+    </div>
+
+    {% if suspension_history %}
+    <div class="history-table-wrap">
+        <table class="history-table w-100">
+            <thead>
+                <tr>
+                    <th>Faculty</th>
+                    <th>Event</th>
+                    <th>Timestamp (IST)</th>
+                    <th>Strikes at Event</th>
+                    <th>Suspended Until</th>
+                    <th>Reason / Note</th>
+                    <th>Lifted By</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for h in suspension_history %}
+                {% set entry = h.entry %}
+                <tr class="history-row {% if entry.event_type == 'suspended' %}row-suspended{% elif entry.event_type == 'lifted' %}row-lifted{% endif %}">
+                    <td>
+                        <div class="fw-semibold text-white" style="font-size: 0.85rem;">{{ entry.faculty.name if entry.faculty else 'Unknown' }}</div>
+                        <div class="text-muted" style="font-size: 0.72rem;">{{ entry.faculty.email if entry.faculty else '—' }}</div>
+                    </td>
+                    <td>
+                        {% if entry.event_type == 'suspended' %}
+                        <span class="event-badge badge-suspended"><i class="bi bi-lock-fill me-1"></i>Suspended</span>
+                        {% elif entry.event_type == 'lifted' %}
+                        <span class="event-badge badge-lifted"><i class="bi bi-unlock-fill me-1"></i>Lifted</span>
+                        {% else %}
+                        <span class="event-badge badge-expired"><i class="bi bi-hourglass-bottom me-1"></i>Expired</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted" style="font-size: 0.8rem; white-space: nowrap;">
+                        {{ h.created_ist.strftime('%d %b %Y') }}<br>
+                        <span style="font-size: 0.7rem;">{{ h.created_ist.strftime('%I:%M %p') }}</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="fw-bold {% if entry.strike_count >= 3 %}text-danger{% elif entry.strike_count >= 2 %}text-warning{% else %}text-muted{% endif %}">
+                            {{ entry.strike_count }}
+                        </span>
+                    </td>
+                    <td class="text-muted" style="font-size: 0.78rem; white-space: nowrap;">
+                        {% if h.suspended_until_ist %}
+                        {{ h.suspended_until_ist.strftime('%d %b %Y, %I:%M %p') }}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="text-muted" style="font-size: 0.78rem; max-width: 260px;">
+                        <span class="history-reason">{{ entry.reason or '—' }}</span>
+                    </td>
+                    <td style="font-size: 0.78rem;">
+                        {% if entry.lifted_by %}
+                        <span class="text-info">{{ entry.lifted_by.name }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="text-center py-4">
+        <i class="bi bi-journal-x text-muted" style="font-size: 2.5rem; opacity: 0.2;"></i>
+        <p class="text-muted mt-2 small">No suspension events recorded yet. History will appear here automatically when suspensions are issued or lifted.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+const CSRF_TOKEN = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+async function liftSuspension(facultyId, name) {
+    const result = await Swal.fire({
+        title: 'Lift Suspension?',
+        html: `Remove the ad-hoc booking ban for <strong>${name}</strong>?<br><span class="text-muted small">A notification will be sent to the faculty member.</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Lift Only',
+        denyButtonText: 'Lift & Clear Strikes',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#22c55e',
+        denyButtonColor: '#f59e0b',
+        cancelButtonColor: '#374151',
+    });
+    if (result.isDismissed) return;
+    const doClearStrikes = result.isDenied;
+    const btn = document.getElementById(`lift-btn-${facultyId}`);
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
+    try {
+        const res = await fetch(`/admin/api/ghost-protocol/lift-suspension/${facultyId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body: JSON.stringify({ clear_strikes: doClearStrikes })
+        });
+        const data = await res.json();
+        if (data.success) {
+            await Swal.fire({ icon: 'success', title: 'Suspension Lifted', text: data.message, timer: 2500, showConfirmButton: false });
+            location.reload();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Error', text: data.error || 'Failed to lift suspension.' });
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-unlock me-1"></i>Lift Suspension'; }
+        }
+    } catch {
+        Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server.' });
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-unlock me-1"></i>Lift Suspension'; }
+    }
+}
+
+async function clearStrikes(facultyId, name) {
+    const result = await Swal.fire({
+        title: 'Clear All Strikes?',
+        html: `Permanently delete all NoShowStrike records for <strong>${name}</strong>.<br><span class="text-danger small">This cannot be undone.</span>`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, Clear All',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#374151',
+    });
+    if (!result.isConfirmed) return;
+    const btn = document.getElementById(`clear-btn-${facultyId}`);
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
+    try {
+        const res = await fetch(`/admin/api/ghost-protocol/clear-strikes/${facultyId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+            body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.success) {
+            await Swal.fire({ icon: 'success', title: 'Strikes Cleared', text: data.message, timer: 2500, showConfirmButton: false });
+            location.reload();
+        } else {
+            Swal.fire({ icon: 'error', title: 'Error', text: data.error || 'Failed to clear strikes.' });
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-trash3 me-1"></i>Clear Strikes'; }
+        }
+    } catch {
+        Swal.fire({ icon: 'error', title: 'Network Error', text: 'Could not reach the server.' });
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-trash3 me-1"></i>Clear Strikes'; }
+    }
+}
+</script>
+{% endblock %}

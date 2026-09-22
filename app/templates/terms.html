@@ -2,11 +2,15 @@
 {% extends "base.html" %}
 
 {% block title %}Terms of Service - MIT-WPU FixLink{% endblock %}
-{% block meta_description %}Terms of Service and Acceptable Use Policy for FixLink, the Smart Room Maintenance Management Platform.{% endblock %}
+{% block meta_description %}Terms of Service and Acceptable Use Policy for FixLink, the Smart Room Maintenance
+Management Platform.{% endblock %}
 
 {% block extra_css %}
 <style>
-    #mobileMenuBtn, #mobile-bottom-nav, #floatingBugTrigger, .floating-bug-trigger {
+    #mobileMenuBtn,
+    #mobile-bottom-nav,
+    #floatingBugTrigger,
+    .floating-bug-trigger {
         display: none !important;
     }
 </style>
@@ -19,13 +23,15 @@
             <!-- Breadcrumb Navigation -->
             <nav aria-label="Breadcrumb" class="mb-4">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}"
+                            class="text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Terms of Service</li>
                 </ol>
             </nav>
 
             <!-- Policy Card -->
-            <article class="card border-0 shadow-sm rounded-4 p-4 p-md-5" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+            <article class="card border-0 shadow-sm rounded-4 p-4 p-md-5"
+                style="background: var(--bg-card); border: 1px solid var(--border-color);">
                 <header class="border-bottom pb-4 mb-4">
                     <h1 class="h2 fw-bold mb-2 text-body-emphasis">Terms of Service & Acceptable Use Policy</h1>
                     <p class="text-body-secondary small mb-0">Draft Date: September 2026</p>
@@ -35,54 +41,76 @@
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">1. Acceptance of Terms</h2>
                         <p>
-                            By accessing or submitting information through the FixLink platform ("Service"), you agree to follow these operational terms, along with applicable MIT World Peace University ("MIT-WPU") IT acceptable use guidelines and campus regulations.
+                            By accessing or submitting information through the FixLink platform ("Service"), you agree
+                            to follow these operational terms, along with applicable MIT World Peace University
+                            ("MIT-WPU") IT acceptable use guidelines and campus regulations.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">2. Authorized Users & Access</h2>
                         <p>
-                            Access to FixLink is intended for registered students, faculty members, facility administrative personnel, and authorized technical staff of MIT-WPU. Users must access the platform using their officially assigned university credentials and submit reports only on their own behalf.
+                            Access to FixLink is intended for registered students, faculty members, facility
+                            administrative personnel, and authorized technical staff of MIT-WPU. Users must access the
+                            platform using their officially assigned university credentials and submit reports only on
+                            their own behalf.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">3. Acceptable Use & Reporting Integrity</h2>
                         <p>
-                            FixLink is engineered solely for reporting classroom hardware defects, electrical faults, laboratory anomalies, HVAC malfunctions, and general campus maintenance needs. To keep the facility queue accurate and operational, users agree:
+                            FixLink is engineered solely for reporting classroom hardware defects, electrical faults,
+                            laboratory anomalies, HVAC malfunctions, and general campus maintenance needs. To keep the
+                            facility queue accurate and operational, users agree:
                         </p>
                         <ul class="ps-3 mb-3">
-                            <li>Do not submit fault reports for equipment that is not genuinely faulty — this delays response to real hazards.</li>
-                            <li>Do not upload media attachments that are unrelated to the physical room fault or contain inappropriate material.</li>
-                            <li>Do not attempt to circumvent platform authentication, session security, or role authorization boundaries.</li>
-                            <li>Do not use ticket descriptions or technician feedback fields for abusive or defamatory comments directed at maintenance staff.</li>
+                            <li>Do not submit fault reports for equipment that is not genuinely faulty — this delays
+                                response to real hazards.</li>
+                            <li>Do not upload media attachments that are unrelated to the physical room fault or contain
+                                inappropriate material.</li>
+                            <li>Do not attempt to circumvent platform authentication, session security, or role
+                                authorization boundaries.</li>
+                            <li>Do not use ticket descriptions or technician feedback fields for abusive or defamatory
+                                comments directed at maintenance staff.</li>
                         </ul>
                     </section>
 
                     <!-- Platform Mechanics Notice -->
-                    <div class="p-3 mb-4 rounded-3 text-body-secondary small" style="background: var(--bg-main); border: 1px solid var(--border-color);">
+                    <div class="p-3 mb-4 rounded-3 text-body-secondary small"
+                        style="background: var(--bg-main); border: 1px solid var(--border-color);">
                         <i class="bi bi-info-circle me-1" aria-hidden="true"></i>
-                        The clauses in this section describe platform mechanics only and do not constitute a binding institutional policy until reviewed and issued by MIT-WPU's administration or legal office.
+                        The clauses in this section describe platform mechanics only and do not constitute a binding
+                        institutional policy until reviewed and issued by MIT-WPU's administration or legal office.
                     </div>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">4. Ticket Triage & Resolution Workflow</h2>
                         <p>
-                            FixLink logs submitted fault reports and organizes them in the operational queue by room, category, and reported urgency (for example, flagging active electrical hazards or exam hall issues for expedited review). Facility technicians and administrators can update ticket status, reassign categories, merge duplicate reports for the same location, or mark tickets resolved once physical inspection is complete.
+                            FixLink logs submitted fault reports and organizes them in the operational queue by room,
+                            category, and reported urgency (for example, flagging active electrical hazards or exam hall
+                            issues for expedited review). Facility technicians and administrators can update ticket
+                            status, reassign categories, merge duplicate reports for the same location, or mark tickets
+                            resolved once physical inspection is complete.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">5. Equipment Liability & Disclaimer</h2>
                         <p>
-                            FixLink is a ticket routing and status-tracking tool. It does not control repair timelines, which depend on facility staff availability and part procurement. FixLink is not an emergency dispatch system; urgent electrical hazards, gas leaks, or life-safety emergencies must be reported immediately and directly to campus security.
+                            FixLink is a ticket routing and status-tracking tool. It does not control repair timelines,
+                            which depend on facility staff availability and part procurement. FixLink is not an
+                            emergency dispatch system; urgent electrical hazards, gas leaks, or life-safety emergencies
+                            must be reported immediately and directly to campus security.
                         </p>
                     </section>
 
                     <section class="mb-4">
                         <h2 class="h5 fw-bold text-primary mb-3">6. Modifications & Platform Changes</h2>
                         <p>
-                            Platform features, workflows, and this documentation may be updated as FixLink evolves. Any future changes to institutional maintenance policies or formal terms of service will be communicated through official university channels and reflected in this document.
+                            Platform features, workflows, and this documentation may be updated as FixLink evolves. Any
+                            future changes to institutional maintenance policies or formal terms of service will be
+                            communicated through official university channels and reflected in this document.
                         </p>
                     </section>
                 </div>

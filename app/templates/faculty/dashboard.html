@@ -14,8 +14,72 @@
 
 <meta name="current-user-id" content="{{ current_user_id | tojson }}">
 <style>
+    main.main-content,
     .faculty-dashboard {
-        animation: fadeIn 0.5s ease-in-out;
+        /* Guarantee true viewport fixed positioning for mobile bottom nav and FAB */
+        transform: none !important;
+        filter: none !important;
+        perspective: none !important;
+        position: relative;
+    }
+    
+    /* Phase 1: Strict Z-Index Hierarchy & Collision Shield */
+    /* 1. Mobile Bottom Navigation (1040) */
+    .faculty-bottom-nav,
+    #mobile-bottom-nav {
+        z-index: 1040 !important;
+    }
+
+    /* 2. Slot Booking UI, Offcanvas & Modals (1050) */
+    .modal-backdrop,
+    .offcanvas-backdrop {
+        z-index: 1048 !important;
+    }
+    .modal,
+    .offcanvas,
+    #roomPopUp {
+        z-index: 1050 !important;
+        pointer-events: auto !important;
+    }
+    .modal-dialog {
+        z-index: 1052 !important;
+        position: relative;
+        pointer-events: auto !important;
+    }
+    .modal-content {
+        position: relative;
+        z-index: 1055 !important;
+        pointer-events: auto !important;
+    }
+
+    /* 3. Global System Alerts & SweetAlerts (1060) */
+    .swal2-container,
+    .global-system-alert-container {
+        z-index: 1060 !important;
+    }
+
+    /* Text & Alignment Lock: Prevent long error strings from breaking viewport */
+    .swal2-popup,
+    .global-system-alert {
+        max-width: 90vw !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        word-break: break-word !important;
+        box-sizing: border-box !important;
+    }
+
+    .swal2-title,
+    .swal2-html-container,
+    .swal2-content {
+        max-width: 100% !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+        word-break: break-word !important;
+    }
+
+    [data-theme="dark"] .modal .btn-close,
+    [data-theme="dark"] .offcanvas .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%) !important;
     }
     
     .nav-pills .nav-link {
@@ -739,6 +803,84 @@
         background: rgba(255, 71, 87, 0.12);
         color: #e2e8f0;
     }
+
+    /* ── Pop-Up Logged Timetable Schedule Section ── */
+    .pop-schedule-box {
+        margin-top: 15px;
+        background: rgba(11, 77, 140, 0.04);
+        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+        border-radius: 14px;
+        padding: 12px;
+    }
+
+    [data-theme="dark"] .pop-schedule-box {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .pop-day-nav {
+        display: flex;
+        gap: 4px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        margin-bottom: 10px;
+        scrollbar-width: thin;
+    }
+
+    .pop-day-btn {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color, rgba(0,0,0,0.1));
+        background: var(--bg-card, #ffffff);
+        color: var(--text-main, #333333);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .pop-day-btn:hover {
+        background: var(--bg-light, #f1f5f9);
+        border-color: var(--mitwpu-blue, #0b4d8c);
+    }
+
+    .pop-day-btn.active {
+        background: var(--mitwpu-blue, #0b4d8c) !important;
+        color: #ffffff !important;
+        border-color: var(--mitwpu-blue, #0b4d8c) !important;
+        box-shadow: 0 2px 6px rgba(11, 77, 140, 0.3);
+    }
+
+    .pop-slot-card {
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, rgba(0,0,0,0.06));
+        border-radius: 10px;
+        padding: 8px 10px;
+        margin-bottom: 6px;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        position: relative;
+    }
+
+    .pop-slot-card:last-child {
+        margin-bottom: 0;
+    }
+
+    [data-theme="dark"] .pop-slot-card {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .pop-slot-card.is-current {
+        border-left: 4px solid #16a34a !important;
+        background: rgba(22, 163, 74, 0.08) !important;
+    }
+
+    .pop-slot-card.is-past {
+        opacity: 0.6;
+    }
+
     /* Modal Styles - Clean Solid Professional Style */
     .glass-modal .modal-content {
         background: #ffffff !important;
@@ -836,7 +978,8 @@
     
     .timetable-grid th, .timetable-grid td {
         padding: 0 !important;
-        height: 80px;
+        height: 64px;
+        min-height: 56px;
         vertical-align: middle;
         border: 1px solid var(--border-color, #f1f5f9) !important;
         text-align: center;
@@ -874,13 +1017,77 @@
                     background-color 0.22s ease;
     }
 
-    .timetable-cell.occupied:hover .cell-content,
-    .cell-content:hover {
+    /* ── Phase 2: Visual Differentiation (Regular vs. Ad-Hoc) ── */
+    /* Regular Assigned Lecture: Solid dark blue background with white text & subtle lock icon */
+    .cell-content.cell-regular {
+        background: linear-gradient(135deg, #0b4d8c 0%, #073866 100%) !important;
+        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+        box-shadow: 0 4px 14px rgba(11, 77, 140, 0.28);
+        color: #ffffff !important;
+    }
+
+    .cell-content.cell-regular .cell-subject {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+
+    .cell-content.cell-regular .cell-meta {
+        color: rgba(255, 255, 255, 0.85) !important;
+    }
+
+    .cell-content.cell-regular .slot-lock-badge {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.7);
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    .timetable-cell.occupied:hover .cell-content.cell-regular {
         transform: translateY(-3px);
-        background: rgba(59, 130, 246, 0.16);
-        border-color: #3b82f6;
-        box-shadow: 0 8px 18px rgba(59, 130, 246, 0.22), 0 0 0 1px rgba(59, 130, 246, 0.3);
-        z-index: 5;
+        background: linear-gradient(135deg, #0f5ba6 0%, #094782 100%) !important;
+        box-shadow: 0 8px 22px rgba(11, 77, 140, 0.42), 0 0 0 1px rgba(255, 255, 255, 0.35) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+    }
+
+    .timetable-cell.occupied:hover .cell-content.cell-regular .slot-lock-badge {
+        color: #ffffff;
+        transform: scale(1.15);
+    }
+
+    /* Ad-Hoc Bookings: Outline variant (transparent background, solid primary-blue border & primary-blue text) */
+    .cell-content.cell-adhoc {
+        background: rgba(37, 99, 235, 0.04) !important;
+        border: 2px solid var(--mitwpu-blue, #2563eb) !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
+        color: var(--mitwpu-blue, #2563eb) !important;
+    }
+
+    .cell-content.cell-adhoc .cell-subject {
+        color: var(--mitwpu-blue, #2563eb) !important;
+        font-weight: 700 !important;
+    }
+
+    .cell-content.cell-adhoc .cell-meta {
+        color: var(--mitwpu-blue, #2563eb) !important;
+        opacity: 0.85;
+    }
+
+    .badge-adhoc-pill {
+        background: rgba(37, 99, 235, 0.12) !important;
+        color: var(--mitwpu-blue, #2563eb) !important;
+        border: 1px solid rgba(37, 99, 235, 0.3) !important;
+        border-radius: 999px;
+        font-size: 0.52rem !important;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        padding: 2px 6px !important;
+    }
+
+    .timetable-cell.occupied:hover .cell-content.cell-adhoc {
+        transform: translateY(-3px);
+        background: rgba(37, 99, 235, 0.12) !important;
+        border-color: #1d4ed8 !important;
+        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25), 0 0 0 1px rgba(37, 99, 235, 0.3) !important;
     }
 
     .btn-delete-class {
@@ -891,7 +1098,7 @@
         height: 22px;
         border-radius: 6px;
         border: none;
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.65);
         color: #ef4444;
         display: flex;
         align-items: center;
@@ -901,7 +1108,7 @@
         opacity: 0;
         transition: all 0.2s ease;
         z-index: 6;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
 
     .timetable-cell.occupied:hover .btn-delete-class {
@@ -913,33 +1120,81 @@
         color: white;
         transform: scale(1.1);
     }
-    
-    .occupied:nth-child(even) .cell-content { 
-        background: rgba(14, 165, 233, 0.1); 
-        border-color: rgba(14, 165, 233, 0.4); 
-    }
-    .timetable-cell.occupied:nth-child(even):hover .cell-content {
-        transform: translateY(-3px);
-        background: rgba(14, 165, 233, 0.18);
-        border-color: #0ea5e9;
-        box-shadow: 0 8px 18px rgba(14, 165, 233, 0.24), 0 0 0 1px rgba(14, 165, 233, 0.35);
+
+    .cell-subject { font-weight: 700; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cell-meta { font-size: 0.65rem; font-weight: 600; margin-top: 2px; }
+
+    /* ── Phase 4: Empty Slot Hover & Quick-Add ── */
+    .timetable-cell.vacant {
+        background: var(--bg-card);
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
-    .occupied:nth-child(3n) .cell-content { 
-        background: rgba(99, 102, 241, 0.1); 
-        border-color: rgba(99, 102, 241, 0.4); 
-    }
-    .timetable-cell.occupied:nth-child(3n):hover .cell-content {
-        transform: translateY(-3px);
-        background: rgba(99, 102, 241, 0.18);
-        border-color: #6366f1;
-        box-shadow: 0 8px 18px rgba(99, 102, 241, 0.24), 0 0 0 1px rgba(99, 102, 241, 0.35);
+    .vacant-slot-placeholder {
+        width: 100%;
+        height: 100%;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: scale(0.85);
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        color: var(--mitwpu-blue, #2563eb);
     }
 
-    .cell-subject { font-weight: 700; font-size: 0.8rem; color: #0f172a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .cell-meta { font-size: 0.65rem; color: #64748b; font-weight: 600; margin-top: 2px; }
+    .vacant-plus-icon {
+        font-size: 1.15rem;
+        font-weight: 700;
+        line-height: 1;
+        transition: transform 0.2s ease;
+    }
 
-    .timetable-cell.vacant { background: var(--bg-card); }
+    .timetable-cell.vacant:hover {
+        background-color: rgba(37, 99, 235, 0.08) !important;
+        box-shadow: inset 0 0 0 1.5px rgba(37, 99, 235, 0.45);
+    }
+
+    .timetable-cell.vacant:hover .vacant-slot-placeholder {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    .timetable-cell.vacant:hover .vacant-plus-icon {
+        transform: scale(1.2);
+    }
+
+    /* ── Phase 7: 3-Strike Accountability Engine - Suspended UI State ── */
+    .timetable-cell.vacant.vacant-suspended {
+        background: rgba(148, 163, 184, 0.08) !important;
+        cursor: not-allowed !important;
+    }
+
+    .timetable-cell.vacant.vacant-suspended .vacant-slot-placeholder {
+        opacity: 0.35 !important;
+        color: var(--text-muted, #94a3b8) !important;
+        transform: scale(0.85) !important;
+    }
+
+    .timetable-cell.vacant.vacant-suspended:hover {
+        background-color: rgba(239, 68, 68, 0.08) !important;
+        box-shadow: inset 0 0 0 1.5px rgba(239, 68, 68, 0.35) !important;
+    }
+
+    .timetable-cell.vacant.vacant-suspended:hover .vacant-slot-placeholder {
+        opacity: 0.85 !important;
+        color: #ef4444 !important;
+    }
+
+    .timetable-cell.vacant.vacant-suspended .vacant-plus-icon {
+        font-size: 0.95rem;
+    }
+
+    [data-theme="dark"] .timetable-cell.vacant.vacant-suspended {
+        background: rgba(255, 255, 255, 0.02) !important;
+    }
 
     /* Dark Mode Timetable Hardening */
     [data-theme="dark"] .timetable-grid th,
@@ -963,46 +1218,120 @@
         color: #94a3b8 !important;
     }
 
-    [data-theme="dark"] .cell-content {
-        background: rgba(37, 99, 235, 0.18) !important;
-        border-color: rgba(59, 130, 246, 0.4) !important;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    [data-theme="dark"] .cell-content.cell-regular {
+        background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%) !important;
+        border-color: rgba(96, 165, 250, 0.35) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
+        color: #ffffff !important;
     }
 
-    [data-theme="dark"] .timetable-cell.occupied:hover .cell-content,
-    [data-theme="dark"] .cell-content:hover {
-        transform: translateY(-3px) !important;
-        background: rgba(37, 99, 235, 0.32) !important;
-        border-color: #3b82f6 !important;
-        box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35), 0 0 12px rgba(59, 130, 246, 0.25) !important;
+    [data-theme="dark"] .timetable-cell.occupied:hover .cell-content.cell-regular {
+        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45), 0 0 12px rgba(96, 165, 250, 0.3) !important;
+        border-color: #60a5fa !important;
     }
 
-    [data-theme="dark"] .occupied:nth-child(even) .cell-content {
-        background: rgba(14, 165, 233, 0.18) !important;
-        border-color: rgba(56, 189, 248, 0.4) !important;
+    [data-theme="dark"] .cell-content.cell-adhoc {
+        background: rgba(59, 130, 246, 0.08) !important;
+        border: 2px solid #60a5fa !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
 
-    [data-theme="dark"] .timetable-cell.occupied:nth-child(even):hover .cell-content {
-        transform: translateY(-3px) !important;
-        background: rgba(14, 165, 233, 0.32) !important;
-        border-color: #38bdf8 !important;
-        box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35), 0 0 12px rgba(56, 189, 248, 0.25) !important;
+    [data-theme="dark"] .cell-content.cell-adhoc .cell-subject {
+        color: #93c5fd !important;
     }
 
-    [data-theme="dark"] .occupied:nth-child(3n) .cell-content {
-        background: rgba(99, 102, 241, 0.18) !important;
-        border-color: rgba(129, 140, 248, 0.4) !important;
+    [data-theme="dark"] .cell-content.cell-adhoc .cell-meta {
+        color: #bfdbfe !important;
+        opacity: 0.9;
     }
 
-    [data-theme="dark"] .timetable-cell.occupied:nth-child(3n):hover .cell-content {
-        transform: translateY(-3px) !important;
-        background: rgba(99, 102, 241, 0.32) !important;
-        border-color: #818cf8 !important;
-        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.35), 0 0 12px rgba(129, 140, 248, 0.25) !important;
+    [data-theme="dark"] .badge-adhoc-pill {
+        background: rgba(96, 165, 250, 0.2) !important;
+        color: #93c5fd !important;
+        border-color: rgba(96, 165, 250, 0.4) !important;
+    }
+
+    [data-theme="dark"] .timetable-cell.occupied:hover .cell-content.cell-adhoc {
+        background: rgba(59, 130, 246, 0.2) !important;
+        border-color: #93c5fd !important;
+        box-shadow: 0 8px 22px rgba(59, 130, 246, 0.35) !important;
     }
 
     [data-theme="dark"] .timetable-cell.vacant {
         background: var(--bg-surface, #141414) !important;
+    }
+
+    /* ── Phase 1: The "Today" Highlight (Contextual Focus) ── */
+    .timetable-grid tr.current-day-column,
+    .timetable-grid tr.current-day-row {
+        background-color: rgba(37, 99, 235, 0.05) !important;
+        position: relative;
+    }
+
+    .timetable-grid tr.current-day-column td.day-label,
+    .timetable-grid tr.current-day-row td.day-label,
+    .timetable-grid td.day-label.current-day-header {
+        color: var(--mitwpu-blue, #2563eb) !important;
+        font-weight: 800 !important;
+        background: rgba(37, 99, 235, 0.09) !important;
+        position: relative;
+    }
+
+    .timetable-grid tr.current-day-column td.day-label::before,
+    .timetable-grid tr.current-day-row td.day-label::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--mitwpu-blue, #2563eb);
+        border-radius: 0 4px 4px 0;
+    }
+
+    .timetable-grid tr.current-day-column td.timetable-cell.vacant,
+    .timetable-grid tr.current-day-row td.timetable-cell.vacant {
+        background-color: rgba(37, 99, 235, 0.04) !important;
+    }
+
+    .today-pill-badge {
+        display: inline-block;
+        font-size: 0.58rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: var(--mitwpu-blue, #2563eb);
+        color: #ffffff !important;
+        margin-left: 6px;
+        vertical-align: middle;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.35);
+    }
+
+    /* Dark Mode Today Highlight */
+    [data-theme="dark"] .timetable-grid tr.current-day-column,
+    [data-theme="dark"] .timetable-grid tr.current-day-row {
+        background-color: rgba(37, 99, 235, 0.09) !important;
+    }
+
+    [data-theme="dark"] .timetable-grid tr.current-day-column td.day-label,
+    [data-theme="dark"] .timetable-grid tr.current-day-row td.day-label,
+    [data-theme="dark"] .timetable-grid td.day-label.current-day-header {
+        color: #60a5fa !important;
+        background: rgba(37, 99, 235, 0.18) !important;
+    }
+
+    [data-theme="dark"] .timetable-grid tr.current-day-column td.day-label::before,
+    [data-theme="dark"] .timetable-grid tr.current-day-row td.day-label::before {
+        background: #60a5fa;
+        box-shadow: 0 0 8px rgba(96, 165, 250, 0.6);
+    }
+
+    [data-theme="dark"] .timetable-grid tr.current-day-column td.timetable-cell.vacant,
+    [data-theme="dark"] .timetable-grid tr.current-day-row td.timetable-cell.vacant {
+        background-color: rgba(37, 99, 235, 0.07) !important;
     }
 
     @media (max-width: 767px) {
@@ -1145,22 +1474,28 @@
         }
     }
 
-    /* ── Native Mobile Bottom Navigation ── */
+    /* ── Native Mobile Bottom Navigation (Phase 1) ── */
     .faculty-bottom-nav {
-        background: var(--bg-card, #ffffff);
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        background: rgba(255, 255, 255, 0.95);
         border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
         height: 64px;
         padding: 6px 12px;
-        padding-bottom: max(6px, env(safe-area-inset-bottom, 6px));
+        padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
         backdrop-filter: blur(16px);
         -webkit-backdrop-filter: blur(16px);
+        z-index: 1050 !important;
     }
 
     [data-theme="dark"] .faculty-bottom-nav {
-        background: #0f172a !important;
-        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
-        box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.4) !important;
+        background: rgba(10, 10, 10, 0.94) !important;
+        border-top: 1px solid #262626 !important;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.8) !important;
     }
 
     .bottom-nav-btn {
@@ -1174,22 +1509,20 @@
         flex: 1;
         color: var(--text-muted, #64748b);
         padding: 4px 0;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        gap: 3px;
+        transition: all 0.2s ease;
         cursor: pointer;
-        text-decoration: none;
-        user-select: none;
     }
 
     .bottom-nav-btn i {
         font-size: 1.25rem;
         line-height: 1;
-        transition: transform 0.2s ease, color 0.2s ease;
+        transition: all 0.2s ease;
     }
 
     .bottom-nav-btn span {
-        font-size: 0.65rem;
-        font-weight: 500;
-        margin-top: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
         line-height: 1;
         letter-spacing: 0.2px;
         transition: color 0.2s ease, font-weight 0.2s ease;
@@ -1213,186 +1546,490 @@
         font-weight: 700;
     }
 
+    [data-theme="dark"] .bottom-nav-btn {
+        color: #71717a !important;
+    }
+
+    [data-theme="dark"] .bottom-nav-btn:hover {
+        color: #e4e4e7 !important;
+    }
+
     [data-theme="dark"] .bottom-nav-btn.active,
     [data-theme="dark"] .bottom-nav-btn.active i,
     [data-theme="dark"] .bottom-nav-btn.active span {
         color: #38bdf8 !important;
     }
 
-    /* ── Floating Action Button (FAB) ── */
+    /* ── Native Mobile Bottom Navigation & FAB (Phase 3) ── */
     .faculty-fab {
-        position: fixed;
-        bottom: 80px;
-        right: 20px;
-        width: 58px;
-        height: 58px;
-        border-radius: 50% !important;
-        background: var(--mitwpu-blue, #0b4d8c) !important;
-        color: #ffffff !important;
-        border: none !important;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        box-shadow: 0 8px 25px rgba(11, 77, 140, 0.45), 0 4px 10px rgba(0, 0, 0, 0.2);
-        z-index: 1050;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        text-decoration: none;
+        display: none !important;
     }
 
-    .faculty-fab:hover {
-        transform: translateY(-4px) scale(1.08);
-        box-shadow: 0 12px 30px rgba(11, 77, 140, 0.6), 0 6px 14px rgba(0, 0, 0, 0.25);
-        color: #ffffff !important;
+    @media (max-width: 767.98px) {
+        .faculty-fab {
+            position: fixed !important;
+            bottom: 80px !important;
+            right: 20px !important;
+            left: auto !important;
+            margin: 0 !important;
+            width: 56px;
+            height: 56px;
+            border-radius: 50% !important;
+            background: var(--mitwpu-blue, #0b4d8c) !important;
+            color: #ffffff !important;
+            border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 25px rgba(11, 77, 140, 0.5), 0 4px 10px rgba(0, 0, 0, 0.2);
+            z-index: 1040 !important;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-decoration: none;
+        }
+
+        .faculty-fab:hover {
+            transform: translateY(-4px) scale(1.08);
+            box-shadow: 0 12px 30px rgba(11, 77, 140, 0.65), 0 6px 14px rgba(0, 0, 0, 0.25);
+            color: #ffffff !important;
+        }
+
+        .faculty-fab:active {
+            transform: translateY(-1px) scale(0.96);
+        }
+
+        .faculty-fab i {
+            font-size: 1.75rem;
+            font-weight: 700;
+            line-height: 1;
+            color: #ffffff !important;
+        }
+
+        [data-theme="dark"] .faculty-fab {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+            border-color: rgba(255, 255, 255, 0.2) !important;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.55), 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] .faculty-fab:hover {
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.7), 0 6px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        body, main.main-content, .faculty-dashboard {
+            padding-bottom: 5rem !important; /* pb-5 applied to scrolling body strictly on mobile */
+        }
+
+        footer {
+            margin-bottom: 74px !important;
+        }
     }
 
-    .faculty-fab:active {
-        transform: translateY(-1px) scale(0.96);
+    @media (min-width: 768px) {
+        .faculty-bottom-nav,
+        .faculty-fab {
+            display: none !important;
+        }
+
+        body, main.main-content, .faculty-dashboard {
+            padding-bottom: 0 !important;
+        }
     }
 
-    .faculty-fab i {
-        font-size: 1.85rem;
-        font-weight: 700;
-        line-height: 1;
-        color: #ffffff !important;
-    }
-
-    [data-theme="dark"] .faculty-fab {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-        box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4);
-    }
-
-    [data-theme="dark"] .faculty-fab:hover {
-        box-shadow: 0 12px 32px rgba(37, 99, 235, 0.7), 0 6px 16px rgba(0, 0, 0, 0.5);
-    }
-
-    /* ── Bottom Sheet Drawer Styling ── */
+    /* ── Phase 5: Bulletproof Responsive Transformation (Ad-Hoc Modal/Offcanvas) ── */
     .offcanvas.offcanvas-bottom {
-        border-top-left-radius: 20px !important;
-        border-top-right-radius: 20px !important;
-        border: none !important;
-        box-shadow: 0 -10px 35px rgba(0, 0, 0, 0.2) !important;
+        border-top-left-radius: 24px !important;
+        border-top-right-radius: 24px !important;
+        border: 1px solid var(--border-color, #e2e8f0) !important;
+        border-bottom: none !important;
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.25) !important;
+        background: var(--bg-card, #ffffff) !important;
+        max-height: 88vh !important;
     }
 
     [data-theme="dark"] .offcanvas.offcanvas-bottom {
-        background: #1e293b !important;
-        box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.6) !important;
+        background: #121212 !important;
+        border-color: #262626 !important;
+        box-shadow: 0 -16px 50px rgba(0, 0, 0, 0.9) !important;
+    }
+
+    /* Desktop Responsive Toggle: Transform Offcanvas to Centered Modal on md and up */
+    @media (min-width: 768px) {
+        #advancedBookingModal.offcanvas.offcanvas-bottom {
+            top: 50% !important;
+            left: 50% !important;
+            right: auto !important;
+            bottom: auto !important;
+            transform: translate(-50%, -50%) !important;
+            width: 540px !important;
+            max-width: 92vw !important;
+            max-height: 85vh !important;
+            border-radius: 20px !important;
+            border: 1px solid var(--border-color, #e2e8f0) !important;
+            box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.45) !important;
+            visibility: hidden;
+            transition: opacity 0.22s ease-out, transform 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        }
+
+        [data-theme="dark"] #advancedBookingModal.offcanvas.offcanvas-bottom {
+            border-color: #2e2e2e !important;
+            box-shadow: 0 30px 70px -10px rgba(0, 0, 0, 0.9) !important;
+        }
+
+        #advancedBookingModal.offcanvas.offcanvas-bottom.show {
+            visibility: visible !important;
+            transform: translate(-50%, -50%) !important;
+        }
+
+        #advancedBookingModal.offcanvas.offcanvas-bottom.showing {
+            transform: translate(-50%, -46%) scale(0.96) !important;
+            opacity: 0 !important;
+        }
+
+        #advancedBookingModal.offcanvas.offcanvas-bottom.show:not(.hiding) {
+            transform: translate(-50%, -50%) scale(1) !important;
+            opacity: 1 !important;
+        }
+
+        #advancedBookingModal.offcanvas.offcanvas-bottom.hiding {
+            transform: translate(-50%, -46%) scale(0.96) !important;
+            opacity: 0 !important;
+        }
+
+        #advancedBookingModal .drag-handle-container {
+            display: none !important;
+        }
+
+        #advancedBookingModal .offcanvas-header {
+            padding-top: 1.25rem !important;
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+        }
+
+        #advancedBookingModal .offcanvas-sticky-footer {
+            border-bottom-left-radius: 20px;
+            border-bottom-right-radius: 20px;
+        }
     }
 
     .drag-handle-pill {
         width: 42px;
-        height: 5px;
+        height: 4px;
         background: var(--text-muted, #94a3b8);
-        opacity: 0.45;
+        opacity: 0.4;
         border-radius: 10px;
-        margin: 0 auto;
+        margin: 8px auto 2px;
         cursor: grab;
     }
 
-    /* ── Touch-Friendly Floor Chips Grid ── */
-    .floor-chip-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 0.5rem;
+    [data-theme="dark"] .drag-handle-pill {
+        background: rgba(255, 255, 255, 0.35);
+        opacity: 0.6;
     }
-    @media (min-width: 576px) {
-        .floor-chip-grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
+
+    /* ── Drawer Field Labels & Segmented Controls ── */
+    .drawer-field-label {
+        font-size: 0.73rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+    }
+
+    [data-theme="dark"] .drawer-field-label {
+        color: #a1a1aa !important;
+    }
+
+    /* ── Integrated Input with Icon Wrapper ── */
+    .input-icon-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .input-icon-wrapper .input-icon {
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.95rem;
+        color: var(--mitwpu-blue, #2563eb);
+        pointer-events: none;
+        z-index: 2;
+        transition: color 0.2s ease;
+    }
+
+    [data-theme="dark"] .input-icon-wrapper .input-icon {
+        color: #38bdf8;
+    }
+
+    .drawer-input {
+        width: 100%;
+        background-color: #ffffff;
+        border: 1px solid var(--border-color, #cbd5e1);
+        color: var(--text-main, #0f172a);
+        border-radius: 12px !important;
+        padding: 0.62rem 0.85rem 0.62rem 38px !important;
+        font-size: 0.88rem !important;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: none !important;
+        display: block;
+    }
+
+    .drawer-input:focus {
+        border-color: var(--mitwpu-blue, #2563eb) !important;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2) !important;
+        background-color: #ffffff;
+    }
+
+    [data-theme="dark"] .drawer-input {
+        background-color: #181818 !important;
+        border: 1px solid #282828 !important;
+        color: #f4f4f5 !important;
+    }
+
+    [data-theme="dark"] .drawer-input:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+        background-color: #1c1c1c !important;
+    }
+
+    .drawer-input.is-invalid {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+    }
+
+    /* ── Inline Error Banner ── */
+    .inline-error-banner {
+        background: rgba(239, 68, 68, 0.08);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: 12px;
+        padding: 0.6rem 0.85rem;
+        color: #ef4444;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        animation: shakeError 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+
+    [data-theme="dark"] .inline-error-banner {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.35);
+        color: #f87171;
+    }
+
+    @keyframes shakeError {
+        10%, 90% { transform: translate3d(-1px, 0, 0); }
+        20%, 80% { transform: translate3d(2px, 0, 0); }
+        30%, 50%, 70% { transform: translate3d(-3px, 0, 0); }
+        40%, 60% { transform: translate3d(3px, 0, 0); }
+    }
+
+    /* Keep backwards compatibility with .form-control-dark */
+    .form-control-dark {
+        background-color: #ffffff;
+        border: 1px solid var(--border-color, #cbd5e1);
+        color: var(--text-main, #0f172a);
+        border-radius: 12px !important;
+        padding: 0.62rem 0.85rem !important;
+        font-size: 0.88rem !important;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        box-shadow: none !important;
+        width: 100%;
+        display: block;
+    }
+
+    [data-theme="dark"] .form-control-dark {
+        background-color: #181818 !important;
+        border: 1px solid #282828 !important;
+        color: #f4f4f5 !important;
+    }
+
+    [data-theme="dark"] .form-control-dark:focus {
+        border-color: #38bdf8 !important;
+        box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25) !important;
+        background-color: #1c1c1c !important;
+    }
+
+    /* Quick Date Pills: flex-nowrap with overflow-x-auto & frictionless horizontal scroll */
+    .quick-date-pill-container {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        gap: 0.5rem;
+        padding-bottom: 0.25rem;
+        margin-bottom: 0.5rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+
+    .quick-date-pill-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .quick-date-pill {
+        flex-shrink: 0;
+        white-space: nowrap;
+        font-size: 0.78rem !important;
+        font-weight: 600;
+        padding: 0.35rem 0.85rem !important;
+        border-radius: 20px !important;
+        border: 1px solid var(--border-color, #e2e8f0) !important;
+        background: #f8fafc;
+        color: #64748b;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        box-shadow: none !important;
+    }
+
+    .quick-date-pill:hover {
+        background: rgba(37, 99, 235, 0.08);
+        border-color: var(--mitwpu-blue, #2563eb) !important;
+        color: var(--mitwpu-blue, #2563eb);
+    }
+
+    .quick-date-pill.active {
+        background: var(--mitwpu-blue, #2563eb) !important;
+        border-color: var(--mitwpu-blue, #2563eb) !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3) !important;
+    }
+
+    [data-theme="dark"] .quick-date-pill {
+        background: #181818;
+        border-color: #282828 !important;
+        color: #a1a1aa;
+    }
+
+    [data-theme="dark"] .quick-date-pill:hover {
+        background: rgba(56, 189, 248, 0.12);
+        border-color: #38bdf8 !important;
+        color: #f4f4f5;
+    }
+
+    [data-theme="dark"] .quick-date-pill.active {
+        background: #0284c7 !important;
+        border-color: #38bdf8 !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 10px rgba(56, 189, 248, 0.35) !important;
+    }
+
+    /* ── Touch-Friendly Floor Chips Grid (Responsive auto-fit minmax 120px) ── */
+    .floor-chip-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)) !important;
+        gap: 0.5rem !important;
+        width: 100% !important;
     }
 
     .floor-chip-label {
-        min-height: 44px;
+        min-height: 44px !important;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem;
+        font-size: 0.82rem;
         font-weight: 600;
-        border-radius: 50rem !important;
-        border: 1.5px solid var(--border-color, #e2e8f0);
-        color: var(--text-color, #334155);
-        background: transparent;
+        border-radius: 12px !important;
+        border: 1px solid var(--border-color, #cbd5e1);
+        color: var(--text-main, #334155);
+        background: #f8fafc;
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         user-select: none;
         cursor: pointer;
-        padding: 0.5rem 0.75rem;
+        padding: 0.45rem 0.75rem;
+        text-align: center;
+        white-space: nowrap;
+        box-sizing: border-box;
     }
 
     .floor-chip-label:hover {
-        background-color: rgba(0, 114, 198, 0.08);
-        border-color: var(--mitwpu-blue, #0072c6);
-        color: var(--mitwpu-blue, #0072c6);
+        background-color: rgba(37, 99, 235, 0.08);
+        border-color: var(--mitwpu-blue, #2563eb);
+        color: var(--mitwpu-blue, #2563eb);
+        transform: translateY(-1px);
     }
 
-    .btn-check:checked + .floor-chip-label,
-    .btn-check:checked + .btn-outline-secondary {
-        background-color: var(--mitwpu-blue, #0072c6) !important;
-        border-color: var(--mitwpu-blue, #0072c6) !important;
-        color: #ffffff !important;
-        box-shadow: 0 4px 12px rgba(0, 114, 198, 0.3) !important;
+    .btn-check:checked + .floor-chip-label {
+        background: linear-gradient(135deg, rgba(37, 99, 235, 0.15), rgba(30, 64, 175, 0.22)) !important;
+        border-color: var(--mitwpu-blue, #2563eb) !important;
+        color: var(--mitwpu-blue, #2563eb) !important;
+        font-weight: 700 !important;
+        box-shadow: 0 0 0 1px var(--mitwpu-blue, #2563eb), 0 3px 8px rgba(37, 99, 235, 0.2) !important;
     }
 
     [data-theme="dark"] .floor-chip-label {
-        border-color: rgba(255, 255, 255, 0.15);
-        color: #cbd5e1;
+        border-color: #282828 !important;
+        color: #71717a !important;
+        background: #161616 !important;
     }
 
     [data-theme="dark"] .floor-chip-label:hover {
-        background-color: rgba(37, 99, 235, 0.15);
-        border-color: #3b82f6;
-        color: #60a5fa;
+        background-color: rgba(56, 189, 248, 0.08) !important;
+        border-color: #3f3f46 !important;
+        color: #f4f4f5 !important;
     }
 
-    [data-theme="dark"] .btn-check:checked + .floor-chip-label,
-    [data-theme="dark"] .btn-check:checked + .btn-outline-secondary {
-        background-color: #2563eb !important;
-        border-color: #2563eb !important;
-        color: #ffffff !important;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45) !important;
+    [data-theme="dark"] .btn-check:checked + .floor-chip-label {
+        background: rgba(11, 77, 140, 0.3) !important;
+        border-color: #38bdf8 !important;
+        color: #38bdf8 !important;
+        font-weight: 700 !important;
+        box-shadow: 0 0 8px rgba(56, 189, 248, 0.25) !important;
     }
 
-    /* ── Sticky CTA Footer & Prominent Button ── */
+    /* ── Sticky CTA Footer & Search Button ── */
     .offcanvas-sticky-footer {
         background: var(--bg-card, #ffffff);
         border-top: 1px solid var(--border-color, #e2e8f0);
         z-index: 10;
+        padding: 0.85rem 1.25rem !important;
     }
 
     [data-theme="dark"] .offcanvas-sticky-footer {
-        background: #1e293b !important;
-        border-top-color: rgba(255, 255, 255, 0.1) !important;
+        background: #141414 !important;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top-color: #262626 !important;
     }
 
     .btn-search-prominent {
-        background: linear-gradient(135deg, var(--mitwpu-blue, #0072c6), #005a9e) !important;
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
         border: none !important;
-        font-size: 1rem !important;
+        font-size: 0.95rem !important;
         font-weight: 700 !important;
         letter-spacing: 0.3px;
-        padding: 0.85rem 1.5rem !important;
-        border-radius: 14px !important;
-        box-shadow: 0 6px 18px rgba(0, 114, 198, 0.35) !important;
-        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        padding: 0.75rem 1.5rem !important;
+        border-radius: 12px !important;
+        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35) !important;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
     }
 
     .btn-search-prominent:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 24px rgba(0, 114, 198, 0.45) !important;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.5) !important;
     }
 
     .btn-search-prominent:active {
         transform: translateY(0);
     }
-
-    [data-theme="dark"] .btn-search-prominent {
-        background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
-        box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
-    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4 faculty-dashboard mb-2">
+<div class="container-fluid px-4 faculty-dashboard mb-2"
+     data-faculty-suspended="{{ 'true' if faculty.is_adhoc_suspended else 'false' }}"
+     data-suspension-remaining="{{ faculty.suspension_remaining_str or '' }}"
+     data-suspension-reason="{{ faculty.adhoc_suspension_reason or '' }}">
     <div class="row">
         <!-- Dashboard Sidebar / Compact Mobile Sticky Header -->
         <div class="col-lg-3 col-xl-2 mb-3 mb-lg-4 px-0 px-lg-2 faculty-hero-col">
@@ -1429,6 +2066,9 @@
                     <button class="btn rounded-3 px-3 py-2 {% if view == 'tracker' %}active{% endif %} d-flex align-items-center" id="btn-tracker">
                         <i class="bi bi-map me-2 fs-5"></i>Map Tracker
                     </button>
+                    <a href="{{ url_for('faculty.submit_timetable_view') }}" class="btn rounded-3 px-3 py-2 d-flex align-items-center text-decoration-none" id="btn-submit-tt">
+                        <i class="bi bi-grid-3x3-gap-fill me-2 fs-5 text-warning"></i>Submit Timetable
+                    </a>
                     <button class="btn rounded-3 px-3 py-2 d-flex align-items-center" id="btn-history">
                         <i class="bi bi-clock-history me-2 fs-5"></i>Booking History
                     </button>
@@ -1443,6 +2083,40 @@
 
     <!-- Section: My Schedule -->
     <div id="view-schedule" class="view-section active">
+        {% if faculty.is_adhoc_suspended %}
+        <!-- Phase 7: The 3-Strike Accountability Suspension Notice -->
+        <div class="alert alert-danger shadow-sm border-0 rounded-4 d-flex align-items-center p-3 mb-4 position-relative overflow-hidden" role="alert" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.05) 100%); border-left: 5px solid #ef4444 !important;">
+            <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 44px; height: 44px; font-size: 1.25rem;">
+                <i class="bi bi-shield-slash-fill"></i>
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <h6 class="alert-heading fw-bold mb-0 text-danger d-flex align-items-center">
+                        <span>Ad-Hoc Booking Privileges Suspended (3-Strike Engine)</span>
+                        <span class="badge bg-danger ms-2 px-2 py-1 text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">7-Day Lockout</span>
+                    </h6>
+                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 font-monospace px-2.5 py-1.5 fw-bold">
+                        <i class="bi bi-hourglass-split me-1"></i>{{ faculty.suspension_remaining_str }}
+                    </span>
+                </div>
+                <p class="mb-0 text-muted small mt-1">
+                    Your Ad-Hoc quick-add booking privileges have been suspended for 7 days due to 3 unconfirmed no-show cancellations under Ghost Protocol in the last 30 days. Reinstatement date: <strong>{{ faculty.adhoc_suspended_until.strftime('%b %d, %Y at %I:%M %p') }}</strong>. Regular assigned timetable lecture duties remain unaffected.
+                </p>
+            </div>
+        </div>
+        {% elif recent_strikes_count and recent_strikes_count > 0 %}
+        <!-- Warning indicator if faculty has 1 or 2 strikes -->
+        <div class="alert alert-warning shadow-sm border-0 rounded-4 d-flex align-items-center p-3 mb-4 position-relative" role="alert" style="background: rgba(245, 158, 11, 0.08); border-left: 5px solid #f59e0b !important;">
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-4 me-3"></i>
+            <div class="flex-grow-1">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <span class="fw-bold text-dark">Ghost Protocol Accountability Warning (Strike {{ recent_strikes_count }} of 3)</span>
+                    <span class="badge bg-warning text-dark font-monospace px-2 py-1">{{ recent_strikes_count }}/3 Strikes (30-day window)</span>
+                </div>
+                <small class="text-muted d-block mt-0.5">3 Ghost Protocol auto-cancellations within 30 days trigger an automated 7-day Ad-Hoc booking suspension. Please check in within 10 minutes of booking start times.</small>
+            </div>
+        </div>
+        {% endif %}
         <div class="row">
             <div class="col-12">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end gap-3 mb-4">
@@ -1450,16 +2124,22 @@
                         <h3 class="fw-bold mb-0">Upcoming Agenda</h3>
                         <p class="text-muted mb-0">Your synchronized teaching schedule across the Vyas building.</p>
                     </div>
-                    {% if session.get('is_admin') %}
-                    <div class="d-flex gap-2 w-100 w-md-auto dashboard-header-buttons">
+                    <div class="d-flex gap-2 w-100 w-md-auto dashboard-header-buttons flex-wrap">
+                        <a href="{{ url_for('faculty.submit_timetable_view') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" style="font-size: 0.85rem;">
+                            <i class="bi bi-grid-3x3-gap-fill text-warning me-1"></i>Build Schedule
+                        </a>
+                        <button class="btn btn-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" data-bs-toggle="offcanvas" data-bs-target="#advancedBookingModal" id="btnHeaderRequestRoom" style="font-size: 0.85rem;">
+                            <i class="bi bi-lightning-charge-fill me-1"></i>Request Room
+                        </button>
+                        {% if session.get('is_admin') %}
                         <button class="btn btn-outline-success rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="font-size: 0.85rem;">
                             <i class="bi bi-file-earmark-spreadsheet me-1 me-md-2"></i>Mass Import Timetable
                         </button>
                         <button class="btn btn-outline-danger rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#deleteTimetableModal" style="font-size: 0.85rem;">
                             <i class="bi bi-trash3 me-1 me-md-2"></i>Delete Timetables
                         </button>
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
 
                 <!-- Ad-Hoc Section -->
@@ -1473,14 +2153,17 @@
                         </div>
                         <div class="slot-details">
                             <span class="adhoc-tag mb-2 d-inline-block">Ad-Hoc Booking</span>
-                            <div class="slot-subject">{{ ad.subject }}</div>
-                            <div class="slot-meta">
+                            <div class="slot-subject text-truncate" title="{{ ad.subject }}">{{ ad.subject }}</div>
+                            <div class="slot-meta text-truncate">
                                 <div class="meta-item"><i class="bi bi-geo-alt"></i> {{ ad.room.number }}</div>
                                 <div class="meta-item"><i class="bi bi-calendar-event"></i> {{ ad.start_datetime.strftime('%d %b %Y') }}</div>
                             </div>
                         </div>
-                        <div class="slot-action">
-                             <span class="room-tag">RESERVED</span>
+                        <div class="slot-action d-flex align-items-center gap-2">
+                            <span class="room-tag">RESERVED</span>
+                            <button class="btn btn-sm btn-outline-danger text-danger bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" onclick="event.stopPropagation(); deleteBooking(event, '{{ ad.id }}')" title="Cancel Ad-Hoc Booking">
+                                <i class="bi bi-trash3-fill text-danger"></i>
+                            </button>
                         </div>
                     </div>
                     {% endfor %}
@@ -1488,7 +2171,7 @@
 
                 <!-- Premium Grid Timetable Section -->
                 <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
-                    <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-0">Weekly Engagement Grid</h5>
+                    <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-0">Upcoming Lectures</h5>
                     <div class="small text-muted"><i class="bi bi-info-circle me-1"></i>Click any class to locate classroom on map</div>
                 </div>
 
@@ -1507,8 +2190,8 @@
                         <tbody>
                             {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] %}
                             {% for day_idx in range(6) %}
-                            <tr>
-                                <td class="day-label">{{ days[day_idx] }}</td>
+                            <tr data-day-index="{{ day_idx }}" data-day-name="{{ days[day_idx] }}">
+                                <td class="day-label" data-day-index="{{ day_idx }}">{{ days[day_idx] }}</td>
                                 {% set day_schedules = [] %}
                                 {% for s in my_schedules %}
                                     {% if s.day_of_week == day_idx and s.start_time and s.end_time %}
@@ -1517,8 +2200,22 @@
                                         {% set end_h = s.end_time.hour %}
                                         {% set duration = end_h - start_h %}
                                         {% if duration <= 0 %}{% set duration = 1 %}{% endif %}
+                                        {% set time_str = s.start_time.strftime('%I:%M %p') ~ ' - ' ~ s.end_time.strftime('%I:%M %p') %}
+                                        {% set div_course = (s.division or '') ~ (' / ' ~ s.course if s.course else '') %}
                                         {# Add to temp list for this day #}
-                                        {% set _ = day_schedules.append({'start': start_h, 'end': end_h, 'duration': duration, 'subject': s.subject, 'room': s.room, 'is_booking': false, 'id': s.id, 'collaborator': s.collaborator}) %}
+                                        {% set _ = day_schedules.append({
+                                            'start': start_h, 
+                                            'end': end_h, 
+                                            'duration': duration, 
+                                            'subject': s.subject, 
+                                            'room': s.room, 
+                                            'is_booking': false, 
+                                            'id': s.id, 
+                                            'collaborator': s.collaborator,
+                                            'division_course': div_course or 'Regular Lecture',
+                                            'time_str': time_str,
+                                            'day_name': days[day_idx]
+                                        }) %}
                                     {% endif %}
                                 {% endfor %}
                                 
@@ -1526,7 +2223,24 @@
                                     {% if b.slot_start.weekday() == day_idx %}
                                         {% set start_h = b.slot_start.hour %}
                                         {% set end_h = start_h + 1 %}
-                                        {% set _ = day_schedules.append({'start': start_h, 'end': end_h, 'duration': 1, 'subject': b.subject, 'room': b.room, 'is_booking': true, 'id': b.id, 'collaborator': none}) %}
+                                        {% set time_str = b.slot_start.strftime('%I:%M %p') ~ ' - ' ~ (b.slot_end.strftime('%I:%M %p') if b.slot_end else (b.slot_start.strftime('%I:%M %p'))) %}
+                                        {% set div_course = (b.division or '') ~ (' / ' ~ b.course if b.course else '') %}
+                                        {% set _ = day_schedules.append({
+                                            'start': start_h, 
+                                            'end': end_h, 
+                                            'duration': 1, 
+                                            'subject': b.subject, 
+                                            'room': b.room, 
+                                            'is_booking': true, 
+                                            'id': b.id, 
+                                            'collaborator': none,
+                                            'division_course': div_course or 'Ad-Hoc Booking',
+                                            'time_str': time_str,
+                                            'day_name': days[day_idx],
+                                            'checked_in': b.checked_in,
+                                            'slot_start_iso': b.slot_start.isoformat(),
+                                            'is_historical': b.is_historical
+                                        }) %}
                                     {% endif %}
                                 {% endfor %}
 
@@ -1545,22 +2259,46 @@
                                         {% if found %}
                                             {% set match = found[0] %}
                                             <td colspan="{{ match.duration }}" class="timetable-cell occupied cursor-pointer" 
-                                                onclick="locateRoom('{{ match.room.number }}', '{{ match.room.id }}', '{{ match.room.floor.level }}')">
-                                                <div class="cell-content cursor-pointer">
+                                                onclick="showClassDetail(this)"
+                                                data-subject="{{ match.subject }}"
+                                                data-division-course="{{ match.division_course }}"
+                                                data-room-number="{{ match.room.number }}"
+                                                data-room-id="{{ match.room.id }}"
+                                                data-floor-level="{{ match.room.floor.level }}"
+                                                data-time="{{ match.day_name }}, {{ match.time_str }}"
+                                                data-is-adhoc="{{ 'true' if match.is_booking else 'false' }}"
+                                                data-is-historical="{{ 'true' if match.is_historical else 'false' }}"
+                                                data-checked-in="{{ 'true' if match.checked_in else 'false' }}"
+                                                data-slot-start-iso="{{ match.slot_start_iso or '' }}"
+                                                data-id="{{ match.id }}">
+                                                <div class="cell-content cursor-pointer {% if not match.is_booking %}cell-regular{% else %}cell-adhoc{% endif %}">
                                                     {% if not match.is_booking %}
-                                                        {% if faculty.id %} {# We use JS to delete, ensure faculty matches #}
-                                                        <button class="btn-delete-class" onclick="deleteClass(event, '{{ match.id }}')">
-                                                            <i class="bi bi-trash3-fill"></i>
+                                                        <span class="slot-lock-badge position-absolute top-0 end-0 m-1.5" title="Regular Assigned Lecture (Locked)">
+                                                            <i class="bi bi-lock-fill"></i>
+                                                        </span>
+                                                        {% if session.get('is_admin') %}
+                                                        <button class="btn-delete-class text-danger" onclick="event.stopPropagation(); deleteClass(event, '{{ match.id }}')" title="Delete Class">
+                                                            <i class="bi bi-trash3-fill text-danger"></i>
                                                         </button>
                                                         {% endif %}
                                                     {% else %}
-                                                        <span class="badge bg-warning position-absolute top-0 start-0 m-1 p-1" style="font-size: 0.5rem;">Ad-Hoc</span>
-                                                        <button class="btn-delete-class" onclick="deleteBooking(event, '{{ match.id }}')">
-                                                            <i class="bi bi-trash3-fill"></i>
+                                                        {% if match.checked_in %}
+                                                        <span class="badge bg-success position-absolute top-0 start-0 m-1 font-monospace" style="font-size: 0.62rem; padding: 2px 6px;" title="Faculty Checked-In">
+                                                            <i class="bi bi-check-circle-fill me-0.5"></i>Checked In
+                                                        </span>
+                                                        {% else %}
+                                                        <span class="badge badge-adhoc-pill position-absolute top-0 start-0 m-1">
+                                                            <i class="bi bi-lightning-charge-fill me-0.5"></i>Ad-Hoc
+                                                        </span>
+                                                        {% endif %}
+                                                        {% if not match.is_historical %}
+                                                        <button class="btn-delete-class text-danger" onclick="event.stopPropagation(); deleteBooking(event, '{{ match.id }}')" title="Cancel Booking">
+                                                            <i class="bi bi-trash3-fill text-danger"></i>
                                                         </button>
+                                                        {% endif %}
                                                     {% endif %}
-                                                    <div class="cell-subject">{{ match.subject }}</div>
-                                                    <div class="cell-meta">
+                                                    <div class="cell-subject text-truncate" title="{{ match.subject }}">{{ match.subject }}</div>
+                                                    <div class="cell-meta text-truncate" title="{{ match.division_course }}">
                                                         <i class="bi bi-person-fill me-1"></i>
                                                         {% if match.collaborator %}
                                                             <span>{{ faculty.name.split(' ')[0] }} & {{ match.collaborator.name.split(' ')[0] }}</span>
@@ -1572,7 +2310,20 @@
                                             </td>
                                             {% set current_h = h + match.duration %}
                                         {% else %}
-                                            <td class="timetable-cell vacant"></td>
+                                            <td class="timetable-cell vacant cursor-pointer {% if faculty.is_adhoc_suspended %}vacant-suspended{% endif %}" 
+                                                data-day-index="{{ day_idx }}"
+                                                data-day-name="{{ days[day_idx] }}"
+                                                data-hour="{{ h }}"
+                                                onclick="quickAddBooking(this)"
+                                                title="{% if faculty.is_adhoc_suspended %}Ad-Hoc Booking Suspended ({{ faculty.suspension_remaining_str }}){% else %}Claim Room for {{ days[day_idx] }} at {{ h > 12 and h-12 or h }}:00 {{ h >= 12 and 'PM' or 'AM' }}{% endif %}">
+                                                <div class="vacant-slot-placeholder">
+                                                    {% if faculty.is_adhoc_suspended %}
+                                                    <i class="bi bi-slash-circle vacant-plus-icon" title="Ad-Hoc Booking Suspended"></i>
+                                                    {% else %}
+                                                    <i class="bi bi-plus-lg vacant-plus-icon"></i>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
                                             {% set current_h = h + 1 %}
                                         {% endif %}
                                     {% endif %}
@@ -1590,18 +2341,28 @@
                         {% set day_name = days[day_idx] %}
                         {% for s in my_schedules %}
                             {% if s.day_of_week == day_idx and s.start_time and s.end_time %}
-                            <div class="card glass-card border shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" onclick="locateRoom('{{ s.room.number }}', '{{ s.room.id }}', '{{ s.room.floor.level }}')">
+                            <div class="card glass-card border shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" 
+                                onclick="showClassDetail(this)"
+                                data-subject="{{ s.subject }}"
+                                data-division-course="{{ (s.division or '') ~ (' / ' ~ s.course if s.course else '') or 'Regular Lecture' }}"
+                                data-room-number="{{ s.room.number }}"
+                                data-room-id="{{ s.room.id }}"
+                                data-floor-level="{{ s.room.floor.level }}"
+                                data-time="{{ day_name }}, {{ s.start_time.strftime('%I:%M %p') }} - {{ s.end_time.strftime('%I:%M %p') }}"
+                                data-is-adhoc="false"
+                                data-is-historical="false"
+                                data-id="{{ s.id }}">
                                 <div class="card-body p-3">
                                     <!-- Floating Status Badge in Top Right -->
-                                    <span class="badge bg-success px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3">
-                                        <i class="bi bi-calendar-check me-1"></i>Regular
+                                    <span class="badge bg-primary px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3 text-white">
+                                        <i class="bi bi-lock-fill me-1"></i>Regular
                                     </span>
                                     
                                     <!-- Stacked: Subject -->
                                     <div class="pe-5 mb-2">
-                                        <h6 class="fw-bold mb-1 text-body">{{ s.subject }}</h6>
+                                        <h6 class="fw-bold mb-1 text-body text-truncate" title="{{ s.subject }}">{{ s.subject }}</h6>
                                         {% if s.collaborator %}
-                                        <div class="text-muted small">
+                                        <div class="text-muted small text-truncate">
                                             <i class="bi bi-people me-1 text-primary"></i>Co-Faculty: {{ s.collaborator.name }}
                                         </div>
                                         {% endif %}
@@ -1612,16 +2373,15 @@
                                         <i class="bi bi-clock me-1.5 text-primary"></i>{{ day_name }}, {{ s.start_time.strftime('%I:%M %p') }} - {{ s.end_time.strftime('%I:%M %p') }}
                                     </div>
                                     
-                                    <!-- Stacked: Room Pill -->
+                                    <!-- Stacked: Room Pill & Actions -->
                                     <div class="pt-2 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
                                         <span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">
-                                            <i class="bi bi-geo-alt-fill me-1 text-primary"></i>Room {{ s.room.number }}
+                                             <i class="bi bi-geo-alt-fill me-1 text-primary"></i>Room {{ s.room.number }}
                                         </span>
-                                        {% if session.get('is_admin') or faculty.id %}
-                                        <button class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" onclick="deleteClass(event, '{{ s.id }}')" title="Delete Class">
-                                            <i class="bi bi-trash3-fill" style="font-size: 0.75rem;"></i>
-                                        </button>
-                                        {% endif %}
+                                        <span class="text-muted small d-inline-flex align-items-center gap-1 opacity-75" title="Assigned by Academic Administration">
+                                            <i class="bi bi-lock-fill text-muted"></i>
+                                            <span style="font-size: 0.68rem; font-weight: 600;">Locked</span>
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -1630,16 +2390,34 @@
                         
                         {% for b in bookings_this_week %}
                             {% if b.slot_start.weekday() == day_idx %}
-                            <div class="card glass-card border shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" onclick="locateRoom('{{ b.room.number }}', '{{ b.room.id }}', '{{ b.room.floor.level }}')">
+                            <div class="card glass-card border border-primary border-opacity-50 shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" 
+                                onclick="showClassDetail(this)"
+                                data-subject="{{ b.subject }}"
+                                data-division-course="{{ (b.division or '') ~ (' / ' ~ b.course if b.course else '') or 'Ad-Hoc Booking' }}"
+                                data-room-number="{{ b.room.number }}"
+                                data-room-id="{{ b.room.id }}"
+                                data-floor-level="{{ b.room.floor.level }}"
+                                data-time="{{ day_name }}, {{ b.slot_start.strftime('%I:%M %p') }} - {{ (b.slot_end.strftime('%I:%M %p') if b.slot_end else (b.slot_start.strftime('%I:%M %p'))) }}"
+                                data-is-adhoc="true"
+                                data-is-historical="{{ 'true' if b.is_historical else 'false' }}"
+                                data-checked-in="{{ 'true' if b.checked_in else 'false' }}"
+                                data-slot-start-iso="{{ b.slot_start.isoformat() }}"
+                                data-id="{{ b.id }}">
                                 <div class="card-body p-3">
                                     <!-- Floating Status Badge in Top Right -->
+                                    {% if b.checked_in %}
+                                    <span class="badge bg-success px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3 text-white">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Checked In
+                                    </span>
+                                    {% else %}
                                     <span class="badge bg-warning text-dark px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3">
                                         <i class="bi bi-lightning-charge me-1"></i>Ad-Hoc
                                     </span>
+                                    {% endif %}
                                     
                                     <!-- Stacked: Subject -->
                                     <div class="pe-5 mb-2">
-                                        <h6 class="fw-bold mb-1 text-body">{{ b.subject }}</h6>
+                                        <h6 class="fw-bold mb-1 text-body text-truncate" title="{{ b.subject }}">{{ b.subject }}</h6>
                                     </div>
                                     
                                     <!-- Stacked: Date / Time -->
@@ -1647,13 +2425,13 @@
                                         <i class="bi bi-clock me-1.5 text-warning"></i>{{ day_name }}, {{ b.slot_start.strftime('%I:%M %p') }}
                                     </div>
                                     
-                                    <!-- Stacked: Room Pill -->
+                                    <!-- Stacked: Room Pill & Destructive Cancel Action -->
                                     <div class="pt-2 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
                                         <span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">
-                                            <i class="bi bi-geo-alt-fill me-1 text-primary"></i>Room {{ b.room.number }}
+                                            <i class="bi bi-geo-alt-fill me-1 text-warning"></i>Room {{ b.room.number }}
                                         </span>
-                                        <button class="btn btn-sm btn-outline-danger rounded-circle p-1" style="width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center;" onclick="deleteBooking(event, '{{ b.id }}')" title="Delete Booking">
-                                            <i class="bi bi-trash3-fill" style="font-size: 0.75rem;"></i>
+                                        <button class="btn btn-sm btn-outline-danger text-danger bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" onclick="event.stopPropagation(); deleteBooking(event, '{{ b.id }}')" title="Cancel Ad-Hoc Booking">
+                                            <i class="bi bi-trash3-fill text-danger" style="font-size: 0.85rem;"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -1687,7 +2465,7 @@
                 <select class="form-select floor-selector-pill" id="floorSelectorMap" aria-label="Select Floor">
                     {% for floor in floors %}
                         <option value="{{ floor.level }}" data-floor-id="{{ floor.id }}" {% if floor.level == 4 %}selected{% endif %}>
-                            {{ floor.name }} {% if floor.level == 4 %}(Interactive){% endif %}
+                            {{ floor.name }}
                         </option>
                     {% endfor %}
                 </select>
@@ -1705,15 +2483,20 @@
 
     </div>
 
-    <!-- Section: Booking History -->
+    <!-- Section: Booking History (Phase 4: Server-Side Paginated, Limit=20) -->
     <div id="view-history" class="view-section" style="display: none; opacity: 0;">
         <div class="row">
             <div class="col-12">
-                <div class="d-flex justify-content-between align-items-end mb-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
                     <div>
                         <h3 class="fw-bold mb-0">Booking History</h3>
-                        <p class="text-muted mb-0">Your past and upcoming class reservations.</p>
+                        <p class="text-muted mb-0">Your past and upcoming class reservations (Timezone: IST UTC+5:30).</p>
                     </div>
+                    {% if history_pagination and history_pagination.total > 0 %}
+                    <div class="text-muted small">
+                        Showing page <span class="fw-bold text-body">{{ history_pagination.page }}</span> of <span class="fw-bold text-body">{{ history_pagination.pages }}</span> (<span class="fw-bold text-primary">{{ history_pagination.total }}</span> total records)
+                    </div>
+                    {% endif %}
                 </div>
                 
                 <!-- Desktop Table View -->
@@ -1721,7 +2504,7 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>Date & Time</th>
+                                <th>Date & Time (IST)</th>
                                 <th>Room</th>
                                 <th>Subject</th>
                                 <th>Division / Course</th>
@@ -1731,17 +2514,22 @@
                         <tbody>
                             {% for b in booking_history %}
                             <tr>
-                                <td>{{ b.date.strftime('%d %b %Y') }} at {{ b.slot_start.strftime('%I:%M %p') }}</td>
-                                <td><span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">{{ b.room.number }}</span></td>
-                                <td class="fw-bold">{{ b.subject }}</td>
-                                <td>{{ b.division or '-' }} / {{ b.course or '-' }}</td>
                                 <td>
-                                    {% if b.status in ['active', 'confirmed', 'Active', 'Confirmed'] %}
-                                    <span class="badge bg-success px-2.5 py-1.5 fw-semibold"><i class="bi bi-check-circle me-1"></i>Active</span>
-                                    {% elif b.status in ['pending', 'Pending'] %}
-                                    <span class="badge bg-warning text-dark px-2.5 py-1.5 fw-semibold"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
-                                    {% elif b.status in ['cancelled', 'Cancelled'] %}
-                                    <span class="badge bg-danger px-2.5 py-1.5 fw-semibold"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                                    <div class="fw-semibold text-body">{{ b.date.strftime('%d %b %Y') }} at {{ b.slot_start.strftime('%I:%M %p') }}</div>
+                                    <small class="text-muted" style="font-size: 0.72rem;">IST (UTC+05:30)</small>
+                                </td>
+                                <td><span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">Room {{ b.room.number }}</span></td>
+                                <td class="fw-bold text-truncate" style="max-width: 240px;" title="{{ b.subject }}">{{ b.subject }}</td>
+                                <td class="text-truncate" style="max-width: 180px;">{{ b.division or '-' }} / {{ b.course or '-' }}</td>
+                                <td>
+                                    {% if b.status in ['cancelled', 'Cancelled'] %}
+                                    <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 px-2.5 py-1.5 fw-semibold"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                                    {% elif b.is_historical %}
+                                    <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold"><i class="bi bi-clock-history me-1"></i>Historical</span>
+                                    {% elif b.checked_in %}
+                                    <span class="badge bg-success px-2.5 py-1.5 fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Checked-In</span>
+                                    {% elif b.status in ['active', 'confirmed', 'Active', 'Confirmed'] %}
+                                    <span class="badge bg-primary px-2.5 py-1.5 fw-semibold"><i class="bi bi-lightning-charge me-1"></i>Upcoming</span>
                                     {% else %}
                                     <span class="badge bg-secondary px-2.5 py-1.5 fw-semibold">{{ b.status|capitalize }}</span>
                                     {% endif %}
@@ -1761,22 +2549,24 @@
                         <div class="card-body p-3">
                             <!-- Floating Status Badge in Top Right -->
                             <div class="position-absolute top-0 end-0 mt-3 me-3">
-                                {% if b.status in ['active', 'confirmed', 'Active', 'Confirmed'] %}
-                                <span class="badge bg-success px-2.5 py-1.5 fw-semibold"><i class="bi bi-check-circle me-1"></i>Active</span>
-                                {% elif b.status in ['pending', 'Pending'] %}
-                                <span class="badge bg-warning text-dark px-2.5 py-1.5 fw-semibold"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
-                                {% elif b.status in ['cancelled', 'Cancelled'] %}
-                                <span class="badge bg-danger px-2.5 py-1.5 fw-semibold"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                                {% if b.status in ['cancelled', 'Cancelled'] %}
+                                <span class="badge bg-danger bg-opacity-15 text-danger border border-danger border-opacity-25 px-2 py-1 fw-semibold"><i class="bi bi-x-circle me-1"></i>Cancelled</span>
+                                {% elif b.is_historical %}
+                                <span class="badge bg-secondary bg-opacity-20 text-secondary border border-secondary border-opacity-25 px-2 py-1 fw-semibold"><i class="bi bi-clock-history me-1"></i>Historical</span>
+                                {% elif b.checked_in %}
+                                <span class="badge bg-success px-2 py-1 fw-semibold"><i class="bi bi-check-circle-fill me-1"></i>Checked-In</span>
+                                {% elif b.status in ['active', 'confirmed', 'Active', 'Confirmed'] %}
+                                <span class="badge bg-primary px-2 py-1 fw-semibold"><i class="bi bi-lightning-charge me-1"></i>Upcoming</span>
                                 {% else %}
-                                <span class="badge bg-secondary px-2.5 py-1.5 fw-semibold">{{ b.status|capitalize }}</span>
+                                <span class="badge bg-secondary px-2 py-1 fw-semibold">{{ b.status|capitalize }}</span>
                                 {% endif %}
                             </div>
 
                             <!-- Stacked: Subject -->
                             <div class="pe-5 mb-2">
-                                <h6 class="fw-bold mb-1 text-body">{{ b.subject }}</h6>
+                                <h6 class="fw-bold mb-1 text-body text-truncate" title="{{ b.subject }}">{{ b.subject }}</h6>
                                 {% if b.division or b.course %}
-                                <div class="text-muted small">
+                                <div class="text-muted small text-truncate">
                                     <i class="bi bi-mortarboard me-1"></i>{{ b.division or '-' }} / {{ b.course or '-' }}
                                 </div>
                                 {% endif %}
@@ -1784,7 +2574,7 @@
 
                             <!-- Stacked: Date / Time -->
                             <div class="text-muted small mb-2 d-flex align-items-center">
-                                <i class="bi bi-calendar3 me-1.5 text-primary"></i>{{ b.date.strftime('%d %b %Y') }} at {{ b.slot_start.strftime('%I:%M %p') }}
+                                <i class="bi bi-calendar3 me-1.5 text-primary"></i>{{ b.date.strftime('%d %b %Y') }} at {{ b.slot_start.strftime('%I:%M %p') }} (IST)
                             </div>
 
                             <!-- Stacked: Room Pill -->
@@ -1802,44 +2592,111 @@
                     </div>
                     {% endfor %}
                 </div>
+
+                <!-- Server-Side Pagination Controls -->
+                {% if history_pagination and history_pagination.pages > 1 %}
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-4 px-2">
+                    <div>
+                        <span class="text-muted small">Page {{ history_pagination.page }} of {{ history_pagination.pages }} ({{ history_pagination.total }} reservations)</span>
+                    </div>
+                    <nav aria-label="Booking History Pagination">
+                        <ul class="pagination pagination-sm mb-0">
+                            <li class="page-item {% if not history_pagination.has_prev %}disabled{% endif %}">
+                                <a class="page-link rounded-start-3" href="?history_page={{ history_pagination.prev_num }}&view=history" aria-label="Previous">
+                                    <i class="bi bi-chevron-left"></i> Previous
+                                </a>
+                            </li>
+                            {% for p in range(1, history_pagination.pages + 1) %}
+                                {% if p == history_pagination.page or p == 1 or p == history_pagination.pages or (p >= history_pagination.page - 1 and p <= history_pagination.page + 1) %}
+                                <li class="page-item {% if p == history_pagination.page %}active{% endif %}">
+                                    <a class="page-link" href="?history_page={{ p }}&view=history">{{ p }}</a>
+                                </li>
+                                {% elif p == history_pagination.page - 2 or p == history_pagination.page + 2 %}
+                                <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+                            <li class="page-item {% if not history_pagination.has_next %}disabled{% endif %}">
+                                <a class="page-link rounded-end-3" href="?history_page={{ history_pagination.next_num }}&view=history" aria-label="Next">
+                                    Next <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
             </div>
         </div>
-    </div>
-</div>
+    </div> <!-- Close col-lg-9 col-xl-10 -->
+    </div> <!-- Close row -->
+</div> <!-- Close container-fluid faculty-dashboard -->
 
 <!-- Static Floating Pop-up Moved to Root of Content -->
 <div id="roomPopUp">
     <div class="pop-card">
         <div class="pop-header">
-            <div class="pop-title" id="popRoomNumber">VY402</div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary bg-opacity-10 text-primary font-monospace px-2.5 py-1 fw-bold fs-6" id="popRoomNumber">VY402</span>
+                <span class="small text-muted" id="popRoomFloor">Floor 4</span>
+            </div>
             <button type="button" class="btn-close" onclick="closePopUp()"></button>
         </div>
-        <div class="pop-body">
-            <div class="d-flex justify-content-between align-items-start mb-3">
+        <div class="pop-body p-3">
+            <div class="d-flex justify-content-between align-items-start mb-2.5">
                 <div>
-                    <div class="pop-title" id="popRoomName">Programming Lab</div>
+                    <div class="pop-title" id="popRoomName" style="font-size: 1.1rem;">Programming Lab</div>
                     <div class="pop-subtitle" id="popRoomType">LAB</div>
                 </div>
                 <div id="popStatusBadge" class="pop-badge vacant">VACANT</div>
             </div>
 
-            <div class="pop-actions">
-                <button class="btn btn-primary w-100 fw-bold py-2" id="btnActionBook" onclick="window.triggerBookingModal()">
-                    <i class="bi bi-calendar-plus me-2"></i>Book Class
-                </button>
-                <button class="btn btn-outline-danger w-100 fw-bold py-2 d-none" id="btnActionCancel">
-                    <i class="bi bi-trash3 me-2"></i>Cancel Session
-                </button>
+            <!-- Real-time Status Alert / Session Summary -->
+            <div id="popStatusAlert" class="status-alert vacant mb-3 py-2 px-3">
+                <div class="d-flex align-items-center mb-1">
+                    <i class="bi bi-info-circle-fill me-2" id="popAlertIcon"></i>
+                    <strong id="popAlertTitle" style="font-size: 0.88rem;">Optimal Levels</strong>
+                </div>
+                <div id="popAlertContent" style="font-size: 0.82rem; line-height: 1.35;">
+                    Room is currently vacant. Access permitted.
+                </div>
             </div>
 
-            <div id="popStatusAlert" class="status-alert vacant">
-                <div class="d-flex align-items-center mb-2">
-                    <i class="bi bi-info-circle-fill me-2"></i>
-                    <strong id="popAlertTitle">Needs Attention</strong>
+            <!-- Logged Schedule / Timetable Section -->
+            <div class="pop-schedule-box mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-uppercase d-flex align-items-center gap-1.5" style="letter-spacing: 0.5px; font-size: 0.75rem;">
+                        <i class="bi bi-calendar3 text-primary"></i>
+                        <span>Logged Timetable</span>
+                    </span>
+                    <span class="badge bg-secondary bg-opacity-25 text-body small font-monospace px-2 py-0.5" id="popScheduleCountBadge">0 classes</span>
                 </div>
-                <div id="popAlertContent">
-                    Room is currently vacant. Energy levels optimal.
+                
+                <!-- Day Switcher Pills -->
+                <div class="pop-day-nav" id="popDayNav">
+                    <button type="button" class="pop-day-btn active" data-day="today">Today</button>
+                    <button type="button" class="pop-day-btn" data-day="0">Mon</button>
+                    <button type="button" class="pop-day-btn" data-day="1">Tue</button>
+                    <button type="button" class="pop-day-btn" data-day="2">Wed</button>
+                    <button type="button" class="pop-day-btn" data-day="3">Thu</button>
+                    <button type="button" class="pop-day-btn" data-day="4">Fri</button>
+                    <button type="button" class="pop-day-btn" data-day="5">Sat</button>
                 </div>
+
+                <!-- Schedule List -->
+                <div id="popScheduleList" style="max-height: 220px; overflow-y: auto; padding-right: 2px;">
+                    <!-- Dynamically populated by JS -->
+                </div>
+            </div>
+
+            <div class="pop-actions mt-2">
+                <button class="btn btn-primary w-100 fw-bold py-2 shadow-sm rounded-3" id="btnActionBook" onclick="window.triggerBookingModal()" style="font-size: 0.88rem;">
+                    <i class="bi bi-calendar-plus me-1.5"></i>Book Ad-Hoc Slot
+                </button>
+                <button class="btn btn-warning text-dark w-100 fw-bold py-2 d-none shadow-sm rounded-3" id="btnActionNudge" style="font-size: 0.88rem;">
+                    <i class="bi bi-bell-fill me-1.5"></i>Send Hallway Nudge
+                </button>
+                <button class="btn btn-outline-danger w-100 fw-bold py-2 d-none shadow-sm rounded-3" id="btnActionCancel" style="font-size: 0.88rem;">
+                    <i class="bi bi-trash3 me-1.5"></i>Cancel Session
+                </button>
             </div>
         </div>
     </div>
@@ -1964,20 +2821,120 @@
 {% endif %}
 
 
+<!-- Responsively Wrapping SlotDetailCard Modal (Phase 4: Timezone-Strict & Flexbox Gap Alignment) -->
+<div class="modal fade" id="classDetailModal" tabindex="-1" aria-labelledby="classDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 460px;">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="background: var(--bg-card);">
+            <!-- Modal Header -->
+            <div class="modal-header border-0 pb-0 pt-3 px-4 d-flex justify-content-between align-items-center">
+                <!-- Status Block -->
+                <div class="d-flex align-items-center flex-wrap gap-2" id="slotDetailStatusBlock">
+                    <span id="classDetailTypeBadge" class="badge rounded-pill px-2.5 py-1">Regular</span>
+                    <span id="classDetailCheckInBadge" class="badge bg-success bg-opacity-25 text-success rounded-pill px-2.5 py-1 fw-bold d-none">
+                        <i class="bi bi-patch-check-fill me-1"></i>Checked-In
+                    </span>
+                    <span id="classDetailHistoricalBadge" class="badge bg-secondary bg-opacity-25 text-secondary border border-secondary border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-none">
+                        <i class="bi bi-clock-history me-1"></i>Past Session (IST)
+                    </span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body / SlotDetailCard Container -->
+            <div class="modal-body p-4 pt-3 d-flex flex-column gap-3">
+                <!-- Subject & Course Block -->
+                <div class="d-flex flex-column gap-1">
+                    <h5 class="fw-bold mb-0 text-truncate" id="classDetailSubject" style="color: var(--text-main);" title="Subject Title">Subject Title</h5>
+                    <div class="text-muted small text-truncate" id="classDetailDivisionCourse" title="Division / Course">Division / Course</div>
+                </div>
+
+                <!-- Ghost Protocol Proximity / Warning Alert -->
+                <div id="classDetailCheckInAlert" class="alert alert-warning py-2 px-3 small rounded-3 mb-0 d-none d-flex align-items-center gap-2 border-warning">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 text-warning flex-shrink-0"></i>
+                    <div style="font-size: 0.82rem; line-height: 1.35;">
+                        <strong>Ghost Protocol:</strong> Check in within 10 minutes of start time to prevent automatic booking cancellation.
+                    </div>
+                </div>
+
+                <!-- Requestor Block -->
+                <div class="d-flex align-items-center gap-2.5 p-2.5 rounded-3 bg-body-tertiary border border-light border-opacity-10" id="slotDetailRequestorBlock">
+                    <div class="rounded-circle bg-primary bg-opacity-20 text-primary d-flex align-items-center justify-content-center fw-bold flex-shrink-0" style="width: 38px; height: 38px; font-size: 0.9rem;">
+                        <span id="classDetailFacultyAvatar">{{ faculty.name[0]|upper if faculty else 'F' }}</span>
+                    </div>
+                    <div class="d-flex flex-column min-w-0">
+                        <span class="small text-muted fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.5px;">SCHEDULE REQUESTOR</span>
+                        <div class="fw-bold text-body text-truncate" id="classDetailFacultyName" style="font-size: 0.88rem;">{{ faculty.name if faculty else 'Faculty Member' }}</div>
+                        <small class="text-muted text-truncate" id="classDetailFacultyEmail" style="font-size: 0.72rem;">{{ faculty.email if faculty else '' }}</small>
+                    </div>
+                </div>
+
+                <!-- Timestamp & Room Block -->
+                <div class="d-flex flex-column gap-2.5 p-3 rounded-3" style="background: rgba(37, 99, 235, 0.05); border: 1px solid rgba(37, 99, 235, 0.12);" id="slotDetailTimestampBlock">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-primary text-white shadow-sm flex-shrink-0" style="width: 36px; height: 36px;">
+                            <i class="bi bi-geo-alt-fill fs-6"></i>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <span class="small text-muted fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.5px;">CAMPUS LOCATION</span>
+                            <div class="fw-bold" id="classDetailRoom" style="font-size: 0.95rem;">Room VY401</div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center justify-content-center rounded-3 bg-info bg-opacity-25 text-primary shadow-sm flex-shrink-0" style="width: 36px; height: 36px;">
+                            <i class="bi bi-clock-fill fs-6"></i>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <div class="d-flex align-items-center gap-1.5">
+                                <span class="small text-muted fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.5px;">DAY & TIME (IST)</span>
+                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold" style="font-size: 0.62rem; padding: 1px 5px;">UTC+05:30</span>
+                            </div>
+                            <div class="fw-bold" id="classDetailTime" style="font-size: 0.92rem;">Monday, 10:00 AM - 11:00 AM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons Footer -->
+                <div class="d-flex flex-wrap gap-2 justify-content-end align-items-center pt-2 border-top border-light border-opacity-10" id="slotDetailActionsBlock">
+                    <button type="button" class="btn btn-outline-danger d-none px-3 rounded-3 fw-semibold" id="btnCancelClassBooking" style="font-size: 0.88rem;">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-success d-none px-3 rounded-3 fw-bold shadow-sm flex-grow-1" id="btnCheckInClassBooking" style="font-size: 0.88rem;">
+                        <i class="bi bi-geo-alt-fill me-1"></i>Check-In Now
+                    </button>
+                    <button type="button" class="btn btn-primary px-3 rounded-3 fw-bold flex-grow-1 shadow-sm" id="btnViewClassOnMap" style="background: var(--mitwpu-blue, #0b4d8c); border: none; font-size: 0.88rem;">
+                        <i class="bi bi-map-fill me-1.5"></i>View on Map
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Booking Modal (Glassmorphism removed for clean light theme) -->
+<!-- Booking Modal -->
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg" style="border-radius: 16px;">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold text-primary"><i class="bi bi-clock-history me-2"></i>Module Slot Booking</h5>
+            <div class="modal-header border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <h5 class="modal-title fw-bold text-primary mb-0"><i class="bi bi-clock-history me-2"></i>Module Slot Booking</h5>
+                    <span class="badge bg-primary bg-opacity-10 text-primary font-monospace px-2.5 py-1" id="bookRoomNumberBadge">Room</span>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <form id="bookingForm">
                     <input type="hidden" id="bookRoomId">
+
                     <div class="mb-3">
-                        <label class="form-label text-muted small fw-bold text-uppercase">Select Start Time (Today)</label>
-                        <select class="form-select" id="bookSlotStart">
+                        <label class="form-label text-muted small fw-bold text-uppercase" for="bookReservationDate">Reservation Date</label>
+                        <input type="date" class="form-control" id="bookReservationDate" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase" for="bookSlotStart">Select Start Time</label>
+                        <select class="form-select" id="bookSlotStart" required>
                             <!-- Dynamic Slots -->
                         </select>
                     </div>
@@ -1998,7 +2955,7 @@
                     <div class="row mb-3">
                         <div class="col-6">
                             <label class="form-label text-muted small fw-bold text-uppercase">Division (Optional)</label>
-                            <input type="text" class="form-control" id="bookDivision" placeholder="e.g. A, B, C">
+                            <input type="text" class="form-control" id="bookDivision" placeholder="e.g. Div A, Batch 1">
                         </div>
                         <div class="col-6">
                             <label class="form-label text-muted small fw-bold text-uppercase">Course (Optional)</label>
@@ -2021,71 +2978,130 @@
     </div>
 </div>
 
-<!-- Advanced Booking Search Bottom Sheet (Offcanvas Bottom) -->
-<div class="offcanvas offcanvas-bottom h-auto border-0 shadow-lg d-flex flex-column" tabindex="-1" id="advancedBookingModal" aria-labelledby="advancedBookingModalLabel" style="border-top-left-radius: 20px !important; border-top-right-radius: 20px !important; max-height: 85vh; background: var(--bg-card);">
-    <!-- Centered Drag Handle Indicator -->
-    <div class="d-flex justify-content-center pt-2 pb-1 flex-shrink-0">
-        <div class="drag-handle-pill" style="width: 42px; height: 5px; background: var(--text-muted, #94a3b8); opacity: 0.45; border-radius: 10px;"></div>
+<!-- Advanced Booking Search Bottom Sheet (Offcanvas on Mobile, Centered Modal on Desktop) -->
+<div class="offcanvas offcanvas-bottom h-auto border-0 shadow-lg d-flex flex-column" tabindex="-1" id="advancedBookingModal" aria-labelledby="advancedBookingModalLabel">
+    <!-- Centered Drag Handle Indicator for Mobile Bottom Sheet -->
+    <div class="drag-handle-container d-flex justify-content-center pt-2 flex-shrink-0">
+        <div class="drag-handle-pill"></div>
     </div>
 
-    <div class="offcanvas-header border-bottom-0 pt-1 pb-1 px-4 flex-shrink-0">
-        <h5 class="offcanvas-title fw-bold text-primary mb-0" id="advancedBookingModalLabel">
-            <i class="bi bi-calendar-plus me-2"></i>Ad-Hoc Room Request
-        </h5>
+    <div class="offcanvas-header border-bottom border-light border-opacity-10 pt-2 pb-3 px-4 flex-shrink-0 d-flex justify-content-between align-items-center">
+        <div class="d-flex align-items-center gap-2.5">
+            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; border: 1px solid rgba(59, 130, 246, 0.25);">
+                <i class="bi bi-lightning-charge-fill text-warning fs-5"></i>
+            </div>
+            <div>
+                <h5 class="offcanvas-title fw-bold text-main mb-0" id="advancedBookingModalLabel" style="font-size: 1.05rem;">
+                    Ad-Hoc Room Request
+                </h5>
+                <small class="text-muted" style="font-size: 0.72rem;">Instant classroom availability finder</small>
+            </div>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     
     <form id="advancedBookingForm" class="d-flex flex-column flex-grow-1 overflow-hidden m-0">
         <!-- Scrollable Body with overflow-y-auto -->
-        <div class="offcanvas-body p-4 pt-2 flex-grow-1 overflow-y-auto" style="max-height: calc(85vh - 130px);">
+        <div class="offcanvas-body p-4 pt-3 flex-grow-1 overflow-y-auto" style="max-height: calc(88vh - 130px);">
+            <!-- Inline Time/Date Validation Error Banner -->
+            <div id="advTimeInlineError" class="inline-error-banner d-none mb-3" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                <span id="advTimeInlineErrorMsg">Selected time cannot be in the past.</span>
+            </div>
+
+            <!-- Date Section -->
             <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                    <label class="form-label text-muted small fw-bold text-uppercase mb-0">Date</label>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-1 px-2.5" id="btnQuickDateToday" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">
-                            <i class="bi bi-calendar-event me-1"></i>Today
-                        </button>
-                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill py-1 px-2.5" id="btnQuickDateTomorrow" style="font-size: 0.75rem; font-weight: 600; line-height: 1.2;">
-                            <i class="bi bi-calendar-plus me-1"></i>Tomorrow
-                        </button>
+                <label class="drawer-field-label mb-1.5" for="advDate">
+                    <i class="bi bi-calendar3 text-primary me-1.5"></i>
+                    <span>Reservation Date</span>
+                </label>
+                <!-- Frictionless UX: flex-nowrap row with overflow-x-auto to prevent crushing inputs -->
+                <div class="quick-date-pill-container" role="group" aria-label="Quick Date Selection">
+                    <button type="button" class="btn quick-date-pill active" id="btnQuickDateToday">
+                        <i class="bi bi-calendar-event"></i>
+                        <span>Today</span>
+                    </button>
+                    <button type="button" class="btn quick-date-pill" id="btnQuickDateTomorrow">
+                        <i class="bi bi-calendar-plus"></i>
+                        <span>Tomorrow</span>
+                    </button>
+                    <button type="button" class="btn quick-date-pill" id="btnQuickDateDayAfter">
+                        <i class="bi bi-calendar-week"></i>
+                        <span>In 2 Days</span>
+                    </button>
+                </div>
+                <div class="input-icon-wrapper">
+                    <i class="bi bi-calendar-date input-icon"></i>
+                    <input type="date" class="form-control drawer-input" id="advDate" required>
+                </div>
+            </div>
+
+            <!-- Start Time & Duration in 2 balanced columns with Native Mobile Pickers -->
+            <div class="row g-2.5 mb-3">
+                <div class="col-6">
+                    <label class="drawer-field-label mb-1.5" for="advStartTime">
+                        <i class="bi bi-clock text-primary me-1.5"></i>
+                        <span>Start Time</span>
+                    </label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-clock-history input-icon"></i>
+                        <input type="time" class="form-control drawer-input" id="advStartTime" min="07:00" max="21:00" step="1800" required>
                     </div>
                 </div>
-                <input type="date" class="form-control" id="advDate" required>
-            </div>
-            <div class="row mb-3">
                 <div class="col-6">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Start Time</label>
-                    <select class="form-select" id="advStartTime" required>
-                        {% for h in range(7, 19) %}
-                        <option value="{{ h }}:00">{{ h > 12 and h-12 or h }}:00 {{ h >= 12 and 'PM' or 'AM' }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-6">
-                    <label class="form-label text-muted small fw-bold text-uppercase">Duration</label>
-                    <select class="form-select" id="advDuration" required>
-                        <option value="1">1 Hour</option>
-                        <option value="2">2 Hours</option>
-                    </select>
+                    <label class="drawer-field-label mb-1.5" for="advDuration">
+                        <i class="bi bi-hourglass-split text-primary me-1.5"></i>
+                        <span>Duration</span>
+                    </label>
+                    <div class="input-icon-wrapper">
+                        <i class="bi bi-hourglass-bottom input-icon"></i>
+                        <select class="form-select drawer-input" id="advDuration" required>
+                            <option value="1">1 Hour</option>
+                            <option value="2">2 Hours</option>
+                            <option value="3">3 Hours</option>
+                            <option value="4">4 Hours</option>
+                        </select>
+                    </div>
                 </div>
             </div>
+
+            <!-- Preferred Floors Chips Grid: Responsive CSS Grid -->
             <div class="mb-3">
-                <label class="form-label text-muted small fw-bold text-uppercase mb-2">Preferred Floors</label>
+                <div class="d-flex justify-content-between align-items-center mb-1.5">
+                    <label class="drawer-field-label mb-0">
+                        <i class="bi bi-layers text-primary me-1.5"></i>
+                        <span>Preferred Floors</span>
+                    </label>
+                    <div class="d-flex align-items-center gap-1.5" style="font-size: 0.72rem;">
+                        <button type="button" class="btn btn-link p-0 text-decoration-none text-primary fw-semibold" id="btnSelectAllFloors" style="font-size: 0.72rem;">Select All</button>
+                        <span class="text-muted opacity-40">|</span>
+                        <button type="button" class="btn btn-link p-0 text-decoration-none text-muted fw-semibold" id="btnClearFloors" style="font-size: 0.72rem;">Clear</button>
+                    </div>
+                </div>
                 <div class="floor-chip-grid">
                     {% for floor in floors %}
                     <input type="checkbox" class="btn-check adv-floor-checkbox" id="advFloor{{ floor.id }}" value="{{ floor.id }}" autocomplete="off" checked>
-                    <label class="btn btn-outline-secondary floor-chip-label" for="advFloor{{ floor.id }}">
+                    <label class="floor-chip-label" for="advFloor{{ floor.id }}">
                         {{ floor.name }}
                     </label>
                     {% endfor %}
                 </div>
             </div>
+
+            <!-- Room Type -->
             <div class="mb-2">
-                <label class="form-label text-muted small fw-bold text-uppercase">Room Type</label>
-                <select class="form-select" id="advRoomType">
-                    <option value="all">Any Type</option>
-                    <option value="class">Classroom</option>
-                    <option value="lab">Lab</option>
-                </select>
+                <label class="drawer-field-label mb-1.5" for="advRoomType">
+                    <i class="bi bi-building text-primary me-1.5"></i>
+                    <span>Room Category</span>
+                </label>
+                <div class="input-icon-wrapper">
+                    <i class="bi bi-door-open input-icon"></i>
+                    <select class="form-select drawer-input" id="advRoomType">
+                        <option value="all">Any Room Type (Classrooms & Labs)</option>
+                        <option value="class">Standard Classrooms Only</option>
+                        <option value="lab">Computer & Electronics Labs Only</option>
+                    </select>
+                </div>
             </div>
         </div>
 
@@ -2093,19 +3109,19 @@
         <div class="p-3 px-4 offcanvas-sticky-footer flex-shrink-0 sticky-bottom shadow-sm">
             <button type="submit" class="btn btn-primary w-100 btn-search-prominent d-flex align-items-center justify-content-center gap-2 text-white" id="btnSearchRooms">
                 <i class="bi bi-search fs-6"></i>
-                <span>Search Availability</span>
+                <span>Search Live Availability</span>
             </button>
         </div>
     </form>
 </div>
 
-<!-- Floating Action Button (FAB) for Ad-Hoc Room Request -->
-<button class="faculty-fab shadow-lg" data-bs-toggle="offcanvas" data-bs-target="#advancedBookingModal" id="fabBookClass" aria-label="Request Ad-Hoc Room" title="Request Ad-Hoc Room">
+<!-- Floating Action Button (FAB) for Reporting Campus Maintenance Issues -->
+<a href="{{ url_for('main.report_form') }}" class="faculty-fab position-fixed shadow-lg d-md-none" id="fabReportIssue" aria-label="Report Campus Issue" title="Report Campus Issue">
     <i class="bi bi-plus-lg"></i>
-</button>
+</a>
 
 <!-- Native Bottom Navigation Bar (Mobile Viewport Only) -->
-<nav class="faculty-bottom-nav position-fixed bottom-0 start-0 end-0 w-100 d-flex d-lg-none justify-content-around align-items-center" style="z-index: 1050;" aria-label="Mobile Navigation">
+<nav class="faculty-bottom-nav position-fixed bottom-0 start-0 end-0 w-100 d-flex d-md-none justify-content-around align-items-center" style="z-index: 1040;" aria-label="Mobile Navigation">
     <button class="bottom-nav-btn {% if view == 'schedule' or not view %}active{% endif %}" id="btn-bottom-agenda" type="button" aria-label="Agenda View">
         <i class="bi bi-calendar-check"></i>
         <span>Agenda</span>
@@ -2113,6 +3129,10 @@
     <button class="bottom-nav-btn {% if view == 'tracker' %}active{% endif %}" id="btn-bottom-map" type="button" aria-label="Map View">
         <i class="bi bi-map"></i>
         <span>Map</span>
+    </button>
+    <button class="bottom-nav-btn" id="btn-bottom-request" type="button" data-bs-toggle="offcanvas" data-bs-target="#advancedBookingModal" aria-label="Request Room">
+        <i class="bi bi-lightning-charge"></i>
+        <span>Request</span>
     </button>
     <button class="bottom-nav-btn" id="btn-bottom-history" type="button" aria-label="Booking History View">
         <i class="bi bi-clock-history"></i>
@@ -2146,6 +3166,30 @@
                 updateClock();
             }
 
+            // ── Phase 1: The "Today" Highlight (Contextual Focus) ──
+            function highlightTodayGrid() {
+                const now = new Date();
+                const jsDay = now.getDay(); // 0 = Sun, 1 = Mon, 2 = Tue, ..., 6 = Sat
+                // Grid index mapping: 0 = Mon, 1 = Tue, 2 = Wed, 3 = Thu, 4 = Fri, 5 = Sat
+                const gridDayIdx = jsDay === 0 ? -1 : jsDay - 1;
+
+                if (gridDayIdx >= 0 && gridDayIdx <= 5) {
+                    const row = document.querySelector(`.timetable-grid tr[data-day-index="${gridDayIdx}"]`);
+                    if (row) {
+                        row.classList.add('current-day-column', 'current-day-row');
+                        const labelCell = row.querySelector('.day-label');
+                        if (labelCell && !labelCell.querySelector('.today-pill-badge')) {
+                            labelCell.classList.add('current-day-header');
+                            const badge = document.createElement('span');
+                            badge.className = 'today-pill-badge';
+                            badge.textContent = 'TODAY';
+                            labelCell.appendChild(badge);
+                        }
+                    }
+                }
+            }
+            highlightTodayGrid();
+
             // Staggered Entry Animation
             if (window.gsap) {
                 gsap.from(".animate-on-load", {
@@ -2160,8 +3204,368 @@
             let currentStatusData = {};
             let selectedRoomId = null;
 
+            // ── Phase 1: Auto-relocate all modals and offcanvases directly to document.body ──
+            // Guarantees modals sit directly above document.body without stacking context or parent clipping
+            document.querySelectorAll('.modal, .offcanvas').forEach(el => {
+                if (el.parentElement !== document.body) {
+                    document.body.appendChild(el);
+                }
+            });
+
             // Pre-initialize modals
             const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
+            const classDetailModalEl = document.getElementById('classDetailModal');
+            const classDetailModal = classDetailModalEl ? new bootstrap.Modal(classDetailModalEl) : null;
+
+            // ── Phase 1: DOM Garbage Collection Listener (hidden.bs.modal & hidden.bs.offcanvas) ──
+            document.addEventListener('hidden.bs.modal', (event) => {
+                // If a modal/alert node is marked for disposable removal, physically remove it from the DOM
+                if (event.target && (event.target.classList.contains('remove-on-hide') || event.target.classList.contains('dynamic-alert'))) {
+                    event.target.remove();
+                }
+
+                // Clean up any remaining backdrops & body lock styles if no modal is active
+                if (!document.querySelector('.modal.show')) {
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('overflow');
+                    document.body.style.removeProperty('padding-right');
+                }
+            });
+
+            document.addEventListener('hidden.bs.offcanvas', (event) => {
+                if (event.target && (event.target.classList.contains('remove-on-hide') || event.target.classList.contains('dynamic-alert'))) {
+                    event.target.remove();
+                }
+
+                if (!document.querySelector('.offcanvas.show')) {
+                    document.querySelectorAll('.offcanvas-backdrop').forEach(el => el.remove());
+                    document.body.classList.remove('modal-open');
+                    document.body.style.removeProperty('overflow');
+                    document.body.style.removeProperty('padding-right');
+                }
+            });
+
+            // Helper for Phase 1: Global system alerts appended directly to document.body with max-width and text wrap
+            window.showSystemAlert = (opts) => {
+                return Swal.fire({
+                    target: document.body,
+                    customClass: {
+                        popup: 'global-system-alert rounded-4 shadow-lg',
+                        title: 'fw-bold',
+                        htmlContainer: 'text-break'
+                    },
+                    ...opts
+                });
+            };
+
+            // ── Phase 3 & Phase 5: Interactive Detail Modal & Ghost Protocol Check-In Controller ──
+            let activeClassData = null;
+
+            function computeCheckInWindow(slotStartIso, isCheckedIn) {
+                if (isCheckedIn) return { state: 'checked_in', label: 'Checked In', active: false };
+                if (!slotStartIso) return { state: 'ready', label: 'Check-In Now', active: true };
+
+                const now = new Date();
+                const startDt = new Date(slotStartIso);
+                if (isNaN(startDt.getTime())) return { state: 'ready', label: 'Check-In Now', active: true };
+
+                const diffMinutes = (startDt.getTime() - now.getTime()) / 60000;
+
+                // Within [-10, 5]: check-in is active
+                if (diffMinutes <= 5 && diffMinutes >= -10) {
+                    return { state: 'active_window', label: 'Check-In Now', active: true, diffMinutes };
+                } else if (diffMinutes > 5) {
+                    const minsUntilOpen = Math.round(diffMinutes - 5);
+                    return { state: 'upcoming', label: `Check-In opens in ${minsUntilOpen}m`, active: false, diffMinutes };
+                } else {
+                    return { state: 'overdue', label: 'Check-In Window Expired', active: false, diffMinutes };
+                }
+            }
+
+            window.showClassDetail = (el) => {
+                if (!el) return;
+                const subject = el.getAttribute('data-subject') || 'Class Session';
+                const divisionCourse = el.getAttribute('data-division-course') || 'General Lecture';
+                const roomNumber = el.getAttribute('data-room-number') || '';
+                const roomId = el.getAttribute('data-room-id') || '';
+                const floorLevel = el.getAttribute('data-floor-level') || '4';
+                const timeStr = el.getAttribute('data-time') || '';
+                const isAdhoc = el.getAttribute('data-is-adhoc') === 'true';
+                const isCheckedIn = el.getAttribute('data-checked-in') === 'true';
+                const slotStartIso = el.getAttribute('data-slot-start-iso') || '';
+                const isHistorical = el.getAttribute('data-is-historical') === 'true';
+
+                activeClassData = { 
+                    subject, divisionCourse, roomNumber, roomId, floorLevel, 
+                    timeStr, isAdhoc, isHistorical, entryId, isCheckedIn, slotStartIso, sourceEl: el 
+                };
+
+                const subjEl = document.getElementById('classDetailSubject');
+                const divEl = document.getElementById('classDetailDivisionCourse');
+                const roomEl = document.getElementById('classDetailRoom');
+                const timeEl = document.getElementById('classDetailTime');
+                const badge = document.getElementById('classDetailTypeBadge');
+                const checkInBadge = document.getElementById('classDetailCheckInBadge');
+                const historicalBadge = document.getElementById('classDetailHistoricalBadge');
+                const checkInAlert = document.getElementById('classDetailCheckInAlert');
+                const cancelBtn = document.getElementById('btnCancelClassBooking');
+                const checkInBtn = document.getElementById('btnCheckInClassBooking');
+
+                if (subjEl) subjEl.textContent = subject;
+                if (divEl) divEl.textContent = divisionCourse;
+                if (roomEl) roomEl.textContent = `Room VY${roomNumber.replace(/^VY/i, '')}`;
+                if (timeEl) timeEl.textContent = timeStr;
+
+                // Reset badges
+                if (historicalBadge) {
+                    if (isHistorical) {
+                        historicalBadge.classList.remove('d-none');
+                    } else {
+                        historicalBadge.classList.add('d-none');
+                    }
+                }
+
+                if (badge && cancelBtn) {
+                    if (isAdhoc) {
+                        badge.className = 'badge bg-warning text-dark rounded-pill px-2.5 py-1 fw-bold';
+                        badge.innerHTML = '<i class="bi bi-lightning-charge-fill me-1"></i>Ad-Hoc Booking';
+
+                        if (isHistorical) {
+                            // Historical bookings: ruthlessly suppress modification/cancellation actions
+                            cancelBtn.classList.add('d-none');
+                            if (checkInBadge) checkInBadge.classList.add('d-none');
+                            if (checkInAlert) checkInAlert.classList.add('d-none');
+                            if (checkInBtn) checkInBtn.classList.add('d-none');
+                        } else {
+                            cancelBtn.classList.remove('d-none');
+
+                            // ── Ghost Protocol Check-In State ──
+                            const checkInInfo = computeCheckInWindow(slotStartIso, isCheckedIn);
+
+                            if (isCheckedIn) {
+                                if (checkInBadge) checkInBadge.classList.remove('d-none');
+                                if (checkInAlert) checkInAlert.classList.add('d-none');
+                                if (checkInBtn) checkInBtn.classList.add('d-none');
+                            } else {
+                                if (checkInBadge) checkInBadge.classList.add('d-none');
+                                if (checkInBtn) {
+                                    checkInBtn.classList.remove('d-none');
+                                    checkInBtn.innerHTML = `<i class="bi bi-geo-alt-fill me-1"></i>${checkInInfo.label}`;
+                                    if (checkInInfo.active) {
+                                        checkInBtn.disabled = false;
+                                        checkInBtn.className = 'btn btn-success px-3 rounded-3 fw-bold shadow-sm flex-grow-1';
+                                        if (checkInAlert) checkInAlert.classList.remove('d-none');
+                                    } else {
+                                        checkInBtn.disabled = true;
+                                        checkInBtn.className = 'btn btn-secondary px-3 rounded-3 fw-semibold shadow-sm flex-grow-1 opacity-75';
+                                        if (checkInAlert) checkInAlert.classList.add('d-none');
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        badge.className = 'badge bg-primary rounded-pill px-2.5 py-1 text-white fw-bold';
+                        badge.innerHTML = '<i class="bi bi-lock-fill me-1"></i>Regular Lecture';
+                        cancelBtn.classList.add('d-none');
+                        if (checkInBadge) checkInBadge.classList.add('d-none');
+                        if (checkInAlert) checkInAlert.classList.add('d-none');
+                        if (checkInBtn) checkInBtn.classList.add('d-none');
+                    }
+                }
+
+                if (classDetailModal) {
+                    classDetailModal.show();
+                }
+            };
+
+            const btnViewClassOnMap = document.getElementById('btnViewClassOnMap');
+            if (btnViewClassOnMap) {
+                btnViewClassOnMap.addEventListener('click', () => {
+                    if (activeClassData && window.locateRoom) {
+                        if (classDetailModal) classDetailModal.hide();
+                        window.locateRoom(activeClassData.roomNumber, activeClassData.roomId, activeClassData.floorLevel);
+                    }
+                });
+            }
+
+            const btnCancelClassBooking = document.getElementById('btnCancelClassBooking');
+            if (btnCancelClassBooking) {
+                btnCancelClassBooking.addEventListener('click', (e) => {
+                    if (activeClassData && activeClassData.isAdhoc && window.deleteBooking) {
+                        if (classDetailModal) classDetailModal.hide();
+                        window.deleteBooking(e, activeClassData.entryId);
+                    }
+                });
+            }
+
+            const btnCheckInClassBooking = document.getElementById('btnCheckInClassBooking');
+            if (btnCheckInClassBooking) {
+                btnCheckInClassBooking.addEventListener('click', async () => {
+                    if (!activeClassData || !activeClassData.entryId) return;
+
+                    btnCheckInClassBooking.disabled = true;
+                    btnCheckInClassBooking.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Securing...';
+
+                    try {
+                        const res = await fetch(`/faculty/api/bookings/${activeClassData.entryId}/check_in`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                        const result = await res.json();
+
+                        if (result.success) {
+                            btnCheckInClassBooking.innerHTML = '<i class="bi bi-patch-check-fill me-1"></i>Checked In!';
+                            btnCheckInClassBooking.className = 'btn btn-outline-success px-3 rounded-3 fw-bold shadow-sm flex-grow-1';
+
+                            const checkInBadge = document.getElementById('classDetailCheckInBadge');
+                            const checkInAlert = document.getElementById('classDetailCheckInAlert');
+                            if (checkInBadge) checkInBadge.classList.remove('d-none');
+                            if (checkInAlert) checkInAlert.classList.add('d-none');
+
+                            activeClassData.isCheckedIn = true;
+                            if (activeClassData.sourceEl) {
+                                activeClassData.sourceEl.setAttribute('data-checked-in', 'true');
+                            }
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Checked-In Successfully',
+                                text: result.message || 'Your room reservation is confirmed.',
+                                timer: 2000,
+                                showConfirmButton: false
+                            });
+
+                            setTimeout(() => {
+                                if (classDetailModal) classDetailModal.hide();
+                                location.reload();
+                            }, 1800);
+                        } else {
+                            btnCheckInClassBooking.disabled = false;
+                            btnCheckInClassBooking.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Check-In Now';
+                            Swal.fire('Check-In Failed', result.error || 'Failed to confirm check-in.', 'error');
+                        }
+                    } catch (err) {
+                        console.error("Check-in error:", err);
+                        btnCheckInClassBooking.disabled = false;
+                        btnCheckInClassBooking.innerHTML = '<i class="bi bi-geo-alt-fill me-1"></i>Check-In Now';
+                        Swal.fire('Error', 'Network error occurred during check-in.', 'error');
+                    }
+                });
+            }
+
+            // ── Phase 5: Proximity Check-In Alert (5 minutes before start) ──
+            function monitorAdHocCheckInProximity() {
+                const now = new Date();
+                const adhocElements = document.querySelectorAll('[data-is-adhoc="true"]');
+
+                adhocElements.forEach(el => {
+                    const isCheckedIn = el.getAttribute('data-checked-in') === 'true';
+                    const slotStartIso = el.getAttribute('data-slot-start-iso');
+                    const entryId = el.getAttribute('data-id');
+                    const subject = el.getAttribute('data-subject') || 'Ad-Hoc Booking';
+                    const roomNumber = el.getAttribute('data-room-number') || '';
+
+                    if (!isCheckedIn && slotStartIso && entryId) {
+                        const startDt = new Date(slotStartIso);
+                        if (!isNaN(startDt.getTime())) {
+                            const diffMinutes = (startDt.getTime() - now.getTime()) / 60000;
+
+                            // If within 5 min before start to 10 min after start
+                            if (diffMinutes <= 5 && diffMinutes >= -10) {
+                                const alertKey = `ghost_notif_seen_${entryId}_${startDt.getHours()}`;
+                                if (!sessionStorage.getItem(alertKey)) {
+                                    sessionStorage.setItem(alertKey, 'true');
+
+                                    const timeLabel = diffMinutes > 0 
+                                        ? `starts in ${Math.ceil(diffMinutes)} min` 
+                                        : `started ${Math.abs(Math.floor(diffMinutes))} min ago`;
+
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: 'warning',
+                                        title: `Check-In Required: ${subject}`,
+                                        html: `Room VY${roomNumber.replace(/^VY/i, '')} (${timeLabel}). Check in to prevent Ghost Protocol auto-cancellation.`,
+                                        showConfirmButton: true,
+                                        confirmButtonText: 'Check In',
+                                        showCancelButton: true,
+                                        cancelButtonText: 'Dismiss',
+                                        timer: 10000,
+                                        timerProgressBar: true
+                                    }).then((result) => {
+                                        if (result.isConfirmed) {
+                                            window.showClassDetail(el);
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Run on load and every 30 seconds
+            monitorAdHocCheckInProximity();
+            setInterval(monitorAdHocCheckInProximity, 30000);
+
+            // ── Phase 4 & Phase 7: Quick-Add Ad-Hoc Booking & 3-Strike Lockout Check ──
+            window.quickAddBooking = (el) => {
+                if (!el) return;
+                const isSuspended = document.querySelector('.faculty-dashboard')?.getAttribute('data-faculty-suspended') === 'true';
+                if (isSuspended) {
+                    const remaining = document.querySelector('.faculty-dashboard')?.getAttribute('data-suspension-remaining') || '7 days';
+                    const reason = document.querySelector('.faculty-dashboard')?.getAttribute('data-suspension-reason') || '3 Ghost Protocol no-shows in 30 days.';
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Ad-Hoc Booking Suspended',
+                        html: `Your Ad-Hoc self-booking privileges are temporarily suspended.<br><br><span class="badge bg-danger p-2 font-monospace fs-6"><i class="bi bi-hourglass-split me-1"></i>${remaining}</span><br><br><small class="text-muted">${reason}</small>`,
+                        confirmButtonText: 'Understood',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    return;
+                }
+
+                const dayIdx = parseInt(el.getAttribute('data-day-index'));
+                const hour = parseInt(el.getAttribute('data-hour'));
+
+                // Calculate target date for this day in current week
+                const now = new Date();
+                const currentJsDay = now.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+                const currentGridDayIdx = currentJsDay === 0 ? 6 : currentJsDay - 1; // Mon = 0, ..., Sun = 6
+                const dayDiff = dayIdx - currentGridDayIdx;
+                const targetDate = new Date(now.getTime() + dayDiff * 86400000);
+                
+                const yyyy = targetDate.getFullYear();
+                const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(targetDate.getDate()).padStart(2, '0');
+                const dateStr = `${yyyy}-${mm}-${dd}`;
+
+                const advDateInput = document.getElementById('advDate');
+                const advStartTimeSelect = document.getElementById('advStartTime');
+
+                if (advDateInput) {
+                    advDateInput.value = dateStr;
+                    if (typeof syncDatePills === 'function') syncDatePills(dateStr);
+                    if (typeof clearInlineTimeError === 'function') clearInlineTimeError();
+                }
+
+                if (advStartTimeSelect) {
+                    const formattedHour = String(hour).padStart(2, '0');
+                    advStartTimeSelect.value = `${formattedHour}:00`;
+                    if (typeof clearInlineTimeError === 'function') clearInlineTimeError();
+                }
+
+                // Open Ad-Hoc Booking Bottom Sheet (Offcanvas on mobile, centered modal on desktop)
+                const offcanvasEl = document.getElementById('advancedBookingModal');
+                if (offcanvasEl) {
+                    const offcanvasInst = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
+                    offcanvasInst.show();
+                }
+            };
 
             // Setup GSAP View Switching
             const btnSchedule = document.getElementById('btn-schedule');
@@ -2356,10 +3760,81 @@
                 });
             }
 
+            let currentPopRoomData = null;
+            let currentPopDay = 'today';
+
+            function renderPopSchedule(dayKey) {
+                const listEl = document.getElementById('popScheduleList');
+                const countBadge = document.getElementById('popScheduleCountBadge');
+                if (!listEl || !currentPopRoomData) return;
+
+                let slots = [];
+                if (dayKey === 'today') {
+                    slots = currentPopRoomData.today_schedule || [];
+                } else {
+                    const dayIdx = parseInt(dayKey);
+                    slots = (currentPopRoomData.weekly_schedule && currentPopRoomData.weekly_schedule[dayIdx]) ? currentPopRoomData.weekly_schedule[dayIdx] : [];
+                }
+
+                if (countBadge) {
+                    countBadge.textContent = `${slots.length} class${slots.length === 1 ? '' : 'es'}`;
+                }
+
+                if (slots.length === 0) {
+                    listEl.innerHTML = `
+                        <div class="text-center py-3 text-muted">
+                            <i class="bi bi-calendar2-check text-success fs-5 d-block mb-1"></i>
+                            <div style="font-size: 0.78rem; font-weight: 500;">No classes scheduled</div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Room is free for this day</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                listEl.innerHTML = slots.map(s => {
+                    const isCurrent = s.is_current;
+                    const isPast = s.is_past;
+                    let badgeHtml = '<span class="badge bg-primary bg-opacity-10 text-primary font-monospace" style="font-size: 0.65rem;">Scheduled</span>';
+                    if (isCurrent) {
+                        badgeHtml = '<span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25 fw-bold" style="font-size: 0.65rem;"><i class="bi bi-broadcast me-1"></i>Live Now</span>';
+                    } else if (isPast) {
+                        badgeHtml = '<span class="badge bg-secondary bg-opacity-25 text-muted" style="font-size: 0.65rem;">Done</span>';
+                    }
+
+                    return `
+                        <div class="pop-slot-card ${isCurrent ? 'is-current' : (isPast ? 'is-past' : '')}">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="badge bg-light text-body border font-monospace fw-semibold" style="font-size: 0.7rem;">
+                                    <i class="bi bi-clock me-1 text-primary"></i>${s.start_time} - ${s.end_time}
+                                </span>
+                                ${badgeHtml}
+                            </div>
+                            <div class="fw-bold text-main" style="font-size: 0.85rem; line-height: 1.25;">${s.subject}</div>
+                            <div class="d-flex justify-content-between align-items-center mt-1 text-muted" style="font-size: 0.72rem;">
+                                <span><i class="bi bi-person-fill me-1 text-primary"></i>${s.faculty_name}</span>
+                                ${(s.division || s.course) ? `<span class="badge bg-secondary bg-opacity-10 text-body" style="font-size: 0.68rem;">${s.division || ''} ${s.course ? '(' + s.course.split(' ')[0] + ')' : ''}</span>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Set up Day Switcher click handlers
+            document.querySelectorAll('#popDayNav .pop-day-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    document.querySelectorAll('#popDayNav .pop-day-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentPopDay = btn.getAttribute('data-day');
+                    renderPopSchedule(currentPopDay);
+                });
+            });
+
             function handleRoomSelection(event, roomNumber, roomId) {
                 selectedRoomId = roomId;
                 const info = currentStatusData[roomId];
                 if (!info) return;
+                currentPopRoomData = info;
 
                 // Highlight selection
                 document.querySelectorAll('.room-group, .room-poly, rect, path, polygon').forEach(r => r.classList.remove('selected'));
@@ -2374,8 +3849,12 @@
                 gsap.fromTo(pop, { opacity: 0, x: 50 }, { opacity: 1, x: 0, duration: 0.3 });
 
                 document.getElementById('popRoomNumber').innerText = info.number;
+                const popFloor = document.getElementById('popRoomFloor');
+                if (popFloor) {
+                    popFloor.innerText = `Floor ${info.floor_id || ''}`;
+                }
                 document.getElementById('popRoomName').innerText = info.name || info.number;
-                document.getElementById('popRoomType').innerText = info.room_type || 'CLASSROOM';
+                document.getElementById('popRoomType').innerText = (info.room_type || 'CLASSROOM').toUpperCase();
                 
                 const occ = info.occupancy || { status: 'vacant' };
                 const bookBtn = document.getElementById('btnActionBook');
@@ -2387,38 +3866,86 @@
                 badge.innerText = occ.status.toUpperCase();
 
                 if (occ.status === 'occupied') {
-                    alert.className = 'status-alert occupied';
-                    document.getElementById('popAlertTitle').innerText = 'In Session';
-                    // Always keep bookBtn active so they can book future slots
-                    bookBtn.classList.remove('disabled');
-                    bookBtn.removeAttribute('disabled');
-                    
-                    // Show a specific warning in the alert for occupied rooms
+                    alert.className = 'status-alert occupied mb-3 py-2 px-3';
                     document.getElementById('popAlertTitle').innerText = 'Currently In Session';
                     document.getElementById('popAlertContent').innerHTML = `
-                        <strong>${occ.subject}</strong> - ${occ.faculty}<br>
-                        Ends at: ${occ.end_time}<br>
-                        <em>You can still book a future slot below.</em>
+                        <strong>${occ.subject}</strong> — ${occ.faculty}<br>
+                        <span class="text-muted">Ends at ${occ.end_time}</span>
                     `;
                     
+                    const nudgeBtn = document.getElementById('btnActionNudge');
+
                     if (occ.faculty_id === currentUserId) {
-                        bookBtn.classList.add('d-none'); // Hide book if they already own it? No, maybe they want to book another slot.
-                        // Let's keep both if they want, but use hierarchy.
-                        // Actually, let's hide Book if they own the current hour to focus on Cancel.
+                        bookBtn.classList.add('d-none');
                         cancelBtn.classList.remove('d-none');
+                        if (nudgeBtn) nudgeBtn.classList.add('d-none');
                         cancelBtn.onclick = () => handleCancellation(occ.id, occ.type);
                     } else {
                         bookBtn.classList.remove('d-none');
                         cancelBtn.classList.add('d-none');
+                        if (nudgeBtn) {
+                            nudgeBtn.classList.remove('d-none');
+                            nudgeBtn.onclick = () => handleSendNudge(selectedRoomId, occ.faculty, occ.subject);
+                        }
                     }
                 } else {
-                    alert.className = 'status-alert vacant';
-                    document.getElementById('popAlertTitle').innerText = 'Optimal Levels';
-                    document.getElementById('popAlertContent').innerHTML = 'Room is currently vacant. Access permitted.';
+                    alert.className = 'status-alert vacant mb-3 py-2 px-3';
+                    document.getElementById('popAlertTitle').innerText = 'Optimal / Vacant';
+                    const nextInfo = info.time_until_next_lecture ? `<br><small class="text-muted">Next lecture in: <strong>${info.time_until_next_lecture}</strong></small>` : '';
+                    document.getElementById('popAlertContent').innerHTML = `Room is currently vacant. Access permitted.${nextInfo}`;
                     bookBtn.classList.remove('disabled');
                     bookBtn.removeAttribute('disabled');
                     bookBtn.classList.remove('d-none');
                     cancelBtn.classList.add('d-none');
+                    const nudgeBtn = document.getElementById('btnActionNudge');
+                    if (nudgeBtn) nudgeBtn.classList.add('d-none');
+                }
+
+                // Reset Day selector to Today and render schedule
+                document.querySelectorAll('#popDayNav .pop-day-btn').forEach(b => {
+                    b.classList.toggle('active', b.getAttribute('data-day') === 'today');
+                });
+                currentPopDay = 'today';
+                renderPopSchedule('today');
+            }
+
+            async function handleSendNudge(roomId, facultyName, subject) {
+                if (!roomId) return;
+                const result = await Swal.fire({
+                    title: 'Send Hallway Nudge?',
+                    html: `Politely notify <strong>Prof. ${facultyName || 'Faculty'}</strong> that you are outside the room preparing for the next session.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="bi bi-bell-fill me-1"></i> Send Polite Nudge',
+                    confirmButtonColor: '#f59e0b',
+                    cancelButtonText: 'Cancel'
+                });
+
+                if (result.isConfirmed) {
+                    try {
+                        const res = await fetch(`/faculty/api/rooms/${roomId}/nudge`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                            }
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Nudge Sent',
+                                text: data.message || `Polite transition notice sent to Prof. ${facultyName}.`,
+                                timer: 2500,
+                                showConfirmButton: false
+                            });
+                        } else {
+                            Swal.fire('Notice', data.error || 'Could not send nudge at this moment.', 'info');
+                        }
+                    } catch (err) {
+                        console.error("Error sending nudge:", err);
+                        Swal.fire('Error', 'Network error while sending hallway nudge.', 'error');
+                    }
                 }
             }
 
@@ -2451,6 +3978,20 @@
             }
 
             window.triggerBookingModal = () => {
+                const isSuspended = document.querySelector('.faculty-dashboard')?.getAttribute('data-faculty-suspended') === 'true';
+                if (isSuspended) {
+                    const remaining = document.querySelector('.faculty-dashboard')?.getAttribute('data-suspension-remaining') || '7 days';
+                    const reason = document.querySelector('.faculty-dashboard')?.getAttribute('data-suspension-reason') || '3 Ghost Protocol no-shows in the last 30 days.';
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Ad-Hoc Booking Suspended',
+                        html: `Your Ad-Hoc booking privileges are temporarily suspended.<br><br><span class="badge bg-danger p-2 font-monospace fs-6"><i class="bi bi-hourglass-split me-1"></i>${remaining}</span><br><br><small class="text-muted">${reason}</small>`,
+                        confirmButtonText: 'Understood',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    return;
+                }
+
                 console.log("triggerBookingModal called. selectedRoomId:", selectedRoomId);
                 if (!selectedRoomId) {
                     Swal.fire('Room Not Selected', 'Please click on a room in the map first.', 'info');
@@ -2466,36 +4007,29 @@
                 const roomNumEl = document.getElementById('bookRoomNumber');
                 if (roomNumEl) roomNumEl.innerText = info.number;
                 
+                const roomNumBadge = document.getElementById('bookRoomNumberBadge');
+                if (roomNumBadge) roomNumBadge.innerText = `Room ${info.number}`;
+                
                 const roomIdEl = document.getElementById('bookRoomId');
                 if (roomIdEl) roomIdEl.value = selectedRoomId;
                 
-                // Populate Time Slots
-                const select = document.getElementById('bookSlotStart');
-                if (select) {
-                    select.innerHTML = '';
-                    if (advancedSearchMode && advancedTimePayload) {
-                        const option = document.createElement('option');
-                        const h = parseInt(advancedTimePayload.timeStr.split(':')[0]);
-                        option.value = advancedTimePayload.timeStr;
-                        option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'} (Selected)`;
-                        select.appendChild(option);
-                        select.disabled = true;
-                        document.getElementById('bookDuration').value = advancedTimePayload.duration;
-                        document.getElementById('bookDuration').disabled = true;
-                    } else {
-                        select.disabled = false;
-                        document.getElementById('bookDuration').disabled = false;
-                        const now = new Date();
-                        const currentHour = now.getHours();
-                        for (let h = currentHour; h <= 19; h++) {
-                            const timeStr = `${h.toString().padStart(2, '0')}:00`;
-                            const option = document.createElement('option');
-                            option.value = timeStr;
-                            option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}`;
-                            select.appendChild(option);
-                        }
-                    }
+                // Set default date (defaults to tomorrow if after 19:00, otherwise today)
+                const dateInput = document.getElementById('bookReservationDate');
+                if (dateInput) {
+                    const now = new Date();
+                    const targetDate = (now.getHours() >= 19) ? new Date(now.getTime() + 86400000) : now;
+                    const yyyy = targetDate.getFullYear();
+                    const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+                    const dd = String(targetDate.getDate()).padStart(2, '0');
+                    dateInput.value = `${yyyy}-${mm}-${dd}`;
+                    
+                    const todayYyyy = now.getFullYear();
+                    const todayMm = String(now.getMonth() + 1).padStart(2, '0');
+                    const todayDd = String(now.getDate()).padStart(2, '0');
+                    dateInput.min = `${todayYyyy}-${todayMm}-${todayDd}`;
                 }
+
+                populateBookingSlots();
                 
                 try {
                     // Force a new instance if the stored one fails
@@ -2507,25 +4041,92 @@
                 }
             };
 
+            function populateBookingSlots() {
+                const dateInput = document.getElementById('bookReservationDate');
+                const select = document.getElementById('bookSlotStart');
+                if (!select) return;
+
+                const selectedDateStr = dateInput ? dateInput.value : '';
+                const now = new Date();
+                const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+                const isToday = (selectedDateStr === todayStr);
+
+                select.innerHTML = '';
+
+                if (advancedSearchMode && advancedTimePayload) {
+                    const option = document.createElement('option');
+                    const h = parseInt(advancedTimePayload.timeStr.split(':')[0]);
+                    option.value = advancedTimePayload.timeStr;
+                    option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'} (Selected)`;
+                    select.appendChild(option);
+                    select.disabled = true;
+                    document.getElementById('bookDuration').value = advancedTimePayload.duration;
+                    document.getElementById('bookDuration').disabled = true;
+                    return;
+                }
+
+                select.disabled = false;
+                document.getElementById('bookDuration').disabled = false;
+
+                const currentHour = now.getHours();
+                // If today and within daytime (8 to 18), start from currentHour. Otherwise, display standard full university hours 08:00 to 19:00.
+                let startHour = 8;
+                if (isToday && currentHour >= 8 && currentHour < 19) {
+                    startHour = currentHour;
+                }
+
+                for (let h = startHour; h <= 19; h++) {
+                    const timeStr = `${h.toString().padStart(2, '0')}:00`;
+                    const option = document.createElement('option');
+                    option.value = timeStr;
+                    option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}`;
+                    select.appendChild(option);
+                }
+
+                // Fallback guarantee: if loop produced 0 items (e.g. evening), populate full standard working hours
+                if (select.children.length === 0) {
+                    for (let h = 8; h <= 19; h++) {
+                        const timeStr = `${h.toString().padStart(2, '0')}:00`;
+                        const option = document.createElement('option');
+                        option.value = timeStr;
+                        option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}`;
+                        select.appendChild(option);
+                    }
+                }
+            }
+
+            const bookDateEl = document.getElementById('bookReservationDate');
+            if (bookDateEl) {
+                bookDateEl.addEventListener('change', populateBookingSlots);
+            }
+
             // Booking Form Submit
             document.getElementById('bookingForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById('btnConfirmBooking');
                 btn.disabled = true;
 
+                const dateInput = document.getElementById('bookReservationDate');
+                const selectedDate = dateInput ? dateInput.value : '';
                 const slotTime = document.getElementById('bookSlotStart').value; 
-                let slotStart;
                 
+                if (!slotTime) {
+                    Swal.fire('Time Required', 'Please select a valid start time.', 'warning');
+                    btn.disabled = false;
+                    return;
+                }
+
+                let slotStart;
                 if (advancedSearchMode && advancedTimePayload) {
                     const startDt = new Date(advancedTimePayload.startIso);
                     slotStart = startDt.getFullYear() + '-' + 
                               String(startDt.getMonth() + 1).padStart(2, '0') + '-' + 
                               String(startDt.getDate()).padStart(2, '0') + 'T' + 
                               slotTime + ':00';
+                } else if (selectedDate) {
+                    slotStart = selectedDate + 'T' + slotTime + ':00';
                 } else {
                     const now = new Date();
-                    const [h, m] = slotTime.split(':');
-                    now.setHours(h, 0, 0, 0);
                     slotStart = now.getFullYear() + '-' + 
                                   String(now.getMonth() + 1).padStart(2, '0') + '-' + 
                                   String(now.getDate()).padStart(2, '0') + 'T' + 
@@ -2553,10 +4154,10 @@
                     const result = await res.json();
                     if (result.success) {
                         try { bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide(); } catch(e){}
-                        Swal.fire({ icon: 'success', title: 'Slot Assigned', text: 'Facility AI has reserved your room.', timer: 2000, showConfirmButton: false });
+                        window.showSystemAlert({ icon: 'success', title: 'Slot Assigned', text: 'Facility AI has reserved your room.', timer: 2000, showConfirmButton: false });
                         setTimeout(() => location.reload(), 2000);
                     } else {
-                        Swal.fire({ icon: 'error', title: 'Access Denied', text: result.error });
+                        window.showSystemAlert({ icon: 'error', title: 'Access Denied', text: result.error });
                     }
                 } catch (err) {
                     console.error(err);
@@ -2565,10 +4166,41 @@
                 }
             });
 
-            // Quick-Select Date Pills (Today & Tomorrow)
+            // ── Phase 5: Inline Time Error Helpers ──
+            function showInlineTimeError(message) {
+                const errorBanner = document.getElementById('advTimeInlineError');
+                const errorMsg = document.getElementById('advTimeInlineErrorMsg');
+                const timeInput = document.getElementById('advStartTime');
+                if (errorBanner && errorMsg) {
+                    errorMsg.textContent = message;
+                    errorBanner.classList.remove('d-none');
+                }
+                if (timeInput) {
+                    timeInput.classList.add('is-invalid');
+                    timeInput.focus();
+                }
+            }
+
+            function clearInlineTimeError() {
+                const errorBanner = document.getElementById('advTimeInlineError');
+                const timeInput = document.getElementById('advStartTime');
+                if (errorBanner) {
+                    errorBanner.classList.add('d-none');
+                }
+                if (timeInput) {
+                    timeInput.classList.remove('is-invalid');
+                }
+            }
+            window.clearInlineTimeError = clearInlineTimeError;
+
+            // Quick-Select Date Pills (Today, Tomorrow, In 2 Days) + Two-Way Sync
             const btnQuickToday = document.getElementById('btnQuickDateToday');
             const btnQuickTomorrow = document.getElementById('btnQuickDateTomorrow');
+            const btnQuickDayAfter = document.getElementById('btnQuickDateDayAfter');
             const advDateInput = document.getElementById('advDate');
+            const advStartTimeInput = document.getElementById('advStartTime');
+            const btnSelectAllFloors = document.getElementById('btnSelectAllFloors');
+            const btnClearFloors = document.getElementById('btnClearFloors');
 
             function formatDateToYMD(d) {
                 const year = d.getFullYear();
@@ -2577,27 +4209,84 @@
                 return `${year}-${month}-${day}`;
             }
 
+            function syncDatePills(dateVal) {
+                const todayStr = formatDateToYMD(new Date());
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowStr = formatDateToYMD(tomorrow);
+                const dayAfter = new Date();
+                dayAfter.setDate(dayAfter.getDate() + 2);
+                const dayAfterStr = formatDateToYMD(dayAfter);
+
+                if (btnQuickToday) btnQuickToday.classList.toggle('active', dateVal === todayStr);
+                if (btnQuickTomorrow) btnQuickTomorrow.classList.toggle('active', dateVal === tomorrowStr);
+                if (btnQuickDayAfter) btnQuickDayAfter.classList.toggle('active', dateVal === dayAfterStr);
+            }
+            window.syncDatePills = syncDatePills;
+
             if (advDateInput) {
                 // Pre-populate with today if empty
                 if (!advDateInput.value) {
                     advDateInput.value = formatDateToYMD(new Date());
                 }
+                syncDatePills(advDateInput.value);
+
+                advDateInput.addEventListener('input', () => {
+                    clearInlineTimeError();
+                    syncDatePills(advDateInput.value);
+                });
                 
                 if (btnQuickToday) {
                     btnQuickToday.addEventListener('click', () => {
+                        clearInlineTimeError();
                         advDateInput.value = formatDateToYMD(new Date());
-                        advDateInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        syncDatePills(advDateInput.value);
                     });
                 }
 
                 if (btnQuickTomorrow) {
                     btnQuickTomorrow.addEventListener('click', () => {
+                        clearInlineTimeError();
                         const tomorrow = new Date();
                         tomorrow.setDate(tomorrow.getDate() + 1);
                         advDateInput.value = formatDateToYMD(tomorrow);
-                        advDateInput.dispatchEvent(new Event('change', { bubbles: true }));
+                        syncDatePills(advDateInput.value);
                     });
                 }
+
+                if (btnQuickDayAfter) {
+                    btnQuickDayAfter.addEventListener('click', () => {
+                        clearInlineTimeError();
+                        const dayAfter = new Date();
+                        dayAfter.setDate(dayAfter.getDate() + 2);
+                        advDateInput.value = formatDateToYMD(dayAfter);
+                        syncDatePills(advDateInput.value);
+                    });
+                }
+            }
+
+            if (advStartTimeInput) {
+                // Default to next nearest hour between 08:00 and 19:00
+                if (!advStartTimeInput.value) {
+                    const now = new Date();
+                    const nextHour = now.getHours() + 1;
+                    const initialHour = nextHour >= 8 && nextHour <= 19 ? nextHour : 9;
+                    advStartTimeInput.value = `${String(initialHour).padStart(2, '0')}:00`;
+                }
+                advStartTimeInput.addEventListener('input', () => {
+                    clearInlineTimeError();
+                });
+            }
+
+            if (btnSelectAllFloors) {
+                btnSelectAllFloors.addEventListener('click', () => {
+                    document.querySelectorAll('.adv-floor-checkbox').forEach(cb => cb.checked = true);
+                });
+            }
+            if (btnClearFloors) {
+                btnClearFloors.addEventListener('click', () => {
+                    document.querySelectorAll('.adv-floor-checkbox').forEach(cb => cb.checked = false);
+                });
             }
 
             // Advanced Booking Form Submit
@@ -2610,9 +4299,37 @@
                     const time = document.getElementById('advStartTime').value;
                     const duration = parseInt(document.getElementById('advDuration').value);
                     
-                    const [h, m] = time.split(':');
+                    if (!date || !time) {
+                        showInlineTimeError('Please specify both reservation date and start time.');
+                        return;
+                    }
+
+                    // Pre-Submit Time Validation against Local Time
+                    const now = new Date();
+                    const todayStr = formatDateToYMD(now);
+
+                    if (date < todayStr) {
+                        showInlineTimeError('Reservation date cannot be in the past.');
+                        return;
+                    }
+
+                    if (date === todayStr) {
+                        const [h, m] = time.split(':').map(Number);
+                        const selectedDateTime = new Date();
+                        selectedDateTime.setHours(h, m !== undefined ? m : 0, 0, 0);
+
+                        if (selectedDateTime.getTime() <= now.getTime()) {
+                            const currentFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                            showInlineTimeError(`Cannot book a slot in the past. Current local time is ${currentFormatted}. Please choose a future time.`);
+                            return;
+                        }
+                    }
+
+                    clearInlineTimeError();
+
+                    const [h, m] = time.split(':').map(Number);
                     const startDt = new Date(date);
-                    startDt.setHours(h, 0, 0, 0);
+                    startDt.setHours(h, m || 0, 0, 0);
                     const endDt = new Date(startDt.getTime() + duration * 3600000);
                     
                     const startIso = startDt.toISOString();
@@ -2623,7 +4340,7 @@
                     const roomType = document.getElementById('advRoomType').value;
                     
                     if (floorIds.length === 0) {
-                        Swal.fire('No Floors Selected', 'Please select at least one floor.', 'warning');
+                        showInlineTimeError('Please select at least one preferred floor.');
                         return;
                     }
                     
@@ -2695,9 +4412,46 @@
             if (pusherAppKey && pusherAppKey !== 'dummy-key' && pusherAppKey !== 'None') {
                 const pusher = new Pusher(pusherAppKey, { cluster: pusherCluster });
                 const channel = pusher.subscribe('public-room-updates');
+                
                 channel.bind('room_occupancy_changed', function(data) {
                     refreshMapStatus(4);
                 });
+
+                // ── Phase 6: Hallway De-Escalator Realtime Nudge Listener ──
+                channel.bind('faculty_hallway_nudge', function(data) {
+                    if (data && data.target_faculty_id == currentUserId) {
+                        const roomNum = (data.room_number || '').replace(/^VY/i, '');
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: `🔔 Hallway Notice: Room VY${roomNum}`,
+                            html: `<strong>Prof. ${data.sender_faculty_name || 'The next instructor'}</strong> is outside setting up for the next session. Please prepare to conclude.`,
+                            showConfirmButton: true,
+                            confirmButtonText: 'Understood',
+                            timer: 15000,
+                            timerProgressBar: true
+                        });
+                    }
+                });
+
+                if (currentUserId) {
+                    const userChannel = pusher.subscribe(`user-${currentUserId}`);
+                    userChannel.bind('faculty_hallway_nudge', function(data) {
+                        const roomNum = (data.room_number || '').replace(/^VY/i, '');
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'info',
+                            title: `🔔 Hallway Notice: Room VY${roomNum}`,
+                            html: `<strong>Prof. ${data.sender_faculty_name || 'The next instructor'}</strong> is outside setting up for the next session. Please prepare to conclude.`,
+                            showConfirmButton: true,
+                            confirmButtonText: 'Understood',
+                            timer: 15000,
+                            timerProgressBar: true
+                        });
+                    });
+                }
             }
 
             // Timetable to Map Logic
@@ -2731,7 +4485,10 @@
             };
 
             window.deleteClass = async (event, entryId) => {
-                event.stopPropagation(); // Don't trigger locateRoom
+                if (event) {
+                    if (event.stopPropagation) event.stopPropagation();
+                    if (event.preventDefault) event.preventDefault();
+                }
                 
                 const result = await Swal.fire({
                     title: 'Remove Class?',
@@ -2769,7 +4526,10 @@
             };
 
             window.deleteBooking = async (event, bookingId) => {
-                event.stopPropagation(); // Don't trigger locateRoom
+                if (event) {
+                    if (event.stopPropagation) event.stopPropagation();
+                    if (event.preventDefault) event.preventDefault();
+                }
                 
                 const result = await Swal.fire({
                     title: 'Cancel Booking?',

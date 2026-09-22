@@ -272,3 +272,63 @@ def send_web_push(user_id=None, professional_id=None, title="New Notification", 
     except Exception as e:
         logger.error(f"Failed to trigger web push: {e}")
         return False
+
+
+def send_sla_escalation_email(dept_name, stale_submissions_count, total_hours, recipient_email, recipient_name="Department Head"):
+    """
+    Phase 4: Sends an automated high-priority SLA escalation ping to the Department Head / Admin.
+    Triggered when a department's faculty timetable batch remains in 'pending' status for >48 hours.
+    """
+    subject = f"[URGENT SLA ESCALATION] {dept_name} Faculty Timetable Batch Exceeded 48h Approval Window"
+    message = f"""
+    ATTENTION: {recipient_name},
+
+    This is an automated SLA Escalation Alert from the FixLink Campus Tracking System.
+
+    The semester timetable submission batch for [{dept_name}] has been pending approval for more than 48 hours without administrative sign-off.
+
+    • Department: {dept_name}
+    • Pending Submissions: {stale_submissions_count} faculty members
+    • Total Lecture Hours Queued: {total_hours} hrs
+    • Escalation Level: HIGH (Live interactive map & Ad-Hoc room finder delayed)
+
+    Please log in to the FixLink Admin Portal immediately and execute the Bulk Approval pipeline:
+    https://fixlink.mitwpu.edu.in/admin/department-approvals
+
+    Failure to execute bulk approval may cause campus-wide room assignment conflicts during active lecture hours.
+
+    Regards,
+    FixLink Automated Anti-Stagnation Engine
+    MIT World Peace University
+    """
+
+    if not EMAILJS_SERVICE_ID or not EMAILJS_TEMPLATE_ID or not EMAILJS_PUBLIC_KEY:
+        logger.warning(f"EmailJS not configured. Logged SLA Escalation Ping for {recipient_email} ({dept_name}).")
+        return True
+
+    payload = {
+        'service_id': EMAILJS_SERVICE_ID,
+        'template_id': EMAILJS_TEMPLATE_ID,
+        'user_id': EMAILJS_PUBLIC_KEY,
+        'accessToken': EMAILJS_PRIVATE_KEY,
+        'template_params': {
+            'to_email': recipient_email,
+            'to_name': recipient_name,
+            'subject': subject,
+            'message': message,
+            'ticket_id': 'SLA-ESCALATION'
+        }
+    }
+
+    try:
+        response = requests.post(
+            EMAILJS_API_URL,
+            data=json.dumps(payload),
+            headers={'Content-Type': 'application/json'},
+            timeout=5
+        )
+        return response.status_code == 200
+    except Exception as e:
+        logger.error(f"Failed to send SLA Escalation email: {e}")
+        return False
+

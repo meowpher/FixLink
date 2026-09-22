@@ -65,8 +65,54 @@ def init_db(app):
                         conn.execute(sqlalchemy.text("ALTER TABLE professionals ADD COLUMN profile_picture TEXT;"))
                         conn.commit()
                     logger.info("Added profile_picture column to professionals table.")
+            
+            # Ensure Ghost Protocol columns exist on room_bookings
+            if inspector.has_table('room_bookings'):
+                rb_columns = [c['name'] for c in inspector.get_columns('room_bookings')]
+                with db.engine.connect() as conn:
+                    if 'checked_in' not in rb_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE room_bookings ADD COLUMN checked_in BOOLEAN DEFAULT FALSE;"))
+                        logger.info("Added checked_in column to room_bookings table.")
+                    if 'checked_in_at' not in rb_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE room_bookings ADD COLUMN checked_in_at TIMESTAMP;"))
+                        logger.info("Added checked_in_at column to room_bookings table.")
+                    conn.commit()
+
+            # Ensure Ghost Protocol columns exist on adhoc_bookings
+            if inspector.has_table('adhoc_bookings'):
+                ah_columns = [c['name'] for c in inspector.get_columns('adhoc_bookings')]
+                with db.engine.connect() as conn:
+                    if 'checked_in' not in ah_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE adhoc_bookings ADD COLUMN checked_in BOOLEAN DEFAULT FALSE;"))
+                        logger.info("Added checked_in column to adhoc_bookings table.")
+                    if 'checked_in_at' not in ah_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE adhoc_bookings ADD COLUMN checked_in_at TIMESTAMP;"))
+                        logger.info("Added checked_in_at column to adhoc_bookings table.")
+                    conn.commit()
+
+            # Ensure 3-Strike Accountability columns exist on users table
+            if inspector.has_table('users'):
+                u_columns = [c['name'] for c in inspector.get_columns('users')]
+                with db.engine.connect() as conn:
+                    if 'adhoc_suspended_until' not in u_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE users ADD COLUMN adhoc_suspended_until TIMESTAMP;"))
+                        logger.info("Added adhoc_suspended_until column to users table.")
+                    if 'adhoc_suspension_reason' not in u_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE users ADD COLUMN adhoc_suspension_reason VARCHAR(255);"))
+                        logger.info("Added adhoc_suspension_reason column to users table.")
+                    conn.commit()
+
+            # Ensure noshow_strikes table exists
+            if not inspector.has_table('noshow_strikes'):
+                db.create_all()
+                logger.info("Created noshow_strikes table.")
+
+            # Ensure schedule_submissions table exists
+            if not inspector.has_table('schedule_submissions'):
+                db.create_all()
+                logger.info("Created schedule_submissions table.")
         except Exception as e:
-            logger.warning(f"Could not verify profile_picture column: {e}")
+            logger.warning(f"Could not verify schema migrations: {e}")
 
         # 2. Verify default admin user
         from .models import User

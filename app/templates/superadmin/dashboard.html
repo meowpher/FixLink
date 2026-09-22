@@ -1272,6 +1272,94 @@
     [data-theme="dark"] .action-icon-large.text-success { color: #4ade80 !important; }
     [data-theme="dark"] .action-icon-large.text-info    { color: #38bdf8 !important; }
     [data-theme="dark"] .action-icon-large.text-danger  { color: #f87171 !important; }
+
+    /* ── Phase 4: Anti-Stagnation SLA Escalation Styles ── */
+    .sla-section-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 22px;
+        padding: 1.75rem 1.8rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        margin-bottom: 2.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stale-batch-card {
+        border: 3px solid #ef4444 !important;
+        box-shadow: 0 0 25px rgba(239, 68, 68, 0.28), inset 0 0 15px rgba(239, 68, 68, 0.08) !important;
+        background: linear-gradient(145deg, rgba(239, 68, 68, 0.04) 0%, rgba(220, 38, 38, 0.02) 100%) !important;
+        position: relative;
+        animation: sla-pulse 3s infinite ease-in-out;
+        border-radius: 18px;
+    }
+
+    [data-theme="dark"] .stale-batch-card {
+        border: 3px solid #ef4444 !important;
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.35), inset 0 0 20px rgba(239, 68, 68, 0.12) !important;
+        background: linear-gradient(145deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.03) 100%) !important;
+    }
+
+    .batch-item-card {
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        border-radius: 18px;
+        transition: all 0.3s ease;
+    }
+
+    @keyframes sla-pulse {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.25);
+            border-color: #ef4444;
+        }
+        50% {
+            box-shadow: 0 0 32px rgba(239, 68, 68, 0.45);
+            border-color: #f87171;
+        }
+    }
+
+    .sla-badge-breach {
+        background: #ef4444;
+        color: #ffffff;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        font-size: 0.76rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+    }
+
+    .sla-badge-healthy {
+        background: rgba(34, 197, 94, 0.15);
+        color: #16a34a;
+        font-weight: 600;
+        font-size: 0.76rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 9999px;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    [data-theme="dark"] .sla-badge-healthy {
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+    }
+
+    .sla-beacon {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #ffffff;
+        display: inline-block;
+        animation: sla-blink 1.2s infinite;
+    }
+
+    @keyframes sla-blink {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.3; transform: scale(0.8); }
+    }
 </style>
 {% endblock %}
 
@@ -1446,6 +1534,103 @@
         </div>
     </div>
 
+    <!-- SLA Escalation: Anti-Stagnation Protocol Section -->
+    <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                <span class="d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border-radius: 10px; background: {% if sla_status and sla_status.has_stale_batches %}linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.1) 100%){% else %}linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%){% endif %}; border: 1px solid {% if sla_status and sla_status.has_stale_batches %}rgba(239, 68, 68, 0.4){% else %}rgba(34, 197, 94, 0.3){% endif %}; color: {% if sla_status and sla_status.has_stale_batches %}#ef4444{% else %}#16a34a{% endif %};">
+                    <i class="bi {% if sla_status and sla_status.has_stale_batches %}bi-shield-exclamation{% else %}bi-shield-check{% endif %}"></i>
+                </span>
+                <span>Anti-Stagnation Protocol: Timetable SLA Escalation</span>
+            </h5>
+            <div class="d-flex align-items-center gap-2">
+                {% if sla_status and sla_status.has_stale_batches %}
+                    <span class="sla-badge-breach">
+                        <span class="sla-beacon"></span>
+                        <span>{{ sla_status.stale_batches_count }} Department SLA Breach (>48h)</span>
+                    </span>
+                {% else %}
+                    <span class="sla-badge-healthy">
+                        <i class="bi bi-check2-circle me-1"></i>0 Stale Batches (All Within SLA)
+                    </span>
+                {% endif %}
+                <a href="{{ url_for('admin.department_approvals') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                    <i class="bi bi-layout-text-window-reverse me-1"></i>Wide Summary Queue
+                </a>
+            </div>
+        </div>
+
+        <div class="sla-section-card">
+            {% if sla_status and sla_status.batches %}
+                <div class="d-flex flex-column gap-3">
+                    {% for batch in sla_status.batches %}
+                    <div class="p-3.5 p-md-4 rounded-4 {{ 'stale-batch-card' if batch.is_stale else 'batch-item-card' }}" id="batch-card-{{ loop.index }}">
+                        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <h6 class="fw-bold mb-0" style="font-size: 1.05rem; color: var(--text-main);">
+                                        <i class="bi bi-mortarboard me-1.5 text-primary"></i>{{ batch.department_name }}
+                                    </h6>
+                                    {% if batch.is_stale %}
+                                        <span class="sla-badge-breach" style="font-size: 0.72rem; padding: 0.2rem 0.6rem;">
+                                            <span class="sla-beacon"></span>
+                                            SLA BREACH: {{ batch.elapsed_hours }}h PENDING ({{ batch.hours_overdue }}h OVERDUE)
+                                        </span>
+                                    {% else %}
+                                        <span class="sla-badge-healthy" style="font-size: 0.72rem; padding: 0.2rem 0.6rem;">
+                                            <i class="bi bi-clock me-1"></i>{{ batch.elapsed_hours }}h / 48h limit
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted small d-flex align-items-center gap-2 flex-wrap">
+                                    <span><i class="bi bi-person-fill-gear me-1"></i>Dept Head: <strong>{{ batch.head_name }}</strong> &lt;{{ batch.head_email }}&gt;</span>
+                                    <span>•</span>
+                                    <span>Oldest Submission: {{ batch.oldest_submitted_at.strftime('%b %d, %Y %H:%M UTC') if batch.oldest_submitted_at else 'Recent' }}</span>
+                                </div>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold ping-dept-btn" 
+                                        onclick="pingDepartmentHead('{{ batch.department_name }}', '{{ batch.head_email }}', this)"
+                                        title="Send automated email ping to Department Head">
+                                    <i class="bi bi-envelope-exclamation me-1.5"></i>Ping Dept Head
+                                </button>
+                                <button type="button" class="btn btn-sm btn-danger rounded-pill px-3 fw-semibold override-approve-btn" 
+                                        onclick="overrideApproveBatch('{{ batch.department_name }}', this)"
+                                        title="Super Admin Override Bulk Approval">
+                                    <i class="bi bi-shield-shaded me-1.5"></i>Override Bulk Approve
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Metrics & Faculty List -->
+                        <div class="d-flex align-items-center gap-3 flex-wrap pt-2 border-top" style="border-color: rgba(0, 0, 0, 0.06) !important;">
+                            <div class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 fw-medium">
+                                <i class="bi bi-people me-1"></i>{{ batch.submission_count }} Faculty Submissions
+                            </div>
+                            <div class="badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2.5 py-1 fw-medium">
+                                <i class="bi bi-clock-history me-1"></i>{{ batch.total_hours }} Queued Lecture Hours
+                            </div>
+                            <div class="small text-muted d-flex align-items-center gap-1">
+                                <span>Faculty in batch:</span>
+                                <span class="fw-semibold text-truncate" style="max-width: 320px;">{{ batch.faculty_names|join(', ') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <div class="d-inline-flex align-items-center justify-content-center mb-2" style="width: 48px; height: 48px; border-radius: 14px; background: rgba(34, 197, 94, 0.1); color: #16a34a; font-size: 1.5rem;">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <div class="fw-bold" style="color: var(--text-main);">All Department Queues Operating Within SLA</div>
+                    <div class="text-muted small mt-1">No faculty timetable batches are currently pending or overdue past the 48-hour threshold.</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- Bug Tracking Section -->
     <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1565,6 +1750,18 @@
                     <i class="bi bi-chevron-right"></i>
                 </div>
             </a>
+            <a href="{{ url_for('admin.department_approvals') }}" class="dev-tile tile-staff">
+                <div class="dev-tile-icon">
+                    <i class="bi bi-check2-all text-success"></i>
+                </div>
+                <div class="dev-tile-info">
+                    <div class="dev-tile-title">Department Approvals</div>
+                    <div class="dev-tile-desc">Bulk schedule approvals</div>
+                </div>
+                <div class="tile-arrow-box">
+                    <i class="bi bi-chevron-right"></i>
+                </div>
+            </a>
             <a href="{{ url_for('admin.professionals') }}" class="dev-tile tile-staff">
                 <div class="dev-tile-icon">
                     <i class="bi bi-person-badge"></i>
@@ -1572,18 +1769,6 @@
                 <div class="dev-tile-info">
                     <div class="dev-tile-title">Staff Management</div>
                     <div class="dev-tile-desc">Workforce directory</div>
-                </div>
-                <div class="tile-arrow-box">
-                    <i class="bi bi-chevron-right"></i>
-                </div>
-            </a>
-            <a href="{{ url_for('admin.help_requests') }}" class="dev-tile tile-help">
-                <div class="dev-tile-icon">
-                    <i class="bi bi-hand-thumbs-up"></i>
-                </div>
-                <div class="dev-tile-info">
-                    <div class="dev-tile-title">Help Requests</div>
-                    <div class="dev-tile-desc">Support & queries</div>
                 </div>
                 <div class="tile-arrow-box">
                     <i class="bi bi-chevron-right"></i>
@@ -1608,6 +1793,93 @@
 
 {% block extra_js %}
 <script>
+    const CSRF_TOKEN = "{{ csrf_token() }}";
+
+    // Trigger automated email ping to Department Head
+    async function pingDepartmentHead(deptName, targetEmail, btnEl) {
+        if (!btnEl) return;
+        const origHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5" role="status"></span>Pinging...';
+
+        try {
+            const resp = await fetch("{{ url_for('superadmin.ping_department_head_api') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    department_name: deptName,
+                    target_email: targetEmail
+                })
+            });
+
+            const data = await resp.json();
+            if (resp.ok && data.success) {
+                btnEl.className = 'btn btn-sm btn-success rounded-pill px-3 fw-semibold';
+                btnEl.innerHTML = '<i class="bi bi-check2 me-1.5"></i>Ping Dispatched!';
+                setTimeout(() => {
+                    btnEl.className = 'btn btn-sm btn-outline-danger rounded-pill px-3 fw-semibold';
+                    btnEl.innerHTML = origHtml;
+                    btnEl.disabled = false;
+                }, 3500);
+            } else {
+                alert(data.error || 'Failed to dispatch email ping.');
+                btnEl.disabled = false;
+                btnEl.innerHTML = origHtml;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Network error while pinging department head.');
+            btnEl.disabled = false;
+            btnEl.innerHTML = origHtml;
+        }
+    }
+
+    // Super Admin override bulk approval
+    async function overrideApproveBatch(deptName, btnEl) {
+        if (!confirm(`Execute Super Admin Override Bulk Approval for [${deptName}]?\n\nThis will immediately approve all pending faculty timetables and sync to the live campus map.`)) {
+            return;
+        }
+
+        if (!btnEl) return;
+        const origHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5" role="status"></span>Approving...';
+
+        try {
+            const resp = await fetch("{{ url_for('superadmin.override_approve_batch_api') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN
+                },
+                body: JSON.stringify({
+                    department_name: deptName
+                })
+            });
+
+            const data = await resp.json();
+            if (resp.ok && data.success) {
+                btnEl.className = 'btn btn-sm btn-success rounded-pill px-3 fw-semibold';
+                btnEl.innerHTML = '<i class="bi bi-check-all me-1.5"></i>Batch Approved!';
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1200);
+            } else {
+                alert(data.error || 'Override approval failed.');
+                btnEl.disabled = false;
+                btnEl.innerHTML = origHtml;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Network error while executing override approval.');
+            btnEl.disabled = false;
+            btnEl.innerHTML = origHtml;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         // Staggered entry animation using GSAP
         if (window.gsap) {

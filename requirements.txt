@@ -13,3 +13,4 @@ cryptography>=42.0.0
 pywebpush>=2.0.0
 pandas>=2.0.0
 Flask-Migrate>=4.0.0
+pytz>=2024.1

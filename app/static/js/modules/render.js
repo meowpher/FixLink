@@ -9,7 +9,7 @@ window.selectRoom = selectRoom;
 
 export function renderFloorMap(container, rooms, floorLevel, isAdmin = false, isReport = false) {
     const svgUrl = `/static/images/floors/VY${floorLevel}.svg`;
-    renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAdmin, isReport);
+    return renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAdmin, isReport);
 }
 
 /**
@@ -19,7 +19,7 @@ export function renderFloorMap(container, rooms, floorLevel, isAdmin = false, is
 export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAdmin = false, isReport = false) {
     container.innerHTML = `<div class="vyas-floor-map svg-container" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
 
-    fetch(svgUrl)
+    return fetch(svgUrl)
         .then(response => {
             if (!response.ok) throw new Error("SVG not found");
             return response.text();

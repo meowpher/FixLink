@@ -585,59 +585,198 @@
         box-shadow: 0 0 8px rgba(59, 130, 246, 0.45);
     }
 
-    /* ── SVG Map Occupancy Lighting for Faculty Portal ── */
-    .interactive-map-wrapper .room-poly.vacant-status,
-    .interactive-map-wrapper .vacant-status,
-    .interactive-map-wrapper [data-room].vacant-status .room-poly {
+    /* ── SVG Map Occupancy & Gray Scale for Faculty Portal ── */
+    #facultyMapContainer .interactive-map-wrapper .room-poly,
+    #facultyMapContainer .interactive-map-wrapper [class*="fill-"],
+    #facultyMapContainer .interactive-map-wrapper rect:not(.room-label):not([id*="_label"]),
+    #facultyMapContainer .interactive-map-wrapper polygon:not(.room-label):not([id*="_label"]),
+    #facultyMapContainer .interactive-map-wrapper path:not([id*="_label"]):not([id*="_text"]):not(.room-label):not(#Background):not(#Map_Outlines):not(#Interior_outlines),
+    #facultyMapContainer .interactive-map-wrapper .room-poly.occupied-status,
+    #facultyMapContainer .interactive-map-wrapper .occupied-status,
+    #facultyMapContainer .interactive-map-wrapper [data-room].occupied-status .room-poly {
+        fill: #94a3b8 !important; /* neutral gray (non-bookable / occupied / rest of map) */
+        stroke: #64748b !important;
+        stroke-width: 1.5px !important;
+        opacity: 0.55 !important;
+        filter: none !important;
+        transition: fill 0.2s ease, stroke 0.2s ease, opacity 0.2s ease;
+    }
+
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .room-poly,
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [class*="fill-"],
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper rect:not(.room-label):not([id*="_label"]),
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper polygon:not(.room-label):not([id*="_label"]),
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper path:not([id*="_label"]):not([id*="_text"]):not(.room-label):not(#Background):not(#Map_Outlines):not(#Interior_outlines),
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .room-poly.occupied-status,
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .occupied-status,
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].occupied-status .room-poly {
+        fill: #334155 !important;
+        stroke: #475569 !important;
+        stroke-width: 1.5px !important;
+        opacity: 0.45 !important;
+        filter: none !important;
+    }
+
+    /* ONLY AVAILABLE CLASSES ARE VIBRANT GREEN */
+    #facultyMapContainer .interactive-map-wrapper .room-poly.vacant-status,
+    #facultyMapContainer .interactive-map-wrapper .vacant-status,
+    #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status .room-poly,
+    #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status rect:not(.room-label):not([id*="_label"]),
+    #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status path:not([id*="_label"]):not([id*="_text"]):not(.room-label):not(#Background):not(#Map_Outlines):not(#Interior_outlines),
+    #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status polygon:not(.room-label):not([id*="_label"]) {
         fill: #16a34a !important; /* solid vibrant green */
         stroke: #22c55e !important;
         stroke-width: 2px !important;
         opacity: 1 !important;
-        filter: drop-shadow(0 0 4px rgba(34, 197, 94, 0.35));
+        filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.45)) !important;
+        cursor: pointer !important;
         transition: fill 0.2s ease, stroke 0.2s ease, opacity 0.2s ease;
     }
 
-    .interactive-map-wrapper .room-poly.occupied-status,
-    .interactive-map-wrapper .occupied-status,
-    .interactive-map-wrapper [data-room].occupied-status .room-poly {
-        fill: rgba(185, 28, 28, 0.35) !important; /* dimmed / dark red */
-        stroke: #ef4444 !important;
-        stroke-width: 1.5px !important;
-        opacity: 0.65 !important;
-        filter: none !important;
-        transition: fill 0.2s ease, stroke 0.2s ease, opacity 0.2s ease;
-    }
-
-    [data-theme="dark"] .dot.available {
-        background-color: #16a34a !important;
-        border: 1.5px solid #22c55e !important;
-        box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
-    }
-
-    [data-theme="dark"] .dot.occupied {
-        background-color: rgba(185, 28, 28, 0.4) !important;
-        border: 1.5px solid #ef4444 !important;
-        box-shadow: none;
-    }
-
-    [data-theme="dark"] .interactive-map-wrapper .room-poly.vacant-status,
-    [data-theme="dark"] .interactive-map-wrapper .vacant-status,
-    [data-theme="dark"] .interactive-map-wrapper [data-room].vacant-status .room-poly {
-        fill: rgba(22, 163, 74, 0.5) !important;
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .room-poly.vacant-status,
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .vacant-status,
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status .room-poly,
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status rect:not(.room-label):not([id*="_label"]),
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status path:not([id*="_label"]):not([id*="_text"]):not(.room-label):not(#Background):not(#Map_Outlines):not(#Interior_outlines),
+    [data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status polygon:not(.room-label):not([id*="_label"]) {
+        fill: #16a34a !important;
         stroke: #22c55e !important;
         stroke-width: 2px !important;
         opacity: 1 !important;
-        filter: drop-shadow(0 0 6px rgba(34, 197, 94, 0.5));
+        filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6)) !important;
+        cursor: pointer !important;
     }
 
-    [data-theme="dark"] .interactive-map-wrapper .room-poly.occupied-status,
-    [data-theme="dark"] .interactive-map-wrapper .occupied-status,
-    [data-theme="dark"] .interactive-map-wrapper [data-room].occupied-status .room-poly {
-        fill: rgba(127, 29, 29, 0.35) !important;
-        stroke: #ef4444 !important;
-        stroke-width: 1.5px !important;
-        opacity: 0.55 !important;
+    /* ── Locate Class Target Mode: Whole map grayed out, only target room in vibrant Green ── */
+    #facultyMapContainer.map-locate-target-mode .room-poly,
+    #facultyMapContainer.map-locate-target-mode rect:not(.room-label):not([id*="_label"]),
+    #facultyMapContainer.map-locate-target-mode path:not([id*="_label"]):not([id*="_text"]):not(.room-label):not(#Background):not(#Map_Outlines):not(#Interior_outlines),
+    #facultyMapContainer.map-locate-target-mode polygon:not(.room-label):not([id*="_label"]),
+    #facultyMapContainer.map-locate-target-mode .room-group .room-poly,
+    #facultyMapContainer.map-locate-target-mode [data-room] .room-poly,
+    #facultyMapContainer.map-locate-target-mode .interactive-room,
+    #facultyMapContainer.map-locate-target-mode .fill-blue,
+    #facultyMapContainer.map-locate-target-mode .fill-teal,
+    #facultyMapContainer.map-locate-target-mode .fill-red,
+    #facultyMapContainer.map-locate-target-mode .fill-orange,
+    #facultyMapContainer.map-locate-target-mode .fill-pink,
+    #facultyMapContainer.map-locate-target-mode .fill-purple,
+    #facultyMapContainer.map-locate-target-mode .fill-cyan,
+    #facultyMapContainer.map-locate-target-mode .fill-kitchen,
+    #facultyMapContainer.map-locate-target-mode .fill-encave,
+    #facultyMapContainer.map-locate-target-mode .vacant-status,
+    #facultyMapContainer.map-locate-target-mode .occupied-status {
+        fill: #cbd5e1 !important;
+        stroke: #94a3b8 !important;
+        stroke-width: 1px !important;
+        opacity: 0.45 !important;
         filter: none !important;
+    }
+
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .room-poly,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode rect:not(.room-label):not([id*="_label"]),
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode path:not([id*="_label"]):not([id*="_text"]):not(.room-label):not(#Background):not(#Map_Outlines):not(#Interior_outlines),
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode polygon:not(.room-label):not([id*="_label"]),
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .room-group .room-poly,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode [data-room] .room-poly,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .interactive-room,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-blue,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-teal,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-red,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-orange,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-pink,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-purple,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-cyan,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-kitchen,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .fill-encave,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .vacant-status,
+    [data-theme="dark"] #facultyMapContainer.map-locate-target-mode .occupied-status {
+        fill: #334155 !important;
+        stroke: #475569 !important;
+        stroke-width: 1px !important;
+        opacity: 0.35 !important;
+        filter: none !important;
+    }
+
+    /* All non-highlighted labels */
+    #facultyMapContainer.map-locate-target-mode .room-label:not(.room-pulse-highlight *):not([data-room].room-pulse-highlight *),
+    #facultyMapContainer.map-locate-target-mode [id*="_label"]:not(.room-pulse-highlight *):not([data-room].room-pulse-highlight *),
+    #facultyMapContainer.map-locate-target-mode text:not(.room-pulse-highlight *):not([data-room].room-pulse-highlight *),
+    #facultyMapContainer.map-locate-target-mode tspan:not(.room-pulse-highlight *):not([data-room].room-pulse-highlight *) {
+        fill: #64748b !important;
+        stroke: none !important;
+        opacity: 0.55 !important;
+        pointer-events: none !important;
+    }
+
+    /* ── ONLY THE TARGET CLASSROOM SHOWS IN COLOR (GREEN) WITH BLINKING GLOW ── */
+    @keyframes roomTargetGreenPulse {
+        0%, 100% {
+            fill: #16a34a !important;
+            stroke: #4ade80 !important;
+            stroke-width: 3.5px !important;
+            filter: drop-shadow(0 0 16px rgba(34, 197, 94, 0.95)) drop-shadow(0 0 35px rgba(22, 163, 74, 0.75)) !important;
+            opacity: 1 !important;
+        }
+        50% {
+            fill: #22c55e !important;
+            stroke: #ffffff !important;
+            stroke-width: 5px !important;
+            filter: drop-shadow(0 0 28px rgba(74, 222, 128, 1)) drop-shadow(0 0 55px rgba(34, 197, 94, 0.95)) !important;
+            opacity: 0.85 !important;
+        }
+    }
+
+    /* Apply pulsing green ONLY to the background polygon/rect shape, NEVER to text paths */
+    #facultyMapContainer .room-poly.room-pulse-highlight,
+    #facultyMapContainer [data-room].room-pulse-highlight .room-poly,
+    #facultyMapContainer.map-locate-target-mode .room-poly.room-pulse-highlight,
+    #facultyMapContainer.map-locate-target-mode [data-room].room-pulse-highlight .room-poly,
+    #facultyMapContainer.map-locate-target-mode g.room-pulse-highlight > rect:not([id*="_label"]):not(.room-label),
+    #facultyMapContainer.map-locate-target-mode g.room-pulse-highlight > polygon:not([id*="_label"]):not(.room-label),
+    #facultyMapContainer.map-locate-target-mode g.room-pulse-highlight > path.room-poly:not([id*="_label"]):not(.room-label) {
+        animation: roomTargetGreenPulse 1.2s infinite ease-in-out !important;
+        fill: #16a34a !important;
+        stroke: #4ade80 !important;
+        stroke-width: 3.5px !important;
+        opacity: 1 !important;
+        stroke-dasharray: none !important;
+        cursor: pointer !important;
+        filter: drop-shadow(0 0 16px rgba(34, 197, 94, 0.95)) drop-shadow(0 0 35px rgba(22, 163, 74, 0.75)) !important;
+    }
+
+    /* Target room label: Crisp, pure white, no stroke distortion */
+    #facultyMapContainer .room-pulse-highlight .room-label,
+    #facultyMapContainer .room-pulse-highlight [id*="_label"],
+    #facultyMapContainer .room-pulse-highlight path[id*="_label"],
+    #facultyMapContainer .room-pulse-highlight text,
+    #facultyMapContainer .room-pulse-highlight tspan,
+    #facultyMapContainer [data-room].room-pulse-highlight .room-label,
+    #facultyMapContainer [data-room].room-pulse-highlight [id*="_label"],
+    #facultyMapContainer [data-room].room-pulse-highlight path[id*="_label"],
+    #facultyMapContainer [data-room].room-pulse-highlight text,
+    #facultyMapContainer [data-room].room-pulse-highlight tspan,
+    #facultyMapContainer.map-locate-target-mode .room-pulse-highlight .room-label,
+    #facultyMapContainer.map-locate-target-mode .room-pulse-highlight [id*="_label"],
+    #facultyMapContainer.map-locate-target-mode .room-pulse-highlight path[id*="_label"],
+    #facultyMapContainer.map-locate-target-mode .room-pulse-highlight text,
+    #facultyMapContainer.map-locate-target-mode .room-pulse-highlight tspan,
+    #facultyMapContainer.map-locate-target-mode [data-room].room-pulse-highlight .room-label,
+    #facultyMapContainer.map-locate-target-mode [data-room].room-pulse-highlight [id*="_label"],
+    #facultyMapContainer.map-locate-target-mode [data-room].room-pulse-highlight path[id*="_label"],
+    #facultyMapContainer.map-locate-target-mode [data-room].room-pulse-highlight text,
+    #facultyMapContainer.map-locate-target-mode [data-room].room-pulse-highlight tspan,
+    #facultyMapContainer.map-locate-target-mode g.room-pulse-highlight .room-label,
+    #facultyMapContainer.map-locate-target-mode g.room-pulse-highlight [id*="_label"],
+    #facultyMapContainer.map-locate-target-mode g.room-pulse-highlight path[id*="_label"] {
+        animation: none !important;
+        fill: #ffffff !important;
+        stroke: none !important;
+        stroke-width: 0 !important;
+        filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.85)) !important;
+        opacity: 1 !important;
+        font-weight: 800 !important;
+        pointer-events: none !important;
     }
 
     .floor-selector-pill {
@@ -2063,12 +2202,6 @@
                     <button class="btn rounded-3 px-3 py-2 {% if view == 'schedule' or not view %}active{% endif %} d-flex align-items-center" id="btn-schedule">
                         <i class="bi bi-calendar-check me-2 fs-5"></i>Schedule
                     </button>
-                    <button class="btn rounded-3 px-3 py-2 {% if view == 'tracker' %}active{% endif %} d-flex align-items-center" id="btn-tracker">
-                        <i class="bi bi-map me-2 fs-5"></i>Map Tracker
-                    </button>
-                    <a href="{{ url_for('faculty.submit_timetable_view') }}" class="btn rounded-3 px-3 py-2 d-flex align-items-center text-decoration-none" id="btn-submit-tt">
-                        <i class="bi bi-grid-3x3-gap-fill me-2 fs-5 text-warning"></i>Submit Timetable
-                    </a>
                     <button class="btn rounded-3 px-3 py-2 d-flex align-items-center" id="btn-history">
                         <i class="bi bi-clock-history me-2 fs-5"></i>Booking History
                     </button>
@@ -2125,20 +2258,9 @@
                         <p class="text-muted mb-0">Your synchronized teaching schedule across the Vyas building.</p>
                     </div>
                     <div class="d-flex gap-2 w-100 w-md-auto dashboard-header-buttons flex-wrap">
-                        <a href="{{ url_for('faculty.submit_timetable_view') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" style="font-size: 0.85rem;">
-                            <i class="bi bi-grid-3x3-gap-fill text-warning me-1"></i>Build Schedule
-                        </a>
-                        <button class="btn btn-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" data-bs-toggle="offcanvas" data-bs-target="#advancedBookingModal" id="btnHeaderRequestRoom" style="font-size: 0.85rem;">
+                        <button class="btn btn-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" id="btnHeaderRequestRoom" style="font-size: 0.85rem;">
                             <i class="bi bi-lightning-charge-fill me-1"></i>Request Room
                         </button>
-                        {% if session.get('is_admin') %}
-                        <button class="btn btn-outline-success rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="font-size: 0.85rem;">
-                            <i class="bi bi-file-earmark-spreadsheet me-1 me-md-2"></i>Mass Import Timetable
-                        </button>
-                        <button class="btn btn-outline-danger rounded-pill px-3 py-2 px-md-4 shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#deleteTimetableModal" style="font-size: 0.85rem;">
-                            <i class="bi bi-trash3 me-1 me-md-2"></i>Delete Timetables
-                        </button>
-                        {% endif %}
                     </div>
                 </div>
 
@@ -2146,7 +2268,14 @@
                 {% if my_adhoc %}
                     <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-3 mt-4">Active Reservations</h5>
                     {% for ad in my_adhoc %}
-                    <div class="slot-card shadow-sm animate-on-load">
+                    <div class="slot-card shadow-sm animate-on-load cursor-pointer"
+                         onclick="locateClassroomFromCell(this)"
+                         data-room-number="{{ ad.room.number }}"
+                         data-room-id="{{ ad.room.id }}"
+                         data-floor-level="{{ ad.room.floor.level }}"
+                         data-subject="{{ ad.subject }}"
+                         data-time="{{ ad.start_datetime.strftime('%d %b %Y, %H:%M') }} - {{ ad.end_datetime.strftime('%H:%M') }}"
+                         title="Locate Room VY{{ ad.room.number }} on map">
                         <div class="slot-time-box">
                             <div class="time-start">{{ ad.start_datetime.strftime('%H:%M') }}</div>
                             <div class="time-end">{{ ad.end_datetime.strftime('%H:%M') }}</div>
@@ -2155,7 +2284,7 @@
                             <span class="adhoc-tag mb-2 d-inline-block">Ad-Hoc Booking</span>
                             <div class="slot-subject text-truncate" title="{{ ad.subject }}">{{ ad.subject }}</div>
                             <div class="slot-meta text-truncate">
-                                <div class="meta-item"><i class="bi bi-geo-alt"></i> {{ ad.room.number }}</div>
+                                <div class="meta-item"><i class="bi bi-geo-alt"></i> VYAS {{ ad.room.number }}</div>
                                 <div class="meta-item"><i class="bi bi-calendar-event"></i> {{ ad.start_datetime.strftime('%d %b %Y') }}</div>
                             </div>
                         </div>
@@ -2245,10 +2374,10 @@
                                 {% endfor %}
 
                                 {# Render slots for the day #}
-                                {% set current_h = 9 %}
-                                {% for slot_idx in range(10) %} {# 9 AM to 7 PM = 10 slots #}
+                                {% set ns = namespace(skip_until=9) %}
+                                {% for slot_idx in range(10) %} {# 9 AM to 7 PM = 10 slots (hours 9 to 18) #}
                                     {% set h = 9 + slot_idx %}
-                                    {% if h >= current_h %}
+                                    {% if h >= ns.skip_until %}
                                         {% set found = [] %}
                                         {% for ds in day_schedules %}
                                             {% if ds.start == h %}
@@ -2258,8 +2387,13 @@
 
                                         {% if found %}
                                             {% set match = found[0] %}
-                                            <td colspan="{{ match.duration }}" class="timetable-cell occupied cursor-pointer" 
-                                                onclick="showClassDetail(this)"
+                                            {% set cell_dur = match.duration %}
+                                            {% if (h + cell_dur) > 19 %}
+                                                {% set cell_dur = 19 - h %}
+                                            {% endif %}
+                                            {% if cell_dur <= 0 %}{% set cell_dur = 1 %}{% endif %}
+                                            <td colspan="{{ cell_dur }}" class="timetable-cell occupied cursor-pointer" 
+                                                onclick="locateClassroomFromCell(this)"
                                                 data-subject="{{ match.subject }}"
                                                 data-division-course="{{ match.division_course }}"
                                                 data-room-number="{{ match.room.number }}"
@@ -2274,7 +2408,7 @@
                                                 <div class="cell-content cursor-pointer {% if not match.is_booking %}cell-regular{% else %}cell-adhoc{% endif %}">
                                                     {% if not match.is_booking %}
                                                         <span class="slot-lock-badge position-absolute top-0 end-0 m-1.5" title="Regular Assigned Lecture (Locked)">
-                                                            <i class="bi bi-lock-fill"></i>
+                                                             <i class="bi bi-lock-fill"></i>
                                                         </span>
                                                         {% if session.get('is_admin') %}
                                                         <button class="btn-delete-class text-danger" onclick="event.stopPropagation(); deleteClass(event, '{{ match.id }}')" title="Delete Class">
@@ -2308,7 +2442,7 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            {% set current_h = h + match.duration %}
+                                            {% set ns.skip_until = h + cell_dur %}
                                         {% else %}
                                             <td class="timetable-cell vacant cursor-pointer {% if faculty.is_adhoc_suspended %}vacant-suspended{% endif %}" 
                                                 data-day-index="{{ day_idx }}"
@@ -2324,7 +2458,7 @@
                                                     {% endif %}
                                                 </div>
                                             </td>
-                                            {% set current_h = h + 1 %}
+                                            {% set ns.skip_until = h + 1 %}
                                         {% endif %}
                                     {% endif %}
                                 {% endfor %}
@@ -2342,7 +2476,7 @@
                         {% for s in my_schedules %}
                             {% if s.day_of_week == day_idx and s.start_time and s.end_time %}
                             <div class="card glass-card border shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" 
-                                onclick="showClassDetail(this)"
+                                onclick="locateClassroomFromCell(this)"
                                 data-subject="{{ s.subject }}"
                                 data-division-course="{{ (s.division or '') ~ (' / ' ~ s.course if s.course else '') or 'Regular Lecture' }}"
                                 data-room-number="{{ s.room.number }}"
@@ -2379,8 +2513,8 @@
                                              <i class="bi bi-geo-alt-fill me-1 text-primary"></i>Room {{ s.room.number }}
                                         </span>
                                         <span class="text-muted small d-inline-flex align-items-center gap-1 opacity-75" title="Assigned by Academic Administration">
-                                            <i class="bi bi-lock-fill text-muted"></i>
-                                            <span style="font-size: 0.68rem; font-weight: 600;">Locked</span>
+                                             <i class="bi bi-lock-fill text-muted"></i>
+                                             <span style="font-size: 0.68rem; font-weight: 600;">Locked</span>
                                         </span>
                                     </div>
                                 </div>
@@ -2391,7 +2525,7 @@
                         {% for b in bookings_this_week %}
                             {% if b.slot_start.weekday() == day_idx %}
                             <div class="card glass-card border border-primary border-opacity-50 shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" 
-                                onclick="showClassDetail(this)"
+                                onclick="locateClassroomFromCell(this)"
                                 data-subject="{{ b.subject }}"
                                 data-division-course="{{ (b.division or '') ~ (' / ' ~ b.course if b.course else '') or 'Ad-Hoc Booking' }}"
                                 data-room-number="{{ b.room.number }}"
@@ -2452,6 +2586,22 @@
 
     <!-- Section: Smart Classroom Management (SVG Map) -->
     <div id="view-tracker" class="view-section">
+        <!-- Ad-Hoc Booking Active Period Banner -->
+        <div id="mapAdHocBanner" class="alert alert-primary border-0 rounded-4 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3 p-3 d-none">
+            <div class="d-flex align-items-center gap-2.5">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                    <i class="bi bi-calendar-check-fill fs-5"></i>
+                </div>
+                <div>
+                    <div class="fw-bold fs-6 text-body" id="mapAdHocSlotText">Ad-Hoc Slot: Loading...</div>
+                    <small class="text-muted">Available classrooms are shown in <span class="badge bg-success bg-opacity-20 text-success fw-bold px-1.5 py-0.5">GREEN</span> (bookable). Occupied classes are in <span class="badge bg-secondary bg-opacity-25 text-body fw-bold px-1.5 py-0.5">GRAY</span> (non-bookable).</small>
+                </div>
+            </div>
+            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 align-self-start align-self-md-auto" id="btnBackToSchedule">
+                <i class="bi bi-arrow-left"></i><span>Back to Schedule</span>
+            </button>
+        </div>
+
         <div class="facility-intelligence-header sticky-top shadow-sm">
             <div>
                 <h4 class="mb-1 d-flex align-items-center"><i class="bi bi-cpu me-2 text-primary"></i>Smart Classroom Management</h4>
@@ -2459,8 +2609,8 @@
             </div>
             <div class="facility-header-controls">
                 <div class="status-legend">
-                    <div class="legend-item"><span class="dot available"></span> Available</div>
-                    <div class="legend-item"><span class="dot occupied"></span> Occupied</div>
+                    <div class="legend-item"><span class="dot available"></span> Available (Bookable)</div>
+                    <div class="legend-item"><span class="dot occupied"></span> Occupied (Non-Bookable)</div>
                 </div>
                 <select class="form-select floor-selector-pill" id="floorSelectorMap" aria-label="Select Floor">
                     {% for floor in floors %}
@@ -2978,143 +3128,6 @@
     </div>
 </div>
 
-<!-- Advanced Booking Search Bottom Sheet (Offcanvas on Mobile, Centered Modal on Desktop) -->
-<div class="offcanvas offcanvas-bottom h-auto border-0 shadow-lg d-flex flex-column" tabindex="-1" id="advancedBookingModal" aria-labelledby="advancedBookingModalLabel">
-    <!-- Centered Drag Handle Indicator for Mobile Bottom Sheet -->
-    <div class="drag-handle-container d-flex justify-content-center pt-2 flex-shrink-0">
-        <div class="drag-handle-pill"></div>
-    </div>
-
-    <div class="offcanvas-header border-bottom border-light border-opacity-10 pt-2 pb-3 px-4 flex-shrink-0 d-flex justify-content-between align-items-center">
-        <div class="d-flex align-items-center gap-2.5">
-            <div class="rounded-3 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; border: 1px solid rgba(59, 130, 246, 0.25);">
-                <i class="bi bi-lightning-charge-fill text-warning fs-5"></i>
-            </div>
-            <div>
-                <h5 class="offcanvas-title fw-bold text-main mb-0" id="advancedBookingModalLabel" style="font-size: 1.05rem;">
-                    Ad-Hoc Room Request
-                </h5>
-                <small class="text-muted" style="font-size: 0.72rem;">Instant classroom availability finder</small>
-            </div>
-        </div>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    
-    <form id="advancedBookingForm" class="d-flex flex-column flex-grow-1 overflow-hidden m-0">
-        <!-- Scrollable Body with overflow-y-auto -->
-        <div class="offcanvas-body p-4 pt-3 flex-grow-1 overflow-y-auto" style="max-height: calc(88vh - 130px);">
-            <!-- Inline Time/Date Validation Error Banner -->
-            <div id="advTimeInlineError" class="inline-error-banner d-none mb-3" role="alert">
-                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
-                <span id="advTimeInlineErrorMsg">Selected time cannot be in the past.</span>
-            </div>
-
-            <!-- Date Section -->
-            <div class="mb-3">
-                <label class="drawer-field-label mb-1.5" for="advDate">
-                    <i class="bi bi-calendar3 text-primary me-1.5"></i>
-                    <span>Reservation Date</span>
-                </label>
-                <!-- Frictionless UX: flex-nowrap row with overflow-x-auto to prevent crushing inputs -->
-                <div class="quick-date-pill-container" role="group" aria-label="Quick Date Selection">
-                    <button type="button" class="btn quick-date-pill active" id="btnQuickDateToday">
-                        <i class="bi bi-calendar-event"></i>
-                        <span>Today</span>
-                    </button>
-                    <button type="button" class="btn quick-date-pill" id="btnQuickDateTomorrow">
-                        <i class="bi bi-calendar-plus"></i>
-                        <span>Tomorrow</span>
-                    </button>
-                    <button type="button" class="btn quick-date-pill" id="btnQuickDateDayAfter">
-                        <i class="bi bi-calendar-week"></i>
-                        <span>In 2 Days</span>
-                    </button>
-                </div>
-                <div class="input-icon-wrapper">
-                    <i class="bi bi-calendar-date input-icon"></i>
-                    <input type="date" class="form-control drawer-input" id="advDate" required>
-                </div>
-            </div>
-
-            <!-- Start Time & Duration in 2 balanced columns with Native Mobile Pickers -->
-            <div class="row g-2.5 mb-3">
-                <div class="col-6">
-                    <label class="drawer-field-label mb-1.5" for="advStartTime">
-                        <i class="bi bi-clock text-primary me-1.5"></i>
-                        <span>Start Time</span>
-                    </label>
-                    <div class="input-icon-wrapper">
-                        <i class="bi bi-clock-history input-icon"></i>
-                        <input type="time" class="form-control drawer-input" id="advStartTime" min="07:00" max="21:00" step="1800" required>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <label class="drawer-field-label mb-1.5" for="advDuration">
-                        <i class="bi bi-hourglass-split text-primary me-1.5"></i>
-                        <span>Duration</span>
-                    </label>
-                    <div class="input-icon-wrapper">
-                        <i class="bi bi-hourglass-bottom input-icon"></i>
-                        <select class="form-select drawer-input" id="advDuration" required>
-                            <option value="1">1 Hour</option>
-                            <option value="2">2 Hours</option>
-                            <option value="3">3 Hours</option>
-                            <option value="4">4 Hours</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Preferred Floors Chips Grid: Responsive CSS Grid -->
-            <div class="mb-3">
-                <div class="d-flex justify-content-between align-items-center mb-1.5">
-                    <label class="drawer-field-label mb-0">
-                        <i class="bi bi-layers text-primary me-1.5"></i>
-                        <span>Preferred Floors</span>
-                    </label>
-                    <div class="d-flex align-items-center gap-1.5" style="font-size: 0.72rem;">
-                        <button type="button" class="btn btn-link p-0 text-decoration-none text-primary fw-semibold" id="btnSelectAllFloors" style="font-size: 0.72rem;">Select All</button>
-                        <span class="text-muted opacity-40">|</span>
-                        <button type="button" class="btn btn-link p-0 text-decoration-none text-muted fw-semibold" id="btnClearFloors" style="font-size: 0.72rem;">Clear</button>
-                    </div>
-                </div>
-                <div class="floor-chip-grid">
-                    {% for floor in floors %}
-                    <input type="checkbox" class="btn-check adv-floor-checkbox" id="advFloor{{ floor.id }}" value="{{ floor.id }}" autocomplete="off" checked>
-                    <label class="floor-chip-label" for="advFloor{{ floor.id }}">
-                        {{ floor.name }}
-                    </label>
-                    {% endfor %}
-                </div>
-            </div>
-
-            <!-- Room Type -->
-            <div class="mb-2">
-                <label class="drawer-field-label mb-1.5" for="advRoomType">
-                    <i class="bi bi-building text-primary me-1.5"></i>
-                    <span>Room Category</span>
-                </label>
-                <div class="input-icon-wrapper">
-                    <i class="bi bi-door-open input-icon"></i>
-                    <select class="form-select drawer-input" id="advRoomType">
-                        <option value="all">Any Room Type (Classrooms & Labs)</option>
-                        <option value="class">Standard Classrooms Only</option>
-                        <option value="lab">Computer & Electronics Labs Only</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <!-- Sticky Call to Action Footer -->
-        <div class="p-3 px-4 offcanvas-sticky-footer flex-shrink-0 sticky-bottom shadow-sm">
-            <button type="submit" class="btn btn-primary w-100 btn-search-prominent d-flex align-items-center justify-content-center gap-2 text-white" id="btnSearchRooms">
-                <i class="bi bi-search fs-6"></i>
-                <span>Search Live Availability</span>
-            </button>
-        </div>
-    </form>
-</div>
-
 <!-- Floating Action Button (FAB) for Reporting Campus Maintenance Issues -->
 <a href="{{ url_for('main.report_form') }}" class="faculty-fab position-fixed shadow-lg d-md-none" id="fabReportIssue" aria-label="Report Campus Issue" title="Report Campus Issue">
     <i class="bi bi-plus-lg"></i>
@@ -3126,11 +3139,7 @@
         <i class="bi bi-calendar-check"></i>
         <span>Agenda</span>
     </button>
-    <button class="bottom-nav-btn {% if view == 'tracker' %}active{% endif %}" id="btn-bottom-map" type="button" aria-label="Map View">
-        <i class="bi bi-map"></i>
-        <span>Map</span>
-    </button>
-    <button class="bottom-nav-btn" id="btn-bottom-request" type="button" data-bs-toggle="offcanvas" data-bs-target="#advancedBookingModal" aria-label="Request Room">
+    <button class="bottom-nav-btn" id="btn-bottom-request" type="button" aria-label="Request Room">
         <i class="bi bi-lightning-charge"></i>
         <span>Request</span>
     </button>
@@ -3512,7 +3521,7 @@
             monitorAdHocCheckInProximity();
             setInterval(monitorAdHocCheckInProximity, 30000);
 
-            // ── Phase 4 & Phase 7: Quick-Add Ad-Hoc Booking & 3-Strike Lockout Check ──
+            // ── Phase 4 & Phase 7: Quick-Add Ad-Hoc Booking Direct to Map ──
             window.quickAddBooking = (el) => {
                 if (!el) return;
                 const isSuspended = document.querySelector('.faculty-dashboard')?.getAttribute('data-faculty-suspended') === 'true';
@@ -3531,40 +3540,78 @@
 
                 const dayIdx = parseInt(el.getAttribute('data-day-index'));
                 const hour = parseInt(el.getAttribute('data-hour'));
+                const dayName = el.getAttribute('data-day-name') || '';
 
                 // Calculate target date for this day in current week
                 const now = new Date();
                 const currentJsDay = now.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
                 const currentGridDayIdx = currentJsDay === 0 ? 6 : currentJsDay - 1; // Mon = 0, ..., Sun = 6
                 const dayDiff = dayIdx - currentGridDayIdx;
-                const targetDate = new Date(now.getTime() + dayDiff * 86400000);
+                const targetDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() + dayDiff);
                 
                 const yyyy = targetDate.getFullYear();
                 const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
                 const dd = String(targetDate.getDate()).padStart(2, '0');
                 const dateStr = `${yyyy}-${mm}-${dd}`;
+                const formattedHour = String(hour).padStart(2, '0');
+                const timeStr = `${formattedHour}:00`;
 
-                const advDateInput = document.getElementById('advDate');
-                const advStartTimeSelect = document.getElementById('advStartTime');
+                // Slot start and end datetime in local ISO string format (YYYY-MM-DDTHH:MM:SS)
+                const nextH = hour + 1;
+                const slotStartIso = `${dateStr}T${formattedHour}:00:00`;
+                const slotEndIso = `${dateStr}T${String(nextH).padStart(2, '0')}:00:00`;
 
-                if (advDateInput) {
-                    advDateInput.value = dateStr;
-                    if (typeof syncDatePills === 'function') syncDatePills(dateStr);
-                    if (typeof clearInlineTimeError === 'function') clearInlineTimeError();
+                // Reject past slots
+                const slotEndDt = new Date(targetDate.getFullYear(), targetDate.getMonth(), targetDate.getDate(), hour + 1, 0, 0, 0);
+                if (slotEndDt.getTime() <= now.getTime()) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Past Time Slot',
+                        text: 'You cannot make an ad-hoc reservation for a past time slot. Please select a current or upcoming slot.',
+                        confirmButtonColor: '#2563eb'
+                    });
+                    return;
                 }
 
-                if (advStartTimeSelect) {
-                    const formattedHour = String(hour).padStart(2, '0');
-                    advStartTimeSelect.value = `${formattedHour}:00`;
-                    if (typeof clearInlineTimeError === 'function') clearInlineTimeError();
-                }
+                const displayHourStart = hour > 12 ? (hour - 12) + ':00 PM' : (hour === 12 ? '12:00 PM' : hour + ':00 AM');
+                const displayHourEnd = nextH > 12 ? (nextH - 12) + ':00 PM' : (nextH === 12 ? '12:00 PM' : nextH + ':00 AM');
+                const dateDisplayStr = targetDate.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+                const slotDisplayTitle = `${dayName || dateDisplayStr}, ${dateDisplayStr} • ${displayHourStart} - ${displayHourEnd}`;
 
-                // Open Ad-Hoc Booking Bottom Sheet (Offcanvas on mobile, centered modal on desktop)
-                const offcanvasEl = document.getElementById('advancedBookingModal');
-                if (offcanvasEl) {
-                    const offcanvasInst = bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
-                    offcanvasInst.show();
-                }
+                // Activate scoped ad-hoc search mode
+                advancedSearchMode = true;
+                advancedTimePayload = {
+                    date: dateStr,
+                    dayIdx: dayIdx,
+                    hour: hour,
+                    duration: 1,
+                    timeStr: timeStr,
+                    startIso: slotStartIso,
+                    endIso: slotEndIso,
+                    displaySlot: slotDisplayTitle
+                };
+
+                // Display Ad-Hoc banner on map
+                const adHocBanner = document.getElementById('mapAdHocBanner');
+                const adHocSlotText = document.getElementById('mapAdHocSlotText');
+                if (adHocBanner) adHocBanner.classList.remove('d-none');
+                if (adHocSlotText) adHocSlotText.textContent = `Ad-Hoc Slot: ${slotDisplayTitle}`;
+
+                // Transition directly to the map view
+                switchView(document.querySelector('.view-section.active'), viewTracker, 'tracker');
+
+                // Refresh floor status for the selected slot
+                const curLevel = floorSelect ? floorSelect.value : 4;
+                refreshMapStatus(curLevel);
+
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'info',
+                    title: `Checking available classrooms for ${slotDisplayTitle}`,
+                    showConfirmButton: false,
+                    timer: 2500
+                });
             };
 
             // Setup GSAP View Switching
@@ -3631,16 +3678,29 @@
 
             if (btnSchedule) {
                 btnSchedule.addEventListener('click', () => {
+                    window.isLocateTargetMode = false;
+                    const container = document.getElementById('facultyMapContainer');
+                    if (container) container.classList.remove('map-locate-target-mode');
+                    const adHocBanner = document.getElementById('mapAdHocBanner');
+                    if (adHocBanner && !advancedSearchMode) adHocBanner.classList.add('d-none');
                     switchView(document.querySelector('.view-section.active'), viewSchedule, 'schedule');
                 });
             }
             if (btnBottomAgenda) {
                 btnBottomAgenda.addEventListener('click', () => {
+                    window.isLocateTargetMode = false;
+                    const container = document.getElementById('facultyMapContainer');
+                    if (container) container.classList.remove('map-locate-target-mode');
+                    const adHocBanner = document.getElementById('mapAdHocBanner');
+                    if (adHocBanner && !advancedSearchMode) adHocBanner.classList.add('d-none');
                     switchView(document.querySelector('.view-section.active'), viewSchedule, 'schedule');
                 });
             }
             
             function activateTrackerView() {
+                window.isLocateTargetMode = false;
+                const container = document.getElementById('facultyMapContainer');
+                if (container) container.classList.remove('map-locate-target-mode');
                 switchView(document.querySelector('.view-section.active'), viewTracker, 'tracker');
                 if (!window.mapInitialized) {
                     refreshMapStatus(4);
@@ -3652,11 +3712,17 @@
             
             if (btnHistory) {
                 btnHistory.addEventListener('click', () => {
+                    window.isLocateTargetMode = false;
+                    const container = document.getElementById('facultyMapContainer');
+                    if (container) container.classList.remove('map-locate-target-mode');
                     switchView(document.querySelector('.view-section.active'), viewHistory, 'history');
                 });
             }
             if (btnBottomHistory) {
                 btnBottomHistory.addEventListener('click', () => {
+                    window.isLocateTargetMode = false;
+                    const container = document.getElementById('facultyMapContainer');
+                    if (container) container.classList.remove('map-locate-target-mode');
                     switchView(document.querySelector('.view-section.active'), viewHistory, 'history');
                 });
             }
@@ -3678,15 +3744,29 @@
                 if (typeof window.closePopUp === 'function') {
                     window.closePopUp();
                 }
+                // If user changes floor manually, exit locate target mode
+                window.isLocateTargetMode = false;
+                const container = document.getElementById('facultyMapContainer');
+                if (container) container.classList.remove('map-locate-target-mode');
+                document.querySelectorAll('.room-pulse-highlight').forEach(el => el.classList.remove('room-pulse-highlight'));
+                const adHocBanner = document.getElementById('mapAdHocBanner');
+                if (adHocBanner && !advancedSearchMode) adHocBanner.classList.add('d-none');
+
                 const level = e.target.value;
                 refreshMapStatus(level);
             });
 
             let advancedSearchMode = false;
             let advancedTimePayload = null;
+            window.isLocateTargetMode = false;
 
             async function refreshMapStatus(floorLevel) {
                 const container = document.getElementById('facultyMapContainer');
+                if (window.isLocateTargetMode && container) {
+                    container.classList.add('map-locate-target-mode');
+                } else if (!window.isLocateTargetMode && container) {
+                    container.classList.remove('map-locate-target-mode');
+                }
                 const selectedOption = floorSelect.options[floorSelect.selectedIndex];
                 const floorId = selectedOption.getAttribute('data-floor-id');
                 
@@ -3696,8 +3776,6 @@
                     
                     if (advancedSearchMode && advancedTimePayload) {
                         url = '/faculty/api/map/status_for_time';
-                        const startDt = new Date(advancedTimePayload.startIso);
-                        const endDt = new Date(startDt.getTime() + advancedTimePayload.duration * 3600000);
                         options = {
                             method: 'POST',
                             headers: {
@@ -3707,8 +3785,8 @@
                             body: JSON.stringify({
                                 floor_ids: [parseInt(floorId)],
                                 room_type: 'all',
-                                start_time: startDt.toISOString(),
-                                end_time: endDt.toISOString()
+                                start_time: advancedTimePayload.startIso,
+                                end_time: advancedTimePayload.endIso
                             })
                         };
                     }
@@ -3722,7 +3800,7 @@
                         rooms.forEach(r => currentStatusData[r.id] = r);
                         
                         container.innerHTML = '';
-                        renderFloorMap(container, rooms, floorLevel.toString(), false);
+                        await renderFloorMap(container, rooms, floorLevel.toString(), false);
                         
                         applyOccupancyStyling();
                     }
@@ -3732,29 +3810,47 @@
             }
 
             function applyOccupancyStyling() {
+                const container = document.getElementById('facultyMapContainer');
+                if (!container) return;
+
+                // Ensure all room polygons and shapes default to gray / non-available
+                container.querySelectorAll('.room-poly, rect:not(.room-label):not([id*="_label"]), polygon:not(.room-label):not([id*="_label"]), path:not([id*="_label"]):not([id*="_text"]):not(.room-label):not(#Background):not(#Map_Outlines):not(#Interior_outlines)').forEach(el => {
+                    el.classList.remove('vacant-status');
+                    el.classList.add('occupied-status');
+                });
+
                 Object.values(currentStatusData).forEach(room => {
                     const roomNum = room.number;
                     const roomId = room.id;
                     const occ = room.occupancy || { status: 'vacant' };
                     const isOccupied = (occ.status === 'occupied');
+                    const roomType = (room.room_type || 'class').toLowerCase();
+                    const isBookableClass = (roomType === 'class' || roomType === 'lab' || roomType === 'classroom');
+
+                    // Available classroom = bookable class type AND vacant
+                    const isAvailableClass = isBookableClass && !isOccupied;
 
                     // Match all shapes and groups for this room across ID and number
-                    const elements = document.querySelectorAll(
+                    const elements = container.querySelectorAll(
                         `g[data-room-id="${roomId}"], g[data-room="${roomNum}"], [data-room-id="${roomId}"].room-poly, [data-room="${roomNum}"].room-poly, #${roomNum}, #${roomNum.toLowerCase()}, #${roomNum.toUpperCase()}`
                     );
 
                     elements.forEach(el => {
                         const target = el.classList.contains('room-poly') ? el : (el.querySelector('.room-poly, rect, path:not([id*="_label"]), polygon') || el);
-                        if (isOccupied) {
-                            target.classList.add('occupied-status');
-                            target.classList.remove('vacant-status');
-                            el.classList.add('occupied-status');
-                            el.classList.remove('vacant-status');
-                        } else {
+                        if (isAvailableClass) {
                             target.classList.add('vacant-status');
                             target.classList.remove('occupied-status');
                             el.classList.add('vacant-status');
                             el.classList.remove('occupied-status');
+                            target.style.cursor = 'pointer';
+                            el.style.cursor = 'pointer';
+                        } else {
+                            target.classList.add('occupied-status');
+                            target.classList.remove('vacant-status');
+                            el.classList.add('occupied-status');
+                            el.classList.remove('vacant-status');
+                            target.style.cursor = 'not-allowed';
+                            el.style.cursor = 'not-allowed';
                         }
                     });
                 });
@@ -3836,6 +3932,11 @@
                 if (!info) return;
                 currentPopRoomData = info;
 
+                const occ = info.occupancy || { status: 'vacant' };
+                const roomType = (info.room_type || 'class').toLowerCase();
+                const isBookableClass = (roomType === 'class' || roomType === 'lab' || roomType === 'classroom');
+                const isOccupied = (occ.status === 'occupied');
+
                 // Highlight selection
                 document.querySelectorAll('.room-group, .room-poly, rect, path, polygon').forEach(r => r.classList.remove('selected'));
                 const elements = document.querySelectorAll(
@@ -3856,48 +3957,71 @@
                 document.getElementById('popRoomName').innerText = info.name || info.number;
                 document.getElementById('popRoomType').innerText = (info.room_type || 'CLASSROOM').toUpperCase();
                 
-                const occ = info.occupancy || { status: 'vacant' };
                 const bookBtn = document.getElementById('btnActionBook');
                 const badge = document.getElementById('popStatusBadge');
                 const alert = document.getElementById('popStatusAlert');
                 const cancelBtn = document.getElementById('btnActionCancel');
+                const nudgeBtn = document.getElementById('btnActionNudge');
 
-                badge.className = `pop-badge ${occ.status}`;
-                badge.innerText = occ.status.toUpperCase();
+                if (isOccupied) {
+                    badge.className = 'pop-badge occupied';
+                    badge.innerText = 'OCCUPIED (NON-BOOKABLE)';
+                    badge.style.backgroundColor = '#6b7280';
 
-                if (occ.status === 'occupied') {
                     alert.className = 'status-alert occupied mb-3 py-2 px-3';
                     document.getElementById('popAlertTitle').innerText = 'Currently In Session';
                     document.getElementById('popAlertContent').innerHTML = `
-                        <strong>${occ.subject}</strong> — ${occ.faculty}<br>
-                        <span class="text-muted">Ends at ${occ.end_time}</span>
+                        <strong>${occ.subject || 'Occupied Class'}</strong> — ${occ.faculty || 'Assigned Faculty'}<br>
+                        <span class="text-muted">${advancedSearchMode && advancedTimePayload ? 'Classroom is already occupied during this time slot.' : 'Currently in session.'}</span>
                     `;
                     
-                    const nudgeBtn = document.getElementById('btnActionNudge');
+                    // Occupied classes are non-bookable!
+                    bookBtn.classList.add('d-none');
+                    bookBtn.setAttribute('disabled', 'true');
 
-                    if (occ.faculty_id === currentUserId) {
-                        bookBtn.classList.add('d-none');
+                    if (occ.faculty_id === currentUserId && !advancedSearchMode) {
                         cancelBtn.classList.remove('d-none');
                         if (nudgeBtn) nudgeBtn.classList.add('d-none');
                         cancelBtn.onclick = () => handleCancellation(occ.id, occ.type);
                     } else {
-                        bookBtn.classList.remove('d-none');
                         cancelBtn.classList.add('d-none');
-                        if (nudgeBtn) {
+                        if (nudgeBtn && !advancedSearchMode) {
                             nudgeBtn.classList.remove('d-none');
                             nudgeBtn.onclick = () => handleSendNudge(selectedRoomId, occ.faculty, occ.subject);
+                        } else if (nudgeBtn) {
+                            nudgeBtn.classList.add('d-none');
                         }
                     }
+                } else if (!isBookableClass) {
+                    badge.className = 'pop-badge occupied';
+                    badge.innerText = 'NON-BOOKABLE';
+                    badge.style.backgroundColor = '#6b7280';
+
+                    alert.className = 'status-alert occupied mb-3 py-2 px-3';
+                    document.getElementById('popAlertTitle').innerText = 'Facility Space';
+                    document.getElementById('popAlertContent').innerText = 'This space is not designated as a classroom or lab and cannot be booked.';
+                    
+                    bookBtn.classList.add('d-none');
+                    bookBtn.setAttribute('disabled', 'true');
+                    cancelBtn.classList.add('d-none');
+                    if (nudgeBtn) nudgeBtn.classList.add('d-none');
                 } else {
+                    // Available Class: Green & Bookable!
+                    badge.className = 'pop-badge vacant';
+                    badge.innerText = 'AVAILABLE';
+                    badge.style.backgroundColor = '';
+
                     alert.className = 'status-alert vacant mb-3 py-2 px-3';
-                    document.getElementById('popAlertTitle').innerText = 'Optimal / Vacant';
-                    const nextInfo = info.time_until_next_lecture ? `<br><small class="text-muted">Next lecture in: <strong>${info.time_until_next_lecture}</strong></small>` : '';
-                    document.getElementById('popAlertContent').innerHTML = `Room is currently vacant. Access permitted.${nextInfo}`;
+                    document.getElementById('popAlertTitle').innerText = 'Available Classroom';
+                    const slotDesc = (advancedSearchMode && advancedTimePayload) 
+                        ? `Classroom is open for <strong>${advancedTimePayload.displaySlot}</strong>.` 
+                        : 'Room is currently vacant. Access permitted.';
+                    document.getElementById('popAlertContent').innerHTML = slotDesc;
+
                     bookBtn.classList.remove('disabled');
                     bookBtn.removeAttribute('disabled');
                     bookBtn.classList.remove('d-none');
                     cancelBtn.classList.add('d-none');
-                    const nudgeBtn = document.getElementById('btnActionNudge');
                     if (nudgeBtn) nudgeBtn.classList.add('d-none');
                 }
 
@@ -4004,6 +4128,22 @@
                     return;
                 }
 
+                // Guard against booking occupied or non-classroom spaces
+                const occ = info.occupancy || { status: 'vacant' };
+                const isOccupied = (occ.status === 'occupied');
+                const roomType = (info.room_type || 'class').toLowerCase();
+                const isBookableClass = (roomType === 'class' || roomType === 'lab' || roomType === 'classroom');
+
+                if (isOccupied || !isBookableClass) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Room Unavailable',
+                        text: `Room ${info.number || ''} is occupied or not available for ad-hoc booking during this time.`,
+                        confirmButtonColor: '#2563eb'
+                    });
+                    return;
+                }
+
                 const roomNumEl = document.getElementById('bookRoomNumber');
                 if (roomNumEl) roomNumEl.innerText = info.number;
                 
@@ -4013,16 +4153,20 @@
                 const roomIdEl = document.getElementById('bookRoomId');
                 if (roomIdEl) roomIdEl.value = selectedRoomId;
                 
-                // Set default date (defaults to tomorrow if after 19:00, otherwise today)
+                // Set date (use ad-hoc date if in ad-hoc mode, otherwise default)
                 const dateInput = document.getElementById('bookReservationDate');
                 if (dateInput) {
+                    if (advancedSearchMode && advancedTimePayload && advancedTimePayload.date) {
+                        dateInput.value = advancedTimePayload.date;
+                    } else {
+                        const now = new Date();
+                        const targetDate = (now.getHours() >= 19) ? new Date(now.getTime() + 86400000) : now;
+                        const yyyy = targetDate.getFullYear();
+                        const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
+                        const dd = String(targetDate.getDate()).padStart(2, '0');
+                        dateInput.value = `${yyyy}-${mm}-${dd}`;
+                    }
                     const now = new Date();
-                    const targetDate = (now.getHours() >= 19) ? new Date(now.getTime() + 86400000) : now;
-                    const yyyy = targetDate.getFullYear();
-                    const mm = String(targetDate.getMonth() + 1).padStart(2, '0');
-                    const dd = String(targetDate.getDate()).padStart(2, '0');
-                    dateInput.value = `${yyyy}-${mm}-${dd}`;
-                    
                     const todayYyyy = now.getFullYear();
                     const todayMm = String(now.getMonth() + 1).padStart(2, '0');
                     const todayDd = String(now.getDate()).padStart(2, '0');
@@ -4060,8 +4204,8 @@
                     option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'} (Selected)`;
                     select.appendChild(option);
                     select.disabled = true;
-                    document.getElementById('bookDuration').value = advancedTimePayload.duration;
-                    document.getElementById('bookDuration').disabled = true;
+                    document.getElementById('bookDuration').value = advancedTimePayload.duration || '1';
+                    document.getElementById('bookDuration').disabled = false;
                     return;
                 }
 
@@ -4117,20 +4261,16 @@
                 }
 
                 let slotStart;
-                if (advancedSearchMode && advancedTimePayload) {
-                    const startDt = new Date(advancedTimePayload.startIso);
-                    slotStart = startDt.getFullYear() + '-' + 
-                              String(startDt.getMonth() + 1).padStart(2, '0') + '-' + 
-                              String(startDt.getDate()).padStart(2, '0') + 'T' + 
-                              slotTime + ':00';
+                if (advancedSearchMode && advancedTimePayload && advancedTimePayload.date) {
+                    slotStart = `${advancedTimePayload.date}T${slotTime}:00`;
                 } else if (selectedDate) {
-                    slotStart = selectedDate + 'T' + slotTime + ':00';
+                    slotStart = `${selectedDate}T${slotTime}:00`;
                 } else {
                     const now = new Date();
-                    slotStart = now.getFullYear() + '-' + 
-                                  String(now.getMonth() + 1).padStart(2, '0') + '-' + 
-                                  String(now.getDate()).padStart(2, '0') + 'T' + 
-                                  slotTime + ':00';
+                    const yyyy = now.getFullYear();
+                    const mm = String(now.getMonth() + 1).padStart(2, '0');
+                    const dd = String(now.getDate()).padStart(2, '0');
+                    slotStart = `${yyyy}-${mm}-${dd}T${slotTime}:00`;
                 }
 
                 const payload = {
@@ -4166,245 +4306,45 @@
                 }
             });
 
-            // ── Phase 5: Inline Time Error Helpers ──
-            function showInlineTimeError(message) {
-                const errorBanner = document.getElementById('advTimeInlineError');
-                const errorMsg = document.getElementById('advTimeInlineErrorMsg');
-                const timeInput = document.getElementById('advStartTime');
-                if (errorBanner && errorMsg) {
-                    errorMsg.textContent = message;
-                    errorBanner.classList.remove('d-none');
-                }
-                if (timeInput) {
-                    timeInput.classList.add('is-invalid');
-                    timeInput.focus();
-                }
-            }
-
-            function clearInlineTimeError() {
-                const errorBanner = document.getElementById('advTimeInlineError');
-                const timeInput = document.getElementById('advStartTime');
-                if (errorBanner) {
-                    errorBanner.classList.add('d-none');
-                }
-                if (timeInput) {
-                    timeInput.classList.remove('is-invalid');
-                }
-            }
-            window.clearInlineTimeError = clearInlineTimeError;
-
-            // Quick-Select Date Pills (Today, Tomorrow, In 2 Days) + Two-Way Sync
-            const btnQuickToday = document.getElementById('btnQuickDateToday');
-            const btnQuickTomorrow = document.getElementById('btnQuickDateTomorrow');
-            const btnQuickDayAfter = document.getElementById('btnQuickDateDayAfter');
-            const advDateInput = document.getElementById('advDate');
-            const advStartTimeInput = document.getElementById('advStartTime');
-            const btnSelectAllFloors = document.getElementById('btnSelectAllFloors');
-            const btnClearFloors = document.getElementById('btnClearFloors');
-
-            function formatDateToYMD(d) {
-                const year = d.getFullYear();
-                const month = String(d.getMonth() + 1).padStart(2, '0');
-                const day = String(d.getDate()).padStart(2, '0');
-                return `${year}-${month}-${day}`;
-            }
-
-            function syncDatePills(dateVal) {
-                const todayStr = formatDateToYMD(new Date());
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                const tomorrowStr = formatDateToYMD(tomorrow);
-                const dayAfter = new Date();
-                dayAfter.setDate(dayAfter.getDate() + 2);
-                const dayAfterStr = formatDateToYMD(dayAfter);
-
-                if (btnQuickToday) btnQuickToday.classList.toggle('active', dateVal === todayStr);
-                if (btnQuickTomorrow) btnQuickTomorrow.classList.toggle('active', dateVal === tomorrowStr);
-                if (btnQuickDayAfter) btnQuickDayAfter.classList.toggle('active', dateVal === dayAfterStr);
-            }
-            window.syncDatePills = syncDatePills;
-
-            if (advDateInput) {
-                // Pre-populate with today if empty
-                if (!advDateInput.value) {
-                    advDateInput.value = formatDateToYMD(new Date());
-                }
-                syncDatePills(advDateInput.value);
-
-                advDateInput.addEventListener('input', () => {
-                    clearInlineTimeError();
-                    syncDatePills(advDateInput.value);
-                });
-                
-                if (btnQuickToday) {
-                    btnQuickToday.addEventListener('click', () => {
-                        clearInlineTimeError();
-                        advDateInput.value = formatDateToYMD(new Date());
-                        syncDatePills(advDateInput.value);
-                    });
-                }
-
-                if (btnQuickTomorrow) {
-                    btnQuickTomorrow.addEventListener('click', () => {
-                        clearInlineTimeError();
-                        const tomorrow = new Date();
-                        tomorrow.setDate(tomorrow.getDate() + 1);
-                        advDateInput.value = formatDateToYMD(tomorrow);
-                        syncDatePills(advDateInput.value);
-                    });
-                }
-
-                if (btnQuickDayAfter) {
-                    btnQuickDayAfter.addEventListener('click', () => {
-                        clearInlineTimeError();
-                        const dayAfter = new Date();
-                        dayAfter.setDate(dayAfter.getDate() + 2);
-                        advDateInput.value = formatDateToYMD(dayAfter);
-                        syncDatePills(advDateInput.value);
-                    });
-                }
-            }
-
-            if (advStartTimeInput) {
-                // Default to next nearest hour between 08:00 and 19:00
-                if (!advStartTimeInput.value) {
-                    const now = new Date();
-                    const nextHour = now.getHours() + 1;
-                    const initialHour = nextHour >= 8 && nextHour <= 19 ? nextHour : 9;
-                    advStartTimeInput.value = `${String(initialHour).padStart(2, '0')}:00`;
-                }
-                advStartTimeInput.addEventListener('input', () => {
-                    clearInlineTimeError();
-                });
-            }
-
-            if (btnSelectAllFloors) {
-                btnSelectAllFloors.addEventListener('click', () => {
-                    document.querySelectorAll('.adv-floor-checkbox').forEach(cb => cb.checked = true);
-                });
-            }
-            if (btnClearFloors) {
-                btnClearFloors.addEventListener('click', () => {
-                    document.querySelectorAll('.adv-floor-checkbox').forEach(cb => cb.checked = false);
-                });
-            }
-
-            // Advanced Booking Form Submit
-            const advForm = document.getElementById('advancedBookingForm');
-            if(advForm) {
-                advForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const date = document.getElementById('advDate').value;
-                    const time = document.getElementById('advStartTime').value;
-                    const duration = parseInt(document.getElementById('advDuration').value);
-                    
-                    if (!date || !time) {
-                        showInlineTimeError('Please specify both reservation date and start time.');
-                        return;
-                    }
-
-                    // Pre-Submit Time Validation against Local Time
-                    const now = new Date();
-                    const todayStr = formatDateToYMD(now);
-
-                    if (date < todayStr) {
-                        showInlineTimeError('Reservation date cannot be in the past.');
-                        return;
-                    }
-
-                    if (date === todayStr) {
-                        const [h, m] = time.split(':').map(Number);
-                        const selectedDateTime = new Date();
-                        selectedDateTime.setHours(h, m !== undefined ? m : 0, 0, 0);
-
-                        if (selectedDateTime.getTime() <= now.getTime()) {
-                            const currentFormatted = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            showInlineTimeError(`Cannot book a slot in the past. Current local time is ${currentFormatted}. Please choose a future time.`);
-                            return;
-                        }
-                    }
-
-                    clearInlineTimeError();
-
-                    const [h, m] = time.split(':').map(Number);
-                    const startDt = new Date(date);
-                    startDt.setHours(h, m || 0, 0, 0);
-                    const endDt = new Date(startDt.getTime() + duration * 3600000);
-                    
-                    const startIso = startDt.toISOString();
-                    const endIso = endDt.toISOString();
-                    
-                    const floorCheckboxes = document.querySelectorAll('.adv-floor-checkbox:checked');
-                    const floorIds = Array.from(floorCheckboxes).map(cb => parseInt(cb.value));
-                    const roomType = document.getElementById('advRoomType').value;
-                    
-                    if (floorIds.length === 0) {
-                        showInlineTimeError('Please select at least one preferred floor.');
-                        return;
-                    }
-                    
-                    advancedSearchMode = true;
-                    advancedTimePayload = {
-                        date: date,
-                        startIso: startIso,
-                        duration: duration,
-                        timeStr: time
-                    };
-                    
-                    try { 
-                        const offcanvasEl = document.getElementById('advancedBookingModal');
-                        const offcanvasInst = bootstrap.Offcanvas.getInstance(offcanvasEl) || bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl);
-                        if (offcanvasInst) offcanvasInst.hide();
-                    } catch(err){}
-                    
-                    btnTracker.click();
-                    
+            // ── Ad-Hoc Flow Handlers ──
+            const btnBackToSchedule = document.getElementById('btnBackToSchedule');
+            if (btnBackToSchedule) {
+                btnBackToSchedule.addEventListener('click', () => {
+                    advancedSearchMode = false;
+                    advancedTimePayload = null;
+                    window.isLocateTargetMode = false;
                     const container = document.getElementById('facultyMapContainer');
-                    container.innerHTML = '<div class="text-center py-5 text-muted"><div class="spinner-border text-primary mb-3"></div><p>Searching for available rooms...</p></div>';
-                    
-                    try {
-                        const res = await fetch('/faculty/api/map/status_for_time', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({
-                                floor_ids: floorIds,
-                                room_type: roomType,
-                                start_time: startIso,
-                                end_time: endIso
-                            })
-                        });
-                        const result = await res.json();
-                        
-                        if (result.success) {
-                            const rooms = result.data.rooms;
-                            currentStatusData = {};
-                            rooms.forEach(r => currentStatusData[r.id] = r);
-                            
-                            const firstFloorId = floorIds[0];
-                            const floorOption = Array.from(document.getElementById('floorSelectorMap').options).find(opt => opt.getAttribute('data-floor-id') == firstFloorId);
-                            if (floorOption) {
-                                document.getElementById('floorSelectorMap').value = floorOption.value;
-                                container.innerHTML = '';
-                                renderFloorMap(container, rooms.filter(r => r.floor_id == firstFloorId), floorOption.value, false);
-                                applyOccupancyStyling();
-                                
-                                Swal.fire({
-                                    toast: true, position: 'top-end', showConfirmButton: false, timer: 3000,
-                                    icon: 'success', title: 'Showing availability for selected time'
-                                });
-                            }
-                        } else {
-                            Swal.fire('Search Failed', result.error, 'error');
-                        }
-                    } catch(err) {
-                        console.error(err);
-                    }
+                    if (container) container.classList.remove('map-locate-target-mode');
+                    document.querySelectorAll('.room-pulse-highlight').forEach(el => el.classList.remove('room-pulse-highlight'));
+                    const adHocBanner = document.getElementById('mapAdHocBanner');
+                    if (adHocBanner) adHocBanner.classList.add('d-none');
+                    switchView(document.querySelector('.view-section.active'), viewSchedule, 'schedule');
                 });
             }
+
+            const handleRequestRoomClick = () => {
+                const activeView = document.querySelector('.view-section.active');
+                if (activeView !== viewSchedule) {
+                    switchView(activeView, viewSchedule, 'schedule');
+                }
+                const grid = document.querySelector('.timetable-grid') || document.getElementById('view-schedule');
+                if (grid) {
+                    grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'info',
+                    title: 'Click any available slot on your schedule to reserve a classroom.',
+                    showConfirmButton: false,
+                    timer: 3500
+                });
+            };
+
+            const btnHeaderRequestRoom = document.getElementById('btnHeaderRequestRoom');
+            if (btnHeaderRequestRoom) btnHeaderRequestRoom.addEventListener('click', handleRequestRoomClick);
+            const btnBottomRequest = document.getElementById('btn-bottom-request');
+            if (btnBottomRequest) btnBottomRequest.addEventListener('click', handleRequestRoomClick);
 
             // Pusher Real-time integration
             const pusherAppKey = "{{ config['PUSHER_KEY'] }}";
@@ -4454,34 +4394,121 @@
                 }
             }
 
-            // Timetable to Map Logic
-            window.locateRoom = (roomNumber, roomId, level) => {
-                // Switch to Map View
-                const btnTracker = document.getElementById('btn-tracker');
-                const btnSchedule = document.getElementById('btn-schedule');
-                const viewSchedule = document.getElementById('view-schedule');
-                const viewTracker = document.getElementById('view-tracker');
-                
-                // If already on schedule, trigger switch
-                if (viewSchedule.classList.contains('active')) {
-                    btnTracker.click();
+            // ── Timetable to Map Classroom Blinking Locator ──
+            let activePulseTimeout = null;
+
+            function highlightRoomOnMap(roomNumber, roomId) {
+                const cleanNum = (roomNumber || '').toString().replace(/^VY/i, '');
+                let attempts = 0;
+
+                function attemptHighlight() {
+                    attempts++;
+                    const svgContainer = document.getElementById('facultyMapContainer');
+                    if (!svgContainer) return;
+
+                    const candidates = svgContainer.querySelectorAll(
+                        `[data-room="${roomNumber}"], [data-room="${cleanNum}"], [data-room="VY${cleanNum}"], [data-room-id="${roomId}"], #${roomNumber}, #${roomNumber.toLowerCase()}, #${roomNumber.toUpperCase()}, #VY${cleanNum}, #vy${cleanNum}`
+                    );
+
+                    if (candidates.length > 0) {
+                        document.querySelectorAll('.room-pulse-highlight').forEach(el => el.classList.remove('room-pulse-highlight'));
+                        
+                        candidates.forEach(el => {
+                            // Do not attach highlight class directly to label paths
+                            if (el.classList.contains('room-label') || (el.id && el.id.includes('_label'))) {
+                                return;
+                            }
+                            el.classList.add('room-pulse-highlight');
+                            const poly = el.classList.contains('room-poly') 
+                                ? el 
+                                : (el.querySelector('.room-poly, rect:not([id*="_label"]), polygon:not([id*="_label"]), path.room-poly') || el.querySelector('rect, polygon'));
+                            if (poly) poly.classList.add('room-pulse-highlight');
+                        });
+
+                        // Scroll map smoothly to the highlighted room
+                        try {
+                            candidates[0].scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+                        } catch (e) {}
+
+                        // Open room popup sidebar
+                        if (typeof handleRoomSelection === 'function') {
+                            handleRoomSelection(null, roomNumber, roomId);
+                        }
+
+                        // Auto-remove pulse after 10 seconds
+                        if (activePulseTimeout) clearTimeout(activePulseTimeout);
+                        activePulseTimeout = setTimeout(() => {
+                            document.querySelectorAll('.room-pulse-highlight').forEach(el => el.classList.remove('room-pulse-highlight'));
+                        }, 10000);
+                    } else if (attempts < 12) {
+                        setTimeout(attemptHighlight, 120);
+                    }
                 }
 
-                // Wait for switch animation, then set floor and highlight
-                setTimeout(() => {
-                    const floorSelect = document.getElementById('floorSelectorMap');
-                    if (floorSelect.value != level) {
-                        floorSelect.value = level;
-                        // Trigger the manual change event
-                        const event = new Event('change');
-                        floorSelect.dispatchEvent(event);
-                    }
-                    
-                    // Highlight room after map refresh
-                    setTimeout(() => {
-                        handleRoomSelection(null, roomNumber, roomId);
-                    }, 800); // Wait for map load
-                }, 500);
+                attemptHighlight();
+            }
+
+            window.locateRoom = (roomNumber, roomId, level, subject, timeStr) => {
+                const targetLevel = (level || '4').toString();
+                const activeView = document.querySelector('.view-section.active');
+                
+                window.isLocateTargetMode = true;
+                const container = document.getElementById('facultyMapContainer');
+                if (container) container.classList.add('map-locate-target-mode');
+
+                // Show banner at top of map
+                const adHocBanner = document.getElementById('mapAdHocBanner');
+                const adHocSlotText = document.getElementById('mapAdHocSlotText');
+                if (adHocBanner) adHocBanner.classList.remove('d-none');
+                if (adHocSlotText) {
+                    const cleanNum = (roomNumber || '').toString().replace(/^VY/i, '');
+                    const label = subject ? `<strong>${subject}</strong> (Room VY${cleanNum})` : `Room VY${cleanNum}`;
+                    const timeLabel = timeStr ? ` &bull; <span class="text-muted">${timeStr}</span>` : '';
+                    adHocSlotText.innerHTML = `<i class="bi bi-geo-alt-fill text-success me-1"></i>Classroom Location: ${label}${timeLabel}`;
+                }
+
+                // Switch to Map Tracker view
+                if (activeView !== viewTracker) {
+                    switchView(activeView, viewTracker, 'tracker');
+                }
+
+                // Update Floor Selector
+                const floorSelect = document.getElementById('floorSelectorMap');
+                if (floorSelect && floorSelect.value !== targetLevel) {
+                    floorSelect.value = targetLevel;
+                }
+
+                // Refresh floor status and trigger green blinking highlight
+                refreshMapStatus(targetLevel);
+                window.mapInitialized = true;
+
+                highlightRoomOnMap(roomNumber, roomId);
+
+                const cleanNum = (roomNumber || '').toString().replace(/^VY/i, '');
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: `Spotlighting Room VY${cleanNum} on Floor ${targetLevel}`,
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+            };
+
+            window.locateClassroomFromCell = (el) => {
+                if (!el) return;
+                const roomNumber = el.getAttribute('data-room-number') || '';
+                const roomId = el.getAttribute('data-room-id') || '';
+                const floorLevel = el.getAttribute('data-floor-level') || '4';
+                const subject = el.getAttribute('data-subject') || '';
+                const timeStr = el.getAttribute('data-time') || '';
+
+                if (!roomNumber && !roomId) {
+                    Swal.fire('No Room Assigned', 'This lecture does not have an assigned room number.', 'info');
+                    return;
+                }
+
+                window.locateRoom(roomNumber, roomId, floorLevel, subject, timeStr);
             };
 
             window.deleteClass = async (event, entryId) => {

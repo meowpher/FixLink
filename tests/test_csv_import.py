@@ -265,6 +265,54 @@ class TestCSVTimetableImport(unittest.TestCase):
         # Verify no form tags wrapping the row
         self.assertNotIn(f'<form id="assign-form-{tt_id}"', content)
 
+    def test_admin_timetable_mass_import_commit(self):
+        with self.app.app_context():
+            admin = User.query.filter_by(email="admin@mitwpu.edu.in").first()
+            admin_id = admin.id
+
+        with self.client.session_transaction() as sess:
+            sess['user_id'] = admin_id
+            sess['user_role'] = User.ROLE_ADMIN
+            sess['is_admin'] = True
+
+        csv_content = (
+            "Room No,Time,Mon,Tue\n"
+            "VY401,09:00 - 10:00,Maths 101,Physics 101\n"
+        ).encode('utf-8')
+
+        # 1. Test Dry Run preview
+        res_dry = self.client.post(
+            '/admin/api/timetable/import',
+            data={'file': (io.BytesIO(csv_content), 'test.csv'), 'dry_run': 'true'},
+            content_type='multipart/form-data'
+        )
+        self.assertEqual(res_dry.status_code, 200)
+        data_dry = res_dry.get_json()
+        self.assertTrue(data_dry['success'])
+        self.assertEqual(data_dry['data']['records_parsed'], 2)
+
+        with self.app.app_context():
+            # Nothing committed during dry run
+            self.assertEqual(Timetable.query.filter_by(subject='Maths 101').count(), 0)
+
+        # 2. Test Commit / Apply
+        res_commit = self.client.post(
+            '/admin/api/timetable/import',
+            data={'file': (io.BytesIO(csv_content), 'test.csv'), 'dry_run': 'false'},
+            content_type='multipart/form-data'
+        )
+        self.assertEqual(res_commit.status_code, 200)
+        data_commit = res_commit.get_json()
+        self.assertTrue(data_commit['success'])
+        self.assertEqual(data_commit['data']['records_parsed'], 2)
+
+        with self.app.app_context():
+            # Records successfully inserted
+            math_tt = Timetable.query.filter_by(course='Maths 101').first()
+            self.assertIsNotNone(math_tt)
+            self.assertEqual(math_tt.room.number, 'VY401')
+            self.assertIsNone(math_tt.faculty_id)
+
 if __name__ == '__main__':
     unittest.main()
 

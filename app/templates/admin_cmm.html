@@ -267,7 +267,7 @@
                                 </label>
                                 <select class="form-select flex-grow-1" id="bulkFacultySelect" aria-label="Select Faculty for Bulk Assignment">
                                     <option value="" selected disabled>Choose Faculty for Bulk Assignment...</option>
-                                    {% for fac in all_faculties %}
+                                    {% for fac in all_faculties or all_faculties_data %}
                                     <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
                                     {% endfor %}
                                 </select>
@@ -294,7 +294,7 @@
                             <select class="cmm-select" id="mobileBulkFacultySelect"
                                 aria-label="Select Faculty for Bulk Assignment">
                                 <option value="" selected disabled>Choose Faculty</option>
-                                {% for fac in all_faculties %}
+                                {% for fac in all_faculties or all_faculties_data %}
                                 <option value="{{ fac.id }}">{{ fac.name }} (ID: {{ fac.id }})</option>
                                 {% endfor %}
                             </select>
@@ -468,7 +468,7 @@
                             <small class="text-muted" style="font-size: 0.75rem;">Validate data and detect conflicts before committing changes</small>
                         </div>
                         <div class="form-check form-switch mb-0">
-                            <input class="form-check-input" type="checkbox" id="dryRunToggle" role="switch" checked style="width: 2.2em; height: 1.2em;">
+                            <input class="form-check-input" type="checkbox" id="dryRunToggle" role="switch" style="width: 2.2em; height: 1.2em;">
                         </div>
                     </div>
 
@@ -494,7 +494,7 @@
                         <button type="button" class="btn cmm-btn-preview" id="btnPreviewCsv">
                             <i class="bi bi-eye me-1.5"></i>Validate
                         </button>
-                        <button type="submit" class="btn cmm-btn-commit" id="btnCommitImport">
+                        <button type="button" class="btn cmm-btn-commit" id="btnCommitImport">
                             <i class="bi bi-check2-circle me-1.5"></i>Upload & Apply
                         </button>
                     </div>
@@ -581,6 +581,18 @@
     // Pre-build shared faculty options HTML string once (eliminates 90,000 DOM nodes)
     facultyOptionsHtml = '<option value="" selected disabled>Choose Faculty...</option>' +
         allFaculties.map(f => `<option value="${f.id}">${f.name} (ID: ${f.id})</option>`).join('');
+
+    // Ensure bulk faculty select dropdowns are also populated
+    const bulkSelect = document.getElementById('bulkFacultySelect');
+    const mobileBulkSelect = document.getElementById('mobileBulkFacultySelect');
+    if (bulkSelect && bulkSelect.options.length <= 1 && allFaculties.length > 0) {
+        bulkSelect.innerHTML = '<option value="" selected disabled>Choose Faculty for Bulk Assignment...</option>' +
+            allFaculties.map(f => `<option value="${f.id}">${f.name} (ID: ${f.id})</option>`).join('');
+    }
+    if (mobileBulkSelect && mobileBulkSelect.options.length <= 1 && allFaculties.length > 0) {
+        mobileBulkSelect.innerHTML = '<option value="" selected disabled>Choose Faculty</option>' +
+            allFaculties.map(f => `<option value="${f.id}">${f.name} (ID: ${f.id})</option>`).join('');
+    }
 
     function updateSelectedCounter() {
         const count = selectedIds.size;
@@ -1235,7 +1247,10 @@
                     }
 
                     if (!isDryRun) {
-                        alert('Timetable imported successfully!');
+                        if (summaryText) {
+                            summaryText.textContent = `Successfully imported ${data.records_parsed || 0} timetable entries! Reloading...`;
+                        }
+                        alert(`Timetable imported successfully! ${data.records_parsed || 0} classes have been added.`);
                         window.location.reload();
                     }
                 } else {
@@ -1248,11 +1263,26 @@
             }
         }
 
-        if (btnPreviewCsv) btnPreviewCsv.addEventListener('click', () => handleCsvSubmit(true));
+        const btnCommitImport = document.getElementById('btnCommitImport');
+
+        if (btnPreviewCsv) {
+            btnPreviewCsv.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleCsvSubmit(true);
+            });
+        }
+
+        if (btnCommitImport) {
+            btnCommitImport.addEventListener('click', function(e) {
+                e.preventDefault();
+                handleCsvSubmit(false);
+            });
+        }
+
         if (importTimetableForm) {
             importTimetableForm.addEventListener('submit', function(e) {
                 e.preventDefault();
-                handleCsvSubmit(document.getElementById('dryRunToggle').checked);
+                handleCsvSubmit(false);
             });
         }
 

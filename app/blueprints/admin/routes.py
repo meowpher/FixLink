@@ -283,6 +283,7 @@ def classroom_management():
         'admin_cmm.html',
         unassigned_classes_data=unassigned_classes_data,
         all_faculties_data=all_faculties_data,
+        all_faculties=all_faculties,
         floors=floors,
         academic_floors=academic_floors,
         rooms=rooms,
@@ -2678,7 +2679,7 @@ def reject_single_submission(submission_id):
                 title="Timetable Submission Needs Revision",
                 message=f"Your schedule submission was returned for revision by the Department Administrator: \"{admin_notes}\"",
                 type=Notification.TYPE_SYSTEM,
-                link="/faculty/submit-timetable"
+                link="/faculty/dashboard"
             )
             db.session.add(notif)
             

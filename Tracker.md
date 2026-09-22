@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.7** | 2026-09-22 | **Deployed** | Faculty Digital Twin Classroom Flashlight, Ad-Hoc Booking Highlighting & Tech Debt Cleanup (Interactive class locator with spotlight pulse on map, available-only green highlighting during ad-hoc booking, fixed duration dropdown, and purged obsolete timetable builder buttons/routes). |
 | **v1.7.6** | 2026-09-16 | **Deployed** | Admin CMM UX Architecture & Safety Hardening (Secured destructive timetable deletion with a warning modal; unified filter architecture by migrating course selector into sidebar; implemented Select column with bulk master checkbox; optimized Assign action buttons). |
 | **v1.7.5** | 2026-09-16 | **Deployed** | Timetable Subject, Course & Division Intelligent Parser & Normalizer (Decomposed combined raw spreadsheet cells into clean Subjects, structured Courses, and Division badges; stripped embedded redundant timestamps; retroactively cleaned 882 database records; upgraded CSV mass importer). |
 | **v1.7.4** | 2026-09-16 | **Deployed** | Root User / Super Admin Security & Immutable Creator Accounts (Permanently secured creator accounts against unauthorized edits, deletions, and password resets; locked down backend routes with 403 Forbidden checks; hardened admin and superadmin Jinja UI templates). |
@@ -15,6 +16,26 @@
 
 ## 2. Chronological Log of Pushed Updates
  
+### Release v1.7.7 (2026-09-22)
+- `feat(faculty-map)`: **Faculty Digital Twin Classroom Flashlight, Ad-Hoc Highlighting & UX Refinement**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Interactive Lecture Locator & Map Spotlight (Flashlight Mode)**:
+     - Enhanced faculty dashboard agenda cards so clicking any upcoming class card smoothly switches to the **Digital Twin Map** tab.
+     - Automatically parses room/floor metadata and dynamically loads the matching floor SVG if not already displayed.
+     - Implemented Spotlight / Flashlight visual effect: grayscales the rest of the floor map while illuminating and pulsing the targeted classroom in vibrant green (`#22c55e`), centering and zooming onto the room.
+  2. **Phase 2: Ad-Hoc Slot Booking Map Highlighting & Duration Fix**:
+     - Upgraded the ad-hoc room reservation mode so only available rooms appear in green while the rest of the floor plan is rendered in high-contrast grayscale.
+     - Fixed an issue where the `#bookDuration` dropdown was inadvertently disabled, restoring smooth duration scrolling and slot selection.
+     - Refactored `renderFloorMap()` and `renderDynamicSVGFloor()` in `render.js` to return Promises, ensuring chained map animations execute reliably.
+  3. **Phase 3: Dead Code & Redundant Feature Purge (Boy Scout Rule)**:
+     - Removed the legacy "Build Schedule" button from the faculty agenda header and deleted the "Submit Timetable" link from sidebar navigation.
+     - Removed backend routes (`/submit-timetable`, `/api/timetable-builder/*`) in `app/blueprints/faculty/routes.py` and deleted orphaned `app/templates/faculty/submit_timetable.html`.
+     - Updated notification redirect links to route directly to `/faculty/dashboard`.
+  4. **Phase 4: Rule 7 Strict Verification & Test Suite Execution**:
+     - Executed full automated test suite with 48/48 tests passing (100% success rate, 0 failures, 0 regressions).
+     - Verified compliance with credential security, dark mode integrity, mobile responsiveness, and OWASP standards.
+
 ### Release v1.7.6 (2026-09-16)
 - `feat(cmm-ux)`: **Admin Dashboard (CMM) UX Redesign & Security Protection**
 

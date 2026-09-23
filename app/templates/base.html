@@ -54,11 +54,11 @@
 
     <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.2" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.3" as="style">
 
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.2">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.3">
 
     <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -855,6 +855,7 @@
             if (isDark) {
                 document.body.setAttribute('data-theme', 'dark');
                 document.documentElement.setAttribute('data-bs-theme', 'dark');
+                document.documentElement.style.colorScheme = 'dark';
                 localStorage.setItem('theme', 'dark');
                 const icon = document.getElementById('themeToggleIcon');
                 if (icon) {
@@ -877,6 +878,7 @@
             } else {
                 document.body.removeAttribute('data-theme');
                 document.documentElement.setAttribute('data-bs-theme', 'light');
+                document.documentElement.style.colorScheme = 'light';
                 localStorage.setItem('theme', 'light');
                 const icon = document.getElementById('themeToggleIcon');
                 if (icon) {

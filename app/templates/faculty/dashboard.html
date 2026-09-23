@@ -2161,6 +2161,459 @@
     .btn-search-prominent:active {
         transform: translateY(0);
     }
+
+    /* ====================================================================
+       MOBILE AGENDA REDESIGN - HIGH-PERFORMANCE TIMELINE & DAY FILTER
+       ==================================================================== */
+    .faculty-suspension-alert {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.03) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.2) !important;
+        border-left: 4px solid #ef4444 !important;
+        border-radius: 16px;
+        transition: all 0.25s ease;
+    }
+    [data-theme="dark"] .faculty-suspension-alert {
+        background: rgba(239, 68, 68, 0.1) !important;
+        border-color: rgba(239, 68, 68, 0.3) !important;
+    }
+    .faculty-suspension-toggle {
+        font-size: 0.78rem;
+        cursor: pointer;
+        color: #ef4444;
+        text-decoration: none;
+    }
+    .faculty-suspension-toggle:hover {
+        text-decoration: underline;
+    }
+
+    /* Horizontal Day Tabs Filter */
+    .faculty-day-tabs-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 4px 2px 10px 2px;
+        margin-bottom: 8px;
+    }
+    .faculty-day-tabs-wrapper::-webkit-scrollbar {
+        display: none;
+    }
+    .faculty-day-pill {
+        flex: 0 0 auto;
+        padding: 6px 14px;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--card-bg, #ffffff);
+        color: var(--text-color, #475569);
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        user-select: none;
+    }
+    .faculty-day-pill:hover {
+        background: rgba(37, 99, 235, 0.08);
+        color: var(--mitwpu-blue, #2563eb);
+        border-color: rgba(37, 99, 235, 0.3);
+    }
+    .faculty-day-pill.active {
+        background: var(--mitwpu-blue, #0b4d8c) !important;
+        color: #ffffff !important;
+        border-color: var(--mitwpu-blue, #0b4d8c) !important;
+        box-shadow: 0 4px 12px rgba(11, 77, 140, 0.3) !important;
+    }
+    [data-theme="dark"] .faculty-day-pill {
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(255, 255, 255, 0.12);
+        color: #cbd5e1;
+    }
+    [data-theme="dark"] .faculty-day-pill:hover {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border-color: rgba(59, 130, 246, 0.35);
+    }
+    [data-theme="dark"] .faculty-day-pill.active {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+    }
+    .faculty-day-pill .day-count {
+        font-size: 0.7rem;
+        padding: 1px 5px;
+        border-radius: 10px;
+        background: rgba(0, 0, 0, 0.08);
+        color: inherit;
+        font-weight: 700;
+    }
+    .faculty-day-pill.active .day-count {
+        background: rgba(255, 255, 255, 0.25);
+        color: #ffffff;
+    }
+
+    /* Mobile Agenda Cards */
+    .mobile-agenda-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .mobile-agenda-card {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 16px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    .mobile-agenda-card:active {
+        transform: scale(0.985);
+    }
+    .mobile-agenda-card.is-adhoc {
+        border-left: 4px solid #f59e0b !important;
+    }
+    .mobile-agenda-card.is-regular {
+        border-left: 4px solid var(--mitwpu-blue, #0b4d8c) !important;
+    }
+    [data-theme="dark"] .mobile-agenda-card {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.08);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+    [data-theme="dark"] .mobile-agenda-card.is-regular {
+        border-left-color: #3b82f6 !important;
+    }
+    [data-theme="dark"] .mobile-agenda-card.is-adhoc {
+        border-left-color: #f59e0b !important;
+    }
+
+    .agenda-time-rail {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-width: 66px;
+        padding-right: 10px;
+        border-right: 1px solid var(--border-color, #e2e8f0);
+        flex-shrink: 0;
+    }
+    [data-theme="dark"] .agenda-time-rail {
+        border-right-color: rgba(255, 255, 255, 0.1);
+    }
+    .agenda-time-rail .time-start {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--text-color, #0f172a);
+        line-height: 1.1;
+    }
+    .agenda-time-rail .time-end {
+        font-size: 0.68rem;
+        color: var(--text-muted, #64748b);
+        margin-top: 2px;
+        font-weight: 500;
+    }
+
+    .agenda-card-main {
+        flex: 1;
+        min-width: 0;
+    }
+    .agenda-subject {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--text-color, #0f172a);
+        margin-bottom: 4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.25;
+    }
+    .agenda-chips {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .chip-room {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 6px;
+        background: rgba(11, 77, 140, 0.08);
+        color: var(--mitwpu-blue, #0b4d8c);
+        font-family: var(--font-monospace, ui-monospace, monospace);
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    [data-theme="dark"] .chip-room {
+        background: rgba(59, 130, 246, 0.15);
+        color: #93c5fd;
+    }
+    .chip-status {
+        font-size: 0.68rem;
+        font-weight: 600;
+        padding: 2px 7px;
+        border-radius: 6px;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+    .chip-status.chip-regular {
+        background: rgba(100, 116, 139, 0.1);
+        color: #64748b;
+    }
+    [data-theme="dark"] .chip-status.chip-regular {
+        background: rgba(148, 163, 184, 0.15);
+        color: #cbd5e1;
+    }
+    .chip-status.chip-adhoc {
+        background: rgba(245, 158, 11, 0.15);
+        color: #d97706;
+    }
+    [data-theme="dark"] .chip-status.chip-adhoc {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fbbf24;
+    }
+    .chip-status.chip-checked-in {
+        background: rgba(16, 185, 129, 0.15);
+        color: #059669;
+    }
+    [data-theme="dark"] .chip-status.chip-checked-in {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+    }
+    .agenda-co-faculty {
+        font-size: 0.7rem;
+        color: var(--text-muted, #64748b);
+        margin-top: 3px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .agenda-card-action {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-agenda-delete {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        color: #ef4444;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .btn-agenda-delete:hover {
+        background: #ef4444;
+        color: #ffffff;
+        transform: scale(1.08);
+    }
+    .agenda-locate-cue {
+        color: var(--text-muted, #94a3b8);
+        font-size: 0.95rem;
+        padding: 4px;
+    }
+
+    .mobile-empty-day-state {
+        text-align: center;
+        padding: 24px 16px;
+        background: var(--card-bg, #ffffff);
+        border: 1px dashed var(--border-color, #cbd5e1);
+        border-radius: 16px;
+        margin-top: 4px;
+    }
+    [data-theme="dark"] .mobile-empty-day-state {
+        background: rgba(255, 255, 255, 0.02);
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Faculty Event Cards */
+    .faculty-event-card {
+        background: var(--card-bg, #ffffff);
+        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .faculty-event-card:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        transform: translateY(-2px);
+    }
+    .faculty-event-card.status-approved {
+        border-left: 4px solid #10b981 !important;
+    }
+    .faculty-event-card.status-pending {
+        border-left: 4px solid #f59e0b !important;
+    }
+    .faculty-event-card.status-cancelled {
+        border-left: 4px solid #94a3b8 !important;
+    }
+    .faculty-event-card.status-rejected {
+        border-left: 4px solid #ef4444 !important;
+    }
+
+    .event-card-header .event-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-color, #1e293b);
+    }
+    .event-badge {
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 999px;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+    .badge-approved {
+        background: rgba(16, 185, 129, 0.12);
+        color: #059669;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .badge-pending {
+        background: rgba(245, 158, 11, 0.12);
+        color: #d97706;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+    }
+    .badge-cancelled {
+        background: rgba(148, 163, 184, 0.15);
+        color: #64748b;
+        border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    .badge-rejected {
+        background: rgba(239, 68, 68, 0.12);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .event-meta-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
+    }
+    .event-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.82rem;
+        color: var(--text-color, #475569);
+    }
+    .event-meta-item i {
+        font-size: 0.9rem;
+        width: 16px;
+        text-align: center;
+        flex-shrink: 0;
+    }
+    .event-callout {
+        font-size: 0.78rem;
+        padding: 6px 10px;
+        border-radius: 8px;
+        line-height: 1.4;
+    }
+    .callout-danger {
+        background: rgba(239, 68, 68, 0.08);
+        color: #dc2626;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .callout-secondary {
+        background: rgba(148, 163, 184, 0.1);
+        color: #64748b;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    .event-card-footer {
+        margin-top: 14px;
+        padding-top: 10px;
+        border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.06));
+        display: flex;
+        justify-content: flex-end;
+    }
+    [data-theme="dark"] .faculty-event-card {
+        background: rgba(30, 41, 59, 0.7);
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+    [data-theme="dark"] .event-card-header .event-title {
+        color: #f1f5f9;
+    }
+    [data-theme="dark"] .event-meta-item {
+        color: #cbd5e1;
+    }
+    [data-theme="dark"] .badge-approved {
+        background: rgba(16, 185, 129, 0.2);
+        color: #34d399;
+    }
+    [data-theme="dark"] .badge-pending {
+        background: rgba(245, 158, 11, 0.2);
+        color: #fbbf24;
+    }
+    [data-theme="dark"] .badge-cancelled {
+        background: rgba(148, 163, 184, 0.2);
+        color: #94a3b8;
+    }
+    [data-theme="dark"] .badge-rejected {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+    [data-theme="dark"] .event-card-footer {
+        border-top-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* Floating Action Button (FAB) & Mobile Viewport Protection */
+    @media (max-width: 767.98px) {
+        #view-schedule,
+        #view-tracker {
+            padding-bottom: 95px !important;
+        }
+        .faculty-fab {
+            bottom: 74px !important;
+            right: 18px !important;
+            z-index: 1030 !important;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--mitwpu-blue, #0b4d8c);
+            color: #ffffff !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            box-shadow: 0 4px 14px rgba(11, 77, 140, 0.4);
+            border: 2px solid #ffffff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none !important;
+        }
+        [data-theme="dark"] .faculty-fab {
+            background: #2563eb;
+            border-color: #1e293b;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.5);
+        }
+    }
 </style>
 {% endblock %}
 
@@ -2221,50 +2674,62 @@
     <div id="view-schedule" class="view-section active">
         {% if faculty.is_adhoc_suspended %}
         <!-- Phase 7: The 3-Strike Accountability Suspension Notice -->
-        <div class="alert alert-danger shadow-sm border-0 rounded-4 d-flex align-items-center p-3 mb-4 position-relative overflow-hidden" role="alert" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.05) 100%); border-left: 5px solid #ef4444 !important;">
-            <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center me-3 flex-shrink-0" style="width: 44px; height: 44px; font-size: 1.25rem;">
-                <i class="bi bi-shield-slash-fill"></i>
-            </div>
-            <div class="flex-grow-1">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <h6 class="alert-heading fw-bold mb-0 text-danger d-flex align-items-center">
-                        <span>Ad-Hoc Booking Privileges Suspended (3-Strike Engine)</span>
-                        <span class="badge bg-danger ms-2 px-2 py-1 text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">7-Day Lockout</span>
-                    </h6>
-                    <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 font-monospace px-2.5 py-1.5 fw-bold">
-                        <i class="bi bi-hourglass-split me-1"></i>{{ faculty.suspension_remaining_str }}
-                    </span>
+        <div class="faculty-suspension-alert shadow-sm p-3 mb-3 position-relative overflow-hidden" role="alert">
+            <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap flex-sm-nowrap">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; font-size: 1.05rem;">
+                        <i class="bi bi-shield-slash-fill"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold text-danger d-flex align-items-center gap-2 flex-wrap" style="font-size: 0.88rem;">
+                            <span>Ad-Hoc Booking Suspended</span>
+                            <span class="badge bg-danger text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.4px;">7-Day Lockout</span>
+                        </div>
+                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 font-monospace px-2 py-0.5 mt-1 fw-bold" style="font-size: 0.72rem;">
+                            <i class="bi bi-hourglass-split me-1"></i>{{ faculty.suspension_remaining_str }}
+                        </span>
+                    </div>
                 </div>
-                <p class="mb-0 text-muted small mt-1">
+                <button class="btn btn-sm btn-link p-0 text-danger text-decoration-none faculty-suspension-toggle d-flex align-items-center gap-1 ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#suspensionDetailsCollapse" aria-expanded="false" aria-controls="suspensionDetailsCollapse">
+                    <span>Details</span> <i class="bi bi-chevron-down"></i>
+                </button>
+            </div>
+            <div class="collapse mt-2 pt-2 border-top border-danger border-opacity-25" id="suspensionDetailsCollapse">
+                <p class="mb-0 text-muted small" style="font-size: 0.78rem; line-height: 1.45;">
                     Your Ad-Hoc quick-add booking privileges have been suspended for 7 days due to 3 unconfirmed no-show cancellations under Ghost Protocol in the last 30 days. Reinstatement date: <strong>{{ faculty.adhoc_suspended_until.strftime('%b %d, %Y at %I:%M %p') }}</strong>. Regular assigned timetable lecture duties remain unaffected.
                 </p>
             </div>
         </div>
         {% elif recent_strikes_count and recent_strikes_count > 0 %}
         <!-- Warning indicator if faculty has 1 or 2 strikes -->
-        <div class="alert alert-warning shadow-sm border-0 rounded-4 d-flex align-items-center p-3 mb-4 position-relative" role="alert" style="background: rgba(245, 158, 11, 0.08); border-left: 5px solid #f59e0b !important;">
-            <i class="bi bi-exclamation-triangle-fill text-warning fs-4 me-3"></i>
+        <div class="alert alert-warning shadow-sm border-0 rounded-4 d-flex align-items-center p-2.5 p-sm-3 mb-3 position-relative" role="alert" style="background: rgba(245, 158, 11, 0.08); border-left: 4px solid #f59e0b !important;">
+            <i class="bi bi-exclamation-triangle-fill text-warning fs-5 me-2.5 flex-shrink-0"></i>
             <div class="flex-grow-1">
-                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <span class="fw-bold text-dark">Ghost Protocol Accountability Warning (Strike {{ recent_strikes_count }} of 3)</span>
-                    <span class="badge bg-warning text-dark font-monospace px-2 py-1">{{ recent_strikes_count }}/3 Strikes (30-day window)</span>
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-1.5">
+                    <span class="fw-bold text-dark" style="font-size: 0.85rem;">Ghost Protocol Warning (Strike {{ recent_strikes_count }}/3)</span>
+                    <span class="badge bg-warning text-dark font-monospace px-2 py-0.5" style="font-size: 0.7rem;">30-day window</span>
                 </div>
-                <small class="text-muted d-block mt-0.5">3 Ghost Protocol auto-cancellations within 30 days trigger an automated 7-day Ad-Hoc booking suspension. Please check in within 10 minutes of booking start times.</small>
+                <small class="text-muted d-block mt-0.5" style="font-size: 0.75rem;">3 Ghost Protocol auto-cancellations within 30 days trigger an automated 7-day Ad-Hoc booking suspension. Please check in within 10 minutes of booking start times.</small>
             </div>
         </div>
         {% endif %}
         <div class="row">
             <div class="col-12">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end gap-3 mb-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end gap-2.5 mb-3 mb-md-4">
                     <div>
-                        <h3 class="fw-bold mb-0">Upcoming Agenda</h3>
-                        <p class="text-muted mb-0">Your synchronized teaching schedule across the Vyas building.</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <h4 class="fw-bold mb-0">Upcoming Agenda</h4>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 d-inline-block d-md-none" style="font-size: 0.72rem;">
+                                {{ (my_schedules|length) + (bookings_this_week|length) }} Lectures
+                            </span>
+                        </div>
+                        <p class="text-muted small mb-0 d-none d-sm-block">Your synchronized teaching schedule across the Vyas building.</p>
                     </div>
-                    <div class="d-flex gap-2 w-100 w-md-auto dashboard-header-buttons flex-wrap">
-                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" style="font-size: 0.85rem;" id="btnHeaderBookEvent">
+                    <div class="d-flex gap-2 w-100 w-md-auto dashboard-header-buttons flex-nowrap">
+                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 fw-semibold" style="font-size: 0.82rem;" id="btnHeaderBookEvent">
                             <i class="bi bi-calendar2-plus me-1"></i>Book Event
                         </a>
-                        <button class="btn btn-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0" id="btnHeaderRequestRoom" style="font-size: 0.85rem;">
+                        <button class="btn btn-primary rounded-pill px-3 py-2 px-md-4 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 fw-semibold" id="btnHeaderRequestRoom" style="font-size: 0.82rem;">
                             <i class="bi bi-lightning-charge-fill me-1"></i>Request Room
                         </button>
                     </div>
@@ -2272,59 +2737,68 @@
 
                 <!-- Event Bookings Section -->
                 {% if my_events %}
-                    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-                        <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-0">My Event Requests & Allocations</h5>
-                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1">
-                            <i class="bi bi-plus-lg me-1"></i>New Event
+                    <div class="d-flex align-items-center justify-content-between mb-3 mt-4 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-0">Event Requests & Allocations</h5>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">{{ my_events|length }}</span>
+                        </div>
+                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1.5 fw-semibold" style="font-size: 0.78rem;">
+                            <i class="bi bi-plus-lg"></i><span>New Event</span>
                         </a>
                     </div>
                     <div class="row g-3 mb-4">
                         {% for ev in my_events %}
-                        <div class="col-md-6 col-xl-4">
-                            <div class="card h-100 border-0 shadow-sm rounded-4 p-3 d-flex flex-column justify-content-between" style="background: var(--card-bg, #ffffff); border: 1px solid var(--border-color, rgba(0,0,0,0.08)) !important;">
-                                <div>
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <h6 class="fw-bold mb-0 text-truncate" title="{{ ev.title }}">{{ ev.title }}</h6>
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="faculty-event-card status-{{ ev.status|lower }} h-100">
+                                <div class="event-card-header">
+                                    <div class="d-flex align-items-start justify-content-between gap-2">
+                                        <h6 class="event-title mb-0 text-truncate" title="{{ ev.title }}">{{ ev.title }}</h6>
                                         {% if ev.status == 'Approved' %}
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1">Approved</span>
+                                            <span class="event-badge badge-approved"><i class="bi bi-check-circle-fill me-1"></i>Approved</span>
                                         {% elif ev.status == 'Pending' %}
-                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-2.5 py-1">Pending Approval</span>
+                                            <span class="event-badge badge-pending"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
                                         {% elif ev.status == 'Cancelled' %}
-                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-2.5 py-1">Cancelled</span>
+                                            <span class="event-badge badge-cancelled"><i class="bi bi-x-circle-fill me-1"></i>Cancelled</span>
                                         {% else %}
-                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-2.5 py-1">Rejected</span>
+                                            <span class="event-badge badge-rejected"><i class="bi bi-slash-circle-fill me-1"></i>Rejected</span>
                                         {% endif %}
                                     </div>
-                                    <div class="text-muted small mb-2">
-                                        <div><i class="bi bi-calendar3 me-1.5 text-primary"></i>{{ ev.start_date.strftime('%d %b %Y') }} {% if ev.start_date != ev.end_date %}to {{ ev.end_date.strftime('%d %b %Y') }}{% endif %}</div>
-                                        <div><i class="bi bi-clock me-1.5 text-primary"></i>{{ ev.start_time.strftime('%I:%M %p') }} - {{ ev.end_time.strftime('%I:%M %p') }}</div>
-                                        <div>
-                                            <i class="bi bi-geo-alt me-1.5 text-primary"></i>
+                                </div>
+                                <div class="event-card-body">
+                                    <div class="event-meta-grid">
+                                        <div class="event-meta-item">
+                                            <i class="bi bi-calendar3 text-primary"></i>
+                                            <span>{{ ev.start_date.strftime('%d %b %Y') }}{% if ev.start_date != ev.end_date %} – {{ ev.end_date.strftime('%d %b %Y') }}{% endif %}</span>
+                                        </div>
+                                        <div class="event-meta-item">
+                                            <i class="bi bi-clock text-primary"></i>
+                                            <span>{{ ev.start_time.strftime('%I:%M %p') }} – {{ ev.end_time.strftime('%I:%M %p') }}</span>
+                                        </div>
+                                        <div class="event-meta-item">
+                                            <i class="bi bi-geo-alt-fill text-primary"></i>
                                             {% if ev.booking_type == 'floors' %}
-                                                <span class="fw-semibold">Entire Floor(s):</span>
-                                                {% for f in ev.floors %}Level {{ f.level }}{% if not loop.last %}, {% endif %}{% endfor %}
+                                                <span>Floor: <strong>{% for f in ev.floors %}Level {{ f.level }}{% if not loop.last %}, {% endif %}{% endfor %}</strong></span>
                                             {% else %}
-                                                <span class="fw-semibold">Rooms:</span>
-                                                {% for r in ev.rooms %}VY{{ r.number }}{% if not loop.last %}, {% endif %}{% endfor %}
+                                                <span>Rooms: <strong>{% for r in ev.rooms %}VY{{ r.number }}{% if not loop.last %}, {% endif %}{% endfor %}</strong></span>
                                             {% endif %}
                                         </div>
                                     </div>
                                     {% if ev.status == 'Rejected' and ev.rejection_reason %}
-                                    <div class="alert alert-danger py-1.5 px-2.5 small mb-0 rounded-3">
-                                        <i class="bi bi-info-circle me-1"></i><strong>Reason:</strong> {{ ev.rejection_reason }}
+                                    <div class="event-callout callout-danger mt-2">
+                                        <i class="bi bi-exclamation-circle-fill me-1"></i><strong>Reason:</strong> {{ ev.rejection_reason }}
                                     </div>
                                     {% elif ev.status == 'Cancelled' and ev.rejection_reason %}
-                                    <div class="alert alert-secondary py-1.5 px-2.5 small mb-0 rounded-3">
-                                        <i class="bi bi-x-circle me-1"></i><strong>Status:</strong> {{ ev.rejection_reason }}
+                                    <div class="event-callout callout-secondary mt-2">
+                                        <i class="bi bi-info-circle-fill me-1"></i><strong>Note:</strong> {{ ev.rejection_reason }}
                                     </div>
                                     {% elif ev.description %}
-                                    <p class="text-muted small mb-0 text-truncate" title="{{ ev.description }}">{{ ev.description }}</p>
+                                    <p class="event-description text-muted small mt-2 mb-0 text-truncate" title="{{ ev.description }}">{{ ev.description }}</p>
                                     {% endif %}
                                 </div>
                                 {% if ev.status in ['Pending', 'Approved'] %}
-                                <div class="mt-3 pt-2 border-top d-flex justify-content-end" style="border-color: var(--border-color, rgba(0,0,0,0.08)) !important;">
-                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold" onclick="cancelFacultyEvent({{ ev.id }}, '{{ ev.title|replace('\'', '\\\'') }}')">
-                                        <i class="bi bi-x-circle me-1"></i>Cancel Event
+                                <div class="event-card-footer">
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" onclick="cancelFacultyEvent({{ ev.id }}, '{{ ev.title|replace('\'', '\\\'') }}')">
+                                        <i class="bi bi-x-circle"></i>Cancel Event
                                     </button>
                                 </div>
                                 {% endif %}
@@ -2538,14 +3012,44 @@
                     </table>
                 </div>
 
-                <!-- Mobile-Only Card Stack View -->
-                <div class="d-block d-md-none">
+                <!-- Mobile Day Filter Tabs -->
+                {% set day_counts = [0, 0, 0, 0, 0, 0] %}
+                {% for s in my_schedules %}
+                    {% if s.day_of_week is not none and s.day_of_week >= 0 and s.day_of_week < 6 %}
+                        {% set _ = day_counts.__setitem__(s.day_of_week, day_counts[s.day_of_week] + 1) %}
+                    {% endif %}
+                {% endfor %}
+                {% for b in bookings_this_week %}
+                    {% set b_day = b.slot_start.weekday() %}
+                    {% if b_day >= 0 and b_day < 6 %}
+                        {% set _ = day_counts.__setitem__(b_day, day_counts[b_day] + 1) %}
+                    {% endif %}
+                {% endfor %}
+                {% set total_mobile_sessions = (my_schedules|length) + (bookings_this_week|length) %}
+
+                <div class="faculty-day-tabs-wrapper d-flex d-md-none" id="facultyDayTabs">
+                    <button type="button" class="faculty-day-pill {% if current_day >= 6 or current_day is not defined %}active{% endif %}" onclick="setFacultyDayFilter('all', this)">
+                        <span>All</span>
+                        <span class="day-count">{{ total_mobile_sessions }}</span>
+                    </button>
+                    {% set day_abbrs = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] %}
+                    {% for d_idx in range(6) %}
+                    <button type="button" class="faculty-day-pill {% if current_day == d_idx %}active{% endif %}" onclick="setFacultyDayFilter({{ d_idx }}, this)">
+                        <span>{{ day_abbrs[d_idx] }}</span>
+                        <span class="day-count">{{ day_counts[d_idx] }}</span>
+                    </button>
+                    {% endfor %}
+                </div>
+
+                <!-- Mobile-Only Redesigned Timeline Agenda Cards -->
+                <div class="mobile-agenda-list d-block d-md-none" id="mobileAgendaList">
                     {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] %}
                     {% for day_idx in range(6) %}
                         {% set day_name = days[day_idx] %}
                         {% for s in my_schedules %}
                             {% if s.day_of_week == day_idx and s.start_time and s.end_time %}
-                            <div class="card glass-card border shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" 
+                            <div class="mobile-agenda-card is-regular cursor-pointer" 
+                                data-day-idx="{{ day_idx }}"
                                 onclick="locateClassroomFromCell(this)"
                                 data-subject="{{ s.subject }}"
                                 data-division-course="{{ (s.division or '') ~ (' / ' ~ s.course if s.course else '') or 'Regular Lecture' }}"
@@ -2556,36 +3060,26 @@
                                 data-is-adhoc="false"
                                 data-is-historical="false"
                                 data-id="{{ s.id }}">
-                                <div class="card-body p-3">
-                                    <!-- Floating Status Badge in Top Right -->
-                                    <span class="badge bg-primary px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3 text-white">
-                                        <i class="bi bi-lock-fill me-1"></i>Regular
-                                    </span>
-                                    
-                                    <!-- Stacked: Subject -->
-                                    <div class="pe-5 mb-2">
-                                        <h6 class="fw-bold mb-1 text-body text-truncate" title="{{ s.subject }}">{{ s.subject }}</h6>
-                                        {% if s.collaborator %}
-                                        <div class="text-muted small text-truncate">
-                                            <i class="bi bi-people me-1 text-primary"></i>Co-Faculty: {{ s.collaborator.name }}
-                                        </div>
+                                <div class="agenda-time-rail">
+                                    <span class="time-start">{{ s.start_time.strftime('%I:%M %p') }}</span>
+                                    <span class="time-end">{{ s.end_time.strftime('%I:%M %p') }}</span>
+                                </div>
+                                <div class="agenda-card-main">
+                                    <h6 class="agenda-subject" title="{{ s.subject }}">{{ s.subject }}</h6>
+                                    <div class="agenda-chips">
+                                        <span class="chip-room"><i class="bi bi-geo-alt-fill"></i> VY{{ s.room.number }}</span>
+                                        <span class="chip-status chip-regular"><i class="bi bi-lock-fill"></i> Regular</span>
+                                        {% if s.division %}
+                                        <span class="text-muted" style="font-size: 0.72rem; font-weight: 500;">{{ s.division }}</span>
                                         {% endif %}
                                     </div>
-                                    
-                                    <!-- Stacked: Date / Time -->
-                                    <div class="text-muted small mb-2 d-flex align-items-center">
-                                        <i class="bi bi-clock me-1.5 text-primary"></i>{{ day_name }}, {{ s.start_time.strftime('%I:%M %p') }} - {{ s.end_time.strftime('%I:%M %p') }}
-                                    </div>
-                                    
-                                    <!-- Stacked: Room Pill & Actions -->
-                                    <div class="pt-2 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">
-                                             <i class="bi bi-geo-alt-fill me-1 text-primary"></i>Room {{ s.room.number }}
-                                        </span>
-                                        <span class="text-muted small d-inline-flex align-items-center gap-1 opacity-75" title="Assigned by Academic Administration">
-                                             <i class="bi bi-lock-fill text-muted"></i>
-                                             <span style="font-size: 0.68rem; font-weight: 600;">Locked</span>
-                                        </span>
+                                    {% if s.collaborator %}
+                                    <div class="agenda-co-faculty"><i class="bi bi-people-fill text-primary me-1"></i>Co-Faculty: {{ s.collaborator.name }}</div>
+                                    {% endif %}
+                                </div>
+                                <div class="agenda-card-action">
+                                    <div class="agenda-locate-cue" title="Locate on map">
+                                        <i class="bi bi-chevron-right"></i>
                                     </div>
                                 </div>
                             </div>
@@ -2594,55 +3088,61 @@
                         
                         {% for b in bookings_this_week %}
                             {% if b.slot_start.weekday() == day_idx %}
-                            <div class="card glass-card border border-primary border-opacity-50 shadow-sm rounded-4 mb-3 overflow-hidden position-relative cursor-pointer" 
+                            {% set b_end = b.slot_end.strftime('%I:%M %p') if b.slot_end else (b.slot_start.strftime('%I:%M %p')) %}
+                            <div class="mobile-agenda-card is-adhoc cursor-pointer" 
+                                data-day-idx="{{ day_idx }}"
                                 onclick="locateClassroomFromCell(this)"
                                 data-subject="{{ b.subject }}"
                                 data-division-course="{{ (b.division or '') ~ (' / ' ~ b.course if b.course else '') or 'Ad-Hoc Booking' }}"
                                 data-room-number="{{ b.room.number }}"
                                 data-room-id="{{ b.room.id }}"
                                 data-floor-level="{{ b.room.floor.level }}"
-                                data-time="{{ day_name }}, {{ b.slot_start.strftime('%I:%M %p') }} - {{ (b.slot_end.strftime('%I:%M %p') if b.slot_end else (b.slot_start.strftime('%I:%M %p'))) }}"
+                                data-time="{{ day_name }}, {{ b.slot_start.strftime('%I:%M %p') }} - {{ b_end }}"
                                 data-is-adhoc="true"
                                 data-is-historical="{{ 'true' if b.is_historical else 'false' }}"
                                 data-checked-in="{{ 'true' if b.checked_in else 'false' }}"
                                 data-slot-start-iso="{{ b.slot_start.isoformat() }}"
                                 data-id="{{ b.id }}">
-                                <div class="card-body p-3">
-                                    <!-- Floating Status Badge in Top Right -->
-                                    {% if b.checked_in %}
-                                    <span class="badge bg-success px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3 text-white">
-                                        <i class="bi bi-check-circle-fill me-1"></i>Checked In
-                                    </span>
+                                <div class="agenda-time-rail">
+                                    <span class="time-start">{{ b.slot_start.strftime('%I:%M %p') }}</span>
+                                    <span class="time-end">{{ b_end }}</span>
+                                </div>
+                                <div class="agenda-card-main">
+                                    <h6 class="agenda-subject" title="{{ b.subject }}">{{ b.subject }}</h6>
+                                    <div class="agenda-chips">
+                                        <span class="chip-room"><i class="bi bi-geo-alt-fill text-warning"></i> VY{{ b.room.number }}</span>
+                                        {% if b.checked_in %}
+                                        <span class="chip-status chip-checked-in"><i class="bi bi-check-circle-fill"></i> Checked In</span>
+                                        {% else %}
+                                        <span class="chip-status chip-adhoc"><i class="bi bi-lightning-charge-fill"></i> Ad-Hoc</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="agenda-card-action">
+                                    {% if not b.is_historical %}
+                                    <button class="btn-agenda-delete" onclick="event.stopPropagation(); deleteBooking(event, '{{ b.id }}')" title="Cancel Ad-Hoc Booking" aria-label="Cancel Ad-Hoc Booking">
+                                        <i class="bi bi-trash3-fill"></i>
+                                    </button>
                                     {% else %}
-                                    <span class="badge bg-warning text-dark px-2.5 py-1.5 fw-semibold position-absolute top-0 end-0 mt-3 me-3">
-                                        <i class="bi bi-lightning-charge me-1"></i>Ad-Hoc
-                                    </span>
+                                    <div class="agenda-locate-cue" title="Locate on map">
+                                        <i class="bi bi-chevron-right"></i>
+                                    </div>
                                     {% endif %}
-                                    
-                                    <!-- Stacked: Subject -->
-                                    <div class="pe-5 mb-2">
-                                        <h6 class="fw-bold mb-1 text-body text-truncate" title="{{ b.subject }}">{{ b.subject }}</h6>
-                                    </div>
-                                    
-                                    <!-- Stacked: Date / Time -->
-                                    <div class="text-muted small mb-2 d-flex align-items-center">
-                                        <i class="bi bi-clock me-1.5 text-warning"></i>{{ day_name }}, {{ b.slot_start.strftime('%I:%M %p') }}
-                                    </div>
-                                    
-                                    <!-- Stacked: Room Pill & Destructive Cancel Action -->
-                                    <div class="pt-2 border-top border-light border-opacity-25 d-flex justify-content-between align-items-center">
-                                        <span class="badge bg-secondary bg-opacity-25 text-body border border-secondary border-opacity-25 px-2.5 py-1.5 fw-semibold font-monospace">
-                                            <i class="bi bi-geo-alt-fill me-1 text-warning"></i>Room {{ b.room.number }}
-                                        </span>
-                                        <button class="btn btn-sm btn-outline-danger text-danger bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" onclick="event.stopPropagation(); deleteBooking(event, '{{ b.id }}')" title="Cancel Ad-Hoc Booking">
-                                            <i class="bi bi-trash3-fill text-danger" style="font-size: 0.85rem;"></i>
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
                             {% endif %}
                         {% endfor %}
                     {% endfor %}
+
+                    <!-- Mobile Empty Day State -->
+                    <div id="mobileDayEmptyState" class="mobile-empty-day-state" style="display: none;">
+                        <i class="bi bi-calendar2-check display-6 text-primary opacity-75 mb-2 d-block"></i>
+                        <h6 class="fw-bold mb-1">No Lectures on <span id="mobileEmptyDayName">this day</span></h6>
+                        <p class="text-muted small mb-3">You have free time or can claim a vacant classroom.</p>
+                        <button class="btn btn-sm btn-primary rounded-pill px-3 py-1.5" onclick="document.getElementById('btnHeaderRequestRoom')?.click()">
+                            <i class="bi bi-plus-lg me-1"></i>Claim Room
+                        </button>
+                    </div>
                 </div>
                 {% else %}
                     <div class="text-center py-5 glass-card border-dashed rounded-4">
@@ -4962,5 +5462,47 @@
                 }
             }
         };
+
+        // Mobile Faculty Day Filter Controller
+        window.setFacultyDayFilter = function(dayIdx, btn) {
+            document.querySelectorAll('.faculty-day-pill').forEach(p => p.classList.remove('active'));
+            if (btn) {
+                btn.classList.add('active');
+            } else {
+                const targetBtn = document.querySelector(`.faculty-day-pill[onclick*="${dayIdx}"]`);
+                if (targetBtn) targetBtn.classList.add('active');
+            }
+
+            const cards = document.querySelectorAll('.mobile-agenda-card');
+            let visibleCount = 0;
+
+            cards.forEach(c => {
+                const cardDay = c.getAttribute('data-day-idx');
+                if (dayIdx === 'all' || cardDay === String(dayIdx)) {
+                    c.style.display = 'flex';
+                    visibleCount++;
+                } else {
+                    c.style.display = 'none';
+                }
+            });
+
+            const emptyEl = document.getElementById('mobileDayEmptyState');
+            if (emptyEl) {
+                emptyEl.style.display = visibleCount === 0 ? 'block' : 'none';
+                const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const emptyNameEl = document.getElementById('mobileEmptyDayName');
+                if (emptyNameEl) {
+                    emptyNameEl.textContent = dayIdx !== 'all' ? (dayNames[dayIdx] || 'this day') : 'this week';
+                }
+            }
+        };
+
+        // Auto-initialize mobile day filter on DOM ready
+        document.addEventListener('DOMContentLoaded', function() {
+            const activePill = document.querySelector('.faculty-day-pill.active');
+            if (activePill) {
+                activePill.click();
+            }
+        });
     </script>
 {% endblock %}

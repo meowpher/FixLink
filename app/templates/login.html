@@ -103,6 +103,15 @@
         border-color: #86b7fe !important;
         box-shadow: 0 0 0 0.25rem rgba(13,110,253,.25) !important;
     }
+    .glass-login-card .form-control:-webkit-autofill,
+    .glass-login-card .form-control:-webkit-autofill:hover,
+    .glass-login-card .form-control:-webkit-autofill:focus,
+    .glass-login-card .form-control:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+        -webkit-text-fill-color: #212529 !important;
+        caret-color: #212529 !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
     .glass-login-card .forgot-pwd {
         color: #6c757d;
         font-size: 13px;
@@ -271,6 +280,15 @@
     body[data-theme="dark"] .glass-login-card .form-control:focus {
         border-color: rgba(255,255,255,0.3) !important;
         background: rgba(255,255,255,0.1) !important;
+    }
+    body[data-theme="dark"] .glass-login-card .form-control:-webkit-autofill,
+    body[data-theme="dark"] .glass-login-card .form-control:-webkit-autofill:hover,
+    body[data-theme="dark"] .glass-login-card .form-control:-webkit-autofill:focus,
+    body[data-theme="dark"] .glass-login-card .form-control:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px #14171f inset !important;
+        -webkit-text-fill-color: #ffffff !important;
+        caret-color: #ffffff !important;
+        transition: background-color 5000s ease-in-out 0s;
     }
     body[data-theme="dark"] .glass-login-card .btn-eye { color: rgba(255,255,255,0.4); }
     body[data-theme="dark"] .glass-login-card .btn-eye:hover { color: #ffffff; }

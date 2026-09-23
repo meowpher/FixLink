@@ -203,9 +203,9 @@ def dashboard():
 def _get_faculty_handle_context():
     """Build unified dataset required by the Faculty Admin Handle console."""
     from sqlalchemy.orm import joinedload
+    from sqlalchemy import func
     from ...models import Timetable, Floor, Room, User, Building, NoShowStrike, SuspensionLog, EventBooking
-    from datetime import date, datetime, timedelta
-    import pytz
+    from datetime import date, datetime, timedelta, timezone
 
     # 1. Event Approvals Data
     pending_events = EventBooking.query.filter_by(status='Pending').order_by(EventBooking.start_date.asc()).all()
@@ -286,7 +286,7 @@ def _get_faculty_handle_context():
     all_faculties_data = [{'id': fac.id, 'name': fac.name} for fac in all_faculties]
 
     # 3. Ghost Protocol Data
-    IST = pytz.timezone('Asia/Kolkata')
+    IST = timezone(timedelta(hours=5, minutes=30))
     now_utc = datetime.utcnow()
     cutoff_30d = now_utc - timedelta(days=30)
 
@@ -319,7 +319,7 @@ def _get_faculty_handle_context():
         suspended_until_ist = None
         if user.adhoc_suspended_until:
             dt = user.adhoc_suspended_until
-            suspended_until_ist = IST.localize(dt) if dt.tzinfo is None else dt.astimezone(IST)
+            suspended_until_ist = dt.replace(tzinfo=timezone.utc).astimezone(IST) if dt.tzinfo is None else dt.astimezone(IST)
 
         flagged_faculty.append({
             'user': user,

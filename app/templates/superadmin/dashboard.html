@@ -787,8 +787,26 @@
         box-shadow: 0 16px 36px -10px rgba(239, 68, 68, 0.15);
     }
 
-    .bugs-tracking-card:hover::before {
-        opacity: 0.85;
+    /* SLA Status Indicator Classes */
+    .sla-icon-indicator {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .sla-icon-breach {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.1) 100%);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #ef4444;
+    }
+
+    .sla-icon-healthy {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        color: #16a34a;
     }
 
     /* Bug Filters and Bulk Actions */
@@ -1681,7 +1699,7 @@
     <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
-                <span class="d-inline-flex align-items-center justify-content-center" style="width: 34px; height: 34px; border-radius: 10px; background: {% if sla_status and sla_status.has_stale_batches %}linear-gradient(135deg, rgba(239, 68, 68, 0.25) 0%, rgba(220, 38, 38, 0.1) 100%){% else %}linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.08) 100%){% endif %}; border: 1px solid {% if sla_status and sla_status.has_stale_batches %}rgba(239, 68, 68, 0.4){% else %}rgba(34, 197, 94, 0.3){% endif %}; color: {% if sla_status and sla_status.has_stale_batches %}#ef4444{% else %}#16a34a{% endif %};">
+                <span class="sla-icon-indicator {% if sla_status and sla_status.has_stale_batches %}sla-icon-breach{% else %}sla-icon-healthy{% endif %}">
                     <i class="bi {% if sla_status and sla_status.has_stale_batches %}bi-shield-exclamation{% else %}bi-shield-check{% endif %}"></i>
                 </span>
                 <span>Anti-Stagnation Protocol: Timetable SLA Escalation</span>
@@ -1886,10 +1904,10 @@
                                         <i class="bi bi-paperclip"></i>
                                     </a>
                                     {% endif %}
-                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill me-1 px-2.5 single-resolve-btn {% if bug.status != 'open' %}d-none{% endif %}" title="Mark as Resolved" data-bug-id="{{ bug.id }}" onclick="singleResolveBug({{ bug.id }}, this)">
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill me-1 px-2.5 single-resolve-btn {% if bug.status != 'open' %}d-none{% endif %}" title="Mark as Resolved" data-bug-id="{{ bug.id }}">
                                         <i class="bi bi-check-lg"></i>
                                     </button>
-                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 single-delete-btn" title="Delete" data-bug-id="{{ bug.id }}" onclick="singleDeleteBug({{ bug.id }}, this)">
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 single-delete-btn" title="Delete" data-bug-id="{{ bug.id }}">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </div>
@@ -2293,7 +2311,7 @@
             });
         }
 
-        // Row checkboxes
+        // Row checkboxes & individual action buttons delegation
         document.getElementById('reportedBugsTableBody')?.addEventListener('change', (e) => {
             if (e.target.classList.contains('bug-checkbox')) {
                 const row = e.target.closest('tr');
@@ -2302,6 +2320,21 @@
                     else row.classList.remove('bug-row-selected');
                 }
                 updateBulkActionBar();
+            }
+        });
+
+        document.getElementById('reportedBugsTableBody')?.addEventListener('click', (e) => {
+            const resolveBtn = e.target.closest('.single-resolve-btn');
+            if (resolveBtn) {
+                const bugId = resolveBtn.dataset.bugId;
+                if (bugId) singleResolveBug(bugId, resolveBtn);
+                return;
+            }
+            const deleteBtn = e.target.closest('.single-delete-btn');
+            if (deleteBtn) {
+                const bugId = deleteBtn.dataset.bugId;
+                if (bugId) singleDeleteBug(bugId, deleteBtn);
+                return;
             }
         });
 

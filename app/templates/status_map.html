@@ -427,11 +427,52 @@
         .floor-sidebar-nav {
             flex-direction: row;
             overflow-x: auto;
-            padding-bottom: 4px;
+            padding-bottom: 6px;
+            gap: 0.45rem;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(37, 99, 235, 0.35) transparent;
         }
+        .floor-sidebar-nav::-webkit-scrollbar {
+            height: 3px;
+        }
+        .floor-sidebar-nav::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.04);
+            border-radius: 99px;
+            margin: 0 4px;
+        }
+        .floor-sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(37, 99, 235, 0.35);
+            border-radius: 99px;
+            transition: background 0.2s ease;
+        }
+        .floor-sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(37, 99, 235, 0.7);
+        }
+
+        [data-theme="dark"] .floor-sidebar-nav,
+        [data-bs-theme="dark"] .floor-sidebar-nav {
+            scrollbar-color: rgba(96, 165, 250, 0.4) transparent;
+        }
+        [data-theme="dark"] .floor-sidebar-nav::-webkit-scrollbar-track,
+        [data-bs-theme="dark"] .floor-sidebar-nav::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        [data-theme="dark"] .floor-sidebar-nav::-webkit-scrollbar-thumb,
+        [data-bs-theme="dark"] .floor-sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(96, 165, 250, 0.45);
+        }
+        [data-theme="dark"] .floor-sidebar-nav::-webkit-scrollbar-thumb:hover,
+        [data-bs-theme="dark"] .floor-sidebar-nav::-webkit-scrollbar-thumb:hover {
+            background: rgba(96, 165, 250, 0.8);
+        }
+
         .floor-sidebar-btn {
             flex-shrink: 0;
-            padding: 0.5rem 0.85rem;
+            padding: 0.5rem 0.95rem;
+            border-radius: 10px;
+            white-space: nowrap;
         }
         .floor-sidebar-btn .floor-btn-icon {
             display: none;
@@ -793,6 +834,12 @@
         // Auto-initialize if floor is selected
         if (currentFloorId) {
             initializeAdminMap(currentFloorId, initialRoomsData, currentFloorLevel);
+        }
+
+        // Center active floor button in horizontal nav on mobile
+        const activeFloorBtn = document.querySelector('.floor-sidebar-btn.active');
+        if (activeFloorBtn && window.innerWidth < 768) {
+            activeFloorBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
         }
 
         // Override selectRoom for admin view

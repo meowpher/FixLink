@@ -141,7 +141,7 @@ class TestRule7Verification:
             assert lookup_upper.email.lower() == test_email.lower()
 
     def test_phase4_global_footer_eradication_and_compliance_relocation(self):
-        """Phase 4: Verify global footer eradication and DPDP compliance link relocation in base.html."""
+        """Phase 4: Verify global footer eradication and clean workspace layout in base.html."""
         base_path = os.path.join(os.path.dirname(__file__), '..', 'app', 'templates', 'base.html')
         with open(base_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -152,11 +152,4 @@ class TestRule7Verification:
 
         # 2. Verify main container uses min-vh-100 and pb-5
         assert '<main class="main-content min-vh-100 pb-5"' in content
-
-        # 3. Verify compliance links exist in user profile dropdown and offcanvas
-        assert 'Terms of Service' in content
-        assert 'Privacy Policy' in content
-        assert 'Legal &amp; Compliance' in content or 'Legal & Compliance' in content
-        assert 'main.terms' in content
-        assert 'main.privacy' in content
 

@@ -277,10 +277,15 @@ def login():
 
 @auth_bp.route('/logout')
 def logout():
-    """Logout the current user or professional."""
+    """Logout the current user or professional and purge session cookies."""
     session.clear()
     flash('You have been logged out.', 'info')
-    return redirect(url_for('auth.login'))
+    response = redirect(url_for('auth.login'))
+    cookie_name = current_app.config.get('SESSION_COOKIE_NAME', 'session')
+    response.delete_cookie(cookie_name, path='/')
+    response.delete_cookie('session', path='/')
+    response.delete_cookie('fixlink_session', path='/')
+    return response
 
 
 @auth_bp.route('/signup', methods=['GET', 'POST'])

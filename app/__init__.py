@@ -58,6 +58,7 @@ def create_app(config_name=None):
     app.config['SECRET_KEY'] = secret_key
 
     # Phase 1: Cookie & Session Lockdown
+    # Determine if Secure cookie flag should be set (enabled in production/HTTPS, disabled in local HTTP development)
     app.config.update(
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SECURE=True,
@@ -108,10 +109,10 @@ def create_app(config_name=None):
             }
         else:
             app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-                'pool_size': 5,
-                'max_overflow': 10,
-                'pool_recycle': 120,      # Recycle connections every 2 min
-                'pool_timeout': 30,       # Wait up to 30s for a connection
+                'pool_size': 2,
+                'max_overflow': 3,
+                'pool_recycle': 60,       # Recycle connections every 1 min
+                'pool_timeout': 15,       # Wait up to 15s for a connection
                 'pool_pre_ping': True,    # Test connection health before use
             }
     

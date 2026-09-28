@@ -93,6 +93,103 @@
         .small, small {
             font-size: 0.75rem !important;
         }
+
+        /* ═══════════════════════════════════════════════════════════════
+           GLOBAL SLEEK HORIZONTAL SCROLLBAR SYSTEM
+           ═══════════════════════════════════════════════════════════════ */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(37, 99, 235, 0.35) transparent;
+        }
+
+        [data-theme="dark"] *,
+        [data-bs-theme="dark"] *,
+        body.dark-mode * {
+            scrollbar-color: rgba(96, 165, 250, 0.45) transparent;
+        }
+
+        /* WebKit Scrollbars */
+        *::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        *::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.04);
+            border-radius: 99px;
+            margin: 0 4px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: rgba(37, 99, 235, 0.35);
+            border-radius: 99px;
+            transition: background 0.2s ease;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: rgba(37, 99, 235, 0.7);
+        }
+
+        [data-theme="dark"] *::-webkit-scrollbar-track,
+        [data-bs-theme="dark"] *::-webkit-scrollbar-track,
+        body.dark-mode *::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.06);
+        }
+        [data-theme="dark"] *::-webkit-scrollbar-thumb,
+        [data-bs-theme="dark"] *::-webkit-scrollbar-thumb,
+        body.dark-mode *::-webkit-scrollbar-thumb {
+            background: rgba(96, 165, 250, 0.45);
+        }
+        [data-theme="dark"] *::-webkit-scrollbar-thumb:hover,
+        [data-bs-theme="dark"] *::-webkit-scrollbar-thumb:hover,
+        body.dark-mode *::-webkit-scrollbar-thumb:hover {
+            background: rgba(96, 165, 250, 0.8);
+        }
+
+        /* Dedicated Horizontal Scrollable Elements */
+        .table-responsive,
+        .history-table-wrap,
+        .cmm-table-responsive,
+        .floor-sidebar-nav,
+        .handle-desktop-tabs,
+        .quick-date-pill-container,
+        .faculty-day-tabs-wrapper,
+        .hero-stats,
+        .overflow-x-auto {
+            scrollbar-width: thin !important;
+            scrollbar-color: rgba(37, 99, 235, 0.35) transparent !important;
+            -webkit-overflow-scrolling: touch;
+        }
+        [data-theme="dark"] .table-responsive,
+        [data-bs-theme="dark"] .table-responsive,
+        [data-theme="dark"] .history-table-wrap,
+        [data-bs-theme="dark"] .history-table-wrap,
+        [data-theme="dark"] .cmm-table-responsive,
+        [data-bs-theme="dark"] .cmm-table-responsive,
+        [data-theme="dark"] .floor-sidebar-nav,
+        [data-bs-theme="dark"] .floor-sidebar-nav,
+        [data-theme="dark"] .handle-desktop-tabs,
+        [data-bs-theme="dark"] .handle-desktop-tabs,
+        [data-theme="dark"] .quick-date-pill-container,
+        [data-bs-theme="dark"] .quick-date-pill-container,
+        [data-theme="dark"] .faculty-day-tabs-wrapper,
+        [data-bs-theme="dark"] .faculty-day-tabs-wrapper,
+        [data-theme="dark"] .hero-stats,
+        [data-bs-theme="dark"] .hero-stats,
+        [data-theme="dark"] .overflow-x-auto,
+        [data-bs-theme="dark"] .overflow-x-auto {
+            scrollbar-color: rgba(96, 165, 250, 0.45) transparent !important;
+        }
+
+        .table-responsive::-webkit-scrollbar,
+        .history-table-wrap::-webkit-scrollbar,
+        .cmm-table-responsive::-webkit-scrollbar,
+        .floor-sidebar-nav::-webkit-scrollbar,
+        .handle-desktop-tabs::-webkit-scrollbar,
+        .quick-date-pill-container::-webkit-scrollbar,
+        .faculty-day-tabs-wrapper::-webkit-scrollbar,
+        .hero-stats::-webkit-scrollbar,
+        .overflow-x-auto::-webkit-scrollbar {
+            display: block !important;
+            height: 4px !important;
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -194,10 +291,6 @@
                         <div class="fw-bold" id="mobileProfileName">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
                         <div class="text-muted small" id="mobileProfileEmail">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
                     </li>
-                    <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px; padding-top: 0.5rem;">Legal &amp; Compliance</h6></li>
-                    <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.terms') }}"><i class="bi bi-file-earmark-text"></i><span>Terms of Service</span></a></li>
-                    <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.privacy') }}"><i class="bi bi-shield-check"></i><span>Privacy Policy</span></a></li>
-                    <li><hr class="dropdown-divider my-1"></li>
                     <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                 </ul>
             </div>
@@ -304,10 +397,6 @@
                     <div class="fw-bold" id="mobileProfileNameBottom">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
                     <div class="text-muted small" id="mobileProfileEmailBottom">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
                 </li>
-                <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px; padding-top: 0.5rem;">Legal &amp; Compliance</h6></li>
-                <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.terms') }}"><i class="bi bi-file-earmark-text"></i><span>Terms of Service</span></a></li>
-                <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.privacy') }}"><i class="bi bi-shield-check"></i><span>Privacy Policy</span></a></li>
-                <li><hr class="dropdown-divider my-1"></li>
                 <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
             </ul>
             {% else %}
@@ -538,21 +627,6 @@
 
         </ul>
 
-        <!-- Compliance & Legal section in mobile offcanvas -->
-        <div class="px-3 py-2 border-top" style="border-color: var(--border-color) !important;">
-            <div class="text-muted small fw-bold text-uppercase mb-1.5" style="font-size: 0.65rem; letter-spacing: 0.6px; opacity: 0.65;">Legal &amp; Compliance</div>
-            <div class="list-group list-group-flush rounded-3 overflow-hidden">
-                <a class="list-group-item list-group-item-action bg-transparent border-0 px-2 py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.terms') }}">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>Terms of Service</span>
-                </a>
-                <a class="list-group-item list-group-item-action bg-transparent border-0 px-2 py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.privacy') }}">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Privacy Policy</span>
-                </a>
-            </div>
-        </div>
-
         <!-- Divider -->
         <div class="msb-divider"></div>
 
@@ -767,10 +841,6 @@
                                 <li><a class="dropdown-item py-2" href="{{ url_for('professional.profile') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                             {% endif %}
-                            <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px; padding-top: 0.5rem;">Legal &amp; Compliance</h6></li>
-                            <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.terms') }}"><i class="bi bi-file-earmark-text"></i><span>Terms of Service</span></a></li>
-                            <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.privacy') }}"><i class="bi bi-shield-check"></i><span>Privacy Policy</span></a></li>
-                            <li><hr class="dropdown-divider my-1"></li>
                             <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </div>

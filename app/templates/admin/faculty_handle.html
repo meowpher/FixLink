@@ -24,14 +24,14 @@
 
     [data-theme="dark"],
     [data-bs-theme="dark"] {
-        --fh-surface: #141414;
-        --fh-surface-hover: #1f1f1f;
-        --fh-border: #262626;
+        --fh-surface: #111111;
+        --fh-surface-hover: #1a1a1a;
+        --fh-border: #222222;
         --fh-text-main: #f8fafc;
         --fh-text-muted: #94a3b8;
         --fh-primary: #3b82f6;
-        --fh-drawer-bg: #141414;
-        --fh-drawer-item-hover: #222222;
+        --fh-drawer-bg: #111111;
+        --fh-drawer-item-hover: #1a1a1a;
     }
 
     .faculty-handle-container {
@@ -47,44 +47,122 @@
     .px-2-5 { padding-left: 0.625rem !important; padding-right: 0.625rem !important; }
     .px-3-5 { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
 
-    /* ── Top Header Navigation Bar ── */
-    .handle-top-bar {
-        background: var(--fh-surface);
-        border: 1px solid var(--fh-border);
-        border-radius: 20px;
-        padding: 1.1rem 1.35rem;
-        margin-bottom: 1.85rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
-        transition: all 0.25s ease;
+    /* ── Unified Page Header (De-Boxed Clean Modern Layout) ── */
+    .handle-unified-header {
+        margin-bottom: 1.5rem;
     }
 
     @media (min-width: 768px) {
-        .handle-top-bar {
-            padding: 1.35rem 2rem;
-            margin-bottom: 2.35rem;
+        .handle-unified-header {
+            margin-bottom: 2rem;
         }
     }
 
     .handle-hamburger-btn {
-        width: 44px;
-        height: 44px;
-        min-width: 44px;
-        border-radius: 12px;
-        background: rgba(var(--mitwpu-blue-rgb, 37, 99, 235), 0.08);
-        color: var(--fh-primary);
-        border: 1px solid rgba(var(--mitwpu-blue-rgb, 37, 99, 235), 0.2);
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        border-radius: 8px;
+        background: var(--fh-surface);
+        color: var(--fh-text-muted);
+        border: 1px solid var(--fh-border);
         display: inline-flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.15s ease;
         flex-shrink: 0;
+        box-shadow: none !important;
     }
 
     .handle-hamburger-btn:hover {
-        background: var(--fh-primary);
-        color: #ffffff;
-        transform: scale(1.04);
+        background: var(--fh-surface-hover);
+        color: var(--fh-text-main);
+        border-color: var(--fh-text-muted);
+    }
+
+    [data-theme="dark"] .handle-hamburger-btn,
+    [data-bs-theme="dark"] .handle-hamburger-btn {
+        background: #141414;
+        color: #94a3b8;
+        border-color: #262626;
+    }
+
+    [data-theme="dark"] .handle-hamburger-btn:hover,
+    [data-bs-theme="dark"] .handle-hamburger-btn:hover {
+        background: #1f1f1f;
+        color: #f8fafc;
+        border-color: #3f3f46;
+    }
+
+    .handle-action-btn {
+        height: 32px;
+        min-height: 32px;
+        border-radius: 8px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        padding: 0 10px;
+        transition: all 0.15s ease;
+        box-shadow: none !important;
+        border: 1px solid transparent;
+        user-select: none;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .handle-action-btn.btn-import {
+        background: rgba(34, 197, 94, 0.12);
+        color: #16a34a;
+        border-color: rgba(34, 197, 94, 0.28);
+    }
+    .handle-action-btn.btn-import:hover {
+        background: rgba(34, 197, 94, 0.2);
+        color: #15803d;
+        border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    .handle-action-btn.btn-clear {
+        background: rgba(239, 68, 68, 0.12);
+        color: #ef4444;
+        border-color: rgba(239, 68, 68, 0.28);
+    }
+    .handle-action-btn.btn-clear:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: #dc2626;
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    [data-theme="dark"] .handle-action-btn.btn-import,
+    [data-bs-theme="dark"] .handle-action-btn.btn-import {
+        background: rgba(34, 197, 94, 0.1);
+        color: #4ade80;
+        border-color: rgba(34, 197, 94, 0.22);
+    }
+
+    [data-theme="dark"] .handle-action-btn.btn-clear,
+    [data-bs-theme="dark"] .handle-action-btn.btn-clear {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.22);
+    }
+
+    @media (max-width: 575.98px) {
+        .handle-action-btn {
+            width: 32px;
+            min-width: 32px;
+            padding: 0;
+        }
+    }
+
+    .handle-tag-badge-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
     }
 
     .handle-tag-badge {
@@ -93,67 +171,115 @@
         letter-spacing: 0.5px;
         padding: 3px 9px;
         border-radius: 6px;
-        background: rgba(37, 99, 235, 0.1);
-        color: var(--fh-primary);
-        border: 1px solid rgba(37, 99, 235, 0.2);
-        display: inline-block;
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        display: inline-flex;
+        align-items: center;
         line-height: 1.2;
     }
 
-    /* ── Full-Width Segmented Sub-Tabs Bar ── */
+    [data-theme="dark"] .handle-tag-badge,
+    [data-bs-theme="dark"] .handle-tag-badge {
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    #headerActiveTitle {
+        line-height: 1.3;
+        margin-top: 0;
+        font-size: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+        #headerActiveTitle {
+            font-size: 1.45rem;
+        }
+    }
+
+    /* ── Sub-Tabs Filter Group (Full-Width Symmetrical Blocks) ── */
     .handle-subtabs {
-        display: flex;
-        width: 100%;
-        background: var(--fh-surface);
-        border: 1px solid var(--fh-border);
-        border-radius: 16px;
-        padding: 6px;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+        background: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 0 !important;
         gap: 8px;
         margin-bottom: 1.5rem;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        box-shadow: none !important;
+        box-sizing: border-box;
     }
 
     .handle-subtabs .nav-item {
-        flex: 1 1 0;
+        flex: 1 1 0 !important;
         min-width: 0;
     }
 
     .handle-subtabs .nav-link {
-        width: 100%;
-        display: flex;
+        width: 100% !important;
+        min-height: 42px;
+        display: inline-flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
-        padding: 10px 16px;
-        border-radius: 11px;
+        padding: 0.5rem 1rem;
+        border-radius: 999px;
         color: var(--fh-text-muted);
-        background: transparent;
-        font-size: 0.88rem;
+        background: var(--fh-surface);
+        font-size: 0.9rem;
         font-weight: 600;
-        border: 1px solid transparent;
-        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        white-space: nowrap;
+        border: 1px solid var(--fh-border);
+        box-shadow: none !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         text-align: center;
+        user-select: none;
+        cursor: pointer;
+        white-space: nowrap;
     }
 
     .handle-subtabs .nav-link:hover {
         color: var(--fh-text-main);
         background: var(--fh-surface-hover);
+        border-color: var(--fh-border);
     }
 
     .handle-subtabs .nav-link.active {
-        color: #0f172a !important;
-        background: #f1f5f9 !important;
-        border-color: #cbd5e1 !important;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #2563eb !important;
+        box-shadow: none !important;
+    }
+
+    .handle-subtabs .nav-link.active i {
+        color: #ffffff !important;
+    }
+
+    .handle-subtabs .nav-link.active .badge {
+        background: rgba(255, 255, 255, 0.22) !important;
+        color: #ffffff !important;
     }
 
     [data-theme="dark"] .handle-subtabs .nav-link.active,
     [data-bs-theme="dark"] .handle-subtabs .nav-link.active {
-        background: #242424 !important;
-        border-color: #3b82f6 !important;
+        background: #2563eb !important;
+        border-color: #2563eb !important;
         color: #ffffff !important;
-        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.3);
+        box-shadow: none !important;
+    }
+
+    [data-theme="dark"] .handle-subtabs .nav-link.active i,
+    [data-bs-theme="dark"] .handle-subtabs .nav-link.active i {
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .handle-subtabs .nav-link.active .badge,
+    [data-bs-theme="dark"] .handle-subtabs .nav-link.active .badge {
+        background: rgba(255, 255, 255, 0.22) !important;
+        color: #ffffff !important;
     }
 
     .handle-subtabs .nav-link .badge {
@@ -161,6 +287,20 @@
         padding: 3px 8px;
         border-radius: 999px;
         font-weight: 700;
+        transition: all 0.15s ease;
+    }
+
+    @media (max-width: 767.98px) {
+        .handle-subtabs {
+            gap: 6px;
+        }
+
+        .handle-subtabs .nav-link {
+            min-height: 38px;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.82rem;
+            gap: 5px;
+        }
     }
 
     /* ── Sliding Left Offcanvas Drawer ── */
@@ -255,9 +395,7 @@
         margin-bottom: 1.5rem;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
     }
-    .handle-desktop-tabs::-webkit-scrollbar { display: none; }
 
     .handle-tab-btn {
         flex: 1;
@@ -490,6 +628,183 @@
     .badge-suspended { background: rgba(239,68,68,0.1); color: #dc2626; border: 1px solid rgba(239,68,68,0.2); }
     .badge-lifted    { background: rgba(34,197,94,0.1); color: #16a34a; border: 1px solid rgba(34,197,94,0.2); }
     .badge-expired   { background: rgba(100,116,139,0.1); color: #64748b; border: 1px solid rgba(100,116,139,0.2); }
+
+    /* ── Unified Filter Toolbar Elements ── */
+    .handle-filter-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+    @media (min-width: 768px) {
+        .handle-filter-toolbar {
+            flex-direction: row;
+            align-items: center;
+            gap: 0.65rem;
+        }
+    }
+    .handle-filter-input-wrap {
+        position: relative;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .handle-filter-input-wrap i {
+        position: absolute;
+        top: 50%;
+        left: 0.95rem;
+        transform: translateY(-50%);
+        color: var(--fh-text-muted);
+        pointer-events: none;
+        z-index: 5;
+        font-size: 0.9rem;
+    }
+    .handle-filter-input {
+        width: 100%;
+        height: 38px;
+        min-height: 38px;
+        border-radius: 999px;
+        padding-left: 2.45rem !important;
+        padding-right: 1rem;
+        font-size: 0.85rem;
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
+        color: var(--fh-text-main);
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .handle-filter-input:focus {
+        border-color: var(--fh-primary);
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        outline: none;
+    }
+    .handle-filter-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+    .handle-filter-select {
+        height: 38px;
+        min-height: 38px;
+        border-radius: 999px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        background-color: var(--fh-surface);
+        border: 1px solid var(--fh-border);
+        color: var(--fh-text-main);
+        padding-left: 0.9rem;
+        padding-right: 2rem;
+        flex: 1 1 auto;
+        min-width: 140px;
+    }
+    @media (min-width: 768px) {
+        .handle-filter-select {
+            flex: 0 0 165px;
+            width: 165px;
+        }
+    }
+    .handle-filter-btn {
+        height: 38px;
+        min-height: 38px;
+        border-radius: 999px;
+        padding: 0 1rem;
+        font-size: 0.82rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        white-space: nowrap;
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
+        color: var(--fh-text-muted);
+        text-decoration: none !important;
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+    }
+    .handle-filter-btn:hover {
+        background: var(--fh-surface-hover);
+        color: var(--fh-text-main);
+        border-color: var(--fh-primary);
+    }
+
+    /* ── Polished Modal & Dropzone Styles ── */
+    .handle-modal-card {
+        background: var(--fh-surface) !important;
+        border: 1px solid var(--fh-border) !important;
+        color: var(--fh-text-main);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25) !important;
+    }
+    .handle-modal-header {
+        border-bottom: 1px solid var(--fh-border);
+        padding: 1.15rem 1.4rem;
+    }
+    .handle-modal-icon-badge {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+    .handle-file-dropzone {
+        background: var(--fh-surface-hover);
+        border: 2px dashed var(--fh-border);
+        border-radius: 14px;
+        padding: 1.5rem 1.25rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+    .handle-file-dropzone:hover,
+    .handle-file-dropzone.dragover {
+        border-color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+    .handle-file-dropzone.has-file {
+        border-style: solid;
+        border-color: rgba(16, 185, 129, 0.4);
+        background: rgba(16, 185, 129, 0.06);
+    }
+    .handle-file-dropzone .dropzone-icon {
+        font-size: 2rem;
+        color: var(--fh-primary);
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .handle-file-dropzone:hover .dropzone-icon {
+        transform: translateY(-2px);
+        color: #10b981;
+    }
+    .handle-file-dropzone.has-file .dropzone-icon {
+        color: #10b981;
+    }
+    .handle-format-guide {
+        background: rgba(37, 99, 235, 0.06);
+        border: 1px solid rgba(37, 99, 235, 0.15);
+        border-radius: 10px;
+        padding: 0.75rem 0.95rem;
+        font-size: 0.78rem;
+        color: var(--fh-text-muted);
+        line-height: 1.5;
+    }
+    .handle-format-guide code {
+        background: rgba(37, 99, 235, 0.12);
+        color: var(--fh-primary);
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 0.73rem;
+        font-weight: 600;
+        font-family: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+        display: inline-block;
+        margin: 2px 1px;
+    }
+    .handle-preview-box {
+        background: rgba(16, 185, 129, 0.08);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        border-radius: 10px;
+        padding: 0.85rem 1rem;
+    }
 </style>
 {% endblock %}
 
@@ -575,53 +890,60 @@
     </div>
 
     <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- UNIFIED TOP HEADER BAR (With Hamburger & Context Actions)              -->
+    <!-- UNIFIED TOP HEADER BAR (De-Boxed & Clean)                              -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <header class="handle-top-bar">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-            
-            <!-- Left Side: Hamburger Drawer Button & Title Hierarchy -->
-            <div class="d-flex align-items-center gap-3 min-w-0">
-                <button type="button" class="handle-hamburger-btn" data-bs-toggle="offcanvas" data-bs-target="#facultyHandleOffcanvas" aria-label="Open subpages menu" title="Open Menu">
-                    <i class="bi bi-list fs-4"></i>
-                </button>
-                <div class="min-w-0">
-                    <div class="d-flex align-items-center gap-2 mb-1.5">
-                        <span class="handle-tag-badge">ADMIN CONSOLE</span>
-                        <span class="text-muted small d-none d-sm-inline" style="font-size: 0.74rem;">• Faculty Admin Handle</span>
-                    </div>
-                    <h1 class="h5 fw-bold mb-0 text-body d-flex align-items-center gap-2 text-truncate" id="headerActiveTitle">
-                        <i class="bi bi-calendar2-check-fill text-primary" id="headerActiveIcon"></i>
-                        <span id="headerActiveText">
-                            {% if active_tab == 'cmm' %}Classroom Management (CMM)
-                            {% elif active_tab == 'ghost' or active_tab == 'ghost_protocol' %}Ghost Protocol
-                            {% elif active_tab == 'bookings' or active_tab == 'booking_history' %}Booking History
-                            {% else %}Event Approvals{% endif %}
-                        </span>
-                    </h1>
-                </div>
+    <header class="handle-unified-header">
+        <!-- Top Utility Row: ADMIN CONSOLE Badge on Left, Action Buttons & Hamburger on Right -->
+        <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="handle-tag-badge-row mb-0">
+                <span class="handle-tag-badge">ADMIN CONSOLE</span>
+                <span class="text-muted small d-none d-sm-inline" style="font-size: 0.74rem;">• Faculty Admin Handle</span>
             </div>
 
-            <!-- Right Side: Context Action Buttons -->
-            <div class="d-flex align-items-center gap-2 ms-auto">
+            <!-- Very Right Side: Context Actions & Mobile Menu Trigger -->
+            <div class="d-flex align-items-center gap-2">
                 <!-- CMM Specific Actions (Visible only when CMM is active) -->
                 <div id="cmmHeaderActions" class="{% if active_tab != 'cmm' %}d-none{% else %}d-flex{% endif %} align-items-center gap-2">
-                    <button class="btn btn-sm btn-success rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#importTimetableModal">
+                    <button class="handle-action-btn btn-import" data-bs-toggle="modal" data-bs-target="#importTimetableModal" title="Mass Import" aria-label="Mass Import">
                         <i class="bi bi-file-earmark-spreadsheet-fill"></i>
                         <span class="d-none d-sm-inline">Mass Import</span>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                    <button class="handle-action-btn btn-clear" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal" title="Clear Timetable" aria-label="Clear Timetable">
                         <i class="bi bi-trash3-fill"></i>
                         <span class="d-none d-sm-inline">Clear Timetable</span>
                     </button>
                 </div>
 
-                <!-- Fast Drawer Switch Trigger on Desktop -->
-                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 fw-semibold d-none d-md-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="offcanvas" data-bs-target="#facultyHandleOffcanvas">
+                <!-- Mobile Drawer Button (Hamburger) -->
+                <button type="button" class="handle-hamburger-btn d-inline-flex d-md-none" data-bs-toggle="offcanvas" data-bs-target="#facultyHandleOffcanvas" aria-label="Open subpages menu" title="Open Menu">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+
+                <!-- Desktop Drawer Trigger Button (Sections) -->
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold d-none d-md-inline-flex align-items-center gap-2" data-bs-toggle="offcanvas" data-bs-target="#facultyHandleOffcanvas">
                     <i class="bi bi-grid-fill text-primary"></i>
                     <span>Sections</span>
                 </button>
             </div>
+        </div>
+
+        <!-- Main Title & Subtitle Stack (Flush-Left) -->
+        <div class="min-w-0">
+            <h1 class="h4 fw-bold mb-1 text-body d-flex align-items-center gap-2 text-truncate" id="headerActiveTitle">
+                <i class="{% if active_tab == 'cmm' %}bi bi-building-gear text-info{% elif active_tab == 'ghost' or active_tab == 'ghost_protocol' %}bi bi-shield-exclamation text-danger{% elif active_tab == 'bookings' or active_tab == 'booking_history' %}bi bi-calendar3-range text-primary{% else %}bi bi-calendar-event-fill text-primary{% endif %}" id="headerActiveIcon"></i>
+                <span id="headerActiveText">
+                    {% if active_tab == 'cmm' %}Classroom Management (CMM)
+                    {% elif active_tab == 'ghost' or active_tab == 'ghost_protocol' %}Ghost Protocol
+                    {% elif active_tab == 'bookings' or active_tab == 'booking_history' %}Classroom Reservation &amp; Booking History
+                    {% else %}Event Booking Requests &amp; Allocations{% endif %}
+                </span>
+            </h1>
+            <p class="text-muted small mb-0" id="headerActiveSubtitle">
+                {% if active_tab == 'cmm' %}Manage timetable schedules and allocate faculty to classroom slots.
+                {% elif active_tab == 'ghost' or active_tab == 'ghost_protocol' %}Monitor attendance strikes, suspensions, and no-show sanctions.
+                {% elif active_tab == 'bookings' or active_tab == 'booking_history' %}Audit log of all ad-hoc and timetable classroom bookings across Vyas Hall.
+                {% else %}Review multi-room reservations and entire floor bookings submitted by faculty.{% endif %}
+            </p>
         </div>
     </header>
 
@@ -662,16 +984,8 @@
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <div class="handle-tab-pane {% if active_tab != 'events' %}d-none{% endif %}" id="pane-events">
         <div class="mb-4">
-            <div class="mb-3">
-                <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
-                    <i class="bi bi-calendar-event-fill text-primary"></i>
-                    <span>Event Booking Requests &amp; Allocations</span>
-                </h4>
-                <p class="text-muted small mb-0">Review multi-room reservations and entire floor bookings submitted by faculty.</p>
-            </div>
-            
-            <!-- Event Sub-Tabs (Full-Width Segmented Tab Bar) -->
-            <ul class="nav nav-pills handle-subtabs w-100" id="eventSubTabs" role="tablist">
+            <!-- Event Sub-Tabs (Full-Width Symmetrical Blocks) -->
+            <ul class="nav nav-pills handle-subtabs w-100 mb-4" id="eventSubTabs" role="tablist">
                 <li class="nav-item flex-fill" role="presentation">
                     <button class="nav-link w-100 active" id="pending-events-subtab" data-bs-toggle="pill" data-bs-target="#events-pending" type="button" role="tab" aria-selected="true">
                         <i class="bi bi-hourglass-split"></i>
@@ -680,16 +994,15 @@
                     </button>
                 </li>
                 <li class="nav-item flex-fill" role="presentation">
-                    <button class="nav-link w-100" id="upcoming-events-subtab" data-bs-toggle="pill" data-bs-target="#events-upcoming" type="button" role="tab" aria-selected="false">
+                    <button class="nav-link w-100" id="upcoming-events-subtab" data-bs-toggle="pill" data-bs-target="#events-upcoming" type="button" role="tab" aria-selected="false" title="Approved &amp; Upcoming">
                         <i class="bi bi-check2-circle text-success"></i>
-                        <span>Approved &amp; Upcoming</span>
+                        <span>Approved<span class="d-none d-sm-inline"> &amp; Upcoming</span></span>
                         <span class="badge bg-success text-white ms-1">{{ upcoming_events|length }}</span>
                     </button>
                 </li>
                 <li class="nav-item flex-fill" role="presentation">
-                    <button class="nav-link w-100" id="history-events-subtab" data-bs-toggle="pill" data-bs-target="#events-history" type="button" role="tab" aria-selected="false">
+                    <button class="nav-link w-100" id="history-events-subtab" data-bs-toggle="pill" data-bs-target="#events-history" type="button" role="tab" aria-selected="false" title="History" aria-label="History">
                         <i class="bi bi-clock-history"></i>
-                        <span>History</span>
                         <span class="badge bg-secondary text-white ms-1">{{ history_events|length }}</span>
                     </button>
                 </li>
@@ -1089,9 +1402,9 @@
                         <div class="card-header border-0 pt-3 pb-2 px-3 px-md-4" style="background: transparent;">
                             <div class="row g-2 align-items-center">
                                 <div class="col-12 col-md-7">
-                                    <div class="input-group">
-                                        <span class="input-group-text border-end-0 bg-transparent text-muted"><i class="bi bi-search"></i></span>
-                                        <input type="text" class="form-control border-start-0 ps-0" id="tableSearchInput" placeholder="Search subject, course, division, room..." aria-label="Search unassigned classes">
+                                    <div class="position-relative">
+                                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="pointer-events: none; z-index: 5;"></i>
+                                        <input type="text" class="form-control rounded-pill" id="tableSearchInput" placeholder="Search subject, course, division, room..." aria-label="Search unassigned classes" style="padding-left: 2.5rem !important;">
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-5 d-flex justify-content-md-end align-items-center gap-2">
@@ -1338,37 +1651,30 @@
     <!-- SUBPAGE 4: BOOKING HISTORY (Audit Trail of Classroom Reservations)     -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <div class="handle-tab-pane {% if active_tab != 'bookings' and active_tab != 'booking_history' %}d-none{% endif %}" id="pane-bookings">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
-            <div>
-                <h4 class="fw-bold mb-1">Classroom Reservation &amp; Booking History</h4>
-                <p class="text-muted small mb-0">Audit log of all ad-hoc and timetable classroom bookings across Vyas Hall.</p>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1.5 fw-semibold" id="totalBookingsCounterBadge">
-                    {{ total_bookings_count }} Total Bookings
-                </span>
-            </div>
+        <div class="d-flex justify-content-end align-items-center mb-3">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1.5 fw-semibold" id="totalBookingsCounterBadge">
+                {{ total_bookings_count }} Total Bookings
+            </span>
         </div>
 
         <!-- Bookings Filter Bar -->
         <div class="card border-0 shadow-sm rounded-4 mb-3 handle-panel-card">
-            <div class="card-body p-3">
-                <div class="row g-2 align-items-center">
-                    <div class="col-12 col-md-8">
-                        <div class="input-group">
-                            <span class="input-group-text border-end-0 bg-transparent text-muted"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control border-start-0 ps-0" id="bookingSearchInput" placeholder="Search by faculty, room number, subject, course..." aria-label="Search bookings">
-                        </div>
+            <div class="card-body p-2.5 p-md-3">
+                <div class="handle-filter-toolbar">
+                    <div class="handle-filter-input-wrap">
+                        <i class="bi bi-search"></i>
+                        <input type="text" class="handle-filter-input" id="bookingSearchInput" placeholder="Search by faculty, room number, subject, course..." aria-label="Search bookings">
                     </div>
-                    <div class="col-12 col-md-4 d-flex justify-content-md-end gap-2">
-                        <select class="form-select" id="bookingStatusFilter" style="max-width: 180px;">
+                    <div class="handle-filter-actions">
+                        <select class="form-select handle-filter-select" id="bookingStatusFilter">
                             <option value="">All Statuses</option>
                             <option value="Active">Active / Upcoming</option>
                             <option value="Completed">Completed</option>
                             <option value="Cancelled">Cancelled</option>
                         </select>
-                        <a href="{{ url_for('admin.booking_history') }}" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 small text-nowrap">
-                            <i class="bi bi-arrows-fullscreen me-1"></i>Full Log
+                        <a href="{{ url_for('admin.booking_history') }}" class="handle-filter-btn" title="View Full Log">
+                            <i class="bi bi-arrows-fullscreen"></i>
+                            <span>Full Log</span>
                         </a>
                     </div>
                 </div>
@@ -1452,29 +1758,71 @@
 
 <!-- Modal 1: Mass Import CSV Modal -->
 <div class="modal fade" id="importTimetableModal" tabindex="-1" aria-labelledby="importTimetableModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 handle-panel-card">
-            <div class="modal-header border-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold" id="importTimetableModalLabel"><i class="bi bi-file-earmark-spreadsheet-fill text-success me-2"></i>Mass Import Timetable Matrix</h5>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 540px;">
+        <div class="modal-content border-0 rounded-4 handle-modal-card overflow-hidden">
+            <div class="modal-header handle-modal-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="handle-modal-icon-badge bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0 text-body" id="importTimetableModalLabel" style="font-size: 1.05rem;">Mass Import Timetable Matrix</h5>
+                        <div class="text-muted small" style="font-size: 0.74rem;">Bulk upload timetable schedule matrix via CSV</div>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <p class="text-muted small mb-3">Upload a CSV file conforming to the standard template (Day, Start Time, End Time, Subject, Course, Division, Room Number, Faculty Email).</p>
-                
+                <!-- Dropzone Area -->
                 <div class="mb-3">
-                    <label for="csvFileInput" class="form-label fw-semibold">Select CSV Document</label>
-                    <input class="form-control" type="file" id="csvFileInput" accept=".csv" required>
+                    <label class="form-label fw-semibold small text-body mb-1.5">Select Timetable CSV Document</label>
+                    <div class="handle-file-dropzone" id="csvDropzone">
+                        <input class="d-none" type="file" id="csvFileInput" accept=".csv" required>
+                        <div class="dropzone-icon mb-2">
+                            <i class="bi bi-cloud-arrow-up-fill" id="dropzoneIcon"></i>
+                        </div>
+                        <div class="fw-bold small text-body mb-1" id="dropzoneTitle">Click to browse or drop CSV file</div>
+                        <div class="text-muted" style="font-size: 0.75rem;" id="dropzoneSub">Supports standard CSV files (.csv) up to 10MB</div>
+                        <div id="dropzoneFileInfo" class="d-none mt-2 align-items-center justify-content-center gap-2">
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1.5 rounded-pill font-monospace small" id="dropzoneFileName"></span>
+                            <button type="button" class="btn btn-sm btn-link text-danger p-0 text-decoration-none" id="dropzoneClearFile" title="Remove file">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="csvPreviewSection" class="d-none mt-3 p-3 bg-light rounded-3">
-                    <div class="fw-bold small text-success mb-1" id="csvPreviewSummary"></div>
-                    <p class="text-muted small mb-0">Click 'Commit Import' below to finalize the timetable upload.</p>
+                <!-- Template Column Specification -->
+                <div class="handle-format-guide mb-3">
+                    <div class="d-flex align-items-center mb-1.5 text-body fw-semibold" style="font-size: 0.78rem;">
+                        <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                        <span>Required CSV Columns:</span>
+                    </div>
+                    <div>
+                        <code>Day</code> <code>Start Time</code> <code>End Time</code> <code>Subject</code> <code>Course</code> <code>Division</code> <code>Room Number</code> <code>Faculty Email</code>
+                    </div>
+                </div>
+
+                <!-- Preview Feedback Box -->
+                <div id="csvPreviewSection" class="d-none handle-preview-box mb-1">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill text-success fs-5 mt-0.5 me-1"></i>
+                        <div>
+                            <div class="fw-bold small text-success mb-0.5" id="csvPreviewSummary">Validated! Ready for commit.</div>
+                            <div class="text-muted" style="font-size: 0.74rem;">Review verified records above and click <strong>Commit Import</strong> to finalize.</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0 pb-4 px-4">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary rounded-pill px-4" id="btnPreviewCsv">Validate File</button>
-                <button type="button" class="btn btn-success rounded-pill px-4" id="btnCommitImport">Commit Import</button>
+            <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-primary rounded-pill px-3.5 py-1.5 small fw-semibold d-inline-flex align-items-center" id="btnPreviewCsv">
+                    <i class="bi bi-shield-check me-1.5"></i>
+                    <span>Validate File</span>
+                </button>
+                <button type="button" class="btn btn-success rounded-pill px-3.5 py-1.5 small fw-semibold d-inline-flex align-items-center" id="btnCommitImport">
+                    <i class="bi bi-cloud-arrow-up-fill me-1.5"></i>
+                    <span>Commit Import</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1482,24 +1830,32 @@
 
 <!-- Modal 2: Delete Confirm Modal -->
 <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 handle-panel-card">
-            <div class="modal-header border-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold text-danger" id="deleteConfirmModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Clear Entire Timetable</h5>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content border-0 rounded-4 handle-modal-card overflow-hidden">
+            <div class="modal-header handle-modal-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="handle-modal-icon-badge bg-danger bg-opacity-10 text-danger">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0 text-danger" id="deleteConfirmModalLabel" style="font-size: 1.05rem;">Clear Entire Timetable</h5>
+                        <div class="text-muted small" style="font-size: 0.74rem;">Irreversible schedule wipe</div>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <p class="text-body fw-bold fs-6 mb-2">This task will clear the time table permanently.</p>
+                <p class="text-body fw-bold fs-6 mb-1.5">This task will clear the timetable permanently.</p>
                 <p class="text-muted small mb-3">All scheduled slots, recurring classes, and faculty assignments across the building will be permanently wiped.</p>
                 <div class="alert alert-danger py-2 px-3 small mb-0 rounded-3 d-flex align-items-center gap-2">
                     <i class="bi bi-shield-slash fs-5"></i>
                     <span>This action is irreversible and cannot be recovered.</span>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0 pb-4 px-4 gap-2">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmDeleteTimetable">
-                    <i class="bi bi-trash3-fill me-1"></i>Clear Timetable
+            <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 small fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger rounded-pill px-3 py-1.5 small fw-semibold d-inline-flex align-items-center gap-1.5" id="btnConfirmDeleteTimetable">
+                    <i class="bi bi-trash3-fill"></i> Clear Timetable
                 </button>
             </div>
         </div>
@@ -1508,10 +1864,18 @@
 
 <!-- Modal 3: Faculty Assign Modal -->
 <div class="modal fade" id="assignFacultyModal" tabindex="-1" aria-labelledby="assignFacultyModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg rounded-4 handle-panel-card">
-            <div class="modal-header border-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold text-primary" id="assignFacultyModalLabel"><i class="bi bi-person-plus-fill me-2"></i>Assign Faculty Member</h5>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content border-0 rounded-4 handle-modal-card overflow-hidden">
+            <div class="modal-header handle-modal-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="handle-modal-icon-badge bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-person-plus-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0 text-body" id="assignFacultyModalLabel" style="font-size: 1.05rem;">Assign Faculty Member</h5>
+                        <div class="text-muted small" style="font-size: 0.74rem;">Allocate faculty to timetable slot</div>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
@@ -1522,8 +1886,8 @@
                     <p class="text-muted small mb-3" id="assignClassSummary">Select a faculty member for this timetable slot.</p>
 
                     <div class="mb-3">
-                        <label for="facultySelectDropdown" class="form-label fw-semibold">Faculty Member</label>
-                        <select class="form-select" id="facultySelectDropdown" required>
+                        <label for="facultySelectDropdown" class="form-label fw-semibold small text-body mb-1.5">Faculty Member</label>
+                        <select class="form-select rounded-3" id="facultySelectDropdown" required>
                             <option value="">Choose faculty...</option>
                             {% for fac in all_faculties %}
                             <option value="{{ fac.id }}">{{ fac.name }} ({{ fac.email }})</option>
@@ -1532,8 +1896,10 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4">Assign Faculty</button>
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-3 py-1.5 small fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-3 py-1.5 small fw-semibold d-inline-flex align-items-center gap-1.5">
+                            <i class="bi bi-check2"></i> Assign Faculty
+                        </button>
                     </div>
                 </form>
             </div>
@@ -1552,23 +1918,27 @@
     // Metadata for each tab section
     const SECTION_METADATA = {
         'events': {
-            title: 'Event Approvals',
-            icon: 'bi-calendar2-check-fill text-primary',
+            title: 'Event Booking Requests & Allocations',
+            subtitle: 'Review multi-room reservations and entire floor bookings submitted by faculty.',
+            icon: 'bi-calendar-event-fill text-primary',
             paneId: 'pane-events'
         },
         'cmm': {
             title: 'Classroom Management (CMM)',
+            subtitle: 'Manage timetable schedules and allocate faculty to classroom slots.',
             icon: 'bi-building-gear text-info',
             paneId: 'pane-cmm'
         },
         'ghost': {
             title: 'Ghost Protocol',
+            subtitle: 'Monitor attendance strikes, suspensions, and no-show sanctions.',
             icon: 'bi-shield-exclamation text-danger',
             paneId: 'pane-ghost'
         },
         'bookings': {
-            title: 'Booking History',
-            icon: 'bi-clock-history text-success',
+            title: 'Classroom Reservation & Booking History',
+            subtitle: 'Audit log of all ad-hoc and timetable classroom bookings across Vyas Hall.',
+            icon: 'bi-calendar3-range text-primary',
             paneId: 'pane-bookings'
         }
     };
@@ -1576,6 +1946,7 @@
     // DOM Elements for Switching
     const headerTitleText = document.getElementById('headerActiveText');
     const headerTitleIcon = document.getElementById('headerActiveIcon');
+    const headerTitleSubtitle = document.getElementById('headerActiveSubtitle');
     const cmmHeaderActions = document.getElementById('cmmHeaderActions');
     const drawerNavItems = document.querySelectorAll('.drawer-nav-item[data-tab-target]');
     const desktopTabBtns = document.querySelectorAll('.handle-tab-btn');
@@ -1595,8 +1966,9 @@
 
         const meta = SECTION_METADATA[tabKey] || SECTION_METADATA['events'];
 
-        // 1. Update Header Title & Icon
+        // 1. Update Header Title, Subtitle & Icon
         if (headerTitleText) headerTitleText.textContent = meta.title;
+        if (headerTitleSubtitle && meta.subtitle) headerTitleSubtitle.textContent = meta.subtitle;
         if (headerTitleIcon) headerTitleIcon.className = `bi ${meta.icon}`;
 
         // 2. Toggle CMM-specific action buttons in header
@@ -1668,6 +2040,11 @@
             switchHandleTab(targetTab);
         });
     });
+
+    // Initialize active tab based on URL param or default
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialTab = urlParams.get('tab') || '{{ active_tab }}' || 'events';
+    switchHandleTab(initialTab);
 
     // ── EVENT APPROVALS ACTIONS ──
     window.approveEvent = async function(eventId) {
@@ -1934,12 +2311,93 @@
     });
 
     // Mass Import CSV handling
+    const csvDropzone = document.getElementById('csvDropzone');
+    const csvFileInput = document.getElementById('csvFileInput');
+    const dropzoneIcon = document.getElementById('dropzoneIcon');
+    const dropzoneTitle = document.getElementById('dropzoneTitle');
+    const dropzoneSub = document.getElementById('dropzoneSub');
+    const dropzoneFileInfo = document.getElementById('dropzoneFileInfo');
+    const dropzoneFileName = document.getElementById('dropzoneFileName');
+    const dropzoneClearFile = document.getElementById('dropzoneClearFile');
+
+    function updateDropzoneState(file) {
+        if (file) {
+            csvDropzone?.classList.add('has-file');
+            if (dropzoneIcon) dropzoneIcon.className = 'bi bi-file-earmark-spreadsheet-fill text-success';
+            if (dropzoneTitle) dropzoneTitle.textContent = 'CSV File Ready';
+            if (dropzoneSub) dropzoneSub.textContent = 'Click to change or replace file';
+            if (dropzoneFileInfo) {
+                dropzoneFileInfo.classList.remove('d-none');
+                dropzoneFileInfo.classList.add('d-flex');
+            }
+            const sizeKb = (file.size / 1024).toFixed(1);
+            if (dropzoneFileName) dropzoneFileName.textContent = `${file.name} (${sizeKb} KB)`;
+        } else {
+            csvDropzone?.classList.remove('has-file');
+            if (dropzoneIcon) dropzoneIcon.className = 'bi bi-cloud-arrow-up-fill text-primary';
+            if (dropzoneTitle) dropzoneTitle.textContent = 'Click to browse or drop CSV file';
+            if (dropzoneSub) dropzoneSub.textContent = 'Supports standard CSV files (.csv) up to 10MB';
+            if (dropzoneFileInfo) {
+                dropzoneFileInfo.classList.add('d-none');
+                dropzoneFileInfo.classList.remove('d-flex');
+            }
+            if (dropzoneFileName) dropzoneFileName.textContent = '';
+            document.getElementById('csvPreviewSection')?.classList.add('d-none');
+        }
+    }
+
+    csvDropzone?.addEventListener('click', (e) => {
+        if (e.target.closest('#dropzoneClearFile')) return;
+        csvFileInput?.click();
+    });
+
+    csvFileInput?.addEventListener('change', () => {
+        const file = csvFileInput.files?.[0];
+        updateDropzoneState(file);
+    });
+
+    dropzoneClearFile?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (csvFileInput) csvFileInput.value = '';
+        updateDropzoneState(null);
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        csvDropzone?.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            csvDropzone.classList.add('dragover');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        csvDropzone?.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            csvDropzone.classList.remove('dragover');
+        });
+    });
+
+    csvDropzone?.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+            const file = files[0];
+            if (file.name.endsWith('.csv') || file.type.includes('csv')) {
+                csvFileInput.files = files;
+                updateDropzoneState(file);
+            } else {
+                Swal.fire('Invalid File', 'Please drop a valid .csv file.', 'warning');
+            }
+        }
+    });
+
     document.getElementById('btnPreviewCsv')?.addEventListener('click', () => handleCsvUpload(true));
     document.getElementById('btnCommitImport')?.addEventListener('click', () => handleCsvUpload(false));
 
     async function handleCsvUpload(isPreview) {
         const fileInput = document.getElementById('csvFileInput');
-        if (!fileInput.files || fileInput.files.length === 0) {
+        if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
             Swal.fire('Select File', 'Please select a CSV file first.', 'warning');
             return;
         }

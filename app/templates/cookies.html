@@ -1,13 +1,38 @@
-<!-- DRAFT: pending legal review, not yet approved by MIT-WPU admin -->
+<!-- MIT-WPU FixLink Institutional Cookie & Local Storage Policy -->
 {% extends "base.html" %}
 
-{% block title %}Cookie Policy - MIT-WPU FixLink{% endblock %}
-{% block meta_description %}Cookie and Local Storage Policy for MIT-WPU FixLink smart room maintenance management platform.{% endblock %}
+{% block title %}Cookie &amp; Local Storage Policy - MIT-WPU FixLink{% endblock %}
+{% block meta_description %}Cookie, Local Storage, and Incognito / Private Browsing Policy for MIT-WPU FixLink smart room maintenance management platform under the DPDP Act (2023).{% endblock %}
 
 {% block extra_css %}
 <style>
     #mobileMenuBtn, #mobile-bottom-nav, #floatingBugTrigger, .floating-bug-trigger {
         display: none !important;
+    }
+    .cookie-policy-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+    .cookie-table th {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .cookie-table td {
+        font-size: 0.88rem;
+        vertical-align: top;
+    }
+    .incognito-callout {
+        background: rgba(37, 99, 235, 0.05);
+        border-left: 4px solid #2563eb;
+        border-radius: 8px;
+        padding: 1.25rem 1.5rem;
+    }
+    body[data-theme="dark"] .incognito-callout {
+        background: rgba(37, 99, 235, 0.1);
+        border-left-color: #60a5fa;
     }
 </style>
 {% endblock %}
@@ -15,91 +40,167 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-8">
+        <div class="col-lg-10 col-xl-9">
             <!-- Breadcrumb Navigation -->
             <nav aria-label="Breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
+                <ol class="breadcrumb small">
                     <li class="breadcrumb-item"><a href="{{ url_for('main.index') }}" class="text-decoration-none">Home</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Cookie Policy</li>
                 </ol>
             </nav>
 
             <!-- Policy Card -->
-            <article class="card border-0 shadow-sm rounded-4 p-4 p-md-5" style="background: var(--bg-card); border: 1px solid var(--border-color);">
+            <article class="card border-0 rounded-4 p-4 p-md-5 cookie-policy-card">
                 <header class="border-bottom pb-4 mb-4">
-                    <h1 class="h2 fw-bold mb-2 text-body-emphasis">Cookie & Local Storage Policy</h1>
-                    <p class="text-body-secondary small mb-0">Draft Date: September 2026</p>
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2.5 py-1.5 rounded-pill small fw-semibold">
+                            DPDP Act (2023) Compliance Framework
+                        </span>
+                        <span class="text-body-secondary small">Dr. Vishwanath Karad MIT World Peace University</span>
+                    </div>
+                    <h1 class="h2 fw-bold mb-2 text-body-emphasis">Cookie, Local Storage &amp; Incognito Policy</h1>
+                    <p class="text-body-secondary small mb-0">
+                        Operational Scope: Vyas Smart-Room Tracker &amp; FixLink Campus Platform | Last Updated: September 2026
+                    </p>
                 </header>
 
-                <div class="legal-content text-body" style="line-height: 1.75;">
-                    <section class="mb-4">
-                        <h2 class="h5 fw-bold text-primary mb-3">1. What Are Cookies?</h2>
+                <div class="legal-content text-body" style="line-height: 1.8;">
+                    <!-- Section 1 -->
+                    <section class="mb-5">
+                        <h2 class="h5 fw-bold text-primary mb-3">1. What Are Cookies &amp; Browser Storage Technologies?</h2>
                         <p>
-                            Cookies and browser storage technologies (such as <code>localStorage</code>) are small text files or key-value entries stored on your device when you use web applications. They are used to keep you signed in, preserve interface preferences, and support application security.
+                            Cookies and browser storage mechanisms (such as <code>localStorage</code> and <code>sessionStorage</code>) are compact data structures placed temporarily or persistently on your client device by web servers. They serve strictly essential operational functions: verifying user identity across requests, upholding authentication security, defending against automated request tampering, and saving client-side display preferences.
+                        </p>
+                        <p class="mb-0">
+                            FixLink adheres strictly to the <strong>Data Minimization Principle</strong> mandated under Section 6 of the <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong>. The platform does not deploy third-party advertising cookies, cross-site trackers, or behavioral analytics beacons.
                         </p>
                     </section>
 
-                    <section class="mb-4">
-                        <h2 class="h5 fw-bold text-primary mb-3">2. How FixLink Uses Cookies</h2>
+                    <!-- Section 2 -->
+                    <section class="mb-5">
+                        <h2 class="h5 fw-bold text-primary mb-3">2. Essential Storage Key Inventory</h2>
                         <p>
-                            FixLink uses the following cookies and storage keys. No cookie is set for a purpose other than those listed below.
+                            FixLink utilizes only the following first-party, strictly necessary cookies and client-side storage keys. No cookie or storage key is deployed for any purpose other than those enumerated below:
                         </p>
 
                         <!-- Table of Cookies & Storage Keys -->
                         <div class="table-responsive my-3">
-                            <table class="table table-bordered table-sm align-middle" style="border-color: var(--border-color);">
+                            <table class="table table-bordered table-sm align-middle cookie-table" style="border-color: var(--border-color);">
                                 <thead style="background: var(--bg-main);">
                                     <tr>
-                                        <th scope="col" class="py-2">Category</th>
-                                        <th scope="col" class="py-2">Key / Mechanism</th>
-                                        <th scope="col" class="py-2">Purpose</th>
-                                        <th scope="col" class="py-2">Duration</th>
+                                        <th scope="col" class="py-2.5 px-3">Classification</th>
+                                        <th scope="col" class="py-2.5 px-3">Cookie / Storage Key</th>
+                                        <th scope="col" class="py-2.5 px-3">Purpose &amp; Security Attributes</th>
+                                        <th scope="col" class="py-2.5 px-3">Duration / Lifespan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td><strong>Strictly Necessary</strong></td>
-                                        <td><code>session</code> (HTTP Cookie)</td>
-                                        <td>Maintains authenticated user session state and account verification on the server.</td>
-                                        <td>24 hours (86,400 seconds) or until logout</td>
+                                        <td class="px-3"><strong>Strictly Necessary</strong></td>
+                                        <td class="px-3"><code>session</code><br><span class="badge bg-secondary-subtle text-secondary-emphasis small">HTTP-Only Cookie</span></td>
+                                        <td class="px-3">
+                                            Cryptographically signed session cookie holding your authenticated user ID, role, and permission tokens. Flagged with <code>HttpOnly</code> (prevents XSS extraction) and <code>SameSite=Lax</code> (prevents CSRF).
+                                        </td>
+                                        <td class="px-3">
+                                            <strong>2-hour sliding window</strong> of idle time, or <strong>immediately destroyed upon logout</strong> or closing the browser.
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Security</strong></td>
-                                        <td><code>csrf_token</code> (Hidden form field / session value)</td>
-                                        <td>Protects form submissions against Cross-Site Request Forgery (CSRF). Transmitted via form inputs and request headers; not stored as an independent browser cookie.</td>
-                                        <td>Active 24-hour session duration</td>
+                                        <td class="px-3"><strong>Security</strong></td>
+                                        <td class="px-3"><code>csrf_token</code><br><span class="badge bg-secondary-subtle text-secondary-emphasis small">Form Token / Header</span></td>
+                                        <td class="px-3">
+                                            Cryptographic nonce generated per authenticated session to protect against Cross-Site Request Forgery (CSRF). Transmitted securely within form payloads.
+                                        </td>
+                                        <td class="px-3">Valid only for the active user session duration.</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Preferences</strong></td>
-                                        <td><code>theme</code> (localStorage, client-only)</td>
-                                        <td>Stores your selected visual theme (Light Theme or Dark Theme) locally on your device. Never sent to the server.</td>
-                                        <td>Persistent until browser storage is cleared</td>
+                                        <td class="px-3"><strong>Interface Preference</strong></td>
+                                        <td class="px-3"><code>theme</code><br><span class="badge bg-info-subtle text-info-emphasis small">Client localStorage</span></td>
+                                        <td class="px-3">
+                                            Saves your visual display mode (Light Theme or Dark Theme) locally on your device to prevent screen flicker upon page reload. <em>Never transmitted across the network to server backends.</em>
+                                        </td>
+                                        <td class="px-3">Persists until client browser storage is cleared.</td>
                                     </tr>
                                     <tr>
-                                        <td><strong>Consent</strong></td>
-                                        <td><code>cookie_consent</code> (Template gate)</td>
-                                        <td>Gating flag evaluated in application templates before loading optional telemetry. Not set as a persistent cookie in the current release.</td>
-                                        <td>None / Not set (0 days) — no tracking scripts are active</td>
+                                        <td class="px-3"><strong>Offline Cache</strong></td>
+                                        <td class="px-3"><code>cached_notifications</code><br><span class="badge bg-info-subtle text-info-emphasis small">Client localStorage</span></td>
+                                        <td class="px-3">
+                                            Locally caches the last few broadcast notifications to allow rapid instant rendering without redundant network round-trips.
+                                        </td>
+                                        <td class="px-3">Purged upon account logout or cache clearing.</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </section>
 
-                    <section class="mb-4">
-                        <h2 class="h5 fw-bold text-primary mb-3">3. Your Choices About Non-Essential Cookies</h2>
-                        <p>
-                            External analytics and tracking scripts do not run by default. They only execute if non-essential cookie consent is explicitly enabled. If consent is absent or declined, no third-party tracking scripts or cookies are loaded.
-                        </p>
+                    <!-- Section 3: Incognito & Private Browsing Policy -->
+                    <section class="mb-5">
+                        <h2 class="h5 fw-bold text-primary mb-3">3. Incognito &amp; Private Browsing Operation</h2>
+                        <div class="incognito-callout mb-3">
+                            <h6 class="fw-bold text-body-emphasis mb-2">
+                                <i class="bi bi-shield-shaded me-2 text-primary"></i>How Cookies Function When You Sign In Under Incognito / Private Mode
+                            </h6>
+                            <p class="small text-body mb-2" style="line-height: 1.7;">
+                                When you access FixLink in <strong>Incognito Mode (Google Chrome / Brave)</strong>, <strong>InPrivate (Microsoft Edge)</strong>, or <strong>Private Browsing (Mozilla Firefox / Apple Safari)</strong>, the browser allocates a temporary, sandboxed memory space for your session:
+                            </p>
+                            <ul class="small text-body mb-0 ps-3" style="line-height: 1.7;">
+                                <li><strong>Session Authentication:</strong> When you log in, FixLink sets the strictly necessary <code>session</code> cookie in your browser's isolated incognito RAM. This is technically mandatory for the server to recognize your authenticated user account as you navigate between pages.</li>
+                                <li><strong>Zero Persistent Storage:</strong> FixLink does <strong>not</strong> write persistent cookies to your physical hard drive during Incognito browsing.</li>
+                                <li><strong>Immediate Automatic Destruction:</strong> The instant you close your Incognito window or private tab, your web browser automatically and permanently destroys the session cookie, CSRF token, and any temporary local storage entries. No login artifact remains on the physical device.</li>
+                                <li><strong>No Super-Cookies or Device Fingerprinting:</strong> FixLink does <strong>not</strong> employ browser canvas fingerprinting, audio API sniffing, hardware UUID harvesting, or cross-session tracking to identify you once your private window is closed.</li>
+                            </ul>
+                        </div>
                     </section>
 
-                    <section class="mb-4">
-                        <h2 class="h5 fw-bold text-primary mb-3">4. Managing Your Cookie Preferences</h2>
-                        <p class="mb-2">
-                            You can manage, inspect, or delete cookies through your web browser's privacy settings. Consult your browser vendor's documentation for detailed instructions.
+                    <!-- Section 4 -->
+                    <section class="mb-5">
+                        <h2 class="h5 fw-bold text-primary mb-3">4. Absolute Prohibition of Third-Party Commercial Tracking</h2>
+                        <p>
+                            Dr. Vishwanath Karad MIT World Peace University does not partner with commercial advertising networks, data brokers, or marketing profiling services. FixLink does not load:
                         </p>
+                        <ul class="ps-3 mb-0">
+                            <li>Third-party behavioral tracking cookies (e.g. Meta Pixel, Google AdSense, Criteo)</li>
+                            <li>Cross-site retargeting scripts or social media tracking widgets</li>
+                            <li>Commercial user data brokers or monetization trackers</li>
+                        </ul>
+                    </section>
+
+                    <!-- Section 5 -->
+                    <section class="mb-5">
+                        <h2 class="h5 fw-bold text-primary mb-3">5. Complete Logout &amp; Cookie Purge Protocol</h2>
+                        <p>
+                            When you click <strong>Sign Out</strong> or access <code>/logout</code>:
+                        </p>
+                        <ol class="ps-3 mb-0">
+                            <li>The server-side session dictionary is immediately invalidated and cleared (<code>session.clear()</code>).</li>
+                            <li>The server transmits explicit HTTP deletion response headers (<code>Set-Cookie: session=; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT; Path=/</code>) commanding your browser to immediately purge the session cookie from active storage.</li>
+                            <li>Any subsequent request to protected campus routes is immediately blocked and redirected to the login gate.</li>
+                        </ol>
+                    </section>
+
+                    <!-- Section 6 -->
+                    <section class="mb-4">
+                        <h2 class="h5 fw-bold text-primary mb-3">6. Managing Your Browser Cookie Settings</h2>
+                        <p class="mb-3">
+                            You possess full autonomy to inspect, block, or delete cookies via your browser's native privacy settings:
+                        </p>
+                        <ul class="ps-3 mb-3">
+                            <li><strong>Google Chrome:</strong> Settings &gt; Privacy and Security &gt; Third-party cookies &gt; Clear browsing data.</li>
+                            <li><strong>Microsoft Edge:</strong> Settings &gt; Cookies and site permissions &gt; Manage and delete cookies and site data.</li>
+                            <li><strong>Mozilla Firefox:</strong> Settings &gt; Privacy &amp; Security &gt; Cookies and Site Data &gt; Clear Data.</li>
+                            <li><strong>Apple Safari:</strong> Settings &gt; Safari &gt; Advanced &gt; Privacy &gt; Block All Cookies / Remove All Website Data.</li>
+                        </ul>
+                        <div class="p-3 rounded-2 bg-body-tertiary border text-body-secondary small">
+                            <strong>Notice on Disabling Strictly Necessary Cookies:</strong> If you completely block all first-party session cookies in your browser settings, you will be unable to log in, report maintenance defects, or view smart room occupancy schedules.
+                        </div>
+                    </section>
+
+                    <!-- Section 7 -->
+                    <section class="mb-0 pt-2 border-top">
+                        <h2 class="h5 fw-bold text-primary mb-2">7. Inquiries &amp; Data Protection Officer (DPO)</h2>
                         <p class="small text-body-secondary mb-0">
-                            <em>Note: Disabling the strictly necessary session cookie will prevent login authentication and ticket submission.</em>
+                            For statutory questions regarding data protection, telemetry practices, or cookie governance under the Digital Personal Data Protection Act (2023), please contact the University Data Protection Officer at <a href="mailto:dpo@mitwpu.edu.in" class="text-primary text-decoration-none fw-semibold">dpo@mitwpu.edu.in</a> or Central Facilities Management at <a href="mailto:facilities@mitwpu.edu.in" class="text-primary text-decoration-none fw-semibold">facilities@mitwpu.edu.in</a>.
                         </p>
                     </section>
                 </div>

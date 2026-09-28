@@ -292,16 +292,6 @@
     flex-wrap: wrap;
 }
 
-.unread-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #3b82f6;
-    display: inline-block;
-    flex-shrink: 0;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
-}
-
 .notif-action-btn {
     font-size: 0.78rem;
     font-weight: 600;
@@ -360,41 +350,40 @@
     
     <!-- Top Header Card with strict alignment & back button (ONLY back icon) -->
     <div class="notif-header-card">
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2.5">
+        <div class="d-flex align-items-center justify-content-between gap-3">
             <div class="d-flex align-items-center gap-3">
-                <a href="javascript:void(0)" onclick="if(window.history.length > 1){window.history.back();}else{window.location.href='/';}" class="notif-back-btn" aria-label="Back" title="Back">
+                <a href="javascript:void(0)" onclick="if(window.history.length > 1){window.history.back();}else{window.location.href='/';}" class="notif-back-btn flex-shrink-0" aria-label="Back" title="Back">
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <div>
                     <div class="d-flex align-items-center gap-2">
                         <h1 class="notif-page-title mb-0">Notifications</h1>
-                        <span class="badge bg-danger rounded-pill px-2 py-1 {% if unread_count == 0 %}d-none{% endif %}" id="pageUnreadBadge" style="font-size: 0.72rem;">
+                        <span class="badge bg-danger rounded-pill px-2.5 py-1 {% if unread_count == 0 %}d-none{% endif %}" id="pageUnreadBadge" style="font-size: 0.72rem;">
                             {{ unread_count }} unread
                         </span>
                     </div>
                     <p class="text-muted small mb-0 d-none d-sm-block mt-0.5">Instant room alerts, timetable updates, and tickets.</p>
                 </div>
             </div>
-
-            <!-- Mark All Read Action Button -->
-            <div class="ms-auto">
-                <button type="button" class="notif-mark-all-btn" id="pageMarkAllReadBtn" onclick="markAllNotificationsRead()">
-                    <i class="bi bi-check2-all"></i>
-                    <span>Mark all as read</span>
-                </button>
-            </div>
         </div>
 
-        <!-- Filter Pill Bar (All / Unread) -->
-        <div class="d-flex align-items-center gap-2 mt-3 pt-3 border-top" style="border-color: var(--notif-border) !important;">
-            <button type="button" class="notif-filter-pill active" id="filterAllBtn" onclick="filterNotifications('all')">
-                <span>All</span>
-                <span class="badge" id="filterAllCount">{{ notifications|length }}</span>
-            </button>
-            <button type="button" class="notif-filter-pill" id="filterUnreadBtn" onclick="filterNotifications('unread')">
-                <span class="unread-dot me-0.5"></span>
-                <span>Unread</span>
-                <span class="badge" id="filterUnreadCount">{{ unread_count }}</span>
+        <!-- Filter Pill Bar (All / Unread) + Mark All Read Action Button -->
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-3 pt-3 border-top" style="border-color: var(--notif-border) !important;">
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="notif-filter-pill active" id="filterAllBtn" onclick="filterNotifications('all')">
+                    <span>All</span>
+                    <span class="badge" id="filterAllCount">{{ notifications|length }}</span>
+                </button>
+                <button type="button" class="notif-filter-pill" id="filterUnreadBtn" onclick="filterNotifications('unread')">
+                    <span>Unread</span>
+                    <span class="badge" id="filterUnreadCount">{{ unread_count }}</span>
+                </button>
+            </div>
+
+            <!-- Mark All Read Action Button -->
+            <button type="button" class="notif-mark-all-btn ms-auto ms-sm-0" id="pageMarkAllReadBtn" onclick="markAllNotificationsRead()">
+                <i class="bi bi-check2-all"></i>
+                <span>Mark all as read</span>
             </button>
         </div>
     </div>
@@ -428,10 +417,7 @@
                     <!-- Content -->
                     <div class="flex-grow-1 min-w-0">
                         <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
-                            <div class="d-flex align-items-center gap-1.5 min-w-0">
-                                {% if not notif.is_read %}
-                                    <span class="unread-dot"></span>
-                                {% endif %}
+                            <div class="d-flex align-items-center min-w-0">
                                 <div class="notif-title text-truncate">{{ notif.title }}</div>
                             </div>
                             <span class="notif-meta flex-shrink-0" style="font-size: 0.72rem;">
@@ -547,7 +533,6 @@
                 if (card) {
                     card.classList.remove('unread');
                     card.setAttribute('data-is-read', 'true');
-                    card.querySelector('.unread-dot')?.remove();
                     card.querySelector('.notif-mark-read-btn')?.remove();
                 }
                 updateCounts();
@@ -585,7 +570,6 @@
                 document.querySelectorAll('.notif-card').forEach(card => {
                     card.classList.remove('unread');
                     card.setAttribute('data-is-read', 'true');
-                    card.querySelector('.unread-dot')?.remove();
                     card.querySelector('.notif-mark-read-btn')?.remove();
                 });
                 updateCounts();

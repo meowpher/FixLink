@@ -6,7 +6,7 @@ from datetime import timedelta
 import os
 import secrets
 import logging
-from flask import Flask, session
+from flask import Flask, session, request, redirect, jsonify, g
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_wtf.csrf import CSRFProtect
@@ -158,6 +158,7 @@ def create_app(config_name=None):
     from .blueprints.professional import professional_bp
     from .blueprints.superadmin import superadmin_bp
     from .blueprints.faculty.routes import faculty_bp
+    from .blueprints.onboarding import onboarding_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -165,6 +166,7 @@ def create_app(config_name=None):
     app.register_blueprint(professional_bp)
     app.register_blueprint(superadmin_bp)
     app.register_blueprint(faculty_bp, url_prefix='/faculty')
+    app.register_blueprint(onboarding_bp)
 
     # Pusher is initialized lazily in realtime.py
     
@@ -185,6 +187,57 @@ def create_app(config_name=None):
             session.pop('professional_id', None)
             session.pop('professional_name', None)
             session.pop('professional_category', None)
+
+    # Phase 2: Clickwrap Legal Compliance Middleware Interceptor
+    @app.before_request
+    def enforce_terms_compliance_interceptor():
+        # Loophole Guard: If request.endpoint is None, immediately return to let Flask handle the 404 naturally.
+        if request.endpoint is None:
+            return None
+
+        # Resolve authenticated user (via cached g, flask_login, or session)
+        user = None
+        if hasattr(g, '_current_user_cached') and g._current_user_cached:
+            user = g._current_user_cached
+        else:
+            try:
+                from flask_login import current_user
+                if current_user and current_user.is_authenticated:
+                    user = current_user
+            except Exception:
+                pass
+
+            if not user and session.get('user_id'):
+                from .models import User
+                user = db.session.get(User, session['user_id'])
+            elif not user and session.get('super_admin_email'):
+                from .models import User
+                user = User.query.filter_by(email=session['super_admin_email']).first()
+
+            if user:
+                g._current_user_cached = user
+
+        # Logic: If current_user.is_authenticated AND current_user.has_accepted_terms == False:
+        is_authenticated = user is not None and getattr(user, 'is_authenticated', True)
+        if is_authenticated and not getattr(user, 'has_accepted_terms', False):
+            # Whitelist: static, logout, and your login/auth routes
+            if request.endpoint.startswith('static') or \
+               request.endpoint in {'static', 'logout', 'auth.logout', 'superadmin.logout', 'professional.logout', 'onboarding.terms', 'onboarding.accept'} or \
+               request.endpoint.startswith('auth.') or \
+               request.endpoint.startswith('onboarding.'):
+                return None
+
+            # API Trap: If the path starts with /api/, abort and return 403 Forbidden with JSON {"error": "terms_required", "redirect": "/logout"}
+            if request.path.startswith('/api/'):
+                return jsonify({
+                    "error": "terms_required",
+                    "redirect": "/logout"
+                }), 403
+
+            # Web Trap: If they bypassed the login form (e.g., via SSO), redirect them to a forced logout or dedicated terms page
+            return redirect('/onboarding/terms')
+
+        return None
 
     # Global Request & Security Headers Hook (Performance & Best Practices 100/100)
     import gzip

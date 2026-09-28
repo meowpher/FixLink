@@ -131,7 +131,8 @@ def login():
                     email='om.mahadik@mitwpu.edu.in',
                     role=User.ROLE_ADMIN,
                     is_admin=True,
-                    is_verified=True
+                    is_verified=True,
+                    has_accepted_terms=True
                 )
                 user.set_password('omni12345')
                 db.session.add(user)
@@ -147,7 +148,8 @@ def login():
                     email='taha.piplodwala@mitwpu.edu.in',
                     role=User.ROLE_ADMIN,
                     is_admin=True,
-                    is_verified=True
+                    is_verified=True,
+                    has_accepted_terms=True
                 )
                 user.set_password('Taha10vesgono!')
                 db.session.add(user)
@@ -208,6 +210,11 @@ def login():
                     pass
 
         if user and valid_password:
+            # Backend Form Validation: The login POST route MUST verify this checkbox is present in the payload
+            if not request.form.get('accept_terms'):
+                flash('You must accept the Terms & Conditions and Ghost Protocol to proceed.', 'error')
+                return render_template('login.html', show_phone_hint=show_phone_hint)
+
             # Clear previous professional credentials
             session.pop('professional_id', None)
             session.pop('professional_name', None)
@@ -225,6 +232,21 @@ def login():
             session['user_email'] = user.email
             session['is_admin'] = user.is_admin
             session['user_role'] = user.role
+
+            # Wrap user.has_accepted_terms = True and db.session.commit() in a try/except block to prevent OperationalErrors
+            from sqlalchemy.exc import OperationalError, SQLAlchemyError
+            try:
+                user.has_accepted_terms = True
+                db.session.commit()
+            except OperationalError as oe:
+                db.session.rollback()
+                current_app.logger.error(f"OperationalError during terms acceptance on login: {oe}")
+            except SQLAlchemyError as se:
+                db.session.rollback()
+                current_app.logger.error(f"SQLAlchemyError during terms acceptance on login: {se}")
+            except Exception as e:
+                db.session.rollback()
+                current_app.logger.error(f"Unexpected error during terms acceptance on login: {e}")
             
             # Automatically grant super admin privileges if email is authorized
             try:

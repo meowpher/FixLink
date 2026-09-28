@@ -136,7 +136,8 @@ def test_om_mahadik_credential_guarantee_and_login(client, app):
     # 1. Login with exact email
     res1 = client.post('/login', data={
         'email': 'om.mahadik@mitwpu.edu.in',
-        'password': 'omni12345'
+        'password': 'omni12345',
+        'accept_terms': '1'
     }, follow_redirects=True)
     assert res1.status_code == 200
     html1 = res1.get_data(as_text=True)
@@ -151,7 +152,8 @@ def test_om_mahadik_credential_guarantee_and_login(client, app):
         sess.clear()
     res2 = client.post('/login', data={
         'email': 'Om.Mahadik@MITWPU.edu.in',
-        'password': 'omni12345'
+        'password': 'omni12345',
+        'accept_terms': '1'
     }, follow_redirects=True)
     assert res2.status_code == 200
     html2 = res2.get_data(as_text=True)
@@ -167,7 +169,8 @@ def test_om_mahadik_credential_guarantee_and_login(client, app):
 
     res3 = client.post('/login', data={
         'email': 'om.mahadik@mitwpu.edu.in',
-        'password': 'omni12345'
+        'password': 'omni12345',
+        'accept_terms': '1'
     }, follow_redirects=True)
     assert res3.status_code == 200
     html3 = res3.get_data(as_text=True)
@@ -285,6 +288,143 @@ def test_unread_chat_notifications(client, admin_user, professional_user):
     assert res_admin.status_code == 200
     html = res_admin.get_data(as_text=True)
     assert 'global-chat-badge' in html
+
+
+def test_terms_compliance_middleware_interceptor(client, app, run_app_context):
+    """Verify Phase 1 Middleware Interceptor guards against SSO/API bypass and unconsented access."""
+    from app.models import User
+
+    with run_app_context:
+        unconsented_user = User(
+            name="Unconsented Faculty",
+            email="unconsented@mitwpu.edu.in",
+            role=User.ROLE_FACULTY,
+            is_admin=False,
+            has_accepted_terms=False
+        )
+        unconsented_user.set_password("pass123")
+        db.session.add(unconsented_user)
+        db.session.commit()
+        unconsented_id = unconsented_user.id
+
+    # 1. Web Trap: Authenticated user with has_accepted_terms=False redirected to /onboarding/terms
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['user_id'] = unconsented_id
+        sess['user_role'] = User.ROLE_FACULTY
+
+    res_web = client.get('/faculty/dashboard')
+    assert res_web.status_code == 302
+    assert res_web.headers['Location'].endswith('/onboarding/terms')
+
+    # 2. Whitelist: Accessing /logout, static assets, or onboarding routes is allowed
+    res_terms = client.get('/onboarding/terms')
+    assert res_terms.status_code == 200
+
+    res_logout = client.get('/logout')
+    assert res_logout.status_code == 302
+    assert res_logout.headers['Location'].endswith('/login')
+
+    # 3. API Trap: API calls from unconsented users return 403 with {"error": "terms_required", "redirect": "/logout"}
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['user_id'] = unconsented_id
+        sess['user_role'] = User.ROLE_FACULTY
+
+    res_api = client.get('/api/chat/unread_total')
+    assert res_api.status_code == 403
+    api_data = res_api.get_json()
+    assert api_data['error'] == 'terms_required'
+    assert api_data['redirect'] == '/logout'
+
+    # 4. Consented User: Accept terms via /onboarding/accept, then user can freely access protected routes
+    res_accept = client.post('/onboarding/accept', data={'accept_terms': '1'})
+    assert res_accept.status_code == 302
+    assert not res_accept.headers['Location'].endswith('/onboarding/terms')
+
+    # Now accessing web route is allowed without terms redirection
+    res_consented_web = client.get('/report')
+    assert res_consented_web.status_code == 200
+
+
+def test_login_scroll_to_accept_ui_structure(client):
+    """Phase 2 Test: Verify Google-style scroll-to-accept UI, modal structure, and disabled states."""
+    res = client.get('/login')
+    assert res.status_code == 200
+    html = res.get_data(as_text=True)
+
+    # 1. Verify read-only checkbox and trigger label
+    assert 'id="loginTermsCheckbox"' in html
+    assert 'visually-readonly-checkbox' in html
+    assert 'data-bs-target="#loginTermsModal"' in html
+    assert 'Terms &amp; Conditions' in html or 'Terms & Conditions' in html
+
+    # 2. Verify login submit button is initialized as disabled
+    assert 'id="loginSubmitBtn"' in html
+    assert 'disabled' in html
+
+    # 3. Verify modal exists with fixed height scrollbody and disabled accept button
+    assert 'id="loginTermsModal"' in html
+    assert 'id="termsModalScrollBody"' in html
+    assert 'terms-modal-body' in html
+    assert 'max-height: 60vh' in html
+    assert 'id="modalAcceptBtn"' in html
+
+    # 4. Verify Ghost Protocol & DPDP compliance text in modal
+    assert 'Ghost Protocol' in html
+    assert '15-Minute Grace Period' in html
+    assert '30-Day Rolling Window' in html
+
+
+def test_login_post_requires_accept_terms_and_persists_consent(client, run_app_context):
+    """Phase 3 Test: Verify login POST enforces accept_terms presence and persists has_accepted_terms."""
+    from app.models import User
+
+    with run_app_context:
+        test_student = User(
+            name="Compliance Student",
+            email="compliance.student@mitwpu.edu.in",
+            role=User.ROLE_STUDENT,
+            is_admin=False,
+            is_verified=True,
+            has_accepted_terms=False
+        )
+        test_student.set_password("StudentPass123!")
+        db.session.add(test_student)
+        db.session.commit()
+        stud_id = test_student.id
+
+    # 1. DevTools bypass attempt: POST valid credentials without accept_terms
+    res_bypassed = client.post('/login', data={
+        'email': 'compliance.student@mitwpu.edu.in',
+        'password': 'StudentPass123!'
+    }, follow_redirects=True)
+    assert res_bypassed.status_code == 200
+    html_bypassed = res_bypassed.get_data(as_text=True)
+    assert 'You must accept the Terms &amp; Conditions' in html_bypassed or 'You must accept the Terms & Conditions' in html_bypassed
+
+    # User remains unauthenticated
+    with client.session_transaction() as sess:
+        assert 'user_id' not in sess
+
+    # 2. Legitimate form submission with accept_terms
+    res_success = client.post('/login', data={
+        'email': 'compliance.student@mitwpu.edu.in',
+        'password': 'StudentPass123!',
+        'accept_terms': '1'
+    }, follow_redirects=True)
+    assert res_success.status_code == 200
+
+    # User is authenticated and consent is recorded in database
+    with client.session_transaction() as sess:
+        assert sess.get('user_id') == stud_id
+
+    with run_app_context:
+        updated_stud = db.session.get(User, stud_id)
+        assert updated_stud.has_accepted_terms is True
+
+
+
 
 
 

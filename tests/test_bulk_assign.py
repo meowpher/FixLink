@@ -31,10 +31,10 @@ class TestBulkAssignFaculty(unittest.TestCase):
             db.session.add(r)
             db.session.flush()
 
-            self.admin = User(name="Admin User", email="admin.cmm@mitwpu.edu.in", role=User.ROLE_ADMIN, is_admin=True)
+            self.admin = User(name="Admin User", email="admin.cmm@mitwpu.edu.in", role=User.ROLE_ADMIN, is_admin=True, has_accepted_terms=True)
             self.admin.set_password("adminpass")
 
-            self.faculty = User(name="Dr. Alan Turing", email="turing@mitwpu.edu.in", role=User.ROLE_FACULTY, is_admin=False)
+            self.faculty = User(name="Dr. Alan Turing", email="turing@mitwpu.edu.in", role=User.ROLE_FACULTY, is_admin=False, has_accepted_terms=True)
             self.faculty.set_password("facultypass")
 
             db.session.add_all([self.admin, self.faculty])

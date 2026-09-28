@@ -5,9 +5,9 @@ from app.models import User, Building, Floor, Room, EventBooking
 
 def test_faculty_cancel_pending_and_approved_event(client, run_app_context):
     with run_app_context:
-        faculty = User(name="Prof Alan", email="alan@mitwpu.edu.in", role=User.ROLE_FACULTY)
+        faculty = User(name="Prof Alan", email="alan@mitwpu.edu.in", role=User.ROLE_FACULTY, has_accepted_terms=True)
         faculty.set_password("pass123")
-        admin = User(name="Admin Boss", email="admin1@mitwpu.edu.in", role=User.ROLE_ADMIN, is_admin=True)
+        admin = User(name="Admin Boss", email="admin1@mitwpu.edu.in", role=User.ROLE_ADMIN, is_admin=True, has_accepted_terms=True)
         admin.set_password("pass123")
         b = Building(name="Vyas")
         db.session.add_all([faculty, admin, b])
@@ -85,9 +85,9 @@ def test_faculty_cancel_pending_and_approved_event(client, run_app_context):
 
 def test_admin_reject_approved_event(client, run_app_context):
     with run_app_context:
-        faculty = User(name="Prof Turing", email="turing@mitwpu.edu.in", role=User.ROLE_FACULTY)
+        faculty = User(name="Prof Turing", email="turing@mitwpu.edu.in", role=User.ROLE_FACULTY, has_accepted_terms=True)
         faculty.set_password("pass123")
-        admin = User(name="Admin Super", email="admin2@mitwpu.edu.in", role=User.ROLE_ADMIN, is_admin=True)
+        admin = User(name="Admin Super", email="admin2@mitwpu.edu.in", role=User.ROLE_ADMIN, is_admin=True, has_accepted_terms=True)
         admin.set_password("pass123")
         db.session.add_all([faculty, admin])
         db.session.commit()
@@ -129,9 +129,9 @@ def test_admin_reject_approved_event(client, run_app_context):
 
 def test_faculty_cannot_cancel_others_event(client, run_app_context):
     with run_app_context:
-        faculty1 = User(name="Prof One", email="one@mitwpu.edu.in", role=User.ROLE_FACULTY)
+        faculty1 = User(name="Prof One", email="one@mitwpu.edu.in", role=User.ROLE_FACULTY, has_accepted_terms=True)
         faculty1.set_password("pass123")
-        faculty2 = User(name="Prof Two", email="two@mitwpu.edu.in", role=User.ROLE_FACULTY)
+        faculty2 = User(name="Prof Two", email="two@mitwpu.edu.in", role=User.ROLE_FACULTY, has_accepted_terms=True)
         faculty2.set_password("pass123")
         db.session.add_all([faculty1, faculty2])
         db.session.commit()

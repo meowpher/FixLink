@@ -5,68 +5,272 @@
 {% block meta_description %}Unified Faculty Administration console combining Event Approvals, Classroom Management (CMM), Ghost Protocol, and Classroom Booking History.{% endblock %}
 
 {% block extra_css %}
-<link rel="preload" href="{{ url_for('static', filename='css/admin_cmm.css') }}?v=1.2" as="style">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_cmm.css') }}?v=1.2">
+<link rel="preload" href="{{ url_for('static', filename='css/admin_cmm.css') }}?v=1.3" as="style">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_cmm.css') }}?v=1.3">
 <style>
     /* ══════════════════════════════════════════════════════════════════════
-       ROOT & ADAPTIVE COLOR SYSTEM FOR FACULTY ADMIN HANDLE
+       ROOT & ADAPTIVE STYLES FOR REDESIGNED FACULTY ADMIN HANDLE
        ══════════════════════════════════════════════════════════════════════ */
+    :root {
+        --fh-surface: #ffffff;
+        --fh-surface-hover: #f8fafc;
+        --fh-border: #e2e8f0;
+        --fh-text-main: #0f172a;
+        --fh-text-muted: #64748b;
+        --fh-primary: #2563eb;
+        --fh-drawer-bg: #ffffff;
+        --fh-drawer-item-hover: #f1f5f9;
+    }
+
+    [data-theme="dark"],
+    [data-bs-theme="dark"] {
+        --fh-surface: #141414;
+        --fh-surface-hover: #1f1f1f;
+        --fh-border: #262626;
+        --fh-text-main: #f8fafc;
+        --fh-text-muted: #94a3b8;
+        --fh-primary: #3b82f6;
+        --fh-drawer-bg: #141414;
+        --fh-drawer-item-hover: #222222;
+    }
+
     .faculty-handle-container {
         max-width: 1650px;
         margin: 0 auto;
         padding-bottom: 90px;
     }
 
-    /* ── Hero Master Card ── */
-    .handle-hero-card {
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
+    /* ── Custom Spacing & Utility Fixes ── */
+    .gap-1-5 { gap: 0.375rem !important; }
+    .gap-2-5 { gap: 0.75rem !important; }
+    .py-1-5 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
+    .px-2-5 { padding-left: 0.625rem !important; padding-right: 0.625rem !important; }
+    .px-3-5 { padding-left: 0.875rem !important; padding-right: 0.875rem !important; }
+
+    /* ── Top Header Navigation Bar ── */
+    .handle-top-bar {
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
         border-radius: 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        position: relative;
-        overflow: hidden;
+        padding: 1.1rem 1.35rem;
+        margin-bottom: 1.85rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        transition: all 0.25s ease;
     }
 
-    [data-theme="dark"] .handle-hero-card,
-    [data-bs-theme="dark"] .handle-hero-card {
-        background: var(--bg-card, #141414) !important;
-        border-color: var(--border-color, #262626) !important;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4) !important;
+    @media (min-width: 768px) {
+        .handle-top-bar {
+            padding: 1.35rem 2rem;
+            margin-bottom: 2.35rem;
+        }
     }
 
-    /* ── Unified Master Tab Bar ── */
-    .handle-master-tabs {
+    .handle-hamburger-btn {
+        width: 44px;
+        height: 44px;
+        min-width: 44px;
+        border-radius: 12px;
+        background: rgba(var(--mitwpu-blue-rgb, 37, 99, 235), 0.08);
+        color: var(--fh-primary);
+        border: 1px solid rgba(var(--mitwpu-blue-rgb, 37, 99, 235), 0.2);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        flex-shrink: 0;
+    }
+
+    .handle-hamburger-btn:hover {
+        background: var(--fh-primary);
+        color: #ffffff;
+        transform: scale(1.04);
+    }
+
+    .handle-tag-badge {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 3px 9px;
+        border-radius: 6px;
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--fh-primary);
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        display: inline-block;
+        line-height: 1.2;
+    }
+
+    /* ── Full-Width Segmented Sub-Tabs Bar ── */
+    .handle-subtabs {
         display: flex;
-        gap: 8px;
-        background: var(--bg-surface, #f1f5f9);
-        border: 1px solid var(--border-color, #e2e8f0);
+        width: 100%;
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
         border-radius: 16px;
         padding: 6px;
-        margin-bottom: 1.75rem;
+        gap: 8px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+    }
+
+    .handle-subtabs .nav-item {
+        flex: 1 1 0;
+        min-width: 0;
+    }
+
+    .handle-subtabs .nav-link {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px 16px;
+        border-radius: 11px;
+        color: var(--fh-text-muted);
+        background: transparent;
+        font-size: 0.88rem;
+        font-weight: 600;
+        border: 1px solid transparent;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .handle-subtabs .nav-link:hover {
+        color: var(--fh-text-main);
+        background: var(--fh-surface-hover);
+    }
+
+    .handle-subtabs .nav-link.active {
+        color: #0f172a !important;
+        background: #f1f5f9 !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    [data-theme="dark"] .handle-subtabs .nav-link.active,
+    [data-bs-theme="dark"] .handle-subtabs .nav-link.active {
+        background: #242424 !important;
+        border-color: #3b82f6 !important;
+        color: #ffffff !important;
+        box-shadow: 0 3px 12px rgba(59, 130, 246, 0.3);
+    }
+
+    .handle-subtabs .nav-link .badge {
+        font-size: 0.74rem;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-weight: 700;
+    }
+
+    /* ── Sliding Left Offcanvas Drawer ── */
+    .handle-drawer {
+        width: 320px !important;
+        background: var(--fh-drawer-bg) !important;
+        border-right: 1px solid var(--fh-border) !important;
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .handle-drawer-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--fh-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .handle-drawer-body {
+        padding: 1rem 0.85rem;
+        overflow-y: auto;
+    }
+
+    .drawer-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.85rem 1rem;
+        border-radius: 14px;
+        text-decoration: none !important;
+        color: var(--fh-text-main);
+        background: transparent;
+        border: 1px solid transparent;
+        margin-bottom: 0.5rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        width: 100%;
+        text-align: left;
+    }
+
+    .drawer-nav-item:hover {
+        background: var(--fh-drawer-item-hover);
+        color: var(--fh-primary);
+        transform: translateX(3px);
+    }
+
+    .drawer-nav-item.active {
+        background: rgba(37, 99, 235, 0.08);
+        border-color: rgba(37, 99, 235, 0.3);
+        color: var(--fh-primary);
+    }
+
+    [data-theme="dark"] .drawer-nav-item.active {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: rgba(59, 130, 246, 0.4);
+        color: #60a5fa;
+    }
+
+    .drawer-icon-box {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .drawer-nav-title {
+        font-weight: 700;
+        font-size: 0.92rem;
+        line-height: 1.2;
+    }
+
+    .drawer-nav-desc {
+        font-size: 0.74rem;
+        color: var(--fh-text-muted);
+        margin-top: 2px;
+        line-height: 1.25;
+    }
+
+    /* ── Desktop Quick Switcher Tabs ── */
+    .handle-desktop-tabs {
+        display: flex;
+        gap: 6px;
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
+        border-radius: 16px;
+        padding: 5px;
+        margin-bottom: 1.5rem;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
     }
-    .handle-master-tabs::-webkit-scrollbar { display: none; }
-
-    [data-theme="dark"] .handle-master-tabs,
-    [data-bs-theme="dark"] .handle-master-tabs {
-        background: #18181b !important;
-        border-color: #27272a !important;
-    }
+    .handle-desktop-tabs::-webkit-scrollbar { display: none; }
 
     .handle-tab-btn {
         flex: 1;
-        min-width: 190px;
-        padding: 10px 18px;
+        min-width: 160px;
+        padding: 9px 14px;
         border-radius: 12px;
         font-weight: 600;
-        font-size: 0.88rem;
+        font-size: 0.85rem;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 8px;
-        color: var(--text-muted, #64748b);
+        gap: 6px;
+        color: var(--fh-text-muted);
         background: transparent;
         border: none;
         transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -76,30 +280,19 @@
     }
 
     .handle-tab-btn:hover {
-        color: var(--text-main, #0f172a);
-        background: rgba(0, 0, 0, 0.04);
-    }
-
-    [data-theme="dark"] .handle-tab-btn:hover {
-        color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.06);
+        color: var(--fh-text-main);
+        background: var(--fh-surface-hover);
     }
 
     .handle-tab-btn.active {
         color: #ffffff !important;
-        background: var(--mitwpu-blue, #2563eb) !important;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-    }
-
-    [data-theme="dark"] .handle-tab-btn.active,
-    [data-bs-theme="dark"] .handle-tab-btn.active {
-        background: #2563eb !important;
-        color: #ffffff !important;
+        background: var(--fh-primary) !important;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
     }
 
     .tab-counter-badge {
-        font-size: 0.72rem;
-        padding: 2px 8px;
+        font-size: 0.7rem;
+        padding: 2px 7px;
         border-radius: 999px;
         font-weight: 700;
         background: rgba(0, 0, 0, 0.08);
@@ -113,8 +306,8 @@
 
     /* ── Metric / Stat Cards ── */
     .handle-stat-card {
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
         border-radius: 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -124,34 +317,21 @@
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
     }
 
-    [data-theme="dark"] .handle-stat-card,
-    [data-bs-theme="dark"] .handle-stat-card {
-        background: var(--bg-card, #141414) !important;
-        border-color: var(--border-color, #262626) !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
-    }
-
     /* ── Generic Panel Cards ── */
     .handle-panel-card {
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
         border-radius: 16px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
     }
 
-    [data-theme="dark"] .handle-panel-card,
-    [data-bs-theme="dark"] .handle-panel-card {
-        background: var(--bg-card, #141414) !important;
-        border-color: var(--border-color, #262626) !important;
-    }
-
     /* ── Event Approvals Cards ── */
     .event-card {
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
         border-radius: 16px;
-        padding: 1.4rem 1.6rem;
-        margin-bottom: 1.25rem;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 1.15rem;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
         transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     }
@@ -160,18 +340,90 @@
         border-color: rgba(37, 99, 235, 0.4);
         box-shadow: 0 8px 24px rgba(0,0,0,0.08);
     }
-    [data-theme="dark"] .event-card,
-    [data-bs-theme="dark"] .event-card {
-        background: #141414 !important;
-        border-color: #262626 !important;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+
+    /* ── Compact Collapsible Event History Cards ── */
+    .event-history-card {
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
+        border-radius: 14px;
+        padding: 0.95rem 1.2rem;
+        margin-bottom: 0.75rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .event-history-card:hover {
+        border-color: rgba(37, 99, 235, 0.4);
+        background: var(--fh-surface-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    }
+
+    .event-history-summary {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .event-history-status-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 11px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+
+    .event-history-status-icon.status-approved {
+        background: rgba(34, 197, 94, 0.12);
+        color: #22c55e;
+    }
+
+    .event-history-status-icon.status-rejected {
+        background: rgba(239, 68, 68, 0.12);
+        color: #ef4444;
+    }
+
+    .event-history-status-icon.status-cancelled {
+        background: rgba(148, 163, 184, 0.12);
+        color: #94a3b8;
+    }
+
+    .event-history-chevron {
+        color: var(--fh-text-muted);
+        transition: transform 0.25s ease;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+    }
+
+    .event-history-summary[aria-expanded="true"] .event-history-chevron,
+    .event-history-summary:not(.collapsed) .event-history-chevron {
+        transform: rotate(180deg);
+        color: var(--fh-primary);
+    }
+
+    .event-history-details {
+        border-color: var(--fh-border) !important;
+        animation: fadeInDetails 0.2s ease-in-out;
+    }
+
+    @keyframes fadeInDetails {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 
     .target-badge {
         font-size: 0.78rem;
         padding: 4px 10px;
         background: rgba(37, 99, 235, 0.1);
-        color: var(--mitwpu-blue, #2563eb);
+        color: var(--fh-primary);
         border: 1px solid rgba(37, 99, 235, 0.2);
         border-radius: 8px;
         font-weight: 600;
@@ -182,22 +434,20 @@
 
     /* ── Ghost Protocol Styles ── */
     .gp-stat-card {
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
         border-radius: 16px;
         padding: 1.25rem 1.5rem;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         transition: border-color 0.25s ease, transform 0.2s ease;
     }
     .gp-stat-card:hover { transform: translateY(-2px); }
-    [data-theme="dark"] .gp-stat-card,
-    [data-bs-theme="dark"] .gp-stat-card { background: #141414 !important; border-color: #262626 !important; }
     .gp-stat-card .stat-value { font-size: 2.2rem; font-weight: 800; line-height: 1; }
     .gp-stat-card .stat-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; margin-top: 0.35rem; opacity: 0.65; }
 
     .flag-card {
-        background: var(--bg-card, #ffffff);
-        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--fh-surface);
+        border: 1px solid var(--fh-border);
         border-radius: 18px;
         overflow: hidden;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -205,13 +455,8 @@
     }
     .flag-card:hover { box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
     .flag-card.is-suspended { border-color: rgba(239, 68, 68, 0.4) !important; }
-    [data-theme="dark"] .flag-card,
-    [data-bs-theme="dark"] .flag-card { background: #141414 !important; border-color: #262626 !important; }
 
-    .flag-header { padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--border-color, #e2e8f0); }
-    [data-theme="dark"] .flag-header,
-    [data-bs-theme="dark"] .flag-header { border-color: #262626 !important; }
-
+    .flag-header { padding: 1.1rem 1.4rem; display: flex; align-items: center; gap: 1rem; border-bottom: 1px solid var(--fh-border); }
     .flag-avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0; }
     .flag-avatar.avatar-red   { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
     .flag-avatar.avatar-amber { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
@@ -219,13 +464,9 @@
     .flag-avatar.avatar-green  { background: rgba(34, 197, 94, 0.12); color: #22c55e; }
 
     .strike-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.5); margin-right: 3px; }
-    .strike-dot.empty { background: var(--border-color, #cbd5e1); box-shadow: none; }
-    [data-theme="dark"] .strike-dot.empty,
-    [data-bs-theme="dark"] .strike-dot.empty { background: #333333; }
+    .strike-dot.empty { background: var(--fh-border); box-shadow: none; }
 
-    .strike-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color, #f1f5f9); font-size: 0.82rem; }
-    [data-theme="dark"] .strike-item,
-    [data-bs-theme="dark"] .strike-item { border-color: #222222; }
+    .strike-item { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--fh-border); font-size: 0.82rem; }
     .strike-item:last-child { border-bottom: none; }
     .strike-pill { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; padding: 0.2rem 0.6rem; font-size: 0.7rem; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
 
@@ -234,25 +475,13 @@
     .btn-clear { background: rgba(239,68,68,0.08); color: #dc2626; border: 1px solid rgba(239,68,68,0.18); border-radius: 10px; padding: 0.4rem 0.9rem; font-size: 0.8rem; font-weight: 700; transition: all 0.2s; cursor: pointer; }
     .btn-clear:hover { background: rgba(239,68,68,0.16); color: #b91c1c; }
 
-    .history-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--border-color, #e2e8f0); }
-    [data-theme="dark"] .history-table-wrap,
-    [data-bs-theme="dark"] .history-table-wrap { border-color: #262626 !important; }
-
+    .history-table-wrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--fh-border); }
     .history-table { border-collapse: collapse; font-size: 0.82rem; min-width: 900px; width: 100%; }
-    .history-table thead tr { background: var(--bg-surface, #f8fafc); }
-    [data-theme="dark"] .history-table thead tr,
-    [data-bs-theme="dark"] .history-table thead tr { background: #1a1a1a !important; }
-
-    .history-table th { padding: 0.75rem 1rem; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted, #64748b); border-bottom: 1px solid var(--border-color, #e2e8f0); white-space: nowrap; }
-    [data-theme="dark"] .history-table th,
-    [data-bs-theme="dark"] .history-table th { color: #94a3b8; border-color: #262626; }
-
-    .history-row { border-bottom: 1px solid var(--border-color, #f1f5f9); transition: background 0.15s; }
-    [data-theme="dark"] .history-row,
-    [data-bs-theme="dark"] .history-row { border-color: #222222; }
+    .history-table thead tr { background: var(--fh-surface-hover); }
+    .history-table th { padding: 0.75rem 1rem; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--fh-text-muted); border-bottom: 1px solid var(--fh-border); white-space: nowrap; }
+    .history-row { border-bottom: 1px solid var(--fh-border); transition: background 0.15s; }
     .history-row:last-child { border-bottom: none; }
-    .history-row:hover { background: rgba(0, 0, 0, 0.02); }
-    [data-theme="dark"] .history-row:hover { background: rgba(255,255,255,0.03); }
+    .history-row:hover { background: var(--fh-surface-hover); }
     .history-row td { padding: 0.75rem 1rem; vertical-align: middle; }
     .history-row.row-suspended td:first-child { border-left: 3px solid rgba(239,68,68,0.6); }
     .history-row.row-lifted td:first-child { border-left: 3px solid rgba(34,197,94,0.6); }
@@ -267,64 +496,163 @@
 {% block content %}
 <div class="container-fluid px-3 px-md-4 py-3 py-md-4 faculty-handle-container">
     
-    <!-- Hero Header Banner -->
-    <div class="card border-0 shadow-sm rounded-4 mb-3 mb-md-4 overflow-hidden handle-hero-card">
-        <div class="card-body p-4 p-md-5">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center w-100" style="row-gap: 20px;">
-                <div class="flex-grow-1 pe-md-4">
-                    <div class="d-flex align-items-center gap-2 mb-2.5 mb-md-3">
-                        <span class="badge bg-primary px-2.5 px-md-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">ADMIN CONSOLE</span>
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 px-md-3 py-1.5 rounded-pill fw-semibold" style="font-size: 0.72rem; letter-spacing: 0.5px;">FACULTY ADMIN HANDLE</span>
-                    </div>
-                    <h1 class="h3 h2-md fw-bold mb-2 text-body" style="letter-spacing: -0.3px; line-height: 1.3;">Faculty Admin Handle</h1>
-                    <p class="text-muted mb-0 lead small d-none d-md-block" style="font-size: 0.95rem; max-width: 850px; line-height: 1.6;">
-                        Centralized administration portal uniting <strong>Event Approvals</strong>, <strong>Classroom Management (CMM)</strong>, <strong>Ghost Protocol</strong> accountability, and <strong>Room Booking History</strong>.
-                    </p>
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- SLIDING OFFCANVAS DRAWER (Left Hamburger Sidebar with 4 Options)       -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <div class="offcanvas offcanvas-start handle-drawer" tabindex="-1" id="facultyHandleOffcanvas" aria-labelledby="facultyHandleOffcanvasLabel">
+        <div class="handle-drawer-header">
+            <div class="d-flex align-items-center gap-2.5">
+                <div class="drawer-icon-box bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-person-workspace"></i>
                 </div>
-                
-                <!-- Hero Fast Actions -->
-                <div class="d-flex flex-row align-items-center flex-shrink-0 ms-md-auto w-100 w-md-auto gap-2">
-                    <button class="btn btn-success rounded-pill px-3.5 px-md-4 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 fw-semibold" data-bs-toggle="modal" data-bs-target="#importTimetableModal" style="height: 40px; font-size: 0.84rem; white-space: nowrap;">
-                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
-                        <span>Mass Import</span>
-                    </button>
-                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary rounded-pill px-3.5 py-2 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 fw-semibold" style="height: 40px; font-size: 0.84rem; white-space: nowrap;">
-                        <i class="bi bi-arrow-left"></i>
-                        <span>Dashboard</span>
-                    </a>
+                <div>
+                    <h5 class="fw-bold mb-0 text-body" id="facultyHandleOffcanvasLabel" style="font-size: 1.05rem;">Faculty Handle</h5>
+                    <div class="text-muted small" style="font-size: 0.72rem;">Management Subpages</div>
                 </div>
             </div>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+
+        <div class="handle-drawer-body">
+            <div class="text-muted small fw-bold px-2 mb-2 text-uppercase" style="font-size: 0.68rem; letter-spacing: 0.6px;">Console Sections</div>
+            
+            <!-- Option 1: Event Approvals -->
+            <button type="button" class="drawer-nav-item {% if active_tab == 'events' %}active{% endif %}" data-tab-target="events">
+                <div class="drawer-icon-box bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-calendar2-check-fill"></i>
+                </div>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="drawer-nav-title">Event Approvals</div>
+                    <div class="drawer-nav-desc text-truncate">Multi-room event requests</div>
+                </div>
+                {% if pending_events|length > 0 %}
+                <span class="badge bg-warning text-dark rounded-pill">{{ pending_events|length }}</span>
+                {% endif %}
+            </button>
+
+            <!-- Option 2: Classroom Management (CMM) -->
+            <button type="button" class="drawer-nav-item {% if active_tab == 'cmm' %}active{% endif %}" data-tab-target="cmm">
+                <div class="drawer-icon-box bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-building-gear"></i>
+                </div>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="drawer-nav-title">CMM</div>
+                    <div class="drawer-nav-desc text-truncate">Classroom management & slots</div>
+                </div>
+                {% if unassigned_count > 0 %}
+                <span class="badge bg-info text-dark rounded-pill">{{ unassigned_count }}</span>
+                {% endif %}
+            </button>
+
+            <!-- Option 3: Ghost Protocol -->
+            <button type="button" class="drawer-nav-item {% if active_tab == 'ghost' or active_tab == 'ghost_protocol' %}active{% endif %}" data-tab-target="ghost">
+                <div class="drawer-icon-box bg-danger bg-opacity-10 text-danger">
+                    <i class="bi bi-shield-exclamation"></i>
+                </div>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="drawer-nav-title">Ghost Protocol</div>
+                    <div class="drawer-nav-desc text-truncate">No-show strikes & sanctions</div>
+                </div>
+                {% if currently_suspended_count > 0 %}
+                <span class="badge bg-danger text-white rounded-pill">{{ currently_suspended_count }}</span>
+                {% endif %}
+            </button>
+
+            <!-- Option 4: Booking History -->
+            <button type="button" class="drawer-nav-item {% if active_tab == 'bookings' or active_tab == 'booking_history' %}active{% endif %}" data-tab-target="bookings">
+                <div class="drawer-icon-box bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <div class="flex-grow-1 min-w-0">
+                    <div class="drawer-nav-title">Booking History</div>
+                    <div class="drawer-nav-desc text-truncate">Classroom audit records</div>
+                </div>
+                {% if total_bookings_count > 0 %}
+                <span class="badge bg-secondary rounded-pill">{{ total_bookings_count }}</span>
+                {% endif %}
+            </button>
         </div>
     </div>
 
-    <!-- ── 4-Subpage Master Tab Switcher ── -->
-    <nav class="handle-master-tabs" id="facultyHandleTabs" aria-label="Faculty Admin Handle Subpages">
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <!-- UNIFIED TOP HEADER BAR (With Hamburger & Context Actions)              -->
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
+    <header class="handle-top-bar">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            
+            <!-- Left Side: Hamburger Drawer Button & Title Hierarchy -->
+            <div class="d-flex align-items-center gap-3 min-w-0">
+                <button type="button" class="handle-hamburger-btn" data-bs-toggle="offcanvas" data-bs-target="#facultyHandleOffcanvas" aria-label="Open subpages menu" title="Open Menu">
+                    <i class="bi bi-list fs-4"></i>
+                </button>
+                <div class="min-w-0">
+                    <div class="d-flex align-items-center gap-2 mb-1.5">
+                        <span class="handle-tag-badge">ADMIN CONSOLE</span>
+                        <span class="text-muted small d-none d-sm-inline" style="font-size: 0.74rem;">• Faculty Admin Handle</span>
+                    </div>
+                    <h1 class="h5 fw-bold mb-0 text-body d-flex align-items-center gap-2 text-truncate" id="headerActiveTitle">
+                        <i class="bi bi-calendar2-check-fill text-primary" id="headerActiveIcon"></i>
+                        <span id="headerActiveText">
+                            {% if active_tab == 'cmm' %}Classroom Management (CMM)
+                            {% elif active_tab == 'ghost' or active_tab == 'ghost_protocol' %}Ghost Protocol
+                            {% elif active_tab == 'bookings' or active_tab == 'booking_history' %}Booking History
+                            {% else %}Event Approvals{% endif %}
+                        </span>
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Right Side: Context Action Buttons -->
+            <div class="d-flex align-items-center gap-2 ms-auto">
+                <!-- CMM Specific Actions (Visible only when CMM is active) -->
+                <div id="cmmHeaderActions" class="{% if active_tab != 'cmm' %}d-none{% else %}d-flex{% endif %} align-items-center gap-2">
+                    <button class="btn btn-sm btn-success rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#importTimetableModal">
+                        <i class="bi bi-file-earmark-spreadsheet-fill"></i>
+                        <span class="d-none d-sm-inline">Mass Import</span>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#deleteConfirmModal">
+                        <i class="bi bi-trash3-fill"></i>
+                        <span class="d-none d-sm-inline">Clear Timetable</span>
+                    </button>
+                </div>
+
+                <!-- Fast Drawer Switch Trigger on Desktop -->
+                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-2 fw-semibold d-none d-md-inline-flex align-items-center gap-2 shadow-sm" data-bs-toggle="offcanvas" data-bs-target="#facultyHandleOffcanvas">
+                    <i class="bi bi-grid-fill text-primary"></i>
+                    <span>Sections</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ── Desktop Quick Tab Switcher ── -->
+    <nav class="handle-desktop-tabs d-none d-md-flex mb-4" id="facultyDesktopTabs" aria-label="Faculty Admin Handle Subpages">
         <button class="handle-tab-btn {% if active_tab == 'events' %}active{% endif %}" id="tab-btn-events" data-target-pane="pane-events" type="button">
-            <i class="bi bi-calendar2-check-fill"></i>
+            <i class="bi bi-calendar2-check-fill me-1"></i>
             <span>Event Approvals</span>
             {% if pending_events|length > 0 %}
-            <span class="tab-counter-badge bg-warning text-dark">{{ pending_events|length }}</span>
+            <span class="tab-counter-badge bg-warning text-dark ms-1">{{ pending_events|length }}</span>
             {% endif %}
         </button>
         <button class="handle-tab-btn {% if active_tab == 'cmm' %}active{% endif %}" id="tab-btn-cmm" data-target-pane="pane-cmm" type="button">
-            <i class="bi bi-building-gear"></i>
-            <span>Classroom Management (CMM)</span>
+            <i class="bi bi-building-gear me-1"></i>
+            <span>CMM</span>
             {% if unassigned_count > 0 %}
-            <span class="tab-counter-badge bg-info text-dark">{{ unassigned_count }} unassigned</span>
+            <span class="tab-counter-badge bg-info text-dark ms-1">{{ unassigned_count }} unassigned</span>
             {% endif %}
         </button>
         <button class="handle-tab-btn {% if active_tab == 'ghost' or active_tab == 'ghost_protocol' %}active{% endif %}" id="tab-btn-ghost" data-target-pane="pane-ghost" type="button">
-            <i class="bi bi-shield-exclamation text-danger"></i>
+            <i class="bi bi-shield-exclamation text-danger me-1"></i>
             <span>Ghost Protocol</span>
             {% if currently_suspended_count > 0 %}
-            <span class="tab-counter-badge bg-danger text-white">{{ currently_suspended_count }} suspended</span>
+            <span class="tab-counter-badge bg-danger text-white ms-1">{{ currently_suspended_count }} suspended</span>
             {% endif %}
         </button>
         <button class="handle-tab-btn {% if active_tab == 'bookings' or active_tab == 'booking_history' %}active{% endif %}" id="tab-btn-bookings" data-target-pane="pane-bookings" type="button">
-            <i class="bi bi-calendar3-range text-primary"></i>
+            <i class="bi bi-calendar3-range text-primary me-1"></i>
             <span>Booking History</span>
             {% if total_bookings_count > 0 %}
-            <span class="tab-counter-badge bg-primary text-white">{{ total_bookings_count }}</span>
+            <span class="tab-counter-badge bg-primary text-white ms-1">{{ total_bookings_count }}</span>
             {% endif %}
         </button>
     </nav>
@@ -333,27 +661,36 @@
     <!-- SUBPAGE 1: EVENT APPROVALS                                             -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <div class="handle-tab-pane {% if active_tab != 'events' %}d-none{% endif %}" id="pane-events">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-            <div>
-                <h4 class="fw-bold mb-1">Event Booking Requests & Allocations</h4>
+        <div class="mb-4">
+            <div class="mb-3">
+                <h4 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                    <i class="bi bi-calendar-event-fill text-primary"></i>
+                    <span>Event Booking Requests &amp; Allocations</span>
+                </h4>
                 <p class="text-muted small mb-0">Review multi-room reservations and entire floor bookings submitted by faculty.</p>
             </div>
             
-            <!-- Event Sub-Tabs -->
-            <ul class="nav nav-pills" id="eventSubTabs" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active rounded-pill px-3 py-1.5 fw-semibold small" id="pending-events-subtab" data-bs-toggle="pill" data-bs-target="#events-pending" type="button">
-                        Pending <span class="badge bg-warning text-dark ms-1.5">{{ pending_events|length }}</span>
+            <!-- Event Sub-Tabs (Full-Width Segmented Tab Bar) -->
+            <ul class="nav nav-pills handle-subtabs w-100" id="eventSubTabs" role="tablist">
+                <li class="nav-item flex-fill" role="presentation">
+                    <button class="nav-link w-100 active" id="pending-events-subtab" data-bs-toggle="pill" data-bs-target="#events-pending" type="button" role="tab" aria-selected="true">
+                        <i class="bi bi-hourglass-split"></i>
+                        <span>Pending</span>
+                        <span class="badge bg-warning text-dark ms-1">{{ pending_events|length }}</span>
                     </button>
                 </li>
-                <li class="nav-item">
-                    <button class="nav-link rounded-pill px-3 py-1.5 fw-semibold small" id="upcoming-events-subtab" data-bs-toggle="pill" data-bs-target="#events-upcoming" type="button">
-                        Approved & Upcoming <span class="badge bg-success ms-1.5">{{ upcoming_events|length }}</span>
+                <li class="nav-item flex-fill" role="presentation">
+                    <button class="nav-link w-100" id="upcoming-events-subtab" data-bs-toggle="pill" data-bs-target="#events-upcoming" type="button" role="tab" aria-selected="false">
+                        <i class="bi bi-check2-circle text-success"></i>
+                        <span>Approved &amp; Upcoming</span>
+                        <span class="badge bg-success text-white ms-1">{{ upcoming_events|length }}</span>
                     </button>
                 </li>
-                <li class="nav-item">
-                    <button class="nav-link rounded-pill px-3 py-1.5 fw-semibold small" id="history-events-subtab" data-bs-toggle="pill" data-bs-target="#events-history" type="button">
-                        History <span class="badge bg-secondary ms-1.5">{{ history_events|length }}</span>
+                <li class="nav-item flex-fill" role="presentation">
+                    <button class="nav-link w-100" id="history-events-subtab" data-bs-toggle="pill" data-bs-target="#events-history" type="button" role="tab" aria-selected="false">
+                        <i class="bi bi-clock-history"></i>
+                        <span>History</span>
+                        <span class="badge bg-secondary text-white ms-1">{{ history_events|length }}</span>
                     </button>
                 </li>
             </ul>
@@ -413,7 +750,7 @@
                                     </div>
                                 </div>
 
-                                <div class="border-top pt-3 mt-3 d-flex justify-content-end gap-2">
+                                <div class="border-top pt-3 mt-3 d-flex justify-content-end gap-2" style="border-color: var(--fh-border) !important;">
                                     <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold" onclick="rejectEvent({{ event.id }})">
                                         <i class="bi bi-x-circle me-1"></i>Reject
                                     </button>
@@ -482,7 +819,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-3 pt-2 border-top d-flex justify-content-end" style="border-color: var(--border-color, rgba(0,0,0,0.08)) !important;">
+                                <div class="mt-3 pt-2 border-top d-flex justify-content-end" style="border-color: var(--fh-border) !important;">
                                     <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold" onclick="rejectEvent({{ event.id }}, true)">
                                         <i class="bi bi-x-circle me-1"></i>Reject / Revoke Event
                                     </button>
@@ -500,59 +837,102 @@
                 {% endif %}
             </div>
 
-            <!-- EVENT HISTORY -->
+            <!-- EVENT HISTORY (Compact Non-Scrolling Expandable Blocks) -->
             <div class="tab-pane fade" id="events-history" role="tabpanel">
                 {% if history_events %}
-                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden handle-panel-card">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th class="ps-4">Event Title</th>
-                                        <th>Faculty</th>
-                                        <th>Dates & Timing</th>
-                                        <th>Target Rooms</th>
-                                        <th>Status</th>
-                                        <th class="pe-4">Notes / Reason</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for event in history_events %}
-                                    <tr>
-                                        <td class="ps-4 fw-semibold text-body">{{ event.title }}</td>
-                                        <td>{{ event.faculty.name if event.faculty else '—' }}</td>
-                                        <td class="small">
-                                            {{ event.start_date.strftime('%b %d, %Y') }}<br>
-                                            <span class="text-muted">{{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}</span>
-                                        </td>
-                                        <td>
+                    <div class="history-events-container d-flex flex-column">
+                        {% for event in history_events %}
+                        <div class="event-history-card">
+                            <!-- Compact Summary Row (Clickable) -->
+                            <div class="event-history-summary" data-bs-toggle="collapse" data-bs-target="#history-detail-{{ event.id }}" role="button" aria-expanded="false" aria-controls="history-detail-{{ event.id }}">
+                                <div class="d-flex align-items-center gap-2.5 min-w-0 flex-grow-1" style="gap: 0.75rem;">
+                                    <div class="event-history-status-icon {% if event.status == 'Approved' %}status-approved{% elif event.status == 'Rejected' %}status-rejected{% else %}status-cancelled{% endif %}">
+                                        {% if event.status == 'Approved' %}
+                                        <i class="bi bi-check-circle-fill"></i>
+                                        {% elif event.status == 'Rejected' %}
+                                        <i class="bi bi-x-circle-fill"></i>
+                                        {% else %}
+                                        <i class="bi bi-slash-circle-fill"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="min-w-0 flex-grow-1">
+                                        <div class="d-flex align-items-center justify-content-between gap-2">
+                                            <h6 class="fw-bold mb-0 text-truncate text-body" style="font-size: 0.95rem;">{{ event.title }}</h6>
+                                            <span class="badge {% if event.status == 'Approved' %}bg-success-subtle text-success border border-success-subtle{% elif event.status == 'Rejected' %}bg-danger-subtle text-danger border border-danger-subtle{% else %}bg-secondary-subtle text-secondary border border-secondary-subtle{% endif %} rounded-pill px-2.5 py-1 small fw-bold">
+                                                {{ event.status }}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center flex-wrap gap-2 text-muted small mt-1" style="font-size: 0.78rem;">
+                                            <span><i class="bi bi-person me-1"></i>{{ event.faculty.name if event.faculty else 'Unknown Faculty' }}</span>
+                                            <span>•</span>
+                                            <span><i class="bi bi-calendar3 me-1"></i>{{ event.start_date.strftime('%b %d, %Y') }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="event-history-chevron ms-2 ps-1">
+                                    <i class="bi bi-chevron-down"></i>
+                                </div>
+                            </div>
+
+                            <!-- Expanded Brief Details Body -->
+                            <div class="collapse" id="history-detail-{{ event.id }}">
+                                <div class="event-history-details border-top pt-3 mt-3">
+                                    <div class="row g-2 small mb-3">
+                                        <div class="col-sm-6">
+                                            <div class="p-2.5 rounded-3 bg-secondary bg-opacity-10" style="padding: 0.65rem;">
+                                                <div class="text-muted fw-semibold mb-1" style="font-size: 0.75rem;"><i class="bi bi-clock me-1 text-primary"></i>Timing:</div>
+                                                <div class="fw-semibold text-body">{{ event.start_time.strftime('%I:%M %p') }} - {{ event.end_time.strftime('%I:%M %p') }}</div>
+                                                {% if event.start_date != event.end_date %}
+                                                <div class="text-muted small mt-0.5" style="font-size: 0.72rem;">Until {{ event.end_date.strftime('%b %d, %Y') }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <div class="p-2.5 rounded-3 bg-secondary bg-opacity-10" style="padding: 0.65rem;">
+                                                <div class="text-muted fw-semibold mb-1" style="font-size: 0.75rem;"><i class="bi bi-envelope me-1 text-primary"></i>Faculty Contact:</div>
+                                                <div class="fw-semibold text-body text-truncate">{{ event.faculty.email if event.faculty else 'N/A' }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        <div class="small fw-semibold text-muted text-uppercase mb-1.5" style="font-size: 0.72rem; letter-spacing: 0.4px;">Target Allocations:</div>
+                                        <div class="d-flex flex-wrap gap-1">
                                             {% if event.booking_type == 'floors' %}
-                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5">Floor(s) Block</span>
+                                                {% for fl in event.get_target_floors() %}
+                                                <span class="target-badge"><i class="bi bi-layers-fill me-1"></i>Entire Floor: Level {{ fl }}</span>
+                                                {% endfor %}
                                             {% else %}
-                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5">{{ event.rooms|length }} rooms</span>
+                                                {% for room in event.rooms %}
+                                                <span class="target-badge"><i class="bi bi-door-open-fill me-1"></i>Room {{ room.number }}</span>
+                                                {% endfor %}
                                             {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if event.status == 'Approved' %}
-                                                <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Completed</span>
-                                            {% elif event.status == 'Rejected' %}
-                                                <span class="badge bg-danger-subtle text-danger rounded-pill px-2.5 py-1">Rejected</span>
-                                            {% elif event.status == 'Cancelled' %}
-                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1">Cancelled</span>
-                                            {% else %}
-                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1">{{ event.status }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="pe-4 small text-muted">{{ event.rejection_reason or '—' }}</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                        </div>
+                                    </div>
+
+                                    {% if event.description %}
+                                    <div class="mb-2">
+                                        <div class="small fw-semibold text-muted text-uppercase mb-1" style="font-size: 0.72rem; letter-spacing: 0.4px;">Description:</div>
+                                        <p class="text-muted small mb-0 fst-italic p-2 rounded-3 bg-secondary bg-opacity-10">"{{ event.description }}"</p>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if event.rejection_reason %}
+                                    <div class="mt-2">
+                                        <div class="small fw-semibold text-danger text-uppercase mb-1" style="font-size: 0.72rem; letter-spacing: 0.4px;">Decision / Notes:</div>
+                                        <p class="text-danger small mb-0 bg-danger bg-opacity-10 border border-danger border-opacity-25 p-2 rounded-3">{{ event.rejection_reason }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
+                        {% endfor %}
                     </div>
                 {% else %}
                     <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
-                        <p class="small mb-0">No historical event records found.</p>
+                        <i class="bi bi-journal-text fs-1 text-muted mb-2 opacity-50"></i>
+                        <h5 class="fw-bold text-body">No Event History</h5>
+                        <p class="small mb-0">No past event reservations are recorded yet.</p>
                     </div>
                 {% endif %}
             </div>
@@ -750,30 +1130,31 @@
                                                 <div class="text-muted small">{{ cls.course or 'Regular Lecture' }}</div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1">{{ cls.division or 'All' }}</span>
+                                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5">
+                                                    {{ cls.division or 'All' }}
+                                                </span>
                                             </td>
                                             <td>
-                                                <div class="small fw-semibold">{{ cls.day_name }}</div>
+                                                <div class="small fw-semibold text-body">{{ cls.day_name }}</div>
                                                 <div class="text-muted small">{{ cls.start_time }} - {{ cls.end_time }}</div>
                                             </td>
                                             <td>
-                                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1">
-                                                    {{ cls.room_number if cls.room_number.startswith('VY') else ('VY' ~ cls.room_number if cls.room_number else '—') }}
+                                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1">
+                                                    {{ cls.room_number or 'Unallocated' }}
                                                 </span>
                                             </td>
                                             <td class="text-end">
-                                                <button class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold assign-single-btn" data-id="{{ cls.id }}" data-subject="{{ cls.subject }}">
-                                                    Assign
+                                                <button class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1 assign-single-btn" data-id="{{ cls.id }}" data-subject="{{ cls.subject }}">
+                                                    <i class="bi bi-person-plus me-1"></i>Assign
                                                 </button>
                                             </td>
                                         </tr>
                                         {% endfor %}
                                     {% else %}
-                                        <tr id="emptyTableState">
+                                        <tr>
                                             <td colspan="6" class="text-center py-5 text-muted">
-                                                <i class="bi bi-check-circle fs-1 text-success mb-2 d-block opacity-50"></i>
-                                                <h6 class="fw-bold text-body">All Classes Allocated</h6>
-                                                <p class="small mb-0">No unassigned timetable classes require faculty assignment.</p>
+                                                <i class="bi bi-check2-circle display-6 d-block mb-2 text-success opacity-75"></i>
+                                                All timetable slots have faculty members assigned!
                                             </td>
                                         </tr>
                                     {% endif %}
@@ -787,177 +1168,169 @@
     </div>
 
     <!-- ══════════════════════════════════════════════════════════════════════ -->
-    <!-- SUBPAGE 3: GHOST PROTOCOL                                              -->
+    <!-- SUBPAGE 3: GHOST PROTOCOL (Attendance & No-Show Enforcement)           -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <div class="handle-tab-pane {% if active_tab != 'ghost' and active_tab != 'ghost_protocol' %}d-none{% endif %}" id="pane-ghost">
         
-        <!-- Ghost Protocol Stat Cards Row -->
-        <div class="row g-3 mb-4">
+        <!-- Ghost Protocol Stat Counters -->
+        <div class="row g-2 g-md-3 mb-4">
             <div class="col-6 col-lg-3">
-                <div class="gp-stat-card">
-                    <div class="stat-value text-danger">{{ red_flag_count }}</div>
-                    <div class="stat-label">Faculty at Risk (3+ Strikes)</div>
+                <div class="gp-stat-card border-danger border-opacity-25">
+                    <div class="stat-value text-danger" id="gpStatSuspended">{{ currently_suspended_count }}</div>
+                    <div class="stat-label text-danger">Active Suspensions</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="gp-stat-card">
-                    <div class="stat-value text-warning">{{ currently_suspended_count }}</div>
-                    <div class="stat-label">Currently Suspended</div>
+                <div class="gp-stat-card border-warning border-opacity-25">
+                    <div class="stat-value text-warning" id="gpStatRedFlags">{{ red_flag_count }}</div>
+                    <div class="stat-label text-warning">Red Flag Faculty (3+ Strikes)</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="gp-stat-card">
-                    <div class="stat-value text-primary">{{ strikes_30d_total }}</div>
-                    <div class="stat-label">Strikes Logged (Last 30 Days)</div>
+                <div class="gp-stat-card border-primary border-opacity-25">
+                    <div class="stat-value text-primary" id="gpStat30d">{{ strikes_30d_total }}</div>
+                    <div class="stat-label text-primary">Strikes (Last 30 Days)</div>
                 </div>
             </div>
             <div class="col-6 col-lg-3">
-                <div class="gp-stat-card">
-                    <div class="stat-value text-muted">{{ total_strikes_ever }}</div>
-                    <div class="stat-label">All-Time Strikes</div>
+                <div class="gp-stat-card border-secondary border-opacity-25">
+                    <div class="stat-value text-secondary" id="gpStatTotal">{{ total_strikes_ever }}</div>
+                    <div class="stat-label text-muted">Total Strikes (All-Time)</div>
                 </div>
             </div>
         </div>
 
-        <!-- Flagged Faculty Section -->
-        <div class="mb-4">
-            <h5 class="fw-bold mb-3"><i class="bi bi-flag-fill text-danger me-2"></i>Flagged &amp; Suspended Faculty</h5>
-            
-            {% if flagged_faculty %}
-            <div class="row g-3">
-                {% for f in flagged_faculty %}
-                <div class="col-12 col-md-6 col-xl-4">
-                    <div class="flag-card h-100 d-flex flex-column justify-content-between {% if f.is_suspended %}is-suspended{% endif %}">
-                        <div>
-                            <div class="flag-header">
-                                <div class="flag-avatar {% if f.strikes_30d >= 3 or f.is_suspended %}avatar-red{% elif f.strikes_30d == 2 %}avatar-amber{% elif f.strikes_30d == 1 %}avatar-yellow{% else %}avatar-green{% endif %}">
-                                    {{ f.user.name[:2].upper() }}
-                                </div>
-                                <div class="min-w-0 flex-grow-1">
-                                    <div class="fw-bold text-truncate text-body">{{ f.user.name }}</div>
-                                    <div class="text-muted small text-truncate">{{ f.user.email }}</div>
-                                </div>
-                                {% if f.is_suspended %}
-                                <span class="badge bg-danger rounded-pill px-2.5 py-1 small fw-bold">Banned</span>
-                                {% endif %}
-                            </div>
+        <!-- Ghost Protocol Navigation Tabs (Full-Width Segmented Tab Bar) -->
+        <ul class="nav nav-pills handle-subtabs w-100 mb-4" id="ghostSubTabs" role="tablist">
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link w-100 active" id="gp-flagged-tab" data-bs-toggle="pill" data-bs-target="#gp-flagged-pane" type="button" role="tab" aria-selected="true">
+                    <i class="bi bi-person-x"></i>
+                    <span>Flagged &amp; Suspended Faculty</span>
+                </button>
+            </li>
+            <li class="nav-item flex-fill" role="presentation">
+                <button class="nav-link w-100" id="gp-audit-tab" data-bs-toggle="pill" data-bs-target="#gp-audit-pane" type="button" role="tab" aria-selected="false">
+                    <i class="bi bi-journal-text"></i>
+                    <span>Suspension Audit Log</span>
+                </button>
+            </li>
+        </ul>
 
-                            <div class="p-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="small fw-semibold text-muted">Recent Strikes (30d):</span>
-                                    <div>
-                                        {% for i in range(1, 4) %}
-                                        <span class="strike-dot {% if i > f.strikes_30d %}empty{% endif %}"></span>
-                                        {% endfor %}
-                                        <span class="small fw-bold ms-1 text-body">{{ f.strikes_30d }}/3</span>
+        <div class="tab-content" id="ghostSubTabsContent">
+            <!-- FLAGGED FACULTY PANE -->
+            <div class="tab-pane fade show active" id="gp-flagged-pane" role="tabpanel">
+                {% if flagged_faculty %}
+                    <div class="row g-3">
+                        {% for item in flagged_faculty %}
+                        {% set u = item.user %}
+                        {% set strikes = item.strikes_30d %}
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="flag-card h-100 d-flex flex-column justify-content-between {% if item.is_suspended %}is-suspended{% endif %}">
+                                <div>
+                                    <div class="flag-header">
+                                        <div class="flag-avatar {% if item.is_suspended or strikes >= 3 %}avatar-red{% elif strikes == 2 %}avatar-amber{% elif strikes == 1 %}avatar-yellow{% else %}avatar-green{% endif %}">
+                                            {{ u.name[0]|upper }}
+                                        </div>
+                                        <div class="min-w-0 flex-grow-1">
+                                            <div class="fw-bold text-body text-truncate">{{ u.name }}</div>
+                                            <div class="text-muted small text-truncate">{{ u.email }}</div>
+                                        </div>
+                                        {% if item.is_suspended %}
+                                        <span class="badge bg-danger rounded-pill px-2.5 py-1 small">SUSPENDED</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="p-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-2">
+                                            <span class="small fw-semibold text-muted">30-Day Strike Meter:</span>
+                                            <div>
+                                                {% for i in range(1, 4) %}
+                                                    <span class="strike-dot {% if i > strikes %}empty{% endif %}"></span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+
+                                        {% if item.is_suspended %}
+                                        <div class="alert alert-danger py-2 px-3 small rounded-3 mb-2">
+                                            <i class="bi bi-lock-fill me-1"></i>Ad-Hoc Booking Suspended
+                                            {% if item.suspended_until %}
+                                            <div class="text-muted mt-0.5" style="font-size: 0.72rem;">Until: {{ item.suspended_until.strftime('%b %d, %Y %I:%M %p') }}</div>
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+
+                                        <div class="text-muted small mt-2">
+                                            All-Time Strikes: <strong>{{ item.all_time_strikes }}</strong>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center mb-3 text-muted small">
-                                    <span>All-time strikes:</span>
-                                    <span class="fw-semibold text-body">{{ f.all_time_strikes }}</span>
-                                </div>
 
-                                {% if f.is_suspended %}
-                                <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3">
-                                    <div class="fw-bold"><i class="bi bi-lock-fill me-1"></i>Suspended until:</div>
-                                    <div>{{ f.suspended_until.strftime('%d %b %Y, %I:%M %p') if f.suspended_until else 'Indefinite' }}</div>
-                                    {% if f.suspension_reason %}
-                                    <div class="mt-1 text-muted fst-italic">{{ f.suspension_reason }}</div>
+                                <div class="p-3 pt-0 d-flex justify-content-end gap-2">
+                                    {% if item.is_suspended %}
+                                    <button class="btn-lift" onclick="liftSuspension({{ u.id }}, '{{ u.name }}')">
+                                        <i class="bi bi-unlock-fill me-1"></i>Lift Suspension
+                                    </button>
+                                    {% endif %}
+                                    {% if item.all_time_strikes > 0 or strikes > 0 %}
+                                    <button class="btn-clear" onclick="clearStrikes({{ u.id }}, '{{ u.name }}')">
+                                        <i class="bi bi-trash3 me-1"></i>Clear Strikes
+                                    </button>
                                     {% endif %}
                                 </div>
-                                {% endif %}
-
-                                {% if f.recent_strikes %}
-                                <div class="small fw-semibold text-muted text-uppercase mb-1.5" style="font-size: 0.68rem;">Recent No-Show Incidents:</div>
-                                {% for st in f.recent_strikes[:2] %}
-                                <div class="strike-item">
-                                    <span class="strike-pill">Strike #{{ loop.index }}</span>
-                                    <div class="min-w-0">
-                                        <div class="text-truncate text-body">{{ st.reason or 'No-show detected' }}</div>
-                                        <div class="text-muted" style="font-size: 0.72rem;">{{ st.created_at.strftime('%d %b %Y') }}</div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                                {% endif %}
                             </div>
                         </div>
-
-                        <div class="p-3 border-top d-flex gap-2 justify-content-end">
-                            {% if f.is_suspended %}
-                            <button class="btn-lift" onclick="liftSuspension({{ f.user.id }}, '{{ f.user.name }}')">
-                                <i class="bi bi-unlock-fill me-1"></i>Lift Suspension
-                            </button>
-                            {% endif %}
-                            {% if f.all_time_strikes > 0 %}
-                            <button class="btn-clear" onclick="clearStrikes({{ f.user.id }}, '{{ f.user.name }}')">
-                                <i class="bi bi-trash3 me-1"></i>Clear Strikes
-                            </button>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
-                <i class="bi bi-shield-check fs-1 text-success mb-2 opacity-50"></i>
-                <h5 class="fw-bold text-body">No Faculty Currently Flagged</h5>
-                <p class="small mb-0">All faculty members are in good standing with zero active no-show strikes.</p>
-            </div>
-            {% endif %}
-        </div>
-
-        <!-- Historical Suspension Audit Log -->
-        <div class="mb-4">
-            <h5 class="fw-bold mb-3"><i class="bi bi-clock-history text-primary me-2"></i>Suspension Audit Trail</h5>
-            {% if suspension_history %}
-            <div class="history-table-wrap">
-                <table class="history-table">
-                    <thead>
-                        <tr>
-                            <th>Faculty</th>
-                            <th>Event</th>
-                            <th>Timestamp</th>
-                            <th>Strikes</th>
-                            <th>Suspended Until</th>
-                            <th>Reason</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for h in suspension_history %}
-                        {% set entry = h.entry %}
-                        <tr class="history-row {% if entry.event_type == 'suspended' %}row-suspended{% elif entry.event_type == 'lifted' %}row-lifted{% endif %}">
-                            <td>
-                                <div class="fw-semibold text-body">{{ entry.faculty.name if entry.faculty else 'Unknown' }}</div>
-                                <div class="text-muted small">{{ entry.faculty.email if entry.faculty else '' }}</div>
-                            </td>
-                            <td>
-                                {% if entry.event_type == 'suspended' %}
-                                <span class="event-badge badge-suspended"><i class="bi bi-lock-fill me-1"></i>Suspended</span>
-                                {% elif entry.event_type == 'lifted' %}
-                                <span class="event-badge badge-lifted"><i class="bi bi-unlock-fill me-1"></i>Lifted</span>
-                                {% else %}
-                                <span class="event-badge badge-expired">Expired</span>
-                                {% endif %}
-                            </td>
-                            <td class="text-muted small">
-                                {{ h.created_ist.strftime('%d %b %Y, %I:%M %p') }}
-                            </td>
-                            <td class="fw-bold text-body">{{ entry.strike_count }}</td>
-                            <td class="text-muted small">
-                                {{ h.suspended_until_ist.strftime('%d %b %Y, %I:%M %p') if h.suspended_until_ist else '—' }}
-                            </td>
-                            <td class="text-muted small">{{ entry.reason or '—' }}</td>
-                        </tr>
                         {% endfor %}
-                    </tbody>
-                </table>
+                    </div>
+                {% else %}
+                    <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
+                        <i class="bi bi-shield-check fs-1 text-success mb-2 opacity-50"></i>
+                        <h5 class="fw-bold text-body">No Flagged Faculty</h5>
+                        <p class="small mb-0">No faculty members currently have active strikes or suspensions under Ghost Protocol.</p>
+                    </div>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="card border-0 rounded-4 p-4 text-center text-muted handle-panel-card">
-                <p class="mb-0 small">No suspension history records found.</p>
+
+            <!-- AUDIT LOG PANE -->
+            <div class="tab-pane fade" id="gp-audit-pane" role="tabpanel">
+                {% if suspension_history %}
+                    <div class="history-table-wrap">
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Faculty</th>
+                                    <th>Action</th>
+                                    <th>Reason</th>
+                                    <th>Admin</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in suspension_history %}
+                                {% set log = item.entry %}
+                                <tr class="history-row {% if log.event_type == 'suspended' %}row-suspended{% else %}row-lifted{% endif %}">
+                                    <td>
+                                        <div class="fw-bold text-body">{{ log.faculty.name if log.faculty else 'Unknown' }}</div>
+                                        <div class="text-muted small">{{ log.faculty.email if log.faculty else '' }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="event-badge {% if log.event_type == 'suspended' %}badge-suspended{% elif log.event_type == 'lifted' %}badge-lifted{% else %}badge-expired{% endif %}">
+                                            {{ log.event_type|upper }}
+                                        </span>
+                                    </td>
+                                    <td class="small">{{ log.reason or '—' }}</td>
+                                    <td class="small">{{ log.lifted_by.name if log.lifted_by else 'System Auto' }}</td>
+                                    <td class="small text-muted">{{ item.created_ist.strftime('%b %d, %Y %I:%M %p') if item.created_ist else '—' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
+                        <p class="small mb-0">No historical suspension logs found.</p>
+                    </div>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
 
@@ -965,7 +1338,7 @@
     <!-- SUBPAGE 4: BOOKING HISTORY (Audit Trail of Classroom Reservations)     -->
     <!-- ══════════════════════════════════════════════════════════════════════ -->
     <div class="handle-tab-pane {% if active_tab != 'bookings' and active_tab != 'booking_history' %}d-none{% endif %}" id="pane-bookings">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
             <div>
                 <h4 class="fw-bold mb-1">Classroom Reservation &amp; Booking History</h4>
                 <p class="text-muted small mb-0">Audit log of all ad-hoc and timetable classroom bookings across Vyas Hall.</p>
@@ -978,7 +1351,7 @@
         </div>
 
         <!-- Bookings Filter Bar -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4 handle-panel-card">
+        <div class="card border-0 shadow-sm rounded-4 mb-3 handle-panel-card">
             <div class="card-body p-3">
                 <div class="row g-2 align-items-center">
                     <div class="col-12 col-md-8">
@@ -1048,12 +1421,12 @@
                                 {% elif b.status == 'Cancelled' %}
                                 <span class="badge bg-danger-subtle text-danger rounded-pill px-2.5 py-1">Cancelled</span>
                                 {% elif b.status == 'No-Show' or b.status == 'Strike' %}
-                                <span class="badge bg-danger text-white rounded-pill px-2.5 py-1">No-Show Strike</span>
+                                <span class="badge bg-danger text-white rounded-pill px-2.5 py-1">No-Show</span>
                                 {% else %}
                                 <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1">Active</span>
                                 {% endif %}
                             </td>
-                            <td class="pe-4 text-end text-muted small">
+                            <td class="pe-4 text-end small text-muted">
                                 {{ b.created_at.strftime('%d %b, %I:%M %p') if b.created_at else '—' }}
                             </td>
                         </tr>
@@ -1064,9 +1437,9 @@
         </div>
         {% else %}
         <div class="card border-0 rounded-4 p-5 text-center text-muted handle-panel-card">
-            <i class="bi bi-calendar3-range fs-1 text-muted mb-2 opacity-50"></i>
-            <h5 class="fw-bold text-body">No Classroom Bookings Recorded</h5>
-            <p class="small mb-0">No ad-hoc room reservation records were found in the database.</p>
+            <i class="bi bi-inbox fs-1 text-muted mb-2 opacity-50"></i>
+            <h5 class="fw-bold text-body">No Classroom Bookings</h5>
+            <p class="small mb-0">No faculty classroom reservations recorded yet.</p>
         </div>
         {% endif %}
     </div>
@@ -1074,37 +1447,34 @@
 </div>
 
 <!-- ══════════════════════════════════════════════════════════════════════ -->
-<!-- GLOBAL MODALS: CMM & EVENT HANDLERS                                    -->
+<!-- MODALS FOR FACULTY ADMIN HANDLE                                        -->
 <!-- ══════════════════════════════════════════════════════════════════════ -->
 
 <!-- Modal 1: Mass Import CSV Modal -->
 <div class="modal fade" id="importTimetableModal" tabindex="-1" aria-labelledby="importTimetableModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden handle-panel-card">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-4 handle-panel-card">
             <div class="modal-header border-0 pb-0 pt-4 px-4">
                 <h5 class="modal-title fw-bold" id="importTimetableModalLabel"><i class="bi bi-file-earmark-spreadsheet-fill text-success me-2"></i>Mass Import Timetable Matrix</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <form id="importTimetableForm">
-                    <div class="mb-3">
-                        <label for="csvFileInput" class="form-label fw-semibold">Select CSV Spreadsheet</label>
-                        <input class="form-control" type="file" id="csvFileInput" accept=".csv" required>
-                        <div class="form-text small">Upload your MIT-WPU Classroom timetable CSV matrix with room and slot definitions.</div>
-                    </div>
+                <p class="text-muted small mb-3">Upload a CSV file conforming to the standard template (Day, Start Time, End Time, Subject, Course, Division, Room Number, Faculty Email).</p>
+                
+                <div class="mb-3">
+                    <label for="csvFileInput" class="form-label fw-semibold">Select CSV Document</label>
+                    <input class="form-control" type="file" id="csvFileInput" accept=".csv" required>
+                </div>
 
-                    <div class="d-none" id="csvPreviewSection">
-                        <div class="alert alert-info py-2 small mb-3">
-                            <i class="bi bi-info-circle me-1"></i><span id="csvPreviewSummary">0 rows ready for import.</span>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-end gap-2 mt-4">
-                        <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-outline-primary rounded-pill px-4" id="btnPreviewCsv">Preview</button>
-                        <button type="submit" class="btn btn-success rounded-pill px-4" id="btnCommitImport">Import & Commit</button>
-                    </div>
-                </form>
+                <div id="csvPreviewSection" class="d-none mt-3 p-3 bg-light rounded-3">
+                    <div class="fw-bold small text-success mb-1" id="csvPreviewSummary"></div>
+                    <p class="text-muted small mb-0">Click 'Commit Import' below to finalize the timetable upload.</p>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary rounded-pill px-4" id="btnPreviewCsv">Validate File</button>
+                <button type="button" class="btn btn-success rounded-pill px-4" id="btnCommitImport">Commit Import</button>
             </div>
         </div>
     </div>
@@ -1115,18 +1485,22 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg rounded-4 handle-panel-card">
             <div class="modal-header border-0 pb-0 pt-4 px-4">
-                <h5 class="modal-title fw-bold text-danger" id="deleteConfirmModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Wipe Timetable Records</h5>
+                <h5 class="modal-title fw-bold text-danger" id="deleteConfirmModalLabel"><i class="bi bi-exclamation-triangle-fill me-2"></i>Clear Entire Timetable</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-4">
-                <p class="text-body mb-3">Are you sure you want to delete timetables? This action will release assigned room allocations across the building.</p>
-                <div class="alert alert-danger py-2 small mb-0">
-                    <i class="bi bi-shield-slash me-1"></i>This action cannot be undone.
+                <p class="text-body fw-bold fs-6 mb-2">This task will clear the time table permanently.</p>
+                <p class="text-muted small mb-3">All scheduled slots, recurring classes, and faculty assignments across the building will be permanently wiped.</p>
+                <div class="alert alert-danger py-2 px-3 small mb-0 rounded-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-slash fs-5"></i>
+                    <span>This action is irreversible and cannot be recovered.</span>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0 pb-4 px-4">
+            <div class="modal-footer border-0 pt-0 pb-4 px-4 gap-2">
                 <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-danger rounded-pill px-4" id="btnConfirmDeleteTimetable">Wipe Timetables</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 fw-semibold" id="btnConfirmDeleteTimetable">
+                    <i class="bi bi-trash3-fill me-1"></i>Clear Timetable
+                </button>
             </div>
         </div>
     </div>
@@ -1159,18 +1533,13 @@
 
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <button type="button" class="btn btn-outline-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary rounded-pill px-4" id="btnSubmitAssign">Save Assignment</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4">Assign Faculty</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Embedded JSON Data for High-Performance Client Interactions -->
-<script id="cmmUnassignedData" type="application/json">{{ unassigned_classes_data|tojson }}</script>
-<script id="cmmFacultiesData" type="application/json">{{ all_faculties_data|tojson }}</script>
-
 {% endblock %}
 
 {% block extra_js %}
@@ -1180,30 +1549,123 @@
     'use strict';
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
 
-    // ── Master Tab Switching with URL state sync ──
-    const masterTabs = document.querySelectorAll('.handle-tab-btn');
-    const tabPanes = document.querySelectorAll('.handle-tab-pane');
+    // Metadata for each tab section
+    const SECTION_METADATA = {
+        'events': {
+            title: 'Event Approvals',
+            icon: 'bi-calendar2-check-fill text-primary',
+            paneId: 'pane-events'
+        },
+        'cmm': {
+            title: 'Classroom Management (CMM)',
+            icon: 'bi-building-gear text-info',
+            paneId: 'pane-cmm'
+        },
+        'ghost': {
+            title: 'Ghost Protocol',
+            icon: 'bi-shield-exclamation text-danger',
+            paneId: 'pane-ghost'
+        },
+        'bookings': {
+            title: 'Booking History',
+            icon: 'bi-clock-history text-success',
+            paneId: 'pane-bookings'
+        }
+    };
 
-    masterTabs.forEach(btn => {
-        btn.addEventListener('click', () => {
-            const targetId = btn.getAttribute('data-target-pane');
-            masterTabs.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
+    // DOM Elements for Switching
+    const headerTitleText = document.getElementById('headerActiveText');
+    const headerTitleIcon = document.getElementById('headerActiveIcon');
+    const cmmHeaderActions = document.getElementById('cmmHeaderActions');
+    const drawerNavItems = document.querySelectorAll('.drawer-nav-item[data-tab-target]');
+    const desktopTabBtns = document.querySelectorAll('.handle-tab-btn');
+    const allPanes = document.querySelectorAll('.handle-tab-pane');
+    const offcanvasEl = document.getElementById('facultyHandleOffcanvas');
+    let offcanvasInst = null;
 
-            tabPanes.forEach(p => {
-                if (p.id === targetId) {
-                    p.classList.remove('d-none');
-                    if (window.gsap) gsap.fromTo(p, { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: 0.25 });
-                } else {
-                    p.classList.add('d-none');
-                }
-            });
+    if (offcanvasEl && typeof bootstrap !== 'undefined') {
+        offcanvasInst = bootstrap.Offcanvas.getInstance(offcanvasEl) || new bootstrap.Offcanvas(offcanvasEl);
+    }
 
-            // Sync URL query param
-            const tabName = targetId.replace('pane-', '');
-            const url = new URL(window.location);
-            url.searchParams.set('tab', tabName);
-            window.history.replaceState({}, '', url);
+    // Core Tab Switching Function
+    window.switchHandleTab = function(tabKey) {
+        if (!tabKey) tabKey = 'events';
+        if (tabKey === 'booking_history') tabKey = 'bookings';
+        if (tabKey === 'ghost_protocol') tabKey = 'ghost';
+
+        const meta = SECTION_METADATA[tabKey] || SECTION_METADATA['events'];
+
+        // 1. Update Header Title & Icon
+        if (headerTitleText) headerTitleText.textContent = meta.title;
+        if (headerTitleIcon) headerTitleIcon.className = `bi ${meta.icon}`;
+
+        // 2. Toggle CMM-specific action buttons in header
+        if (cmmHeaderActions) {
+            if (tabKey === 'cmm') {
+                cmmHeaderActions.classList.remove('d-none');
+                cmmHeaderActions.classList.add('d-flex');
+            } else {
+                cmmHeaderActions.classList.add('d-none');
+                cmmHeaderActions.classList.remove('d-flex');
+            }
+        }
+
+        // 3. Switch Visible Pane
+        allPanes.forEach(pane => {
+            if (pane.id === meta.paneId) {
+                pane.classList.remove('d-none');
+                if (window.gsap) gsap.fromTo(pane, { opacity: 0, y: 6 }, { opacity: 1, y: 0, duration: 0.2 });
+            } else {
+                pane.classList.add('d-none');
+            }
+        });
+
+        // 4. Update Active states in Drawer
+        drawerNavItems.forEach(item => {
+            if (item.getAttribute('data-tab-target') === tabKey) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // 5. Update Active states in Desktop Tabs
+        desktopTabBtns.forEach(btn => {
+            if (btn.getAttribute('data-target-pane') === meta.paneId) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // 6. Close Drawer if open
+        if (offcanvasEl && typeof bootstrap !== 'undefined') {
+            const inst = bootstrap.Offcanvas.getInstance(offcanvasEl);
+            if (inst) inst.hide();
+        }
+
+        // 7. Update URL Query Param without page reload
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tabKey);
+        window.history.replaceState({}, '', url);
+    };
+
+    // Attach Listeners to Drawer Items
+    drawerNavItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = item.getAttribute('data-tab-target');
+            switchHandleTab(target);
+        });
+    });
+
+    // Attach Listeners to Desktop Tabs
+    desktopTabBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetPane = btn.getAttribute('data-target-pane');
+            const targetTab = targetPane.replace('pane-', '');
+            switchHandleTab(targetTab);
         });
     });
 
@@ -1270,29 +1732,27 @@
 
     // ── GHOST PROTOCOL ACTIONS ──
     window.liftSuspension = async function(facultyId, name) {
-        const result = await Swal.fire({
+        const { value: clearStrikes } = await Swal.fire({
             title: 'Lift Suspension?',
-            html: `Remove Ad-Hoc booking ban for <strong>${name}</strong>?`,
-            icon: 'warning',
+            html: `Lift Ad-Hoc room booking suspension for <strong>${name}</strong>?`,
+            icon: 'question',
             showCancelButton: true,
-            showDenyButton: true,
-            confirmButtonText: 'Lift Only',
-            denyButtonText: 'Lift & Clear Strikes',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#22c55e',
-            denyButtonColor: '#f59e0b',
+            confirmButtonText: 'Lift Suspension',
+            confirmButtonColor: '#16a34a',
+            input: 'checkbox',
+            inputValue: 1,
+            inputPlaceholder: 'Also clear 30-day strike records (clean slate)'
         });
-        if (result.isDismissed) return;
-        const doClearStrikes = result.isDenied;
+        if (clearStrikes === undefined) return;
         try {
             const res = await fetch(`/admin/api/ghost-protocol/lift-suspension/${facultyId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                body: JSON.stringify({ clear_strikes: doClearStrikes })
+                body: JSON.stringify({ clear_strikes: Boolean(clearStrikes) })
             });
             const data = await res.json();
             if (data.success) {
-                Swal.fire('Success', data.message, 'success').then(() => location.reload());
+                Swal.fire('Suspension Lifted', data.message, 'success').then(() => location.reload());
             } else {
                 Swal.fire('Error', data.error || 'Failed to lift suspension.', 'error');
             }
@@ -1315,7 +1775,7 @@
             const res = await fetch(`/admin/api/ghost-protocol/clear-strikes/${facultyId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                body: JSON.stringify({})
+                body: JSON.stringify({ scope: 'single', faculty_id: facultyId })
             });
             const data = await res.json();
             if (data.success) {
@@ -1525,9 +1985,9 @@
                 const delModalEl = document.getElementById('deleteConfirmModal');
                 const delModalInst = bootstrap.Modal.getInstance(delModalEl);
                 if (delModalInst) delModalInst.hide();
-                Swal.fire('Cleared', data.message || 'Timetables cleared.', 'success').then(() => location.reload());
+                Swal.fire('Timetable Cleared', data.message || 'The entire timetable has been permanently cleared.', 'success').then(() => location.reload());
             } else {
-                Swal.fire('Error', data.error || 'Failed to delete timetables.', 'error');
+                Swal.fire('Error', data.error || 'Failed to clear timetables.', 'error');
             }
         } catch {
             Swal.fire('Error', 'Network communication failed.', 'error');

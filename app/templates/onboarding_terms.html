@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="robots" content="noindex, nofollow">
+    <title>Mandatory Compliance &amp; Terms Agreement — FixLink</title>
+    
+    <!-- CSS Dependencies -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-body: #0a0a0a;
+            --bg-card: #141414;
+            --bg-inner: #1a1a1a;
+            --border-color: #262626;
+            --border-hover: #3b82f6;
+            --text-primary: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary-accent: #2563eb;
+            --primary-hover: #1d4ed8;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem 1rem;
+            margin: 0;
+            user-select: text;
+        }
+
+        .compliance-wrapper {
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto;
+        }
+
+        .compliance-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+
+        .compliance-header {
+            padding: 2rem 2.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.05) 0%, transparent 100%);
+        }
+
+        .terms-scrollbox {
+            max-height: 380px;
+            overflow-y: auto;
+            background: var(--bg-inner);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.5rem;
+            font-size: 0.88rem;
+            line-height: 1.7;
+            color: #cbd5e1;
+            scrollbar-width: thin;
+            scrollbar-color: #3b82f6 var(--bg-inner);
+        }
+
+        .terms-scrollbox::-webkit-scrollbar {
+            width: 6px;
+        }
+        .terms-scrollbox::-webkit-scrollbar-track {
+            background: var(--bg-inner);
+            border-radius: 4px;
+        }
+        .terms-scrollbox::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+        .terms-scrollbox::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-accent);
+        }
+
+        .policy-section-title {
+            color: #60a5fa;
+            font-weight: 700;
+            font-size: 0.96rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .policy-section-title:first-child {
+            margin-top: 0;
+        }
+
+        .highlight-badge {
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .agreement-box {
+            background: rgba(37, 99, 235, 0.06);
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            border-radius: 14px;
+            padding: 1.2rem 1.4rem;
+            margin-top: 1.5rem;
+            transition: border-color 0.2s ease;
+        }
+        .agreement-box:hover {
+            border-color: rgba(37, 99, 235, 0.5);
+        }
+
+        .form-check-input {
+            width: 1.4rem;
+            height: 1.4rem;
+            cursor: pointer;
+            margin-top: 0.15rem;
+            border-color: #475569;
+            background-color: #1e293b;
+        }
+        .form-check-input:checked {
+            background-color: var(--primary-accent);
+            border-color: var(--primary-accent);
+        }
+        .form-check-label {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #f1f5f9;
+            padding-left: 0.5rem;
+            line-height: 1.4;
+        }
+
+        .btn-accept {
+            background: var(--primary-accent);
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: 0.3px;
+            padding: 0.95rem 1.75rem;
+            border-radius: 12px;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+        }
+        .btn-accept:hover:not(:disabled) {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+            color: #ffffff;
+        }
+        .btn-accept:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none;
+        }
+
+        .user-identity-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 4px 14px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .signout-link {
+            color: #ef4444;
+            font-size: 0.8rem;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+        .signout-link:hover {
+            text-decoration: underline;
+            color: #f87171;
+        }
+    </style>
+</head>
+<body>
+
+<div class="compliance-wrapper">
+    <div class="compliance-card">
+        <!-- Header -->
+        <div class="compliance-header">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="highlight-badge bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">
+                        <i class="bi bi-shield-check me-1"></i>Security &amp; Legal Gate
+                    </span>
+                    <span class="highlight-badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25">
+                        Action Required
+                    </span>
+                </div>
+                {% if user %}
+                <div class="user-identity-chip">
+                    <i class="bi bi-person-circle text-primary"></i>
+                    <span>{{ user.name }} ({{ user.email }})</span>
+                    <a href="{{ url_for('auth.logout') }}" class="signout-link" title="Sign out if this is not your account">
+                        <i class="bi bi-box-arrow-right me-1"></i>Sign Out
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            <h1 class="h3 fw-bold mb-1 text-white">Compliance &amp; Terms Agreement</h1>
+            <p class="text-muted small mb-0">
+                To access FixLink services, classroom resources, and administrative tools, you must review and accept the institutional compliance policies below.
+            </p>
+        </div>
+
+        <!-- Body Form -->
+        <div class="p-4 p-md-4">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category in ['error', 'danger'] else 'info' }} rounded-3 py-2.5 px-3 small d-flex align-items-center gap-2 mb-3" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                        <div>{{ message }}</div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <!-- Terms & Compliance Scroll Box -->
+            <div class="terms-scrollbox" id="termsBox" tabindex="0" role="region" aria-label="Terms and Compliance Policy Content">
+                
+                {% if user.role == 'faculty' or user.is_admin or session.get('is_admin') %}
+                <!-- ═══════════════════════════════════════════════════
+                     FACULTY & ADMIN COMPLIANCE DOCUMENT (GHOST PROTOCOL)
+                ══════════════════════════════════════════════════════ -->
+                <div class="p-2.5 px-3 rounded-2 bg-body-secondary border text-muted small mb-4" style="font-size: 0.8rem; line-height: 1.45;">
+                    <strong>Faculty &amp; Administration Notice:</strong> This document contains the mandatory <strong>Ghost Protocol</strong> attendance accountability policy, ad-hoc space reservation regulations, priority maintenance workflows, and administrative compliance governance for MIT-WPU Pune. Acceptance of all provisions is required to complete session onboarding.
+                </div>
+
+                <!-- Article 1 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 1: Institutional Authority, Scope &amp; Executive Mandate</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>1.1 Statutory Authority:</strong> Enacted under executive direction of the Vice-Chancellor and Registrar of Dr. Vishwanath Karad MIT World Peace University (MIT-WPU), Pune, this governance framework regulates space management, smart classroom technology, and infrastructure maintenance across all faculty and administrative divisions.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>1.2 Role-Based Administrative Scope:</strong> Faculty members, Department Heads (HODs), Central Maintenance Managers (CMM), and Super Administrators are granted specific role-based permissions. Exercising permissions outside authorized academic scope is strictly prohibited.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 2 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 2: Faculty Credential Integrity &amp; Anti-Delegation</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>2.1 Official Credential Use:</strong> Faculty and staff must authenticate exclusively via their designated university email (<code>@mitwpu.edu.in</code>).
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>2.2 Anti-Delegation Mandate:</strong> Delegating administrative credentials, sharing login passwords, or authorizing student proxies to reserve rooms or modify master schedules under faculty credentials constitutes a violation of university administrative protocol.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 3: Ghost Protocol -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 3: The Ghost Protocol — Smart Space Utilization &amp; Attendance Enforcement</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            To eliminate unoccupied classroom reservations, guarantee equitable resource distribution, and maintain zero-waste operational efficiency across the Vyas Building, FixLink enforces the automated <strong>Ghost Protocol</strong> engine:
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>3.1 15-Minute Grace Period:</strong> For all ad-hoc room reservations, special seminars, and departmental events, the reserving faculty organizer or designated co-instructor must physically occupy the room and record an authenticated digital check-in within exactly fifteen (15) minutes of the scheduled slot start time.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>3.2 Automated No-Show Cancellation &amp; Space Reallocation:</strong> If an authenticated check-in is not logged before the expiration of the 15-minute grace period, the FixLink engine automatically revokes the reservation, immediately returns the room to the active campus vacancy pool for other faculty, and records an immutable <em>No-Show Strike</em> on the organizer's profile.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>3.3 30-Day Rolling Window &amp; 14-Day Suspension Enforcement:</strong> Accumulating three (3) active strikes within any rolling 30-day window automatically triggers a mandatory fourteen (14) calendar day suspension of ad-hoc room booking privileges.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>3.4 Master Timetable Protection:</strong> Scheduled academic curriculum timetable lectures assigned by the Central Timetable Committee are protected and will not be auto-cancelled by ad-hoc strike suspensions.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>3.5 Prohibition of Room Squatting:</strong> Occupying smart classrooms, laboratories, or seminar halls without an active timetable slot or an approved FixLink booking is prohibited.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 4 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 4: Ad-Hoc Room Reservation Rules &amp; Event Management</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>4.1 Advance Booking Window:</strong> Ad-hoc reservations may be placed between a minimum of two (2) hours and a maximum of fourteen (14) calendar days prior to the required time slot.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>4.2 Good-Faith Advance Cancellation:</strong> If a reserved classroom is no longer required, the organizer must cancel the booking at least one (1) hour prior to slot commencement. Timely cancellation frees the space and incurs zero penalty or strike.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>4.3 Conflict Resolution Hierarchy:</strong> Conflicting space requests are resolved by strict operational priority: (1) University Examinations &gt; (2) Master Timetable Lectures &gt; (3) Approved Institutional Conferences &gt; (4) Departmental Seminars &gt; (5) Ad-Hoc Sessions.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 5 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 5: Priority Maintenance Work Orders &amp; Emergency Escalations</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>5.1 Priority Dispatch Authority:</strong> Faculty members possess authorization to flag active instructional defects (e.g. smart panel failure during ongoing lecture, projector power failure) as "High Priority" for fast-track technician dispatch.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>5.2 Critical Safety Hazards:</strong> Suspected electrical short-circuits, structural anomalies, chemical spills, or fire equipment faults must be immediately flagged for full physical evacuation and urgent administrative dispatch.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>5.3 Repair Verification:</strong> Faculty organizers must confirm the physical rectification of reported faults prior to approving ticket closure.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 6 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 6: DPDP Act (2023) Compliance, Telemetry &amp; Confidentiality</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>6.1 Student Data Protection:</strong> Faculty and staff accessing student ticketing data, PRN identifiers, or maintenance histories must handle all records with strict confidentiality under the DPDP Act (2023).
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>6.2 Prohibition of Unauthorized Data Extraction:</strong> Bulk downloading, exporting, or sharing of campus facility reports, technician metrics, or student telemetry with external non-university entities is prohibited.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 7 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 7: Immutable Cryptographic Audit Trails &amp; Forensics</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>7.1 Unalterable Action Logging:</strong> All room reservations, cancellations, check-in verifications, strike issuances, administrative waivers, and work order modifications generate tamper-evident cryptographic log entries.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>7.2 CERT-In Compliance:</strong> Forensic server logs, client network timestamps, and authenticated user states are retained in accordance with national cybersecurity directives.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 8 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 8: Strike Appeals, Administrative Disputes &amp; Amendments</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>8.1 48-Hour Dispute Window:</strong> Faculty members wishing to contest an automated strike due to verifiable technical anomalies, network outages, or urgent departmental summons may submit a formal appeal to Central Administration within forty-eight (48) hours of strike notification.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>8.2 Valid Grounds for Waiver:</strong> Documented campus network failure, medical emergencies, or official Dean/HOD convocations constitute acceptable grounds for strike mitigation.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>8.3 Institutional Amendments:</strong> MIT-WPU reserves the right to revise operational protocols in alignment with university academic calendars and facility governance guidelines.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 9: Developer Liability Shield & Algorithmic Disclaimer -->
+                <div class="mb-3">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 9: Algorithmic Telemetry Disclaimer, "As Is" Operation &amp; Developer Immunity</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>9.1 Algorithmic &amp; Automated Space Telemetry Disclaimer:</strong> The automated Ghost Protocol engine, check-in countdown timers, occupancy tracking heuristics, and live vacancy calculations operate through automated system logic. Because network synchronization, campus Wi-Fi handover, or server latency can occasionally cause temporary data lag, FixLink does not guarantee that room status telemetry is 100% infallible or real-time under all environmental conditions. Faculty organizers are advised to conduct independent verification for university examinations, guest symposiums, or high-stakes institutional events.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>9.2 "As Is" Provision &amp; Non-Liability:</strong> FixLink and its scheduling modules are deployed on an "AS IS" and "AS AVAILABLE" basis without warranties of uninterrupted uptime, absolute accuracy, or fault tolerance.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>9.3 Absolute Developer, Maintainer &amp; Engineering Team Personal Shield:</strong> Faculty members, departmental coordinators, and administrative officers expressly acknowledge and agree that the software engineers, student developers, maintainers, and individual system architects who built and maintain FixLink act purely in a technical software development capacity. Under no legal theory (contractual, tortious, statutory, administrative, or common law) shall the individual software developers or maintainers be held personally liable, sued, disciplined, prosecuted, or subject to financial, civil, or employment claims for any software bugs, unexpected booking cancellations, strike generation errors, timetable collisions, platform outages, or data loss.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>9.4 Waiver of Claims &amp; Hold Harmless:</strong> By authenticating and accepting this agreement, faculty and administrative users irrevocably waive all claims, causes of action, and legal remedies against the individual developers and maintainers of FixLink, agreeing to hold them completely harmless from any operational consequence or institutional dispute arising from platform utilization.
+                        </p>
+                    </div>
+                </div>
+
+                {% else %}
+                <!-- ═══════════════════════════════════════════════════
+                     STUDENT TERMS OF SERVICE & ACCEPTABLE USE VIEW
+                ══════════════════════════════════════════════════════ -->
+                <div class="p-2.5 px-3 rounded-2 bg-body-secondary border text-muted small mb-4" style="font-size: 0.8rem; line-height: 1.45;">
+                    <strong>Student Notice:</strong> This document constitutes a legally binding institutional agreement governing your access to FixLink, your responsibilities regarding campus infrastructure and smart classroom equipment preservation, maintenance reporting protocols, and your data protection rights under the Digital Personal Data Protection (DPDP) Act, 2023. Acceptance is required to complete session onboarding.
+                </div>
+
+                <!-- Article 1 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 1: Institutional Scope, Jurisdiction &amp; Binding Agreement</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>1.1 Statutory Authority &amp; Assent:</strong> By authenticating, accessing, or utilizing FixLink, you, as an enrolled student of Dr. Vishwanath Karad MIT World Peace University (MIT-WPU), Pune, enter into a binding legal contract under the Indian Contract Act (1872), the Information Technology Act (2000), and institutional bylaws. If you do not agree to these terms in their entirety, you must immediately discontinue use of the platform.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>1.2 Student Eligibility &amp; Enrollment Standing:</strong> Access to FixLink is granted strictly to students with active academic enrollment. Graduation, academic withdrawal, administrative suspension, or de-registration immediately and automatically terminates platform authorization.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>1.3 Scope of FixLink Facilities:</strong> The platform facilitates real-time reporting of physical infrastructure defects, status observation of smart classroom assets across the Vyas Building and adjacent academic blocks, and authenticated communication with certified university technicians and facility coordinators.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 2 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 2: Student Credential Custody &amp; SSO Authentication Policy</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>2.1 Mandatory Institutional Single Sign-On (SSO):</strong> Students must access FixLink exclusively through their designated institutional account (<code>PRN@mitwpu.edu.in</code> or <code>name.prn@mitwpu.edu.in</code>). Personal or non-university email domains are prohibited for student authentication.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>2.2 Anti-Impersonation &amp; No-Proxy Mandate:</strong> Account credentials, passwords, session tokens, and one-time verification links are strictly personal and non-transferable. Submitting maintenance requests, messaging technicians, or logging in on behalf of another student is treated as identity fraud under university disciplinary codes. The registered student associated with the PRN remains strictly responsible for all actions executed under their session.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>2.3 Public &amp; Shared Terminal Security:</strong> When accessing FixLink from public kiosks, laboratory workstations, or shared classroom podiums, students must explicitly log out and terminate their browser session to prevent unauthorized access.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>2.4 Immediate Compromise Reporting:</strong> Any suspected unauthorized access, credential leakage, or session hijacking must be reported within twelve (12) hours to the IT Security Helpdesk at <code>it-security@mitwpu.edu.in</code>.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 3 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 3: Smart Classroom, Laboratory &amp; Campus Infrastructure Care</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>3.1 Duty of Preservation:</strong> Students must exercise diligence and care when utilizing smart classroom infrastructure, including 4K interactive touch panels, digital projection hardware, ceiling audio arrays, wireless microphones, laboratory computing units, HVAC controllers, sensory IoT nodes, and electrical distribution switches.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>3.2 Strict Prohibition of Vandalism &amp; Hardware Tampering:</strong> Intentionally disconnecting display cables, tampering with smart classroom touch interfaces, damaging HDMI/Type-C wall plates, stealing computer peripherals (mice, keyboards, power adapters), scratching furniture, defacing acoustic wall panels, or tampering with electrical circuit breakers constitutes actionable institutional property damage.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>3.3 Hazardous Substances &amp; Beverage Restrictions:</strong> Bringing unsealed liquid containers, open food items, or unauthorized chemical agents into smart classrooms or computer laboratories is strictly prohibited to prevent accidental equipment ruin.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>3.4 Immediate Hazard Reporting:</strong> Students discovering broken electrical sockets, exposed live wiring, water leakage, structural damage, or malfunctioning fire safety fixtures are obligated to raise an immediate priority ticket via FixLink to protect campus community safety.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 4 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 4: Maintenance Work Order Protocols &amp; SLA Expectations</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>4.1 Authenticity &amp; Physical Verifiability:</strong> Every ticket submitted via FixLink must reflect a genuine, physical fault. Attaching fraudulent photos, misleading descriptions, satirical content, or unrelated memes is strictly prohibited.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>4.2 Accurate Categorization:</strong> Users must classify defects under the appropriate maintenance discipline (Electrical, Plumbing, Audio-Visual, Computing Hardware, HVAC, Furniture &amp; Fixtures, Civil/Structural).
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>4.3 Priority &amp; Severity Integrity:</strong> Minor aesthetic blemishes must not be tagged as "High Priority" or "Emergency Hazard". Falsifying urgency impairs the triage response for life-safety emergencies.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>4.4 Professional Decorum in Communications:</strong> Interactions with certified technicians, engineering personnel, and administrative dispatchers within the ticket messaging system must remain professional, courteous, and objective. Harassment, abusive language, or obstruction of maintenance staff will result in immediate disciplinary escalation.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 5 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 5: Digital Personal Data Protection (DPDP) Act, 2023 Compliance</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>5.1 Data Fiduciary Notice:</strong> Dr. Vishwanath Karad MIT World Peace University acts as the Data Fiduciary. By logging in, students provide informed consent under Section 6 of the DPDP Act (2023) for processing essential service data.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>5.2 Categories of Processed Data:</strong> The platform processes your Full Name, Permanent Registration Number (PRN), Institutional Email, Academic Program, IP Address, Device Fingerprint, and Timestamped Ticket Logs.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>5.3 Purpose Limitation &amp; Zero Commercial Monetization:</strong> Student data is utilized strictly for campus facility maintenance, infrastructure quality improvement, and safety enforcement. Personal data is never sold, licensed, or shared with commercial advertising entities.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>5.4 Storage &amp; Encryption Standards:</strong> Telemetry and ticket data are stored on secure university servers within the Republic of India and encrypted in transit (TLS 1.3) and at rest (AES-256).
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>5.5 Data Principal Rights &amp; Grievance Redressal:</strong> In accordance with statutory provisions, students have the right to request access to their telemetry logs, seek rectification of inaccurate information, or lodge grievances with the University Data Protection Officer at <code>dpo@mitwpu.edu.in</code>.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 6 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 6: Cybersecurity, Anti-Tampering &amp; CERT-In Compliance</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>6.1 Prohibition of Circumvention:</strong> Students shall not utilize automated bots, scrapers, script injection, developer console manipulation, or unauthorized API fuzzing to bypass terms acceptance gates, spam maintenance queues, or access unauthorized administrative endpoints.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>6.2 Immutable Forensic Audit Logs:</strong> In compliance with Indian Computer Emergency Response Team (CERT-In) directives, all network interactions, IP addresses, user agent headers, and clickwrap timestamps are permanently logged and retained for forensic audits.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 7 -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 7: Disciplinary Sanctions, Financial Restitution &amp; Appeals</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>7.1 Disciplinary Escalation:</strong> Violations of these terms, fraudulent ticketing, physical asset vandalism, or cyber-tampering will be referred directly to the MIT-WPU Proctorial Board and Student Disciplinary Committee for disciplinary action, up to and including digital suspension or academic debarment.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>7.2 Monetary Restitution:</strong> Any student found liable for deliberate damage to campus electronics, smart boards, or laboratory computing equipment shall be required to pay the full replacement and installation cost, charged directly to their university student ledger.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>7.3 Student Ombudsman &amp; Inquiries:</strong> Inquiries, legitimate feedback, or maintenance queries may be addressed to the Central Facilities Helpdesk at <code>facilities@mitwpu.edu.in</code> or the Student Affairs Office.
+                        </p>
+                    </div>
+                </div>
+
+                <hr class="my-3 opacity-25">
+
+                <!-- Article 8: Developer Liability Shield & Automated Disclaimer -->
+                <div class="mb-3">
+                    <h6 class="fw-bold text-body mb-2 text-uppercase" style="font-size: 0.82rem; letter-spacing: 0.5px;">Article 8: Automated Data Disclaimer, "As Is" Operation &amp; Absolute Developer Liability Shield</h6>
+                    <div class="ps-2">
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>8.1 Automated Processing &amp; Data Variance:</strong> You expressly acknowledge that FixLink relies on automated software routines, heuristic room occupancy detection, asynchronous database sync, and network telemetry. Due to potential campus network latency, sensor latency, or third-party connectivity factors, information presented on the platform—including room vacancy states, maintenance ticket statuses, technician response estimates, and equipment availability—is provided for informational guidance only and may not be 100% accurate, complete, or real-time.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>8.2 "As Is" &amp; "As Available" Service Provision:</strong> FixLink is provided on a strict "AS IS" and "AS AVAILABLE" basis without warranties, representations, or conditions of any kind, whether express, statutory, or implied, including but not limited to merchantability, fitness for a particular purpose, uptime guarantee, or uninterrupted error-free operation.
+                        </p>
+                        <p class="text-muted small mb-2" style="line-height: 1.65;">
+                            <strong>8.3 Absolute Developer, Creator &amp; Maintainer Liability Release:</strong> FixLink is engineered and maintained as an institutional technology platform. You explicitly agree that under no legal theory (whether in contract, tort, strict liability, negligence, equity, or otherwise) shall the individual software developers, student creators, engineering maintainers, open-source contributors, or project authors be held personally liable, sued, prosecuted, or held financially or legally responsible for any errors, software bugs, server outages, data loss, schedule discrepancies, academic delays, or direct, indirect, incidental, consequential, or punitive damages arising from the use, inability to use, or operational output of FixLink.
+                        </p>
+                        <p class="text-muted small mb-0" style="line-height: 1.65;">
+                            <strong>8.4 Hold Harmless &amp; Waiver of Legal Claims:</strong> By accessing and authenticating into FixLink, you irrevocably release, indemnify, and hold completely harmless the individual software developers, project team members, and system maintainers from any and all claims, liabilities, disputes, demands, actions, or legal proceedings arising from or connected to platform operation.
+                        </p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="p-3 rounded-2 bg-body-tertiary text-center border mt-3" id="termsScrollEndMarker">
+                    <div class="fw-semibold small text-body">End of Compliance Document</div>
+                    <div class="text-muted small" style="font-size: 0.75rem;">You have reached the end of the MIT-WPU FixLink Terms of Service Policy.</div>
+                </div>
+            </div>
+
+            <!-- Agreement Form -->
+            <form action="{{ url_for('onboarding.accept') }}" method="POST" id="complianceForm" class="mt-3">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <!-- Mandatory Checkbox -->
+                <div class="agreement-box">
+                    <div class="form-check d-flex align-items-start gap-2 mb-0">
+                        <input class="form-check-input" type="checkbox" id="acceptTermsCheckbox" name="accept_terms" value="1" required>
+                        <label class="form-check-label" for="acceptTermsCheckbox">
+                            {% if user.role == 'faculty' or user.is_admin or session.get('is_admin') %}
+                                I have read, understood, and formally agree to the <strong>Ghost Protocol Attendance Policy</strong> and the <strong>FixLink Terms of Service</strong>.
+                            {% else %}
+                                I have read, understood, and formally agree to the <strong>FixLink Terms of Service</strong>.
+                            {% endif %}
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submit Button with Anti-Spam Lock -->
+                <div class="mt-3 pt-2">
+                    <button type="submit" id="submitAcceptBtn" class="btn btn-accept w-100 py-3 d-flex align-items-center justify-content-center gap-2" disabled>
+                        <i class="bi bi-check2-circle fs-5"></i>
+                        <span id="btnText">I Accept &amp; Continue</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Inline Vanilla JS Script (UI Loophole Guard & Double-Submit Lock) -->
+<script>
+(function() {
+    'use strict';
+    
+    const form = document.getElementById('complianceForm');
+    const submitBtn = document.getElementById('submitAcceptBtn');
+    const btnText = document.getElementById('btnText');
+    const checkbox = document.getElementById('acceptTermsCheckbox');
+
+    if (!form || !submitBtn || !checkbox) return;
+
+    // Toggle button enabled state based on checkbox
+    checkbox.addEventListener('change', function() {
+        submitBtn.disabled = !this.checked;
+    });
+
+    // UI Loophole Guard: Instantly apply disabled = true and change text to "Securing..."
+    form.addEventListener('submit', function(e) {
+        if (!checkbox.checked) {
+            e.preventDefault();
+            return false;
+        }
+
+        // Anti-Spam Lock: Disable button and update text immediately
+        submitBtn.disabled = true;
+        if (btnText) {
+            btnText.textContent = 'Securing...';
+        }
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Securing...';
+    });
+})();
+</script>
+
+</body>
+</html>

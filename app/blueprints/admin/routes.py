@@ -340,7 +340,7 @@ def _get_faculty_handle_context():
         if user.id not in seen_ids:
             all_time = NoShowStrike.query.filter_by(faculty_id=user.id).count()
             dt = user.adhoc_suspended_until
-            suspended_until_ist = IST.localize(dt) if dt.tzinfo is None else dt.astimezone(IST)
+            suspended_until_ist = dt.replace(tzinfo=timezone.utc).astimezone(IST) if dt.tzinfo is None else dt.astimezone(IST)
             flagged_faculty.append({
                 'user': user,
                 'strikes_30d': 0,
@@ -369,10 +369,10 @@ def _get_faculty_handle_context():
     )
     history_display = []
     for entry in suspension_history:
-        created_ist = IST.localize(entry.created_at) if entry.created_at.tzinfo is None else entry.created_at.astimezone(IST)
+        created_ist = entry.created_at.replace(tzinfo=timezone.utc).astimezone(IST) if entry.created_at.tzinfo is None else entry.created_at.astimezone(IST)
         until_ist = None
         if entry.suspended_until:
-            until_ist = IST.localize(entry.suspended_until) if entry.suspended_until.tzinfo is None else entry.suspended_until.astimezone(IST)
+            until_ist = entry.suspended_until.replace(tzinfo=timezone.utc).astimezone(IST) if entry.suspended_until.tzinfo is None else entry.suspended_until.astimezone(IST)
         history_display.append({
             'entry': entry,
             'created_ist': created_ist,

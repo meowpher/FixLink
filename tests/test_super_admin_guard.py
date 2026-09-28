@@ -18,10 +18,10 @@ class TestSuperAdminGuard(unittest.TestCase):
 
         with self.app.app_context():
             db.create_all()
-            self.sa_taha = User(name="Taha Piplodwala", email="taha.piplodwala@mitwpu.edu.in", is_admin=True)
-            self.sa_om = User(name="Om Mahadik", email="om.mahadik@mitwpu.edu.in", is_admin=True)
-            self.regular_admin = User(name="Regular Admin", email="reg.admin@mitwpu.edu.in", is_admin=True)
-            self.student = User(name="Normal Student", email="student@mitwpu.edu.in", is_admin=False)
+            self.sa_taha = User(name="Taha Piplodwala", email="taha.piplodwala@mitwpu.edu.in", is_admin=True, has_accepted_terms=True)
+            self.sa_om = User(name="Om Mahadik", email="om.mahadik@mitwpu.edu.in", is_admin=True, has_accepted_terms=True)
+            self.regular_admin = User(name="Regular Admin", email="reg.admin@mitwpu.edu.in", is_admin=True, has_accepted_terms=True)
+            self.student = User(name="Normal Student", email="student@mitwpu.edu.in", is_admin=False, has_accepted_terms=True)
 
             db.session.add_all([self.sa_taha, self.sa_om, self.regular_admin, self.student])
             db.session.commit()

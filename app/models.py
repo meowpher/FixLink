@@ -28,12 +28,13 @@ class User(db.Model):
     profile_photo = db.Column(db.String(255), nullable=True)  # uploaded avatar filename
     adhoc_suspended_until = db.Column(db.DateTime, nullable=True)  # 3-Strike Accountability 7-day lockout
     adhoc_suspension_reason = db.Column(db.String(255), nullable=True)
+    has_accepted_terms = db.Column(db.Boolean, default=False, server_default='false', nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
     tickets = db.relationship('Ticket', backref='reporter', lazy=True)
     
-    def __init__(self, name=None, email=None, role=ROLE_STUDENT, prn=None, is_admin=False, is_verified=False, verification_token=None, profile_photo=None, adhoc_suspended_until=None, adhoc_suspension_reason=None, **kwargs):
+    def __init__(self, name=None, email=None, role=ROLE_STUDENT, prn=None, is_admin=False, is_verified=False, verification_token=None, profile_photo=None, adhoc_suspended_until=None, adhoc_suspension_reason=None, has_accepted_terms=False, **kwargs):
         super().__init__(**kwargs)
         if name is not None:
             self.name = name
@@ -45,6 +46,7 @@ class User(db.Model):
             self.prn = prn
         self.is_admin = is_admin
         self.is_verified = is_verified
+        self.has_accepted_terms = has_accepted_terms
         if verification_token is not None:
             self.verification_token = verification_token
         if profile_photo is not None:
@@ -116,6 +118,7 @@ class User(db.Model):
             'is_admin': self.is_admin,
             'is_super_admin': self.is_super_admin,
             'is_verified': self.is_verified,
+            'has_accepted_terms': self.has_accepted_terms,
             'is_adhoc_suspended': self.is_adhoc_suspended,
             'adhoc_suspended_until': self.adhoc_suspended_until.isoformat() + 'Z' if self.adhoc_suspended_until else None,
             'suspension_remaining': self.suspension_remaining_str,
@@ -210,6 +213,15 @@ class Building(db.Model):
     # Relationships
     floors = db.relationship('Floor', backref='building', lazy=True, cascade='all, delete-orphan')
     
+    def __init__(self, name=None, description=None, **kwargs):
+        super().__init__(**kwargs)
+        if name is not None:
+            self.name = name
+        if description is not None:
+            self.description = description
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def __repr__(self):
         return f'<Building {self.name}>'
     
@@ -235,6 +247,19 @@ class Floor(db.Model):
     # Relationships
     rooms = db.relationship('Room', backref='floor', lazy=True, cascade='all, delete-orphan')
     
+    def __init__(self, level=None, name=None, building_id=None, building=None, **kwargs):
+        super().__init__(**kwargs)
+        if level is not None:
+            self.level = level
+        if name is not None:
+            self.name = name
+        if building_id is not None:
+            self.building_id = building_id
+        if building is not None:
+            self.building = building
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def __repr__(self):
         return f'<Floor {self.name}>'
     
@@ -285,6 +310,25 @@ class Room(db.Model):
     timetables = db.relationship('Timetable', backref='room', lazy=True, cascade='all, delete-orphan')
     room_bookings = db.relationship('RoomBooking', backref='room', lazy=True, cascade='all, delete-orphan')
     
+    def __init__(self, number=None, name=None, floor_id=None, floor=None, room_type=ROOM_TYPE_CLASSROOM, map_coords=None, svg_id=None, **kwargs):
+        super().__init__(**kwargs)
+        if number is not None:
+            self.number = number
+        if name is not None:
+            self.name = name
+        if floor_id is not None:
+            self.floor_id = floor_id
+        if floor is not None:
+            self.floor = floor
+        if room_type is not None:
+            self.room_type = room_type
+        if map_coords is not None:
+            self.map_coords = map_coords
+        if svg_id is not None:
+            self.svg_id = svg_id
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def __repr__(self):
         return f'<Room {self.number}>'
     
@@ -586,6 +630,23 @@ class Asset(db.Model):
     # Relationships
     tickets = db.relationship('Ticket', backref='asset', lazy=True)
     
+    def __init__(self, name=None, asset_type=None, room_id=None, room=None, status=STATUS_WORKING, installation_date=None, **kwargs):
+        super().__init__(**kwargs)
+        if name is not None:
+            self.name = name
+        if asset_type is not None:
+            self.asset_type = asset_type
+        if room_id is not None:
+            self.room_id = room_id
+        if room is not None:
+            self.room = room
+        if status is not None:
+            self.status = status
+        if installation_date is not None:
+            self.installation_date = installation_date
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def __repr__(self):
         return f'<Asset {self.name} ({self.status})>'
     

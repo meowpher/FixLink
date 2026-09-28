@@ -32,10 +32,10 @@ class TestCSVTimetableImport(unittest.TestCase):
             r2 = Room(floor_id=f.id, number="VY404", name="Programming Lab 404")
             db.session.add_all([r1, r2])
             
-            fac = User(name="Prof. Sharma", email="sharma@mitwpu.edu.in", role=User.ROLE_FACULTY, is_admin=False)
+            fac = User(name="Prof. Sharma", email="sharma@mitwpu.edu.in", role=User.ROLE_FACULTY, is_admin=False, has_accepted_terms=True)
             fac.set_password("password123")
             
-            admin = User(name="Admin User", email="admin@mitwpu.edu.in", role=User.ROLE_ADMIN, is_admin=True)
+            admin = User(name="Admin User", email="admin@mitwpu.edu.in", role=User.ROLE_ADMIN, is_admin=True, has_accepted_terms=True)
             admin.set_password("password123")
             
             db.session.add_all([fac, admin])
@@ -258,10 +258,10 @@ class TestCSVTimetableImport(unittest.TestCase):
         self.assertIn("Unassigned Classes", content)
         # Check CSRF meta tag
         self.assertIn('name="csrf-token"', content)
-        # Check that data is serialized for client-side rendering
+        # Check that data is rendered in the table
         self.assertIn("Algorithms and Data", content)
         self.assertIn("Prof. Sharma", content)
-        self.assertIn(f'"id": {tt_id}', content)
+        self.assertIn(f'data-class-id="{tt_id}"', content)
         # Verify no form tags wrapping the row
         self.assertNotIn(f'<form id="assign-form-{tt_id}"', content)
 

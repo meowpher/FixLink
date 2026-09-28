@@ -394,6 +394,19 @@ def get_me():
     return api_response(success=False, error="Not logged in", status=401)
 
 
+@main_bp.route('/notifications')
+@login_required
+def notifications_page():
+    """Dedicated notifications page for mobile and responsive views."""
+    user_id = session.get('user_id')
+    notifications = []
+    unread_count = 0
+    if user_id:
+        notifications = Notification.query.filter_by(user_id=user_id).order_by(Notification.created_at.desc()).limit(100).all()
+        unread_count = Notification.query.filter_by(user_id=user_id, is_read=False).count()
+    return render_template('notifications.html', notifications=notifications, unread_count=unread_count)
+
+
 @main_bp.route('/api/notifications', methods=['GET'])
 @login_required
 @handle_api_errors

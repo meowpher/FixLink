@@ -1,0 +1,642 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - MIT-WPU FixLink{% endblock %}
+{% block meta_description %}Stay updated with room booking alerts, ticket updates, timetable announcements, and facility notifications on FixLink.{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══════════════════════════════════════════════════════════════════════
+   STRICT LIGHT & DARK MODE COLOR SYSTEM FOR NOTIFICATIONS
+   ══════════════════════════════════════════════════════════════════════ */
+:root {
+    --notif-surface: #ffffff;
+    --notif-surface-hover: #f8fafc;
+    --notif-border: #e2e8f0;
+    --notif-text-primary: #0f172a;
+    --notif-text-secondary: #475569;
+    --notif-text-muted: #64748b;
+    --notif-unread-bg: rgba(37, 99, 235, 0.04);
+    --notif-unread-border: rgba(37, 99, 235, 0.22);
+    --notif-unread-accent: #2563eb;
+    --notif-back-btn-bg: #f1f5f9;
+    --notif-back-btn-color: #334155;
+    --notif-back-btn-hover: #e2e8f0;
+    --notif-pill-bg: #f8fafc;
+    --notif-pill-border: #e2e8f0;
+    --notif-pill-text: #64748b;
+    --notif-pill-badge-bg: #e2e8f0;
+    --notif-pill-badge-text: #334155;
+    --notif-mark-btn-bg: rgba(37, 99, 235, 0.06);
+    --notif-mark-btn-border: rgba(37, 99, 235, 0.3);
+    --notif-mark-btn-color: #2563eb;
+    --notif-mark-btn-hover: #2563eb;
+}
+
+[data-theme="dark"],
+[data-bs-theme="dark"] {
+    --notif-surface: #141414;
+    --notif-surface-hover: #1a1a1a;
+    --notif-border: #262626;
+    --notif-text-primary: #f8fafc;
+    --notif-text-secondary: #cbd5e1;
+    --notif-text-muted: #94a3b8;
+    --notif-unread-bg: rgba(37, 99, 235, 0.08);
+    --notif-unread-border: rgba(59, 130, 246, 0.35);
+    --notif-unread-accent: #3b82f6;
+    --notif-back-btn-bg: #1f1f1f;
+    --notif-back-btn-color: #f8fafc;
+    --notif-back-btn-hover: #2a2a2a;
+    --notif-pill-bg: #18181b;
+    --notif-pill-border: #27272a;
+    --notif-pill-text: #a1a1aa;
+    --notif-pill-badge-bg: #27272a;
+    --notif-pill-badge-text: #f4f4f5;
+    --notif-mark-btn-bg: rgba(59, 130, 246, 0.12);
+    --notif-mark-btn-border: rgba(59, 130, 246, 0.4);
+    --notif-mark-btn-color: #60a5fa;
+    --notif-mark-btn-hover: #3b82f6;
+}
+
+.notifications-page-container {
+    max-width: 840px;
+    margin: 0 auto;
+    padding: 1rem 0.75rem 4rem 0.75rem;
+}
+
+@media (min-width: 768px) {
+    .notifications-page-container {
+        padding: 2rem 1.25rem 5rem 1.25rem;
+    }
+}
+
+/* ── Top Header Card ── */
+.notif-header-card {
+    background: var(--notif-surface);
+    border: 1px solid var(--notif-border);
+    border-radius: 20px;
+    padding: 1.15rem 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+@media (min-width: 768px) {
+    .notif-header-card {
+        padding: 1.35rem 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+[data-theme="dark"] .notif-header-card,
+[data-bs-theme="dark"] .notif-header-card {
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+.notif-back-btn {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    background: var(--notif-back-btn-bg);
+    color: var(--notif-back-btn-color);
+    border: 1px solid var(--notif-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.notif-back-btn:hover, .notif-back-btn:focus {
+    background: var(--notif-back-btn-hover);
+    color: var(--notif-text-primary);
+    transform: scale(1.05);
+}
+
+.notif-page-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--notif-text-primary);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+@media (min-width: 768px) {
+    .notif-page-title {
+        font-size: 1.65rem;
+    }
+}
+
+.notif-mark-all-btn {
+    background: var(--notif-mark-btn-bg) !important;
+    border: 1px solid var(--notif-mark-btn-border) !important;
+    color: var(--notif-mark-btn-color) !important;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.45rem 1rem;
+    border-radius: 30px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.notif-mark-all-btn:hover {
+    background: var(--notif-mark-btn-hover) !important;
+    color: #ffffff !important;
+    border-color: var(--notif-mark-btn-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.notif-filter-pill {
+    padding: 0.45rem 1.1rem;
+    border-radius: 30px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: 1px solid var(--notif-pill-border);
+    background: var(--notif-pill-bg);
+    color: var(--notif-pill-text);
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    text-decoration: none;
+    user-select: none;
+}
+
+.notif-filter-pill:hover {
+    color: var(--notif-text-primary);
+    background: var(--notif-surface-hover);
+    border-color: var(--notif-unread-accent);
+}
+
+.notif-filter-pill.active {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35);
+}
+
+.notif-filter-pill .badge {
+    background: var(--notif-pill-badge-bg) !important;
+    color: var(--notif-pill-badge-text) !important;
+    font-size: 0.72rem;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.notif-filter-pill.active .badge {
+    background: rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+}
+
+/* ── Notification Cards ── */
+.notif-card {
+    background: var(--notif-surface);
+    border: 1px solid var(--notif-border);
+    border-radius: 16px;
+    padding: 1rem 1.15rem;
+    margin-bottom: 0.75rem;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+@media (min-width: 768px) {
+    .notif-card {
+        padding: 1.25rem 1.45rem;
+        gap: 1.15rem;
+        margin-bottom: 0.85rem;
+    }
+}
+
+[data-theme="dark"] .notif-card,
+[data-bs-theme="dark"] .notif-card {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.notif-card:hover {
+    background: var(--notif-surface-hover);
+    border-color: rgba(59, 130, 246, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+.notif-card.unread {
+    background: var(--notif-unread-bg);
+    border-color: var(--notif-unread-border);
+    border-left: 4px solid var(--notif-unread-accent);
+}
+
+.notif-icon-circle {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.notif-icon-ticket { background: rgba(59, 130, 246, 0.12); color: #2563eb; }
+.notif-icon-event, .notif-icon-booking { background: rgba(6, 182, 212, 0.12); color: #0891b2; }
+.notif-icon-help { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+.notif-icon-chat { background: rgba(16, 185, 129, 0.12); color: #059669; }
+.notif-icon-cancel, .notif-icon-cancellation { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+.notif-icon-assignment { background: rgba(139, 92, 246, 0.12); color: #7c3aed; }
+.notif-icon-system { background: rgba(99, 102, 241, 0.12); color: #4f46e5; }
+
+[data-theme="dark"] .notif-icon-ticket { color: #60a5fa; background: rgba(59, 130, 246, 0.18); }
+[data-theme="dark"] .notif-icon-event, [data-theme="dark"] .notif-icon-booking { color: #22d3ee; background: rgba(6, 182, 212, 0.18); }
+[data-theme="dark"] .notif-icon-help { color: #fbbf24; background: rgba(245, 158, 11, 0.18); }
+[data-theme="dark"] .notif-icon-chat { color: #34d399; background: rgba(16, 185, 129, 0.18); }
+[data-theme="dark"] .notif-icon-cancel, [data-theme="dark"] .notif-icon-cancellation { color: #f87171; background: rgba(239, 68, 68, 0.18); }
+[data-theme="dark"] .notif-icon-assignment { color: #a78bfa; background: rgba(139, 92, 246, 0.18); }
+[data-theme="dark"] .notif-icon-system { color: #818cf8; background: rgba(99, 102, 241, 0.18); }
+
+.notif-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--notif-text-primary);
+    line-height: 1.3;
+}
+
+.notif-message {
+    font-size: 0.85rem;
+    color: var(--notif-text-secondary);
+    line-height: 1.45;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+}
+
+.notif-meta {
+    font-size: 0.74rem;
+    color: var(--notif-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #3b82f6;
+    display: inline-block;
+    flex-shrink: 0;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
+
+.notif-action-btn {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    border-radius: 20px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s ease;
+}
+
+.notif-mark-read-btn {
+    background: transparent;
+    border: none;
+    color: var(--notif-text-muted);
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.notif-mark-read-btn:hover {
+    background: var(--notif-border);
+    color: var(--notif-text-primary);
+}
+
+/* ── Empty State ── */
+.notif-empty-state {
+    background: var(--notif-surface);
+    border: 1px dashed var(--notif-border);
+    border-radius: 20px;
+    padding: 3.5rem 1.5rem;
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.notif-empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.1);
+    color: #3b82f6;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid notifications-page-container">
+    
+    <!-- Top Header Card with strict alignment & back button (ONLY back icon) -->
+    <div class="notif-header-card">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2.5">
+            <div class="d-flex align-items-center gap-3">
+                <a href="javascript:void(0)" onclick="if(window.history.length > 1){window.history.back();}else{window.location.href='/';}" class="notif-back-btn" aria-label="Back" title="Back">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h1 class="notif-page-title mb-0">Notifications</h1>
+                        <span class="badge bg-danger rounded-pill px-2 py-1 {% if unread_count == 0 %}d-none{% endif %}" id="pageUnreadBadge" style="font-size: 0.72rem;">
+                            {{ unread_count }} unread
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-0 d-none d-sm-block mt-0.5">Instant room alerts, timetable updates, and tickets.</p>
+                </div>
+            </div>
+
+            <!-- Mark All Read Action Button -->
+            <div class="ms-auto">
+                <button type="button" class="notif-mark-all-btn" id="pageMarkAllReadBtn" onclick="markAllNotificationsRead()">
+                    <i class="bi bi-check2-all"></i>
+                    <span>Mark all as read</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Pill Bar (All / Unread) -->
+        <div class="d-flex align-items-center gap-2 mt-3 pt-3 border-top" style="border-color: var(--notif-border) !important;">
+            <button type="button" class="notif-filter-pill active" id="filterAllBtn" onclick="filterNotifications('all')">
+                <span>All</span>
+                <span class="badge" id="filterAllCount">{{ notifications|length }}</span>
+            </button>
+            <button type="button" class="notif-filter-pill" id="filterUnreadBtn" onclick="filterNotifications('unread')">
+                <span class="unread-dot me-0.5"></span>
+                <span>Unread</span>
+                <span class="badge" id="filterUnreadCount">{{ unread_count }}</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Notification Feed Container -->
+    <div id="notificationsFeed">
+        {% if notifications and notifications|length > 0 %}
+            {% for notif in notifications %}
+                {% set n_type = (notif.type or 'system')|lower %}
+                <div class="notif-card {% if not notif.is_read %}unread{% endif %}" id="notif-card-{{ notif.id }}" data-is-read="{{ 'true' if notif.is_read else 'false' }}">
+                    
+                    <!-- Type Icon -->
+                    <div class="notif-icon-circle notif-icon-{{ n_type }}">
+                        {% if 'ticket' in n_type %}
+                            <i class="bi bi-ticket-detailed-fill"></i>
+                        {% elif 'event' in n_type or 'booking' in n_type %}
+                            <i class="bi bi-calendar2-event-fill"></i>
+                        {% elif 'help' in n_type %}
+                            <i class="bi bi-hand-thumbs-up-fill"></i>
+                        {% elif 'chat' in n_type %}
+                            <i class="bi bi-chat-dots-fill"></i>
+                        {% elif 'cancel' in n_type %}
+                            <i class="bi bi-x-circle-fill"></i>
+                        {% elif 'assign' in n_type %}
+                            <i class="bi bi-person-check-fill"></i>
+                        {% else %}
+                            <i class="bi bi-bell-fill"></i>
+                        {% endif %}
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
+                            <div class="d-flex align-items-center gap-1.5 min-w-0">
+                                {% if not notif.is_read %}
+                                    <span class="unread-dot"></span>
+                                {% endif %}
+                                <div class="notif-title text-truncate">{{ notif.title }}</div>
+                            </div>
+                            <span class="notif-meta flex-shrink-0" style="font-size: 0.72rem;">
+                                {{ notif.created_at.strftime('%b %d, %I:%M %p') if notif.created_at else '' }}
+                            </span>
+                        </div>
+
+                        <div class="notif-message">{{ notif.message }}</div>
+
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-1">
+                            {% if notif.link and notif.link != '#' %}
+                                <a href="{{ notif.link }}" class="btn btn-sm btn-primary notif-action-btn" onclick="markAndNavigate({{ notif.id }}, '{{ notif.link }}', event)">
+                                    <span>View Details</span>
+                                    <i class="bi bi-arrow-right"></i>
+                                </a>
+                            {% else %}
+                                <span></span>
+                            {% endif %}
+
+                            {% if not notif.is_read %}
+                                <button type="button" class="notif-mark-read-btn" onclick="markSingleAsRead({{ notif.id }})" title="Mark as read">
+                                    <i class="bi bi-check2 me-1"></i>Mark read
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <!-- Empty State -->
+            <div class="notif-empty-state" id="emptyStateContainer">
+                <div class="notif-empty-icon">
+                    <i class="bi bi-bell-slash"></i>
+                </div>
+                <h4 class="fw-bold text-body mb-2">No notifications yet</h4>
+                <p class="text-muted small mb-3" style="max-width: 400px; margin: 0 auto;">
+                    You are all caught up! New room requests, ticket updates, and timetable alerts will appear here.
+                </p>
+                <a href="javascript:void(0)" onclick="if(window.history.length > 1){window.history.back();}else{window.location.href='/';}" class="btn btn-outline-secondary rounded-pill px-4 py-2 small fw-semibold">
+                    <i class="bi bi-arrow-left me-1"></i>Return Back
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    'use strict';
+    let currentFilter = 'all';
+
+    function getCsrfToken() {
+        return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+               document.querySelector('meta[name="csrf-token"]')?.content || '';
+    }
+
+    // Filter Notifications (All / Unread)
+    window.filterNotifications = function(filter) {
+        currentFilter = filter;
+        const allBtn = document.getElementById('filterAllBtn');
+        const unreadBtn = document.getElementById('filterUnreadBtn');
+        
+        if (allBtn && unreadBtn) {
+            allBtn.classList.toggle('active', filter === 'all');
+            unreadBtn.classList.toggle('active', filter === 'unread');
+        }
+
+        const cards = document.querySelectorAll('.notif-card');
+        let visibleCount = 0;
+        cards.forEach(card => {
+            const isRead = card.getAttribute('data-is-read') === 'true';
+            if (filter === 'all' || (filter === 'unread' && !isRead)) {
+                card.style.display = 'flex';
+                visibleCount++;
+            } else {
+                card.style.display = 'none';
+            }
+        });
+
+        // Toggle empty message when unread filter has 0 cards
+        const feed = document.getElementById('notificationsFeed');
+        let noUnreadMsg = document.getElementById('noUnreadState');
+        if (filter === 'unread' && visibleCount === 0 && cards.length > 0) {
+            if (!noUnreadMsg) {
+                noUnreadMsg = document.createElement('div');
+                noUnreadMsg.id = 'noUnreadState';
+                noUnreadMsg.className = 'notif-empty-state';
+                noUnreadMsg.innerHTML = `
+                    <div class="notif-empty-icon"><i class="bi bi-check2-circle text-success"></i></div>
+                    <h5 class="fw-bold text-body mb-1">All caught up!</h5>
+                    <p class="text-muted small mb-0">You have no unread notifications.</p>
+                `;
+                if (feed) feed.appendChild(noUnreadMsg);
+            }
+            noUnreadMsg.style.display = 'block';
+        } else if (noUnreadMsg) {
+            noUnreadMsg.style.display = 'none';
+        }
+    };
+
+    // Mark Single As Read
+    window.markSingleAsRead = async function(id) {
+        try {
+            const res = await fetch(`/api/notifications/${id}/read`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() }
+            });
+            if (res.ok) {
+                const card = document.getElementById(`notif-card-${id}`);
+                if (card) {
+                    card.classList.remove('unread');
+                    card.setAttribute('data-is-read', 'true');
+                    card.querySelector('.unread-dot')?.remove();
+                    card.querySelector('.notif-mark-read-btn')?.remove();
+                }
+                updateCounts();
+                if (currentFilter === 'unread') {
+                    filterNotifications('unread');
+                }
+            }
+        } catch (err) {
+            console.error('Failed to mark read:', err);
+        }
+    };
+
+    // Mark and navigate
+    window.markAndNavigate = async function(id, link, event) {
+        if (event) event.preventDefault();
+        try {
+            await fetch(`/api/notifications/${id}/read`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() }
+            });
+        } catch (e) {
+            // Ignore and navigate anyway
+        }
+        window.location.href = link;
+    };
+
+    // Mark All Read
+    window.markAllNotificationsRead = async function() {
+        try {
+            const res = await fetch('/api/notifications/read-all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() }
+            });
+            if (res.ok) {
+                document.querySelectorAll('.notif-card').forEach(card => {
+                    card.classList.remove('unread');
+                    card.setAttribute('data-is-read', 'true');
+                    card.querySelector('.unread-dot')?.remove();
+                    card.querySelector('.notif-mark-read-btn')?.remove();
+                });
+                updateCounts();
+                if (currentFilter === 'unread') {
+                    filterNotifications('unread');
+                }
+            }
+        } catch (err) {
+            console.error('Failed to mark all read:', err);
+        }
+    };
+
+    function updateCounts() {
+        const unreadCount = document.querySelectorAll('.notif-card[data-is-read="false"]').length;
+        const totalCount = document.querySelectorAll('.notif-card').length;
+        
+        const unreadBadge = document.getElementById('pageUnreadBadge');
+        const filterUnreadCount = document.getElementById('filterUnreadCount');
+        const filterAllCount = document.getElementById('filterAllCount');
+        
+        if (unreadBadge) {
+            if (unreadCount > 0) {
+                unreadBadge.textContent = `${unreadCount} unread`;
+                unreadBadge.classList.remove('d-none');
+            } else {
+                unreadBadge.classList.add('d-none');
+            }
+        }
+        if (filterUnreadCount) filterUnreadCount.textContent = unreadCount;
+        if (filterAllCount) filterAllCount.textContent = totalCount;
+
+        // Also update navbar badges
+        const desktopBadge = document.getElementById('notificationBadge');
+        const mobileBadge = document.getElementById('mobileNotifBadge');
+        if (desktopBadge) {
+            if (unreadCount > 0) {
+                desktopBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                desktopBadge.classList.remove('d-none');
+            } else {
+                desktopBadge.classList.add('d-none');
+            }
+        }
+        if (mobileBadge) {
+            if (unreadCount > 0) {
+                mobileBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                mobileBadge.classList.remove('d-none');
+            } else {
+                mobileBadge.classList.add('d-none');
+            }
+        }
+    }
+})();
+</script>
+{% endblock %}

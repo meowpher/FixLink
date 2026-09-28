@@ -46,7 +46,7 @@ def admin_user(app, run_app_context):
     """Fixture to create and return an admin user."""
     admin = User.query.filter_by(email="admin@mitwpu.edu.in").first()
     if not admin:
-        admin = User(name="Test Admin", email="admin@mitwpu.edu.in", is_admin=True)
+        admin = User(name="Test Admin", email="admin@mitwpu.edu.in", is_admin=True, has_accepted_terms=True)
         admin.set_password("password")
         db.session.add(admin)
         db.session.commit()
@@ -55,7 +55,7 @@ def admin_user(app, run_app_context):
 @pytest.fixture
 def student_user(app, run_app_context):
     """Fixture to create and return a regular student user."""
-    student = User(name="Test Student", email="student@mitwpu.edu.in", prn="1234567890", is_admin=False)
+    student = User(name="Test Student", email="student@mitwpu.edu.in", prn="1234567890", is_admin=False, has_accepted_terms=True)
     student.set_password("password")
     db.session.add(student)
     db.session.commit()

@@ -93,13 +93,6 @@
         .small, small {
             font-size: 0.75rem !important;
         }
-        /* Footer Typography */
-        footer, .site-footer {
-            font-size: 0.72rem !important;
-        }
-        footer a, footer p, footer span {
-            font-size: inherit !important;
-        }
     </style>
 
     {% block extra_css %}{% endblock %}
@@ -179,21 +172,12 @@
 
             {% if session.get('user_id') or session.get('professional_id') %}
 
-            <!-- Admin & Faculty Notifications Bell -->
+            <!-- Admin & Faculty Notifications Bell (Direct page navigation on mobile) -->
             {% if session.get('is_admin') or session.get('user_role') == 'faculty' %}
-            <div class="dropdown">
-                <button class="top-bar-icon-btn position-relative" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notifications">
-                    <i class="bi bi-bell-fill" aria-hidden="true"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="mobileNotifBadge" style="font-size:0.55rem;" aria-label="Unread notifications"></span>
-                </button>
-                <div class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0" style="width:300px;">
-                    <div class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
-                        <span class="fw-bold">Notifications</span>
-                        <button class="btn btn-sm btn-link p-0 text-decoration-none" id="mobileMarkAllReadBtn" style="font-size:0.75rem;">Mark all as read</button>
-                    </div>
-                    <div id="mobileNotificationList" style="max-height:300px;overflow-y:auto;"></div>
-                </div>
-            </div>
+            <a href="{{ url_for('main.notifications_page') }}" class="top-bar-icon-btn position-relative" aria-label="Notifications">
+                <i class="bi bi-bell-fill" aria-hidden="true"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="mobileNotifBadge" style="font-size:0.55rem;" aria-label="Unread notifications">0</span>
+            </a>
             {% endif %}
 
             <!-- Avatar / Profile Dropdown -->
@@ -210,7 +194,11 @@
                         <div class="fw-bold" id="mobileProfileName">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
                         <div class="text-muted small" id="mobileProfileEmail">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
                     </li>
-                    <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                    <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px; padding-top: 0.5rem;">Legal &amp; Compliance</h6></li>
+                    <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.terms') }}"><i class="bi bi-file-earmark-text"></i><span>Terms of Service</span></a></li>
+                    <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.privacy') }}"><i class="bi bi-shield-check"></i><span>Privacy Policy</span></a></li>
+                    <li><hr class="dropdown-divider my-1"></li>
+                    <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                 </ul>
             </div>
             {% endif %}
@@ -316,7 +304,11 @@
                     <div class="fw-bold" id="mobileProfileNameBottom">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
                     <div class="text-muted small" id="mobileProfileEmailBottom">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
                 </li>
-                <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px; padding-top: 0.5rem;">Legal &amp; Compliance</h6></li>
+                <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.terms') }}"><i class="bi bi-file-earmark-text"></i><span>Terms of Service</span></a></li>
+                <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.privacy') }}"><i class="bi bi-shield-check"></i><span>Privacy Policy</span></a></li>
+                <li><hr class="dropdown-divider my-1"></li>
+                <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
             </ul>
             {% else %}
             <a href="{{ url_for('auth.login') }}" class="bottom-nav-item {% if request.endpoint == 'auth.login' %}active{% endif %}">
@@ -349,14 +341,10 @@
                     <i class="bi bi-clock-history fs-5"></i>
                     <div><div class="manage-item-title">Full History</div><div class="manage-item-desc">All resolved tickets</div></div>
                 </a>
-                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.booking_history') }}">
-                    <i class="bi bi-calendar3-range fs-5"></i>
-                    <div><div class="manage-item-title">Booking History</div><div class="manage-item-desc">Room booking records</div></div>
-                </a>
                 {% if session.get('is_admin') %}
                 <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.faculty_admin_handle') }}">
                     <i class="bi bi-person-workspace fs-5 text-primary"></i>
-                    <div><div class="manage-item-title">Faculty Admin Handle</div><div class="manage-item-desc">Event Approvals, CMM &amp; Ghost Protocol</div></div>
+                    <div><div class="manage-item-title">Faculty Admin Handle</div><div class="manage-item-desc">Event Approvals, CMM, Ghost Protocol &amp; Bookings</div></div>
                 </a>
                 {% elif session.get('user_role') == 'faculty' %}
                 <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('faculty.dashboard') }}">
@@ -456,7 +444,6 @@
                         <li><a class="msb-subitem" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people"></i>Professionals</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up"></i>Help Requests</a></li>
                         <li><a class="msb-subitem" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history"></i>Full History</a></li>
-                        <li><a class="msb-subitem" href="{{ url_for('admin.booking_history') }}"><i class="bi bi-calendar3-range"></i>Bookings</a></li>
                     </ul>
                 </li>
                 <li>
@@ -550,6 +537,21 @@
             {% endif %}
 
         </ul>
+
+        <!-- Compliance & Legal section in mobile offcanvas -->
+        <div class="px-3 py-2 border-top" style="border-color: var(--border-color) !important;">
+            <div class="text-muted small fw-bold text-uppercase mb-1.5" style="font-size: 0.65rem; letter-spacing: 0.6px; opacity: 0.65;">Legal &amp; Compliance</div>
+            <div class="list-group list-group-flush rounded-3 overflow-hidden">
+                <a class="list-group-item list-group-item-action bg-transparent border-0 px-2 py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.terms') }}">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Terms of Service</span>
+                </a>
+                <a class="list-group-item list-group-item-action bg-transparent border-0 px-2 py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.privacy') }}">
+                    <i class="bi bi-shield-check"></i>
+                    <span>Privacy Policy</span>
+                </a>
+            </div>
+        </div>
 
         <!-- Divider -->
         <div class="msb-divider"></div>
@@ -690,7 +692,6 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
                         <ul class="dropdown-menu shadow rounded-4 border-0">
                             <li><a class="dropdown-item {% if request.endpoint == 'admin.faculty_admin_handle' %}active{% endif %}" href="{{ url_for('admin.faculty_admin_handle') }}"><i class="bi bi-person-workspace me-2 text-primary"></i>Faculty Admin Handle</a></li>
-                            <li><a class="dropdown-item {% if request.endpoint == 'admin.booking_history' %}active{% endif %}" href="{{ url_for('admin.booking_history') }}"><i class="bi bi-calendar3-range me-2 text-info"></i>Booking History</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
                             <li><hr class="dropdown-divider"></li>
@@ -741,6 +742,11 @@
                                 <button class="btn btn-sm btn-link p-0 text-decoration-none" id="markAllReadBtn" style="font-size: 0.75rem;">Mark all as read</button>
                             </div>
                             <div id="notificationList" style="max-height: 350px; overflow-y: auto;"></div>
+                            <div class="p-2 border-top text-center bg-light">
+                                <a href="{{ url_for('main.notifications_page') }}" class="text-primary small text-decoration-none fw-semibold">
+                                    <i class="bi bi-list-ul me-1"></i>View all notifications
+                                </a>
+                            </div>
                         </div>
                     {% endif %}
 
@@ -760,10 +766,12 @@
                             {% if session.get('professional_id') %}
                                 <li><a class="dropdown-item py-2" href="{{ url_for('professional.profile') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
-                            {% else %}
-                                <li><a class="dropdown-item py-2 mt-1 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                             {% endif %}
+                            <li><h6 class="dropdown-header text-uppercase text-muted" style="font-size: 0.65rem; letter-spacing: 0.5px; padding-top: 0.5rem;">Legal &amp; Compliance</h6></li>
+                            <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.terms') }}"><i class="bi bi-file-earmark-text"></i><span>Terms of Service</span></a></li>
+                            <li><a class="dropdown-item py-1.5 small text-muted d-flex align-items-center gap-2" href="{{ url_for('main.privacy') }}"><i class="bi bi-shield-check"></i><span>Privacy Policy</span></a></li>
+                            <li><hr class="dropdown-divider my-1"></li>
+                            <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </div>
                 {% endif %}
@@ -774,7 +782,7 @@
     </div>
 
     <!-- Main Content -->
-    <main class="main-content" id="main-content" role="main">
+    <main class="main-content min-vh-100 pb-5" id="main-content" role="main">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             <div class="container mt-3">
@@ -789,28 +797,6 @@
         {% endwith %}
         {% block content %}{% endblock %}
     </main>
-
-    <!-- Footer -->
-    {% if not (request.endpoint and (
-        request.endpoint.endswith('.login') or 
-        request.endpoint == 'admin.dashboard' or 
-        request.endpoint == 'admin.status_map' or 
-        request.endpoint == 'admin.analytics' or
-        request.endpoint in ['admin.chat', 'professional.chat']
-    )) %}
-    <footer class="mt-auto py-3 border-top" style="border-color: var(--border-color, #262626) !important; background-color: var(--bg-main, #0a0a0a);">
-        <div class="container text-center text-muted" style="font-size: 0.72rem; line-height: 1.5;">
-            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-1" style="font-size: 0.72rem;">
-                <a href="{{ url_for('main.privacy') }}" class="text-muted text-decoration-none" style="font-size: 0.72rem;">Privacy Policy</a>
-                <span aria-hidden="true" style="opacity: 0.4;">&bull;</span>
-                <a href="{{ url_for('main.terms') }}" class="text-muted text-decoration-none" style="font-size: 0.72rem;">Terms of Service</a>
-                <span aria-hidden="true" style="opacity: 0.4;">&bull;</span>
-                <a href="{{ url_for('main.cookies') }}" class="text-muted text-decoration-none" style="font-size: 0.72rem;">Cookie Policy</a>
-            </div>
-            <p class="mb-0" style="font-size: 0.68rem; opacity: 0.65;">&copy; MIT-WPU FixLink — Smart Room Maintenance Platform. For internal university facility management.</p>
-        </div>
-    </footer>
-    {% endif %}
 
 
     <!-- Bootstrap 5 JS (self-hosted) -->
@@ -1045,12 +1031,11 @@
         }
     })();
 
-    // Admin Notification System
+    // Admin & Faculty Notification System
     (function() {
         const dropBtn = document.getElementById('notificationsDropdown');
-        if (!dropBtn) return;
-
         const badge = document.getElementById('notificationBadge');
+        const mobileBadge = document.getElementById('mobileNotifBadge');
         const list = document.getElementById('notificationList');
         const markAllReadBtn = document.getElementById('markAllReadBtn');
 
@@ -1058,7 +1043,7 @@
             try {
                 const res = await fetch('/api/notifications');
                 const result = await res.json();
-                if (result.success) {
+                if (result.success && result.data) {
                     updateUI(result.data.notifications, result.data.unread_count);
                 }
             } catch (err) {
@@ -1068,36 +1053,51 @@
 
         function updateUI(notifications, unreadCount) {
             // Cache for modal access
-            localStorage.setItem('cached_notifications', JSON.stringify(notifications));
-            // Update badge
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
-                badge.classList.remove('d-none');
-            } else {
-                badge.classList.add('d-none');
+            localStorage.setItem('cached_notifications', JSON.stringify(notifications || []));
+            
+            // Update desktop badge
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
+                }
             }
 
-            // Update list
-            if (!notifications || notifications.length === 0) {
-                list.innerHTML = `
-                    <li class="dropdown-item text-center py-4 text-muted border-0">
-                        <div class="mb-2"><i class="bi bi-bell-slash fs-4"></i></div>
-                        <span>No notifications yet</span>
-                    </li>`;
-                return;
+            // Update mobile badge
+            if (mobileBadge) {
+                if (unreadCount > 0) {
+                    mobileBadge.textContent = unreadCount > 9 ? '9+' : unreadCount;
+                    mobileBadge.classList.remove('d-none');
+                } else {
+                    mobileBadge.classList.add('d-none');
+                }
             }
 
-            list.innerHTML = notifications.map(n => `
-                <li class="notification-item ${n.is_read ? '' : 'unread'} p-0 border-bottom">
-                    <a class="dropdown-item py-2 px-3" href="${n.link || '#'}" onclick="handleNotificationClick(${n.id}, event, '${n.link || '#'}')">
-                        <div class="d-flex justify-content-between align-items-start mb-1">
-                            <span class="fw-bold text-primary" style="font-size: 0.85rem;">${n.title}</span>
-                            <small class="text-muted" style="font-size: 0.7rem;">${formatTime(n.created_at)}</small>
-                        </div>
-                        <p class="mb-0 text-wrap text-muted" style="font-size: 0.8rem; line-height: 1.3;">${n.message}</p>
-                    </a>
-                </li>
-            `).join('');
+            // Update desktop dropdown list if element exists
+            if (list) {
+                if (!notifications || notifications.length === 0) {
+                    list.innerHTML = `
+                        <li class="dropdown-item text-center py-4 text-muted border-0">
+                            <div class="mb-2"><i class="bi bi-bell-slash fs-4"></i></div>
+                            <span>No notifications yet</span>
+                        </li>`;
+                    return;
+                }
+
+                list.innerHTML = notifications.map(n => `
+                    <li class="notification-item ${n.is_read ? '' : 'unread'} p-0 border-bottom">
+                        <a class="dropdown-item py-2 px-3" href="${n.link || '#'}" onclick="handleNotificationClick(${n.id}, event, '${n.link || '#'}')">
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <span class="fw-bold text-primary" style="font-size: 0.85rem;">${n.title}</span>
+                                <small class="text-muted" style="font-size: 0.7rem;">${formatTime(n.created_at)}</small>
+                            </div>
+                            <p class="mb-0 text-wrap text-muted" style="font-size: 0.8rem; line-height: 1.3;">${n.message}</p>
+                        </a>
+                    </li>
+                `).join('');
+            }
         }
 
         window.handleNotificationClick = async function(id, e, link) {
@@ -1119,7 +1119,7 @@
                 
                 if (notification) {
                     // Special case: If it's a ticket notification and we're on admin dashboard, use viewTicket
-                    const urlParams = new URLSearchParams(notification.link.split('?')[1] || '');
+                    const urlParams = new URLSearchParams((notification.link || '').split('?')[1] || '');
                     const ticketId = urlParams.get('ticket_id') || urlParams.get('id');
                     
                     if (ticketId && typeof window.viewTicket === 'function') {
@@ -1128,25 +1128,30 @@
                     }
                     
                     // General notification modal
-                    document.getElementById('notificationModalTitle').textContent = notification.title;
-                    document.getElementById('notificationModalBody').textContent = notification.message;
+                    const modalTitle = document.getElementById('notificationModalTitle');
+                    const modalBody = document.getElementById('notificationModalBody');
+                    if (modalTitle) modalTitle.textContent = notification.title;
+                    if (modalBody) modalBody.textContent = notification.message;
                     
                     const actionBtn = document.getElementById('notificationModalActionBtn');
-                    if (notification.link && notification.link !== '#') {
-                        actionBtn.classList.remove('d-none');
-                        actionBtn.href = notification.link;
-                    } else {
-                        actionBtn.classList.add('d-none');
+                    if (actionBtn) {
+                        if (notification.link && notification.link !== '#') {
+                            actionBtn.classList.remove('d-none');
+                            actionBtn.href = notification.link;
+                        } else {
+                            actionBtn.classList.add('d-none');
+                        }
                     }
                     
-                    const modal = new bootstrap.Modal(document.getElementById('notificationModal'));
-                    modal.show();
+                    const modalEl = document.getElementById('notificationModal');
+                    if (modalEl) {
+                        const modal = new bootstrap.Modal(modalEl);
+                        modal.show();
+                    }
                 } else if (link && link !== '#') {
-                    // Fallback to link if notification not found in cache
                     window.location.href = link;
                 }
                 
-                // Reload list to update unread status in the background
                 fetchNotifications();
             } catch (err) {
                 console.error('Error handling notification click:', err);
@@ -1174,6 +1179,7 @@
         }
 
         function formatTime(isoStr) {
+            if (!isoStr) return '';
             const date = new Date(isoStr);
             const now = new Date();
             const diffInSeconds = Math.floor((now - date) / 1000);
@@ -1183,11 +1189,12 @@
             return date.toLocaleDateString();
         }
 
-        // Fetch once on load and then only when the dropdown is opened
+        // Always fetch notifications on load
         fetchNotifications();
-        // NOTE: Polling removed — Pusher WebSockets handle real-time updates.
-        // Fetch when dropdown is opened to be fresh
-        dropBtn.addEventListener('show.bs.dropdown', fetchNotifications);
+
+        if (dropBtn) {
+            dropBtn.addEventListener('show.bs.dropdown', fetchNotifications);
+        }
     })();
     </script>
 

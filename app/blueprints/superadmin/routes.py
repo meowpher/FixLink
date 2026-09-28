@@ -6,7 +6,7 @@ import os
 import hmac
 import logging
 from functools import wraps
-from flask import Blueprint, render_template, request, session, redirect, url_for, flash, abort
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, abort, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 from ... import db
 from ...api_utils import api_response
@@ -136,6 +136,8 @@ def resolve_bug(bug_id):
     bug = BugReport.query.get_or_404(bug_id)
     bug.status = BugReport.STATUS_RESOLVED
     db.session.commit()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': f'Bug #{bug_id} marked as resolved!', 'bug_id': bug_id})
     flash('Bug marked as resolved!', 'success')
     return redirect(url_for('superadmin.dashboard'))
 
@@ -146,7 +148,70 @@ def delete_bug(bug_id):
     bug = BugReport.query.get_or_404(bug_id)
     db.session.delete(bug)
     db.session.commit()
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': f'Bug #{bug_id} deleted permanently.', 'bug_id': bug_id})
     flash('Bug deleted.', 'info')
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@superadmin_bp.route('/developer/bugs/bulk-resolve', methods=['POST'])
+@super_admin_required
+def bulk_resolve_bugs():
+    from ...models import BugReport
+    data = request.get_json(silent=True) or request.form
+    raw_ids = data.get('bug_ids', [])
+    if isinstance(raw_ids, str):
+        bug_ids = [int(bid.strip()) for bid in raw_ids.split(',') if bid.strip().isdigit()]
+    elif isinstance(raw_ids, list):
+        bug_ids = [int(bid) for bid in raw_ids if str(bid).isdigit()]
+    else:
+        bug_ids = []
+        
+    if not bug_ids:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'success': False, 'error': 'No bugs selected'}), 400
+        flash('No bugs selected.', 'warning')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    updated = BugReport.query.filter(BugReport.id.in_(bug_ids)).update(
+        {BugReport.status: BugReport.STATUS_RESOLVED},
+        synchronize_session='fetch'
+    )
+    db.session.commit()
+    
+    msg = f"{updated} bug report(s) marked as resolved."
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': msg, 'updated_count': updated, 'bug_ids': bug_ids})
+    flash(msg, 'success')
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@superadmin_bp.route('/developer/bugs/bulk-delete', methods=['POST'])
+@super_admin_required
+def bulk_delete_bugs():
+    from ...models import BugReport
+    data = request.get_json(silent=True) or request.form
+    raw_ids = data.get('bug_ids', [])
+    if isinstance(raw_ids, str):
+        bug_ids = [int(bid.strip()) for bid in raw_ids.split(',') if bid.strip().isdigit()]
+    elif isinstance(raw_ids, list):
+        bug_ids = [int(bid) for bid in raw_ids if str(bid).isdigit()]
+    else:
+        bug_ids = []
+        
+    if not bug_ids:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'success': False, 'error': 'No bugs selected'}), 400
+        flash('No bugs selected.', 'warning')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    deleted = BugReport.query.filter(BugReport.id.in_(bug_ids)).delete(synchronize_session='fetch')
+    db.session.commit()
+    
+    msg = f"{deleted} bug report(s) permanently deleted."
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': msg, 'deleted_count': deleted, 'bug_ids': bug_ids})
+    flash(msg, 'info')
     return redirect(url_for('superadmin.dashboard'))
 
 

@@ -1090,11 +1090,26 @@
             <div class="col-lg-5 col-xl-4">
                 <div class="form-panel slide-up">
                     <div class="form-header">
-                        <h1 class="form-title">Report Issue</h1>
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
+                            <h1 class="form-title mb-0">Report Issue</h1>
+                            {% if not user or not user.is_super_admin %}
+                            <span class="badge {% if daily_remaining is defined and daily_remaining == 0 %}bg-danger-subtle text-danger border border-danger-subtle{% elif daily_remaining is defined and daily_remaining == 1 %}bg-warning-subtle text-warning border border-warning-subtle{% else %}bg-primary-subtle text-primary border border-primary-subtle{% endif %} px-2.5 py-1.5 rounded-pill font-monospace fw-semibold" style="font-size: 11px;" title="Daily reporting limit (Max 3/day)">
+                                <i class="bi bi-shield-check me-1"></i>Quota: {{ reports_today or 0 }}/{{ daily_limit or 3 }}
+                            </span>
+                            {% endif %}
+                        </div>
                         {% if room_param %}
                         <div class="room-detected-badge">
                             <i class="bi bi-check-circle-fill me-1"></i>
                             Room detected: <strong>{{ room_param }}</strong>
+                        </div>
+                        {% endif %}
+                        {% if is_limit_reached %}
+                        <div class="alert alert-warning d-flex align-items-center gap-2 mt-2 mb-0 py-2 px-3 rounded-3" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill flex-shrink-0 text-warning"></i>
+                            <div style="font-size: 12px; line-height: 1.4;">
+                                <strong>Daily Limit Reached (3/3).</strong> You have reached your maximum report limit for today.
+                            </div>
                         </div>
                         {% endif %}
                     </div>
@@ -1182,9 +1197,9 @@
                             <!-- Submit Button -->
                             <button type="submit"
                                 class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
-                                id="submitBtn">
+                                id="submitBtn" {% if is_limit_reached %}disabled title="Daily report limit reached (Max 3/day)"{% endif %}>
                                 <i class="bi bi-send-fill"></i>
-                                <span>Submit Issue Report</span>
+                                <span>{% if is_limit_reached %}Daily Limit Reached (3/3){% else %}Submit Issue Report{% endif %}</span>
                             </button>
                         </div>
                     </form>

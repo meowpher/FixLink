@@ -144,5 +144,46 @@ class TestSuperAdminGuard(unittest.TestCase):
         # Both Taha and Om must show static Super Admin badge
         self.assertIn('Super Admin', html)
 
+    def test_bulk_resolve_and_delete_bugs(self):
+        from app.models import BugReport
+        with self.app.app_context():
+            b1 = BugReport(title="Bug 1", description="Desc 1", reporter_type="student", status=BugReport.STATUS_OPEN)
+            b2 = BugReport(title="Bug 2", description="Desc 2", reporter_type="faculty", status=BugReport.STATUS_OPEN)
+            b3 = BugReport(title="Bug 3", description="Desc 3", reporter_type="guest", status=BugReport.STATUS_OPEN)
+            db.session.add_all([b1, b2, b3])
+            db.session.commit()
+            b1_id, b2_id, b3_id = b1.id, b2.id, b3.id
+
+        # Non super-admin cannot bulk resolve
+        res_unauth = self.client.post('/developer/bugs/bulk-resolve', json={'bug_ids': [b1_id, b2_id]})
+        self.assertEqual(res_unauth.status_code, 302)  # redirects to login
+
+        # Super admin bulk resolve
+        with self.client.session_transaction() as sess:
+            sess['is_super_admin'] = True
+            sess['super_admin_email'] = 'taha.piplodwala@mitwpu.edu.in'
+
+        res_resolve = self.client.post('/developer/bugs/bulk-resolve', json={'bug_ids': [b1_id, b2_id]}, headers={'X-Requested-With': 'XMLHttpRequest'})
+        self.assertEqual(res_resolve.status_code, 200)
+        self.assertTrue(res_resolve.get_json()['success'])
+
+        with self.app.app_context():
+            b1_db = db.session.get(BugReport, b1_id)
+            b2_db = db.session.get(BugReport, b2_id)
+            b3_db = db.session.get(BugReport, b3_id)
+            self.assertEqual(b1_db.status, BugReport.STATUS_RESOLVED)
+            self.assertEqual(b2_db.status, BugReport.STATUS_RESOLVED)
+            self.assertEqual(b3_db.status, BugReport.STATUS_OPEN)
+
+        # Super admin bulk delete
+        res_delete = self.client.post('/developer/bugs/bulk-delete', json={'bug_ids': [b1_id, b3_id]}, headers={'X-Requested-With': 'XMLHttpRequest'})
+        self.assertEqual(res_delete.status_code, 200)
+        self.assertTrue(res_delete.get_json()['success'])
+
+        with self.app.app_context():
+            self.assertIsNone(db.session.get(BugReport, b1_id))
+            self.assertIsNotNone(db.session.get(BugReport, b2_id))
+            self.assertIsNone(db.session.get(BugReport, b3_id))
+
 if __name__ == '__main__':
     unittest.main()

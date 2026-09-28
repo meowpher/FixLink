@@ -173,6 +173,11 @@ def report_form():
     ]
     
     user = db.session.get(User, session['user_id'])
+    from ...spam_detector import get_user_daily_reports_count, MAX_DAILY_REPORTS
+    reports_today = get_user_daily_reports_count(user.id if user else None, user.email if user else None)
+    daily_limit = MAX_DAILY_REPORTS
+    daily_remaining = max(0, daily_limit - reports_today) if user and not user.is_super_admin else daily_limit
+    is_limit_reached = (daily_remaining == 0) if user and not user.is_super_admin else False
     
     return render_template('report.html',
                          user=user,
@@ -183,7 +188,11 @@ def report_form():
                          selected_floor=selected_floor,
                          selected_room=selected_room,
                          room_param=room_param,
-                         rooms_data=rooms_data)
+                         rooms_data=rooms_data,
+                         reports_today=reports_today,
+                         daily_limit=daily_limit,
+                         daily_remaining=daily_remaining,
+                         is_limit_reached=is_limit_reached)
 
 
 @main_bp.route('/report', methods=['POST'])
@@ -192,8 +201,19 @@ def submit_report():
     """
     Submit a new maintenance ticket.
     Handles both AJAX and form submissions.
+    Enforces maximum 3 reports/day and automated spam detection / strikes.
     """
     user = db.session.get(User, session['user_id'])
+    from ...spam_detector import is_daily_report_limit_exceeded, detect_report_spam, apply_spam_strike_to_user
+    
+    # Check daily reporting limit (Max 3/day for non-superadmins)
+    if is_daily_report_limit_exceeded(user):
+        limit_err = "Daily report limit reached (Maximum 3 reports per day). Please try again tomorrow."
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return api_response(success=False, error=limit_err, status=429)
+        building = Building.query.filter_by(name='Vyas').first()
+        return render_template('report.html', user=user, building=building, errors=[limit_err], is_limit_reached=True), 429
+
     reporter_name = user.name
     prn = user.prn or 'Admin'
     reporter_email = user.email
@@ -219,6 +239,29 @@ def submit_report():
             return api_response(success=False, error='; '.join(errors), status=400)
         return render_template('report.html', errors=errors), 400
     
+    # Ensure IDs are valid integers
+    try:
+        r_id = int(room_id)
+    except (TypeError, ValueError):
+        errors.append('Invalid Room ID')
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return api_response(success=False, error='; '.join(errors), status=400)
+        building = Building.query.filter_by(name='Vyas').first()
+        return render_template('report.html', user=user, building=building, errors=errors), 400
+
+    # Spam & Abuse Detection with Auto-Strike Logic
+    is_spam, spam_reason = detect_report_spam(user, r_id, issue_type, description)
+    if is_spam:
+        strikes_count, is_suspended = apply_spam_strike_to_user(user, r_id, spam_reason)
+        strike_msg = f"Report rejected: {spam_reason}. A violation strike has been issued ({strikes_count}/3 strikes)."
+        if is_suspended:
+            strike_msg += " Your ad-hoc booking privileges have been suspended for 14 days due to 3 active violation strikes."
+        current_app.logger.warning(f"Spam detected from user {user.id} ({user.email}): {spam_reason}. Strike #{strikes_count}")
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return api_response(success=False, error=strike_msg, status=400, strikes=strikes_count, suspended=is_suspended)
+        building = Building.query.filter_by(name='Vyas').first()
+        return render_template('report.html', user=user, building=building, errors=[strike_msg]), 400
+    
     # Handle image upload
     image_filename = None
     if 'image' in request.files:
@@ -234,19 +277,6 @@ def submit_report():
     
     try:
         # Create ticket
-        # Ensure IDs are valid integers
-        try:
-            r_id = int(room_id)
-        except (TypeError, ValueError):
-            errors.append('Invalid Room ID')
-        
-        if errors:
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return api_response(success=False, error='; '.join(errors), status=400)
-            user = db.session.get(User, session['user_id'])
-            building = Building.query.filter_by(name='Vyas').first()
-            return render_template('report.html', user=user, building=building, errors=errors), 400
-
         ticket = Ticket(
             room_id=r_id,
             asset_id=None,

@@ -791,6 +791,149 @@
         opacity: 0.85;
     }
 
+    /* Bug Filters and Bulk Actions */
+    /* Segmented Bug Filter Control */
+    .bug-filter-group {
+        display: inline-flex;
+        align-items: center;
+        background: rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--border-color);
+        border-radius: 9999px;
+        padding: 3px;
+        gap: 3px;
+    }
+
+    [data-theme="dark"] .bug-filter-group {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .bug-filter-btn {
+        color: var(--text-muted);
+        border: none !important;
+        background: transparent;
+        border-radius: 9999px !important;
+        padding: 4px 12px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        line-height: 1;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+    }
+
+    .bug-filter-btn:hover {
+        color: var(--text-main);
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    .bug-filter-btn .filter-count-badge {
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 9999px;
+        background: rgba(0, 0, 0, 0.08);
+        color: var(--text-muted);
+        line-height: 1;
+        transition: all 0.2s ease;
+    }
+
+    [data-theme="dark"] .bug-filter-btn .filter-count-badge {
+        background: rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+    }
+
+    .bug-filter-btn.active {
+        background: var(--mitwpu-blue, #0b4d8c) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(11, 77, 140, 0.3);
+    }
+
+    [data-theme="dark"] .bug-filter-btn.active {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    .bug-filter-btn.active .filter-count-badge {
+        background: rgba(255, 255, 255, 0.22) !important;
+        color: #ffffff !important;
+    }
+
+    /* Bug Search Wrapper */
+    .bug-search-wrapper {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .bug-search-wrapper input {
+        height: 34px;
+        padding-left: 34px !important;
+        padding-right: 14px;
+        font-size: 0.78rem;
+        border-radius: 9999px;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        transition: all 0.2s ease;
+    }
+
+    [data-theme="dark"] .bug-search-wrapper input {
+        background: rgba(255, 255, 255, 0.04);
+        border-color: rgba(255, 255, 255, 0.08);
+        color: #f8fafc;
+    }
+
+    .bug-search-wrapper input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        outline: none;
+    }
+
+    .bug-search-wrapper .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        pointer-events: none;
+    }
+
+    .bugs-bulk-bar {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 10px 16px;
+        min-height: 50px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+        transition: all 0.25s ease;
+    }
+
+    [data-theme="dark"] .bugs-bulk-bar {
+        background: rgba(22, 22, 26, 0.95);
+        border: 1px solid rgba(59, 130, 246, 0.35);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 16px rgba(59, 130, 246, 0.12);
+    }
+
+    .bugs-bulk-bar .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .bug-row-selected {
+        background-color: rgba(59, 130, 246, 0.07) !important;
+    }
+
+    [data-theme="dark"] .bug-row-selected {
+        background-color: rgba(59, 130, 246, 0.15) !important;
+    }
+
     .bugs-tracking-card .table {
         margin-bottom: 0;
     }
@@ -1632,49 +1775,97 @@
     </div>
 
     <!-- Bug Tracking Section -->
-    <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
-                <span class="d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171;">
-                    <i class="bi bi-bug-fill"></i>
+    <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);" id="reportedBugsSection">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                    <span class="d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.08) 100%); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171;">
+                        <i class="bi bi-bug-fill"></i>
+                    </span>
+                    <span>Reported Bugs</span>
+                </h5>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-1 fw-semibold" id="openBugsHeaderBadge" style="font-size: 0.78rem;">
+                    <i class="bi bi-exclamation-triangle-fill me-1"></i><span id="openBugsCount">{{ (bugs | selectattr('status', 'equalto', 'open') | list | length) }}</span> Open Issues
                 </span>
-                <span>Reported Bugs</span>
-            </h5>
-            {% if bugs|length > 0 %}
-                <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.78rem;">
-                    <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ bugs|length }} Open Issues
-                </span>
-            {% else %}
-                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold" style="font-size: 0.78rem;">
-                    <i class="bi bi-check-circle-fill me-1"></i>0 Issues
-                </span>
-            {% endif %}
+            </div>
+
+            <!-- Small Filter Controls & Search -->
+            <div class="d-flex align-items-center flex-wrap gap-2.5">
+                <!-- Status Filter Pills -->
+                <div class="bug-filter-group" role="group" aria-label="Bug Status Filter">
+                    <button type="button" class="bug-filter-btn active" data-filter="all">
+                        All <span class="filter-count-badge" id="filterCountAll">{{ bugs|length }}</span>
+                    </button>
+                    <button type="button" class="bug-filter-btn" data-filter="open">
+                        Open <span class="filter-count-badge" id="filterCountOpen">{{ (bugs | selectattr('status', 'equalto', 'open') | list | length) }}</span>
+                    </button>
+                    <button type="button" class="bug-filter-btn" data-filter="resolved">
+                        Resolved <span class="filter-count-badge" id="filterCountResolved">{{ (bugs | selectattr('status', 'equalto', 'resolved') | list | length) }}</span>
+                    </button>
+                </div>
+
+                <!-- Small Search Input -->
+                <div class="bug-search-wrapper" style="min-width: 175px;">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" id="bugSearchInput" class="form-control form-control-sm" placeholder="Filter bugs...">
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Multiple Select Bulk Action Toolbar -->
+        <div id="bugsBulkActionBar" class="bugs-bulk-bar mb-3 d-none align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary text-white rounded-pill px-3 py-1.5 font-monospace fw-bold" id="selectedBugsCountBadge" style="font-size: 0.8rem;">0 Selected</span>
+                <span class="text-muted opacity-50 small">|</span>
+                <button type="button" class="btn btn-sm btn-link text-decoration-none text-muted p-0 hover-text-primary" id="selectOnlyOpenBtn" style="font-size: 0.78rem;">
+                    <i class="bi bi-check2 me-1"></i>Select all open
+                </button>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" id="bulkResolveBtn" class="btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center" style="font-size: 0.78rem;">
+                    <i class="bi bi-check-circle-fill me-1.5"></i>
+                    <span>Mark as Fixed</span>
+                </button>
+                <button type="button" id="bulkDeleteBtn" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center" style="font-size: 0.78rem;">
+                    <i class="bi bi-trash3-fill me-1.5"></i>
+                    <span>Delete</span>
+                </button>
+                <button type="button" id="clearSelectionBtn" class="btn btn-sm btn-outline-secondary rounded-circle d-inline-flex align-items-center justify-content-center" title="Clear selection" style="width: 28px; height: 28px; padding: 0;">
+                    <i class="bi bi-x-lg" style="font-size: 0.72rem;"></i>
+                </button>
+            </div>
         </div>
         
         <div class="bugs-tracking-card">
             <div class="table-responsive">
-                <table class="table align-middle mb-0">
+                <table class="table align-middle mb-0" id="reportedBugsTable">
                     <thead>
                         <tr>
-                            <th class="ps-4">Status</th>
+                            <th class="ps-3 text-center" style="width: 44px;">
+                                <input type="checkbox" id="selectAllBugs" class="form-check-input" title="Select all visible bugs" style="cursor: pointer;">
+                            </th>
+                            <th>Status</th>
                             <th>Title & Description</th>
                             <th>Reporter</th>
                             <th>Date</th>
                             <th class="text-center">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="reportedBugsTableBody">
                         {% for bug in bugs %}
-                        <tr>
-                            <td class="ps-4">
+                        <tr class="bug-table-row" id="bugRow-{{ bug.id }}" data-bug-id="{{ bug.id }}" data-status="{{ bug.status }}" data-text="{{ (bug.title ~ ' ' ~ bug.description ~ ' ' ~ bug.reporter_type ~ ' ' ~ (bug.reporter_id or '')) | lower }}">
+                            <td class="ps-3 text-center">
+                                <input type="checkbox" class="form-check-input bug-checkbox" value="{{ bug.id }}" data-status="{{ bug.status }}" style="cursor: pointer;">
+                            </td>
+                            <td>
                                 {% if bug.status == 'open' %}
-                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold"><i class="bi bi-exclamation-circle me-1"></i>Open</span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold bug-status-badge"><i class="bi bi-exclamation-circle me-1"></i>Open</span>
                                 {% else %}
-                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold"><i class="bi bi-check-circle me-1"></i>Resolved</span>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold bug-status-badge"><i class="bi bi-check-circle me-1"></i>Resolved</span>
                                 {% endif %}
                             </td>
                             <td style="max-width: 400px;">
-                                <div class="fw-bold mb-1" style="color: var(--text-main);">{{ bug.title }}</div>
+                                <div class="fw-bold mb-1 bug-title-text" style="color: var(--text-main);">{{ bug.title }}</div>
                                 <div class="text-muted small text-truncate">{{ bug.description }}</div>
                             </td>
                             <td>
@@ -1695,26 +1886,18 @@
                                         <i class="bi bi-paperclip"></i>
                                     </a>
                                     {% endif %}
-                                    {% if bug.status == 'open' %}
-                                    <form action="{{ url_for('superadmin.resolve_bug', bug_id=bug.id) }}" method="POST" class="d-inline">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-success rounded-pill me-1 px-2.5" title="Mark as Resolved">
-                                            <i class="bi bi-check-lg"></i>
-                                        </button>
-                                    </form>
-                                    {% endif %}
-                                    <form action="{{ url_for('superadmin.delete_bug', bug_id=bug.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this bug report permanently?');">
-                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2.5" title="Delete">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill me-1 px-2.5 single-resolve-btn {% if bug.status != 'open' %}d-none{% endif %}" title="Mark as Resolved" data-bug-id="{{ bug.id }}" onclick="singleResolveBug({{ bug.id }}, this)">
+                                        <i class="bi bi-check-lg"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 single-delete-btn" title="Delete" data-bug-id="{{ bug.id }}" onclick="singleDeleteBug({{ bug.id }}, this)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                         {% else %}
-                        <tr>
-                            <td colspan="5" class="p-0 border-0">
+                        <tr id="emptyBugsInitialRow">
+                            <td colspan="6" class="p-0 border-0">
                                 <div class="empty-bugs-state">
                                     <div class="empty-bugs-icon">
                                         <i class="bi bi-shield-check"></i>
@@ -1725,6 +1908,11 @@
                             </td>
                         </tr>
                         {% endfor %}
+                        <tr id="noMatchingBugsRow" class="d-none">
+                            <td colspan="6" class="text-center py-4 text-muted small">
+                                <i class="bi bi-search me-1"></i>No bug reports match your filter criteria.
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -1880,7 +2068,370 @@
         }
     }
 
+    // Bug Filtering & Multi-Select Bulk Action System
+    let currentBugFilter = 'all';
+
+    function updateBugCounts() {
+        const rows = document.querySelectorAll('.bug-table-row');
+        let total = rows.length;
+        let openCount = 0;
+        let resolvedCount = 0;
+
+        rows.forEach(r => {
+            if (r.dataset.status === 'open') openCount++;
+            else if (r.dataset.status === 'resolved') resolvedCount++;
+        });
+
+        const filterCountAll = document.getElementById('filterCountAll');
+        const filterCountOpen = document.getElementById('filterCountOpen');
+        const filterCountResolved = document.getElementById('filterCountResolved');
+        const openBugsCount = document.getElementById('openBugsCount');
+
+        if (filterCountAll) filterCountAll.textContent = total;
+        if (filterCountOpen) filterCountOpen.textContent = openCount;
+        if (filterCountResolved) filterCountResolved.textContent = resolvedCount;
+        if (openBugsCount) openBugsCount.textContent = openCount;
+    }
+
+    function applyBugFilters() {
+        const query = (document.getElementById('bugSearchInput')?.value || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.bug-table-row');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const status = row.dataset.status;
+            const text = (row.dataset.text || '').toLowerCase();
+            const matchesStatus = (currentBugFilter === 'all') || (status === currentBugFilter);
+            const matchesSearch = !query || text.includes(query);
+
+            if (matchesStatus && matchesSearch) {
+                row.classList.remove('d-none');
+                visibleCount++;
+            } else {
+                row.classList.add('d-none');
+                // Uncheck hidden rows if needed
+                const cb = row.querySelector('.bug-checkbox');
+                if (cb && cb.checked) {
+                    cb.checked = false;
+                    row.classList.remove('bug-row-selected');
+                }
+            }
+        });
+
+        const noMatchRow = document.getElementById('noMatchingBugsRow');
+        if (noMatchRow) {
+            if (visibleCount === 0 && rows.length > 0) {
+                noMatchRow.classList.remove('d-none');
+            } else {
+                noMatchRow.classList.add('d-none');
+            }
+        }
+
+        updateBulkActionBar();
+    }
+
+    function updateBulkActionBar() {
+        const checkedBoxes = document.querySelectorAll('.bug-checkbox:checked');
+        const count = checkedBoxes.length;
+        const bulkBar = document.getElementById('bugsBulkActionBar');
+        const badge = document.getElementById('selectedBugsCountBadge');
+        const selectAllCb = document.getElementById('selectAllBugs');
+
+        if (badge) badge.textContent = `${count} Selected`;
+
+        if (bulkBar) {
+            if (count > 0) {
+                bulkBar.classList.remove('d-none');
+                bulkBar.classList.add('d-flex');
+            } else {
+                bulkBar.classList.add('d-none');
+                bulkBar.classList.remove('d-flex');
+            }
+        }
+
+        // Sync master select-all checkbox state
+        const visibleBoxes = Array.from(document.querySelectorAll('.bug-table-row:not(.d-none) .bug-checkbox'));
+        if (selectAllCb) {
+            if (visibleBoxes.length > 0 && visibleBoxes.every(cb => cb.checked)) {
+                selectAllCb.checked = true;
+                selectAllCb.indeterminate = false;
+            } else if (count > 0) {
+                selectAllCb.checked = false;
+                selectAllCb.indeterminate = true;
+            } else {
+                selectAllCb.checked = false;
+                selectAllCb.indeterminate = false;
+            }
+        }
+    }
+
+    function getSelectedBugIds() {
+        const checked = document.querySelectorAll('.bug-checkbox:checked');
+        return Array.from(checked).map(cb => parseInt(cb.value)).filter(n => !isNaN(n));
+    }
+
+    // Single bug resolve
+    async function singleResolveBug(bugId, btnEl) {
+        if (!btnEl) return;
+        const origHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+        try {
+            const resp = await fetch(`/developer/bugs/${bugId}/resolve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await resp.json();
+            if (resp.ok && data.success) {
+                const row = document.getElementById(`bugRow-${bugId}`);
+                if (row) {
+                    row.dataset.status = 'resolved';
+                    const badge = row.querySelector('.bug-status-badge');
+                    if (badge) {
+                        badge.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold bug-status-badge';
+                        badge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Resolved';
+                    }
+                    btnEl.classList.add('d-none');
+                }
+                updateBugCounts();
+                applyBugFilters();
+            } else {
+                alert(data.error || 'Failed to mark bug as resolved.');
+                btnEl.disabled = false;
+                btnEl.innerHTML = origHtml;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Network error resolving bug.');
+            btnEl.disabled = false;
+            btnEl.innerHTML = origHtml;
+        }
+    }
+
+    // Single bug delete
+    async function singleDeleteBug(bugId, btnEl) {
+        if (!confirm('Permanently delete this bug report?')) return;
+        if (!btnEl) return;
+        const origHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+        try {
+            const resp = await fetch(`/developer/bugs/${bugId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await resp.json();
+            if (resp.ok && data.success) {
+                const row = document.getElementById(`bugRow-${bugId}`);
+                if (row) {
+                    row.style.transition = 'all 0.3s ease';
+                    row.style.opacity = '0';
+                    row.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        row.remove();
+                        updateBugCounts();
+                        applyBugFilters();
+                    }, 300);
+                }
+            } else {
+                alert(data.error || 'Failed to delete bug report.');
+                btnEl.disabled = false;
+                btnEl.innerHTML = origHtml;
+            }
+        } catch (e) {
+            console.error(e);
+            alert('Network error deleting bug.');
+            btnEl.disabled = false;
+            btnEl.innerHTML = origHtml;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
+        // Bug filter pill buttons
+        document.querySelectorAll('.bug-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.bug-filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentBugFilter = btn.dataset.filter || 'all';
+                applyBugFilters();
+            });
+        });
+
+        // Bug search filter
+        const searchInput = document.getElementById('bugSearchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', () => {
+                applyBugFilters();
+            });
+        }
+
+        // Master select all checkbox
+        const selectAllCb = document.getElementById('selectAllBugs');
+        if (selectAllCb) {
+            selectAllCb.addEventListener('change', (e) => {
+                const isChecked = e.target.checked;
+                const visibleBoxes = document.querySelectorAll('.bug-table-row:not(.d-none) .bug-checkbox');
+                visibleBoxes.forEach(cb => {
+                    cb.checked = isChecked;
+                    const row = cb.closest('tr');
+                    if (row) {
+                        if (isChecked) row.classList.add('bug-row-selected');
+                        else row.classList.remove('bug-row-selected');
+                    }
+                });
+                updateBulkActionBar();
+            });
+        }
+
+        // Row checkboxes
+        document.getElementById('reportedBugsTableBody')?.addEventListener('change', (e) => {
+            if (e.target.classList.contains('bug-checkbox')) {
+                const row = e.target.closest('tr');
+                if (row) {
+                    if (e.target.checked) row.classList.add('bug-row-selected');
+                    else row.classList.remove('bug-row-selected');
+                }
+                updateBulkActionBar();
+            }
+        });
+
+        // Select only open button
+        document.getElementById('selectOnlyOpenBtn')?.addEventListener('click', () => {
+            document.querySelectorAll('.bug-table-row').forEach(row => {
+                const cb = row.querySelector('.bug-checkbox');
+                if (cb) {
+                    if (row.dataset.status === 'open' && !row.classList.contains('d-none')) {
+                        cb.checked = true;
+                        row.classList.add('bug-row-selected');
+                    } else {
+                        cb.checked = false;
+                        row.classList.remove('bug-row-selected');
+                    }
+                }
+            });
+            updateBulkActionBar();
+        });
+
+        // Clear selection button
+        document.getElementById('clearSelectionBtn')?.addEventListener('click', () => {
+            document.querySelectorAll('.bug-checkbox').forEach(cb => {
+                cb.checked = false;
+                cb.closest('tr')?.classList.remove('bug-row-selected');
+            });
+            updateBulkActionBar();
+        });
+
+        // Bulk resolve button
+        document.getElementById('bulkResolveBtn')?.addEventListener('click', async function() {
+            const bugIds = getSelectedBugIds();
+            if (bugIds.length === 0) return;
+
+            const btn = this;
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Updating...';
+
+            try {
+                const resp = await fetch("{{ url_for('superadmin.bulk_resolve_bugs') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ bug_ids: bugIds })
+                });
+                const data = await resp.json();
+                if (resp.ok && data.success) {
+                    bugIds.forEach(id => {
+                        const row = document.getElementById(`bugRow-${id}`);
+                        if (row) {
+                            row.dataset.status = 'resolved';
+                            const badge = row.querySelector('.bug-status-badge');
+                            if (badge) {
+                                badge.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold bug-status-badge';
+                                badge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Resolved';
+                            }
+                            const resBtn = row.querySelector('.single-resolve-btn');
+                            if (resBtn) resBtn.classList.add('d-none');
+                            const cb = row.querySelector('.bug-checkbox');
+                            if (cb) cb.checked = false;
+                            row.classList.remove('bug-row-selected');
+                        }
+                    });
+                    updateBugCounts();
+                    applyBugFilters();
+                } else {
+                    alert(data.error || 'Bulk resolve failed.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error while executing bulk resolve.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        });
+
+        // Bulk delete button
+        document.getElementById('bulkDeleteBtn')?.addEventListener('click', async function() {
+            const bugIds = getSelectedBugIds();
+            if (bugIds.length === 0) return;
+
+            if (!confirm(`Permanently delete ${bugIds.length} selected bug report(s)?`)) return;
+
+            const btn = this;
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Deleting...';
+
+            try {
+                const resp = await fetch("{{ url_for('superadmin.bulk_delete_bugs') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': CSRF_TOKEN,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify({ bug_ids: bugIds })
+                });
+                const data = await resp.json();
+                if (resp.ok && data.success) {
+                    bugIds.forEach(id => {
+                        const row = document.getElementById(`bugRow-${id}`);
+                        if (row) {
+                            row.style.transition = 'all 0.3s ease';
+                            row.style.opacity = '0';
+                            row.style.transform = 'scale(0.95)';
+                            setTimeout(() => row.remove(), 300);
+                        }
+                    });
+                    setTimeout(() => {
+                        updateBugCounts();
+                        applyBugFilters();
+                    }, 350);
+                } else {
+                    alert(data.error || 'Bulk delete failed.');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Network error while executing bulk delete.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        });
+
         // Staggered entry animation using GSAP
         if (window.gsap) {
             gsap.to(".animate-on-load", {

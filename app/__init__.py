@@ -196,27 +196,19 @@ def create_app(config_name=None):
         if request.endpoint is None:
             return None
 
-        # Resolve authenticated user (via cached g, flask_login, or session)
+        # Resolve authenticated user (via cached g or session)
         user = None
         if hasattr(g, '_current_user_cached') and g._current_user_cached:
             user = g._current_user_cached
-        else:
-            try:
-                from flask_login import current_user
-                if current_user and current_user.is_authenticated:
-                    user = current_user
-            except Exception:
-                pass
+        elif session.get('user_id'):
+            from .models import User
+            user = db.session.get(User, session['user_id'])
+        elif session.get('super_admin_email'):
+            from .models import User
+            user = User.query.filter_by(email=session['super_admin_email']).first()
 
-            if not user and session.get('user_id'):
-                from .models import User
-                user = db.session.get(User, session['user_id'])
-            elif not user and session.get('super_admin_email'):
-                from .models import User
-                user = User.query.filter_by(email=session['super_admin_email']).first()
-
-            if user:
-                g._current_user_cached = user
+        if user:
+            g._current_user_cached = user
 
         # Logic: If current_user.is_authenticated AND current_user.has_accepted_terms == False:
         is_authenticated = user is not None and getattr(user, 'is_authenticated', True)

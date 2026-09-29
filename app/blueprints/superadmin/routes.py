@@ -459,12 +459,6 @@ def delete_admin(admin_id):
     target_user = User.query.get_or_404(admin_id)
     
     current_user_id = session.get('user_id')
-    try:
-        from flask_login import current_user
-        if current_user and hasattr(current_user, 'id'):
-            current_user_id = current_user.id
-    except Exception:
-        pass
 
     if target_user.is_super_admin and current_user_id != target_user.id:
         flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
@@ -595,12 +589,6 @@ def delete_user(user_id):
     target_user = User.query.get_or_404(user_id)
     
     current_user_id = session.get('user_id')
-    try:
-        from flask_login import current_user
-        if current_user and hasattr(current_user, 'id'):
-            current_user_id = current_user.id
-    except Exception:
-        pass
 
     if target_user.is_super_admin and current_user_id != target_user.id:
         flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
@@ -624,12 +612,6 @@ def update_user_role(user_id):
     target_user = User.query.get_or_404(user_id)
     
     current_user_id = session.get('user_id')
-    try:
-        from flask_login import current_user
-        if current_user and hasattr(current_user, 'id'):
-            current_user_id = current_user.id
-    except Exception:
-        pass
 
     if target_user.is_super_admin and current_user_id != target_user.id:
         flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
@@ -661,12 +643,6 @@ def edit_user_details(user_id):
     target_user = User.query.get_or_404(user_id)
     
     current_user_id = session.get('user_id')
-    try:
-        from flask_login import current_user
-        if current_user and hasattr(current_user, 'id'):
-            current_user_id = current_user.id
-    except Exception:
-        pass
 
     if target_user.is_super_admin and current_user_id != target_user.id:
         flash("Unauthorized: Cannot modify Super Admin accounts.", "error")

@@ -184,6 +184,17 @@ class SuspensionLog(db.Model):
                                 backref=db.backref('suspension_logs', lazy=True, cascade='all, delete-orphan'))
     lifted_by = db.relationship('User', foreign_keys=[lifted_by_id], lazy=True)
 
+    def __init__(self, faculty_id=None, event_type=None, reason=None, suspended_until=None, strike_count=0, lifted_by_id=None, **kwargs):
+        super().__init__(**kwargs)
+        if faculty_id is not None: self.faculty_id = faculty_id
+        if event_type is not None: self.event_type = event_type
+        if reason is not None: self.reason = reason
+        if suspended_until is not None: self.suspended_until = suspended_until
+        if strike_count is not None: self.strike_count = strike_count
+        if lifted_by_id is not None: self.lifted_by_id = lifted_by_id
+        for k, v in kwargs.items():
+            setattr(self, k, v)
+
     def __repr__(self):
         return f'<SuspensionLog {self.event_type} faculty={self.faculty_id}>'
 
@@ -1453,6 +1464,21 @@ class EventBooking(db.Model):
         db.Index('idx_event_start_end', 'start_date', 'end_date'),
         db.Index('idx_event_status', 'status'),
     )
+
+    def __init__(self, title=None, description=None, faculty_id=None, booking_type='rooms', start_date=None, end_date=None, start_time=None, end_time=None, status='Pending', rejection_reason=None, **kwargs):
+        super().__init__(**kwargs)
+        if title is not None: self.title = title
+        if description is not None: self.description = description
+        if faculty_id is not None: self.faculty_id = faculty_id
+        if booking_type is not None: self.booking_type = booking_type
+        if start_date is not None: self.start_date = start_date
+        if end_date is not None: self.end_date = end_date
+        if start_time is not None: self.start_time = start_time
+        if end_time is not None: self.end_time = end_time
+        if status is not None: self.status = status
+        if rejection_reason is not None: self.rejection_reason = rejection_reason
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
     def get_all_target_room_ids(self):
         if self.booking_type == 'floors':

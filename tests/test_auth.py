@@ -348,22 +348,20 @@ def test_terms_compliance_middleware_interceptor(client, app, run_app_context):
 
 
 def test_login_scroll_to_accept_ui_structure(client):
-    """Phase 2 Test: Verify Google-style scroll-to-accept UI, modal structure, and disabled states."""
+    """Phase 2 Test: Verify terms UI components, modal structure, and accessibility."""
     res = client.get('/login')
     assert res.status_code == 200
     html = res.get_data(as_text=True)
 
-    # 1. Verify read-only checkbox and trigger label
+    # 1. Verify checkbox and trigger label
     assert 'id="loginTermsCheckbox"' in html
-    assert 'visually-readonly-checkbox' in html
     assert 'data-bs-target="#loginTermsModal"' in html
     assert 'Terms &amp; Conditions' in html or 'Terms & Conditions' in html
 
-    # 2. Verify login submit button is initialized as disabled
+    # 2. Verify login submit button exists
     assert 'id="loginSubmitBtn"' in html
-    assert 'disabled' in html
 
-    # 3. Verify modal exists with fixed height scrollbody and disabled accept button
+    # 3. Verify modal exists with fixed height scrollbody and accept button
     assert 'id="loginTermsModal"' in html
     assert 'id="termsModalScrollBody"' in html
     assert 'terms-modal-body' in html
@@ -377,7 +375,7 @@ def test_login_scroll_to_accept_ui_structure(client):
 
 
 def test_login_post_requires_accept_terms_and_persists_consent(client, run_app_context):
-    """Phase 3 Test: Verify login POST enforces accept_terms presence and persists has_accepted_terms."""
+    """Verify first-time user accepts terms once, and subsequent logins let user in directly."""
     from app.models import User
 
     with run_app_context:
@@ -394,34 +392,37 @@ def test_login_post_requires_accept_terms_and_persists_consent(client, run_app_c
         db.session.commit()
         stud_id = test_student.id
 
-    # 1. DevTools bypass attempt: POST valid credentials without accept_terms
-    res_bypassed = client.post('/login', data={
+    # 1. First-time login: Unconsented user is authenticated and routed to /onboarding/terms
+    res_first_login = client.post('/login', data={
         'email': 'compliance.student@mitwpu.edu.in',
         'password': 'StudentPass123!'
-    }, follow_redirects=True)
-    assert res_bypassed.status_code == 200
-    html_bypassed = res_bypassed.get_data(as_text=True)
-    assert 'You must accept the Terms &amp; Conditions' in html_bypassed or 'You must accept the Terms & Conditions' in html_bypassed
+    }, follow_redirects=False)
+    assert res_first_login.status_code == 302
+    assert res_first_login.headers['Location'].endswith('/onboarding/terms')
 
-    # User remains unauthenticated
-    with client.session_transaction() as sess:
-        assert 'user_id' not in sess
-
-    # 2. Legitimate form submission with accept_terms
-    res_success = client.post('/login', data={
-        'email': 'compliance.student@mitwpu.edu.in',
-        'password': 'StudentPass123!',
-        'accept_terms': '1'
-    }, follow_redirects=True)
-    assert res_success.status_code == 200
-
-    # User is authenticated and consent is recorded in database
+    # Session is established
     with client.session_transaction() as sess:
         assert sess.get('user_id') == stud_id
+
+    # 2. User accepts terms via onboarding endpoint
+    res_accept = client.post('/onboarding/accept', data={'accept_terms': '1'}, follow_redirects=False)
+    assert res_accept.status_code == 302
+    assert not res_accept.headers['Location'].endswith('/onboarding/terms')
 
     with run_app_context:
         updated_stud = db.session.get(User, stud_id)
         assert updated_stud.has_accepted_terms is True
+
+    # 3. Subsequent login from same email ID: User logs in and goes straight to dashboard without terms prompt
+    client.get('/logout')
+    res_subsequent_login = client.post('/login', data={
+        'email': 'compliance.student@mitwpu.edu.in',
+        'password': 'StudentPass123!'
+    }, follow_redirects=False)
+    assert res_subsequent_login.status_code == 302
+    assert not res_subsequent_login.headers['Location'].endswith('/onboarding/terms')
+    assert res_subsequent_login.headers['Location'].endswith('/report')
+
 
 
 

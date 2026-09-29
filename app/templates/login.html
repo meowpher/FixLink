@@ -597,14 +597,14 @@
         <!-- Google-Style Clickwrap Scroll-To-Accept Checkbox -->
         <div class="mb-4 text-start">
             <div class="form-check terms-check-group d-flex align-items-start gap-2" id="termsCheckGroup">
-                <input class="form-check-input visually-readonly-checkbox mt-1" type="checkbox" name="accept_terms" id="loginTermsCheckbox" value="1" required aria-required="true" onclick="return false;">
+                <input class="form-check-input mt-1" type="checkbox" name="accept_terms" id="loginTermsCheckbox" value="1" checked>
                 <span class="form-check-label terms-trigger-label" id="termsTriggerLabel" data-bs-toggle="modal" data-bs-target="#loginTermsModal" role="button" tabindex="0" aria-label="Open terms and conditions modal">
                     <span id="termsCheckboxLabelText">I accept the <span class="terms-link">Terms &amp; Conditions</span>.</span>
                 </span>
             </div>
         </div>
         
-        <button type="submit" id="loginSubmitBtn" class="btn btn-primary w-100 fw-semibold mb-3" aria-label="Sign in to your account" disabled>Login</button>
+        <button type="submit" id="loginSubmitBtn" class="btn btn-primary w-100 fw-semibold mb-3" aria-label="Sign in to your account">Login</button>
     </form>
     
     {% if not show_phone_hint %}

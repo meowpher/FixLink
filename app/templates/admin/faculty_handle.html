@@ -1574,12 +1574,12 @@
 
                                 <div class="p-3 pt-0 d-flex justify-content-end gap-2">
                                     {% if item.is_suspended %}
-                                    <button class="btn-lift" onclick="liftSuspension({{ u.id }}, '{{ u.name }}')">
+                                    <button type="button" class="btn-lift" data-action="lift-suspension" data-faculty-id="{{ u.id }}" data-faculty-name="{{ u.name | replace("'", "\\'") }}">
                                         <i class="bi bi-unlock-fill me-1"></i>Lift Suspension
                                     </button>
                                     {% endif %}
                                     {% if item.all_time_strikes > 0 or strikes > 0 %}
-                                    <button class="btn-clear" onclick="clearStrikes({{ u.id }}, '{{ u.name }}')">
+                                    <button type="button" class="btn-clear" data-action="clear-strikes" data-faculty-id="{{ u.id }}" data-faculty-name="{{ u.name | replace("'", "\\'") }}">
                                         <i class="bi bi-trash3 me-1"></i>Clear Strikes
                                     </button>
                                     {% endif %}
@@ -1900,6 +1900,103 @@
         </div>
     </div>
 </div>
+
+<!-- Modal: Lift Suspension Customized Modal -->
+<div class="modal fade" id="liftSuspensionModal" tabindex="-1" aria-labelledby="liftSuspensionModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content border-0 rounded-4 handle-modal-card overflow-hidden shadow-lg">
+            <div class="modal-header handle-modal-header d-flex align-items-center justify-content-between p-3.5 border-bottom">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="handle-modal-icon-badge bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center rounded-3" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                        <i class="bi bi-unlock-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0 text-body" id="liftSuspensionModalLabel" style="font-size: 1.05rem;">Lift Suspension</h5>
+                        <div class="text-muted small" style="font-size: 0.74rem;">Ghost Protocol Privilege Restoration</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center gap-3 mb-3 p-3 rounded-3 bg-body-tertiary border">
+                    <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px; font-size: 1.05rem;" id="liftModalAvatar">F</div>
+                    <div class="min-w-0">
+                        <div class="fw-bold text-body text-truncate" id="liftModalFacultyName">Faculty Name</div>
+                        <div class="text-muted small" style="font-size: 0.75rem;">Ad-Hoc booking privileges will be restored</div>
+                    </div>
+                </div>
+
+                <p class="text-muted small mb-3">
+                    Lifting this suspension allows the faculty member to immediately resume booking rooms across Vyas Hall.
+                </p>
+
+                <div class="form-check p-3 rounded-3 border bg-body-tertiary d-flex align-items-start gap-2 mb-2">
+                    <input class="form-check-input mt-1 ms-0" type="checkbox" id="liftModalClearStrikesCheckbox" checked>
+                    <label class="form-check-label small" for="liftModalClearStrikesCheckbox">
+                        <strong class="text-body d-block">Clean Slate (Recommended)</strong>
+                        <span class="text-muted" style="font-size: 0.76rem;">Also clear all 30-day strike records and reset the strike meter.</span>
+                    </label>
+                </div>
+
+                <div id="liftModalAlert" class="alert alert-danger py-2 px-3 small rounded-3 d-none mt-3 mb-0"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3.5 py-1.5 small fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success rounded-pill px-4 py-1.5 small fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" id="btnConfirmLiftSuspension">
+                    <i class="bi bi-unlock-fill"></i>
+                    <span>Lift Suspension</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Clear Strikes Customized Modal -->
+<div class="modal fade" id="clearStrikesModal" tabindex="-1" aria-labelledby="clearStrikesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+        <div class="modal-content border-0 rounded-4 handle-modal-card overflow-hidden shadow-lg">
+            <div class="modal-header handle-modal-header d-flex align-items-center justify-content-between p-3.5 border-bottom">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="handle-modal-icon-badge bg-danger bg-opacity-10 text-danger d-flex align-items-center justify-content-center rounded-3" style="width: 40px; height: 40px; font-size: 1.2rem;">
+                        <i class="bi bi-trash3-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0 text-danger" id="clearStrikesModalLabel" style="font-size: 1.05rem;">Clear All Strikes</h5>
+                        <div class="text-muted small" style="font-size: 0.74rem;">Permanent Strike History Deletion</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="d-flex align-items-center gap-3 mb-3 p-3 rounded-3 bg-body-tertiary border">
+                    <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center fw-bold" style="width: 38px; height: 38px; font-size: 1.05rem;" id="clearModalAvatar">F</div>
+                    <div class="min-w-0">
+                        <div class="fw-bold text-body text-truncate" id="clearModalFacultyName">Faculty Name</div>
+                        <div class="text-danger small fw-semibold" style="font-size: 0.75rem;">All active strike records will be erased</div>
+                    </div>
+                </div>
+
+                <p class="text-muted small mb-3">
+                    Are you sure you want to permanently delete all strike records for this faculty member? The strike meter will be reset to 0.
+                </p>
+
+                <div class="alert alert-warning py-2.5 px-3 small mb-0 rounded-3 d-flex align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 text-warning flex-shrink-0"></i>
+                    <span>This action is permanent and cannot be undone.</span>
+                </div>
+
+                <div id="clearModalAlert" class="alert alert-danger py-2 px-3 small rounded-3 d-none mt-3 mb-0"></div>
+            </div>
+            <div class="modal-footer border-0 pt-0 pb-4 px-4 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3.5 py-1.5 small fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4 py-1.5 small fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" id="btnConfirmClearStrikes">
+                    <i class="bi bi-trash3-fill"></i>
+                    <span>Yes, Clear Strikes</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
@@ -2101,63 +2198,165 @@
         }
     };
 
-    // ── GHOST PROTOCOL ACTIONS ──
-    window.liftSuspension = async function(facultyId, name) {
-        const { value: clearStrikes } = await Swal.fire({
-            title: 'Lift Suspension?',
-            html: `Lift Ad-Hoc room booking suspension for <strong>${name}</strong>?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Lift Suspension',
-            confirmButtonColor: '#16a34a',
-            input: 'checkbox',
-            inputValue: 1,
-            inputPlaceholder: 'Also clear 30-day strike records (clean slate)'
-        });
-        if (clearStrikes === undefined) return;
-        try {
-            const res = await fetch(`/admin/api/ghost-protocol/lift-suspension/${facultyId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                body: JSON.stringify({ clear_strikes: Boolean(clearStrikes) })
-            });
-            const data = await res.json();
-            if (data.success) {
-                Swal.fire('Suspension Lifted', data.message, 'success').then(() => location.reload());
-            } else {
-                Swal.fire('Error', data.error || 'Failed to lift suspension.', 'error');
-            }
-        } catch {
-            Swal.fire('Error', 'Network communication failed.', 'error');
+    // ── GHOST PROTOCOL CUSTOM MODAL ACTIONS ──
+    let _activeGhostFacultyId = null;
+    let _activeGhostFacultyName = '';
+
+    window.liftSuspension = function(facultyId, name) {
+        _activeGhostFacultyId = facultyId;
+        _activeGhostFacultyName = name || 'Faculty Member';
+
+        const nameEl = document.getElementById('liftModalFacultyName');
+        const avatarEl = document.getElementById('liftModalAvatar');
+        const alertEl = document.getElementById('liftModalAlert');
+        const chkEl = document.getElementById('liftModalClearStrikesCheckbox');
+        const confirmBtn = document.getElementById('btnConfirmLiftSuspension');
+
+        if (nameEl) nameEl.textContent = _activeGhostFacultyName;
+        if (avatarEl) avatarEl.textContent = (_activeGhostFacultyName.trim()[0] || 'F').toUpperCase();
+        if (alertEl) { alertEl.classList.add('d-none'); alertEl.textContent = ''; }
+        if (chkEl) chkEl.checked = true;
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="bi bi-unlock-fill"></i><span>Lift Suspension</span>';
+        }
+
+        const modalEl = document.getElementById('liftSuspensionModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const inst = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (inst) inst.show();
         }
     };
 
-    window.clearStrikes = async function(facultyId, name) {
-        const result = await Swal.fire({
-            title: 'Clear Strikes?',
-            html: `Delete all strike records for <strong>${name}</strong>?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonText: 'Yes, Clear',
-            confirmButtonColor: '#dc2626',
-        });
-        if (!result.isConfirmed) return;
+    window.clearStrikes = function(facultyId, name) {
+        _activeGhostFacultyId = facultyId;
+        _activeGhostFacultyName = name || 'Faculty Member';
+
+        const nameEl = document.getElementById('clearModalFacultyName');
+        const avatarEl = document.getElementById('clearModalAvatar');
+        const alertEl = document.getElementById('clearModalAlert');
+        const confirmBtn = document.getElementById('btnConfirmClearStrikes');
+
+        if (nameEl) nameEl.textContent = _activeGhostFacultyName;
+        if (avatarEl) avatarEl.textContent = (_activeGhostFacultyName.trim()[0] || 'F').toUpperCase();
+        if (alertEl) { alertEl.classList.add('d-none'); alertEl.textContent = ''; }
+        if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="bi bi-trash3-fill"></i><span>Yes, Clear Strikes</span>';
+        }
+
+        const modalEl = document.getElementById('clearStrikesModal');
+        if (modalEl && typeof bootstrap !== 'undefined') {
+            const inst = bootstrap.Modal.getOrCreateInstance(modalEl);
+            if (inst) inst.show();
+        }
+    };
+
+    // Confirm Lift Suspension Button Listener
+    document.getElementById('btnConfirmLiftSuspension')?.addEventListener('click', async function() {
+        if (!_activeGhostFacultyId) return;
+        const confirmBtn = this;
+        const alertEl = document.getElementById('liftModalAlert');
+        const chkEl = document.getElementById('liftModalClearStrikesCheckbox');
+        const clearStrikesVal = chkEl ? chkEl.checked : false;
+
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Lifting...';
+        if (alertEl) alertEl.classList.add('d-none');
+
         try {
-            const res = await fetch(`/admin/api/ghost-protocol/clear-strikes/${facultyId}`, {
+            const token = csrfToken || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="csrf_token"]')?.value || '';
+            const res = await fetch(`/admin/api/ghost-protocol/lift-suspension/${_activeGhostFacultyId}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-                body: JSON.stringify({ scope: 'single', faculty_id: facultyId })
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': token },
+                body: JSON.stringify({ clear_strikes: clearStrikesVal })
             });
             const data = await res.json();
             if (data.success) {
-                Swal.fire('Cleared', data.message, 'success').then(() => location.reload());
+                confirmBtn.className = 'btn btn-success rounded-pill px-4 py-1.5 small fw-semibold d-inline-flex align-items-center gap-2';
+                confirmBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Lifted! Reloading...';
+                setTimeout(() => window.location.reload(), 600);
             } else {
-                Swal.fire('Error', data.error || 'Failed to clear strikes.', 'error');
+                if (alertEl) {
+                    alertEl.textContent = data.error || 'Failed to lift suspension.';
+                    alertEl.classList.remove('d-none');
+                }
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="bi bi-unlock-fill"></i><span>Lift Suspension</span>';
             }
-        } catch {
-            Swal.fire('Error', 'Network communication failed.', 'error');
+        } catch (err) {
+            console.error('Ghost lift error:', err);
+            if (alertEl) {
+                alertEl.textContent = 'Network communication error. Please try again.';
+                alertEl.classList.remove('d-none');
+            }
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="bi bi-unlock-fill"></i><span>Lift Suspension</span>';
         }
-    };
+    });
+
+    // Confirm Clear Strikes Button Listener
+    document.getElementById('btnConfirmClearStrikes')?.addEventListener('click', async function() {
+        if (!_activeGhostFacultyId) return;
+        const confirmBtn = this;
+        const alertEl = document.getElementById('clearModalAlert');
+
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Clearing...';
+        if (alertEl) alertEl.classList.add('d-none');
+
+        try {
+            const token = csrfToken || document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || document.querySelector('input[name="csrf_token"]')?.value || '';
+            const res = await fetch(`/admin/api/ghost-protocol/clear-strikes/${_activeGhostFacultyId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': token },
+                body: JSON.stringify({ scope: 'single', faculty_id: _activeGhostFacultyId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                confirmBtn.className = 'btn btn-danger rounded-pill px-4 py-1.5 small fw-semibold d-inline-flex align-items-center gap-2';
+                confirmBtn.innerHTML = '<i class="bi bi-check2-circle"></i> Cleared! Reloading...';
+                setTimeout(() => window.location.reload(), 600);
+            } else {
+                if (alertEl) {
+                    alertEl.textContent = data.error || 'Failed to clear strikes.';
+                    alertEl.classList.remove('d-none');
+                }
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="bi bi-trash3-fill"></i><span>Yes, Clear Strikes</span>';
+            }
+        } catch (err) {
+            console.error('Ghost clear strikes error:', err);
+            if (alertEl) {
+                alertEl.textContent = 'Network communication error. Please try again.';
+                alertEl.classList.remove('d-none');
+            }
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = '<i class="bi bi-trash3-fill"></i><span>Yes, Clear Strikes</span>';
+        }
+    });
+
+    // Ghost Protocol Click Event Delegation
+    document.addEventListener('click', (e) => {
+        const liftBtn = e.target.closest('.btn-lift, [data-action="lift-suspension"]');
+        if (liftBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const fId = liftBtn.dataset.facultyId || liftBtn.getAttribute('data-faculty-id');
+            const fName = liftBtn.dataset.facultyName || liftBtn.getAttribute('data-faculty-name') || 'Faculty Member';
+            if (fId) window.liftSuspension(fId, fName);
+            return;
+        }
+        const clearBtn = e.target.closest('.btn-clear, [data-action="clear-strikes"]');
+        if (clearBtn) {
+            e.preventDefault();
+            e.stopPropagation();
+            const fId = clearBtn.dataset.facultyId || clearBtn.getAttribute('data-faculty-id');
+            const fName = clearBtn.dataset.facultyName || clearBtn.getAttribute('data-faculty-name') || 'Faculty Member';
+            if (fId) window.clearStrikes(fId, fName);
+            return;
+        }
+    });
 
     // ── CMM SCRIPT LOGIC (Filters, Search, Bulk Select, Modal Handlers) ──
     const searchInput = document.getElementById('tableSearchInput');

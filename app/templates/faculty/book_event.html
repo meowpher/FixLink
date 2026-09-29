@@ -5,167 +5,469 @@
 
 {% block extra_css %}
 <style>
+    .event-booking-wrapper {
+        max-width: 860px;
+        margin: 0 auto;
+    }
+
     .event-booking-card {
-        background: var(--card-bg);
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        border: 1px solid var(--border-color);
-        padding: 2.5rem;
-        margin-top: 2rem;
+        background: var(--bg-card, #ffffff);
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+        border: 1px solid var(--border-color, #e2e8f0);
+        padding: 1.5rem 1.75rem;
     }
     
-    [data-theme="dark"] .event-booking-card {
-        background: rgba(30, 41, 59, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255,255,255,0.1);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    [data-theme="dark"] .event-booking-card,
+    [data-bs-theme="dark"] .event-booking-card {
+        background: #141414;
+        border-color: #262626;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        color: #f4f4f5;
     }
 
-    .booking-type-toggle {
+    .form-section-header {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted, #64748b);
+        margin-bottom: 0.75rem;
         display: flex;
-        gap: 1rem;
-        margin-bottom: 2rem;
+        align-items: center;
+        gap: 0.5rem;
     }
-    .booking-type-btn {
-        flex: 1;
-        padding: 1rem;
-        border-radius: 12px;
-        border: 2px solid var(--border-color);
-        background: transparent;
-        color: var(--text-color);
-        font-weight: 600;
-        transition: all 0.3s ease;
-        text-align: center;
-        cursor: pointer;
-    }
-    .booking-type-btn.active {
-        border-color: var(--mitwpu-blue);
-        background: rgba(37, 99, 235, 0.1);
-        color: var(--mitwpu-blue);
+    [data-theme="dark"] .form-section-header,
+    [data-bs-theme="dark"] .form-section-header {
+        color: #a1a1aa;
     }
 
-    .room-badge-checkbox {
+    .form-control,
+    .form-select {
+        height: 40px;
+        font-size: 0.88rem;
+        border-radius: 8px;
+        border: 1.5px solid var(--border-color, #e2e8f0);
+        background-color: var(--bg-card, #ffffff);
+        color: var(--text-primary, #1e293b);
+        transition: all 0.2s ease;
+    }
+    textarea.form-control {
+        height: auto;
+    }
+    [data-theme="dark"] .form-control,
+    [data-theme="dark"] .form-select,
+    [data-bs-theme="dark"] .form-control,
+    [data-bs-theme="dark"] .form-select {
+        background-color: #181818 !important;
+        border-color: #262626 !important;
+        color: #f4f4f5 !important;
+    }
+    .form-control:focus,
+    .form-select:focus {
+        border-color: var(--mitwpu-blue, #2563eb) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    }
+
+    /* Scope Segmented Control */
+    .scope-toggle-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.5rem;
+        background: var(--bg-main, #f1f5f9);
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color, #e2e8f0);
+    }
+    [data-theme="dark"] .scope-toggle-group,
+    [data-bs-theme="dark"] .scope-toggle-group {
+        background: #181818;
+        border-color: #262626;
+    }
+    .scope-toggle-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.55rem 1rem;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--text-muted, #64748b);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        user-select: none;
+    }
+    [data-theme="dark"] .scope-toggle-btn,
+    [data-bs-theme="dark"] .scope-toggle-btn {
+        color: #a1a1aa;
+    }
+    .scope-toggle-btn.active {
+        background: var(--bg-card, #ffffff);
+        color: var(--mitwpu-blue, #2563eb);
+        border-color: var(--border-color, #cbd5e1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    [data-theme="dark"] .scope-toggle-btn.active,
+    [data-bs-theme="dark"] .scope-toggle-btn.active {
+        background: #262626;
+        color: #ffffff;
+        border-color: #3f3f46;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Floor Filter Pills */
+    .floor-filter-pill {
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 20px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--bg-main, #f8fafc);
+        color: var(--text-muted, #64748b);
+        cursor: pointer;
+        transition: all 0.18s ease;
+    }
+    [data-theme="dark"] .floor-filter-pill,
+    [data-bs-theme="dark"] .floor-filter-pill {
+        background: #181818;
+        border-color: #262626;
+        color: #a1a1aa;
+    }
+    .floor-filter-pill:hover {
+        background: var(--border-color, #e2e8f0);
+        color: var(--text-primary, #1e293b);
+    }
+    [data-theme="dark"] .floor-filter-pill:hover,
+    [data-bs-theme="dark"] .floor-filter-pill:hover {
+        background: #1e1e1e;
+        color: #f4f4f5;
+        border-color: #3f3f46;
+    }
+    .floor-filter-pill.active {
+        background: #2563eb !important;
+        border-color: #2563eb !important;
+        color: #ffffff !important;
+    }
+
+    /* Room Chips Grid */
+    .rooms-scroll-panel {
+        max-height: 220px;
+        overflow-y: auto;
+        padding: 4px;
+        border-radius: 10px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        background: var(--bg-main, #f8fafc);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+    }
+    [data-theme="dark"] .rooms-scroll-panel,
+    [data-bs-theme="dark"] .rooms-scroll-panel {
+        background: #111111;
+        border-color: #222222;
+    }
+    .rooms-scroll-panel::-webkit-scrollbar {
+        width: 5px;
+    }
+    .rooms-scroll-panel::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 4px;
+    }
+
+    .room-chip-checkbox,
+    .floor-chip-checkbox {
         display: none;
     }
-    .room-badge-label {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        margin: 0.25rem;
-        border-radius: 20px;
-        border: 1px solid var(--border-color);
-        background: var(--bg-card);
-        color: var(--text-muted);
+    .room-chip-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.4rem;
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: 1.5px solid var(--border-color, #e2e8f0);
+        background: var(--bg-card, #ffffff);
+        color: var(--text-primary, #1e293b);
+        font-size: 0.8rem;
+        font-weight: 500;
         cursor: pointer;
-        transition: all 0.2s;
+        transition: all 0.15s ease;
+        user-select: none;
+        height: 36px;
     }
-    .room-badge-checkbox:checked + .room-badge-label {
-        background: var(--mitwpu-blue);
-        color: white;
-        border-color: var(--mitwpu-blue);
+    [data-theme="dark"] .room-chip-label,
+    [data-bs-theme="dark"] .room-chip-label {
+        background: #181818;
+        border-color: #262626;
+        color: #f4f4f5;
+    }
+    .room-chip-label:hover {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.05);
+    }
+    [data-theme="dark"] .room-chip-label:hover,
+    [data-bs-theme="dark"] .room-chip-label:hover {
+        border-color: #3b82f6;
+        background: #1e1e1e;
+    }
+    .room-chip-checkbox:checked + .room-chip-label {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #2563eb !important;
+        font-weight: 600;
+    }
+    .room-chip-checkbox:checked + .room-chip-label .room-type-tag {
+        background: rgba(255, 255, 255, 0.25) !important;
+        color: #ffffff !important;
+    }
+    .room-chip-checkbox:checked + .room-chip-label .chip-check-icon {
+        display: inline-block !important;
+    }
+
+    .room-type-tag {
+        font-size: 0.65rem;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.06);
+        color: var(--text-muted, #64748b);
+        font-weight: 600;
+    }
+    [data-theme="dark"] .room-type-tag,
+    [data-bs-theme="dark"] .room-type-tag {
+        background: #262626;
+        color: #a1a1aa;
+    }
+
+    /* Floor Block Card */
+    .floor-chip-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1.5px solid var(--border-color, #e2e8f0);
+        background: var(--bg-card, #ffffff);
+        color: var(--text-primary, #1e293b);
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        user-select: none;
+    }
+    [data-theme="dark"] .floor-chip-label,
+    [data-bs-theme="dark"] .floor-chip-label {
+        background: #181818;
+        border-color: #262626;
+        color: #f4f4f5;
+    }
+    .floor-chip-label:hover {
+        border-color: #3b82f6;
+        background: rgba(37, 99, 235, 0.05);
+    }
+    [data-theme="dark"] .floor-chip-label:hover,
+    [data-bs-theme="dark"] .floor-chip-label:hover {
+        border-color: #3b82f6;
+        background: #1e1e1e;
+    }
+    .floor-chip-checkbox:checked + .floor-chip-label {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #2563eb !important;
+    }
+    .floor-chip-checkbox:checked + .floor-chip-label .floor-count-tag {
+        background: rgba(255, 255, 255, 0.25) !important;
+        color: #ffffff !important;
+    }
+
+    .floor-count-tag {
+        font-size: 0.72rem;
+        padding: 2px 8px;
+        border-radius: 12px;
+        background: rgba(0, 0, 0, 0.06);
+        color: var(--text-muted, #64748b);
+        font-weight: 600;
+    }
+    [data-theme="dark"] .floor-count-tag,
+    [data-bs-theme="dark"] .floor-count-tag {
+        background: #262626;
+        color: #a1a1aa;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-link text-decoration-none ps-0 mb-3 text-muted">
-                <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-            </a>
-            
-            <h2 class="fw-bold mb-1">Book an Event</h2>
-            <p class="text-muted">Reserve multiple classrooms or entire floors for seminars, exams, or guest lectures.</p>
-            
-            <div class="event-booking-card">
-                <form id="eventBookingForm">
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Event Title <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control form-control-lg" id="eventTitle" required placeholder="e.g., Final Year Project Presentations">
+<div class="container py-3 py-md-4">
+    <div class="event-booking-wrapper">
+        <!-- Compact Top Navigation -->
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+            <div>
+                <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1.5 mb-2" style="font-size: 0.8rem;">
+                    <i class="bi bi-arrow-left"></i><span>Back to Dashboard</span>
+                </a>
+                <h4 class="fw-bold mb-0">Book an Event</h4>
+                <p class="text-muted small mb-0">Reserve classrooms or floor blocks for department seminars, exams, or guest lectures.</p>
+            </div>
+        </div>
+        
+        <!-- Main Form Card -->
+        <div class="event-booking-card">
+            <form id="eventBookingForm">
+                <!-- Section 1: Event Details -->
+                <div class="form-section-header">
+                    <i class="bi bi-card-text text-primary"></i>
+                    <span>1. Event Information</span>
+                </div>
+                
+                <div class="row g-3 mb-3">
+                    <div class="col-12">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="eventTitle">Event Title <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="eventTitle" required placeholder="e.g. Final Year Project Presentations">
                     </div>
-                    
-                    <div class="mb-4">
-                        <label class="form-label fw-semibold">Description (Optional)</label>
-                        <textarea class="form-control" id="eventDescription" rows="3" placeholder="Additional details for the admin review..."></textarea>
+                    <div class="col-12">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="eventDescription">Description (Optional)</label>
+                        <textarea class="form-control" id="eventDescription" rows="2" placeholder="Additional details or special requirements for administrative review..."></textarea>
                     </div>
+                </div>
 
-                    <h5 class="fw-bold mb-3 mt-5">Booking Scope</h5>
-                    <div class="booking-type-toggle">
-                        <div class="booking-type-btn active" data-type="rooms" id="btnTypeRooms">
-                            <i class="bi bi-grid-3x3-gap me-2"></i>Individual Classrooms
-                        </div>
-                        <div class="booking-type-btn" data-type="floors" id="btnTypeFloors">
-                            <i class="bi bi-layers me-2"></i>Full Floor Block
-                        </div>
-                    </div>
-                    
-                    <input type="hidden" id="bookingType" value="rooms">
+                <!-- Section 2: Date & Time Schedule -->
+                <div class="form-section-header mt-4">
+                    <i class="bi bi-calendar-range text-primary"></i>
+                    <span>2. Schedule & Duration</span>
+                </div>
 
-                    <!-- Rooms Picker -->
-                    <div id="roomsPicker" class="mb-4">
-                        <label class="form-label fw-semibold">Select Target Rooms</label>
-                        <div class="d-flex flex-wrap" id="roomsListContainer">
+                <div class="row g-2.5 g-md-3 mb-3">
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="startDate">Start Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="startDate" required>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="startTime">Start Time <span class="text-danger">*</span></label>
+                        <input type="time" class="form-control" id="startTime" required>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="endDate">End Date <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control" id="endDate" required>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="endTime">End Time <span class="text-danger">*</span></label>
+                        <input type="time" class="form-control" id="endTime" required>
+                    </div>
+                </div>
+
+                <!-- Section 3: Booking Scope & Target Selection -->
+                <div class="form-section-header mt-4">
+                    <i class="bi bi-building text-primary"></i>
+                    <span>3. Target Spaces</span>
+                </div>
+
+                <div class="scope-toggle-group mb-3">
+                    <button type="button" class="scope-toggle-btn active" data-type="rooms" id="btnTypeRooms">
+                        <i class="bi bi-grid-3x3-gap"></i><span>Individual Classrooms</span>
+                    </button>
+                    <button type="button" class="scope-toggle-btn" data-type="floors" id="btnTypeFloors">
+                        <i class="bi bi-layers"></i><span>Full Floor Block</span>
+                    </button>
+                </div>
+                
+                <input type="hidden" id="bookingType" value="rooms">
+
+                <!-- Space Selection: Individual Rooms Picker -->
+                <div id="roomsPicker">
+                    <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-1.5 flex-wrap" id="floorFilterGroup">
+                            <button type="button" class="floor-filter-pill active" data-filter="all">All Floors</button>
                             {% for floor in floors %}
-                                <div class="w-100 mt-2 mb-1"><small class="text-muted fw-bold">{{ floor.name }}</small></div>
+                                <button type="button" class="floor-filter-pill" data-filter="{{ floor.level }}">
+                                    {{ floor.name }}
+                                </button>
+                            {% endfor %}
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1" id="roomsCountBadge" style="font-size: 0.72rem;">
+                                0 Rooms Selected
+                            </span>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 text-muted" id="btnSelectAllRooms" style="font-size: 0.75rem;">Select All</button>
+                            <span class="text-muted small">•</span>
+                            <button type="button" class="btn btn-sm btn-link text-decoration-none p-0 text-muted" id="btnClearRooms" style="font-size: 0.75rem;">Clear</button>
+                        </div>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control border-start-0 ps-0" id="roomSearchInput" placeholder="Filter room number (e.g. 101, 205, MR10)...">
+                        </div>
+                    </div>
+
+                    <div class="rooms-scroll-panel" id="roomsListContainer">
+                        <div class="row g-1.5">
+                            {% for floor in floors %}
                                 {% for room in floor.rooms %}
-                                    <input type="checkbox" class="room-badge-checkbox room-checkbox" id="room_{{ room.id }}" value="{{ room.id }}">
-                                    <label class="room-badge-label" for="room_{{ room.id }}">{{ room.number }}</label>
+                                    {% set is_utility = room.room_type in ['washroom', 'storage', 'kitchen', 'bar'] or 'lift' in (room.number|lower) or 'washroom' in (room.number|lower) %}
+                                    {% if not is_utility %}
+                                        {% set room_type_label = 'Lab' if room.room_type == 'lab' else ('Conf' if 'conf' in room.room_type or 'conf' in (room.name or '')|lower else ('Meeting' if 'meet' in room.room_type or 'mr' in (room.number|lower) else 'Class')) %}
+                                        <div class="col-6 col-sm-4 col-md-3 room-item-wrapper" data-floor="{{ floor.level }}" data-room-num="{{ room.number|lower }}">
+                                            <input type="checkbox" class="room-chip-checkbox room-checkbox" id="room_{{ room.id }}" value="{{ room.id }}">
+                                            <label class="room-chip-label" for="room_{{ room.id }}" title="{{ room.name or room.number }} - {{ floor.name }}">
+                                                <span class="font-monospace fw-bold">{{ room.number }}</span>
+                                                <div class="d-flex align-items-center gap-1">
+                                                    <span class="room-type-tag">{{ room_type_label }}</span>
+                                                    <i class="bi bi-check-lg chip-check-icon d-none" style="font-size: 0.8rem;"></i>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    {% endif %}
                                 {% endfor %}
                             {% endfor %}
                         </div>
                     </div>
+                </div>
 
-                    <!-- Floors Picker -->
-                    <div id="floorsPicker" class="mb-4 d-none">
-                        <label class="form-label fw-semibold">Select Target Floors</label>
-                        <div class="d-flex flex-wrap">
-                            {% for floor in floors %}
-                                <input type="checkbox" class="room-badge-checkbox floor-checkbox" id="floor_{{ floor.level }}" value="{{ floor.level }}">
-                                <label class="room-badge-label px-4 py-2" for="floor_{{ floor.level }}">{{ floor.name }}</label>
-                            {% endfor %}
-                        </div>
+                <!-- Space Selection: Floors Picker -->
+                <div id="floorsPicker" class="d-none">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted small">Select entire floors for large-scale bookings:</span>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1" id="floorsCountBadge" style="font-size: 0.72rem;">
+                            0 Floors Selected
+                        </span>
                     </div>
+                    <div class="row g-2">
+                        {% for floor in floors %}
+                            <div class="col-sm-6 col-md-4">
+                                <input type="checkbox" class="floor-chip-checkbox floor-checkbox" id="floor_{{ floor.level }}" value="{{ floor.level }}">
+                                <label class="floor-chip-label" for="floor_{{ floor.level }}">
+                                    <span>{{ floor.name }}</span>
+                                    <span class="floor-count-tag">{{ floor.rooms|length }} Spaces</span>
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
 
-                    <h5 class="fw-bold mb-3 mt-5">Date & Time</h5>
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Start Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="startDate" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">End Date <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control" id="endDate" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">Start Time <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" id="startTime" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold">End Time <span class="text-danger">*</span></label>
-                            <input type="time" class="form-control" id="endTime" required>
-                        </div>
-                    </div>
+                <!-- Validation Alerts -->
+                <div class="alert alert-danger py-2 px-3 small d-flex align-items-center gap-2 mt-3 d-none" id="dateErrorAlert" style="border-radius: 8px;">
+                    <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                    <span id="dateErrorMsg">Invalid date/time selection.</span>
+                </div>
 
-                    <div class="alert alert-warning d-none" id="dateErrorAlert">
-                        <i class="bi bi-exclamation-triangle me-2"></i><span id="dateErrorMsg">Invalid date/time combination.</span>
-                    </div>
-
-                    <div class="d-grid mt-5">
-                        <button type="submit" class="btn btn-primary btn-lg rounded-pill" id="btnSubmitEvent">
-                            <span class="btn-text">Submit Event for Review</span>
-                            <span class="spinner-border spinner-border-sm d-none ms-2" role="status" aria-hidden="true"></span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <!-- Submit Button -->
+                <div class="d-flex align-items-center justify-content-end gap-2.5 mt-4 pt-2 border-top border-secondary border-opacity-10">
+                    <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-outline-secondary px-3 py-2 rounded-3" style="font-size: 0.85rem;">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-bold shadow-sm d-inline-flex align-items-center gap-2" id="btnSubmitEvent" style="font-size: 0.88rem;">
+                        <i class="bi bi-calendar2-check-fill"></i>
+                        <span class="btn-text">Submit Event for Review</span>
+                        <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const btnRooms = document.getElementById('btnTypeRooms');
@@ -176,9 +478,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set min date to today
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('startDate').min = today;
-    document.getElementById('endDate').min = today;
+    const startDateInput = document.getElementById('startDate');
+    const endDateInput = document.getElementById('endDate');
+    if (startDateInput) startDateInput.min = today;
+    if (endDateInput) endDateInput.min = today;
     
+    // Scope Toggles
     btnRooms.addEventListener('click', () => {
         btnRooms.classList.add('active');
         btnFloors.classList.remove('active');
@@ -194,7 +499,80 @@ document.addEventListener('DOMContentLoaded', () => {
         floorsPicker.classList.remove('d-none');
         roomsPicker.classList.add('d-none');
     });
+
+    // Floor Filter Pills for Room Selection
+    const filterPills = document.querySelectorAll('.floor-filter-pill');
+    const roomItems = document.querySelectorAll('.room-item-wrapper');
+    const roomSearchInput = document.getElementById('roomSearchInput');
+
+    const filterRooms = () => {
+        const activePill = document.querySelector('.floor-filter-pill.active');
+        const filterVal = activePill ? activePill.getAttribute('data-filter') : 'all';
+        const searchVal = roomSearchInput ? roomSearchInput.value.trim().toLowerCase() : '';
+
+        roomItems.forEach(item => {
+            const floor = item.getAttribute('data-floor');
+            const roomNum = item.getAttribute('data-room-num');
+            const matchesFloor = (filterVal === 'all' || floor === filterVal);
+            const matchesSearch = (!searchVal || roomNum.includes(searchVal));
+
+            if (matchesFloor && matchesSearch) {
+                item.classList.remove('d-none');
+            } else {
+                item.classList.add('d-none');
+            }
+        });
+    };
+
+    filterPills.forEach(pill => {
+        pill.addEventListener('click', () => {
+            filterPills.forEach(p => p.classList.remove('active'));
+            pill.classList.add('active');
+            filterRooms();
+        });
+    });
+
+    if (roomSearchInput) {
+        roomSearchInput.addEventListener('input', filterRooms);
+    }
+
+    // Selected Rooms & Floors Counter
+    const updateSelectedCount = () => {
+        const checkedRooms = document.querySelectorAll('.room-checkbox:checked').length;
+        const roomsBadge = document.getElementById('roomsCountBadge');
+        if (roomsBadge) roomsBadge.textContent = `${checkedRooms} Room${checkedRooms === 1 ? '' : 's'} Selected`;
+
+        const checkedFloors = document.querySelectorAll('.floor-checkbox:checked').length;
+        const floorsBadge = document.getElementById('floorsCountBadge');
+        if (floorsBadge) floorsBadge.textContent = `${checkedFloors} Floor${checkedFloors === 1 ? '' : 's'} Selected`;
+    };
+
+    document.querySelectorAll('.room-checkbox').forEach(cb => cb.addEventListener('change', updateSelectedCount));
+    document.querySelectorAll('.floor-checkbox').forEach(cb => cb.addEventListener('change', updateSelectedCount));
+
+    // Select All / Clear Visible Rooms
+    const btnSelectAllRooms = document.getElementById('btnSelectAllRooms');
+    const btnClearRooms = document.getElementById('btnClearRooms');
+
+    if (btnSelectAllRooms) {
+        btnSelectAllRooms.addEventListener('click', () => {
+            document.querySelectorAll('.room-item-wrapper:not(.d-none) .room-checkbox').forEach(cb => {
+                cb.checked = true;
+            });
+            updateSelectedCount();
+        });
+    }
+
+    if (btnClearRooms) {
+        btnClearRooms.addEventListener('click', () => {
+            document.querySelectorAll('.room-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+            updateSelectedCount();
+        });
+    }
     
+    // Form Submission
     document.getElementById('eventBookingForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -225,13 +603,13 @@ document.addEventListener('DOMContentLoaded', () => {
         
         let targetIds = [];
         if (bType === 'rooms') {
-            document.querySelectorAll('#roomsPicker .room-checkbox:checked').forEach(cb => targetIds.push(parseInt(cb.value)));
+            document.querySelectorAll('#roomsPicker .room-checkbox:checked').forEach(cb => targetIds.push(parseInt(cb.value, 10)));
         } else {
-            document.querySelectorAll('#floorsPicker .floor-checkbox:checked').forEach(cb => targetIds.push(parseInt(cb.value)));
+            document.querySelectorAll('#floorsPicker .floor-checkbox:checked').forEach(cb => targetIds.push(parseInt(cb.value, 10)));
         }
         
         if (targetIds.length === 0) {
-            dateErrorMsg.textContent = "Please select at least one target room or floor.";
+            dateErrorMsg.textContent = "Please select at least one target classroom or floor.";
             dateErrorAlert.classList.remove('d-none');
             return;
         }
@@ -241,10 +619,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const btnText = btnSubmit.querySelector('.btn-text');
         
         btnSubmit.disabled = true;
-        spinner.classList.remove('d-none');
-        btnText.textContent = "Validating...";
-        
-        gsap.to(btnSubmit, {scale: 0.95, duration: 0.2});
+        if (spinner) spinner.classList.remove('d-none');
+        if (btnText) btnText.textContent = "Submitting Event...";
         
         try {
             const res = await fetch('/faculty/events/book', {
@@ -263,26 +639,23 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const result = await res.json();
             if (res.ok && result.success) {
-                gsap.to(btnSubmit, {scale: 1, duration: 0.2});
-                btnText.textContent = "Success!";
-                spinner.classList.add('d-none');
+                if (btnText) btnText.textContent = "Submitted Successfully!";
+                if (spinner) spinner.classList.add('d-none');
                 btnSubmit.classList.replace('btn-primary', 'btn-success');
                 
                 setTimeout(() => {
                     window.location.href = '/faculty/dashboard';
-                }, 1500);
+                }, 1200);
             } else {
                 throw new Error(result.error || "Conflict detected or unknown error");
             }
         } catch (err) {
-            gsap.to(btnSubmit, {scale: 1, duration: 0.2});
             btnSubmit.disabled = false;
-            spinner.classList.add('d-none');
-            btnText.textContent = "Submit Event for Review";
+            if (spinner) spinner.classList.add('d-none');
+            if (btnText) btnText.textContent = "Submit Event for Review";
             
             dateErrorMsg.textContent = err.message;
             dateErrorAlert.classList.remove('d-none');
-            gsap.fromTo(dateErrorAlert, {y: -10, opacity: 0}, {y: 0, opacity: 1, duration: 0.3});
         }
     });
 });

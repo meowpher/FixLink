@@ -1,7 +1,7 @@
 """
 Faculty Routes Blueprint - Smart Room Scheduling
 """
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import logging
 from flask import Blueprint, render_template, request, jsonify, session
 from sqlalchemy import or_
@@ -13,6 +13,15 @@ from ...api_utils import handle_api_errors, api_response
 from ...realtime import emit_room_status_change, emit_faculty_nudge
 
 logger = logging.getLogger(__name__)
+
+IST = timezone(timedelta(hours=5, minutes=30))
+
+def to_ist(dt):
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc).astimezone(IST)
+    return dt.astimezone(IST)
 
 faculty_bp = Blueprint('faculty', __name__)
 
@@ -54,8 +63,6 @@ def dashboard():
     # 3. Booking History (Paginated)
     page = request.args.get('page', 1, type=int)
     per_page = 10
-    import pytz
-    IST = pytz.timezone('Asia/Kolkata')
     now_ist = datetime.now(IST)
     history_pagination = RoomBooking.query.filter_by(
         faculty_id=faculty.id
@@ -64,7 +71,7 @@ def dashboard():
     for b in history_pagination.items:
         slot_end_dt = b.slot_end
         if slot_end_dt:
-            slot_end_ist = IST.localize(slot_end_dt) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
+            slot_end_ist = to_ist(slot_end_dt)
             b.is_historical = slot_end_ist < now_ist
         else:
             b.is_historical = False
@@ -101,12 +108,31 @@ def dashboard():
         NoShowStrike.created_at >= cutoff_30d
     ).count()
 
+    # Meeting & Conference Rooms (Ground Floor Level 0 & 6th Floor Level 6)
+    target_floors = Floor.query.filter(Floor.level.in_([0, 6])).all()
+    target_floor_ids = [f.id for f in target_floors]
+    meeting_rooms = Room.query.filter(
+        Room.floor_id.in_(target_floor_ids),
+        or_(
+            Room.room_type.in_([Room.ROOM_TYPE_CONFERENCE, Room.ROOM_TYPE_MEETING, 'conference', 'meeting', 'conference_room', 'meeting_room']),
+            Room.number.ilike('MR%'),
+            Room.name.ilike('%conference%'),
+            Room.name.ilike('%meeting%')
+        )
+    ).options(
+        joinedload(Room.floor),
+        joinedload(Room.timetables),
+        joinedload(Room.adhoc_bookings),
+        joinedload(Room.room_bookings)
+    ).order_by(Room.floor_id, Room.number).all()
+
     return render_template('faculty/dashboard.html',
                            faculty=faculty,
                            floors=floors,
                            all_rooms=all_rooms,
                            all_faculties=all_faculties,
                            rooms_by_floor=rooms_by_floor,
+                           meeting_rooms=meeting_rooms,
                            my_schedules=my_schedules,
                            my_adhoc=my_adhoc,
                            my_events=my_events,
@@ -288,9 +314,16 @@ def create_booking():
         slot_start = datetime.fromisoformat(slot_iso.replace('Z', ''))
         # Normalize to the beginning of the hour
         slot_start = slot_start.replace(minute=0, second=0, microsecond=0)
-        duration_hours = int(data.get('duration', 1))
-        if duration_hours > 2:
-            return api_response(success=False, error="Maximum booking duration is 2 hours.", status=400)
+        room = db.session.get(Room, room_id)
+        is_meeting_or_conf = room and room.floor and room.floor.level in [0, 6] and (
+            room.room_type in [Room.ROOM_TYPE_CONFERENCE, Room.ROOM_TYPE_MEETING, 'conference', 'meeting', 'conference_room', 'meeting_room'] or
+            room.number.upper().startswith('MR') or
+            'conference' in (room.name or '').lower() or
+            'meeting' in (room.name or '').lower()
+        )
+        max_duration = 4 if is_meeting_or_conf else 2
+        if duration_hours > max_duration:
+            return api_response(success=False, error=f"Maximum booking duration for this room is {max_duration} hour(s).", status=400)
         
         booking_date = slot_start.date()
         current_day = slot_start.weekday()
@@ -347,6 +380,227 @@ def create_booking():
         return api_response(success=True, message=f"Successfully reserved for {duration_hours} hour(s).")
     except ValueError:
         return api_response(success=False, error="Invalid date/time format.", status=400)
+
+
+@faculty_bp.route('/api/meeting-rooms', methods=['GET'])
+@faculty_login_required
+@handle_api_errors
+def get_meeting_rooms():
+    """Returns all available meeting and conference rooms located on Ground Floor (0) and 6th Floor (6)."""
+    target_floors = Floor.query.filter(Floor.level.in_([0, 6])).all()
+    target_floor_ids = [f.id for f in target_floors]
+    rooms = Room.query.filter(
+        Room.floor_id.in_(target_floor_ids),
+        or_(
+            Room.room_type.in_([Room.ROOM_TYPE_CONFERENCE, Room.ROOM_TYPE_MEETING, 'conference', 'meeting', 'conference_room', 'meeting_room']),
+            Room.number.ilike('MR%'),
+            Room.name.ilike('%conference%'),
+            Room.name.ilike('%meeting%')
+        )
+    ).options(
+        joinedload(Room.floor),
+        joinedload(Room.timetables),
+        joinedload(Room.adhoc_bookings),
+        joinedload(Room.room_bookings)
+    ).order_by(Room.floor_id, Room.number).all()
+
+    rooms_data = []
+    for r in rooms:
+        occ = r.current_occupancy_status
+        rooms_data.append({
+            'id': r.id,
+            'number': r.number,
+            'name': r.name or f"Room {r.number}",
+            'room_type': r.room_type,
+            'floor_id': r.floor_id,
+            'floor_level': r.floor.level if r.floor else None,
+            'floor_name': r.floor.name if r.floor else f"Level {r.floor.level}",
+            'occupancy': occ
+        })
+    return api_response(data={'rooms': rooms_data})
+
+
+@faculty_bp.route('/api/meeting-rooms/book', methods=['POST'])
+@faculty_login_required
+@handle_api_errors
+def book_meeting_room():
+    """Book or claim a meeting/conference room on Ground (0) or 6th (6) floor with 1 to 4 hours duration."""
+    data = request.get_json() or {}
+    room_id = data.get('room_id')
+    booking_type = data.get('booking_type', 'instant')  # 'instant' or 'scheduled'
+    duration_hours = data.get('duration_hours')
+    
+    if duration_hours is None and data.get('duration_mins') is not None:
+        try:
+            duration_hours = int(data.get('duration_mins')) // 60
+        except (ValueError, TypeError):
+            duration_hours = 1
+            
+    try:
+        duration_hours = int(duration_hours if duration_hours is not None else 1)
+    except (ValueError, TypeError):
+        return api_response(success=False, error="Invalid duration. Duration must be between 1 and 4 hours.", status=400)
+
+    if duration_hours < 1 or duration_hours > 4:
+        return api_response(success=False, error="Meeting and conference room bookings must be between 1 hour minimum and 4 hours maximum.", status=400)
+
+    duration_mins = duration_hours * 60
+    subject = (data.get('subject') or 'Meeting / Conference Discussion').strip()
+    BUFFER_MINUTES = 15
+
+    if not room_id:
+        return api_response(success=False, error="Room selection is required.", status=400)
+
+    room = Room.query.options(
+        joinedload(Room.floor),
+        joinedload(Room.timetables),
+        joinedload(Room.adhoc_bookings),
+        joinedload(Room.room_bookings)
+    ).filter_by(id=room_id).first_or_404()
+
+    # Verify room is eligible (Ground or 6th floor meeting/conference room)
+    if not (room.floor and room.floor.level in [0, 6]):
+        return api_response(success=False, error="Meeting room bookings are only allowed for rooms on the Ground Floor (Level 0) and 6th Floor (Level 6).", status=400)
+
+    is_meeting_or_conf = (
+        room.room_type in [Room.ROOM_TYPE_CONFERENCE, Room.ROOM_TYPE_MEETING, 'conference', 'meeting', 'conference_room', 'meeting_room'] or
+        room.number.upper().startswith('MR') or
+        'conference' in (room.name or '').lower() or
+        'meeting' in (room.name or '').lower()
+    )
+    if not is_meeting_or_conf:
+        return api_response(success=False, error="The selected room is not classified as a Meeting Room or Conference Room.", status=400)
+
+    user_id = session.get('user_id')
+    faculty = db.session.get(User, user_id)
+
+    # Check Ghost Protocol 3-Strike Lockout
+    if faculty and faculty.is_adhoc_suspended:
+        suspended_until_str = faculty.adhoc_suspended_until.strftime('%b %d, %Y at %I:%M %p')
+        return api_response(
+            success=False,
+            error=f"Booking privileges are temporarily suspended until {suspended_until_str} ({faculty.suspension_remaining_str}) due to 3 unconfirmed no-shows under Ghost Protocol.",
+            status=403
+        )
+
+    if booking_type == 'instant':
+        # 1. Check if room is vacant right now
+        status_info = room.current_occupancy_status
+        if status_info['status'] == 'occupied':
+            return api_response(success=False, error=f"Room is currently occupied by {status_info.get('faculty')} for {status_info.get('subject')}.", status=400)
+
+        start_utc = datetime.utcnow()
+        end_utc = start_utc + timedelta(minutes=duration_mins)
+        current_dt = start_utc + timedelta(hours=5, minutes=30)
+        current_day = current_dt.weekday()
+        end_dt_ist = end_utc + timedelta(hours=5, minutes=30)
+
+        # Check transition dead zone (15 min buffer from prior adhoc)
+        recent_adhoc = AdHocBooking.query.filter(
+            AdHocBooking.room_id == room.id,
+            AdHocBooking.end_datetime <= start_utc,
+            AdHocBooking.end_datetime + timedelta(minutes=BUFFER_MINUTES) > start_utc
+        ).first()
+        if recent_adhoc:
+            buf_until = (recent_adhoc.end_datetime + timedelta(hours=5, minutes=30+BUFFER_MINUTES)).strftime('%I:%M %p')
+            return api_response(success=False, error=f"Room is currently in a 15-minute physical transition dead-zone until {buf_until}.", status=400)
+
+        # Check timetable conflicts
+        for sched in room.timetables:
+            if sched.day_of_week == current_day:
+                sched_start = datetime.combine(current_dt.date(), sched.start_time)
+                sched_end = datetime.combine(current_dt.date(), sched.end_time)
+                if sched_end <= current_dt < sched_end + timedelta(minutes=BUFFER_MINUTES):
+                    buf_until = (sched_end + timedelta(minutes=BUFFER_MINUTES)).strftime('%I:%M %p')
+                    return api_response(success=False, error=f"Room is in a 15-minute transition buffer following {sched.subject} until {buf_until}.", status=400)
+                if current_dt < sched_start < end_dt_ist + timedelta(minutes=BUFFER_MINUTES):
+                    return api_response(success=False, error=f"Time conflict: scheduled class for {sched.subject} starts at {sched.start_time.strftime('%I:%M %p')}.", status=400)
+
+        # Check future active RoomBooking / AdHocBooking overlapping with requested duration
+        overlap_adhoc = AdHocBooking.query.filter(
+            AdHocBooking.room_id == room.id,
+            AdHocBooking.end_datetime > start_utc,
+            AdHocBooking.start_datetime < end_utc
+        ).first()
+        if overlap_adhoc:
+            return api_response(success=False, error=f"Conflict detected: another session ({overlap_adhoc.subject}) overlaps with the requested duration.", status=400)
+
+        booking = AdHocBooking(
+            room_id=room.id,
+            faculty_id=user_id,
+            subject=subject,
+            start_datetime=start_utc,
+            end_datetime=end_utc,
+            checked_in=True,
+            checked_in_at=datetime.utcnow()
+        )
+        db.session.add(booking)
+        db.session.commit()
+
+        emit_room_status_change(room, {
+            'status': 'occupied',
+            'type': 'adhoc',
+            'subject': subject,
+            'faculty': faculty.name if faculty else 'Faculty',
+            'end_time': end_dt_ist.strftime('%I:%M %p')
+        })
+
+        return api_response(success=True, message=f"Meeting Room {room.number} ({room.name or 'Conference/Meeting'}) successfully claimed for {duration_hours} hour(s) until {end_dt_ist.strftime('%I:%M %p')}.")
+
+    else:
+        # Scheduled slot booking
+        slot_iso = data.get('slot_start')
+        if not slot_iso:
+            return api_response(success=False, error="Reservation date and start time are required.", status=400)
+        try:
+            slot_start = datetime.fromisoformat(slot_iso.replace('Z', ''))
+            slot_start = slot_start.replace(minute=0, second=0, microsecond=0)
+        except ValueError:
+            return api_response(success=False, error="Invalid date/time format.", status=400)
+
+        booking_date = slot_start.date()
+        current_day = slot_start.weekday()
+
+        for i in range(duration_hours):
+            current_slot = slot_start + timedelta(hours=i)
+            slot_start_time = current_slot.time()
+            slot_end_time = (current_slot + timedelta(hours=1)).time()
+
+            existing_booking = RoomBooking.query.filter(
+                RoomBooking.room_id == room.id,
+                RoomBooking.date == booking_date,
+                RoomBooking.status == RoomBooking.STATUS_ACTIVE,
+                RoomBooking.slot_start < current_slot + timedelta(hours=1),
+                RoomBooking.slot_start >= current_slot
+            ).first()
+            if existing_booking:
+                return api_response(success=False, error=f"Room is already booked for the {current_slot.strftime('%I:%M %p')} slot.", status=400)
+
+            existing_timetable = Timetable.query.filter(
+                Timetable.room_id == room.id,
+                Timetable.day_of_week == current_day,
+                Timetable.start_time < slot_end_time,
+                Timetable.end_time > slot_start_time
+            ).first()
+            if existing_timetable:
+                return api_response(success=False, error=f"Conflict with regular schedule: {existing_timetable.subject}.", status=400)
+
+        for i in range(duration_hours):
+            rb = RoomBooking(
+                room_id=room.id,
+                faculty_id=user_id,
+                date=booking_date,
+                slot_start=slot_start + timedelta(hours=i),
+                subject=subject,
+                division=data.get('division', ''),
+                course=data.get('course', '')
+            )
+            db.session.add(rb)
+        db.session.commit()
+
+        emit_room_status_change(room, room.current_occupancy_status)
+        return api_response(success=True, message=f"Meeting Room {room.number} ({room.name or 'Conference/Meeting'}) successfully scheduled for {duration_hours} hour(s) on {slot_start.strftime('%b %d at %I:%M %p')}.")
+
 
 @faculty_bp.route('/api/map/status_for_time', methods=['POST'])
 @faculty_login_required
@@ -608,24 +862,46 @@ def nudge_faculty(room_id):
 
 
 @faculty_bp.route('/api/bookings/cancel/<int:booking_id>', methods=['POST'])
+@faculty_bp.route('/api/adhoc/cancel/<int:booking_id>', methods=['POST'])
+@faculty_bp.route('/api/adhoc/<int:booking_id>/cancel', methods=['POST'])
 @faculty_login_required
 @handle_api_errors
 def cancel_booking(booking_id):
-    """Cancels a faculty booking if they are the owner and not historical."""
-    import pytz
-    IST = pytz.timezone('Asia/Kolkata')
+    """Cancels a faculty booking (RoomBooking or AdHocBooking) if they are the owner and not historical."""
     now_ist = datetime.now(IST)
-
-    booking = RoomBooking.query.get_or_404(booking_id)
     user_id = session.get('user_id')
+
+    # Determine if specifically adhoc based on route or request payload/params
+    is_adhoc_request = '/adhoc' in request.path or request.args.get('type') == 'adhoc'
+    if request.is_json and request.json and request.json.get('type') == 'adhoc':
+        is_adhoc_request = True
+
+    booking = None
+    is_adhoc = False
+
+    if is_adhoc_request:
+        booking = AdHocBooking.query.get(booking_id)
+        if booking:
+            is_adhoc = True
+        else:
+            booking = RoomBooking.query.get(booking_id)
+    else:
+        booking = RoomBooking.query.get(booking_id)
+        if not booking:
+            booking = AdHocBooking.query.get(booking_id)
+            if booking:
+                is_adhoc = True
+
+    if not booking:
+        return api_response(success=False, error="Reservation record not found.", status=404)
     
     if booking.faculty_id != user_id:
         return api_response(success=False, error="You can only cancel your own reservations.", status=403)
         
     # Timezone-aware past/historical rejection
-    slot_end_dt = booking.slot_end
+    slot_end_dt = getattr(booking, 'slot_end', None) or getattr(booking, 'end_datetime', None)
     if slot_end_dt:
-        slot_end_ist = IST.localize(slot_end_dt) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
+        slot_end_ist = to_ist(slot_end_dt)
         if slot_end_ist < now_ist:
             return api_response(
                 success=False,
@@ -633,14 +909,19 @@ def cancel_booking(booking_id):
                 status=400
             )
 
-    booking.status = RoomBooking.STATUS_CANCELLED
+    room = booking.room
+    if is_adhoc:
+        db.session.delete(booking)
+    else:
+        booking.status = RoomBooking.STATUS_CANCELLED
+        
     db.session.commit()
     
     # Update map for everyone
-    if booking.room:
-        emit_room_status_change(booking.room, booking.room.current_occupancy_status)
+    if room:
+        emit_room_status_change(room, room.current_occupancy_status)
     
-    return api_response(success=True, message="Reservation cancelled successfully.")
+    return api_response(success=True, message="Reservation deleted successfully." if is_adhoc else "Reservation cancelled successfully.")
 
 
 @faculty_bp.route('/api/bookings/<int:booking_id>/check_in', methods=['POST'])
@@ -653,8 +934,6 @@ def check_in_booking(booking_id):
     Check-In endpoint for Ad-Hoc and Slot bookings (Phase 5 Ghost Protocol).
     Secures the room reservation and marks the session as active and present.
     """
-    import pytz
-    IST = pytz.timezone('Asia/Kolkata')
     now_ist = datetime.now(IST)
 
     user_id = session.get('user_id')
@@ -676,7 +955,7 @@ def check_in_booking(booking_id):
     # Timezone-aware check: Cannot check into past/historical sessions
     slot_end_dt = getattr(booking, 'slot_end', None) or getattr(booking, 'end_datetime', None)
     if slot_end_dt:
-        slot_end_ist = IST.localize(slot_end_dt) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
+        slot_end_ist = to_ist(slot_end_dt)
         if slot_end_ist < now_ist:
             return api_response(
                 success=False,
@@ -713,8 +992,6 @@ def get_slot_detail_api(slot_id):
     Returns enriched, timezone-aware SlotDetail payload for modal / card inspection.
     Flags is_historical strictly based on IST datetime comparison.
     """
-    import pytz
-    IST = pytz.timezone('Asia/Kolkata')
     now_ist = datetime.now(IST)
 
     booking = RoomBooking.query.get(slot_id)
@@ -726,7 +1003,7 @@ def get_slot_detail_api(slot_id):
 
     slot_end_dt = getattr(booking, 'slot_end', None) or getattr(booking, 'end_datetime', None)
     if slot_end_dt:
-        slot_end_ist = IST.localize(slot_end_dt) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
+        slot_end_ist = to_ist(slot_end_dt)
         is_historical = slot_end_ist < now_ist
     else:
         is_historical = False
@@ -760,8 +1037,6 @@ def get_booking_history_api():
     """
     Returns server-side paginated booking history (limit=20) with timezone-aware is_historical flags.
     """
-    import pytz
-    IST = pytz.timezone('Asia/Kolkata')
     now_ist = datetime.now(IST)
 
     user_id = session.get('user_id')
@@ -777,7 +1052,7 @@ def get_booking_history_api():
         d = b.to_dict()
         slot_end_dt = b.slot_end
         if slot_end_dt:
-            slot_end_ist = IST.localize(slot_end_dt) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
+            slot_end_ist = to_ist(slot_end_dt)
             d['is_historical'] = slot_end_ist < now_ist
         else:
             d['is_historical'] = False

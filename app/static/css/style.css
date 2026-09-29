@@ -7535,23 +7535,26 @@ select:-webkit-autofill:active {
     box-shadow: none !important;
 }
 
-/* Override any inline styles or specific JS classes for dots */
+/* Dark mode status dots with rich, vibrant indicator colors */
 [data-theme="dark"] .dot.available,
-[data-theme="dark"] .dot.occupied,
-[data-theme="dark"] .dot.selected {
-    background-color: var(--surface) !important;
-    border: 2px solid var(--ice-hint) !important;
-    box-shadow: none !important;
+[data-bs-theme="dark"] .dot.available {
+    background-color: #10b981 !important;
+    border: none !important;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.55) !important;
 }
 
-/* Fix for inline styled elements in Map Legend */
-[data-theme="dark"] [style*="background-color: #28a745"],
-[data-theme="dark"] [style*="background-color: #ffc107"],
-[data-theme="dark"] [style*="background-color: #007bff"],
-[data-theme="dark"] [style*="background-color: #dc3545"],
-[data-theme="dark"] [style*="background-color: #20c997"] {
-    background-color: var(--surface) !important;
-    border: 2px solid var(--ice-hint) !important;
+[data-theme="dark"] .dot.occupied,
+[data-bs-theme="dark"] .dot.occupied {
+    background-color: #ef4444 !important;
+    border: none !important;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.45) !important;
+}
+
+[data-theme="dark"] .dot.selected,
+[data-bs-theme="dark"] .dot.selected {
+    background-color: #3b82f6 !important;
+    border: none !important;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.55) !important;
 }
 
 /* ============================================

@@ -118,38 +118,133 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
 
-    /* Floor Filter Pills */
-    .floor-filter-pill {
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 4px 10px;
-        border-radius: 20px;
-        border: 1px solid var(--border-color, #e2e8f0);
-        background: var(--bg-main, #f8fafc);
-        color: var(--text-muted, #64748b);
-        cursor: pointer;
-        transition: all 0.18s ease;
+    /* Custom Dropdown Common Styles */
+    .custom-dropdown-container {
+        position: relative;
+        user-select: none;
     }
-    [data-theme="dark"] .floor-filter-pill,
-    [data-bs-theme="dark"] .floor-filter-pill {
-        background: #181818;
-        border-color: #262626;
-        color: #a1a1aa;
-    }
-    .floor-filter-pill:hover {
-        background: var(--border-color, #e2e8f0);
+    .custom-dropdown-trigger {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        height: 38px;
+        padding: 0.4rem 0.85rem;
+        background: var(--bg-card, #ffffff);
+        border: 1.5px solid var(--border-color, #cbd5e1);
+        border-radius: 10px;
+        font-size: 0.84rem;
+        font-weight: 500;
         color: var(--text-primary, #1e293b);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
     }
-    [data-theme="dark"] .floor-filter-pill:hover,
-    [data-bs-theme="dark"] .floor-filter-pill:hover {
-        background: #1e1e1e;
-        color: #f4f4f5;
-        border-color: #3f3f46;
+    .custom-dropdown-trigger .dropdown-selected-label {
+        display: inline-flex;
+        align-items: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
-    .floor-filter-pill.active {
-        background: #2563eb !important;
+    .custom-dropdown-trigger:hover,
+    .custom-dropdown-trigger:focus,
+    .custom-dropdown-container.open .custom-dropdown-trigger {
         border-color: #2563eb !important;
-        color: #ffffff !important;
+        background: var(--bg-card, #ffffff) !important;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+        outline: none;
+    }
+    .custom-dropdown-trigger .dropdown-caret {
+        transition: transform 0.2s ease;
+        color: var(--text-muted, #64748b);
+        font-size: 0.75rem;
+        flex-shrink: 0;
+        margin-left: 8px;
+    }
+    .custom-dropdown-container.open .custom-dropdown-trigger .dropdown-caret {
+        transform: rotate(180deg);
+        color: #2563eb;
+    }
+    .custom-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 6px);
+        left: 0;
+        right: 0;
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 12px;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12);
+        z-index: 1080;
+        padding: 6px;
+        display: none;
+        max-height: 230px;
+        overflow-y: auto;
+    }
+    .custom-dropdown-container.open .custom-dropdown-menu {
+        display: block;
+        animation: dropMenuFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes dropMenuFadeIn {
+        from { opacity: 0; transform: translateY(-6px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .custom-dropdown-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.55rem 0.75rem;
+        border-radius: 8px;
+        font-size: 0.84rem;
+        font-weight: 500;
+        color: var(--text-primary, #334155);
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+    .custom-dropdown-item:hover {
+        background: rgba(37, 99, 235, 0.08);
+        color: #2563eb;
+    }
+    .custom-dropdown-item.selected {
+        background: rgba(37, 99, 235, 0.12);
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    [data-theme="dark"] .custom-dropdown-trigger,
+    [data-bs-theme="dark"] .custom-dropdown-trigger {
+        background: #181818 !important;
+        border-color: #262626 !important;
+        color: #f4f4f5 !important;
+    }
+    [data-theme="dark"] .custom-dropdown-trigger:hover,
+    [data-theme="dark"] .custom-dropdown-trigger:focus,
+    [data-theme="dark"] .custom-dropdown-container.open .custom-dropdown-trigger,
+    [data-bs-theme="dark"] .custom-dropdown-trigger:hover,
+    [data-bs-theme="dark"] .custom-dropdown-trigger:focus,
+    [data-bs-theme="dark"] .custom-dropdown-container.open .custom-dropdown-trigger {
+        border-color: #3b82f6 !important;
+        background: #1e1e1e !important;
+    }
+    [data-theme="dark"] .custom-dropdown-menu,
+    [data-bs-theme="dark"] .custom-dropdown-menu {
+        background: #181818 !important;
+        border-color: #262626 !important;
+        box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7) !important;
+    }
+    [data-theme="dark"] .custom-dropdown-item,
+    [data-bs-theme="dark"] .custom-dropdown-item {
+        color: #d4d4d8 !important;
+    }
+    [data-theme="dark"] .custom-dropdown-item:hover,
+    [data-bs-theme="dark"] .custom-dropdown-item:hover {
+        background: #222222 !important;
+        color: #60a5fa !important;
+    }
+    [data-theme="dark"] .custom-dropdown-item.selected,
+    [data-bs-theme="dark"] .custom-dropdown-item.selected {
+        background: rgba(59, 130, 246, 0.2) !important;
+        color: #60a5fa !important;
     }
 
     /* Room Chips Grid */
@@ -294,18 +389,128 @@
         background: #262626;
         color: #a1a1aa;
     }
+
+    .back-icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: var(--bg-card, #ffffff);
+        border: 1.5px solid var(--border-color, #e2e8f0);
+        color: var(--text-primary, #334155);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        font-size: 1.15rem;
+    }
+    .back-icon-btn:hover {
+        background: rgba(37, 99, 235, 0.08);
+        border-color: #2563eb;
+        color: #2563eb;
+        transform: translateX(-2px);
+    }
+    [data-theme="dark"] .back-icon-btn,
+    [data-bs-theme="dark"] .back-icon-btn {
+        background: #181818;
+        border-color: #262626;
+        color: #f4f4f5;
+    }
+    [data-theme="dark"] .back-icon-btn:hover,
+    [data-bs-theme="dark"] .back-icon-btn:hover {
+        background: #222222;
+        border-color: #3b82f6;
+        color: #60a5fa;
+    }
+
+    /* Form Action Buttons (Pixel-Perfect Alignment) */
+    .form-action-btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 42px;
+        padding: 0 1.25rem;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        font-weight: 600;
+        line-height: 1;
+        border: 1.5px solid var(--border-color, #cbd5e1);
+        background: var(--bg-card, #ffffff);
+        color: var(--text-primary, #334155);
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+    }
+    .form-action-btn-cancel:hover {
+        background: rgba(0, 0, 0, 0.04);
+        border-color: #94a3b8;
+        color: var(--text-primary, #1e293b);
+    }
+    [data-theme="dark"] .form-action-btn-cancel,
+    [data-bs-theme="dark"] .form-action-btn-cancel {
+        background: #181818;
+        border-color: #262626;
+        color: #f4f4f5;
+    }
+    [data-theme="dark"] .form-action-btn-cancel:hover,
+    [data-bs-theme="dark"] .form-action-btn-cancel:hover {
+        background: #222222;
+        border-color: #3f3f46;
+        color: #ffffff;
+    }
+
+    .form-action-btn-submit {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        height: 42px;
+        padding: 0 1.5rem;
+        border-radius: 10px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        line-height: 1;
+        border: none;
+        background: var(--mitwpu-blue, #2563eb);
+        color: #ffffff;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+    .form-action-btn-submit:hover {
+        background: #1d4ed8;
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+        transform: translateY(-1px);
+        color: #ffffff;
+    }
+    .form-action-btn-submit:active {
+        transform: translateY(0);
+    }
+    .form-action-btn-submit i {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        line-height: 1;
+    }
+    .form-action-btn-submit .btn-text {
+        display: inline-flex;
+        align-items: center;
+        line-height: 1;
+    }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="container py-3 py-md-4">
     <div class="event-booking-wrapper">
-        <!-- Compact Top Navigation -->
-        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <!-- Header with Back Icon on Left -->
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <a href="{{ url_for('faculty.dashboard') }}" class="back-icon-btn flex-shrink-0" title="Back to Dashboard" aria-label="Back to Dashboard">
+                <i class="bi bi-arrow-left"></i>
+            </a>
             <div>
-                <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1.5 mb-2" style="font-size: 0.8rem;">
-                    <i class="bi bi-arrow-left"></i><span>Back to Dashboard</span>
-                </a>
                 <h4 class="fw-bold mb-0">Book an Event</h4>
                 <p class="text-muted small mb-0">Reserve classrooms or floor blocks for department seminars, exams, or guest lectures.</p>
             </div>
@@ -376,13 +581,26 @@
                 <!-- Space Selection: Individual Rooms Picker -->
                 <div id="roomsPicker">
                     <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
-                        <div class="d-flex align-items-center gap-1.5 flex-wrap" id="floorFilterGroup">
-                            <button type="button" class="floor-filter-pill active" data-filter="all">All Floors</button>
-                            {% for floor in floors %}
-                                <button type="button" class="floor-filter-pill" data-filter="{{ floor.level }}">
-                                    {{ floor.name }}
-                                </button>
-                            {% endfor %}
+                        <div class="custom-dropdown-container" id="floorFilterDropdownContainer" style="min-width: 175px;">
+                            <button type="button" class="custom-dropdown-trigger" id="floorFilterDropdownBtn" aria-expanded="false" style="height: 34px; padding: 0.35rem 0.85rem; border-radius: 10px; font-size: 0.82rem;">
+                                <span class="dropdown-selected-label" id="floorFilterSelectedDisplay">
+                                    <i class="bi bi-layers-fill text-primary me-1.5"></i>All Floors
+                                </span>
+                                <i class="bi bi-chevron-down dropdown-caret"></i>
+                            </button>
+                            <div class="custom-dropdown-menu" id="floorFilterDropdownMenu" style="min-width: 190px;">
+                                <div class="custom-dropdown-item selected" data-value="all" data-label="All Floors" data-icon="bi-layers-fill">
+                                    <span class="d-flex align-items-center"><i class="bi bi-layers-fill me-2 text-primary"></i>All Floors</span>
+                                    <i class="bi bi-check-lg item-check text-primary"></i>
+                                </div>
+                                {% for floor in floors %}
+                                <div class="custom-dropdown-item" data-value="{{ floor.level }}" data-label="{{ floor.name }}" data-icon="bi-layers">
+                                    <span class="d-flex align-items-center"><i class="bi bi-layers me-2 text-muted"></i>{{ floor.name }}</span>
+                                    <i class="bi bi-check-lg item-check text-primary d-none"></i>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <input type="hidden" id="selectedFloorFilter" value="all">
                         </div>
                         <div class="d-flex align-items-center gap-2">
                             <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1" id="roomsCountBadge" style="font-size: 0.72rem;">
@@ -394,15 +612,13 @@
                         </div>
                     </div>
 
-                    <div class="mb-2">
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                            <input type="text" class="form-control border-start-0 ps-0" id="roomSearchInput" placeholder="Filter room number (e.g. 101, 205, MR10)...">
-                        </div>
+                    <div class="position-relative mb-2">
+                        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="pointer-events: none; z-index: 5; font-size: 0.82rem;"></i>
+                        <input type="text" class="form-control" id="roomSearchInput" placeholder="Filter room number (e.g. 101, 205, MR10)..." style="padding-left: 2.25rem !important; height: 38px; font-size: 0.84rem; border-radius: 10px;">
                     </div>
 
                     <div class="rooms-scroll-panel" id="roomsListContainer">
-                        <div class="row g-1.5">
+                        <div class="row g-2">
                             {% for floor in floors %}
                                 {% for room in floor.rooms %}
                                     {% set is_utility = room.room_type in ['washroom', 'storage', 'kitchen', 'bar'] or 'lift' in (room.number|lower) or 'washroom' in (room.number|lower) %}
@@ -453,9 +669,9 @@
                 </div>
 
                 <!-- Submit Button -->
-                <div class="d-flex align-items-center justify-content-end gap-2.5 mt-4 pt-2 border-top border-secondary border-opacity-10">
-                    <a href="{{ url_for('faculty.dashboard') }}" class="btn btn-outline-secondary px-3 py-2 rounded-3" style="font-size: 0.85rem;">Cancel</a>
-                    <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-bold shadow-sm d-inline-flex align-items-center gap-2" id="btnSubmitEvent" style="font-size: 0.88rem;">
+                <div class="d-flex align-items-center justify-content-end gap-3 mt-4 pt-3 border-top border-secondary border-opacity-10">
+                    <a href="{{ url_for('faculty.dashboard') }}" class="form-action-btn-cancel">Cancel</a>
+                    <button type="submit" class="form-action-btn-submit" id="btnSubmitEvent">
                         <i class="bi bi-calendar2-check-fill"></i>
                         <span class="btn-text">Submit Event for Review</span>
                         <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
@@ -500,14 +716,17 @@ document.addEventListener('DOMContentLoaded', () => {
         roomsPicker.classList.add('d-none');
     });
 
-    // Floor Filter Pills for Room Selection
-    const filterPills = document.querySelectorAll('.floor-filter-pill');
+    // Custom Dropdown Floor Filter for Room Selection
+    const floorDropdownContainer = document.getElementById('floorFilterDropdownContainer');
+    const floorDropdownBtn = document.getElementById('floorFilterDropdownBtn');
+    const floorDropdownMenu = document.getElementById('floorFilterDropdownMenu');
+    const floorSelectedInput = document.getElementById('selectedFloorFilter');
+    const floorSelectedDisplay = document.getElementById('floorFilterSelectedDisplay');
     const roomItems = document.querySelectorAll('.room-item-wrapper');
     const roomSearchInput = document.getElementById('roomSearchInput');
 
     const filterRooms = () => {
-        const activePill = document.querySelector('.floor-filter-pill.active');
-        const filterVal = activePill ? activePill.getAttribute('data-filter') : 'all';
+        const filterVal = floorSelectedInput ? floorSelectedInput.value : 'all';
         const searchVal = roomSearchInput ? roomSearchInput.value.trim().toLowerCase() : '';
 
         roomItems.forEach(item => {
@@ -524,13 +743,49 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
-    filterPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            filterPills.forEach(p => p.classList.remove('active'));
-            pill.classList.add('active');
-            filterRooms();
+    if (floorDropdownBtn && floorDropdownContainer) {
+        floorDropdownBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            floorDropdownContainer.classList.toggle('open');
+            floorDropdownBtn.setAttribute('aria-expanded', floorDropdownContainer.classList.contains('open'));
         });
-    });
+
+        document.addEventListener('click', (e) => {
+            if (!floorDropdownContainer.contains(e.target)) {
+                floorDropdownContainer.classList.remove('open');
+                floorDropdownBtn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        if (floorDropdownMenu) {
+            const dropdownItems = floorDropdownMenu.querySelectorAll('.custom-dropdown-item');
+            dropdownItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    dropdownItems.forEach(di => {
+                        di.classList.remove('selected');
+                        const check = di.querySelector('.item-check');
+                        if (check) check.classList.add('d-none');
+                    });
+                    item.classList.add('selected');
+                    const check = item.querySelector('.item-check');
+                    if (check) check.classList.remove('d-none');
+
+                    const val = item.getAttribute('data-value') || 'all';
+                    const label = item.getAttribute('data-label') || item.innerText.trim();
+                    const icon = item.getAttribute('data-icon') || 'bi-layers-fill';
+
+                    if (floorSelectedInput) floorSelectedInput.value = val;
+                    if (floorSelectedDisplay) {
+                        floorSelectedDisplay.innerHTML = `<i class="bi ${icon} text-primary me-1.5"></i>${label}`;
+                    }
+
+                    floorDropdownContainer.classList.remove('open');
+                    floorDropdownBtn.setAttribute('aria-expanded', 'false');
+                    filterRooms();
+                });
+            });
+        }
+    }
 
     if (roomSearchInput) {
         roomSearchInput.addEventListener('input', filterRooms);

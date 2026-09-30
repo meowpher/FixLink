@@ -937,25 +937,83 @@
         background: rgba(0, 0, 0, 0.25);
     }
 
+    /* ── Compact Breathable Space Selector Track ── */
+    #meetingRoomsListContainer {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 8px;
+        padding: 4px 2px 8px 2px;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        max-height: unset !important;
+    }
+    #meetingRoomsListContainer .meeting-room-item-row {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        width: 125px;
+    }
     #meetingRoomModal .meeting-room-card {
         background: #ffffff;
         border: 1.5px solid #e2e8f0;
-        padding: 8px 12px;
-        border-radius: 10px;
+        padding: 7px 10px;
+        border-radius: 11px;
         cursor: pointer;
-        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
     #meetingRoomModal .meeting-room-card:hover {
         border-color: #2563eb;
         background: #f8fafc;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
     }
     #meetingRoomModal .meeting-room-card.selected {
-        border-color: #2563eb;
-        background: #eff6ff;
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+        border-color: #2563eb !important;
+        background: rgba(37, 99, 235, 0.08) !important;
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25) !important;
+        transform: translateY(-1px);
+    }
+    .meeting-room-card .room-status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+    .meeting-room-card .room-status-dot.vacant {
+        background: #16a34a;
+        box-shadow: 0 0 6px rgba(22, 163, 74, 0.5);
+    }
+    .meeting-room-card .room-status-dot.occupied {
+        background: #ea580c;
+    }
+    .meeting-floor-tabs-group {
+        background: rgba(0, 0, 0, 0.05);
+        padding: 3px;
+        border-radius: 50rem;
+        display: inline-flex;
+    }
+    .meeting-floor-tab {
+        border: none !important;
+        border-radius: 50rem !important;
+        font-size: 0.72rem !important;
+        font-weight: 600 !important;
+        padding: 4px 11px !important;
+        color: #64748b !important;
+        background: transparent !important;
+        transition: all 0.2s ease !important;
+    }
+    .meeting-floor-tab.active {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3) !important;
     }
     #meetingRoomModal .room-number-text {
         color: #0f172a;
@@ -968,8 +1026,10 @@
         background: #ffffff;
         border: 1.5px solid #cbd5e1;
         color: #1e293b;
-        height: 42px;
-        padding: 0.55rem 0.95rem;
+        height: 38px;
+        padding: 0.45rem 0.85rem;
+        font-size: 0.82rem;
+        border-radius: 9px;
     }
     #meetingRoomModal .custom-dropdown-trigger:hover,
     #meetingRoomModal .custom-dropdown-trigger:focus,
@@ -982,9 +1042,12 @@
         background: #ffffff;
         border: 1px solid #e2e8f0;
         box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        border-radius: 10px;
     }
     #meetingRoomModal .custom-dropdown-item {
         color: #334155;
+        font-size: 0.82rem;
+        padding: 7px 12px;
     }
     #meetingRoomModal .custom-dropdown-item:hover {
         background: #f1f5f9;
@@ -1000,7 +1063,12 @@
         background-color: #ffffff;
         border: 1.5px solid #cbd5e1;
         color: #1e293b;
-        height: 40px;
+        height: 42px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        border-radius: 10px;
+        padding: 0.55rem 0.95rem;
+        transition: all 0.2s ease;
     }
     #meetingRoomModal .form-control:focus,
     #meetingRoomModal .form-select:focus {
@@ -1257,13 +1325,13 @@
     }
     [data-theme="dark"] #meetingRoomModal .btn-cancel-dark,
     [data-bs-theme="dark"] #meetingRoomModal .btn-cancel-dark {
-        background: #181818 !important;
-        border-color: #262626 !important;
+        background: #18181b !important;
+        border-color: #27272a !important;
         color: #a1a1aa !important;
     }
     [data-theme="dark"] #meetingRoomModal .btn-cancel-dark:hover,
     [data-bs-theme="dark"] #meetingRoomModal .btn-cancel-dark:hover {
-        background: #1e1e1e !important;
+        background: #27272a !important;
         color: #f4f4f5 !important;
     }
     [data-theme="dark"] #meetingRoomModal .btn-close,
@@ -1291,39 +1359,40 @@
             max-width: calc(100% - 1rem) !important;
         }
         #meetingRoomModal .modal-content {
-            border-radius: 16px !important;
+            border-radius: 18px !important;
         }
         #meetingRoomModal .modal-header {
-            padding: 1rem 1.25rem 0.5rem 1.25rem !important;
+            padding: 0.85rem 1rem 0.4rem 1rem !important;
         }
         #meetingRoomModal .modal-body {
-            padding: 1rem !important;
-            max-height: calc(88vh - 70px) !important;
+            padding: 0.85rem 1rem 1rem 1rem !important;
+            max-height: calc(90vh - 65px) !important;
             overflow-y: auto !important;
         }
         #meetingRoomModal .meeting-map-container-box {
-            padding: 0.75rem !important;
+            padding: 0.6rem !important;
             border-radius: 12px !important;
         }
         #meetingRoomModal .meeting-map-panzoom-target {
-            min-height: 220px !important;
+            min-height: 190px !important;
         }
         #meetingRoomModal #meetingModalMapContainer svg {
-            max-height: 240px !important;
+            max-height: 200px !important;
         }
         #meetingRoomModal .meeting-floor-tab {
-            padding: 4px 8px !important;
+            padding: 3px 9px !important;
             font-size: 0.68rem !important;
         }
         #meetingRoomModal #meetingRoomsListContainer {
-            max-height: 160px !important;
+            padding-bottom: 6px !important;
         }
         #meetingRoomModal .meeting-room-card {
-            padding: 6px 10px !important;
+            padding: 6px 9px !important;
         }
         #meetingRoomModal .modal-footer-actions {
             flex-direction: column-reverse !important;
             width: 100% !important;
+            gap: 8px !important;
         }
         #meetingRoomModal .modal-footer-actions button {
             width: 100% !important;
@@ -1351,6 +1420,112 @@
         .facility-header-controls .floor-selector-pill {
             width: 100% !important;
         }
+    }
+
+    /* ── Faculty Manage Bottom Offcanvas Sheet & Action Cards ── */
+    .faculty-manage-offcanvas {
+        background: var(--bg-card, #ffffff) !important;
+        border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+        box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.22) !important;
+        z-index: 1055 !important;
+        border-radius: 24px 24px 0 0 !important;
+    }
+    .faculty-manage-offcanvas .offcanvas-header {
+        padding: 18px 20px 14px 20px !important;
+        border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08));
+    }
+    .faculty-manage-offcanvas .offcanvas-body {
+        padding: 16px 18px 24px 18px !important;
+    }
+
+    .manage-item-btn {
+        background: #f8fafc;
+        border: 1.5px solid #e2e8f0 !important;
+        border-radius: 16px !important;
+        padding: 14px 16px !important;
+        display: flex;
+        align-items: center;
+        gap: 16px !important;
+        width: 100%;
+        text-align: left;
+        transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+        position: relative;
+        text-decoration: none !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+    .manage-item-btn:hover {
+        background: #ffffff;
+        border-color: #2563eb !important;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.14);
+    }
+    .manage-item-btn .manage-icon-box {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+    }
+    .manage-item-btn .manage-title {
+        color: var(--text-main, #0f172a);
+        font-size: 0.98rem;
+        font-weight: 600;
+        line-height: 1.3;
+        margin-bottom: 3px;
+    }
+    .manage-item-btn .manage-desc {
+        color: var(--text-muted, #64748b);
+        font-size: 0.8rem;
+        line-height: 1.35;
+    }
+    .manage-item-btn .manage-chevron {
+        font-size: 0.9rem;
+        color: var(--text-muted, #94a3b8);
+        opacity: 0.5;
+        flex-shrink: 0;
+        margin-left: auto;
+        transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .manage-item-btn:hover .manage-chevron {
+        transform: translateX(3px);
+        color: #2563eb !important;
+        opacity: 1 !important;
+    }
+
+    [data-theme="dark"] .faculty-manage-offcanvas {
+        background: #121214 !important;
+        border-color: #27272a !important;
+        box-shadow: 0 -16px 50px rgba(0, 0, 0, 0.85) !important;
+    }
+    [data-theme="dark"] .faculty-manage-offcanvas .offcanvas-header {
+        border-color: #27272a !important;
+    }
+    [data-theme="dark"] .manage-item-btn {
+        background: #18181b;
+        border-color: #27272a !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    [data-theme="dark"] .manage-item-btn:hover {
+        background: #202024;
+        border-color: #3b82f6 !important;
+        box-shadow: 0 8px 26px rgba(0, 0, 0, 0.6);
+    }
+    [data-theme="dark"] .manage-item-btn .manage-title {
+        color: #f1f5f9 !important;
+    }
+    [data-theme="dark"] .manage-item-btn .manage-desc {
+        color: #94a3b8 !important;
+    }
+    [data-theme="dark"] .manage-item-btn .manage-chevron {
+        color: #71717a !important;
+    }
+    [data-theme="dark"] .manage-item-btn:hover .manage-chevron {
+        color: #38bdf8 !important;
     }
 
     /* Custom Dropdown Common Styles */
@@ -2486,13 +2661,18 @@
             z-index: 1100 !important;
         }
         
+        .faculty-dashboard {
+            padding-left: 0.85rem !important;
+            padding-right: 0.85rem !important;
+            padding-top: 0.35rem !important;
+        }
+
         .faculty-hero-col {
-            position: sticky !important;
-            top: 0 !important;
-            z-index: 1030 !important;
-            margin-left: -1rem !important;
-            margin-right: -1rem !important;
-            margin-bottom: 0.75rem !important;
+            position: relative !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+            margin-top: 0 !important;
+            margin-bottom: 0.85rem !important;
         }
 
         .faculty-hero {
@@ -2500,11 +2680,11 @@
             top: 0 !important;
             height: auto !important;
             min-height: unset !important;
-            max-height: 15vh !important;
-            border-radius: 0 0 18px 18px !important;
-            padding: 10px 16px !important;
+            max-height: none !important;
+            border-radius: 20px !important;
+            padding: 14px 18px !important;
             margin-bottom: 0 !important;
-            box-shadow: 0 4px 20px rgba(0, 70, 140, 0.25) !important;
+            box-shadow: 0 8px 25px rgba(0, 70, 140, 0.25) !important;
             display: flex !important;
             flex-direction: column !important;
             justify-content: center !important;
@@ -2513,9 +2693,9 @@
         }
 
         .faculty-hero .faculty-name {
-            font-size: 1.05rem !important;
+            font-size: 1.08rem !important;
             font-weight: 700 !important;
-            line-height: 1.2 !important;
+            line-height: 1.25 !important;
             margin-bottom: 2px !important;
         }
 
@@ -2603,10 +2783,10 @@
             padding: 10px 14px;
         }
         
-        .dashboard-header-buttons .btn {
-            font-size: 0.76rem !important;
-            padding: 8px 12px !important;
-            white-space: nowrap !important;
+        .agenda-actions-dropdown .btn {
+            font-size: 0.82rem;
+            padding: 7px 14px;
+            white-space: nowrap;
         }
 
         .faculty-dashboard {
@@ -3625,7 +3805,7 @@
      data-suspension-reason="{{ faculty.adhoc_suspension_reason or '' }}">
     <div class="row">
         <!-- Dashboard Sidebar / Compact Mobile Sticky Header -->
-        <div class="col-lg-3 col-xl-2 mb-3 mb-lg-4 px-0 px-lg-2 faculty-hero-col">
+        <div class="col-lg-3 col-xl-2 mb-3 mb-lg-4 px-0 px-lg-2 faculty-hero-col position-relative">
             <div class="faculty-hero sticky-top">
                 <div class="faculty-hero-greeting mb-1 mb-lg-4">
                     <h5 class="faculty-name mb-0 fw-bold">
@@ -3656,7 +3836,7 @@
                     <button class="btn rounded-3 px-3 py-2 {% if view == 'schedule' or not view %}active{% endif %} d-flex align-items-center" id="btn-schedule">
                         <i class="bi bi-calendar-check me-2 fs-5"></i>Schedule
                     </button>
-                    <button class="btn rounded-3 px-3 py-2 d-flex align-items-center" id="btn-sidebar-meeting-rooms">
+                    <button class="btn rounded-3 px-3 py-2 d-flex align-items-center" id="btn-sidebar-meeting-rooms" data-bs-toggle="modal" data-bs-target="#meetingRoomModal">
                         <i class="bi bi-people-fill me-2 fs-5"></i>Meeting Rooms
                     </button>
                     <button class="btn rounded-3 px-3 py-2 d-flex align-items-center" id="btn-history">
@@ -3719,26 +3899,68 @@
         {% endif %}
         <div class="row">
             <div class="col-12">
-                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-end gap-2.5 mb-3 mb-md-4">
-                    <div>
-                        <div class="d-flex align-items-center gap-2">
-                            <h4 class="fw-bold mb-0">Upcoming Agenda</h4>
-                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1 d-inline-block d-md-none" style="font-size: 0.72rem;">
-                                {{ (my_schedules|length) + (bookings_this_week|length) }} Lectures
-                            </span>
-                        </div>
-                        <p class="text-muted small mb-0 d-none d-sm-block">Your synchronized teaching schedule across the Vyas building.</p>
+                <div class="d-flex align-items-center justify-content-between gap-2 mb-3 mb-md-4">
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="fw-bold mb-0">Upcoming Agenda</h4>
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-2.5 py-1" style="font-size: 0.72rem;">
+                            {{ (my_schedules|length) + (bookings_this_week|length) }} Lectures
+                        </span>
                     </div>
-                    <div class="d-flex gap-2 w-100 w-md-auto dashboard-header-buttons flex-wrap flex-md-nowrap">
-                        <button class="btn btn-outline-primary rounded-pill px-3 py-2 px-md-3 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 fw-semibold" id="btnHeaderBookMeetingRoom" style="font-size: 0.82rem;">
-                            <i class="bi bi-people-fill me-1"></i>Book Meeting Room
-                        </button>
-                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-outline-primary rounded-pill px-3 py-2 px-md-3 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 fw-semibold" style="font-size: 0.82rem;" id="btnHeaderBookEvent">
-                            <i class="bi bi-calendar2-plus me-1"></i>Book Event
-                        </a>
-                        <button class="btn btn-primary rounded-pill px-3 py-2 px-md-3 shadow-sm d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-md-grow-0 fw-semibold" id="btnHeaderRequestRoom" style="font-size: 0.82rem;">
-                            <i class="bi bi-lightning-charge-fill me-1"></i>Request Room
-                        </button>
+                    <p class="text-muted small mb-0 d-none d-md-block">Your synchronized teaching schedule across the Vyas building.</p>
+                </div>
+
+                <!-- Faculty Quick Actions Slide-In Offcanvas Drawer -->
+                <div class="offcanvas offcanvas-start faculty-actions-drawer" tabindex="-1" id="facultyActionsDrawer" aria-labelledby="facultyActionsDrawerLabel">
+                    <div class="offcanvas-header border-bottom">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="drawer-header-icon">
+                                <i class="bi bi-grid-fill text-primary"></i>
+                            </div>
+                            <div>
+                                <h5 class="offcanvas-title fw-bold mb-0" id="facultyActionsDrawerLabel" style="font-size: 1.05rem;">Quick Actions</h5>
+                                <span class="text-muted small" style="font-size: 0.76rem;">Faculty Room & Event Tools</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close text-reset shadow-none" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                    </div>
+                    <div class="offcanvas-body">
+                        <div class="drawer-actions-list">
+                            <!-- Book Meeting Room -->
+                            <button class="drawer-action-card" type="button" id="btnDrawerBookMeetingRoom" data-bs-dismiss="offcanvas">
+                                <div class="action-icon-box bg-primary bg-opacity-10 text-primary">
+                                    <i class="bi bi-people-fill"></i>
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="action-title">Book Meeting Room</div>
+                                    <div class="action-desc text-truncate">Reserve Ground or 6th Floor spaces</div>
+                                </div>
+                                <i class="bi bi-chevron-right action-chevron"></i>
+                            </button>
+
+                            <!-- Book Event -->
+                            <a href="{{ url_for('faculty.book_event') }}" class="drawer-action-card text-decoration-none" id="btnDrawerBookEvent">
+                                <div class="action-icon-box bg-info bg-opacity-10 text-info">
+                                    <i class="bi bi-calendar2-plus"></i>
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="action-title">Book Event</div>
+                                    <div class="action-desc text-truncate">Schedule workshops, guest talks & halls</div>
+                                </div>
+                                <i class="bi bi-chevron-right action-chevron"></i>
+                            </a>
+
+                            <!-- Request Room -->
+                            <button class="drawer-action-card" type="button" id="btnDrawerRequestRoom" data-bs-dismiss="offcanvas">
+                                <div class="action-icon-box bg-warning bg-opacity-10 text-warning">
+                                    <i class="bi bi-calendar-plus-fill"></i>
+                                </div>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="action-title">Request Room</div>
+                                    <div class="action-desc text-truncate">Ad-hoc classroom allocation & sync</div>
+                                </div>
+                                <i class="bi bi-chevron-right action-chevron"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -4786,100 +5008,89 @@
                              RIGHT SIDE: All Other Form Controls
                              ══════════════════════════════════════ -->
                         <div class="col-lg-7 col-md-7 d-flex flex-column justify-content-between">
-                            <div class="d-flex flex-column gap-3">
+                            <div class="d-flex flex-column gap-2.5">
                                 <!-- 1. Select Space & Dedicated Floor Tabs -->
                                 <div>
                                     <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
                                         <div class="d-flex align-items-center gap-2">
-                                            <label class="form-label text-muted small fw-bold text-uppercase mb-0" style="font-size: 0.75rem; letter-spacing: 0.04em;">1. Select Space</label>
-                                            <span class="badge badge-vacant-pill rounded-pill px-2.5 py-1 fw-semibold" id="availableRoomsBadge" style="font-size: 0.72rem;">
-                                                <i class="bi bi-check-circle-fill me-1"></i><span id="availableMeetingRoomsCount">{% if meeting_rooms %}{{ meeting_rooms|selectattr('current_occupancy_status.status', 'equalto', 'vacant')|list|length }}{% else %}0{% endif %}</span> Vacant
+                                            <label class="form-label text-muted small fw-bold text-uppercase mb-0 flex-shrink-0" style="font-size: 0.72rem; letter-spacing: 0.04em;">1. Select Space</label>
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" id="availableRoomsBadge" style="font-size: 0.7rem;">
+                                                <i class="bi bi-check-circle-fill"></i>
+                                                <span id="availableMeetingRoomsCount">{% if meeting_rooms %}{{ meeting_rooms|selectattr('current_occupancy_status.status', 'equalto', 'vacant')|list|length }}{% else %}0{% endif %}</span>
+                                                <span>Vacant</span>
                                             </span>
                                         </div>
-                                        <div class="btn-group btn-group-sm flex-wrap gap-1" role="group" aria-label="Floor Selection">
-                                            <button type="button" class="btn meeting-floor-tab active rounded-pill px-3 py-1 fw-semibold" data-floor="0">
-                                                <i class="bi bi-display me-1"></i>Ground (L0) • Conference
-                                            </button>
-                                            <button type="button" class="btn meeting-floor-tab rounded-pill px-3 py-1 fw-semibold" data-floor="6">
-                                                <i class="bi bi-people me-1"></i>6th Floor (L6) • MR
+                                        <div class="meeting-floor-tabs-group" role="group" aria-label="Floor Selection">
+                                            <button type="button" class="btn meeting-floor-tab active" data-floor="0">
+                                                <i class="bi bi-display me-1"></i>Ground (L0)
+                                             </button>
+                                            <button type="button" class="btn meeting-floor-tab" data-floor="6">
+                                                <i class="bi bi-people me-1"></i>6th Floor (L6)
                                             </button>
                                         </div>
                                     </div>
 
-                                    <!-- Space List for Active Floor -->
-                                    <div class="d-flex flex-column gap-2 mb-2" id="meetingRoomsListContainer" style="max-height: 195px; overflow-y: auto;">
-                                        {% if meeting_rooms %}
-                                            {% for room in meeting_rooms %}
-                                                {% set occ = room.current_occupancy_status %}
-                                                {% set is_vacant = occ.status == 'vacant' %}
-                                                {% set is_mr = room.number.startswith('MR') or ('meeting' in (room.name or '')|lower) %}
-                                                {% set category = 'mr' if is_mr else 'conference' %}
-                                                {% set floor_lvl = room.floor.level if room.floor else 0 %}
-                                                <div class="meeting-room-item-row {% if floor_lvl != 0 %}d-none{% endif %}" 
-                                                     data-floor="{{ floor_lvl }}"
-                                                     data-category="{{ category }}">
-                                                    <div class="meeting-room-card d-flex align-items-center justify-content-between {% if not is_vacant %}opacity-75{% endif %}"
-                                                         data-room-id="{{ room.id }}"
-                                                         data-room-number="{{ room.number }}"
-                                                         data-room-name="{{ room.name or ('Room ' ~ room.number) }}"
-                                                         data-room-category="{{ category }}"
-                                                         data-room-floor="{{ floor_lvl }}"
-                                                         data-room-floor-name="{{ room.floor.name if room.floor else ('Level ' ~ floor_lvl) }}"
-                                                         data-is-vacant="{{ 'true' if is_vacant else 'false' }}">
-                                                        <div class="d-flex align-items-center gap-2.5 min-w-0">
-                                                            <div class="room-icon-indicator rounded-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 32px; height: 32px; font-size: 0.85rem; {% if is_mr %}background: rgba(6, 182, 212, 0.12); color: #0891b2;{% else %}background: rgba(37, 99, 235, 0.12); color: #2563eb;{% endif %}">
-                                                                <i class="bi {% if is_mr %}bi-people-fill{% else %}bi-display{% endif %}"></i>
+                                    <!-- Compact Horizontal Swipeable Space Strip -->
+                                    <div class="meeting-rooms-scroll-wrapper mb-1.5">
+                                        <div class="meeting-rooms-list-track" id="meetingRoomsListContainer">
+                                            {% if meeting_rooms %}
+                                                {% for room in meeting_rooms %}
+                                                    {% set occ = room.current_occupancy_status %}
+                                                    {% set is_vacant = occ.status == 'vacant' %}
+                                                    {% set is_mr = room.number.startswith('MR') or ('meeting' in (room.name or '')|lower) %}
+                                                    {% set category = 'mr' if is_mr else 'conference' %}
+                                                    {% set floor_lvl = room.floor.level if room.floor else 0 %}
+                                                    <div class="meeting-room-item-row {% if floor_lvl != 0 %}d-none{% endif %}" 
+                                                         data-floor="{{ floor_lvl }}"
+                                                         data-category="{{ category }}">
+                                                        <div class="meeting-room-card {% if not is_vacant %}opacity-60{% endif %}"
+                                                             data-room-id="{{ room.id }}"
+                                                             data-room-number="{{ room.number }}"
+                                                             data-room-name="{{ room.name or ('Room ' ~ room.number) }}"
+                                                             data-room-category="{{ category }}"
+                                                             data-room-floor="{{ floor_lvl }}"
+                                                             data-room-floor-name="{{ room.floor.name if room.floor else ('Level ' ~ floor_lvl) }}"
+                                                             data-is-vacant="{{ 'true' if is_vacant else 'false' }}">
+                                                            <div class="d-flex align-items-center justify-content-between gap-1 mb-1">
+                                                                <span class="fw-bold font-monospace room-number-text" style="font-size: 0.84rem;">{{ room.number }}</span>
+                                                                <span class="room-status-dot {% if is_vacant %}vacant{% else %}occupied{% endif %}" title="{{ 'Vacant' if is_vacant else 'Occupied' }}"></span>
                                                             </div>
-                                                            <div class="min-w-0">
-                                                                <div class="d-flex align-items-center gap-2">
-                                                                    <span class="fw-bold font-monospace room-number-text" style="font-size: 0.88rem;">{{ room.number }}</span>
-                                                                    <span class="badge font-monospace px-1.5 py-0.5 rounded" style="font-size: 0.6rem; {% if is_mr %}background: rgba(6, 182, 212, 0.15); color: #0891b2;{% else %}background: rgba(37, 99, 235, 0.12); color: #2563eb;{% endif %}">
-                                                                        {{ 'Meeting' if is_mr else 'Conference' }}
-                                                                    </span>
-                                                                </div>
-                                                                <div class="text-truncate text-muted small" style="font-size: 0.72rem;">
-                                                                    {% if floor_lvl == 0 %}16 Seats • 4K Display{% elif room.number == 'MR11' or room.number == 'MR14' %}12 Seats • Presentation{% elif room.number == 'MR10' %}4 Seats • Soundproof{% else %}6 Seats • Studio Mic{% endif %}
-                                                                </div>
+                                                            <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.68rem;">
+                                                                <span class="text-truncate">{{ 'Meeting' if is_mr else 'Conf' }}</span>
+                                                                <span class="font-monospace ms-1">{% if floor_lvl == 0 %}16s{% elif room.number == 'MR11' or room.number == 'MR14' %}12s{% elif room.number == 'MR10' %}4s{% else %}6s{% endif %}</span>
                                                             </div>
                                                         </div>
-                                                        <span class="badge {% if is_vacant %}badge-vacant-pill{% else %}badge-occupied-pill{% endif %} rounded-pill px-2.5 py-1 flex-shrink-0 ms-2" style="font-size: 0.68rem;">
-                                                            <i class="bi {% if is_vacant %}bi-check-circle-fill{% else %}bi-clock-fill{% endif %} me-1"></i>{{ 'Vacant' if is_vacant else 'Occupied' }}
-                                                        </span>
                                                     </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="text-center py-2 text-muted small w-100">
+                                                    <i class="bi bi-info-circle me-1"></i>Loading spaces...
                                                 </div>
-                                            {% endfor %}
-                                        {% else %}
-                                            <div class="text-center py-3 text-muted small">
-                                                <i class="bi bi-info-circle me-1"></i>Loading rooms...
-                                            </div>
-                                        {% endif %}
+                                            {% endif %}
+                                        </div>
                                     </div>
 
                                     <!-- Hidden selected room ID -->
                                     <input type="hidden" id="selectedMeetingRoomId" required>
 
-                                    <!-- Selected Room Details Bar -->
-                                    <div id="selectedMeetingRoomBanner" class="alert d-flex align-items-center justify-content-between p-2 px-3 mt-2 mb-0 d-none rounded-3">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="p-1.5 rounded-2 d-flex align-items-center justify-content-center selected-room-icon-box" style="width: 30px; height: 30px; font-size: 0.9rem;">
-                                                <i class="bi bi-door-open-fill"></i>
-                                            </div>
-                                            <div>
-                                                <strong class="fw-bold small selected-room-title" id="selectedMeetingRoomText" style="font-size: 0.85rem;">Select a room</strong>
-                                                <span class="badge text-white ms-1 font-monospace" id="selectedMeetingRoomBadge" style="font-size: 0.68rem; background: #2563eb;">--</span>
-                                                <span class="text-muted small ms-1" id="selectedMeetingRoomLocation" style="font-size: 0.75rem;">• Ground Floor</span>
-                                            </div>
+                                    <!-- Selected Room Details Bar (Ultra Compact) -->
+                                    <div id="selectedMeetingRoomBanner" class="alert d-flex align-items-center justify-content-between p-1.5 px-2.5 mt-1.5 mb-0 d-none rounded-2">
+                                        <div class="d-flex align-items-center gap-1.5">
+                                            <i class="bi bi-door-open-fill text-primary" style="font-size: 0.85rem;"></i>
+                                            <strong class="fw-bold selected-room-title" id="selectedMeetingRoomText" style="font-size: 0.78rem;">Select a room</strong>
+                                            <span class="badge text-white font-monospace" id="selectedMeetingRoomBadge" style="font-size: 0.65rem; background: #2563eb;">--</span>
+                                            <span class="text-muted small" id="selectedMeetingRoomLocation" style="font-size: 0.72rem;">• Ground</span>
                                         </div>
-                                        <span class="badge badge-vacant-pill rounded-pill px-2.5 py-1 small" id="selectedRoomStatusBadge" style="font-size: 0.68rem;">
-                                            <i class="bi bi-check-circle-fill me-1"></i>Currently Vacant
+                                        <span class="badge badge-vacant-pill rounded-pill px-2 py-0.5" id="selectedRoomStatusBadge" style="font-size: 0.65rem;">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Vacant
                                         </span>
                                     </div>
                                 </div>
 
-                                <!-- 2. Booking Mode & 3. Duration Row -->
-                                <div class="row g-3">
+                                <!-- Booking Mode & Duration Row -->
+                                <div class="row g-3 mb-3">
                                     <div class="col-6">
-                                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.75rem; letter-spacing: 0.04em;">2. Booking Mode</label>
+                                        <label class="form-label text-muted small fw-semibold mb-1.5" style="font-size: 0.78rem;">Booking Mode</label>
                                         <div class="custom-dropdown-container" id="bookingModeDropdownContainer">
                                             <button type="button" class="custom-dropdown-trigger" id="bookingModeDropdownBtn" aria-expanded="false">
                                                 <span class="dropdown-selected-label" id="bookingModeSelectedDisplay">Instant meeting</span>
@@ -4899,30 +5110,30 @@
                                         </div>
                                     </div>
                                     <div class="col-6">
-                                        <div class="d-flex align-items-center justify-content-between mb-1">
-                                            <label class="form-label text-muted small fw-bold text-uppercase mb-0" style="font-size: 0.75rem; letter-spacing: 0.04em;">3. Duration</label>
-                                            <span class="text-muted small font-monospace" id="meetingDurationEndTime" style="font-size: 0.72rem;">~--:--</span>
+                                        <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                            <label class="form-label text-muted small fw-semibold mb-0" style="font-size: 0.78rem;">Duration</label>
+                                            <span class="text-muted small font-monospace opacity-75" id="meetingDurationEndTime" style="font-size: 0.72rem;">~--:--</span>
                                         </div>
                                         <div class="custom-dropdown-container" id="durationDropdownContainer">
                                             <button type="button" class="custom-dropdown-trigger" id="durationDropdownBtn" aria-expanded="false">
-                                                <span class="dropdown-selected-label" id="durationSelectedDisplay">2 Hours (Standard)</span>
+                                                <span class="dropdown-selected-label" id="durationSelectedDisplay">2 Hours</span>
                                                 <i class="bi bi-chevron-down dropdown-caret"></i>
                                             </button>
                                             <div class="custom-dropdown-menu" id="durationDropdownMenu">
                                                 <div class="custom-dropdown-item" data-value="1">
-                                                    <span>1 Hour <span class="text-muted small ms-1">(Min)</span></span>
+                                                    <span>1 Hour</span>
                                                     <i class="bi bi-check-lg item-check text-primary d-none"></i>
                                                 </div>
                                                 <div class="custom-dropdown-item selected" data-value="2">
-                                                    <span>2 Hours <span class="text-muted small ms-1">(Standard)</span></span>
+                                                    <span>2 Hours</span>
                                                     <i class="bi bi-check-lg item-check text-primary"></i>
                                                 </div>
                                                 <div class="custom-dropdown-item" data-value="3">
-                                                    <span>3 Hours <span class="text-muted small ms-1">(Extended)</span></span>
+                                                    <span>3 Hours</span>
                                                     <i class="bi bi-check-lg item-check text-primary d-none"></i>
                                                 </div>
                                                 <div class="custom-dropdown-item" data-value="4">
-                                                    <span>4 Hours <span class="text-muted small ms-1">(Max)</span></span>
+                                                    <span>4 Hours</span>
                                                     <i class="bi bi-check-lg item-check text-primary d-none"></i>
                                                 </div>
                                             </div>
@@ -4932,13 +5143,13 @@
                                 </div>
 
                                 <!-- Scheduled Date & Time Container (hidden by default for instant claim) -->
-                                <div class="row g-3 d-none" id="meetingScheduledFields">
+                                <div class="row g-3 mb-3 d-none" id="meetingScheduledFields">
                                     <div class="col-6">
-                                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="meetingDate" style="font-size: 0.75rem;"><i class="bi bi-calendar-event me-1 text-primary"></i>Reservation Date</label>
+                                        <label class="form-label text-muted small fw-semibold mb-1.5" for="meetingDate" style="font-size: 0.78rem;"><i class="bi bi-calendar-event me-1 text-primary"></i>Reservation Date</label>
                                         <input type="date" class="form-control" id="meetingDate">
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="meetingTime" style="font-size: 0.75rem;"><i class="bi bi-clock me-1 text-primary"></i>Start Time</label>
+                                        <label class="form-label text-muted small fw-semibold mb-1.5" for="meetingTime" style="font-size: 0.78rem;"><i class="bi bi-clock me-1 text-primary"></i>Start Time</label>
                                         <select class="form-select" id="meetingTime">
                                             <option value="08:00">08:00 AM</option>
                                             <option value="09:00">09:00 AM</option>
@@ -4956,33 +5167,24 @@
                                     </div>
                                 </div>
 
-                                <!-- 4. Meeting Subject / Agenda -->
-                                <div>
-                                    <label class="form-label text-muted small fw-bold text-uppercase mb-1" for="meetingSubject" style="font-size: 0.75rem; letter-spacing: 0.04em;">4. Meeting Subject / Agenda</label>
-                                    <input type="text" class="form-control mb-2" id="meetingSubject" placeholder="e.g. Department Faculty Sync / Academic Review" required>
-                                    <div class="d-flex align-items-center gap-1.5 flex-wrap small text-muted" style="font-size: 0.72rem;">
-                                        <span class="fw-semibold">Quick fill:</span>
-                                        <button type="button" class="quick-subject-btn" data-subject="Department Faculty Sync">Faculty Sync</button>
-                                        <button type="button" class="quick-subject-btn" data-subject="Research Panel Review">Research Panel</button>
-                                        <button type="button" class="quick-subject-btn" data-subject="Thesis Defense Committee">Thesis Defense</button>
-                                        <button type="button" class="quick-subject-btn" data-subject="Curriculum Planning Sync">Curriculum</button>
-                                    </div>
+                                <!-- Meeting Subject / Agenda -->
+                                <div class="mb-3">
+                                    <label class="form-label text-muted small fw-semibold mb-1.5" for="meetingSubject" style="font-size: 0.78rem;">Meeting Subject / Agenda</label>
+                                    <input type="text" class="form-control" id="meetingSubject" placeholder="e.g. Faculty Sync, Academic Review" required>
                                 </div>
 
-                                <!-- Policy Info Box -->
-                                <div class="alert alert-info py-2 px-3 small bg-opacity-10 border-info d-flex align-items-center gap-2 mb-0" style="font-size: 0.75rem; border-radius: 10px;">
-                                    <i class="bi bi-shield-check text-info fs-6 flex-shrink-0"></i>
-                                    <div>
-                                        <strong class="text-info">Ghost Protocol Policy:</strong> Check in within 10 minutes of start time to prevent automatic booking cancellation.
-                                    </div>
+                                <!-- Ghost Protocol Subtext Note -->
+                                <div class="d-flex align-items-center gap-1.5 text-muted small px-0.5 mb-2" style="font-size: 0.74rem;">
+                                    <i class="bi bi-shield-check text-info flex-shrink-0"></i>
+                                    <span>Check in within 10 mins of start time to prevent cancellation.</span>
                                 </div>
                             </div>
 
                             <!-- Footer Actions -->
-                            <div class="d-flex align-items-center justify-content-end gap-2.5 pt-3 mt-3 border-top border-light border-opacity-10 modal-footer-actions">
+                            <div class="d-flex align-items-center gap-2 pt-3 mt-1 border-top border-light border-opacity-10 modal-footer-actions">
                                 <button type="button" class="btn btn-cancel-dark px-3.5 py-2 rounded-3" data-bs-dismiss="modal" style="font-size: 0.85rem;">Cancel</button>
-                                <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-bold shadow-sm d-flex align-items-center gap-2" id="btnConfirmMeetingBooking" style="font-size: 0.85rem;">
-                                    <i class="bi bi-check-circle-fill"></i><span>CONFIRM BOOKING</span>
+                                <button type="submit" class="btn btn-primary flex-grow-1 py-2 px-3.5 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" id="btnConfirmMeetingBooking" style="font-size: 0.88rem;">
+                                    <i class="bi bi-check-circle-fill"></i><span>Confirm Booking</span>
                                 </button>
                             </div>
                         </div>
@@ -5004,23 +5206,65 @@
         <i class="bi bi-calendar-check"></i>
         <span>Agenda</span>
     </button>
-    <button class="bottom-nav-btn" id="btn-bottom-meeting" type="button" aria-label="Meeting Rooms">
-        <i class="bi bi-people-fill"></i>
-        <span>Meetings</span>
+    <!-- Manage triggers bottom sheet (Book Event, Book Meeting Room, Request Room) -->
+    <button class="bottom-nav-btn border-0 bg-transparent" id="btn-bottom-manage" type="button" data-bs-toggle="offcanvas" data-bs-target="#facultyManageOffcanvas" aria-controls="facultyManageOffcanvas" aria-label="Manage">
+        <i class="bi bi-grid"></i>
+        <span>Manage</span>
     </button>
-    <button class="bottom-nav-btn" id="btn-bottom-request" type="button" aria-label="Request Room">
-        <i class="bi bi-lightning-charge"></i>
-        <span>Request</span>
-    </button>
-    <a href="{{ url_for('faculty.book_event') }}" class="bottom-nav-btn text-decoration-none" id="btn-bottom-event" aria-label="Book Event">
-        <i class="bi bi-calendar2-plus"></i>
-        <span>Events</span>
-    </a>
     <button class="bottom-nav-btn" id="btn-bottom-history" type="button" aria-label="Booking History View">
         <i class="bi bi-clock-history"></i>
         <span>History</span>
     </button>
 </nav>
+
+<!-- Faculty Manage Offcanvas Sheet (Bottom Sheet like Admin Manage) -->
+<div class="offcanvas offcanvas-bottom d-md-none faculty-manage-offcanvas" tabindex="-1" id="facultyManageOffcanvas" aria-labelledby="facultyManageOffcanvasLabel" style="height:auto;border-radius:22px 22px 0 0;z-index:1055;">
+    <div class="offcanvas-header border-bottom pb-3 pt-3 px-3">
+        <h6 class="offcanvas-title fw-bold d-flex align-items-center mb-0" id="facultyManageOffcanvasLabel">
+            <i class="bi bi-grid me-2 text-primary"></i>Manage
+        </h6>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body px-3 pb-4 pt-3">
+        <div class="d-grid gap-2">
+            <!-- 1. Book Event -->
+            <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('faculty.book_event') }}">
+                <div class="manage-icon-box bg-info bg-opacity-10 text-info">
+                    <i class="bi bi-calendar2-plus-fill"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="manage-title">Book Event</div>
+                    <div class="manage-desc">Multi-room &amp; floor allocations</div>
+                </div>
+                <i class="bi bi-chevron-right manage-chevron"></i>
+            </a>
+
+            <!-- 2. Book Meeting Room -->
+            <button type="button" class="manage-item-btn text-start d-flex align-items-center gap-3 border-0" data-bs-dismiss="offcanvas" data-bs-toggle="modal" data-bs-target="#meetingRoomModal">
+                <div class="manage-icon-box bg-primary bg-opacity-10 text-primary">
+                    <i class="bi bi-people-fill"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="manage-title">Book Meeting Room</div>
+                    <div class="manage-desc">Ground &amp; 6th floor conference rooms</div>
+                </div>
+                <i class="bi bi-chevron-right manage-chevron"></i>
+            </button>
+
+            <!-- 3. Request Room -->
+            <button type="button" class="manage-item-btn text-start d-flex align-items-center gap-3 border-0" data-bs-dismiss="offcanvas" onclick="window.triggerBookingModal ? window.triggerBookingModal() : new bootstrap.Modal(document.getElementById('bookingModal')).show()">
+                <div class="manage-icon-box bg-warning bg-opacity-10 text-warning">
+                    <i class="bi bi-calendar-plus-fill"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="manage-title">Request Room</div>
+                    <div class="manage-desc">Instant ad-hoc classroom reservations</div>
+                </div>
+                <i class="bi bi-chevron-right manage-chevron"></i>
+            </button>
+        </div>
+    </div>
+</div>
 
 {% endblock %}
 
@@ -6351,6 +6595,8 @@
 
             const btnHeaderRequestRoom = document.getElementById('btnHeaderRequestRoom');
             if (btnHeaderRequestRoom) btnHeaderRequestRoom.addEventListener('click', handleRequestRoomClick);
+            const btnDrawerRequestRoom = document.getElementById('btnDrawerRequestRoom');
+            if (btnDrawerRequestRoom) btnDrawerRequestRoom.addEventListener('click', handleRequestRoomClick);
             const btnBottomRequest = document.getElementById('btn-bottom-request');
             if (btnBottomRequest) btnBottomRequest.addEventListener('click', handleRequestRoomClick);
 
@@ -6385,6 +6631,8 @@
 
             const btnHeaderBookMeetingRoom = document.getElementById('btnHeaderBookMeetingRoom');
             if (btnHeaderBookMeetingRoom) btnHeaderBookMeetingRoom.addEventListener('click', handleMeetingRoomModalOpen);
+            const btnDrawerBookMeetingRoom = document.getElementById('btnDrawerBookMeetingRoom');
+            if (btnDrawerBookMeetingRoom) btnDrawerBookMeetingRoom.addEventListener('click', handleMeetingRoomModalOpen);
             const btnSidebarMeetingRooms = document.getElementById('btn-sidebar-meeting-rooms');
             if (btnSidebarMeetingRooms) btnSidebarMeetingRooms.addEventListener('click', handleMeetingRoomModalOpen);
             const btnBottomMeeting = document.getElementById('btn-bottom-meeting');

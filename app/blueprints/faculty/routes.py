@@ -96,8 +96,8 @@ def dashboard():
     for b in bookings_this_week:
         slot_end_dt = b.slot_end
         if slot_end_dt:
-            slot_end_ist = IST.localize(slot_end_dt) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
-            b.is_historical = slot_end_ist < now_ist
+            slot_end_ist = slot_end_dt.replace(tzinfo=IST) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
+            b.is_historical = slot_end_ist.date() < now_ist.date()
         else:
             b.is_historical = False
 
@@ -286,12 +286,19 @@ def get_room_schedule(room_id):
 @handle_api_errors
 def create_booking():
     """Validates and creates a 1-hour slot room booking."""
-    data = request.get_json()
+    data = request.get_json() or {}
     room_id = data.get('room_id')
     slot_iso = data.get('slot_start') # Expecting ISO format 'YYYY-MM-DDTHH:MM:SS'
     subject = data.get('subject', 'Faculty Meeting')
     division = data.get('division', '')
     course = data.get('course', '')
+    
+    try:
+        duration_hours = int(data.get('duration', 1))
+    except (ValueError, TypeError):
+        duration_hours = 1
+    if duration_hours <= 0:
+        duration_hours = 1
     
     if not room_id or not slot_iso:
         return api_response(success=False, error="Room ID and slot start time are required.", status=400)
@@ -315,6 +322,9 @@ def create_booking():
         # Normalize to the beginning of the hour
         slot_start = slot_start.replace(minute=0, second=0, microsecond=0)
         room = db.session.get(Room, room_id)
+        if not room:
+            return api_response(success=False, error="Room not found.", status=404)
+
         is_meeting_or_conf = room and room.floor and room.floor.level in [0, 6] and (
             room.room_type in [Room.ROOM_TYPE_CONFERENCE, Room.ROOM_TYPE_MEETING, 'conference', 'meeting', 'conference_room', 'meeting_room'] or
             room.number.upper().startswith('MR') or
@@ -870,50 +880,88 @@ def cancel_booking(booking_id):
     """Cancels a faculty booking (RoomBooking or AdHocBooking) if they are the owner and not historical."""
     now_ist = datetime.now(IST)
     user_id = session.get('user_id')
+    is_admin = session.get('is_admin', False)
 
-    # Determine if specifically adhoc based on route or request payload/params
-    is_adhoc_request = '/adhoc' in request.path or request.args.get('type') == 'adhoc'
-    if request.is_json and request.json and request.json.get('type') == 'adhoc':
-        is_adhoc_request = True
+    # Determine requested type preference
+    requested_type = None
+    if request.is_json and request.json and request.json.get('type'):
+        requested_type = request.json.get('type')
+    elif request.args.get('type'):
+        requested_type = request.args.get('type')
+    elif '/adhoc' in request.path:
+        requested_type = 'adhoc'
+    elif '/bookings' in request.path:
+        requested_type = 'booking'
 
     booking = None
     is_adhoc = False
 
-    if is_adhoc_request:
-        booking = AdHocBooking.query.get(booking_id)
+    # Look for active booking owned by current faculty (or any if admin)
+    if requested_type == 'adhoc':
+        if is_admin:
+            booking = AdHocBooking.query.get(booking_id)
+        else:
+            booking = AdHocBooking.query.filter_by(id=booking_id, faculty_id=user_id).first()
         if booking:
             is_adhoc = True
         else:
+            if is_admin:
+                booking = RoomBooking.query.get(booking_id)
+            else:
+                booking = RoomBooking.query.filter_by(id=booking_id, faculty_id=user_id).first()
+    elif requested_type in ['booking', 'room_booking']:
+        if is_admin:
             booking = RoomBooking.query.get(booking_id)
-    else:
-        booking = RoomBooking.query.get(booking_id)
+        else:
+            booking = RoomBooking.query.filter_by(id=booking_id, faculty_id=user_id).first()
         if not booking:
-            booking = AdHocBooking.query.get(booking_id)
+            if is_admin:
+                booking = AdHocBooking.query.get(booking_id)
+            else:
+                booking = AdHocBooking.query.filter_by(id=booking_id, faculty_id=user_id).first()
             if booking:
                 is_adhoc = True
+    else:
+        if is_admin:
+            booking = RoomBooking.query.get(booking_id)
+            if not booking:
+                booking = AdHocBooking.query.get(booking_id)
+                if booking:
+                    is_adhoc = True
+        else:
+            booking = RoomBooking.query.filter_by(id=booking_id, faculty_id=user_id).first()
+            if not booking:
+                booking = AdHocBooking.query.filter_by(id=booking_id, faculty_id=user_id).first()
+                if booking:
+                    is_adhoc = True
 
+    # If still not found owned by user, check if record exists at all
     if not booking:
-        return api_response(success=False, error="Reservation record not found.", status=404)
-    
-    if booking.faculty_id != user_id:
-        return api_response(success=False, error="You can only cancel your own reservations.", status=403)
+        other_rb = RoomBooking.query.get(booking_id)
+        other_adhoc = AdHocBooking.query.get(booking_id)
+        if not is_admin and ((other_rb and other_rb.faculty_id != user_id) or (other_adhoc and other_adhoc.faculty_id != user_id)):
+            return api_response(success=False, error="You can only cancel your own reservations.", status=403)
+        return api_response(success=False, error="Reservation record not found or already cancelled.", status=404)
         
-    # Timezone-aware past/historical rejection
-    slot_end_dt = getattr(booking, 'slot_end', None) or getattr(booking, 'end_datetime', None)
-    if slot_end_dt:
-        slot_end_ist = to_ist(slot_end_dt)
-        if slot_end_ist < now_ist:
-            return api_response(
-                success=False,
-                error="Action rejected: Cannot cancel or modify past/historical reservations.",
-                status=400
-            )
+    # If already cancelled
+    if hasattr(booking, 'status') and booking.status == RoomBooking.STATUS_CANCELLED:
+        return api_response(success=True, message="Reservation is already cancelled.")
 
     room = booking.room
     if is_adhoc:
         db.session.delete(booking)
     else:
         booking.status = RoomBooking.STATUS_CANCELLED
+        # Also cancel all active slots from the same reservation session (e.g. multi-hour booking)
+        related_slots = RoomBooking.query.filter(
+            RoomBooking.faculty_id == booking.faculty_id,
+            RoomBooking.room_id == booking.room_id,
+            RoomBooking.date == booking.date,
+            RoomBooking.subject == booking.subject,
+            RoomBooking.status == RoomBooking.STATUS_ACTIVE
+        ).all()
+        for slot in related_slots:
+            slot.status = RoomBooking.STATUS_CANCELLED
         
     db.session.commit()
     
@@ -935,19 +983,19 @@ def check_in_booking(booking_id):
     Secures the room reservation and marks the session as active and present.
     """
     now_ist = datetime.now(IST)
-
     user_id = session.get('user_id')
     
-    # Check RoomBooking first
-    booking = RoomBooking.query.get(booking_id)
+    # Check owned booking first
+    booking = RoomBooking.query.filter_by(id=booking_id, faculty_id=user_id, status=RoomBooking.STATUS_ACTIVE).first()
     if not booking:
-        booking = AdHocBooking.query.get(booking_id)
+        booking = AdHocBooking.query.filter_by(id=booking_id, faculty_id=user_id).first()
         
     if not booking:
+        other_rb = RoomBooking.query.get(booking_id)
+        other_adhoc = AdHocBooking.query.get(booking_id)
+        if (other_rb and other_rb.faculty_id != user_id) or (other_adhoc and other_adhoc.faculty_id != user_id):
+            return api_response(success=False, error="You can only check in to your own reservations.", status=403)
         return api_response(success=False, error="Reservation record not found.", status=404)
-        
-    if booking.faculty_id != user_id:
-        return api_response(success=False, error="You can only check in to your own reservations.", status=403)
         
     if hasattr(booking, 'status') and booking.status == RoomBooking.STATUS_CANCELLED:
         return api_response(success=False, error="This booking has already been cancelled or expired under Ghost Protocol.", status=400)
@@ -955,7 +1003,11 @@ def check_in_booking(booking_id):
     # Timezone-aware check: Cannot check into past/historical sessions
     slot_end_dt = getattr(booking, 'slot_end', None) or getattr(booking, 'end_datetime', None)
     if slot_end_dt:
-        slot_end_ist = to_ist(slot_end_dt)
+        if isinstance(booking, RoomBooking):
+            slot_end_ist = slot_end_dt.replace(tzinfo=IST) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
+        else:
+            slot_end_ist = to_ist(slot_end_dt)
+            
         if slot_end_ist < now_ist:
             return api_response(
                 success=False,

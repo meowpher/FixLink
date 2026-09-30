@@ -2234,7 +2234,7 @@
         height: 22px;
         border-radius: 6px;
         border: none;
-        background: rgba(255, 255, 255, 0.65);
+        background: rgba(255, 255, 255, 0.85);
         color: #ef4444;
         display: flex;
         align-items: center;
@@ -2243,8 +2243,12 @@
         cursor: pointer;
         opacity: 0;
         transition: all 0.2s ease;
-        z-index: 6;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    .btn-delete-class i {
+        pointer-events: none;
     }
 
     .timetable-cell.occupied:hover .btn-delete-class {
@@ -2254,7 +2258,7 @@
     .btn-delete-class:hover {
         background: #ef4444;
         color: white;
-        transform: scale(1.1);
+        transform: scale(1.15);
     }
 
     .cell-subject { font-weight: 700; font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -3738,113 +3742,6 @@
                     </div>
                 </div>
 
-                <!-- Event Bookings Section -->
-                {% if my_events %}
-                    <div class="d-flex align-items-center justify-content-between mb-3 mt-4 flex-wrap gap-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-0">Event Requests & Allocations</h5>
-                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">{{ my_events|length }}</span>
-                        </div>
-                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1.5 fw-semibold" style="font-size: 0.78rem;">
-                            <i class="bi bi-plus-lg"></i><span>New Event</span>
-                        </a>
-                    </div>
-                    <div class="row g-3 mb-4">
-                        {% for ev in my_events %}
-                        <div class="col-12 col-md-6 col-xl-4">
-                            <div class="faculty-event-card status-{{ ev.status|lower }} h-100">
-                                <div class="event-card-header">
-                                    <div class="d-flex align-items-start justify-content-between gap-2">
-                                        <h6 class="event-title mb-0 text-truncate" title="{{ ev.title }}">{{ ev.title }}</h6>
-                                        {% if ev.status == 'Approved' %}
-                                            <span class="event-badge badge-approved"><i class="bi bi-check-circle-fill me-1"></i>Approved</span>
-                                        {% elif ev.status == 'Pending' %}
-                                            <span class="event-badge badge-pending"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
-                                        {% elif ev.status == 'Cancelled' %}
-                                            <span class="event-badge badge-cancelled"><i class="bi bi-x-circle-fill me-1"></i>Cancelled</span>
-                                        {% else %}
-                                            <span class="event-badge badge-rejected"><i class="bi bi-slash-circle-fill me-1"></i>Rejected</span>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                                <div class="event-card-body">
-                                    <div class="event-meta-grid">
-                                        <div class="event-meta-item">
-                                            <i class="bi bi-calendar3 text-primary"></i>
-                                            <span>{{ ev.start_date.strftime('%d %b %Y') }}{% if ev.start_date != ev.end_date %} – {{ ev.end_date.strftime('%d %b %Y') }}{% endif %}</span>
-                                        </div>
-                                        <div class="event-meta-item">
-                                            <i class="bi bi-clock text-primary"></i>
-                                            <span>{{ ev.start_time.strftime('%I:%M %p') }} – {{ ev.end_time.strftime('%I:%M %p') }}</span>
-                                        </div>
-                                        <div class="event-meta-item">
-                                            <i class="bi bi-geo-alt-fill text-primary"></i>
-                                            {% if ev.booking_type == 'floors' %}
-                                                <span>Floor: <strong>{% for f in ev.floors %}Level {{ f.level }}{% if not loop.last %}, {% endif %}{% endfor %}</strong></span>
-                                            {% else %}
-                                                <span>Rooms: <strong>{% for r in ev.rooms %}VY{{ r.number }}{% if not loop.last %}, {% endif %}{% endfor %}</strong></span>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                    {% if ev.status == 'Rejected' and ev.rejection_reason %}
-                                    <div class="event-callout callout-danger mt-2">
-                                        <i class="bi bi-exclamation-circle-fill me-1"></i><strong>Reason:</strong> {{ ev.rejection_reason }}
-                                    </div>
-                                    {% elif ev.status == 'Cancelled' and ev.rejection_reason %}
-                                    <div class="event-callout callout-secondary mt-2">
-                                        <i class="bi bi-info-circle-fill me-1"></i><strong>Note:</strong> {{ ev.rejection_reason }}
-                                    </div>
-                                    {% elif ev.description %}
-                                    <p class="event-description text-muted small mt-2 mb-0 text-truncate" title="{{ ev.description }}">{{ ev.description }}</p>
-                                    {% endif %}
-                                </div>
-                                {% if ev.status in ['Pending', 'Approved'] %}
-                                <div class="event-card-footer">
-                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" onclick="cancelFacultyEvent({{ ev.id }}, '{{ ev.title|replace('\'', '\\\'') }}')">
-                                        <i class="bi bi-x-circle"></i>Cancel Event
-                                    </button>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        {% endfor %}
-                    </div>
-                {% endif %}
-
-                <!-- Ad-Hoc Section -->
-                {% if my_adhoc %}
-                    <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-3 mt-4">Active Reservations</h5>
-                    {% for ad in my_adhoc %}
-                    <div class="slot-card shadow-sm animate-on-load cursor-pointer"
-                         onclick="locateClassroomFromCell(this)"
-                         data-room-number="{{ ad.room.number }}"
-                         data-room-id="{{ ad.room.id }}"
-                         data-floor-level="{{ ad.room.floor.level }}"
-                         data-subject="{{ ad.subject }}"
-                         data-time="{{ ad.start_datetime.strftime('%d %b %Y, %H:%M') }} - {{ ad.end_datetime.strftime('%H:%M') }}"
-                         title="Locate Room VY{{ ad.room.number }} on map">
-                        <div class="slot-time-box">
-                            <div class="time-start">{{ ad.start_datetime.strftime('%H:%M') }}</div>
-                            <div class="time-end">{{ ad.end_datetime.strftime('%H:%M') }}</div>
-                        </div>
-                        <div class="slot-details">
-                            <span class="adhoc-tag mb-2 d-inline-block">Ad-Hoc Booking</span>
-                            <div class="slot-subject text-truncate" title="{{ ad.subject }}">{{ ad.subject }}</div>
-                            <div class="slot-meta text-truncate">
-                                <div class="meta-item"><i class="bi bi-geo-alt"></i> VYAS {{ ad.room.number }}</div>
-                                <div class="meta-item"><i class="bi bi-calendar-event"></i> {{ ad.start_datetime.strftime('%d %b %Y') }}</div>
-                            </div>
-                        </div>
-                        <div class="slot-action d-flex align-items-center gap-2">
-                            <span class="room-tag">RESERVED</span>
-                            <button class="btn btn-sm btn-outline-danger text-danger bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" onclick="event.stopPropagation(); deleteBooking(event, '{{ ad.id }}')" title="Cancel Ad-Hoc Booking">
-                                <i class="bi bi-trash3-fill text-danger"></i>
-                            </button>
-                        </div>
-                    </div>
-                    {% endfor %}
-                {% endif %}
-
                 <!-- Premium Grid Timetable Section -->
                 <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
                     <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-0">Upcoming Lectures</h5>
@@ -3948,9 +3845,11 @@
                                                 data-floor-level="{{ match.room.floor.level }}"
                                                 data-time="{{ match.day_name }}, {{ match.time_str }}"
                                                 data-is-adhoc="{{ 'true' if match.is_booking else 'false' }}"
+                                                data-booking-type="{{ 'booking' if match.is_booking else 'regular' }}"
                                                 data-is-historical="{{ 'true' if match.is_historical else 'false' }}"
                                                 data-checked-in="{{ 'true' if match.checked_in else 'false' }}"
                                                 data-slot-start-iso="{{ match.slot_start_iso or '' }}"
+                                                data-entry-id="{{ match.id }}"
                                                 data-id="{{ match.id }}">
                                                 <div class="cell-content cursor-pointer {% if not match.is_booking %}cell-regular{% else %}cell-adhoc{% endif %}">
                                                     {% if not match.is_booking %}
@@ -3959,7 +3858,7 @@
                                                         </span>
                                                         {% if session.get('is_admin') %}
                                                         <button class="btn-delete-class text-danger" onclick="event.stopPropagation(); deleteClass(event, '{{ match.id }}')" title="Delete Class">
-                                                            <i class="bi bi-trash3-fill text-danger"></i>
+                                                             <i class="bi bi-trash3-fill text-danger"></i>
                                                         </button>
                                                         {% endif %}
                                                     {% else %}
@@ -3973,7 +3872,7 @@
                                                         </span>
                                                         {% endif %}
                                                         {% if not match.is_historical %}
-                                                        <button class="btn-delete-class text-danger" onclick="event.stopPropagation(); deleteBooking(event, '{{ match.id }}')" title="Cancel Booking">
+                                                        <button class="btn-delete-class text-danger" onclick="event.stopPropagation(); deleteBooking(event, '{{ match.id }}', 'booking')" title="Cancel Booking">
                                                             <i class="bi bi-trash3-fill text-danger"></i>
                                                         </button>
                                                         {% endif %}
@@ -4102,9 +4001,11 @@
                                 data-floor-level="{{ b.room.floor.level }}"
                                 data-time="{{ day_name }}, {{ b.slot_start.strftime('%I:%M %p') }} - {{ b_end }}"
                                 data-is-adhoc="true"
+                                data-booking-type="booking"
                                 data-is-historical="{{ 'true' if b.is_historical else 'false' }}"
                                 data-checked-in="{{ 'true' if b.checked_in else 'false' }}"
                                 data-slot-start-iso="{{ b.slot_start.isoformat() }}"
+                                data-entry-id="{{ b.id }}"
                                 data-id="{{ b.id }}">
                                 <div class="agenda-time-rail">
                                     <span class="time-start">{{ b.slot_start.strftime('%I:%M %p') }}</span>
@@ -4123,7 +4024,7 @@
                                 </div>
                                 <div class="agenda-card-action">
                                     {% if not b.is_historical %}
-                                    <button class="btn-agenda-delete" onclick="event.stopPropagation(); deleteBooking(event, '{{ b.id }}')" title="Cancel Ad-Hoc Booking" aria-label="Cancel Ad-Hoc Booking">
+                                    <button class="btn-agenda-delete" onclick="event.stopPropagation(); deleteBooking(event, '{{ b.id }}', 'booking')" title="Cancel Ad-Hoc Booking" aria-label="Cancel Ad-Hoc Booking">
                                         <i class="bi bi-trash3-fill"></i>
                                     </button>
                                     {% else %}
@@ -4151,6 +4052,117 @@
                     <div class="text-center py-5 glass-card border-dashed rounded-4">
                         <i class="bi bi-calendar-x display-4 text-muted mb-3 d-block"></i>
                         <p class="text-muted">No recurring classes found on your schedule.</p>
+                    </div>
+                {% endif %}
+
+                <!-- Ad-Hoc Section -->
+                {% if my_adhoc %}
+                    <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-3 mt-5">Active Reservations</h5>
+                    {% for ad in my_adhoc %}
+                    <div class="slot-card shadow-sm animate-on-load cursor-pointer"
+                         onclick="locateClassroomFromCell(this)"
+                         data-room-number="{{ ad.room.number }}"
+                         data-room-id="{{ ad.room.id }}"
+                         data-floor-level="{{ ad.room.floor.level }}"
+                         data-subject="{{ ad.subject }}"
+                         data-is-adhoc="true"
+                         data-booking-type="adhoc"
+                         data-entry-id="{{ ad.id }}"
+                         data-id="{{ ad.id }}"
+                         data-time="{{ ad.start_datetime.strftime('%d %b %Y, %H:%M') }} - {{ ad.end_datetime.strftime('%H:%M') }}"
+                         title="Locate Room VY{{ ad.room.number }} on map">
+                        <div class="slot-time-box">
+                            <div class="time-start">{{ ad.start_datetime.strftime('%H:%M') }}</div>
+                            <div class="time-end">{{ ad.end_datetime.strftime('%H:%M') }}</div>
+                        </div>
+                        <div class="slot-details">
+                            <span class="adhoc-tag mb-2 d-inline-block">Ad-Hoc Booking</span>
+                            <div class="slot-subject text-truncate" title="{{ ad.subject }}">{{ ad.subject }}</div>
+                            <div class="slot-meta text-truncate">
+                                <div class="meta-item"><i class="bi bi-geo-alt"></i> VYAS {{ ad.room.number }}</div>
+                                <div class="meta-item"><i class="bi bi-calendar-event"></i> {{ ad.start_datetime.strftime('%d %b %Y') }}</div>
+                            </div>
+                        </div>
+                        <div class="slot-action d-flex align-items-center gap-2">
+                            <span class="room-tag">RESERVED</span>
+                            <button class="btn btn-sm btn-outline-danger text-danger bg-danger bg-opacity-10 border-danger border-opacity-25 rounded-circle p-1 d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" onclick="event.stopPropagation(); deleteBooking(event, '{{ ad.id }}', 'adhoc')" title="Cancel Ad-Hoc Booking">
+                                <i class="bi bi-trash3-fill text-danger"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Event Bookings Section -->
+                {% if my_events %}
+                    <div class="d-flex align-items-center justify-content-between mb-3 mt-5 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="fw-bold text-uppercase small letter-spacing-1 text-muted mb-0">Event Requests & Allocations</h5>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">{{ my_events|length }}</span>
+                        </div>
+                        <a href="{{ url_for('faculty.book_event') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 d-inline-flex align-items-center gap-1.5 fw-semibold" style="font-size: 0.78rem;">
+                            <i class="bi bi-plus-lg"></i><span>New Event</span>
+                        </a>
+                    </div>
+                    <div class="row g-3 mb-4">
+                        {% for ev in my_events %}
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="faculty-event-card status-{{ ev.status|lower }} h-100">
+                                <div class="event-card-header">
+                                    <div class="d-flex align-items-start justify-content-between gap-2">
+                                        <h6 class="event-title mb-0 text-truncate" title="{{ ev.title }}">{{ ev.title }}</h6>
+                                        {% if ev.status == 'Approved' %}
+                                            <span class="event-badge badge-approved"><i class="bi bi-check-circle-fill me-1"></i>Approved</span>
+                                        {% elif ev.status == 'Pending' %}
+                                            <span class="event-badge badge-pending"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                                        {% elif ev.status == 'Cancelled' %}
+                                            <span class="event-badge badge-cancelled"><i class="bi bi-x-circle-fill me-1"></i>Cancelled</span>
+                                        {% else %}
+                                            <span class="event-badge badge-rejected"><i class="bi bi-slash-circle-fill me-1"></i>Rejected</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="event-card-body">
+                                    <div class="event-meta-grid">
+                                        <div class="event-meta-item">
+                                            <i class="bi bi-calendar3 text-primary"></i>
+                                            <span>{{ ev.start_date.strftime('%d %b %Y') }}{% if ev.start_date != ev.end_date %} – {{ ev.end_date.strftime('%d %b %Y') }}{% endif %}</span>
+                                        </div>
+                                        <div class="event-meta-item">
+                                            <i class="bi bi-clock text-primary"></i>
+                                            <span>{{ ev.start_time.strftime('%I:%M %p') }} – {{ ev.end_time.strftime('%I:%M %p') }}</span>
+                                        </div>
+                                        <div class="event-meta-item">
+                                            <i class="bi bi-geo-alt-fill text-primary"></i>
+                                            {% if ev.booking_type == 'floors' %}
+                                                <span>Floor: <strong>{% for f in ev.floors %}Level {{ f.level }}{% if not loop.last %}, {% endif %}{% endfor %}</strong></span>
+                                            {% else %}
+                                                <span>Rooms: <strong>{% for r in ev.rooms %}VY{{ r.number }}{% if not loop.last %}, {% endif %}{% endfor %}</strong></span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    {% if ev.status == 'Rejected' and ev.rejection_reason %}
+                                    <div class="event-callout callout-danger mt-2">
+                                        <i class="bi bi-exclamation-circle-fill me-1"></i><strong>Reason:</strong> {{ ev.rejection_reason }}
+                                    </div>
+                                    {% elif ev.status == 'Cancelled' and ev.rejection_reason %}
+                                    <div class="event-callout callout-secondary mt-2">
+                                        <i class="bi bi-info-circle-fill me-1"></i><strong>Note:</strong> {{ ev.rejection_reason }}
+                                    </div>
+                                    {% elif ev.description %}
+                                    <p class="event-description text-muted small mt-2 mb-0 text-truncate" title="{{ ev.description }}">{{ ev.description }}</p>
+                                    {% endif %}
+                                </div>
+                                {% if ev.status in ['Pending', 'Approved'] %}
+                                <div class="event-card-footer">
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" onclick="cancelFacultyEvent({{ ev.id }}, '{{ ev.title|replace('\'', '\\\'') }}')">
+                                        <i class="bi bi-x-circle"></i>Cancel Event
+                                    </button>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 {% endif %}
             </div>
@@ -5165,10 +5177,12 @@
                 const isCheckedIn = el.getAttribute('data-checked-in') === 'true';
                 const slotStartIso = el.getAttribute('data-slot-start-iso') || '';
                 const isHistorical = el.getAttribute('data-is-historical') === 'true';
+                const entryId = el.getAttribute('data-entry-id') || el.getAttribute('data-id') || el.getAttribute('data-booking-id') || '';
+                const bookingType = el.getAttribute('data-booking-type') || (isAdhoc ? 'booking' : 'regular');
 
                 activeClassData = { 
                     subject, divisionCourse, roomNumber, roomId, floorLevel, 
-                    timeStr, isAdhoc, isHistorical, entryId, isCheckedIn, slotStartIso, sourceEl: el 
+                    timeStr, isAdhoc, isHistorical, entryId, bookingType, isCheckedIn, slotStartIso, sourceEl: el 
                 };
 
                 const subjEl = document.getElementById('classDetailSubject');
@@ -5264,7 +5278,7 @@
                 btnCancelClassBooking.addEventListener('click', (e) => {
                     if (activeClassData && activeClassData.isAdhoc && window.deleteBooking) {
                         if (classDetailModal) classDetailModal.hide();
-                        window.deleteBooking(e, activeClassData.entryId);
+                        window.deleteBooking(e, activeClassData.entryId, activeClassData.bookingType || 'booking');
                     }
                 });
             }
@@ -5602,21 +5616,23 @@
 
             // Dynamic Floor Selection
             const floorSelect = document.getElementById('floorSelectorMap');
-            floorSelect.addEventListener('change', (e) => {
-                if (typeof window.closePopUp === 'function') {
-                    window.closePopUp();
-                }
-                // If user changes floor manually, exit locate target mode
-                window.isLocateTargetMode = false;
-                const container = document.getElementById('facultyMapContainer');
-                if (container) container.classList.remove('map-locate-target-mode');
-                document.querySelectorAll('.room-pulse-highlight').forEach(el => el.classList.remove('room-pulse-highlight'));
-                const adHocBanner = document.getElementById('mapAdHocBanner');
-                if (adHocBanner && !advancedSearchMode) adHocBanner.classList.add('d-none');
+            if (floorSelect) {
+                floorSelect.addEventListener('change', (e) => {
+                    if (typeof window.closePopUp === 'function') {
+                        window.closePopUp();
+                    }
+                    // If user changes floor manually, exit locate target mode
+                    window.isLocateTargetMode = false;
+                    const container = document.getElementById('facultyMapContainer');
+                    if (container) container.classList.remove('map-locate-target-mode');
+                    document.querySelectorAll('.room-pulse-highlight').forEach(el => el.classList.remove('room-pulse-highlight'));
+                    const adHocBanner = document.getElementById('mapAdHocBanner');
+                    if (adHocBanner && !advancedSearchMode) adHocBanner.classList.add('d-none');
 
-                const level = e.target.value;
-                refreshMapStatus(level);
-            });
+                    const level = e.target.value;
+                    refreshMapStatus(level);
+                });
+            }
 
             let advancedSearchMode = false;
             let advancedTimePayload = null;
@@ -5624,25 +5640,64 @@
 
             async function refreshMapStatus(floorLevel) {
                 const container = document.getElementById('facultyMapContainer');
-                if (window.isLocateTargetMode && container) {
+                if (!container) return;
+
+                if (window.isLocateTargetMode) {
                     container.classList.add('map-locate-target-mode');
-                } else if (!window.isLocateTargetMode && container) {
+                } else {
                     container.classList.remove('map-locate-target-mode');
                 }
-                const selectedOption = floorSelect.options[floorSelect.selectedIndex];
-                const floorId = selectedOption.getAttribute('data-floor-id');
-                
+
+                // Determine target level (default 4 if unspecified)
+                let targetLevel = (floorLevel !== undefined && floorLevel !== null) ? floorLevel.toString() : (floorSelect ? floorSelect.value : '4');
+
+                // Sync floor dropdown and extract data-floor-id
+                let floorId = null;
+                if (floorSelect) {
+                    let matchingOpt = floorSelect.querySelector(`option[value="${targetLevel}"]`);
+                    if (!matchingOpt && floorSelect.options.length > 0) {
+                        matchingOpt = floorSelect.options[floorSelect.selectedIndex] || floorSelect.options[0];
+                    }
+                    if (matchingOpt) {
+                        matchingOpt.selected = true;
+                        floorSelect.value = matchingOpt.value;
+                        floorId = matchingOpt.getAttribute('data-floor-id');
+                        targetLevel = matchingOpt.value;
+                    }
+                }
+
+                // Fallback floor ID if not found in dropdown: level + 1 (0 -> 1, 4 -> 5)
+                if (!floorId) {
+                    const parsedLvl = parseInt(targetLevel);
+                    floorId = (!isNaN(parsedLvl) ? (parsedLvl + 1) : 5).toString();
+                }
+
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <p class="mb-0">Loading Floor ${targetLevel} Schematics...</p>
+                    </div>
+                `;
+
                 try {
                     let url = `/faculty/api/map/status/${floorId}`;
-                    let options = {};
+                    let options = {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    };
                     
                     if (advancedSearchMode && advancedTimePayload) {
                         url = '/faculty/api/map/status_for_time';
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
                         options = {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+                                'Accept': 'application/json',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRFToken': csrfToken
                             },
                             body: JSON.stringify({
                                 floor_ids: [parseInt(floorId)],
@@ -5654,22 +5709,41 @@
                     }
 
                     const res = await fetch(url, options); 
+                    if (!res.ok) {
+                        throw new Error(`Server returned HTTP ${res.status}`);
+                    }
                     const result = await res.json();
                     
-                    if (result.success) {
-                        const rooms = result.data.rooms;
+                    if (result && result.success && result.data) {
+                        const rooms = result.data.rooms || [];
                         currentStatusData = {};
                         rooms.forEach(r => currentStatusData[r.id] = r);
                         
                         container.innerHTML = '';
-                        await renderFloorMap(container, rooms, floorLevel.toString(), false);
+                        await renderFloorMap(container, rooms, targetLevel, false);
                         
                         applyOccupancyStyling();
+                    } else {
+                        throw new Error(result?.error || 'Failed to retrieve floor status');
                     }
                 } catch (err) {
                     console.error("Map Status Error:", err);
+                    container.innerHTML = `
+                        <div class="alert alert-warning text-center my-4 py-4 rounded-4 shadow-sm mx-auto" style="max-width: 500px;">
+                            <i class="bi bi-exclamation-triangle fs-2 text-warning d-block mb-2"></i>
+                            <h6 class="fw-bold">Unable to Load Floor ${targetLevel} Schematics</h6>
+                            <p class="small text-muted mb-3">${err.message || 'Please check your connection and try again.'}</p>
+                            <button class="btn btn-primary btn-sm rounded-pill px-4" onclick="window.retryFloorLoad('${targetLevel}')">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Retry Loading
+                            </button>
+                        </div>
+                    `;
                 }
             }
+
+            window.retryFloorLoad = (level) => {
+                refreshMapStatus(level);
+            };
 
             function applyOccupancyStyling() {
                 const container = document.getElementById('facultyMapContainer');
@@ -7101,10 +7175,16 @@
                 }
             };
 
-            window.deleteBooking = async (event, bookingId, bookingType = 'adhoc') => {
+            window.deleteBooking = async (event, bookingId, bookingType = 'booking') => {
                 if (event) {
                     if (event.stopPropagation) event.stopPropagation();
                     if (event.preventDefault) event.preventDefault();
+                }
+
+                if (!bookingId) {
+                    console.error("deleteBooking called without a valid bookingId");
+                    Swal.fire('Error', 'Invalid booking identifier.', 'error');
+                    return;
                 }
                 
                 const result = await Swal.fire({
@@ -7133,7 +7213,7 @@
                         });
                         const data = await res.json();
                         if (data.success) {
-                            Swal.fire('Cancelled!', data.message, 'success').then(() => {
+                            Swal.fire('Cancelled!', data.message || 'Reservation cancelled successfully.', 'success').then(() => {
                                 location.reload();
                             });
                         } else {

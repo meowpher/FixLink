@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.11** | 2026-09-30 | **Deployed** | Faculty Ad-Hoc Multi-Hour Deletion, Real-Time Cancellation & Schedule Layout Optimization (Unified RoomBooking/AdHocBooking deletion with multi-hour contiguous slot cleanup, eliminated false historical rejections, elevated lecture timetable to top of faculty schedule, and fixed floor schematic loading). |
 | **v1.7.10** | 2026-09-22 | **Deployed** | Faculty Event Self-Cancellation & Admin Approved Event Revocation / Rejection (Allows faculty to cancel pending or approved events anytime with instant room deallocation and admin notifications; allows administrators to reject/revoke approved events anytime with live map refresh and faculty alerts). |
 | **v1.7.9** | 2026-09-22 | **Deployed** | Unified Faculty Admin Handle Console, UI Color System Harmonization & Booking History Integration (Consolidated Event Approvals, Classroom Management Module / CMM, Ghost Protocol, and Classroom Booking History into a unified portal with 4-tab navigation, adaptive Light/Dark mode color variables, fixed room number badges, and navbar Manage dropdown shortcuts). |
 | **v1.7.8** | 2026-09-22 | **Deployed** | FixLink-F Event Booking, Multi-Room Allocation, Admin Approval & Real-Time Notifications (Comprehensive faculty multi-room/floor reservation system, admin conflict-resolving approval panel with automatic lecture displacement detection, interactive navigation shortcuts, and global WebSocket notification bell). |
@@ -16,6 +17,24 @@
 
 ## 2. Chronological Log of Pushed Updates
  
+### Release v1.7.11 (2026-09-30)
+- `feat(faculty-schedule)`: **Faculty Ad-Hoc Multi-Hour Deletion, Real-Time Cancellation & Schedule Layout Optimization**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Multi-Hour Session Chunking & Contiguous Slot Cancellation**:
+     - Upgraded `/faculty/api/bookings/cancel/<id>` and `/faculty/api/adhoc/cancel/<id>` backend handlers.
+     - When cancelling any slot of a multi-hour ad-hoc booking (which stores individual 1-hour records in `room_bookings`), the system now automatically releases and cancels all contiguous active slots for that session (`faculty_id`, `room_id`, `date`, `subject`) in a single click.
+     - Resolved dual-model ID space collisions between `RoomBooking` and `AdHocBooking` by scoping queries to current faculty session ownership first.
+  2. **Phase 2: Historical Expiration & Timezone Alignment**:
+     - Corrected `is_historical` calculation in `faculty.dashboard` (`slot_end_ist.date() < now_ist.date()`) so active and same-day future bookings are never prematurely flagged as historical.
+     - Eliminated false 400 rejections ("Action rejected: Cannot cancel or modify past/historical reservations"), allowing professors to effortlessly cancel active or upcoming sessions.
+  3. **Phase 3: Schedule View Reordering & UI Ergonomics**:
+     - Reordered the Faculty Schedule view: elevated the Upcoming Lecture Timetable Grid to the top of the page and moved Event Requests & Allocations to the bottom for immediate access to day-to-day lectures.
+     - Enhanced `.btn-delete-class` hitboxes (`z-index: 10`, `pointer-events: none` on inner icon) to prevent event bubbling conflicts with cell location triggers.
+     - Fixed floor schematics rendering stall on the faculty dashboard.
+  4. **Phase 4: Automated Verification**:
+     - Added test coverage in `tests/test_meeting_room_booking.py` for RoomBooking slot cancellation; all 59 automated test suites passing with 100% success rate.
+
 ### Release v1.7.10 (2026-09-22)
 - `feat(events)`: **Faculty Event Self-Cancellation & Admin Approved Event Revocation / Rejection**
 

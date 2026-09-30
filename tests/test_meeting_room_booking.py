@@ -125,3 +125,14 @@ def test_meeting_room_booking_full_flow(client, run_app_context):
     with run_app_context:
         assert AdHocBooking.query.get(adhoc_id) is None
 
+    # 8. Cancel RoomBooking via /faculty/api/bookings/cancel/<id>
+    rb_id = bookings[0].id
+    res = client.post(f'/faculty/api/bookings/cancel/{rb_id}', json={'type': 'booking'})
+    assert res.status_code == 200
+    assert res.get_json()['success'] is True
+    assert 'cancelled successfully' in res.get_json()['message']
+
+    with run_app_context:
+        rb = RoomBooking.query.get(rb_id)
+        assert rb.status == RoomBooking.STATUS_CANCELLED
+

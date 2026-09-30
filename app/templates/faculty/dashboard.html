@@ -7,12 +7,8 @@
 {% block og_description %}Instant room booking, personal timetable sync, and live floor occupancy tracking for MIT-WPU faculty.{% endblock %}
 
 {% block extra_css %}
-<!-- Module Preload for zero waterfall delay -->
-<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/render.js') }}">
-<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/ui.js') }}">
-<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/api.js') }}">
-
 <meta name="current-user-id" content="{{ current_user_id | tojson }}">
+<link rel="preload" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}" as="style">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}">
 {% endblock %}
 
@@ -1489,12 +1485,8 @@
 {% block extra_js %}
     <!-- SweetAlert2 (self-hosted, deferred) -->
     <script defer src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
-    <!-- Pusher (self-hosted, deferred) -->
-    <script defer src="{{ url_for('static', filename='js/pusher.min.js') }}"></script>
 
-    <script type="module">
-        import { renderFloorMap } from "{{ url_for('static', filename='js/modules/render.js') }}";
-
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Current logged-in user ID (read from meta tag to keep Jinja out of JS module scope)
             const currentUserId = JSON.parse(document.querySelector('meta[name="current-user-id"]').content);
@@ -1534,32 +1526,38 @@
             }
             highlightTodayGrid();
 
-            // Staggered Entry Animation
-            if (window.gsap) {
-                gsap.from(".animate-on-load", {
-                    opacity: 0,
-                    y: 20,
-                    duration: 0.6,
-                    stagger: 0.1,
-                    ease: "power2.out"
-                });
-            }
+            // Staggered Entry Animation (Scheduled via rAF to unblock critical paint)
+            requestAnimationFrame(() => {
+                if (window.gsap) {
+                    gsap.from(".animate-on-load", {
+                        opacity: 0,
+                        y: 15,
+                        duration: 0.4,
+                        stagger: 0.05,
+                        ease: "power2.out"
+                    });
+                }
+            });
 
             let currentStatusData = {};
             let selectedRoomId = null;
 
-            // ── Phase 1: Auto-relocate all modals and offcanvases directly to document.body ──
-            // Guarantees modals sit directly above document.body without stacking context or parent clipping
-            document.querySelectorAll('.modal, .offcanvas').forEach(el => {
-                if (el.parentElement !== document.body) {
-                    document.body.appendChild(el);
+            // Relocate modal to document.body on demand when shown (eliminates page load DOM thrashing)
+            document.addEventListener('show.bs.modal', (event) => {
+                if (event.target && event.target.parentElement !== document.body) {
+                    document.body.appendChild(event.target);
                 }
             });
 
-            // Pre-initialize modals
-            const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
-            const classDetailModalEl = document.getElementById('classDetailModal');
-            const classDetailModal = classDetailModalEl ? new bootstrap.Modal(classDetailModalEl) : null;
+            // Lazy modal getter
+            let _classDetailModal = null;
+            const getClassDetailModal = () => {
+                if (!_classDetailModal) {
+                    const el = document.getElementById('classDetailModal');
+                    if (el && window.bootstrap) _classDetailModal = new bootstrap.Modal(el);
+                }
+                return _classDetailModal;
+            };
 
             // ── Phase 1: DOM Garbage Collection Listener (hidden.bs.modal & hidden.bs.offcanvas) ──
             document.addEventListener('hidden.bs.modal', (event) => {
@@ -1720,8 +1718,9 @@
                     }
                 }
 
-                if (classDetailModal) {
-                    classDetailModal.show();
+                const modal = getClassDetailModal();
+                if (modal) {
+                    modal.show();
                 }
             };
 
@@ -1729,7 +1728,8 @@
             if (btnViewClassOnMap) {
                 btnViewClassOnMap.addEventListener('click', () => {
                     if (activeClassData && window.locateRoom) {
-                        if (classDetailModal) classDetailModal.hide();
+                        const modal = getClassDetailModal();
+                        if (modal) modal.hide();
                         window.locateRoom(activeClassData.roomNumber, activeClassData.roomId, activeClassData.floorLevel);
                     }
                 });
@@ -1739,7 +1739,8 @@
             if (btnCancelClassBooking) {
                 btnCancelClassBooking.addEventListener('click', (e) => {
                     if (activeClassData && activeClassData.isAdhoc && window.deleteBooking) {
-                        if (classDetailModal) classDetailModal.hide();
+                        const modal = getClassDetailModal();
+                        if (modal) modal.hide();
                         window.deleteBooking(e, activeClassData.entryId, activeClassData.bookingType || 'booking');
                     }
                 });

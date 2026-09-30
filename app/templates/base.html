@@ -52,7 +52,10 @@
     }
     </script>
 
-    <!-- Critical Core Stylesheets -->
+    <!-- Critical Core Stylesheets with Preload (FCP Optimization) -->
+    <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.3" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/base_addons.min.css') }}?v=1.0" as="style">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.3">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/base_addons.min.css') }}?v=1.0">
@@ -2277,7 +2280,11 @@
     });
 
     document.addEventListener('DOMContentLoaded', () => {
-        window.initCustomDropdowns();
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => window.initCustomDropdowns(), { timeout: 1200 });
+        } else {
+            setTimeout(() => window.initCustomDropdowns(), 50);
+        }
     });
 
     document.addEventListener('shown.bs.modal', (e) => {

@@ -55,6 +55,9 @@
     --notif-mark-btn-border: rgba(59, 130, 246, 0.4);
     --notif-mark-btn-color: #60a5fa;
     --notif-mark-btn-hover: #3b82f6;
+/* Hide top bar back button since notifications page has its own dedicated in-page back button */
+#mobile-topbar-back-btn {
+    display: none !important;
 }
 
 .notifications-page-container {
@@ -150,8 +153,7 @@
     background: var(--notif-mark-btn-hover) !important;
     color: #ffffff !important;
     border-color: var(--notif-mark-btn-hover) !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    box-shadow: none !important;
 }
 
 .notif-filter-pill {
@@ -181,7 +183,7 @@
     background: #2563eb !important;
     color: #ffffff !important;
     border-color: #2563eb !important;
-    box-shadow: 0 3px 10px rgba(37, 99, 235, 0.35);
+    box-shadow: none !important;
 }
 
 .notif-filter-pill .badge {
@@ -212,6 +214,7 @@
     align-items: flex-start;
     gap: 0.9rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    overflow: hidden;
 }
 
 @media (min-width: 768px) {
@@ -237,7 +240,17 @@
 .notif-card.unread {
     background: var(--notif-unread-bg);
     border-color: var(--notif-unread-border);
-    border-left: 4px solid var(--notif-unread-accent);
+}
+
+.notif-card.unread::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--notif-unread-accent);
+    border-radius: 4px 0 0 4px;
 }
 
 .notif-icon-circle {
@@ -293,31 +306,52 @@
 }
 
 .notif-action-btn {
-    font-size: 0.78rem;
+    font-size: 0.82rem;
     font-weight: 600;
-    padding: 0.35rem 0.85rem;
+    padding: 0.45rem 1.15rem;
     border-radius: 20px;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    transition: all 0.2s ease;
+    gap: 0.4rem;
+    background: #2563eb !important;
+    border: none !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+    transition: background-color 0.15s ease;
+}
+
+.notif-action-btn:hover {
+    background: #1d4ed8 !important;
+    color: #ffffff !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .notif-mark-read-btn {
     background: transparent;
     border: none;
     color: var(--notif-text-muted);
-    padding: 4px 8px;
+    padding: 6px 12px;
     border-radius: 8px;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
 }
 
 .notif-mark-read-btn:hover {
-    background: var(--notif-border);
-    color: var(--notif-text-primary);
+    background: var(--notif-surface-hover);
+    color: var(--notif-unread-accent);
+}
+
+[data-theme="dark"] .notif-mark-read-btn:hover,
+[data-bs-theme="dark"] .notif-mark-read-btn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #60a5fa;
 }
 
 /* ── Empty State ── */
@@ -416,30 +450,28 @@
 
                     <!-- Content -->
                     <div class="flex-grow-1 min-w-0">
-                        <div class="d-flex align-items-center justify-content-between gap-2 mb-1">
-                            <div class="d-flex align-items-center min-w-0">
-                                <div class="notif-title text-truncate">{{ notif.title }}</div>
-                            </div>
-                            <span class="notif-meta flex-shrink-0" style="font-size: 0.72rem;">
+                        <div class="d-flex align-items-start justify-content-between gap-3 mb-1.5 flex-wrap flex-sm-nowrap">
+                            <div class="notif-title">{{ notif.title }}</div>
+                            <span class="notif-meta flex-shrink-0 text-nowrap ms-auto" style="font-size: 0.72rem; margin-top: 1px;">
                                 {{ notif.created_at.strftime('%b %d, %I:%M %p') if notif.created_at else '' }}
                             </span>
                         </div>
 
                         <div class="notif-message">{{ notif.message }}</div>
 
-                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-1">
+                        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2">
                             {% if notif.link and notif.link != '#' %}
                                 <a href="{{ notif.link }}" class="btn btn-sm btn-primary notif-action-btn" onclick="markAndNavigate({{ notif.id }}, '{{ notif.link }}', event)">
                                     <span>View Details</span>
                                     <i class="bi bi-arrow-right"></i>
                                 </a>
                             {% else %}
-                                <span></span>
+                                <div></div>
                             {% endif %}
 
                             {% if not notif.is_read %}
-                                <button type="button" class="notif-mark-read-btn" onclick="markSingleAsRead({{ notif.id }})" title="Mark as read">
-                                    <i class="bi bi-check2 me-1"></i>Mark read
+                                <button type="button" class="notif-mark-read-btn ms-auto" onclick="markSingleAsRead({{ notif.id }})" title="Mark as read">
+                                    <i class="bi bi-check2"></i><span>Mark read</span>
                                 </button>
                             {% endif %}
                         </div>

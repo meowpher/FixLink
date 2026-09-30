@@ -279,6 +279,8 @@ def create_app(config_name=None):
                 except Exception:
                     pass
 
+        if session.get('tab_guard_id'):
+            response.headers['X-Tab-Guard-ID'] = session['tab_guard_id']
         return response
     
     # Global Template Context with G-Memoization

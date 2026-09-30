@@ -34,9 +34,7 @@ def login():
 @professional_bp.route('/logout')
 def logout():
     """Logout the current professional."""
-    session.pop('professional_id', None)
-    session.pop('professional_name', None)
-    session.pop('professional_category', None)
+    session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('professional.login'))
 

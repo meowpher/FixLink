@@ -73,6 +73,7 @@ def login():
         password = request.form.get('password', '').strip()
         
         if check_super_admin(email, password):
+            session['tab_guard_id'] = secrets.token_hex(16)
             session['is_super_admin'] = True
             session['super_admin_email'] = email
             session['user_email'] = email
@@ -102,8 +103,7 @@ def login():
 @superadmin_bp.route('/developer/logout')
 def logout():
     """Logout super admin."""
-    session.pop('is_super_admin', None)
-    session.pop('super_admin_email', None)
+    session.clear()
     flash('Logged out.', 'info')
     return redirect(url_for('superadmin.login'))
 

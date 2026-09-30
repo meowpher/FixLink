@@ -65,6 +65,13 @@
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') }}"></noscript>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- Enterprise Cross-Tab Session Guard Metadata (Zero-Trust Anchor) -->
+    <meta name="tab-guard-id" content="{{ session.get('tab_guard_id', '') }}">
+    <meta name="user-id" content="{{ session.get('user_id', session.get('professional_id', '')) }}">
+    <meta name="user-email" content="{{ session.get('user_email', session.get('super_admin_email', '')) }}">
+    <meta name="is-authenticated" content="{{ 'true' if (session.get('user_id') or session.get('professional_id') or session.get('is_super_admin')) else 'false' }}">
+    <script src="{{ url_for('static', filename='js/cross_tab_guard.js') }}?v=1.0"></script>
+
     <!-- Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 

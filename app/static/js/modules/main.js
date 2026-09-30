@@ -6,14 +6,22 @@ import * as api from './api.js';
 import * as render from './render.js';
 import * as ui from './ui.js';
 
-document.addEventListener('DOMContentLoaded', () => {
-    initializeFloorMap();
-    initializeReportForm();
-    initializeValidation();
-    if (ui && ui.initializeIssueDropdown) {
-        ui.initializeIssueDropdown();
-    }
-});
+const onReady = () => {
+    requestAnimationFrame(() => {
+        initializeFloorMap();
+        initializeReportForm();
+        initializeValidation();
+        if (ui && ui.initializeIssueDropdown) {
+            ui.initializeIssueDropdown();
+        }
+    });
+};
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', onReady);
+} else {
+    onReady();
+}
 
 /**
  * Initialize floor selection and map loading.

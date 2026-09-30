@@ -11,6 +11,9 @@
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/render.js') }}">
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/ui.js') }}">
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/api.js') }}">
+{% if selected_floor %}
+<link rel="preload" href="/static/images/floors/VY{{ selected_floor.level }}.svg" as="fetch" crossorigin="anonymous">
+{% endif %}
 <style>
 @media (max-width: 767px) {
     /* ── Legend: split into two clean pill rows ── */

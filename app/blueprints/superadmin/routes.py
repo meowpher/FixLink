@@ -132,6 +132,46 @@ def dashboard():
 
 
 
+@superadmin_bp.route('/developer/bugs/<int:bug_id>/resolve', methods=['POST'])
+@super_admin_required
+def resolve_single_bug(bug_id):
+    from ...models import BugReport
+    bug = db.session.get(BugReport, bug_id)
+    if not bug:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'success': False, 'error': 'Bug report not found'}), 404
+        flash('Bug report not found.', 'danger')
+        return redirect(url_for('superadmin.dashboard'))
+    
+    bug.status = BugReport.STATUS_RESOLVED
+    db.session.commit()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': f'Bug #{bug_id} marked as resolved.'})
+    flash(f'Bug #{bug_id} marked as resolved.', 'success')
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@superadmin_bp.route('/developer/bugs/<int:bug_id>/delete', methods=['POST'])
+@super_admin_required
+def delete_single_bug(bug_id):
+    from ...models import BugReport
+    bug = db.session.get(BugReport, bug_id)
+    if not bug:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'success': False, 'error': 'Bug report not found'}), 404
+        flash('Bug report not found.', 'danger')
+        return redirect(url_for('superadmin.dashboard'))
+    
+    db.session.delete(bug)
+    db.session.commit()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': f'Bug #{bug_id} permanently deleted.'})
+    flash(f'Bug #{bug_id} deleted.', 'info')
+    return redirect(url_for('superadmin.dashboard'))
+
+
 @superadmin_bp.route('/developer/bugs/bulk-resolve', methods=['POST'])
 @super_admin_required
 def bulk_resolve_bugs():

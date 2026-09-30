@@ -175,6 +175,23 @@ class TestSuperAdminGuard(unittest.TestCase):
             self.assertEqual(b2_db.status, BugReport.STATUS_RESOLVED)
             self.assertEqual(b3_db.status, BugReport.STATUS_OPEN)
 
+        # Super admin single resolve
+        res_single_resolve = self.client.post(f'/developer/bugs/{b3_id}/resolve', headers={'X-Requested-With': 'XMLHttpRequest'})
+        self.assertEqual(res_single_resolve.status_code, 200)
+        self.assertTrue(res_single_resolve.get_json()['success'])
+
+        with self.app.app_context():
+            b3_db = db.session.get(BugReport, b3_id)
+            self.assertEqual(b3_db.status, BugReport.STATUS_RESOLVED)
+
+        # Super admin single delete
+        res_single_delete = self.client.post(f'/developer/bugs/{b2_id}/delete', headers={'X-Requested-With': 'XMLHttpRequest'})
+        self.assertEqual(res_single_delete.status_code, 200)
+        self.assertTrue(res_single_delete.get_json()['success'])
+
+        with self.app.app_context():
+            self.assertIsNone(db.session.get(BugReport, b2_id))
+
         # Super admin bulk delete
         res_delete = self.client.post('/developer/bugs/bulk-delete', json={'bug_ids': [b1_id, b3_id]}, headers={'X-Requested-With': 'XMLHttpRequest'})
         self.assertEqual(res_delete.status_code, 200)
@@ -182,7 +199,6 @@ class TestSuperAdminGuard(unittest.TestCase):
 
         with self.app.app_context():
             self.assertIsNone(db.session.get(BugReport, b1_id))
-            self.assertIsNotNone(db.session.get(BugReport, b2_id))
             self.assertIsNone(db.session.get(BugReport, b3_id))
 
 if __name__ == '__main__':

@@ -246,11 +246,15 @@ def create_app(config_name=None):
         response.headers['Cross-Origin-Resource-Policy'] = 'same-origin'
         response.headers['X-Permitted-Cross-Domain-Policies'] = 'none'
 
-        # 2. Static Asset Caching (Performance 100/100)
+        # 2. Static Asset & Page Caching (Performance 100/100 & BFCache Restoration)
         if request.path.startswith('/static/'):
             response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
-        elif 'Cache-Control' not in response.headers:
-            response.headers['Cache-Control'] = 'private, no-cache, must-revalidate'
+        else:
+            # Overwrite any default 'no-store' headers to allow Back/Forward Cache (BFCache)
+            # while still requiring revalidation on browser return
+            current_cc = response.headers.get('Cache-Control', '')
+            if not current_cc or 'no-store' in current_cc:
+                response.headers['Cache-Control'] = 'private, no-cache, must-revalidate'
 
         # 3. Dynamic Gzip Compression Middleware (Performance 100/100)
         accept_encoding = request.headers.get('Accept-Encoding', '')

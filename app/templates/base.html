@@ -55,6 +55,7 @@
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.3">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/base_addons.min.css') }}?v=1.0">
 
     <!-- Bootstrap Icons (self-hosted minified, non-render-blocking) -->
     <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -77,285 +78,6 @@
     </noscript>
     {% endif %}
 
-    <style>
-        /* Global Typography Scaling */
-        html {
-            font-size: 14px !important;
-        }
-        body {
-            font-size: 0.875rem !important;
-            line-height: 1.5 !important;
-        }
-        .small, small {
-            font-size: 0.75rem !important;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           GLOBAL SLEEK HORIZONTAL SCROLLBAR SYSTEM
-           ═══════════════════════════════════════════════════════════════ */
-        * {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(37, 99, 235, 0.35) transparent;
-        }
-
-        [data-theme="dark"] *,
-        [data-bs-theme="dark"] *,
-        body.dark-mode * {
-            scrollbar-color: rgba(96, 165, 250, 0.45) transparent;
-        }
-
-        /* WebKit Scrollbars */
-        *::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-        *::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.04);
-            border-radius: 99px;
-            margin: 0 4px;
-        }
-        *::-webkit-scrollbar-thumb {
-            background: rgba(37, 99, 235, 0.35);
-            border-radius: 99px;
-            transition: background 0.2s ease;
-        }
-        *::-webkit-scrollbar-thumb:hover {
-            background: rgba(37, 99, 235, 0.7);
-        }
-
-        [data-theme="dark"] *::-webkit-scrollbar-track,
-        [data-bs-theme="dark"] *::-webkit-scrollbar-track,
-        body.dark-mode *::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.06);
-        }
-        [data-theme="dark"] *::-webkit-scrollbar-thumb,
-        [data-bs-theme="dark"] *::-webkit-scrollbar-thumb,
-        body.dark-mode *::-webkit-scrollbar-thumb {
-            background: rgba(96, 165, 250, 0.45);
-        }
-        [data-theme="dark"] *::-webkit-scrollbar-thumb:hover,
-        [data-bs-theme="dark"] *::-webkit-scrollbar-thumb:hover,
-        body.dark-mode *::-webkit-scrollbar-thumb:hover {
-            background: rgba(96, 165, 250, 0.8);
-        }
-
-        /* Dedicated Horizontal Scrollable Elements */
-        .table-responsive,
-        .history-table-wrap,
-        .cmm-table-responsive,
-        .floor-sidebar-nav,
-        .handle-desktop-tabs,
-        .quick-date-pill-container,
-        .faculty-day-tabs-wrapper,
-        .hero-stats,
-        .overflow-x-auto {
-            scrollbar-width: thin !important;
-            scrollbar-color: rgba(37, 99, 235, 0.35) transparent !important;
-            -webkit-overflow-scrolling: touch;
-        }
-        [data-theme="dark"] .table-responsive,
-        [data-bs-theme="dark"] .table-responsive,
-        [data-theme="dark"] .history-table-wrap,
-        [data-bs-theme="dark"] .history-table-wrap,
-        [data-theme="dark"] .cmm-table-responsive,
-        [data-bs-theme="dark"] .cmm-table-responsive,
-        [data-theme="dark"] .floor-sidebar-nav,
-        [data-bs-theme="dark"] .floor-sidebar-nav,
-        [data-theme="dark"] .handle-desktop-tabs,
-        [data-bs-theme="dark"] .handle-desktop-tabs,
-        [data-theme="dark"] .quick-date-pill-container,
-        [data-bs-theme="dark"] .quick-date-pill-container,
-        [data-theme="dark"] .faculty-day-tabs-wrapper,
-        [data-bs-theme="dark"] .faculty-day-tabs-wrapper,
-        [data-theme="dark"] .hero-stats,
-        [data-bs-theme="dark"] .hero-stats,
-        [data-theme="dark"] .overflow-x-auto,
-        [data-bs-theme="dark"] .overflow-x-auto {
-            scrollbar-color: rgba(96, 165, 250, 0.45) transparent !important;
-        }
-
-        .table-responsive::-webkit-scrollbar,
-        .history-table-wrap::-webkit-scrollbar,
-        .cmm-table-responsive::-webkit-scrollbar,
-        .floor-sidebar-nav::-webkit-scrollbar,
-        .handle-desktop-tabs::-webkit-scrollbar,
-        .quick-date-pill-container::-webkit-scrollbar,
-        .faculty-day-tabs-wrapper::-webkit-scrollbar,
-        .hero-stats::-webkit-scrollbar,
-        .overflow-x-auto::-webkit-scrollbar {
-            width: 4px;
-            height: 4px;
-        }
-
-        /* ═══════════════════════════════════════════════════════════════
-           UNIVERSAL CUSTOM DROPDOWN SYSTEM
-           ═══════════════════════════════════════════════════════════════ */
-        .custom-dropdown-container {
-            position: relative;
-            user-select: none;
-            display: inline-block;
-            width: 100%;
-            vertical-align: middle;
-        }
-        .custom-dropdown-trigger {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            min-height: 38px;
-            padding: 0.42rem 0.85rem;
-            background: var(--bg-card, #ffffff);
-            border: 1.5px solid var(--border-color, #cbd5e1);
-            border-radius: 10px;
-            font-size: 0.86rem;
-            font-weight: 500;
-            color: var(--text-primary, #1e293b);
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            text-align: left;
-            box-sizing: border-box;
-        }
-        .custom-dropdown-trigger .dropdown-selected-label {
-            display: inline-flex;
-            align-items: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex-grow: 1;
-            min-width: 0;
-        }
-        .custom-dropdown-trigger:hover,
-        .custom-dropdown-trigger:focus,
-        .custom-dropdown-container.open .custom-dropdown-trigger {
-            border-color: #2563eb !important;
-            background: var(--bg-card, #ffffff) !important;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
-            outline: none;
-        }
-        .custom-dropdown-trigger .dropdown-caret {
-            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-            color: var(--text-muted, #64748b);
-            font-size: 0.75rem;
-            flex-shrink: 0;
-            margin-left: 8px;
-        }
-        .custom-dropdown-container.open .custom-dropdown-trigger .dropdown-caret {
-            transform: rotate(180deg);
-            color: #2563eb;
-        }
-        .custom-dropdown-menu {
-            position: absolute;
-            top: calc(100% + 5px);
-            left: 0;
-            right: 0;
-            background: var(--bg-card, #ffffff);
-            border: 1px solid var(--border-color, #e2e8f0);
-            border-radius: 12px;
-            box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.14), 0 4px 10px -2px rgba(0, 0, 0, 0.05);
-            z-index: 1085;
-            padding: 6px;
-            display: none;
-            max-height: 240px;
-            overflow-y: auto;
-            scrollbar-width: thin;
-        }
-        .custom-dropdown-container.open .custom-dropdown-menu {
-            display: block;
-            animation: dropMenuFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        @keyframes dropMenuFadeIn {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .custom-dropdown-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0.5rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.84rem;
-            font-weight: 500;
-            color: var(--text-primary, #334155);
-            cursor: pointer;
-            transition: all 0.15s ease;
-            gap: 0.5rem;
-        }
-        .custom-dropdown-item:hover {
-            background: rgba(37, 99, 235, 0.08);
-            color: #2563eb;
-        }
-        .custom-dropdown-item.selected {
-            background: rgba(37, 99, 235, 0.12);
-            color: #2563eb;
-            font-weight: 600;
-        }
-        .custom-dropdown-item.disabled {
-            opacity: 0.45;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-        .custom-dropdown-item .item-check {
-            font-size: 0.85rem;
-            flex-shrink: 0;
-        }
-
-        /* Compact sizing modifier for small selects */
-        .custom-dropdown-container.dropdown-sm .custom-dropdown-trigger {
-            min-height: 32px;
-            padding: 0.25rem 0.65rem;
-            font-size: 0.8rem;
-            border-radius: 8px;
-        }
-        .custom-dropdown-container.dropdown-sm .custom-dropdown-item {
-            padding: 0.35rem 0.6rem;
-            font-size: 0.78rem;
-        }
-
-        /* Dark Mode */
-        [data-theme="dark"] .custom-dropdown-trigger,
-        [data-bs-theme="dark"] .custom-dropdown-trigger,
-        body.dark-mode .custom-dropdown-trigger {
-            background: #181818 !important;
-            border-color: #262626 !important;
-            color: #f4f4f5 !important;
-        }
-        [data-theme="dark"] .custom-dropdown-trigger:hover,
-        [data-theme="dark"] .custom-dropdown-trigger:focus,
-        [data-theme="dark"] .custom-dropdown-container.open .custom-dropdown-trigger,
-        [data-bs-theme="dark"] .custom-dropdown-trigger:hover,
-        [data-bs-theme="dark"] .custom-dropdown-trigger:focus,
-        [data-bs-theme="dark"] .custom-dropdown-container.open .custom-dropdown-trigger,
-        body.dark-mode .custom-dropdown-trigger:hover,
-        body.dark-mode .custom-dropdown-trigger:focus,
-        body.dark-mode .custom-dropdown-container.open .custom-dropdown-trigger {
-            border-color: #3b82f6 !important;
-            background: #1e1e1e !important;
-        }
-        [data-theme="dark"] .custom-dropdown-menu,
-        [data-bs-theme="dark"] .custom-dropdown-menu,
-        body.dark-mode .custom-dropdown-menu {
-            background: #181818 !important;
-            border-color: #262626 !important;
-            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7) !important;
-        }
-        [data-theme="dark"] .custom-dropdown-item,
-        [data-bs-theme="dark"] .custom-dropdown-item,
-        body.dark-mode .custom-dropdown-item {
-            color: #d4d4d8 !important;
-        }
-        [data-theme="dark"] .custom-dropdown-item:hover,
-        [data-bs-theme="dark"] .custom-dropdown-item:hover,
-        body.dark-mode .custom-dropdown-item:hover {
-            background: #222222 !important;
-            color: #60a5fa !important;
-        }
-        [data-theme="dark"] .custom-dropdown-item.selected,
-        [data-bs-theme="dark"] .custom-dropdown-item.selected,
-        body.dark-mode .custom-dropdown-item.selected {
-            background: rgba(59, 130, 246, 0.2) !important;
-            color: #60a5fa !important;
-        }
-    </style>
 
     {% block extra_css %}{% endblock %}
 </head>
@@ -821,89 +543,6 @@
     </nav>
     <!-- ═══════════════════════════════════════════════════ -->
 
-    <!-- Navigation (Modern Capsule) -->
-    <style>
-        .pointer-events-none { pointer-events: none; }
-        .pointer-events-auto { pointer-events: auto; }
-        .nav-capsule {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 40px;
-            border: 1px solid rgba(0, 0, 0, 0.05);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-        }
-        [data-theme="dark"] .nav-capsule {
-            background: rgba(15, 22, 36, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        .nav-capsule .nav-link {
-            color: var(--text-color);
-            font-weight: 500;
-            font-size: 0.9rem;
-            padding: 8px 16px;
-            border-radius: 30px;
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            white-space: nowrap;
-        }
-        .nav-capsule .nav-link:hover {
-            background: rgba(var(--mitwpu-blue-rgb), 0.1);
-            color: var(--mitwpu-blue);
-        }
-        .nav-capsule .nav-link.active {
-            background: var(--mitwpu-blue);
-            color: white !important;
-            box-shadow: none !important;
-        }
-        [data-theme="dark"] .nav-capsule .nav-link.active {
-            background: #1d4ed8;
-            box-shadow: none !important;
-        }
-        .brand-text-capsule {
-            font-weight: 800;
-            font-size: 1.15rem;
-            color: var(--text-main);
-            letter-spacing: -0.5px;
-        }
-        .global-chat-badge {
-            font-size: 0.68rem !important;
-            font-weight: 700 !important;
-            line-height: 1 !important;
-            padding: 2.5px 5.5px !important;
-            background-color: #ef4444 !important;
-            color: #ffffff !important;
-            border-radius: 999px !important;
-            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4) !important;
-            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s ease !important;
-            vertical-align: middle !important;
-        }
-        .bottom-nav-chat-badge {
-            position: absolute !important;
-            top: -5px !important;
-            right: -10px !important;
-            font-size: 0.6rem !important;
-            padding: 2px 4.5px !important;
-            min-width: 15px !important;
-            text-align: center !important;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-        }
-        .chat-badge-pulse {
-            animation: chatBadgePulse 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        @keyframes chatBadgePulse {
-            0% { transform: scale(0.5); }
-            60% { transform: scale(1.3); }
-            100% { transform: scale(1); }
-        }
-    </style>
-
     <div class="fixed-top mt-4 d-none d-lg-flex justify-content-center pointer-events-none" style="z-index: 1040;">
         <div class="nav-capsule pointer-events-auto">
             <!-- Brand -->
@@ -1236,9 +875,13 @@
         };
 
         if ('requestIdleCallback' in window) {
-            requestIdleCallback(loadUserProfile, { timeout: 2000 });
+            window.addEventListener('load', () => {
+                requestIdleCallback(loadUserProfile, { timeout: 2500 });
+            });
         } else {
-            setTimeout(loadUserProfile, 500);
+            window.addEventListener('load', () => {
+                setTimeout(loadUserProfile, 1500);
+            });
         }
 
         // Photo upload
@@ -1428,8 +1071,16 @@
             return date.toLocaleDateString();
         }
 
-        // Always fetch notifications on load
-        fetchNotifications();
+        // Fetch notifications after initial render in idle time or on interaction
+        if ('requestIdleCallback' in window) {
+            window.addEventListener('load', () => {
+                requestIdleCallback(fetchNotifications, { timeout: 2500 });
+            });
+        } else {
+            window.addEventListener('load', () => {
+                setTimeout(fetchNotifications, 1500);
+            });
+        }
 
         if (dropBtn) {
             dropBtn.addEventListener('show.bs.dropdown', fetchNotifications);
@@ -1583,9 +1234,8 @@
     <meta name="chat-channel" content="{% if session.get('is_admin') %}private-admins{% elif session.get('professional_id') %}private-professional-{{ session.get('professional_id') }}{% endif %}">
     <script defer src="{{ url_for('static', filename='js/pusher.min.js') }}"></script>
     <script>
-    // Global Chat Notification Logic (Non-blocking deferred execution)
-    window.addEventListener('load', function() {
-        // Fetch unread count on page load
+    // Global Chat Notification Logic (Non-blocking idle execution without forced reflows)
+    (function() {
         function updateGlobalChatBadges(count) {
             const numCount = parseInt(count, 10) || 0;
             const badges = document.querySelectorAll('.global-chat-badge');
@@ -1595,8 +1245,9 @@
                     if (badge.textContent !== text) {
                         badge.textContent = text;
                         badge.classList.remove('chat-badge-pulse');
-                        void badge.offsetWidth; // Trigger DOM reflow for pulse animation
-                        badge.classList.add('chat-badge-pulse');
+                        requestAnimationFrame(() => {
+                            badge.classList.add('chat-badge-pulse');
+                        });
                     }
                     badge.classList.remove('d-none');
                 } else {
@@ -1605,73 +1256,78 @@
                 }
             });
         }
-        
-        // Only run if logged in
-        if (document.querySelector('meta[name="user-logged-in"]').content === 'true') {
-            
-            window.refreshGlobalChatBadges = function() {
-                fetch('/api/chat/unread_total')
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data && data.success) {
-                            const count = (data.data && typeof data.data.unread_count !== 'undefined') 
-                                ? data.data.unread_count 
-                                : (typeof data.unread_count !== 'undefined' ? data.unread_count : 0);
-                            updateGlobalChatBadges(count);
-                        }
-                    })
-                    .catch(e => console.error('Failed to fetch unread chat count:', e));
-            };
-            
-            // Initial fetch
-            window.refreshGlobalChatBadges();
 
-            // Periodic background sync every 10 seconds for real-time fallback
-            setInterval(function() {
-                if (!window.location.pathname.includes('/chat')) {
-                    window.refreshGlobalChatBadges();
-                }
-            }, 10000);
-                
-            // Setup global Pusher for live chat pings
-            const pKey = '{{ config["PUSHER_KEY"] }}';
-            if (pKey && pKey !== 'dummy-key' && pKey !== 'None') {
-                try {
-                    Pusher.logToConsole = false;
-                    const pusher = new Pusher('{{ config["PUSHER_KEY"] }}', {
-                        cluster: '{{ config["PUSHER_CLUSTER"] }}',
-                        authEndpoint: '/pusher/auth',
-                        auth: {
-                            headers: {
-                                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+        const runDeferredChatSetup = function() {
+            // Only run if logged in
+            if (document.querySelector('meta[name="user-logged-in"]')?.content === 'true') {
+                window.refreshGlobalChatBadges = function() {
+                    fetch('/api/chat/unread_total')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data && data.success) {
+                                const count = (data.data && typeof data.data.unread_count !== 'undefined') 
+                                    ? data.data.unread_count 
+                                    : (typeof data.unread_count !== 'undefined' ? data.unread_count : 0);
+                                updateGlobalChatBadges(count);
                             }
-                        }
-                    });
+                        })
+                        .catch(e => console.error('Failed to fetch unread chat count:', e));
+                };
+                
+                // Initial fetch
+                window.refreshGlobalChatBadges();
+
+                // Periodic background sync every 15 seconds for real-time fallback
+                setInterval(function() {
+                    if (!window.location.pathname.includes('/chat')) {
+                        window.refreshGlobalChatBadges();
+                    }
+                }, 15000);
                     
-                    let channelName = document.querySelector('meta[name="chat-channel"]')?.content;
-                    
-                    if (channelName) {
+                // Setup global Pusher for live chat pings
+                const pKey = '{{ config["PUSHER_KEY"] }}';
+                let channelName = document.querySelector('meta[name="chat-channel"]')?.content;
+                if (channelName && pKey && pKey !== 'dummy-key' && pKey !== 'None' && typeof Pusher !== 'undefined') {
+                    try {
+                        Pusher.logToConsole = false;
+                        const pusher = new Pusher('{{ config["PUSHER_KEY"] }}', {
+                            cluster: '{{ config["PUSHER_CLUSTER"] }}',
+                            authEndpoint: '/pusher/auth',
+                            auth: {
+                                headers: {
+                                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                                }
+                            }
+                        });
+                        
                         const channel = pusher.subscribe(channelName);
                         channel.bind('new_chat_message', function(data) {
-                            // If we are not on the chat page, refresh global badges immediately.
                             if (!window.location.pathname.includes('/chat')) {
                                 window.refreshGlobalChatBadges();
-                                
-                                // Optional: play a subtle notification sound
                                 try {
                                     const audio = new Audio('/static/sounds/notification.mp3');
                                     audio.volume = 0.5;
-                                    audio.play().catch(e => {}); // Ignore autoplay errors
+                                    audio.play().catch(e => {});
                                 } catch (e) {}
                             }
                         });
+                    } catch (e) {
+                        console.error('Global Pusher init error:', e);
                     }
-                } catch (e) {
-                    console.error('Global Pusher init error:', e);
                 }
             }
+        };
+
+        if ('requestIdleCallback' in window) {
+            window.addEventListener('load', () => {
+                requestIdleCallback(runDeferredChatSetup, { timeout: 2000 });
+            });
+        } else {
+            window.addEventListener('load', () => {
+                setTimeout(runDeferredChatSetup, 1000);
+            });
         }
-    });
+    })();
     </script>
 
     <!-- Global Floating Report Bug Button & Modern Modal -->

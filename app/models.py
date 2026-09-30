@@ -93,11 +93,7 @@ class User(db.Model):
         else:
             return f"{mins}m remaining"
 
-    @property
-    def minimum_required_hours(self):
-        """Standard faculty minimum workload requirement in hours/week (default: 12)."""
-        val = getattr(self, 'min_weekly_hours', None)
-        return val if val and val > 0 else 12
+
 
     @property
     def is_super_admin(self):
@@ -363,20 +359,7 @@ class Room(db.Model):
         """Check if room has any OPEN tickets (Red status) using efficient DB query."""
         return Ticket.query.filter_by(room_id=self.id, status=Ticket.STATUS_OPEN).first() is not None
     
-    @property
-    def has_in_progress_tickets(self):
-        """Check if room has any IN_PROGRESS tickets (Yellow status) using efficient DB query."""
-        return Ticket.query.filter_by(room_id=self.id, status=Ticket.STATUS_IN_PROGRESS).first() is not None
-    
-    @property
-    def has_broken_assets(self):
-        """Check if room has any broken assets using efficient DB query."""
-        return Asset.query.filter_by(room_id=self.id, status=Asset.STATUS_BROKEN).first() is not None
 
-    @property
-    def has_assigned_tickets(self):
-        """Check if room has any ASSIGNED tickets (Blue status) using efficient DB query."""
-        return Ticket.query.filter_by(room_id=self.id, status=Ticket.STATUS_ASSIGNED).first() is not None
     
     @property
     def current_occupancy_status(self):

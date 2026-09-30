@@ -465,12 +465,13 @@ def status_map():
         
         if selected_floor:
             from sqlalchemy.orm import joinedload
-            from ...models import RoomBooking, Timetable
+            from ...models import RoomBooking, Timetable, EventBooking
             rooms = Room.query.options(
                 joinedload(Room.tickets),
                 joinedload(Room.assets),
                 joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
-                joinedload(Room.timetables).joinedload(Timetable.faculty)
+                joinedload(Room.timetables).joinedload(Timetable.faculty),
+                joinedload(Room.booked_events).joinedload(EventBooking.faculty)
             ).filter_by(floor_id=selected_floor.id).all()
             
     rooms_data = [room.to_map_dict() for room in rooms] if rooms else []
@@ -1041,12 +1042,13 @@ def get_floor_data(floor_id):
     floor = Floor.query.get_or_404(floor_id)
     
     from sqlalchemy.orm import joinedload
-    from ...models import RoomBooking, Timetable
+    from ...models import RoomBooking, Timetable, EventBooking
     rooms = Room.query.options(
         joinedload(Room.tickets),
         joinedload(Room.assets),
         joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
-        joinedload(Room.timetables).joinedload(Timetable.faculty)
+        joinedload(Room.timetables).joinedload(Timetable.faculty),
+        joinedload(Room.booked_events).joinedload(EventBooking.faculty)
     ).filter_by(floor_id=floor_id).all()
     
     result = {

@@ -129,29 +129,7 @@ def dashboard():
                          bugs=bugs,
                          sla_status=sla_status)
 
-@superadmin_bp.route('/developer/bugs/<int:bug_id>/resolve', methods=['POST'])
-@super_admin_required
-def resolve_bug(bug_id):
-    from ...models import BugReport
-    bug = BugReport.query.get_or_404(bug_id)
-    bug.status = BugReport.STATUS_RESOLVED
-    db.session.commit()
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
-        return jsonify({'success': True, 'message': f'Bug #{bug_id} marked as resolved!', 'bug_id': bug_id})
-    flash('Bug marked as resolved!', 'success')
-    return redirect(url_for('superadmin.dashboard'))
 
-@superadmin_bp.route('/developer/bugs/<int:bug_id>/delete', methods=['POST'])
-@super_admin_required
-def delete_bug(bug_id):
-    from ...models import BugReport
-    bug = BugReport.query.get_or_404(bug_id)
-    db.session.delete(bug)
-    db.session.commit()
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
-        return jsonify({'success': True, 'message': f'Bug #{bug_id} deleted permanently.', 'bug_id': bug_id})
-    flash('Bug deleted.', 'info')
-    return redirect(url_for('superadmin.dashboard'))
 
 
 @superadmin_bp.route('/developer/bugs/bulk-resolve', methods=['POST'])

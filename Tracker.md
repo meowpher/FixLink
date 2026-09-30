@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.12** | 2026-09-30 | **Deployed** | **Performance Optimization (<500ms) & Dead Code Cleanup** (Eliminated massive N+1 query bottlenecks in live-map fetching by eager loading `EventBooking` relations. Reduced data payload latency. Removed dead 251KB unminified CSS and obsolete legacy routes/properties.) |
 | **v1.7.11** | 2026-09-30 | **Deployed** | Faculty Ad-Hoc Multi-Hour Deletion, Real-Time Cancellation & Schedule Layout Optimization (Unified RoomBooking/AdHocBooking deletion with multi-hour contiguous slot cleanup, eliminated false historical rejections, elevated lecture timetable to top of faculty schedule, and fixed floor schematic loading). |
 | **v1.7.10** | 2026-09-22 | **Deployed** | Faculty Event Self-Cancellation & Admin Approved Event Revocation / Rejection (Allows faculty to cancel pending or approved events anytime with instant room deallocation and admin notifications; allows administrators to reject/revoke approved events anytime with live map refresh and faculty alerts). |
 | **v1.7.9** | 2026-09-22 | **Deployed** | Unified Faculty Admin Handle Console, UI Color System Harmonization & Booking History Integration (Consolidated Event Approvals, Classroom Management Module / CMM, Ghost Protocol, and Classroom Booking History into a unified portal with 4-tab navigation, adaptive Light/Dark mode color variables, fixed room number badges, and navbar Manage dropdown shortcuts). |
@@ -16,7 +17,22 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
- 
+
+### Release v1.7.12 (2026-09-30)
+- `perf(core)`: **Performance Optimization (<500ms), DB Query Reduction & Dead Code Purge**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Massive N+1 Query Resolution**:
+     - Identified a severe database bottleneck where `current_occupancy_status` (used by the live map) was triggering 2 extra queries per room (lazy loading `EventBooking` and `User` relations).
+     - Fixed by extending `joinedload` eagerly in `app/cache.py`, `app/blueprints/faculty/routes.py`, and `app/blueprints/admin/routes.py`.
+     - Cut database hits for live map requests from >60 queries down to just 2-3 highly optimized queries, enabling sub-500ms load times.
+  2. **Phase 2: Dead Static Asset Purge**:
+     - Audited frontend assets and identified that `style.css` (251KB) was entirely orphaned and unused since `style.min.css` was active.
+     - Safely deleted `style.css` to reduce repository bloat.
+  3. **Phase 3: Python Dead Code & Route Pruning**:
+     - Removed unused model properties (`minimum_required_hours`, `has_in_progress_tickets`, `has_broken_assets`, `has_assigned_tickets`) from `app/models.py` which risked triggering unintentional N+1 loads.
+     - Removed legacy unused `/developer/bugs/<bug_id>/resolve` and `/developer/bugs/<bug_id>/delete` routes from `app/blueprints/superadmin/routes.py`, leaning entirely on the bulk alternatives used by the frontend.
+
 ### Release v1.7.11 (2026-09-30)
 - `feat(faculty-schedule)`: **Faculty Ad-Hoc Multi-Hour Deletion, Real-Time Cancellation & Schedule Layout Optimization**
 

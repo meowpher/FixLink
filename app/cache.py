@@ -51,13 +51,14 @@ def get_cached_floor_data(floor_id):
         return cached_data
         
     from sqlalchemy.orm import joinedload
-    from .models import Room, RoomBooking, Timetable
+    from .models import Room, RoomBooking, Timetable, EventBooking
     
     rooms = Room.query.options(
         joinedload(Room.tickets),
         joinedload(Room.assets),
         joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
-        joinedload(Room.timetables).joinedload(Timetable.faculty)
+        joinedload(Room.timetables).joinedload(Timetable.faculty),
+        joinedload(Room.booked_events).joinedload(EventBooking.faculty)
     ).filter_by(floor_id=floor_id).all()
     
     rooms_data = [room.to_map_dict() for room in rooms]

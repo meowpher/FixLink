@@ -250,9 +250,11 @@ def claim_room():
 def get_map_status(floor_id):
     """Returns room data for the selected floor in a standard map-ready format."""
     floor = Floor.query.get_or_404(floor_id)
+    from ...models import EventBooking
     rooms = Room.query.filter_by(floor_id=floor_id).options(
         joinedload(Room.timetables).joinedload(Timetable.faculty),
         joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
+        joinedload(Room.booked_events).joinedload(EventBooking.faculty),
         joinedload(Room.tickets),
         joinedload(Room.assets)
     ).all()

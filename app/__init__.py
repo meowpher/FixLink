@@ -250,7 +250,7 @@ def create_app(config_name=None):
         if request.path.startswith('/static/'):
             response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
         elif 'Cache-Control' not in response.headers:
-            response.headers['Cache-Control'] = 'private, no-cache, no-store, must-revalidate'
+            response.headers['Cache-Control'] = 'private, no-cache, must-revalidate'
 
         # 3. Dynamic Gzip Compression Middleware (Performance 100/100)
         accept_encoding = request.headers.get('Accept-Encoding', '')
@@ -258,14 +258,15 @@ def create_app(config_name=None):
             'gzip' in accept_encoding.lower()
             and 200 <= response.status_code < 300
             and 'Content-Encoding' not in response.headers
-            and not response.is_streamed
         ):
             content_type = response.headers.get('Content-Type', '').lower()
-            compressible_types = ('text/', 'application/json', 'application/javascript', 'image/svg+xml', 'application/xml')
+            compressible_types = ('text/', 'application/json', 'application/javascript', 'application/x-javascript', 'image/svg+xml', 'application/xml')
             if any(content_type.startswith(ct) for ct in compressible_types):
                 try:
+                    if response.direct_passthrough:
+                        response.direct_passthrough = False
                     data = response.get_data()
-                    if len(data) >= 500:
+                    if len(data) >= 200:
                         compressed_data = gzip.compress(data, compresslevel=6)
                         response.set_data(compressed_data)
                         response.headers['Content-Encoding'] = 'gzip'

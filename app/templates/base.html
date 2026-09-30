@@ -52,17 +52,13 @@
     }
     </script>
 
-    <!-- Preload Critical CSS (exact matching URLs to prevent duplicate downloads) -->
-    <link rel="preload" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" as="style">
-    <link rel="preload" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.3" as="style">
-
     <!-- Critical Core Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}?v=16.3">
 
-    <!-- Bootstrap Icons (self-hosted, non-render-blocking) -->
-    <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.css') }}"></noscript>
+    <!-- Bootstrap Icons (self-hosted minified, non-render-blocking) -->
+    <link rel="preload" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') }}" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') }}"></noscript>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Manifest -->
@@ -187,6 +183,10 @@
         .faculty-day-tabs-wrapper::-webkit-scrollbar,
         .hero-stats::-webkit-scrollbar,
         .overflow-x-auto::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
         /* ═══════════════════════════════════════════════════════════════
            UNIVERSAL CUSTOM DROPDOWN SYSTEM
            ═══════════════════════════════════════════════════════════════ */
@@ -1034,8 +1034,8 @@
     <script defer src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 
     {% if request.endpoint not in ['main.report_form', 'main.report_bug', 'auth.login'] %}
-    <!-- Core GSAP for Smooth Animations (self-contained, deferred) -->
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <!-- Core GSAP for Smooth Animations (self-hosted, deferred) -->
+    <script defer src="{{ url_for('static', filename='js/gsap.min.js') }}"></script>
 
     <!-- Custom JS -->
     <script defer src="{{ url_for('static', filename='js/animations.js') }}"></script>
@@ -1201,37 +1201,45 @@
             if (nameEl) nameEl.textContent = name;
         }
 
-        // Fetch current user from server
-        fetch('/api/me')
-            .then(r => r.json())
-            .then(result => {
-                if (!result.success) return;
-                const data = result.data;
-                const emailEl = document.getElementById('profileEmail');
-                const prnEl = document.getElementById('profilePRN');
-                if (emailEl) emailEl.textContent = data.email;
-                if (prnEl) prnEl.textContent = data.prn || '—';
-                const mobileEmailEl = document.getElementById('mobileProfileEmail');
-                if (mobileEmailEl) mobileEmailEl.textContent = data.email || '—';
-                const mobileEmailElReport = document.getElementById('mobileProfileEmailReport');
-                if (mobileEmailElReport) mobileEmailElReport.textContent = data.email || '—';
-                const mobileEmailElBottom = document.getElementById('mobileProfileEmailBottom');
-                if (mobileEmailElBottom) mobileEmailElBottom.textContent = data.email || '—';
-                
-                // Populate mobile sidebar elements as well to eliminate redundant fetch
-                const msbAvatar = document.getElementById('msbAvatar');
-                const msbName = document.getElementById('msbUserName');
-                const msbEmail = document.getElementById('msbUserEmail');
-                if (msbName) msbName.textContent = data.name || '—';
-                if (msbEmail) msbEmail.textContent = data.email || '—';
-                if (msbAvatar) {
-                    const initials = data.name ? (data.name.trim().split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase()) : '?';
-                    msbAvatar.textContent = initials;
-                }
-                
-                setAvatar(data.name, data.photo_url);
-            })
-            .catch(() => {});
+        // Fetch current user from server during idle time (prevents blocking critical render)
+        const loadUserProfile = () => {
+            fetch('/api/me')
+                .then(r => r.json())
+                .then(result => {
+                    if (!result.success) return;
+                    const data = result.data;
+                    const emailEl = document.getElementById('profileEmail');
+                    const prnEl = document.getElementById('profilePRN');
+                    if (emailEl) emailEl.textContent = data.email;
+                    if (prnEl) prnEl.textContent = data.prn || '—';
+                    const mobileEmailEl = document.getElementById('mobileProfileEmail');
+                    if (mobileEmailEl) mobileEmailEl.textContent = data.email || '—';
+                    const mobileEmailElReport = document.getElementById('mobileProfileEmailReport');
+                    if (mobileEmailElReport) mobileEmailElReport.textContent = data.email || '—';
+                    const mobileEmailElBottom = document.getElementById('mobileProfileEmailBottom');
+                    if (mobileEmailElBottom) mobileEmailElBottom.textContent = data.email || '—';
+                    
+                    // Populate mobile sidebar elements as well to eliminate redundant fetch
+                    const msbAvatar = document.getElementById('msbAvatar');
+                    const msbName = document.getElementById('msbUserName');
+                    const msbEmail = document.getElementById('msbUserEmail');
+                    if (msbName) msbName.textContent = data.name || '—';
+                    if (msbEmail) msbEmail.textContent = data.email || '—';
+                    if (msbAvatar) {
+                        const initials = data.name ? (data.name.trim().split(/\s+/).map(p=>p[0]).join('').slice(0,2).toUpperCase()) : '?';
+                        msbAvatar.textContent = initials;
+                    }
+                    
+                    setAvatar(data.name, data.photo_url);
+                })
+                .catch(() => {});
+        };
+
+        if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadUserProfile, { timeout: 2000 });
+        } else {
+            setTimeout(loadUserProfile, 500);
+        }
 
         // Photo upload
         const uploadInput = document.getElementById('photoUploadInput');
@@ -1573,7 +1581,7 @@
 
     <meta name="user-logged-in" content="{{ 'true' if session.get('user_id') or session.get('professional_id') else 'false' }}">
     <meta name="chat-channel" content="{% if session.get('is_admin') %}private-admins{% elif session.get('professional_id') %}private-professional-{{ session.get('professional_id') }}{% endif %}">
-    <script defer src="https://js.pusher.com/8.0.1/pusher.min.js" crossorigin="anonymous" referrerpolicy="no-referrer" rel="noopener noreferrer"></script>
+    <script defer src="{{ url_for('static', filename='js/pusher.min.js') }}"></script>
     <script>
     // Global Chat Notification Logic (Non-blocking deferred execution)
     window.addEventListener('load', function() {
@@ -2567,11 +2575,7 @@
             }
         });
 
-        const observer = new MutationObserver(() => {
-            rebuildMenu();
-        });
-        observer.observe(selectEl, { childList: true, subtree: true, attributes: true, attributeFilter: ['selected', 'disabled'] });
-
+        selectEl.dataset.customEnhanced = 'true';
         selectEl.style.setProperty('position', 'absolute', 'important');
         selectEl.style.setProperty('opacity', '0', 'important');
         selectEl.style.setProperty('pointer-events', 'none', 'important');
@@ -2581,10 +2585,14 @@
         selectEl.style.setProperty('padding', '0', 'important');
         selectEl.style.setProperty('z-index', '-1', 'important');
 
-        selectEl.dataset.customEnhanced = 'true';
         if (selectEl.parentNode) {
             selectEl.parentNode.insertBefore(container, selectEl.nextSibling);
         }
+
+        const observer = new MutationObserver(() => {
+            rebuildMenu();
+        });
+        observer.observe(selectEl, { childList: true, attributes: true, attributeFilter: ['disabled'] });
     }
 
     window.initCustomDropdowns = function(root = document) {

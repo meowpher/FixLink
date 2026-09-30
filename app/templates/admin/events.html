@@ -156,7 +156,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script defer src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
 <script>
 async function approveEvent(eventId) {
     const res = await Swal.fire({

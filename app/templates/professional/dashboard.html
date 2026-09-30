@@ -435,7 +435,7 @@
 
 {% block extra_js %}
 <!-- Pusher Integration -->
-<script src="https://js.pusher.com/8.0.1/pusher.min.js"></script>
+<script defer src="{{ url_for('static', filename='js/pusher.min.js') }}"></script>
 <script>
     let pusher;
     let channel;

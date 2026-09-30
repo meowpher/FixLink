@@ -8,29 +8,36 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (!notifBadge || !notifList) return;
 
-    // Fetch initial notifications
-    fetchNotifications();
+    // Fetch initial notifications when the browser is idle
+    const startNotificationService = () => {
+        fetchNotifications();
 
-    // Setup Pusher for live notification updates
-    if (typeof pusher !== 'undefined') {
-        const currentUserId = document.querySelector('meta[name="current-user-id"]')?.content;
-        
-        // Listen for admin events
-        const adminChannel = pusher.subscribe('admin-notifications');
-        adminChannel.bind('new-event-request', (data) => {
-            // Show toast and refresh list
-            showNotificationToast('New Event Request', data.title);
-            fetchNotifications();
-        });
-
-        // Listen for faculty events if applicable
-        if (currentUserId && currentUserId !== 'null') {
-            const facultyChannel = pusher.subscribe(`faculty-${currentUserId}-alerts`);
-            facultyChannel.bind('notification-received', (data) => {
-                showNotificationToast('Notification Update', data.message);
+        // Setup Pusher for live notification updates
+        if (typeof pusher !== 'undefined') {
+            const currentUserId = document.querySelector('meta[name="current-user-id"]')?.content;
+            
+            // Listen for admin events
+            const adminChannel = pusher.subscribe('admin-notifications');
+            adminChannel.bind('new-event-request', (data) => {
+                showNotificationToast('New Event Request', data.title);
                 fetchNotifications();
             });
+
+            // Listen for faculty events if applicable
+            if (currentUserId && currentUserId !== 'null') {
+                const facultyChannel = pusher.subscribe(`faculty-${currentUserId}-alerts`);
+                facultyChannel.bind('notification-received', (data) => {
+                    showNotificationToast('Notification Update', data.message);
+                    fetchNotifications();
+                });
+            }
         }
+    };
+
+    if ('requestIdleCallback' in window) {
+        requestIdleCallback(startNotificationService, { timeout: 1500 });
+    } else {
+        setTimeout(startNotificationService, 300);
     }
 
     if (markAllBtn) {

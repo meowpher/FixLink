@@ -37,12 +37,18 @@ def dashboard():
     current_day = current_dt.weekday() # 0 = Monday
     
     # 1. My Schedule (Include where I am primary OR collaborator)
-    my_schedules = Timetable.query.filter(
+    my_schedules = Timetable.query.options(
+        joinedload(Timetable.room).joinedload(Room.floor),
+        joinedload(Timetable.faculty),
+        joinedload(Timetable.collaborator)
+    ).filter(
         or_(Timetable.faculty_id == faculty.id, Timetable.collaborator_id == faculty.id)
     ).order_by(Timetable.day_of_week, Timetable.start_time).all()
     
     all_faculties = User.query.filter_by(role=User.ROLE_FACULTY).order_by(User.name).all()
-    my_adhoc = AdHocBooking.query.filter(
+    my_adhoc = AdHocBooking.query.options(
+        joinedload(AdHocBooking.room).joinedload(Room.floor)
+    ).filter(
         AdHocBooking.faculty_id == faculty.id,
         AdHocBooking.end_datetime >= datetime.utcnow()
     ).order_by(AdHocBooking.start_datetime).all()
@@ -53,7 +59,7 @@ def dashboard():
     
     # 2. Floors & Rooms for Real-Time Tracker Tab
     floors = Floor.query.order_by(Floor.level).all()
-    all_rooms = Room.query.all()
+    all_rooms = Room.query.options(joinedload(Room.floor)).all()
     
     # Group rooms by floor
     rooms_by_floor = {}
@@ -64,7 +70,10 @@ def dashboard():
     page = request.args.get('page', 1, type=int)
     per_page = 10
     now_ist = datetime.now(IST)
-    history_pagination = RoomBooking.query.filter_by(
+    history_pagination = RoomBooking.query.options(
+        joinedload(RoomBooking.room).joinedload(Room.floor),
+        joinedload(RoomBooking.faculty)
+    ).filter_by(
         faculty_id=faculty.id
     ).order_by(RoomBooking.created_at.desc()).paginate(page=page, per_page=per_page, error_out=False)
     
@@ -86,7 +95,9 @@ def dashboard():
     start_of_week = (current_dt - timedelta(days=current_day)).replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_week = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
     
-    bookings_this_week = RoomBooking.query.filter(
+    bookings_this_week = RoomBooking.query.options(
+        joinedload(RoomBooking.room).joinedload(Room.floor)
+    ).filter(
         RoomBooking.faculty_id == faculty.id,
         RoomBooking.status == RoomBooking.STATUS_ACTIVE,
         RoomBooking.slot_start >= start_of_week,

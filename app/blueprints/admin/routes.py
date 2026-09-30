@@ -2321,12 +2321,13 @@ def assign_faculty(class_id):
 
 @admin_bp.route('/api/bulk_assign_faculty', methods=['POST'])
 @admin_bp.route('/api/bulk-assign-faculty', methods=['POST'])
+@admin_bp.route('/api/timetable/assign-faculty', methods=['POST'])
 @admin_required
 @handle_api_errors
 def bulk_assign_faculty():
     """
     Bulk assign multiple Timetable classes to a single faculty member.
-    Payload: {"faculty_id": <int>, "class_ids": [<int>, ...]}
+    Payload: {"faculty_id": <int>, "class_ids": [<int>, ...]} or {"faculty_id": <int>, "timetable_ids": [<int>, ...]}
     """
     from ...models import Timetable, User
 
@@ -2335,7 +2336,7 @@ def bulk_assign_faculty():
         return api_response(success=False, error="Invalid or missing JSON payload.", status=400)
 
     raw_faculty_id = data.get('faculty_id')
-    class_ids = data.get('class_ids')
+    class_ids = data.get('class_ids') or data.get('timetable_ids')
 
     if not raw_faculty_id:
         return api_response(success=False, error="'faculty_id' is required.", status=400)

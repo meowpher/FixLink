@@ -1395,17 +1395,33 @@
                         <!-- Filter & Table Controls Header -->
                         <div class="card-header border-0 pt-3 pb-2 px-3 px-md-4" style="background: transparent;">
                             <div class="row g-2 align-items-center">
-                                <div class="col-12 col-md-7">
+                                <div class="col-12 col-xl-5 col-lg-4">
                                     <div class="position-relative">
                                         <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted" style="pointer-events: none; z-index: 5;"></i>
                                         <input type="text" class="form-control rounded-pill" id="tableSearchInput" placeholder="Search subject, course, division, room..." aria-label="Search unassigned classes" style="padding-left: 2.5rem !important;">
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-5 d-flex justify-content-md-end align-items-center gap-2">
+                                <div class="col-12 col-xl-7 col-lg-8 d-flex justify-content-lg-end align-items-center gap-2 flex-wrap">
                                     <span class="text-muted small" id="showingCountBadge">Showing <strong>{{ unassigned_count }}</strong> classes</span>
-                                    <button class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-none" id="btnBulkAssignMaster" style="white-space: nowrap;">
-                                        <i class="bi bi-person-plus-fill me-1"></i>Assign Selected (<span id="bulkSelectedCount">0</span>)
-                                    </button>
+                                    
+                                    <!-- Bulk Assign Faculty Custom Dropdown Toolbar -->
+                                    <div class="d-none align-items-center gap-2 p-1.5 px-2.5 rounded-pill bg-body-tertiary border shadow-sm" id="bulkAssignFacultyToolbar">
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small fw-semibold">
+                                            <i class="bi bi-check2-square me-1"></i><span id="bulkSelectedCount">0</span> selected
+                                        </span>
+                                        <div style="min-width: 200px; max-width: 260px;">
+                                            <select class="form-select form-select-sm faculty-select" id="bulkFacultySelect" aria-label="Select faculty for bulk assignment">
+                                                <option value="">Choose faculty...</option>
+                                                {% for fac in all_faculties %}
+                                                <option value="{{ fac.id }}">{{ fac.name }} ({{ fac.email }})</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-primary btn-sm rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" id="btnBulkAssignDirect" style="white-space: nowrap;">
+                                            <i class="bi bi-person-check-fill"></i>
+                                            <span>Assign</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -2436,7 +2452,7 @@
         applyCmmFilters();
     });
 
-    // Bulk selection
+    // Bulk selection & Custom Dropdown Toolbar
     selectAllCheckbox?.addEventListener('change', function() {
         const rows = tableBody?.querySelectorAll('tr[data-class-id]:not(.d-none) .row-select-checkbox') || [];
         rows.forEach(cb => cb.checked = selectAllCheckbox.checked);
@@ -2449,15 +2465,121 @@
 
     function updateBulkButton() {
         const selected = tableBody?.querySelectorAll('.row-select-checkbox:checked') || [];
-        if (bulkSelectedCount) bulkSelectedCount.textContent = selected.length;
-        if (btnBulkAssignMaster) {
-            btnBulkAssignMaster.classList.toggle('d-none', selected.length === 0);
+        const count = selected.length;
+        if (bulkSelectedCount) bulkSelectedCount.textContent = count;
+        const bulkToolbar = document.getElementById('bulkAssignFacultyToolbar');
+        if (bulkToolbar) {
+            if (count > 0) {
+                bulkToolbar.classList.remove('d-none');
+                bulkToolbar.classList.add('d-flex');
+                if (window.initCustomDropdowns) {
+                    window.initCustomDropdowns(bulkToolbar);
+                }
+            } else {
+                bulkToolbar.classList.remove('d-flex');
+                bulkToolbar.classList.add('d-none');
+            }
         }
     }
+
+    // Direct Bulk Assign via Custom Dropdown Toolbar
+    document.getElementById('btnBulkAssignDirect')?.addEventListener('click', async function() {
+        const selected = Array.from(tableBody.querySelectorAll('.row-select-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
+        if (selected.length === 0) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('No Classes Selected', 'Please select at least one class to assign.', 'warning');
+            } else {
+                alert('Please select at least one class to assign.');
+            }
+            return;
+        }
+
+        const facultySelect = document.getElementById('bulkFacultySelect');
+        const facultyId = facultySelect ? facultySelect.value : '';
+        if (!facultyId) {
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Faculty Required', 'Please select a faculty member from the dropdown.', 'warning');
+            } else {
+                alert('Please select a faculty member from the dropdown.');
+            }
+            return;
+        }
+
+        const facultyName = facultySelect.options[facultySelect.selectedIndex]?.text || 'the selected faculty';
+        
+        let shouldProceed = true;
+        if (typeof Swal !== 'undefined') {
+            const confirmRes = await Swal.fire({
+                title: 'Confirm Bulk Assignment',
+                text: `Assign ${selected.length} selected class slot(s) to ${facultyName}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-person-check-fill me-1"></i>Yes, Assign',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#2563eb'
+            });
+            shouldProceed = confirmRes.isConfirmed;
+        } else {
+            shouldProceed = confirm(`Assign ${selected.length} selected class slot(s) to ${facultyName}?`);
+        }
+        if (!shouldProceed) return;
+
+        const origHtml = this.innerHTML;
+        this.disabled = true;
+        this.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status"></span>Assigning...';
+
+        try {
+            const res = await fetch('/admin/api/bulk-assign-faculty', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                body: JSON.stringify({ timetable_ids: selected, faculty_id: facultyId })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Assigned!',
+                        text: data.message || `${selected.length} classes assigned successfully.`,
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => location.reload());
+                } else {
+                    alert(data.message || `${selected.length} classes assigned successfully.`);
+                    location.reload();
+                }
+            } else {
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire('Assignment Failed', data.error || 'Failed to assign faculty.', 'error');
+                } else {
+                    alert(data.error || 'Failed to assign faculty.');
+                }
+                this.disabled = false;
+                this.innerHTML = origHtml;
+            }
+        } catch (err) {
+            console.error(err);
+            if (typeof Swal !== 'undefined') {
+                Swal.fire('Error', 'Network communication error.', 'error');
+            } else {
+                alert('Network communication error.');
+            }
+            this.disabled = false;
+            this.innerHTML = origHtml;
+        }
+    });
 
     // Single / Bulk Assign modal trigger
     const assignModalEl = document.getElementById('assignFacultyModal');
     const assignModal = assignModalEl ? new bootstrap.Modal(assignModalEl) : null;
+    if (assignModalEl) {
+        assignModalEl.addEventListener('shown.bs.modal', function() {
+            if (window.initCustomDropdowns) {
+                window.initCustomDropdowns(assignModalEl);
+            }
+        });
+    }
+
     tableBody?.addEventListener('click', (e) => {
         const btn = e.target.closest('.assign-single-btn');
         if (btn && assignModal) {
@@ -2470,15 +2592,6 @@
         }
     });
 
-    btnBulkAssignMaster?.addEventListener('click', () => {
-        const selected = Array.from(tableBody.querySelectorAll('.row-select-checkbox:checked')).map(cb => cb.getAttribute('data-id'));
-        if (selected.length === 0 || !assignModal) return;
-        document.getElementById('assignClassId').value = JSON.stringify(selected);
-        document.getElementById('assignBulkMode').value = 'true';
-        document.getElementById('assignClassSummary').textContent = `Assign faculty to ${selected.length} selected timetable slots.`;
-        assignModal.show();
-    });
-
     document.getElementById('assignFacultyForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
         const facultyId = document.getElementById('facultySelectDropdown').value;
@@ -2486,7 +2599,7 @@
         const classIds = isBulk ? JSON.parse(document.getElementById('assignClassId').value) : [document.getElementById('assignClassId').value];
 
         try {
-            const res = await fetch('/admin/api/timetable/assign-faculty', {
+            const res = await fetch('/admin/api/bulk-assign-faculty', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
                 body: JSON.stringify({ timetable_ids: classIds, faculty_id: facultyId })

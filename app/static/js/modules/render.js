@@ -12,6 +12,8 @@ export function renderFloorMap(container, rooms, floorLevel, isAdmin = false, is
     return renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAdmin, isReport);
 }
 
+window.renderFloorMap = renderFloorMap;
+
 /**
  * Dynamic SVG Layout
  * Fetches the raw SVG file and makes room elements interactive based on IDs

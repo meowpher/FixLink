@@ -8,6 +8,8 @@
 
 {% block extra_css %}
 <meta name="current-user-id" content="{{ current_user_id | tojson }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/render.js') }}">
+<link rel="modulepreload" href="{{ url_for('static', filename='js/modules/ui.js') }}">
 <link rel="preload" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}" as="style">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}">
 {% endblock %}
@@ -2183,7 +2185,12 @@
                         rooms.forEach(r => currentStatusData[r.id] = r);
                         
                         container.innerHTML = '';
-                        await renderFloorMap(container, rooms, targetLevel, false);
+                        let renderFn = window.renderFloorMap;
+                        if (typeof renderFn !== 'function') {
+                            const renderMod = await import("{{ url_for('static', filename='js/modules/render.js') }}");
+                            renderFn = renderMod.renderFloorMap;
+                        }
+                        await renderFn(container, rooms, targetLevel, false);
                         
                         applyOccupancyStyling();
                     } else {
@@ -4031,4 +4038,5 @@
             }
         });
     </script>
+    <script type="module" src="{{ url_for('static', filename='js/modules/render.js') }}"></script>
 {% endblock %}

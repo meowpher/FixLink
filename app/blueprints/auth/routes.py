@@ -19,6 +19,28 @@ from ...realtime import get_pusher
 
 auth_bp = Blueprint('auth', __name__)
 
+@auth_bp.route('/api/auth/status', methods=['GET'])
+def auth_status():
+    """Anti-cache polling endpoint for Zero-Trust Cross-Tab Session Guard."""
+    from ...models import User
+    
+    is_authenticated = False
+    if session.get('user_id'):
+        user = db.session.get(User, session['user_id'])
+        is_authenticated = user is not None and getattr(user, 'is_authenticated', True)
+    elif session.get('professional_id') or session.get('is_super_admin'):
+        is_authenticated = True
+
+    response = jsonify({
+        "authenticated": is_authenticated,
+        "guard_id": session.get('tab_guard_id', '')
+    })
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+
 @auth_bp.route('/pusher/auth', methods=['POST'])
 @csrf.exempt
 def pusher_authentication():

@@ -186,7 +186,7 @@
                     <div class="small text-muted"><i class="bi bi-info-circle me-1"></i>Click any class to locate classroom on map</div>
                 </div>
 
-                {% if my_schedules %}
+                {% if my_schedules or bookings_this_week %}
                 <!-- Desktop Table View -->
                 <div class="table-responsive glass-card border-0 shadow-sm rounded-4 overflow-hidden d-none d-md-block">
                     <table class="table table-bordered timetable-grid mb-0">
@@ -233,13 +233,14 @@
                                 {% for b in bookings_this_week %}
                                     {% if b.slot_start.weekday() == day_idx %}
                                         {% set start_h = b.slot_start.hour %}
-                                        {% set end_h = start_h + 1 %}
+                                        {% set duration = b.duration if b.duration is defined else 1 %}
+                                        {% set end_h = start_h + duration %}
                                         {% set time_str = b.slot_start.strftime('%I:%M %p') ~ ' - ' ~ (b.slot_end.strftime('%I:%M %p') if b.slot_end else (b.slot_start.strftime('%I:%M %p'))) %}
                                         {% set div_course = (b.division or '') ~ (' / ' ~ b.course if b.course else '') %}
                                         {% set _ = day_schedules.append({
                                             'start': start_h, 
                                             'end': end_h, 
-                                            'duration': 1, 
+                                            'duration': duration, 
                                             'subject': b.subject, 
                                             'room': b.room, 
                                             'is_booking': true, 

@@ -136,3 +136,79 @@ def test_meeting_room_booking_full_flow(client, run_app_context):
         rb = RoomBooking.query.get(rb_id)
         assert rb.status == RoomBooking.STATUS_CANCELLED
 
+
+def test_contiguous_room_booking_merging_on_dashboard(client, run_app_context):
+    """Verify that contiguous 2-hour ad-hoc room bookings are merged into a single block with colspan=2."""
+    from app.blueprints.faculty.routes import merge_contiguous_room_bookings
+    
+    with run_app_context:
+        faculty = User(name="Dr. Alan Turing", email="alan.turing@mitwpu.edu.in", role=User.ROLE_FACULTY, has_accepted_terms=True)
+        faculty.set_password("secure123")
+        b = Building(name="Vyas Hall")
+        db.session.add_all([faculty, b])
+        db.session.commit()
+
+        floor = Floor(building_id=b.id, level=3, name="3rd Floor")
+        db.session.add(floor)
+        db.session.commit()
+
+        room = Room(floor_id=floor.id, number="VY315", name="Vyas 315", room_type=Room.ROOM_TYPE_CLASSROOM)
+        db.session.add(room)
+        db.session.commit()
+
+        # Create two contiguous 1-hour bookings on Tuesday of current week
+        now = datetime.utcnow() + timedelta(hours=5, minutes=30)
+        current_day = now.weekday()
+        start_of_week = (now - timedelta(days=current_day)).date()
+        tuesday_date = start_of_week + timedelta(days=1)
+        slot1_start = datetime.combine(tuesday_date, time(10, 0))
+        slot2_start = datetime.combine(tuesday_date, time(11, 0))
+
+        rb1 = RoomBooking(
+            room_id=room.id,
+            faculty_id=faculty.id,
+            date=tuesday_date,
+            slot_start=slot1_start,
+            subject="DSC",
+            division="TY-CSE",
+            course="Data Science",
+            checked_in=True
+        )
+        rb2 = RoomBooking(
+            room_id=room.id,
+            faculty_id=faculty.id,
+            date=tuesday_date,
+            slot_start=slot2_start,
+            subject="DSC",
+            division="TY-CSE",
+            course="Data Science",
+            checked_in=True
+        )
+        db.session.add_all([rb1, rb2])
+        db.session.commit()
+
+        # 1. Test helper directly
+        raw_list = [rb1, rb2]
+        merged = merge_contiguous_room_bookings(raw_list)
+        assert len(merged) == 1
+        assert merged[0].duration == 2
+        assert merged[0].slot_start == slot1_start
+        assert merged[0].slot_end == datetime.combine(tuesday_date, time(12, 0))
+        assert merged[0].subject == "DSC"
+        assert len(merged[0].ids) == 2
+
+        faculty_id = faculty.id
+
+    # 2. Test rendered dashboard HTML contains colspan="2" and single merged cell
+    with client.session_transaction() as sess:
+        sess['user_id'] = faculty_id
+        sess['user_role'] = User.ROLE_FACULTY
+
+    res = client.get('/faculty/dashboard')
+    assert res.status_code == 200
+    html = res.get_data(as_text=True)
+    assert 'colspan="2"' in html
+    assert 'DSC' in html
+    assert 'VY315' in html
+
+

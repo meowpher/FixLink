@@ -5,7 +5,7 @@ Provides mandatory interstitial terms acceptance gates and anti-tamper endpoints
 import logging
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, current_app, jsonify
 from sqlalchemy.exc import OperationalError, SQLAlchemyError
-from app import db
+from app import db, csrf
 from app.models import User
 
 logger = logging.getLogger(__name__)
@@ -55,6 +55,7 @@ def terms():
 
 
 @onboarding_bp.route('/accept', methods=['POST'])
+@csrf.exempt
 def accept():
     """Dedicated endpoint to process terms acceptance with race-condition rollback."""
     user = get_current_user()

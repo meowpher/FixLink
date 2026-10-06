@@ -22,6 +22,90 @@ def to_ist(dt):
     if dt.tzinfo is None:
         return dt.replace(tzinfo=timezone.utc).astimezone(IST)
     return dt.astimezone(IST)
+class MergedRoomBooking:
+    """Wrapper that merges contiguous 1-hour RoomBooking slots into a single multi-hour booking block."""
+    def __init__(self, b):
+        self.id = b.id
+        self.ids = [b.id]
+        self.room_id = b.room_id
+        self.room = b.room
+        self.faculty_id = b.faculty_id
+        self.faculty = getattr(b, 'faculty', None)
+        self.date = b.date
+        self.slot_start = b.slot_start
+        self._slot_end = b.slot_end
+        self.status = b.status
+        self.subject = b.subject
+        self.division = b.division
+        self.course = b.course
+        self.checked_in = b.checked_in
+        self.checked_in_at = b.checked_in_at
+        self.is_historical = getattr(b, 'is_historical', False)
+        self.duration = 1
+        self.is_booking = True
+        self.collaborator = None
+
+    @property
+    def slot_end(self):
+        if self._slot_end:
+            return self._slot_end
+        if self.slot_start:
+            return self.slot_start + timedelta(hours=self.duration)
+        return None
+
+    def extend(self, b):
+        self.ids.append(b.id)
+        self.duration += 1
+        self._slot_end = b.slot_end or (b.slot_start + timedelta(hours=1))
+        if b.checked_in:
+            self.checked_in = True
+        self.is_historical = self.is_historical and getattr(b, 'is_historical', False)
+
+
+def merge_contiguous_room_bookings(bookings):
+    """
+    Groups contiguous 1-hour RoomBooking records belonging to the same session
+    into a single merged multi-hour block for timetable grid rendering.
+    """
+    if not bookings:
+        return []
+    
+    sorted_bookings = sorted(
+        bookings,
+        key=lambda b: (
+            b.date or (b.slot_start.date() if b.slot_start else datetime.min.date()),
+            b.room_id or 0,
+            b.slot_start or datetime.min
+        )
+    )
+    
+    merged = []
+    for b in sorted_bookings:
+        if not merged:
+            merged.append(MergedRoomBooking(b))
+            continue
+        
+        last = merged[-1]
+        b_date = b.date or (b.slot_start.date() if b.slot_start else None)
+        last_date = last.date or (last.slot_start.date() if last.slot_start else None)
+        
+        is_contiguous = (
+            last.room_id == b.room_id and
+            last.faculty_id == b.faculty_id and
+            last_date == b_date and
+            (last.subject or '').strip().lower() == (b.subject or '').strip().lower() and
+            (last.division or '').strip().lower() == (b.division or '').strip().lower() and
+            (last.course or '').strip().lower() == (b.course or '').strip().lower() and
+            last.slot_end == b.slot_start
+        )
+        
+        if is_contiguous:
+            last.extend(b)
+        else:
+            merged.append(MergedRoomBooking(b))
+            
+    return sorted(merged, key=lambda m: m.slot_start or datetime.min)
+
 
 faculty_bp = Blueprint('faculty', __name__)
 
@@ -95,22 +179,24 @@ def dashboard():
     start_of_week = (current_dt - timedelta(days=current_day)).replace(hour=0, minute=0, second=0, microsecond=0)
     end_of_week = start_of_week + timedelta(days=6, hours=23, minutes=59, seconds=59)
     
-    bookings_this_week = RoomBooking.query.options(
+    bookings_this_week_raw = RoomBooking.query.options(
         joinedload(RoomBooking.room).joinedload(Room.floor)
     ).filter(
         RoomBooking.faculty_id == faculty.id,
         RoomBooking.status == RoomBooking.STATUS_ACTIVE,
         RoomBooking.slot_start >= start_of_week,
         RoomBooking.slot_start <= end_of_week
-    ).all()
+    ).order_by(RoomBooking.slot_start.asc()).all()
     
-    for b in bookings_this_week:
+    for b in bookings_this_week_raw:
         slot_end_dt = b.slot_end
         if slot_end_dt:
             slot_end_ist = slot_end_dt.replace(tzinfo=IST) if slot_end_dt.tzinfo is None else slot_end_dt.astimezone(IST)
             b.is_historical = slot_end_ist.date() < now_ist.date()
         else:
             b.is_historical = False
+
+    bookings_this_week = merge_contiguous_room_bookings(bookings_this_week_raw)
 
     # 3-Strike Accountability Strike Count (last 30 days)
     cutoff_30d = datetime.utcnow() - timedelta(days=30)

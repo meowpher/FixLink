@@ -205,9 +205,11 @@ def create_app(config_name=None):
         if 'logout' in endpoint_lower or endpoint_lower in {'logout', 'auth.logout', 'superadmin.logout', 'professional.logout'}:
             return None
 
-        # Login / Public Auth Whitelist:
+        # Login / Public Auth / Onboarding Whitelist:
         if endpoint_lower in {'auth.login', 'auth.signup', 'auth.forgot_password', 'auth.reset_password', 'superadmin.login', 'professional.login'} or \
-           request.path in {'/login', '/signup', '/forgot-password', '/developer/login', '/professional/login'}:
+           endpoint_lower.startswith('onboarding.') or \
+           request.path in {'/login', '/signup', '/forgot-password', '/developer/login', '/professional/login'} or \
+           request.path.startswith('/onboarding'):
             return None
 
         server_guard_id = session.get('tab_guard_id')

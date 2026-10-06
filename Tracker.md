@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.13** | 2026-10-07 | **Deployed** | **Multi-Hour Ad-Hoc Timetable Slot Merging & Grid Consolidation** (Merged contiguous 1-hour ad-hoc room reservations on the weekly schedule into a single continuous block spanning multiple columns with `colspan`, full time-range display, and unified mobile agenda cards). |
 | **v1.7.12** | 2026-09-30 | **Deployed** | **Performance Optimization (<500ms) & Dead Code Cleanup** (Eliminated massive N+1 query bottlenecks in live-map fetching by eager loading `EventBooking` relations. Reduced data payload latency. Removed dead 251KB unminified CSS and obsolete legacy routes/properties.) |
 | **v1.7.11** | 2026-09-30 | **Deployed** | Faculty Ad-Hoc Multi-Hour Deletion, Real-Time Cancellation & Schedule Layout Optimization (Unified RoomBooking/AdHocBooking deletion with multi-hour contiguous slot cleanup, eliminated false historical rejections, elevated lecture timetable to top of faculty schedule, and fixed floor schematic loading). |
 | **v1.7.10** | 2026-09-22 | **Deployed** | Faculty Event Self-Cancellation & Admin Approved Event Revocation / Rejection (Allows faculty to cancel pending or approved events anytime with instant room deallocation and admin notifications; allows administrators to reject/revoke approved events anytime with live map refresh and faculty alerts). |
@@ -17,6 +18,23 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.13 (2026-10-07)
+- `feat(faculty-schedule)`: **Multi-Hour Ad-Hoc Timetable Slot Merging & Grid Consolidation**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Contiguous RoomBooking Multi-Hour Slot Grouping**:
+     - Resolved UI fragmentation where 2+ hour ad-hoc classroom reservations (persisted as discrete 1-hour `RoomBooking` records in the database) rendered as disconnected adjacent 1-hour cards.
+     - Implemented `MergedRoomBooking` wrapper and `merge_contiguous_room_bookings()` in `app/blueprints/faculty/routes.py` to identify consecutive booking records matching room, date, faculty, and subject, unifying them into a single session object with computed multi-hour duration and synchronized start/end timestamps.
+  2. **Phase 2: Dynamic Timetable UI Grid Spanning (`colspan`)**:
+     - Updated `app/templates/faculty/dashboard.html` to feed merged `b.duration` values into the desktop timetable day builder.
+     - Multi-hour bookings now render seamlessly across 2 (or more) grid columns (`colspan="{{ cell_dur }}"`) with an unbroken visual boundary, unified action triggers, full time span (`10:00 AM - 12:00 PM`), and a single session cancellation button.
+     - Updated timetable container visibility checks (`{% if my_schedules or bookings_this_week %}`) so faculty with ad-hoc bookings can always view their full schedule grid.
+  3. **Phase 3: Mobile Agenda & Filter Tab Consolidation**:
+     - Merged multi-hour bookings in the mobile day tab counters and timeline agenda cards, preventing duplicate cards and showing the full multi-hour block duration in a single card.
+  4. **Phase 4: Automated Verification & Test Coverage**:
+     - Added `test_contiguous_room_booking_merging_on_dashboard` in `tests/test_meeting_room_booking.py` verifying grouping logic and `colspan="2"` HTML rendering.
+     - Whitelisted onboarding endpoints in `app/__init__.py` tab guard check; all 61 automated test suites passing with 100% success rate.
 
 ### Release v1.7.12 (2026-09-30)
 - `perf(core)`: **Performance Optimization (<500ms), DB Query Reduction & Dead Code Purge**

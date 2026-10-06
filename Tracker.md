@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.15** | 2026-10-07 | **Deployed** | **Smart Classroom Pop-Up Schedule Day Selection & Legend Color Harmonization** (Removed obsolete "Today" tab from the room pop-up schedule, automatically selecting the faculty's chosen booking day or current weekday; updated the map status legend dot for "Occupied (Non-Bookable)" to gray matching the gray occupied classroom schematics). |
 | **v1.7.14** | 2026-10-07 | **Deployed** | **Building Operating Hours & Night Booking Enforcement (7 AM – 7 PM IST Boundary)** (Enforced hard operational hours across all room reservation pipelines: classrooms, conference rooms, and meeting rooms can only be booked between 7:00 AM and 6:00 PM start times, with all reservations concluding at or before 7:00 PM sharp; night instant claims and overflow multi-hour slots are strictly blocked on both backend and frontend). |
 | **v1.7.13** | 2026-10-07 | **Deployed** | **Multi-Hour Ad-Hoc Timetable Slot Merging & Grid Consolidation** (Merged contiguous 1-hour ad-hoc room reservations on the weekly schedule into a single continuous block spanning multiple columns with `colspan`, full time-range display, and unified mobile agenda cards). |
 | **v1.7.12** | 2026-09-30 | **Deployed** | **Performance Optimization (<500ms) & Dead Code Cleanup** (Eliminated massive N+1 query bottlenecks in live-map fetching by eager loading `EventBooking` relations. Reduced data payload latency. Removed dead 251KB unminified CSS and obsolete legacy routes/properties.) |
@@ -19,6 +20,18 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.15 (2026-10-07)
+- `feat(faculty-ui)`: **Smart Classroom Pop-Up Schedule Day Selection & Legend Color Harmonization**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Removed "Today" Button from Room Pop-Up Schedule**:
+     - Stripped the generic `Today` button from `#popDayNav`, leaving direct weekday pills (`Mon` through `Sat`).
+  2. **Context-Aware Automatic Day Selection**:
+     - Opening a room pop-up after selecting a timetable slot or booking date now immediately selects and displays the timetable for that target booking day.
+     - When inspecting rooms from the general map view without a preselected slot, the pop-up defaults to the current day of the week (Mon–Sat).
+  3. **Map Legend Color Synchronization**:
+     - Updated the status legend dot for **"Occupied (Non-Bookable)"** in `app/static/css/faculty_dashboard.min.css` from red to slate gray (`#64748b`), perfectly matching the gray non-bookable classroom polygons on the floor maps and the header subtext badge.
 
 ### Release v1.7.14 (2026-10-07)
 - `feat(booking-rules)`: **Building Operating Hours & Night Booking Enforcement (7 AM – 7 PM IST Boundary)**

@@ -844,9 +844,8 @@
                     <span class="badge bg-secondary bg-opacity-25 text-body small font-monospace px-2 py-0.5" id="popScheduleCountBadge">0 classes</span>
                 </div>
                 
-                <!-- Day Switcher Pills -->
+                <!-- Day Switcher Pills (Mon - Sat) -->
                 <div class="pop-day-nav" id="popDayNav">
-                    <button type="button" class="pop-day-btn active" data-day="today">Today</button>
                     <button type="button" class="pop-day-btn" data-day="0">Mon</button>
                     <button type="button" class="pop-day-btn" data-day="1">Tue</button>
                     <button type="button" class="pop-day-btn" data-day="2">Wed</button>
@@ -2272,19 +2271,21 @@
             }
 
             let currentPopRoomData = null;
-            let currentPopDay = 'today';
+            let currentPopDay = '0';
 
             function renderPopSchedule(dayKey) {
                 const listEl = document.getElementById('popScheduleList');
                 const countBadge = document.getElementById('popScheduleCountBadge');
                 if (!listEl || !currentPopRoomData) return;
 
+                const dayIdx = parseInt(dayKey, 10);
                 let slots = [];
-                if (dayKey === 'today') {
-                    slots = currentPopRoomData.today_schedule || [];
+                if (!isNaN(dayIdx) && currentPopRoomData.weekly_schedule && currentPopRoomData.weekly_schedule[dayIdx]) {
+                    slots = currentPopRoomData.weekly_schedule[dayIdx];
+                } else if (!isNaN(dayIdx) && currentPopRoomData.weekly_schedule && currentPopRoomData.weekly_schedule[String(dayIdx)]) {
+                    slots = currentPopRoomData.weekly_schedule[String(dayIdx)];
                 } else {
-                    const dayIdx = parseInt(dayKey);
-                    slots = (currentPopRoomData.weekly_schedule && currentPopRoomData.weekly_schedule[dayIdx]) ? currentPopRoomData.weekly_schedule[dayIdx] : [];
+                    slots = currentPopRoomData.today_schedule || [];
                 }
 
                 if (countBadge) {
@@ -2477,12 +2478,25 @@
                     if (nudgeBtn) nudgeBtn.classList.add('d-none');
                 }
 
-                // Reset Day selector to Today and render schedule
+                // Determine target day: directly select chosen booking day, or default to current weekday (Mon=0..Sat=5)
+                const now = new Date();
+                const jsDay = now.getDay(); // 0 = Sun, 1 = Mon, ..., 6 = Sat
+                const defaultTodayIdx = (jsDay === 0) ? 0 : Math.min(jsDay - 1, 5); // 0=Mon .. 5=Sat
+                let targetDay = String(defaultTodayIdx);
+
+                if (advancedSearchMode && advancedTimePayload && advancedTimePayload.dayIdx !== undefined) {
+                    targetDay = String(Math.min(Math.max(parseInt(advancedTimePayload.dayIdx, 10), 0), 5));
+                } else if (advancedSearchMode && advancedTimePayload && advancedTimePayload.date) {
+                    const d = new Date(advancedTimePayload.date + 'T00:00:00');
+                    const jd = d.getDay();
+                    targetDay = String((jd === 0) ? 0 : Math.min(jd - 1, 5));
+                }
+
                 document.querySelectorAll('#popDayNav .pop-day-btn').forEach(b => {
-                    b.classList.toggle('active', b.getAttribute('data-day') === 'today');
+                    b.classList.toggle('active', b.getAttribute('data-day') === targetDay);
                 });
-                currentPopDay = 'today';
-                renderPopSchedule('today');
+                currentPopDay = targetDay;
+                renderPopSchedule(targetDay);
             }
 
             async function handleSendNudge(roomId, facultyName, subject) {

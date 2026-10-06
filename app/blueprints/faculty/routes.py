@@ -288,6 +288,21 @@ def claim_room():
     current_dt = start_utc + timedelta(hours=5, minutes=30)
     current_day = current_dt.weekday()
     end_dt_ist = end_utc + timedelta(hours=5, minutes=30)
+
+    # Check operational hours (7:00 AM to 7:00 PM IST)
+    if current_dt.hour < 7 or current_dt.hour >= 19:
+        return api_response(
+            success=False,
+            error="The building is closed. Instant room claims are only permitted during operational hours (7:00 AM to 7:00 PM IST).",
+            status=400
+        )
+
+    if end_dt_ist.hour > 19 or (end_dt_ist.hour == 19 and end_dt_ist.minute > 0) or end_dt_ist.date() > current_dt.date():
+        return api_response(
+            success=False,
+            error=f"The building closes at 7:00 PM sharp. Instant reservations cannot extend past 7:00 PM (ends at {end_dt_ist.strftime('%I:%M %p')}).",
+            status=400
+        )
     
     # Check recent ad-hoc bookings transition buffer (15-min dead zone)
     recent_adhoc = AdHocBooking.query.filter(
@@ -433,6 +448,22 @@ def create_booking():
         max_duration = 4 if is_meeting_or_conf else 2
         if duration_hours > max_duration:
             return api_response(success=False, error=f"Maximum booking duration for this room is {max_duration} hour(s).", status=400)
+
+        # Check operating hours (7:00 AM to 7:00 PM IST; slots can start between 07:00 and 18:00)
+        if slot_start.hour < 7 or slot_start.hour > 18:
+            return api_response(
+                success=False,
+                error="Room bookings can only be scheduled between 7:00 AM and 6:00 PM. The building closes at 7:00 PM sharp.",
+                status=400
+            )
+
+        slot_end = slot_start + timedelta(hours=duration_hours)
+        if slot_end.hour > 19 or (slot_end.hour == 19 and slot_end.minute > 0) or slot_end.date() > slot_start.date():
+            return api_response(
+                success=False,
+                error=f"The building closes at 7:00 PM sharp. A {duration_hours}-hour booking starting at {slot_start.strftime('%I:%M %p')} would extend past closing hours (7:00 PM).",
+                status=400
+            )
         
         booking_date = slot_start.date()
         current_day = slot_start.weekday()
@@ -593,16 +624,32 @@ def book_meeting_room():
         )
 
     if booking_type == 'instant':
-        # 1. Check if room is vacant right now
-        status_info = room.current_occupancy_status
-        if status_info['status'] == 'occupied':
-            return api_response(success=False, error=f"Room is currently occupied by {status_info.get('faculty')} for {status_info.get('subject')}.", status=400)
-
+        # Calculate UTC start and end
         start_utc = datetime.utcnow()
         end_utc = start_utc + timedelta(minutes=duration_mins)
         current_dt = start_utc + timedelta(hours=5, minutes=30)
         current_day = current_dt.weekday()
         end_dt_ist = end_utc + timedelta(hours=5, minutes=30)
+
+        # Check operational hours (7:00 AM to 7:00 PM IST)
+        if current_dt.hour < 7 or current_dt.hour >= 19:
+            return api_response(
+                success=False,
+                error="The building is closed. Instant meeting room reservations are only permitted during operational hours (7:00 AM to 7:00 PM IST).",
+                status=400
+            )
+
+        if end_dt_ist.hour > 19 or (end_dt_ist.hour == 19 and end_dt_ist.minute > 0) or end_dt_ist.date() > current_dt.date():
+            return api_response(
+                success=False,
+                error=f"The building closes at 7:00 PM sharp. Instant reservations cannot extend past 7:00 PM (ends at {end_dt_ist.strftime('%I:%M %p')}).",
+                status=400
+            )
+
+        # 1. Check if room is vacant right now
+        status_info = room.current_occupancy_status
+        if status_info['status'] == 'occupied':
+            return api_response(success=False, error=f"Room is currently occupied by {status_info.get('faculty')} for {status_info.get('subject')}.", status=400)
 
         # Check transition dead zone (15 min buffer from prior adhoc)
         recent_adhoc = AdHocBooking.query.filter(
@@ -669,6 +716,22 @@ def book_meeting_room():
 
         booking_date = slot_start.date()
         current_day = slot_start.weekday()
+
+        # Check operating hours (7:00 AM to 7:00 PM IST; slots can start between 07:00 and 18:00)
+        if slot_start.hour < 7 or slot_start.hour > 18:
+            return api_response(
+                success=False,
+                error="Meeting room bookings can only be scheduled between 7:00 AM and 6:00 PM. The building closes at 7:00 PM sharp.",
+                status=400
+            )
+
+        slot_end = slot_start + timedelta(hours=duration_hours)
+        if slot_end.hour > 19 or (slot_end.hour == 19 and slot_end.minute > 0) or slot_end.date() > slot_start.date():
+            return api_response(
+                success=False,
+                error=f"The building closes at 7:00 PM sharp. A {duration_hours}-hour booking starting at {slot_start.strftime('%I:%M %p')} would extend past closing hours (7:00 PM).",
+                status=400
+            )
 
         for i in range(duration_hours):
             current_slot = slot_start + timedelta(hours=i)

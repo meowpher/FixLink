@@ -1368,6 +1368,7 @@
                                     <div class="col-6">
                                         <label class="form-label text-muted small fw-semibold mb-1.5" for="meetingTime" style="font-size: 0.78rem;"><i class="bi bi-clock me-1 text-primary"></i>Start Time</label>
                                         <select class="form-select" id="meetingTime">
+                                            <option value="07:00">07:00 AM</option>
                                             <option value="08:00">08:00 AM</option>
                                             <option value="09:00">09:00 AM</option>
                                             <option value="10:00">10:00 AM</option>
@@ -1378,8 +1379,7 @@
                                             <option value="15:00">03:00 PM</option>
                                             <option value="16:00">04:00 PM</option>
                                             <option value="17:00">05:00 PM</option>
-                                            <option value="18:00">06:00 PM</option>
-                                            <option value="19:00">07:00 PM</option>
+                                            <option value="18:00">06:00 PM (Last slot)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -2692,27 +2692,38 @@
                 document.getElementById('bookDuration').disabled = false;
 
                 const currentHour = now.getHours();
-                // If today and within daytime (8 to 18), start from currentHour. Otherwise, display standard full university hours 08:00 to 19:00.
-                let startHour = 8;
-                if (isToday && currentHour >= 8 && currentHour < 19) {
-                    startHour = currentHour;
+                // Operating hours: 7:00 AM to 7:00 PM. Latest booking slot start is 18:00 (06:00 PM).
+                let startHour = 7;
+                if (isToday && currentHour >= 7) {
+                    startHour = Math.min(Math.max(currentHour, 7), 18);
                 }
 
-                for (let h = startHour; h <= 19; h++) {
+                // If today and currentHour >= 19, building is closed for today
+                if (isToday && currentHour >= 19) {
+                    const option = document.createElement('option');
+                    option.value = "";
+                    option.innerText = "Building closed for today (Reopens 07:00 AM)";
+                    option.disabled = true;
+                    option.selected = true;
+                    select.appendChild(option);
+                    return;
+                }
+
+                for (let h = startHour; h <= 18; h++) {
                     const timeStr = `${h.toString().padStart(2, '0')}:00`;
                     const option = document.createElement('option');
                     option.value = timeStr;
-                    option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}`;
+                    option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}${h === 18 ? ' (Last slot)' : ''}`;
                     select.appendChild(option);
                 }
 
-                // Fallback guarantee: if loop produced 0 items (e.g. evening), populate full standard working hours
+                // Fallback guarantee: if loop produced 0 items, populate full standard working hours 7 to 18
                 if (select.children.length === 0) {
-                    for (let h = 8; h <= 19; h++) {
+                    for (let h = 7; h <= 18; h++) {
                         const timeStr = `${h.toString().padStart(2, '0')}:00`;
                         const option = document.createElement('option');
                         option.value = timeStr;
-                        option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}`;
+                        option.innerText = `${h > 12 ? h-12 : h}:00 ${h >= 12 ? 'PM' : 'AM'}${h === 18 ? ' (Last slot)' : ''}`;
                         select.appendChild(option);
                     }
                 }
@@ -2732,9 +2743,22 @@
                 const dateInput = document.getElementById('bookReservationDate');
                 const selectedDate = dateInput ? dateInput.value : '';
                 const slotTime = document.getElementById('bookSlotStart').value; 
+                const durationVal = parseInt(document.getElementById('bookDuration').value, 10) || 1;
                 
                 if (!slotTime) {
                     Swal.fire('Time Required', 'Please select a valid start time.', 'warning');
+                    btn.disabled = false;
+                    return;
+                }
+
+                const [slotH] = slotTime.split(':').map(Number);
+                if (slotH < 7 || slotH > 18) {
+                    Swal.fire('Outside Operating Hours', 'Classroom bookings can only be scheduled between 7:00 AM and 6:00 PM. The building closes at 7:00 PM sharp.', 'warning');
+                    btn.disabled = false;
+                    return;
+                }
+                if (slotH + durationVal > 19) {
+                    Swal.fire('Exceeds Closing Hours', `The building closes at 7:00 PM sharp. A ${durationVal}-hour booking starting at ${slotTime} would extend past 7:00 PM.`, 'warning');
                     btn.disabled = false;
                     return;
                 }
@@ -3255,11 +3279,30 @@
                 
                 let targetDate = new Date();
                 if (bookingType === 'scheduled') {
-                    const timeVal = document.getElementById('meetingTime')?.value || '08:00';
+                    const timeVal = document.getElementById('meetingTime')?.value || '09:00';
                     const [h, m] = timeVal.split(':').map(Number);
                     targetDate.setHours(h, m, 0, 0);
+                    const startH = h;
+                    targetDate.setHours(targetDate.getHours() + durationHours);
+                    const endH = targetDate.getHours();
+                    if (startH + durationHours > 19 || endH > 19) {
+                        endTimeEl.innerHTML = '<span class="text-danger fw-bold">Exceeds 7 PM closing</span>';
+                        return;
+                    }
+                } else {
+                    const curH = targetDate.getHours();
+                    if (curH < 7 || curH >= 19) {
+                        endTimeEl.innerHTML = '<span class="text-danger fw-bold">Closed (7 PM – 7 AM)</span>';
+                        return;
+                    }
+                    targetDate.setHours(targetDate.getHours() + durationHours);
+                    const endH = targetDate.getHours();
+                    const endM = targetDate.getMinutes();
+                    if (endH > 19 || (endH === 19 && endM > 0) || targetDate.getDate() !== new Date().getDate()) {
+                        endTimeEl.innerHTML = '<span class="text-danger fw-bold">Exceeds 7 PM closing</span>';
+                        return;
+                    }
                 }
-                targetDate.setHours(targetDate.getHours() + durationHours);
 
                 const timeStr = targetDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
                 endTimeEl.textContent = `Reserved until ~${timeStr}`;
@@ -3384,12 +3427,43 @@
                         return;
                     }
 
+                    if (bookingType === 'instant') {
+                        const now = new Date();
+                        const curH = now.getHours();
+                        if (curH < 7 || curH >= 19) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Building Closed',
+                                text: 'The Vyas building is closed (operational hours are 7:00 AM to 7:00 PM IST). Instant meeting room reservations are not available at night.'
+                            });
+                            return;
+                        }
+                        const endH = curH + durationHours;
+                        if (endH > 19 || (endH === 19 && now.getMinutes() > 0)) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Exceeds Closing Hours',
+                                text: `The building closes at 7:00 PM sharp. A ${durationHours}-hour instant meeting starting now would extend past closing hours (7:00 PM).`
+                            });
+                            return;
+                        }
+                    }
+
                     let slotStart = null;
                     if (bookingType === 'scheduled') {
                         const dateVal = document.getElementById('meetingDate').value;
                         const timeVal = document.getElementById('meetingTime').value;
                         if (!dateVal || !timeVal) {
                             Swal.fire('Time Required', 'Please select a date and start time for scheduled reservation.', 'warning');
+                            return;
+                        }
+                        const [startH] = timeVal.split(':').map(Number);
+                        if (startH < 7 || startH > 18) {
+                            Swal.fire('Outside Operating Hours', 'Meeting room bookings can only be scheduled between 7:00 AM and 6:00 PM. The building closes at 7:00 PM sharp.', 'warning');
+                            return;
+                        }
+                        if (startH + durationHours > 19) {
+                            Swal.fire('Exceeds Closing Hours', `The building closes at 7:00 PM sharp. A ${durationHours}-hour reservation starting at ${timeVal} would extend past closing hours (7:00 PM).`, 'warning');
                             return;
                         }
                         slotStart = `${dateVal}T${timeVal}:00`;

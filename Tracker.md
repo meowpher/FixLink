@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.14** | 2026-10-07 | **Deployed** | **Building Operating Hours & Night Booking Enforcement (7 AM – 7 PM IST Boundary)** (Enforced hard operational hours across all room reservation pipelines: classrooms, conference rooms, and meeting rooms can only be booked between 7:00 AM and 6:00 PM start times, with all reservations concluding at or before 7:00 PM sharp; night instant claims and overflow multi-hour slots are strictly blocked on both backend and frontend). |
 | **v1.7.13** | 2026-10-07 | **Deployed** | **Multi-Hour Ad-Hoc Timetable Slot Merging & Grid Consolidation** (Merged contiguous 1-hour ad-hoc room reservations on the weekly schedule into a single continuous block spanning multiple columns with `colspan`, full time-range display, and unified mobile agenda cards). |
 | **v1.7.12** | 2026-09-30 | **Deployed** | **Performance Optimization (<500ms) & Dead Code Cleanup** (Eliminated massive N+1 query bottlenecks in live-map fetching by eager loading `EventBooking` relations. Reduced data payload latency. Removed dead 251KB unminified CSS and obsolete legacy routes/properties.) |
 | **v1.7.11** | 2026-09-30 | **Deployed** | Faculty Ad-Hoc Multi-Hour Deletion, Real-Time Cancellation & Schedule Layout Optimization (Unified RoomBooking/AdHocBooking deletion with multi-hour contiguous slot cleanup, eliminated false historical rejections, elevated lecture timetable to top of faculty schedule, and fixed floor schematic loading). |
@@ -18,6 +19,27 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.14 (2026-10-07)
+- `feat(booking-rules)`: **Building Operating Hours & Night Booking Enforcement (7 AM – 7 PM IST Boundary)**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Strict Building Operating Hours Definition (7:00 AM – 7:00 PM IST)**:
+     - Enforced strict operational boundaries for Vyas building operations: bookings across all space types (classrooms, meeting rooms, conference rooms) are restricted between 7:00 AM (07:00 IST) and 7:00 PM (19:00 IST).
+     - Set 06:00 PM (18:00 IST) as the absolute latest start time for 1-hour slots, ensuring all activities conclude strictly by the 7:00 PM building closure.
+  2. **Phase 2: Backend API Validation & Night Claim Rejection**:
+     - Updated `/faculty/api/claim-room` (instant classroom claim): rejects instant room claims triggered when the building is closed (before 7 AM or after 7 PM IST) and blocks claims whose duration would conclude past 7:00 PM IST.
+     - Updated `/faculty/api/bookings/create` (classroom slot scheduling): rejects bookings with start hours outside `07:00`–`18:00`, and rejects multi-hour bookings that would conclude after `19:00` IST (e.g. 2 hours at 6 PM).
+     - Updated `/faculty/api/meeting-rooms/book` (instant & scheduled meeting/conference room reservations): enforces 7 AM to 7 PM operational limit on instant claims and scheduled multi-hour bookings (1–4 hours).
+  3. **Phase 3: Frontend Modal & Dynamic Slot Safeguards**:
+     - Updated `#meetingTime` select in `meetingRoomModal` to offer slots starting from `07:00 AM` through `06:00 PM (Last slot)`.
+     - Updated `populateBookingSlots()` in `bookingModal` to restrict generated slots between `07:00` and `18:00`, displaying `"Building closed for today (Reopens 07:00 AM)"` if accessed after 7 PM.
+     - Updated `updateDurationEndTime()` to display warning badges (`"Closed (7 PM – 7 AM)"` / `"Exceeds 7 PM closing"`) in red when a selected slot or duration exceeds building operating hours.
+     - Added form submission guards in both `#meetingRoomForm` and `#bookingForm` providing instant feedback before API dispatch.
+  4. **Phase 4: Automated Verification & Test Coverage**:
+     - Added `test_classroom_booking_operating_hours_enforcement` in `tests/test_meeting_room_booking.py` testing pre-7 AM rejection, 7 AM 1-hour success, 6 PM 2-hour rejection, and valid 6 PM 1-hour booking.
+     - Added night instant claim mock test and scheduled out-of-bounds rejection tests to `test_meeting_room_booking_full_flow`.
+     - Full test suite passing with 62/62 tests passing cleanly (100% success rate).
 
 ### Release v1.7.13 (2026-10-07)
 - `feat(faculty-schedule)`: **Multi-Hour Ad-Hoc Timetable Slot Merging & Grid Consolidation**

@@ -79,16 +79,38 @@ def test_meeting_room_booking_full_flow(client, run_app_context):
     assert res.status_code == 400
     assert 'only allowed for rooms on the Ground Floor' in res.get_json()['error']
 
-    # 5. Valid 3-hour instant ad-hoc claim for Conference Room on Ground Floor
-    res = client.post('/faculty/api/meeting-rooms/book', json={
-        'room_id': conf0_id,
-        'booking_type': 'instant',
-        'duration_hours': 3,
-        'subject': 'Board of Studies Conference'
-    })
-    assert res.status_code == 200
-    assert res.get_json()['success'] is True
-    assert '3 hour(s)' in res.get_json()['message']
+    from unittest.mock import patch
+
+    # 5. Night Instant Booking Check: Claiming at night (e.g. 11 PM IST / 17:30 UTC) should be rejected
+    mock_night_utc = datetime(2026, 10, 7, 17, 30, 0)
+    with patch('app.blueprints.faculty.routes.datetime') as mock_dt:
+        mock_dt.utcnow.return_value = mock_night_utc
+        mock_dt.combine = datetime.combine
+        mock_dt.fromisoformat = datetime.fromisoformat
+        res = client.post('/faculty/api/meeting-rooms/book', json={
+            'room_id': conf0_id,
+            'booking_type': 'instant',
+            'duration_hours': 1,
+            'subject': 'Night Sync Attempt'
+        })
+        assert res.status_code == 400
+        assert 'building is closed' in res.get_json()['error']
+
+    # 5b. Valid 3-hour instant ad-hoc claim during operational hours (e.g. 10:00 AM IST / 04:30 UTC)
+    mock_day_utc = datetime(2026, 10, 7, 4, 30, 0)
+    with patch('app.blueprints.faculty.routes.datetime') as mock_dt:
+        mock_dt.utcnow.return_value = mock_day_utc
+        mock_dt.combine = datetime.combine
+        mock_dt.fromisoformat = datetime.fromisoformat
+        res = client.post('/faculty/api/meeting-rooms/book', json={
+            'room_id': conf0_id,
+            'booking_type': 'instant',
+            'duration_hours': 3,
+            'subject': 'Board of Studies Conference'
+        })
+        assert res.status_code == 200
+        assert res.get_json()['success'] is True
+        assert '3 hour(s)' in res.get_json()['message']
 
     # Verify AdHocBooking was created in DB
     with run_app_context:
@@ -97,8 +119,31 @@ def test_meeting_room_booking_full_flow(client, run_app_context):
         assert adhoc.faculty_id == faculty_id
         assert adhoc.checked_in is True
 
-    # 6. Valid 4-hour scheduled slot reservation for Meeting Room on 6th Floor
+    # 6. Scheduled booking checks:
+    # 6a. Booking past 6 PM slot start (e.g. 7 PM / 19:00) should be rejected
     future_date = (datetime.utcnow() + timedelta(days=2)).strftime('%Y-%m-%d')
+    res = client.post('/faculty/api/meeting-rooms/book', json={
+        'room_id': mr6_id,
+        'booking_type': 'scheduled',
+        'slot_start': f'{future_date}T19:00:00',
+        'duration_hours': 1,
+        'subject': 'Late Evening Meeting'
+    })
+    assert res.status_code == 400
+    assert 'between 7:00 AM and 6:00 PM' in res.get_json()['error']
+
+    # 6b. Booking starting at 6 PM (18:00) for 2 hours (ending at 8 PM) should be rejected (exceeds 7 PM closing)
+    res = client.post('/faculty/api/meeting-rooms/book', json={
+        'room_id': mr6_id,
+        'booking_type': 'scheduled',
+        'slot_start': f'{future_date}T18:00:00',
+        'duration_hours': 2,
+        'subject': 'Overtime Meeting'
+    })
+    assert res.status_code == 400
+    assert 'extend past closing hours (7:00 PM)' in res.get_json()['error']
+
+    # 6c. Valid 4-hour scheduled slot reservation for Meeting Room on 6th Floor (10:00 AM to 2:00 PM)
     res = client.post('/faculty/api/meeting-rooms/book', json={
         'room_id': mr6_id,
         'booking_type': 'scheduled',
@@ -110,10 +155,21 @@ def test_meeting_room_booking_full_flow(client, run_app_context):
     assert res.get_json()['success'] is True
     assert '4 hour(s)' in res.get_json()['message']
 
-    # Verify 4 RoomBooking slots created
+    # 6d. Valid 1-hour early morning slot reservation at 7:00 AM
+    res = client.post('/faculty/api/meeting-rooms/book', json={
+        'room_id': mr6_id,
+        'booking_type': 'scheduled',
+        'slot_start': f'{future_date}T07:00:00',
+        'duration_hours': 1,
+        'subject': 'Early Morning Research Sync'
+    })
+    assert res.status_code == 200
+    assert res.get_json()['success'] is True
+
+    # Verify RoomBooking slots created
     with run_app_context:
         bookings = RoomBooking.query.filter_by(room_id=mr6_id, faculty_id=faculty_id).all()
-        assert len(bookings) == 4
+        assert len(bookings) == 5
         adhoc_id = AdHocBooking.query.filter_by(room_id=conf0_id).first().id
 
     # 7. Cancel AdHocBooking via /faculty/api/adhoc/cancel/<id>
@@ -135,6 +191,73 @@ def test_meeting_room_booking_full_flow(client, run_app_context):
     with run_app_context:
         rb = RoomBooking.query.get(rb_id)
         assert rb.status == RoomBooking.STATUS_CANCELLED
+
+
+def test_classroom_booking_operating_hours_enforcement(client, run_app_context):
+    """Verify that classroom bookings enforce 7 AM - 6 PM start slots and 7 PM closing limit."""
+    with run_app_context:
+        faculty = User(name="Dr. Alan Turing", email="alan.turing2@mitwpu.edu.in", role=User.ROLE_FACULTY, has_accepted_terms=True)
+        faculty.set_password("secure123")
+        b = Building(name="Vyas Hall")
+        db.session.add_all([faculty, b])
+        db.session.commit()
+
+        floor = Floor(building_id=b.id, level=2, name="2nd Floor")
+        db.session.add(floor)
+        db.session.commit()
+
+        room = Room(floor_id=floor.id, number="VY201", name="Vyas 201", room_type=Room.ROOM_TYPE_CLASSROOM)
+        db.session.add(room)
+        db.session.commit()
+
+        faculty_id = faculty.id
+        room_id = room.id
+
+    with client.session_transaction() as sess:
+        sess['user_id'] = faculty_id
+        sess['user_role'] = User.ROLE_FACULTY
+
+    future_date = (datetime.utcnow() + timedelta(days=3)).strftime('%Y-%m-%d')
+
+    # 1. Booking before 7 AM (e.g. 06:00) should be rejected
+    res = client.post('/faculty/api/bookings/create', json={
+        'room_id': room_id,
+        'slot_start': f'{future_date}T06:00:00',
+        'duration': 1,
+        'subject': 'Pre-Dawn Class'
+    })
+    assert res.status_code == 400
+    assert 'between 7:00 AM and 6:00 PM' in res.get_json()['error']
+
+    # 2. Booking at 7 AM (07:00) for 1 hour should succeed
+    res = client.post('/faculty/api/bookings/create', json={
+        'room_id': room_id,
+        'slot_start': f'{future_date}T07:00:00',
+        'duration': 1,
+        'subject': 'Morning 7 AM Class'
+    })
+    assert res.status_code == 200
+    assert res.get_json()['success'] is True
+
+    # 3. Booking at 6 PM (18:00) for 2 hours should be rejected (ends at 8 PM, past 7 PM closing)
+    res = client.post('/faculty/api/bookings/create', json={
+        'room_id': room_id,
+        'slot_start': f'{future_date}T18:00:00',
+        'duration': 2,
+        'subject': 'Extended Evening Class'
+    })
+    assert res.status_code == 400
+    assert 'extend past closing hours (7:00 PM)' in res.get_json()['error']
+
+    # 4. Valid 1-hour booking at 6 PM (18:00 to 19:00) should succeed
+    res = client.post('/faculty/api/bookings/create', json={
+        'room_id': room_id,
+        'slot_start': f'{future_date}T18:00:00',
+        'duration': 1,
+        'subject': 'Final Slot Class'
+    })
+    assert res.status_code == 200
+    assert res.get_json()['success'] is True
 
 
 def test_contiguous_room_booking_merging_on_dashboard(client, run_app_context):

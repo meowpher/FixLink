@@ -65,13 +65,6 @@
     <noscript><link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap-icons.min.css') }}"></noscript>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <!-- Enterprise Cross-Tab Session Guard Metadata (Zero-Trust Anchor) -->
-    <meta name="tab-guard-id" content="{{ session.get('tab_guard_id', '') }}">
-    <meta name="user-id" content="{{ session.get('user_id', session.get('professional_id', '')) }}">
-    <meta name="user-email" content="{{ session.get('user_email', session.get('super_admin_email', '')) }}">
-    <meta name="is-authenticated" content="{{ 'true' if (session.get('user_id') or session.get('professional_id') or session.get('is_super_admin')) else 'false' }}">
-    <script src="{{ url_for('static', filename='js/cross_tab_guard.js') }}?v=1.0"></script>
-
     <!-- Manifest -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
 
@@ -620,13 +613,13 @@
                             <i class="bi bi-bell-fill fs-5 text-muted" aria-hidden="true"></i>
                             <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge" style="font-size: 0.6rem;" aria-label="Unread notifications">0</span>
                         </a>
-                        <div class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0" aria-labelledby="notificationsDropdown" style="width: 320px;">
-                            <div class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom">
-                                <span class="fw-bold text-body">Notifications</span>
+                        <div class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border p-0 overflow-hidden notif-dropdown-menu" aria-labelledby="notificationsDropdown" style="width: 320px; border-color: var(--border-color) !important;">
+                            <div class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2.5 border-bottom" style="background: var(--bg-card); border-color: var(--border-color) !important;">
+                                <span class="fw-bold text-body" style="font-size: 0.85rem;">Notifications</span>
                                 <button class="btn btn-sm btn-link p-0 text-decoration-none" id="markAllReadBtn" style="font-size: 0.75rem;">Mark all as read</button>
                             </div>
                             <div id="notificationList" style="max-height: 350px; overflow-y: auto;"></div>
-                            <div class="p-2 border-top text-center bg-light">
+                            <div class="p-2 border-top text-center" style="background: var(--bg-card); border-color: var(--border-color) !important;">
                                 <a href="{{ url_for('main.notifications_page') }}" class="text-primary small text-decoration-none fw-semibold">
                                     <i class="bi bi-list-ul me-1"></i>View all notifications
                                 </a>

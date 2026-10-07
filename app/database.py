@@ -113,6 +113,11 @@ def init_db(app):
                 logger.info("Created schedule_submissions table.")
         except Exception as e:
             logger.warning(f"Could not verify schema migrations: {e}")
+            try:
+                db.session.rollback()
+                db.engine.dispose()
+            except Exception:
+                pass
 
         # 2. Verify default admin user
         from .models import User

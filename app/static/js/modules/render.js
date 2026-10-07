@@ -7,6 +7,47 @@ import { selectRoom } from './ui.js';
 // Attach to window so SVG onclick and global callers work
 window.selectRoom = selectRoom;
 
+// In-memory cache for floor plan SVGs to eliminate redundant network downloads
+const svgMemoryCache = new Map();
+
+/**
+ * Preloads all floor SVGs (0 to 7) into memory in the background.
+ */
+export function preloadFloorSVGs() {
+    [0, 1, 2, 3, 4, 5, 6, 7].forEach(level => {
+        const url = `/static/images/floors/VY${level}.svg`;
+        if (!svgMemoryCache.has(url)) {
+            fetch(url)
+                .then(r => r.ok ? r.text() : null)
+                .then(text => {
+                    if (text) svgMemoryCache.set(url, text);
+                })
+                .catch(() => {});
+        }
+    });
+}
+
+// Auto-trigger background preloading on module load
+if (typeof window !== 'undefined') {
+    window.preloadFloorSVGs = preloadFloorSVGs;
+    if (typeof requestIdleCallback === 'function') {
+        requestIdleCallback(preloadFloorSVGs);
+    } else {
+        setTimeout(preloadFloorSVGs, 100);
+    }
+}
+
+export async function fetchFloorSVG(svgUrl) {
+    if (svgMemoryCache.has(svgUrl)) {
+        return svgMemoryCache.get(svgUrl);
+    }
+    const response = await fetch(svgUrl);
+    if (!response.ok) throw new Error(`SVG file not found (${svgUrl})`);
+    const svgContent = await response.text();
+    svgMemoryCache.set(svgUrl, svgContent);
+    return svgContent;
+}
+
 export function renderFloorMap(container, rooms, floorLevel, isAdmin = false, isReport = false) {
     const svgUrl = `/static/images/floors/VY${floorLevel}.svg`;
     return renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAdmin, isReport);
@@ -19,13 +60,12 @@ window.renderFloorMap = renderFloorMap;
  * Fetches the raw SVG file and makes room elements interactive based on IDs
  */
 export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAdmin = false, isReport = false) {
-    container.innerHTML = `<div class="vyas-floor-map svg-container" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+    // If SVG is not in memory yet, show lightweight spinner
+    if (!svgMemoryCache.has(svgUrl)) {
+        container.innerHTML = `<div class="vyas-floor-map svg-container" style="display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>`;
+    }
 
-    return fetch(svgUrl)
-        .then(response => {
-            if (!response.ok) throw new Error("SVG not found");
-            return response.text();
-        })
+    return fetchFloorSVG(svgUrl)
         .then(svgContent => {
             container.innerHTML = `<div class="vyas-floor-map svg-container interactive-map-wrapper">${svgContent}</div>`;
             const svgDoc = container.querySelector('svg');
@@ -40,18 +80,6 @@ export function renderDynamicSVGFloor(container, rooms, floorLevel, svgUrl, isAd
             svgDoc.style.transformOrigin = 'center center';
             svgDoc.style.transition = 'transform 0.15s ease-out';
             
-            // Add Glow Filter if not exists
-            if (!svgDoc.querySelector('defs filter#glow')) {
-                const defs = svgDoc.querySelector('defs') || document.createElementNS('http://www.w3.org/2000/svg', 'defs');
-                if (!svgDoc.querySelector('defs')) svgDoc.prepend(defs);
-                defs.innerHTML += `
-                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                        <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                    </filter>
-                `;
-            }
-
             // Rule 2: Root SVG container receives pointer-events: none to prevent phantom bounding box clicks
             svgDoc.style.pointerEvents = 'none';
 

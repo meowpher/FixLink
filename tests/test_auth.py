@@ -97,24 +97,6 @@ def test_bottlesingh_professional_login(client, run_app_context):
     html = response.get_data(as_text=True)
     assert "Bottle Singh" in html or "Dashboard" in html or "My Tasks" in html
 
-    # Attempt login via email on standard student/admin login endpoint
-    response_email = client.post('/login', data={
-        'email': 'bottle.singh@fixlink.com',
-        'password': 'tester456!'
-    }, follow_redirects=True)
-    assert response_email.status_code == 200
-    html_email = response_email.get_data(as_text=True)
-    assert "Bottle Singh" in html_email or "Dashboard" in html_email or "My Tasks" in html_email
-
-    # Attempt login via phone on standard student/admin login endpoint
-    response_phone = client.post('/login', data={
-        'email': '2424242424',
-        'password': 'tester456!'
-    }, follow_redirects=True)
-    assert response_phone.status_code == 200
-    html_phone = response_phone.get_data(as_text=True)
-    assert "Bottle Singh" in html_phone or "Dashboard" in html_phone or "My Tasks" in html_phone
-
 
 def test_professional_profile_picture_upload_and_remove(client, professional_user):
     """Test updating and removing professional profile picture via API."""

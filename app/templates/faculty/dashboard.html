@@ -12,48 +12,6 @@
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/ui.js') }}">
 <link rel="preload" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}" as="style">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}">
-<style>
-/* Remove glowy drop-shadow blur effect from all room boxes across all floors */
-#facultyMapContainer .interactive-map-wrapper .room-poly,
-#facultyMapContainer .interactive-map-wrapper .vacant-status,
-#facultyMapContainer .interactive-map-wrapper [data-room],
-#facultyMapContainer .interactive-map-wrapper [data-room] .room-poly,
-#facultyMapContainer .interactive-map-wrapper [data-room] rect,
-#facultyMapContainer .interactive-map-wrapper [data-room] path,
-#facultyMapContainer .interactive-map-wrapper [data-room] polygon,
-#facultyMapContainer .interactive-map-wrapper .room-poly.vacant-status,
-#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status,
-#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status .room-poly,
-#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status rect,
-#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status path,
-#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status polygon,
-#facultyMapContainer .room-pulse-highlight,
-#facultyMapContainer .room-poly.room-pulse-highlight {
-    filter: none !important;
-    -webkit-filter: none !important;
-    box-shadow: none !important;
-}
-
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .room-poly,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .vacant-status,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room],
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room] .room-poly,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room] rect,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room] path,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room] polygon,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .room-poly.vacant-status,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status .room-poly,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status rect,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status path,
-[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status polygon,
-[data-theme="dark"] #facultyMapContainer .room-pulse-highlight,
-[data-theme="dark"] #facultyMapContainer .room-poly.room-pulse-highlight {
-    filter: none !important;
-    -webkit-filter: none !important;
-    box-shadow: none !important;
-}
-</style>
 {% endblock %}
 
 {% block content %}
@@ -653,21 +611,19 @@
     <!-- Section: Smart Classroom Management (SVG Map) -->
     <div id="view-tracker" class="view-section">
         <!-- Ad-Hoc Booking Active Period Banner -->
-        <div id="mapAdHocBanner" class="alert alert-primary border-0 rounded-4 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3 mb-3 p-3 p-md-3.5 d-none">
-            <div class="d-flex align-items-center gap-3 flex-grow-1 min-w-0">
-                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm" style="width: 42px; height: 42px; min-width: 42px;">
+        <div id="mapAdHocBanner" class="alert alert-primary border-0 rounded-4 shadow-sm d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3 p-3 d-none">
+            <div class="d-flex align-items-center gap-2.5">
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
                     <i class="bi bi-calendar-check-fill fs-5"></i>
                 </div>
-                <div class="flex-grow-1 min-w-0">
-                    <div class="fw-bold fs-6 text-body mb-1" id="mapAdHocSlotText" style="line-height: 1.35;">Ad-Hoc Slot: Loading...</div>
-                    <div class="text-muted small" style="line-height: 1.4;">Available classrooms are shown in <span class="badge bg-success bg-opacity-20 text-success fw-bold px-2 py-0.5 rounded-pill">GREEN</span> (bookable). Occupied classes are in <span class="badge bg-secondary bg-opacity-25 text-body fw-bold px-2 py-0.5 rounded-pill">GRAY</span> (non-bookable).</div>
+                <div>
+                    <div class="fw-bold fs-6 text-body" id="mapAdHocSlotText">Ad-Hoc Slot: Loading...</div>
+                    <small class="text-muted">Available classrooms are shown in <span class="badge bg-success bg-opacity-20 text-success fw-bold px-1.5 py-0.5">GREEN</span> (bookable). Occupied classes are in <span class="badge bg-secondary bg-opacity-25 text-body fw-bold px-1.5 py-0.5">GRAY</span> (non-bookable).</small>
                 </div>
             </div>
-            <div class="w-100 w-md-auto flex-shrink-0 pt-2 pt-md-0 d-flex justify-content-stretch justify-content-md-end">
-                <button class="btn btn-outline-primary btn-sm rounded-pill px-3.5 py-2 fw-semibold d-inline-flex align-items-center justify-content-center gap-1.5 w-100 w-md-auto shadow-xs" id="btnBackToSchedule">
-                    <i class="bi bi-arrow-left"></i><span>Back to Schedule</span>
-                </button>
-            </div>
+            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 align-self-start align-self-md-auto" id="btnBackToSchedule">
+                <i class="bi bi-arrow-left"></i><span>Back to Schedule</span>
+            </button>
         </div>
 
         <div class="facility-intelligence-header sticky-top shadow-sm">
@@ -2146,24 +2102,6 @@
             let advancedSearchMode = false;
             let advancedTimePayload = null;
             window.isLocateTargetMode = false;
-            const floorStatusCache = new Map();
-
-            async function fetchWithRetry(url, options, maxRetries = 2) {
-                let lastErr = null;
-                for (let i = 0; i <= maxRetries; i++) {
-                    try {
-                        const res = await fetch(url, options);
-                        if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-                        return await res.json();
-                    } catch (err) {
-                        lastErr = err;
-                        if (i < maxRetries) {
-                            await new Promise(r => setTimeout(r, 200 * (i + 1)));
-                        }
-                    }
-                }
-                throw lastErr;
-            }
 
             async function refreshMapStatus(floorLevel) {
                 const container = document.getElementById('facultyMapContainer');
@@ -2193,39 +2131,21 @@
                     }
                 }
 
+                // Fallback floor ID if not found in dropdown: level + 1 (0 -> 1, 4 -> 5)
                 if (!floorId) {
-                    floorId = targetLevel;
+                    const parsedLvl = parseInt(targetLevel);
+                    floorId = (!isNaN(parsedLvl) ? (parsedLvl + 1) : 5).toString();
                 }
 
-                let renderFn = window.renderFloorMap;
-                if (typeof renderFn !== 'function') {
-                    try {
-                        const renderMod = await import("{{ url_for('static', filename='js/modules/render.js') }}");
-                        renderFn = renderMod.renderFloorMap;
-                    } catch (e) {}
-                }
-
-                // Stale-While-Revalidate: Instant render from memory cache if available
-                const isCached = floorStatusCache.has(targetLevel);
-                if (isCached && !advancedSearchMode) {
-                    const cachedData = floorStatusCache.get(targetLevel);
-                    currentStatusData = {};
-                    (cachedData.rooms || []).forEach(r => currentStatusData[r.id] = r);
-                    if (typeof renderFn === 'function') {
-                        renderFn(container, cachedData.rooms || [], targetLevel, false);
-                        applyOccupancyStyling();
-                    }
-                } else if (!container.querySelector('.interactive-map-wrapper')) {
-                    container.innerHTML = `
-                        <div class="text-center py-5 text-muted">
-                            <div class="spinner-border text-primary mb-3" role="status"></div>
-                            <p class="mb-0">Loading Floor ${targetLevel} Schematics...</p>
-                        </div>
-                    `;
-                }
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <div class="spinner-border text-primary mb-3" role="status"></div>
+                        <p class="mb-0">Loading Floor ${targetLevel} Schematics...</p>
+                    </div>
+                `;
 
                 try {
-                    let url = `/faculty/api/map/status/${encodeURIComponent(floorId)}`;
+                    let url = `/faculty/api/map/status/${floorId}`;
                     let options = {
                         headers: {
                             'Accept': 'application/json',
@@ -2253,14 +2173,19 @@
                         };
                     }
 
-                    const result = await fetchWithRetry(url, options, 2);
+                    const res = await fetch(url, options); 
+                    if (!res.ok) {
+                        throw new Error(`Server returned HTTP ${res.status}`);
+                    }
+                    const result = await res.json();
                     
                     if (result && result.success && result.data) {
                         const rooms = result.data.rooms || [];
-                        floorStatusCache.set(targetLevel, result.data);
                         currentStatusData = {};
                         rooms.forEach(r => currentStatusData[r.id] = r);
                         
+                        container.innerHTML = '';
+                        let renderFn = window.renderFloorMap;
                         if (typeof renderFn !== 'function') {
                             const renderMod = await import("{{ url_for('static', filename='js/modules/render.js') }}");
                             renderFn = renderMod.renderFloorMap;
@@ -2273,20 +2198,12 @@
                     }
                 } catch (err) {
                     console.error("Map Status Error:", err);
-                    if (!isCached) {
-                        container.innerHTML = `
-                            <div class="alert alert-warning text-center my-4 py-4 rounded-4 shadow-sm mx-auto" style="max-width: 500px;">
-                                <i class="bi bi-exclamation-triangle fs-2 text-warning d-block mb-2"></i>
-                                <h6 class="fw-bold">Unable to Load Floor ${targetLevel} Schematics</h6>
-                                <p class="small text-muted mb-3">${err.message || 'Please check your connection and try again.'}</p>
-                                <button class="btn btn-primary btn-sm rounded-pill px-4" onclick="window.retryFloorLoad('${targetLevel}')">
-                                    <i class="bi bi-arrow-clockwise me-1"></i>Retry Loading
-                                </button>
-                            </div>
-                        `;
-                    }
-                }
-            }
+                    container.innerHTML = `
+                        <div class="alert alert-warning text-center my-4 py-4 rounded-4 shadow-sm mx-auto" style="max-width: 500px;">
+                            <i class="bi bi-exclamation-triangle fs-2 text-warning d-block mb-2"></i>
+                            <h6 class="fw-bold">Unable to Load Floor ${targetLevel} Schematics</h6>
+                            <p class="small text-muted mb-3">${err.message || 'Please check your connection and try again.'}</p>
+                            <button class="btn btn-primary btn-sm rounded-pill px-4" onclick="window.retryFloorLoad('${targetLevel}')">
                                 <i class="bi bi-arrow-clockwise me-1"></i>Retry Loading
                             </button>
                         </div>
@@ -2835,9 +2752,7 @@
             document.getElementById('bookingForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById('btnConfirmBooking');
-                const originalBtnHtml = btn.innerHTML;
                 btn.disabled = true;
-                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>DEPLOYING ASSIGNMENT...';
 
                 const dateInput = document.getElementById('bookReservationDate');
                 const selectedDate = dateInput ? dateInput.value : '';
@@ -2847,7 +2762,6 @@
                 if (!slotTime) {
                     Swal.fire('Time Required', 'Please select a valid start time.', 'warning');
                     btn.disabled = false;
-                    btn.innerHTML = originalBtnHtml;
                     return;
                 }
 
@@ -2897,28 +2811,15 @@
                     const result = await res.json();
                     if (result.success) {
                         try { bootstrap.Modal.getInstance(document.getElementById('bookingModal')).hide(); } catch(e){}
-                        const roomNum = document.getElementById('bookRoomNumber')?.innerText || '';
-                        const confirmMsg = result.message || (roomNum ? `Room ${roomNum} deployment has been confirmed successfully.` : 'Your room slot booking has been confirmed successfully.');
-                        window.showSystemAlert({
-                            icon: 'success',
-                            title: 'BOOKING CONFIRMED',
-                            text: confirmMsg,
-                            timer: 3000,
-                            showConfirmButton: true,
-                            confirmButtonText: 'Great!',
-                            confirmButtonColor: '#2563eb'
-                        });
-                        setTimeout(() => location.reload(), 2200);
+                        window.showSystemAlert({ icon: 'success', title: 'Slot Assigned', text: 'Facility AI has reserved your room.', timer: 2000, showConfirmButton: false });
+                        setTimeout(() => location.reload(), 2000);
                     } else {
-                        const errTitle = res.status === 403 ? 'Access Denied' : (result.error_title || (res.status === 409 || res.status === 400 ? 'Reservation Conflict' : 'Reservation Failed'));
-                        window.showSystemAlert({ icon: 'error', title: errTitle, text: result.error || 'Failed to complete reservation.' });
+                        window.showSystemAlert({ icon: 'error', title: 'Access Denied', text: result.error });
                     }
                 } catch (err) {
                     console.error(err);
-                    window.showSystemAlert({ icon: 'error', title: 'Network Error', text: 'Could not connect to the server. Please check your connection and try again.' });
                 } finally {
                     btn.disabled = false;
-                    btn.innerHTML = originalBtnHtml;
                 }
             });
 
@@ -3748,8 +3649,8 @@
                 if (adHocSlotText) {
                     const cleanNum = (roomNumber || '').toString().replace(/^VY/i, '');
                     const label = subject ? `<strong>${subject}</strong> (Room VY${cleanNum})` : `Room VY${cleanNum}`;
-                    const timeLabel = timeStr ? ` &bull; <span class="text-muted fw-normal">${timeStr}</span>` : '';
-                    adHocSlotText.innerHTML = `<span class="d-inline-flex align-items-center flex-wrap gap-1"><i class="bi bi-geo-alt-fill text-success me-1"></i><span>Classroom Location:</span> <span>${label}</span>${timeLabel}</span>`;
+                    const timeLabel = timeStr ? ` &bull; <span class="text-muted">${timeStr}</span>` : '';
+                    adHocSlotText.innerHTML = `<i class="bi bi-geo-alt-fill text-success me-1"></i>Classroom Location: ${label}${timeLabel}`;
                 }
 
                 // Switch to Map Tracker view

@@ -189,6 +189,56 @@ def create_app(config_name=None):
             session.pop('professional_name', None)
             session.pop('professional_category', None)
 
+        # Phase 2: Zero-Trust Backend Middleware (The Deadlock Fix)
+    @app.before_request
+    def zero_trust_cross_tab_guard_middleware():
+        # Exclusively inspect mutating methods: POST, PUT, DELETE, PATCH
+        if request.method not in ['POST', 'PUT', 'DELETE', 'PATCH']:
+            return None
+
+        # Loophole Guard: If endpoint is None, allow Flask routing to process 404
+        if request.endpoint is None:
+            return None
+
+        # Logout Whitelist: If request.endpoint == 'logout' (or contains logout), return immediately
+        endpoint_lower = request.endpoint.lower()
+        if 'logout' in endpoint_lower or endpoint_lower in {'logout', 'auth.logout', 'superadmin.logout', 'professional.logout'}:
+            return None
+
+        # Login / Public Auth / Onboarding Whitelist:
+        if endpoint_lower in {'auth.login', 'auth.signup', 'auth.forgot_password', 'auth.reset_password', 'superadmin.login', 'professional.login'} or \
+           endpoint_lower.startswith('onboarding.') or \
+           request.path in {'/login', '/signup', '/forgot-password', '/developer/login', '/professional/login'} or \
+           request.path.startswith('/onboarding'):
+            return None
+
+        server_guard_id = session.get('tab_guard_id')
+        if not server_guard_id:
+            return None
+
+        # Guard Check: Extract client_guard_id = request.headers.get('X-Tab-Guard-ID') or request.form.get('X-Tab-Guard-ID')
+        client_guard_id = request.headers.get('X-Tab-Guard-ID')
+        if not client_guard_id:
+            try:
+                client_guard_id = request.form.get('X-Tab-Guard-ID')
+            except Exception:
+                pass
+        if not client_guard_id and request.is_json:
+            try:
+                json_data = request.get_json(silent=True)
+                if isinstance(json_data, dict):
+                    client_guard_id = json_data.get('X-Tab-Guard-ID') or json_data.get('tab_guard_id')
+            except Exception:
+                pass
+
+        # If they do not match, abort(403) with JSON: {"error": "session_conflict", "message": "Session corrupted. Please refresh."}
+        if client_guard_id != server_guard_id:
+            return jsonify({
+                "error": "session_conflict",
+                "message": "Session corrupted. Please refresh."
+            }), 403
+
+        return None
 
     # Phase 2: Clickwrap Legal Compliance Middleware Interceptor
     @app.before_request
@@ -250,6 +300,10 @@ def create_app(config_name=None):
         # 2. Static Asset & Page Caching (Performance 100/100 & BFCache Restoration)
         if request.path.startswith('/static/'):
             response.headers['Cache-Control'] = 'public, max-age=31536000, immutable'
+        elif request.path.startswith('/api/auth/status'):
+            response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
         else:
             # Overwrite any default 'no-store' headers to allow Back/Forward Cache (BFCache)
             # while still requiring revalidation on browser return
@@ -280,6 +334,8 @@ def create_app(config_name=None):
                 except Exception:
                     pass
 
+        if session.get('tab_guard_id'):
+            response.headers['X-Tab-Guard-ID'] = session['tab_guard_id']
         return response
     
     # Global Template Context with G-Memoization

@@ -73,6 +73,7 @@ def login():
         password = request.form.get('password', '').strip()
         
         if check_super_admin(email, password):
+            session['tab_guard_id'] = secrets.token_hex(16)
             session['is_super_admin'] = True
             session['super_admin_email'] = email
             session['user_email'] = email
@@ -120,38 +121,6 @@ def dashboard():
     bugs = BugReport.query.order_by(BugReport.created_at.desc()).all()
     sla_status = get_pending_batches_sla_status()
     
-    # Enrich bugs with full reporter metadata for detailed popup card
-    user_ids = [b.reporter_id for b in bugs if b.reporter_id and b.reporter_type in ['user', 'student', 'faculty', 'admin', 'Superadmin', 'superadmin']]
-    prof_ids = [b.reporter_id for b in bugs if b.reporter_id and b.reporter_type in ['professional', 'Professional']]
-    
-    users_map = {u.id: u for u in User.query.filter(User.id.in_(user_ids)).all()} if user_ids else {}
-    profs_map = {p.id: p for p in Professional.query.filter(Professional.id.in_(prof_ids)).all()} if prof_ids else {}
-    
-    for b in bugs:
-        rep_type_lower = (b.reporter_type or 'guest').lower()
-        if rep_type_lower in ['user', 'student', 'faculty', 'admin'] and b.reporter_id in users_map:
-            u = users_map[b.reporter_id]
-            b.reporter_name = u.name
-            b.reporter_email = u.email
-            b.reporter_role_label = u.role.capitalize() if u.role else 'User'
-            b.reporter_prn = u.prn or ''
-        elif rep_type_lower == 'professional' and b.reporter_id in profs_map:
-            p = profs_map[b.reporter_id]
-            b.reporter_name = p.name
-            b.reporter_email = p.email
-            b.reporter_role_label = f"Professional ({p.category.replace('_', ' ').title() if p.category else 'General'})"
-            b.reporter_prn = p.phone or ''
-        elif rep_type_lower in ['superadmin', 'super_admin']:
-            b.reporter_name = 'Super Admin / Developer'
-            b.reporter_email = 'superadmin@mitwpu.edu.in'
-            b.reporter_role_label = 'Super Admin'
-            b.reporter_prn = ''
-        else:
-            b.reporter_name = 'Guest Reporter' if rep_type_lower == 'guest' else f"Reporter #{b.reporter_id or 'N/A'}"
-            b.reporter_email = 'Unauthenticated' if rep_type_lower == 'guest' else ''
-            b.reporter_role_label = b.reporter_type.capitalize() if b.reporter_type else 'Guest'
-            b.reporter_prn = ''
-    
     return render_template('superadmin/dashboard.html',
                          admin_count=admin_count,
                          faculty_count=faculty_count,
@@ -178,28 +147,8 @@ def resolve_single_bug(bug_id):
     db.session.commit()
     
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
-        return jsonify({'success': True, 'status': 'resolved', 'message': f'Bug #{bug_id} marked as resolved.'})
+        return jsonify({'success': True, 'message': f'Bug #{bug_id} marked as resolved.'})
     flash(f'Bug #{bug_id} marked as resolved.', 'success')
-    return redirect(url_for('superadmin.dashboard'))
-
-
-@superadmin_bp.route('/developer/bugs/<int:bug_id>/reopen', methods=['POST'])
-@super_admin_required
-def reopen_single_bug(bug_id):
-    from ...models import BugReport
-    bug = db.session.get(BugReport, bug_id)
-    if not bug:
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
-            return jsonify({'success': False, 'error': 'Bug report not found'}), 404
-        flash('Bug report not found.', 'danger')
-        return redirect(url_for('superadmin.dashboard'))
-    
-    bug.status = BugReport.STATUS_OPEN
-    db.session.commit()
-    
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
-        return jsonify({'success': True, 'status': 'open', 'message': f'Bug #{bug_id} reopened.'})
-    flash(f'Bug #{bug_id} reopened.', 'info')
     return redirect(url_for('superadmin.dashboard'))
 
 

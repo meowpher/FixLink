@@ -561,7 +561,6 @@
     
     <form method="POST" action="{{ url_for('auth.login') }}{% if show_phone_hint %}?pro=1{% endif %}" aria-label="Sign in form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-        <input type="hidden" name="is_pro_portal" value="{% if show_phone_hint %}1{% else %}0{% endif %}">
         
         <div class="mb-3 text-start">
             <label class="form-label small fw-semibold mb-1" for="loginInput">
@@ -572,18 +571,11 @@
                 {% endif %}
             </label>
             <input type="text" name="email" id="loginInput" class="form-control" required autocomplete="username"
-                   placeholder="{% if show_phone_hint %}name@fixlink.com or username or 9876543210{% else %}name@mitwpu.edu.in{% endif %}"
+                   placeholder="{% if show_phone_hint %}name@mitwpu.edu.in or username or 9876543210{% else %}name@mitwpu.edu.in{% endif %}"
                    aria-required="true" aria-label="{% if show_phone_hint %}Email, Username, or Phone{% else %}Email Address{% endif %}">
             {% if show_phone_hint %}
             <div class="form-text mt-1 text-muted small" style="font-size: 12px;">
-                <i class="bi bi-info-circle me-1"></i>Job Certified Professionals can use their email, username, or phone number
-            </div>
-            <div id="proPortalMitHint" class="form-text mt-1 text-danger small d-none" style="font-size: 12px;">
-                <i class="bi bi-exclamation-triangle-fill me-1"></i>MIT-WPU domain accounts (@mitwpu.edu.in) must log in via the <a href="{{ url_for('auth.login') }}" class="fw-bold text-decoration-underline">Student &amp; Faculty Portal</a>.
-            </div>
-            {% else %}
-            <div id="mainPortalProHint" class="form-text mt-1 text-warning-emphasis small d-none" style="font-size: 12px;">
-                <i class="bi bi-info-circle-fill me-1 text-warning"></i>Are you a Job Certified Professional? <a href="?pro=1" class="fw-bold text-primary text-decoration-underline">Click here to log in on the Professionals Portal</a>.
+                <i class="bi bi-info-circle me-1"></i>Job Certified Professionals can use their username or phone number
             </div>
             {% endif %}
         </div>
@@ -605,7 +597,7 @@
         <!-- Google-Style Clickwrap Scroll-To-Accept Checkbox -->
         <div class="mb-4 text-start">
             <div class="form-check terms-check-group d-flex align-items-start gap-2" id="termsCheckGroup">
-                <input class="form-check-input mt-1" type="checkbox" name="accept_terms" id="loginTermsCheckbox" value="1">
+                <input class="form-check-input mt-1" type="checkbox" name="accept_terms" id="loginTermsCheckbox" value="1" checked>
                 <span class="form-check-label terms-trigger-label" id="termsTriggerLabel" data-bs-toggle="modal" data-bs-target="#loginTermsModal" role="button" tabindex="0" aria-label="Open terms and conditions modal">
                     <span id="termsCheckboxLabelText">I accept the <span class="terms-link">Terms &amp; Conditions</span>.</span>
                 </span>
@@ -1083,7 +1075,7 @@ function togglePwd() {
     });
 })();
 
-// Scroll-To-Accept Clickwrap Enforcement Logic (Per-Email Dynamic Verification)
+// Scroll-To-Accept Clickwrap Enforcement Logic (Phase 3 Strict Implementation)
 (function() {
     function initTermsModalLogic() {
         const scrollBody = document.getElementById('termsModalScrollBody');
@@ -1108,34 +1100,15 @@ function togglePwd() {
             return null;
         }
 
-        let debounceCheckTimer = null;
-        let lastCheckedVal = '';
-
-        // Update UI when terms are accepted
-        function setTermsAcceptedUI() {
-            loginTermsCheckbox.checked = true;
-            if (termsCheckboxLabelText) {
-                termsCheckboxLabelText.innerHTML = '<span class="text-success small fw-semibold"><i class="bi bi-shield-check me-1"></i>Terms &amp; Conditions accepted</span>';
-            }
-        }
-
-        // Update UI when terms are NOT yet accepted for the current email
-        function setTermsUnacceptedUI() {
-            loginTermsCheckbox.checked = false;
-            updateTermsForRole();
-        }
-
-        // Dynamic Role Text based on email / credentials input
+        // Dynamic Role Detection based on email / credentials input
         function updateTermsForRole() {
-            if (loginTermsCheckbox.checked) {
-                if (termsCheckboxLabelText) {
-                    termsCheckboxLabelText.innerHTML = '<span class="text-success small fw-semibold"><i class="bi bi-shield-check me-1"></i>Terms &amp; Conditions accepted</span>';
-                }
-                return;
-            }
-
             const val = (loginInput ? loginInput.value : '').trim().toLowerCase();
             const isProPortal = window.location.search.includes('pro=1') || window.location.pathname.includes('/professional');
+            
+            // Faculty / Admin indicators:
+            // 1. Explicit admin/faculty/superadmin keywords
+            // 2. Technician / Professional portal
+            // 3. Name-based email (e.g. om.mahadik@mitwpu.edu.in, first.last with no PRN digits)
             const isFacultyOrAdmin = isProPortal || 
                 val.includes('faculty') || 
                 val.includes('admin') || 
@@ -1159,113 +1132,33 @@ function togglePwd() {
             }
         }
 
-        // Check if a specific email / identifier has already accepted terms
-        async function checkTermsStatus(identifier) {
-            const val = (identifier || '').trim().toLowerCase();
-            if (!val) {
-                setTermsUnacceptedUI();
-                return;
-            }
-
-            // 1. Fast local cache check for THIS email ID
-            if (localStorage.getItem('fixlink_terms_accepted_' + val) === 'true') {
-                setTermsAcceptedUI();
-                return;
-            }
-
-            // 2. Server check for existing user/record consent
-            try {
-                const res = await fetch(`/api/check-terms-status?identifier=${encodeURIComponent(val)}`);
-                const result = await res.json();
-                
-                // Confirm user hasn't changed the input during network request
-                const currentVal = (loginInput ? loginInput.value : '').trim().toLowerCase();
-                if (val !== currentVal) return;
-
-                if (result && result.success && result.data && result.data.has_accepted_terms) {
-                    localStorage.setItem('fixlink_terms_accepted_' + val, 'true');
-                    setTermsAcceptedUI();
-                } else {
-                    setTermsUnacceptedUI();
-                }
-            } catch (err) {
-                setTermsUnacceptedUI();
-            }
-        }
-
-        // Live input handler: Automatically unticks on new/changed email until verified
-        function handleIdentifierInput() {
-            const val = (loginInput ? loginInput.value : '').trim().toLowerCase();
-
-            // Live hint feedback for portal routing
-            const isProPortal = window.location.search.includes('pro=1') || window.location.pathname.includes('/professional');
-            const mainPortalProHint = document.getElementById('mainPortalProHint');
-            const proPortalMitHint = document.getElementById('proPortalMitHint');
-
-            if (!isProPortal && mainPortalProHint) {
-                if (val.length >= 3 && !val.endsWith('@mitwpu.edu.in') && (val.includes('@') || /^\d{4,}/.test(val) || val.includes('#pro'))) {
-                    mainPortalProHint.classList.remove('d-none');
-                } else {
-                    mainPortalProHint.classList.add('d-none');
-                }
-            }
-
-            if (isProPortal && proPortalMitHint) {
-                if (val.endsWith('@mitwpu.edu.in')) {
-                    proPortalMitHint.classList.remove('d-none');
-                } else {
-                    proPortalMitHint.classList.add('d-none');
-                }
-            }
-
-            if (!val) {
-                lastCheckedVal = '';
-                setTermsUnacceptedUI();
-                return;
-            }
-
-            if (val === lastCheckedVal && loginTermsCheckbox.checked) {
-                return;
-            }
-
-            lastCheckedVal = val;
-
-            // If locally accepted for THIS specific email, check it
-            if (localStorage.getItem('fixlink_terms_accepted_' + val) === 'true') {
-                setTermsAcceptedUI();
-                return;
-            }
-
-            // Otherwise, immediately UNTICK the checkbox for the new email
-            setTermsUnacceptedUI();
-
-            // Query backend status with debounce
-            clearTimeout(debounceCheckTimer);
-            debounceCheckTimer = setTimeout(() => {
-                checkTermsStatus(val);
-            }, 300);
-        }
-
         if (loginInput) {
-            loginInput.addEventListener('input', handleIdentifierInput);
-            loginInput.addEventListener('change', handleIdentifierInput);
-            loginInput.addEventListener('blur', handleIdentifierInput);
-            loginInput.addEventListener('paste', () => {
-                setTimeout(handleIdentifierInput, 50);
-            });
-            
-            // Initial check on load
-            if (loginInput.value) {
-                handleIdentifierInput();
-            } else {
-                setTermsUnacceptedUI();
-            }
+            loginInput.addEventListener('input', updateTermsForRole);
+            loginInput.addEventListener('change', updateTermsForRole);
         }
 
-        // Modal Scroll Tracker: must scroll to bottom to enable accept button
+        // Sync tab clicks inside the modal to the checkbox label
+        if (tabStudentBtn) {
+            tabStudentBtn.addEventListener('shown.bs.tab', function() {
+                if (termsCheckboxLabelText) {
+                    termsCheckboxLabelText.innerHTML = 'I accept the <span class="terms-link">Terms &amp; Conditions</span>.';
+                }
+                handleScrollEvent();
+            });
+        }
+        if (tabFacultyBtn) {
+            tabFacultyBtn.addEventListener('shown.bs.tab', function() {
+                if (termsCheckboxLabelText) {
+                    termsCheckboxLabelText.innerHTML = 'I accept the <span class="terms-link">Terms &amp; Conditions</span> and Ghost Protocol.';
+                }
+                handleScrollEvent();
+            });
+        }
+
+        // Strict Scroll Tracker: scrollTop + clientHeight >= scrollHeight - 15 (15px buffer for high-DPI scaling)
         function handleScrollEvent() {
             const currentScroll = scrollBody.scrollTop + scrollBody.clientHeight;
-            const targetScroll = scrollBody.scrollHeight - 25; // 25px buffer for cross-device scaling
+            const targetScroll = scrollBody.scrollHeight - 15;
             if (currentScroll >= targetScroll) {
                 modalAcceptBtn.removeAttribute('disabled');
                 modalAcceptBtn.disabled = false;
@@ -1278,54 +1171,20 @@ function togglePwd() {
 
         scrollBody.addEventListener('scroll', handleScrollEvent, { passive: true });
 
-        // Reset scroll position and accept button when modal opens
-        modalEl.addEventListener('show.bs.modal', function() {
-            const val = (loginInput ? loginInput.value : '').trim().toLowerCase();
-            const isAccepted = val && (localStorage.getItem('fixlink_terms_accepted_' + val) === 'true');
-            if (!isAccepted) {
-                scrollBody.scrollTop = 0;
-                modalAcceptBtn.setAttribute('disabled', 'true');
-                modalAcceptBtn.disabled = true;
-                if (modalScrollStatus) {
-                    modalScrollStatus.textContent = 'Please scroll to the bottom of the document to activate acceptance.';
-                    modalScrollStatus.className = 'text-warning small fw-medium';
-                }
-            } else {
-                modalAcceptBtn.removeAttribute('disabled');
-                modalAcceptBtn.disabled = false;
-                if (modalScrollStatus) {
-                    modalScrollStatus.textContent = 'Document previously accepted.';
-                    modalScrollStatus.className = 'text-success small fw-medium';
-                }
-            }
-        });
-
         modalEl.addEventListener('shown.bs.modal', function() {
+            updateTermsForRole();
             handleScrollEvent();
         });
 
-        // Sync tab clicks inside the modal to the checkbox label
-        if (tabStudentBtn) {
-            tabStudentBtn.addEventListener('shown.bs.tab', function() {
-                scrollBody.scrollTop = 0;
-                handleScrollEvent();
-            });
-        }
-        if (tabFacultyBtn) {
-            tabFacultyBtn.addEventListener('shown.bs.tab', function() {
-                scrollBody.scrollTop = 0;
-                handleScrollEvent();
-            });
-        }
-
-        // When "I Accept" is clicked inside the modal:
+        // When "I Accept" is clicked:
+        // 1. Programmatically set the main login checkbox to checked = true
+        // 2. Remove the disabled attribute from the main Login Submit button
+        // 3. Close the modal cleanly
         modalAcceptBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            const val = (loginInput ? loginInput.value : '').trim().toLowerCase();
-            if (val) {
-                localStorage.setItem('fixlink_terms_accepted_' + val, 'true');
-            }
-            setTermsAcceptedUI();
+            loginTermsCheckbox.checked = true;
+            loginSubmitBtn.removeAttribute('disabled');
+            loginSubmitBtn.disabled = false;
 
             const modalInst = getModalInstance();
             if (modalInst) {
@@ -1333,47 +1192,18 @@ function togglePwd() {
             }
         });
 
-        // If user clicks directly on the checkbox without having accepted, prompt modal
+        // If user clicks directly on the checkbox, open the modal via Bootstrap
         loginTermsCheckbox.addEventListener('click', function(e) {
-            const val = (loginInput ? loginInput.value : '').trim().toLowerCase();
-            const isAccepted = val && (localStorage.getItem('fixlink_terms_accepted_' + val) === 'true');
-            if (!isAccepted) {
-                e.preventDefault();
-                loginTermsCheckbox.checked = false;
-                const modalInst = getModalInstance();
-                if (modalInst) {
-                    modalInst.show();
-                }
+            e.preventDefault();
+            const modalInst = getModalInstance();
+            if (modalInst) {
+                modalInst.show();
             }
         });
 
-        // Intercept form submission if terms are not accepted
+        // Anti-Spam & Double Submit Lock on form submission
         if (loginForm) {
-            loginForm.addEventListener('submit', function(e) {
-                const val = (loginInput ? loginInput.value : '').trim().toLowerCase();
-                const isAccepted = (val && localStorage.getItem('fixlink_terms_accepted_' + val) === 'true') || loginTermsCheckbox.checked;
-
-                if (!isAccepted) {
-                    e.preventDefault();
-                    loginTermsCheckbox.checked = false;
-                    const modalInst = getModalInstance();
-                    if (modalInst) {
-                        modalInst.show();
-                    }
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            toast: true,
-                            position: 'top-end',
-                            icon: 'info',
-                            title: 'Please scroll through and accept the Terms & Conditions.',
-                            showConfirmButton: false,
-                            timer: 3500
-                        });
-                    }
-                    return;
-                }
-
-                loginTermsCheckbox.checked = true;
+            loginForm.addEventListener('submit', function() {
                 loginSubmitBtn.disabled = true;
                 loginSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Securing...';
             });

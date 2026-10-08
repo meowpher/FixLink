@@ -115,21 +115,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         notifications.forEach(notif => {
             const item = document.createElement('div');
-            item.className = `p-3 border-bottom notif-item-hover ${notif.is_read ? 'opacity-75' : 'fw-medium'}`;
+            item.className = `p-3 border-bottom ${notif.is_read ? 'bg-white' : 'bg-light'}`;
             item.style.cursor = 'pointer';
-            item.style.transition = 'background-color 0.15s ease';
-            
-            const timeStr = notif.created_at ? new Date(notif.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
             
             item.innerHTML = `
                 <div class="d-flex justify-content-between align-items-start mb-1">
-                    <span class="text-body fw-bold" style="font-size: 0.85rem;">${notif.title}</span>
-                    <div class="d-flex align-items-center gap-1">
-                        ${!notif.is_read ? '<span class="badge rounded-pill bg-primary" style="font-size: 0.55rem;">NEW</span>' : ''}
-                        <small class="text-muted" style="font-size: 0.7rem;">${timeStr}</small>
-                    </div>
+                    <strong class="text-dark" style="font-size: 0.85rem;">${notif.title}</strong>
+                    ${!notif.is_read ? '<span class="badge bg-primary" style="font-size: 0.5rem;">NEW</span>' : ''}
                 </div>
-                <div class="text-secondary small" style="font-size: 0.8rem; line-height: 1.35;">${notif.message}</div>
+                <div class="text-muted" style="font-size: 0.8rem;">${notif.message}</div>
+                <div class="text-secondary mt-1" style="font-size: 0.7rem;">
+                    ${new Date(notif.created_at).toLocaleString()}
+                </div>
             `;
             
             item.addEventListener('click', async () => {

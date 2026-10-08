@@ -19,6 +19,27 @@ from ...realtime import get_pusher
 
 auth_bp = Blueprint('auth', __name__)
 
+@auth_bp.route('/api/auth/status', methods=['GET'])
+def auth_status():
+    """Anti-cache polling endpoint for Zero-Trust Cross-Tab Session Guard."""
+    from ...models import User
+    
+    is_authenticated = False
+    if session.get('user_id'):
+        user = db.session.get(User, session['user_id'])
+        is_authenticated = user is not None and getattr(user, 'is_authenticated', True)
+    elif session.get('professional_id') or session.get('is_super_admin'):
+        is_authenticated = True
+
+    response = jsonify({
+        "authenticated": is_authenticated,
+        "guard_id": session.get('tab_guard_id', '')
+    })
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 
 @auth_bp.route('/pusher/auth', methods=['POST'])
 @csrf.exempt
@@ -98,11 +119,7 @@ def login():
             session.pop('professional_category', None)
     
     # Check for special query parameter or professional path to show phone login (for professionals only)
-    show_phone_hint = (
-        request.args.get('pro') == '1' or 
-        request.form.get('is_pro_portal') == '1' or 
-        request.path.startswith('/professional')
-    )
+    show_phone_hint = request.args.get('pro') == '1' or request.path.startswith('/professional')
             
     if request.method == 'POST':
         login_input = request.form.get('email', '').strip()
@@ -111,213 +128,176 @@ def login():
         # Check if input is a phone number (Indian phone: 10 digits, possibly with +91)
         cleaned_input = login_input.replace('+91', '').replace('-', '').replace(' ', '')
         is_phone = cleaned_input.isdigit() and len(cleaned_input) == 10
+        
+        # Check if input looks like a username (no @ symbol, not all digits)
         is_username = '@' not in login_input and not cleaned_input.isdigit()
-        is_mitwpu_domain = login_input.lower().endswith('@mitwpu.edu.in')
-
-        # ── PORTAL ENFORCEMENT ──
-        if show_phone_hint:
-            # 1. PROFESSIONALS PORTAL: Strictly block @mitwpu.edu.in accounts
-            if is_mitwpu_domain:
-                flash('MIT-WPU domain accounts (@mitwpu.edu.in) cannot log in through the Professionals portal. Please use the Student & Faculty portal.', 'error')
-                return render_template('login.html', show_phone_hint=True)
-            
-            # Lookup Professional by phone, username, or external email
-            professional = None
-            if is_phone:
-                professional = Professional.query.filter(
-                    (Professional.phone == cleaned_input) |
-                    (Professional.phone == login_input)
-                ).filter(Professional.is_active == True).first()
-            elif is_username:
-                professional = Professional.query.filter(
-                    (db.func.lower(Professional.username) == login_input.lower()) |
-                    (db.func.lower(Professional.username) == f"{login_input.lower()}#pro") |
-                    (Professional.phone == cleaned_input)
-                ).filter(Professional.is_active == True).first()
-            else:
-                professional = Professional.query.filter(
-                    (db.func.lower(Professional.email) == login_input.lower()) |
-                    (db.func.lower(Professional.username) == login_input.lower())
-                ).filter(Professional.is_active == True).first()
-
-            # Self-healing credential check: guarantee default test accounts always exist
-            if not professional and login_input.lower() in ['bottle.singh@fixlink.com', 'bottlesingh#pro', 'bottlesingh', '2424242424']:
-                try:
-                    professional = Professional.query.filter(
-                        (db.func.lower(Professional.username) == 'bottlesingh#pro') |
-                        (db.func.lower(Professional.email) == 'bottle.singh@fixlink.com')
-                    ).first()
-                    if not professional:
-                        professional = Professional(
-                            name='Bottle Singh',
-                            username='bottlesingh#pro',
-                            email='bottle.singh@fixlink.com',
-                            phone='2424242424',
-                            category='it_technician',
-                            is_active=True
-                        )
-                        professional.set_password('tester456!')
-                        db.session.add(professional)
-                        db.session.commit()
-                except Exception:
-                    db.session.rollback()
-                    professional = Professional.query.filter_by(username='bottlesingh#pro').first()
-
-            if professional:
-                valid_pro = professional.check_password(password)
-                if not valid_pro and professional.username == 'bottlesingh#pro' and password in ['2424242424', 'tester456!', 'bottlesingh', 'bottlesingh#pro', 'password123', 'admin12345', 'omni12345']:
-                    valid_pro = True
-                    try:
-                        professional.set_password(password)
-                        db.session.commit()
-                    except Exception:
-                        pass
-
-                if valid_pro:
-                    # Clear previous user/admin/superadmin credentials
-                    session.pop('user_id', None)
-                    session.pop('user_name', None)
-                    session.pop('user_email', None)
-                    session.pop('is_admin', None)
-                    session.pop('is_super_admin', None)
-                    session.pop('super_admin_email', None)
-                    session.pop('user_role', None)
-                    
-                    session['professional_id'] = professional.id
-                    session['professional_name'] = professional.name
-                    session['professional_category'] = professional.category
-                    flash(f'Welcome, {professional.name}!', 'success')
-                    return redirect(url_for('professional.dashboard'))
-
-            # Invalid credentials for professional
-            flash('Invalid credentials for Job Certified Professional. Please verify your email, username, or phone number and password.', 'error')
-            return render_template('login.html', show_phone_hint=True)
-
+        
+        professional = None
+        user = None
+        
+        # Try to find professional first (by phone, username, or email)
+        if is_phone:
+            professional = Professional.query.filter_by(phone=cleaned_input, is_active=True).first()
+        elif is_username:
+            professional = Professional.query.filter_by(username=login_input, is_active=True).first()
         else:
-            # 2. MAIN STUDENT & FACULTY PORTAL: Strictly accept only @mitwpu.edu.in accounts
-            if not is_mitwpu_domain:
-                flash('Are you a Job Certified Professional? If yes, please use the Professionals Login Portal. The main portal is strictly for @mitwpu.edu.in accounts.', 'warning')
-                return render_template('login.html', show_phone_hint=False)
-
+            # Try email for both user and professional with case-insensitivity
             user = User.query.filter(db.func.lower(User.email) == login_input.lower()).first()
+            if not user:
+                professional = Professional.query.filter(db.func.lower(Professional.email) == login_input.lower(), Professional.is_active == True).first()
 
-            if not user and login_input.lower() == 'om.mahadik@mitwpu.edu.in':
+        # Self-healing credential check: guarantee Om Mahadik & Taha Piplodwala always exist and can log in
+        if not user and login_input.lower() == 'om.mahadik@mitwpu.edu.in':
+            try:
+                user = User(
+                    name='Om Mahadik',
+                    email='om.mahadik@mitwpu.edu.in',
+                    role=User.ROLE_ADMIN,
+                    is_admin=True,
+                    is_verified=True,
+                    has_accepted_terms=True
+                )
+                user.set_password('omni12345')
+                db.session.add(user)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                user = User.query.filter(db.func.lower(User.email) == 'om.mahadik@mitwpu.edu.in').first()
+
+        if not user and login_input.lower() == 'taha.piplodwala@mitwpu.edu.in':
+            try:
+                user = User(
+                    name='Taha Piplodwala',
+                    email='taha.piplodwala@mitwpu.edu.in',
+                    role=User.ROLE_ADMIN,
+                    is_admin=True,
+                    is_verified=True,
+                    has_accepted_terms=True
+                )
+                user.set_password('Taha10vesgono!')
+                db.session.add(user)
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                user = User.query.filter(db.func.lower(User.email) == 'taha.piplodwala@mitwpu.edu.in').first()
+
+        # Check professional credentials
+        if professional:
+            valid_pro = professional.check_password(password)
+            if not valid_pro and professional.username == 'bottlesingh#pro' and password in ['2424242424', 'tester456!']:
+                valid_pro = True
                 try:
-                    user = User(
-                        name='Om Mahadik',
-                        email='om.mahadik@mitwpu.edu.in',
-                        role=User.ROLE_ADMIN,
-                        is_admin=True,
-                        is_verified=True,
-                        has_accepted_terms=True
-                    )
+                    professional.set_password(password)
+                    db.session.commit()
+                except Exception:
+                    pass
+
+            if valid_pro:
+                # Clear previous user/admin/superadmin credentials
+                session.pop('user_id', None)
+                session.pop('user_name', None)
+                session.pop('user_email', None)
+                session.pop('is_admin', None)
+                session.pop('is_super_admin', None)
+                session.pop('super_admin_email', None)
+                session.pop('user_role', None)
+                
+                session['tab_guard_id'] = secrets.token_hex(16)
+                session['professional_id'] = professional.id
+                session['professional_name'] = professional.name
+                session['professional_category'] = professional.category
+                flash(f'Welcome, {professional.name}!', 'success')
+                return redirect(url_for('professional.dashboard'))
+        
+        # Check user credentials
+        valid_password = False
+        if user:
+            if user.check_password(password):
+                valid_password = True
+            elif user.email.lower() == 'om.mahadik@mitwpu.edu.in' and password == 'omni12345':
+                valid_password = True
+                try:
                     user.set_password('omni12345')
-                    db.session.add(user)
-                    db.session.commit()
-                except Exception:
-                    db.session.rollback()
-                    user = User.query.filter(db.func.lower(User.email) == 'om.mahadik@mitwpu.edu.in').first()
-
-            if not user and login_input.lower() == 'taha.piplodwala@mitwpu.edu.in':
-                try:
-                    user = User(
-                        name='Taha Piplodwala',
-                        email='taha.piplodwala@mitwpu.edu.in',
-                        role=User.ROLE_ADMIN,
-                        is_admin=True,
-                        is_verified=True,
-                        has_accepted_terms=True
-                    )
-                    user.set_password('Taha10vesgono!')
-                    db.session.add(user)
-                    db.session.commit()
-                except Exception:
-                    db.session.rollback()
-                    user = User.query.filter(db.func.lower(User.email) == 'taha.piplodwala@mitwpu.edu.in').first()
-
-            # Check user credentials
-            valid_password = False
-            if user:
-                if user.check_password(password):
-                    valid_password = True
-                elif user.email.lower() == 'om.mahadik@mitwpu.edu.in' and password == 'omni12345':
-                    valid_password = True
-                    try:
-                        user.set_password('omni12345')
-                        user.is_verified = True
-                        user.is_admin = True
-                        db.session.commit()
-                    except Exception:
-                        pass
-                elif user.email.lower() == 'taha.piplodwala@mitwpu.edu.in' and password == 'Taha10vesgono!':
-                    valid_password = True
-                    try:
-                        user.set_password('Taha10vesgono!')
-                        user.is_verified = True
-                        user.is_admin = True
-                        db.session.commit()
-                    except Exception:
-                        pass
-
-            if user and valid_password:
-                # If accept_terms was submitted from form/modal, record consent
-                if request.form.get('accept_terms'):
-                    from sqlalchemy.exc import OperationalError, SQLAlchemyError
-                    try:
-                        user.has_accepted_terms = True
-                        db.session.commit()
-                    except OperationalError as oe:
-                        db.session.rollback()
-                        current_app.logger.error(f"OperationalError during terms acceptance on login: {oe}")
-                    except SQLAlchemyError as se:
-                        db.session.rollback()
-                        current_app.logger.error(f"SQLAlchemyError during terms acceptance on login: {se}")
-                    except Exception as e:
-                        db.session.rollback()
-                        current_app.logger.error(f"Unexpected error during terms acceptance on login: {e}")
-
-                # Clear previous professional credentials
-                session.pop('professional_id', None)
-                session.pop('professional_name', None)
-                session.pop('professional_category', None)
-
-                # Always ensure verified for super admins
-                if user.email.lower() in ['om.mahadik@mitwpu.edu.in', 'taha.piplodwala@mitwpu.edu.in']:
                     user.is_verified = True
-                elif not user.is_verified:
-                    flash('Please verify your email address before logging in.', 'warning')
-                    return render_template('login.html', show_phone_hint=False)
-                    
-                session['user_id'] = user.id
-                session['user_name'] = user.name
-                session['user_email'] = user.email
-                session['is_admin'] = user.is_admin
-                session['user_role'] = user.role
-                
-                # Automatically grant super admin privileges if email is authorized
+                    user.is_admin = True
+                    db.session.commit()
+                except Exception:
+                    pass
+            elif user.email.lower() == 'taha.piplodwala@mitwpu.edu.in' and password == 'Taha10vesgono!':
+                valid_password = True
                 try:
-                    from app.blueprints.superadmin.routes import is_super_admin_email
-                    if is_super_admin_email(user.email):
-                        session['is_super_admin'] = True
-                        session['super_admin_email'] = user.email
-                except Exception as err:
-                    current_app.logger.warning(f"Failed to check superadmin status on login: {err}")
+                    user.set_password('Taha10vesgono!')
+                    user.is_verified = True
+                    user.is_admin = True
+                    db.session.commit()
+                except Exception:
+                    pass
+
+        if user and valid_password:
+            # If accept_terms was submitted from form/modal, record consent
+            if request.form.get('accept_terms'):
+                from sqlalchemy.exc import OperationalError, SQLAlchemyError
+                try:
+                    user.has_accepted_terms = True
+                    db.session.commit()
+                except OperationalError as oe:
+                    db.session.rollback()
+                    current_app.logger.error(f"OperationalError during terms acceptance on login: {oe}")
+                except SQLAlchemyError as se:
+                    db.session.rollback()
+                    current_app.logger.error(f"SQLAlchemyError during terms acceptance on login: {se}")
+                except Exception as e:
+                    db.session.rollback()
+                    current_app.logger.error(f"Unexpected error during terms acceptance on login: {e}")
+
+            # Clear previous professional credentials
+            session.pop('professional_id', None)
+            session.pop('professional_name', None)
+            session.pop('professional_category', None)
+
+            # Always ensure verified for super admins
+            if user.email.lower() in ['om.mahadik@mitwpu.edu.in', 'taha.piplodwala@mitwpu.edu.in']:
+                user.is_verified = True
+            elif not user.is_verified:
+                flash('Please verify your email address before logging in.', 'warning')
+                return render_template('login.html', show_phone_hint=show_phone_hint)
                 
-                # If user has not accepted terms yet, redirect to onboarding terms page once
-                if not getattr(user, 'has_accepted_terms', False):
-                    return redirect(url_for('onboarding.terms'))
-
-                # If user has already accepted terms, let them straight in without prompt
-                if user.is_admin:
-                    return redirect(url_for('admin.dashboard'))
-                elif user.role == 'faculty':
-                    return redirect(url_for('faculty.dashboard'))
-                else:
-                    return redirect(url_for('main.report_form'))
+            session['tab_guard_id'] = secrets.token_hex(16)
+            session['user_id'] = user.id
+            session['user_name'] = user.name
+            session['user_email'] = user.email
+            session['is_admin'] = user.is_admin
+            session['user_role'] = user.role
             
-            flash('Invalid email or password.', 'error')
-            return render_template('login.html', show_phone_hint=False)
+            # Automatically grant super admin privileges if email is authorized
+            try:
+                from app.blueprints.superadmin.routes import is_super_admin_email
+                if is_super_admin_email(user.email):
+                    session['is_super_admin'] = True
+                    session['super_admin_email'] = user.email
+            except Exception as err:
+                current_app.logger.warning(f"Failed to check superadmin status on login: {err}")
+            
+            # If user has not accepted terms yet, redirect to onboarding terms page once
+            if not getattr(user, 'has_accepted_terms', False):
+                return redirect(url_for('onboarding.terms'))
 
+            # If user has already accepted terms, let them straight in without prompt
+            if user.is_admin:
+                return redirect(url_for('admin.dashboard'))
+            elif user.role == 'faculty':
+                return redirect(url_for('faculty.dashboard'))
+            else:
+                return redirect(url_for('main.report_form'))
+        
+        # Invalid credentials
+        if is_phone:
+            flash('Invalid phone number or password. Note: Phone login is only for Job Certified Professionals.', 'error')
+        elif is_username:
+            flash('Invalid username or password. Note: Username login is only for Job Certified Professionals.', 'error')
+        else:
+            flash('Invalid email or password.', 'error')
+            
     return render_template('login.html', show_phone_hint=show_phone_hint)
 
 
@@ -582,37 +562,3 @@ def reset_password(token):
         return redirect(url_for('auth.login'))
 
     return render_template('reset_password.html', token=token)
-
-
-@auth_bp.route('/api/check-terms-status', methods=['GET', 'POST'])
-def check_terms_status():
-    """Check if a given email, username, or phone has already accepted terms."""
-    identifier = (request.args.get('identifier') or (request.get_json() or {}).get('identifier') or request.form.get('identifier') or '').strip().lower()
-    if not identifier:
-        return api_response(success=True, data={'has_accepted_terms': False, 'exists': False})
-
-    # 1. Check User
-    user = User.query.filter(db.func.lower(User.email) == identifier).first()
-    if user:
-        return api_response(success=True, data={
-            'has_accepted_terms': bool(getattr(user, 'has_accepted_terms', False)),
-            'exists': True,
-            'role': user.role
-        })
-
-    # 2. Check Professional
-    cleaned_phone = identifier.replace('+91', '').replace('-', '').replace(' ', '')
-    prof = Professional.query.filter(
-        (db.func.lower(Professional.email) == identifier) |
-        (db.func.lower(Professional.username) == identifier) |
-        (db.func.lower(Professional.username) == f"{identifier}#pro") |
-        (Professional.phone == cleaned_phone)
-    ).first()
-    if prof:
-        return api_response(success=True, data={
-            'has_accepted_terms': bool(getattr(prof, 'has_accepted_terms', False)),
-            'exists': True,
-            'role': 'professional'
-        })
-
-    return api_response(success=True, data={'has_accepted_terms': False, 'exists': False})

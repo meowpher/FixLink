@@ -973,29 +973,16 @@
         color: #94a3b8;
     }
 
-    .bugs-tracking-card .table tbody tr.bug-table-row {
-        cursor: pointer !important;
-        transition: background-color 0.18s ease, transform 0.12s ease;
+    .bugs-tracking-card .table tbody tr {
+        transition: background-color 0.2s ease;
     }
 
-    .bugs-tracking-card .table tbody tr.bug-table-row:hover td {
-        background-color: rgba(59, 130, 246, 0.05) !important;
+    .bugs-tracking-card .table tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.02) !important;
     }
 
-    [data-theme="dark"] .bugs-tracking-card .table tbody tr.bug-table-row:hover td {
-        background-color: rgba(59, 130, 246, 0.09) !important;
-    }
-
-    .bug-table-row .bug-title-text {
-        transition: color 0.18s ease;
-    }
-
-    .bug-table-row:hover .bug-title-text {
-        color: #2563eb !important;
-    }
-
-    [data-theme="dark"] .bug-table-row:hover .bug-title-text {
-        color: #60a5fa !important;
+    [data-theme="dark"] .bugs-tracking-card .table tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.03) !important;
     }
 
     .bugs-tracking-card .table tbody td {
@@ -1006,223 +993,6 @@
 
     [data-theme="dark"] .bugs-tracking-card .table tbody td {
         border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-    }
-
-    /* Bug Detail Custom Popup Card Modal */
-    #bugDetailModal {
-        z-index: 1065 !important;
-        pointer-events: auto !important;
-    }
-
-    .bug-detail-modal-dialog {
-        max-width: 680px;
-        margin: 1.75rem auto;
-        z-index: 1066 !important;
-        pointer-events: auto !important;
-        position: relative;
-    }
-
-    .bug-detail-card {
-        background: var(--bg-card, #ffffff) !important;
-        border: 1px solid var(--border-color, #e2e8f0) !important;
-        border-radius: 24px !important;
-        overflow: hidden !important;
-        box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-        position: relative;
-    }
-
-    .bug-detail-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(90deg, #ef4444 0%, #f59e0b 45%, #3b82f6 100%);
-        z-index: 10;
-    }
-
-    [data-theme="dark"] .bug-detail-card {
-        background: linear-gradient(165deg, rgba(22, 22, 28, 0.98) 0%, rgba(14, 14, 18, 0.98) 100%) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        box-shadow: 0 30px 70px -15px rgba(0, 0, 0, 0.85), 0 0 35px rgba(59, 130, 246, 0.12) !important;
-    }
-
-    .bug-detail-header {
-        padding: 1.4rem 1.65rem 1.15rem;
-        border-bottom: 1px solid var(--border-color, #f1f5f9);
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 1rem;
-        background: rgba(0, 0, 0, 0.015);
-    }
-
-    [data-theme="dark"] .bug-detail-header {
-        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(255, 255, 255, 0.02);
-    }
-
-    .bug-detail-id-bubble {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'JetBrains Mono', monospace;
-        font-weight: 800;
-        font-size: 1.05rem;
-        background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
-        border: 1px solid rgba(239, 68, 68, 0.25);
-        color: var(--text-main);
-        flex-shrink: 0;
-    }
-
-    .bug-detail-title {
-        font-size: 1.18rem;
-        font-weight: 800;
-        color: var(--text-main);
-        letter-spacing: -0.3px;
-        line-height: 1.35;
-    }
-
-    .bug-detail-body {
-        padding: 1.4rem 1.65rem;
-        max-height: 72vh;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 1.15rem;
-    }
-
-    .bug-detail-section-card {
-        background: rgba(0, 0, 0, 0.02);
-        border: 1px solid var(--border-color, #e2e8f0);
-        border-radius: 16px;
-        padding: 1.15rem 1.25rem;
-        position: relative;
-    }
-
-    [data-theme="dark"] .bug-detail-section-card {
-        background: rgba(255, 255, 255, 0.03);
-        border-color: rgba(255, 255, 255, 0.07);
-    }
-
-    .bug-detail-section-title {
-        font-size: 0.73rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1.1px;
-        color: var(--text-muted);
-        margin-bottom: 0.75rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .bug-reporter-avatar {
-        width: 44px;
-        height: 44px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.35rem;
-        flex-shrink: 0;
-    }
-
-    .bug-reporter-avatar.type-user {
-        background: rgba(14, 165, 233, 0.12);
-        border: 1px solid rgba(14, 165, 233, 0.25);
-        color: #0284c7;
-    }
-    .bug-reporter-avatar.type-professional {
-        background: rgba(16, 185, 129, 0.12);
-        border: 1px solid rgba(16, 185, 129, 0.25);
-        color: #059669;
-    }
-    .bug-reporter-avatar.type-superadmin {
-        background: rgba(239, 68, 68, 0.12);
-        border: 1px solid rgba(239, 68, 68, 0.25);
-        color: #dc2626;
-    }
-    .bug-reporter-avatar.type-guest {
-        background: rgba(100, 116, 139, 0.12);
-        border: 1px solid rgba(100, 116, 139, 0.25);
-        color: #64748b;
-    }
-
-    .bug-detail-desc-text {
-        font-size: 0.9rem;
-        line-height: 1.65;
-        color: var(--text-main);
-        white-space: pre-wrap;
-        word-break: break-word;
-    }
-
-    .bug-context-url-banner {
-        background: rgba(59, 130, 246, 0.08);
-        border: 1px solid rgba(59, 130, 246, 0.2);
-        border-radius: 12px;
-        padding: 0.75rem 1rem;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.75rem;
-        margin-top: 0.85rem;
-    }
-
-    [data-theme="dark"] .bug-context-url-banner {
-        background: rgba(59, 130, 246, 0.12);
-        border-color: rgba(59, 130, 246, 0.3);
-    }
-
-    .bug-attachment-preview-box {
-        border-radius: 14px;
-        overflow: hidden;
-        border: 1px solid var(--border-color, #e2e8f0);
-        background: rgba(0, 0, 0, 0.04);
-        max-height: 280px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-    }
-
-    [data-theme="dark"] .bug-attachment-preview-box {
-        border-color: rgba(255, 255, 255, 0.08);
-        background: rgba(0, 0, 0, 0.3);
-    }
-
-    .bug-attachment-img {
-        max-height: 280px;
-        width: auto;
-        max-width: 100%;
-        object-fit: contain;
-        transition: transform 0.3s ease;
-    }
-
-    .bug-attachment-img:hover {
-        transform: scale(1.02);
-    }
-
-    .bug-detail-footer {
-        padding: 1rem 1.65rem;
-        border-top: 1px solid var(--border-color, #f1f5f9);
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 0.75rem;
-        background: rgba(0, 0, 0, 0.015);
-    }
-
-    [data-theme="dark"] .bug-detail-footer {
-        border-top: 1px solid rgba(255, 255, 255, 0.06);
-        background: rgba(255, 255, 255, 0.02);
     }
 
     .empty-bugs-state {
@@ -2101,23 +1871,7 @@
                     </thead>
                     <tbody id="reportedBugsTableBody">
                         {% for bug in bugs %}
-                        <tr class="bug-table-row" id="bugRow-{{ bug.id }}" 
-                            data-bug-id="{{ bug.id }}" 
-                            data-status="{{ bug.status }}" 
-                            data-title="{{ bug.title | e }}"
-                            data-description="{{ bug.description | e }}"
-                            data-reporter-type="{{ (bug.reporter_type or 'guest') | e }}"
-                            data-reporter-id="{{ bug.reporter_id or '' }}"
-                            data-reporter-name="{{ (bug.reporter_name or 'N/A') | e }}"
-                            data-reporter-email="{{ (bug.reporter_email or '') | e }}"
-                            data-reporter-role="{{ (bug.reporter_role_label or bug.reporter_type) | e }}"
-                            data-reporter-prn="{{ (bug.reporter_prn or '') | e }}"
-                            data-created-at="{{ bug.created_at.strftime('%b %d, %Y %H:%M') if bug.created_at else '' }}"
-                            data-has-attachment="{{ '1' if (bug.file_path or bug.file_data) else '0' }}"
-                            data-attachment-url="{% if bug.file_path or bug.file_data %}{{ url_for('superadmin.view_bug_attachment', bug_id=bug.id) }}{% endif %}"
-                            data-attachment-name="{{ bug.file_path or 'attachment.png' }}"
-                            data-text="{{ (bug.title ~ ' ' ~ bug.description ~ ' ' ~ (bug.reporter_type or '') ~ ' ' ~ (bug.reporter_id or '') ~ ' ' ~ (bug.reporter_name or '') ~ ' ' ~ (bug.reporter_email or '')) | lower }}"
-                            title="Click to view full report details">
+                        <tr class="bug-table-row" id="bugRow-{{ bug.id }}" data-bug-id="{{ bug.id }}" data-status="{{ bug.status }}" data-text="{{ (bug.title ~ ' ' ~ bug.description ~ ' ' ~ bug.reporter_type ~ ' ' ~ (bug.reporter_id or '')) | lower }}">
                             <td class="ps-3 text-center">
                                 <input type="checkbox" class="form-check-input bug-checkbox" value="{{ bug.id }}" data-status="{{ bug.status }}" style="cursor: pointer;">
                             </td>
@@ -2238,120 +1992,6 @@
                     <i class="bi bi-chevron-right"></i>
                 </div>
             </a>
-        </div>
-    </div>
-</div>
-
-<!-- Detailed Custom Bug Report Popup Modal Card (Placed at Root Level) -->
-<div class="modal fade" id="bugDetailModal" tabindex="-1" aria-labelledby="bugModalTitle" aria-hidden="true" style="z-index: 1065;">
-    <div class="modal-dialog modal-dialog-centered bug-detail-modal-dialog">
-        <div class="modal-content bug-detail-card">
-            <!-- Modal Header -->
-            <div class="bug-detail-header">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="bug-detail-id-bubble" id="bugModalIdBadge">
-                        #<span id="bugModalId">1</span>
-                    </div>
-                    <div>
-                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                            <span id="bugModalStatusBadge" class="badge">Open</span>
-                            <span class="bug-detail-date text-muted small" id="bugModalDate"><i class="bi bi-clock me-1"></i>Sep 30, 2026 13:45</span>
-                        </div>
-                        <h4 class="bug-detail-title mb-0" id="bugModalTitle">Bug Title</h4>
-                    </div>
-                </div>
-                <button type="button" class="btn-close bug-modal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-
-            <!-- Modal Body -->
-            <div class="bug-detail-body">
-                <!-- Reporter Card -->
-                <div class="bug-detail-section-card">
-                    <div class="bug-detail-section-title">
-                        <i class="bi bi-person-badge-fill text-primary"></i>
-                        <span>Reporter Profile</span>
-                    </div>
-                    <div class="d-flex align-items-center gap-3">
-                        <div class="bug-reporter-avatar" id="bugModalReporterAvatar">
-                            <i class="bi bi-person"></i>
-                        </div>
-                        <div class="flex-grow-1 min-w-0">
-                            <div class="d-flex align-items-center gap-2 flex-wrap">
-                                <h6 class="mb-0 fw-bold" id="bugModalReporterName" style="color: var(--text-main);">Reporter Name</h6>
-                                <span class="badge rounded-pill px-2.5 py-0.5" id="bugModalReporterRoleBadge" style="font-size: 0.72rem;">Role</span>
-                                <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-0.5" id="bugModalReporterIdBadge" style="font-size: 0.7rem;">ID: 1</span>
-                            </div>
-                            <div class="text-muted small mt-1 d-flex align-items-center gap-3 flex-wrap">
-                                <span id="bugModalReporterEmailWrapper" class="d-inline-flex align-items-center gap-1">
-                                    <i class="bi bi-envelope"></i>
-                                    <span id="bugModalReporterEmail">email@domain.com</span>
-                                </span>
-                                <span id="bugModalReporterPrnWrapper" class="d-inline-flex align-items-center gap-1 d-none">
-                                    <i class="bi bi-card-text"></i>
-                                    <span id="bugModalReporterPrn">PRN / Phone</span>
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Description & Context Section -->
-                <div class="bug-detail-section-card">
-                    <div class="bug-detail-section-title">
-                        <i class="bi bi-file-earmark-text-fill text-danger"></i>
-                        <span>Issue Description & Context</span>
-                    </div>
-                    <div class="bug-detail-desc-text" id="bugModalDescription">
-                        Detailed issue explanation...
-                    </div>
-
-                    <!-- Context URL Banner -->
-                    <div class="bug-context-url-banner d-none" id="bugModalContextUrlBanner">
-                        <div class="d-flex align-items-center gap-2 overflow-hidden">
-                            <span class="badge bg-primary text-white rounded-pill px-2 py-0.5" style="font-size: 0.68rem;">
-                                <i class="bi bi-link-45deg me-1"></i>Context URL
-                            </span>
-                            <span class="text-truncate small font-monospace" id="bugModalContextUrlText" style="color: var(--text-main);">https://...</span>
-                        </div>
-                        <a href="#" target="_blank" rel="noopener noreferrer" id="bugModalContextUrlLink" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold text-nowrap d-inline-flex align-items-center gap-1" style="font-size: 0.75rem;">
-                            <span>Visit Page</span>
-                            <i class="bi bi-box-arrow-up-right"></i>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Attachment / Evidence Section -->
-                <div class="bug-detail-section-card">
-                    <div class="bug-detail-section-title">
-                        <i class="bi bi-paperclip text-info"></i>
-                        <span>Attachment & Evidence</span>
-                    </div>
-                    <div id="bugModalAttachmentContent">
-                        <!-- Populated dynamically -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Modal Footer -->
-            <div class="bug-detail-footer">
-                <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" id="bugModalCopySummaryBtn">
-                        <i class="bi bi-clipboard"></i>
-                        <span id="bugModalCopySummaryText">Copy Summary</span>
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" id="bugModalDeleteBtn">
-                        <i class="bi bi-trash"></i>
-                        <span>Delete Report</span>
-                    </button>
-                </div>
-                <div class="d-flex align-items-center gap-2">
-                    <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3 py-1.5" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-sm btn-success rounded-pill px-3.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" id="bugModalToggleStatusBtn">
-                        <i class="bi bi-check2-circle"></i>
-                        <span id="bugModalToggleStatusText">Mark as Resolved</span>
-                    </button>
-                </div>
-            </div>
         </div>
     </div>
 </div>
@@ -2548,227 +2188,15 @@
         return Array.from(checked).map(cb => parseInt(cb.value)).filter(n => !isNaN(n));
     }
 
-    // Bug Detail Modal System
-    let bugDetailModalInstance = null;
-    let activeModalBugId = null;
-
-    function extractContextUrl(desc) {
-        if (!desc) return { cleanDescription: '', contextUrl: null };
-        const match = desc.match(/\[Context URL:\s*(https?:\/\/[^\]\s]+)\]/i) ||
-                      desc.match(/Context URL:\s*(https?:\/\/[^\s\n]+)/i);
-        if (match) {
-            return {
-                cleanDescription: desc.replace(match[0], '').trim(),
-                contextUrl: match[1]
-            };
-        }
-        return { cleanDescription: desc, contextUrl: null };
-    }
-
-    function updateModalStatusDisplay(status) {
-        const isResolved = status === 'resolved';
-        const statusBadge = document.getElementById('bugModalStatusBadge');
-        const toggleBtn = document.getElementById('bugModalToggleStatusBtn');
-
-        if (statusBadge) {
-            if (isResolved) {
-                statusBadge.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-semibold';
-                statusBadge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Resolved';
-            } else {
-                statusBadge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1 fw-semibold';
-                statusBadge.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Open';
-            }
-        }
-
-        if (toggleBtn) {
-            if (isResolved) {
-                toggleBtn.className = 'btn btn-sm btn-outline-warning rounded-pill px-3.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5';
-                toggleBtn.innerHTML = '<i class="bi bi-arrow-counterclockwise"></i><span>Reopen Issue</span>';
-            } else {
-                toggleBtn.className = 'btn btn-sm btn-success rounded-pill px-3.5 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5';
-                toggleBtn.innerHTML = '<i class="bi bi-check2-circle"></i><span>Mark as Resolved</span>';
-            }
-        }
-    }
-
-    function openBugDetailModal(row) {
-        if (!row) return;
-        const ds = row.dataset;
-        const bugId = ds.bugId;
-        activeModalBugId = bugId;
-
-        const modalEl = document.getElementById('bugDetailModal');
-        if (!modalEl) return;
-
-        // Ensure modal DOM element is a direct child of document.body so no CSS transforms or containing blocks trap it
-        if (modalEl.parentElement !== document.body) {
-            document.body.appendChild(modalEl);
-        }
-
-        if (!bugDetailModalInstance && window.bootstrap) {
-            bugDetailModalInstance = new bootstrap.Modal(modalEl);
-        }
-
-        // Populate ID & Date & Title
-        const idEl = document.getElementById('bugModalId');
-        if (idEl) idEl.textContent = bugId;
-        
-        const titleEl = document.getElementById('bugModalTitle');
-        if (titleEl) titleEl.textContent = ds.title || 'Untitled Report';
-        
-        const dateEl = document.getElementById('bugModalDate');
-        if (dateEl) dateEl.innerHTML = `<i class="bi bi-clock me-1"></i>${ds.createdAt || 'Recent'}`;
-
-        // Status Badge & Action Button
-        updateModalStatusDisplay(ds.status);
-
-        // Reporter Profile
-        const repType = (ds.reporterType || 'guest').toLowerCase();
-        const avatarEl = document.getElementById('bugModalReporterAvatar');
-        const roleBadge = document.getElementById('bugModalReporterRoleBadge');
-        const idBadge = document.getElementById('bugModalReporterIdBadge');
-        const nameEl = document.getElementById('bugModalReporterName');
-        const emailEl = document.getElementById('bugModalReporterEmail');
-        const emailWrapper = document.getElementById('bugModalReporterEmailWrapper');
-        const prnEl = document.getElementById('bugModalReporterPrn');
-        const prnWrapper = document.getElementById('bugModalReporterPrnWrapper');
-
-        if (nameEl) nameEl.textContent = ds.reporterName || (repType === 'guest' ? 'Guest Visitor' : `Reporter #${ds.reporterId}`);
-        if (roleBadge) roleBadge.textContent = ds.reporterRole || ds.reporterType || 'Guest';
-
-        if (emailEl && emailWrapper) {
-            if (ds.reporterEmail && ds.reporterEmail !== 'Unauthenticated' && ds.reporterEmail !== '') {
-                emailEl.textContent = ds.reporterEmail;
-                emailWrapper.classList.remove('d-none');
-            } else {
-                emailWrapper.classList.add('d-none');
-            }
-        }
-
-        if (prnEl && prnWrapper) {
-            if (ds.reporterPrn) {
-                prnEl.textContent = ds.reporterPrn;
-                prnWrapper.classList.remove('d-none');
-            } else {
-                prnWrapper.classList.add('d-none');
-            }
-        }
-
-        if (idBadge) {
-            if (ds.reporterId) {
-                idBadge.textContent = `ID: ${ds.reporterId}`;
-                idBadge.classList.remove('d-none');
-            } else {
-                idBadge.classList.add('d-none');
-            }
-        }
-
-        // Avatar styling based on reporter type
-        if (avatarEl && roleBadge) {
-            avatarEl.className = 'bug-reporter-avatar';
-            if (repType === 'professional') {
-                avatarEl.classList.add('type-professional');
-                avatarEl.innerHTML = '<i class="bi bi-tools"></i>';
-                roleBadge.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-0.5';
-            } else if (repType === 'superadmin') {
-                avatarEl.classList.add('type-superadmin');
-                avatarEl.innerHTML = '<i class="bi bi-shield-lock-fill"></i>';
-                roleBadge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-0.5';
-            } else if (repType === 'user' || repType === 'student' || repType === 'faculty' || repType === 'admin') {
-                avatarEl.classList.add('type-user');
-                avatarEl.innerHTML = '<i class="bi bi-person-fill"></i>';
-                roleBadge.className = 'badge bg-info-subtle text-info border border-info-subtle rounded-pill px-2.5 py-0.5';
-            } else {
-                avatarEl.classList.add('type-guest');
-                avatarEl.innerHTML = '<i class="bi bi-incognito"></i>';
-                roleBadge.className = 'badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2.5 py-0.5';
-            }
-        }
-
-        // Parse Description & Context URL
-        const rawDesc = ds.description || '';
-        const { cleanDescription, contextUrl } = extractContextUrl(rawDesc);
-        
-        const descEl = document.getElementById('bugModalDescription');
-        if (descEl) descEl.textContent = cleanDescription || rawDesc || 'No description provided.';
-
-        const ctxBanner = document.getElementById('bugModalContextUrlBanner');
-        const ctxText = document.getElementById('bugModalContextUrlText');
-        const ctxLink = document.getElementById('bugModalContextUrlLink');
-
-        if (ctxBanner && ctxText && ctxLink) {
-            if (contextUrl) {
-                ctxText.textContent = contextUrl;
-                ctxLink.href = contextUrl;
-                ctxBanner.classList.remove('d-none');
-            } else {
-                ctxBanner.classList.add('d-none');
-            }
-        }
-
-        // Attachments
-        const attachContent = document.getElementById('bugModalAttachmentContent');
-        const hasAttach = ds.hasAttachment === '1';
-        const attachUrl = ds.attachmentUrl;
-        const attachName = ds.attachmentName || 'Attachment';
-
-        if (attachContent) {
-            if (hasAttach && attachUrl) {
-                attachContent.innerHTML = `
-                    <div class="d-flex flex-column gap-2.5">
-                        <div class="bug-attachment-preview-box">
-                            <img src="${attachUrl}" alt="Bug Attachment Screenshot" class="bug-attachment-img" onerror="this.parentElement.style.display='none'; document.getElementById('nonImageAttachBox').classList.remove('d-none');">
-                        </div>
-                        <div id="nonImageAttachBox" class="d-none p-3 rounded-3 text-center bg-body-secondary border">
-                            <i class="bi bi-file-earmark-arrow-down fs-2 text-primary"></i>
-                            <div class="small fw-semibold mt-1">${attachName}</div>
-                        </div>
-                        <div class="d-flex align-items-center justify-content-between gap-2 flex-wrap pt-1">
-                            <span class="text-muted small"><i class="bi bi-image me-1"></i>${attachName}</span>
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="${attachUrl}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
-                                    <i class="bi bi-arrows-fullscreen"></i>
-                                    <span>Open Fullscreen</span>
-                                </a>
-                                <a href="${attachUrl}" download="${attachName}" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1.5" style="font-size: 0.78rem;">
-                                    <i class="bi bi-download"></i>
-                                    <span>Download</span>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                attachContent.innerHTML = `
-                    <div class="text-center py-3 text-muted small">
-                        <i class="bi bi-paperclip opacity-50 me-1"></i>No media attachments or screenshots uploaded with this report.
-                    </div>
-                `;
-            }
-        }
-
-        // Show Modal
-        if (bugDetailModalInstance) {
-            bugDetailModalInstance.show();
-        }
-    }
-
     // Single bug resolve
     async function singleResolveBug(bugId, btnEl) {
-        const row = document.getElementById(`bugRow-${bugId}`);
-        const currentStatus = row?.dataset.status || 'open';
-        const isCurrentlyOpen = currentStatus === 'open';
-        const targetEndpoint = isCurrentlyOpen ? `/developer/bugs/${bugId}/resolve` : `/developer/bugs/${bugId}/reopen`;
-        
-        let origHtml = '';
-        if (btnEl) {
-            origHtml = btnEl.innerHTML;
-            btnEl.disabled = true;
-            btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
-        }
+        if (!btnEl) return;
+        const origHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
 
         try {
-            const resp = await fetch(targetEndpoint, {
+            const resp = await fetch(`/developer/bugs/${bugId}/resolve`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2778,56 +2206,38 @@
             });
             const data = await resp.json();
             if (resp.ok && data.success) {
-                const newStatus = data.status || (isCurrentlyOpen ? 'resolved' : 'open');
+                const row = document.getElementById(`bugRow-${bugId}`);
                 if (row) {
-                    row.dataset.status = newStatus;
+                    row.dataset.status = 'resolved';
                     const badge = row.querySelector('.bug-status-badge');
                     if (badge) {
-                        if (newStatus === 'resolved') {
-                            badge.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold bug-status-badge';
-                            badge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Resolved';
-                        } else {
-                            badge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-3 py-1.5 fw-semibold bug-status-badge';
-                            badge.innerHTML = '<i class="bi bi-exclamation-circle me-1"></i>Open';
-                        }
+                        badge.className = 'badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 fw-semibold bug-status-badge';
+                        badge.innerHTML = '<i class="bi bi-check-circle me-1"></i>Resolved';
                     }
-                    const rowResBtn = row.querySelector('.single-resolve-btn');
-                    if (rowResBtn) {
-                        if (newStatus === 'resolved') rowResBtn.classList.add('d-none');
-                        else rowResBtn.classList.remove('d-none');
-                    }
+                    btnEl.classList.add('d-none');
                 }
-                
-                // If the detail modal is currently showing this bug, update its status view
-                if (activeModalBugId == bugId) {
-                    updateModalStatusDisplay(newStatus);
-                }
-
                 updateBugCounts();
                 applyBugFilters();
             } else {
-                alert(data.error || 'Failed to update bug status.');
-            }
-        } catch (e) {
-            console.error(e);
-            alert('Network error updating bug status.');
-        } finally {
-            if (btnEl) {
+                alert(data.error || 'Failed to mark bug as resolved.');
                 btnEl.disabled = false;
                 btnEl.innerHTML = origHtml;
             }
+        } catch (e) {
+            console.error(e);
+            alert('Network error resolving bug.');
+            btnEl.disabled = false;
+            btnEl.innerHTML = origHtml;
         }
     }
 
     // Single bug delete
     async function singleDeleteBug(bugId, btnEl) {
         if (!confirm('Permanently delete this bug report?')) return;
-        let origHtml = '';
-        if (btnEl) {
-            origHtml = btnEl.innerHTML;
-            btnEl.disabled = true;
-            btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
-        }
+        if (!btnEl) return;
+        const origHtml = btnEl.innerHTML;
+        btnEl.disabled = true;
+        btnEl.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
 
         try {
             const resp = await fetch(`/developer/bugs/${bugId}/delete`, {
@@ -2840,10 +2250,6 @@
             });
             const data = await resp.json();
             if (resp.ok && data.success) {
-                if (bugDetailModalInstance && activeModalBugId == bugId) {
-                    bugDetailModalInstance.hide();
-                }
-
                 const row = document.getElementById(`bugRow-${bugId}`);
                 if (row) {
                     row.style.transition = 'all 0.3s ease';
@@ -2857,18 +2263,14 @@
                 }
             } else {
                 alert(data.error || 'Failed to delete bug report.');
-                if (btnEl) {
-                    btnEl.disabled = false;
-                    btnEl.innerHTML = origHtml;
-                }
+                btnEl.disabled = false;
+                btnEl.innerHTML = origHtml;
             }
         } catch (e) {
             console.error(e);
             alert('Network error deleting bug.');
-            if (btnEl) {
-                btnEl.disabled = false;
-                btnEl.innerHTML = origHtml;
-            }
+            btnEl.disabled = false;
+            btnEl.innerHTML = origHtml;
         }
     }
 
@@ -2909,7 +2311,7 @@
             });
         }
 
-        // Row checkboxes & individual action buttons delegation + ROW CLICK TO OPEN MODAL
+        // Row checkboxes & individual action buttons delegation
         document.getElementById('reportedBugsTableBody')?.addEventListener('change', (e) => {
             if (e.target.classList.contains('bug-checkbox')) {
                 const row = e.target.closest('tr');
@@ -2934,61 +2336,6 @@
                 if (bugId) singleDeleteBug(bugId, deleteBtn);
                 return;
             }
-
-            // If clicked directly on a link, attachment button, or checkbox, let default handle it
-            if (e.target.closest('.bug-checkbox, a, .btn, input')) {
-                return;
-            }
-
-            // Clicked anywhere else on the row -> Open Detailed Custom Popup Card!
-            const row = e.target.closest('.bug-table-row');
-            if (row) {
-                openBugDetailModal(row);
-            }
-        });
-
-        // Modal Action Handlers
-        document.getElementById('bugModalToggleStatusBtn')?.addEventListener('click', function() {
-            if (activeModalBugId) {
-                singleResolveBug(activeModalBugId, this);
-            }
-        });
-
-        document.getElementById('bugModalDeleteBtn')?.addEventListener('click', function() {
-            if (activeModalBugId) {
-                singleDeleteBug(activeModalBugId, this);
-            }
-        });
-
-        document.getElementById('bugModalCopySummaryBtn')?.addEventListener('click', function() {
-            if (!activeModalBugId) return;
-            const row = document.getElementById(`bugRow-${activeModalBugId}`);
-            if (!row) return;
-
-            const ds = row.dataset;
-            const summaryText = `[FixLink Bug Report #${ds.bugId}]
-Title: ${ds.title || 'N/A'}
-Status: ${(ds.status || 'open').toUpperCase()}
-Reporter: ${ds.reporterName || 'N/A'} (${ds.reporterRole || ds.reporterType || 'Guest'}${ds.reporterId ? ', ID: ' + ds.reporterId : ''})
-${ds.reporterEmail ? 'Email: ' + ds.reporterEmail + '\n' : ''}Reported At: ${ds.createdAt || 'N/A'}
-Description:
-${ds.description || 'No description'}`;
-
-            navigator.clipboard.writeText(summaryText).then(() => {
-                const btn = document.getElementById('bugModalCopySummaryBtn');
-                const textEl = document.getElementById('bugModalCopySummaryText');
-                if (btn && textEl) {
-                    const origHtml = btn.innerHTML;
-                    btn.className = 'btn btn-sm btn-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5';
-                    btn.innerHTML = '<i class="bi bi-check2"></i><span>Copied!</span>';
-                    setTimeout(() => {
-                        btn.className = 'btn btn-sm btn-outline-secondary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5';
-                        btn.innerHTML = origHtml;
-                    }, 2000);
-                }
-            }).catch(err => {
-                console.error('Failed to copy to clipboard', err);
-            });
         });
 
         // Select only open button

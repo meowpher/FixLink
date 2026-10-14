@@ -2473,7 +2473,14 @@
                     bookBtn.innerText = 'CLAIM AD-HOC CLASSROOM';
                     bookBtn.classList.remove('disabled', 'd-none');
                     bookBtn.removeAttribute('disabled');
-                    bookBtn.onclick = handleBooking;
+                    bookBtn.onclick = () => {
+                        if (typeof window.triggerBookingModal === 'function') {
+                            window.triggerBookingModal();
+                        } else {
+                            const el = document.getElementById('bookingModal');
+                            if (el) bootstrap.Modal.getOrCreateInstance(el).show();
+                        }
+                    };
                     cancelBtn.classList.add('d-none');
                     if (nudgeBtn) nudgeBtn.classList.add('d-none');
                 }
@@ -2790,12 +2797,14 @@
                     slotStart = `${yyyy}-${mm}-${dd}T${slotTime}:00`;
                 }
 
+                const rawRoomId = document.getElementById('bookRoomId').value;
+                const parsedRoomId = parseInt(rawRoomId, 10);
                 const payload = {
-                    room_id: document.getElementById('bookRoomId').value,
+                    room_id: isNaN(parsedRoomId) ? rawRoomId : parsedRoomId,
                     subject: document.getElementById('bookSubject').value,
                     division: document.getElementById('bookDivision').value,
                     course: document.getElementById('bookCourse').value,
-                    duration: document.getElementById('bookDuration').value,
+                    duration: parseInt(document.getElementById('bookDuration').value, 10) || 1,
                     slot_start: slotStart
                 };
 
@@ -2814,7 +2823,12 @@
                         window.showSystemAlert({ icon: 'success', title: 'Slot Assigned', text: 'Facility AI has reserved your room.', timer: 2000, showConfirmButton: false });
                         setTimeout(() => location.reload(), 2000);
                     } else {
-                        window.showSystemAlert({ icon: 'error', title: 'Access Denied', text: result.error });
+                        const isAccessDenied = result.error && (result.error.toLowerCase().includes('suspended') || result.error.toLowerCase().includes('privilege') || result.error.toLowerCase().includes('access'));
+                        window.showSystemAlert({
+                            icon: 'error',
+                            title: isAccessDenied ? 'Access Denied' : 'Booking Error',
+                            text: result.error || 'Unable to complete room reservation.'
+                        });
                     }
                 } catch (err) {
                     console.error(err);

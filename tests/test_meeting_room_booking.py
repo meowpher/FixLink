@@ -335,3 +335,72 @@ def test_contiguous_room_booking_merging_on_dashboard(client, run_app_context):
     assert 'VY315' in html
 
 
+def test_classroom_booking_with_string_and_room_number_ids(client, run_app_context):
+    """Verify that /faculty/api/bookings/create gracefully handles string room IDs and room numbers like 'VY527'."""
+    with run_app_context:
+        from app.models import Building
+        b = Building.query.first()
+        if not b:
+            b = Building(name="Vyas Main")
+            db.session.add(b)
+            db.session.commit()
+
+        fl = Floor.query.filter_by(level=5).first()
+        if not fl:
+            fl = Floor(building_id=b.id, level=5, name="5th Floor")
+            db.session.add(fl)
+            db.session.commit()
+
+        room527 = Room.query.filter_by(number="VY527").first()
+        if not room527:
+            room527 = Room(number="VY527", name="Computer Lab 527", room_type="lab", floor_id=fl.id)
+            db.session.add(room527)
+
+        faculty = User.query.filter_by(email="prof_string_test@mitwpu.edu.in").first()
+        if not faculty:
+            faculty = User(name="Prof String Test", email="prof_string_test@mitwpu.edu.in", role=User.ROLE_FACULTY, has_accepted_terms=True)
+            faculty.set_password("SecurePass123!")
+            db.session.add(faculty)
+
+        db.session.commit()
+        room_id_int = room527.id
+        faculty_id = faculty.id
+
+    with client.session_transaction() as sess:
+        sess['user_id'] = faculty_id
+        sess['user_role'] = User.ROLE_FACULTY
+
+    future_date = (datetime.utcnow() + timedelta(days=4)).strftime('%Y-%m-%d')
+
+    # 1. Booking using string numeric room_id (e.g. "28" or str(room_id_int))
+    res1 = client.post('/faculty/api/bookings/create', json={
+        'room_id': str(room_id_int),
+        'slot_start': f'{future_date}T10:00:00',
+        'duration': "1",
+        'subject': 'Operating Systems'
+    })
+    assert res1.status_code == 200
+    assert res1.get_json()['success'] is True
+
+    # 2. Booking using room number string (e.g. "VY527")
+    res2 = client.post('/faculty/api/bookings/create', json={
+        'room_id': "VY527",
+        'slot_start': f'{future_date}T11:00:00',
+        'duration': 1,
+        'subject': 'Cloud Computing Lab'
+    })
+    assert res2.status_code == 200
+    assert res2.get_json()['success'] is True
+
+    # 3. Booking non-existent room should return 404 Room not found, not 500
+    res3 = client.post('/faculty/api/bookings/create', json={
+        'room_id': "VY99999",
+        'slot_start': f'{future_date}T12:00:00',
+        'duration': 1,
+        'subject': 'Ghost Room'
+    })
+    assert res3.status_code == 404
+    assert 'Room not found' in res3.get_json()['error']
+
+
+

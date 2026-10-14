@@ -399,13 +399,13 @@ def get_room_schedule(room_id):
 @faculty_login_required
 @handle_api_errors
 def create_booking():
-    """Validates and creates a 1-hour slot room booking."""
+    """Validates and creates a 1-hour or 2-hour slot room booking."""
     data = request.get_json() or {}
-    room_id = data.get('room_id')
-    slot_iso = data.get('slot_start') # Expecting ISO format 'YYYY-MM-DDTHH:MM:SS'
-    subject = data.get('subject', 'Faculty Meeting')
-    division = data.get('division', '')
-    course = data.get('course', '')
+    raw_room_id = data.get('room_id')
+    slot_iso = data.get('slot_start')  # Expecting ISO format 'YYYY-MM-DDTHH:MM:SS'
+    subject = (data.get('subject') or 'Faculty Meeting').strip()
+    division = (data.get('division') or '').strip()
+    course = (data.get('course') or '').strip()
     
     try:
         duration_hours = int(data.get('duration', 1))
@@ -414,10 +414,18 @@ def create_booking():
     if duration_hours <= 0:
         duration_hours = 1
     
-    if not room_id or not slot_iso:
+    if not raw_room_id or not slot_iso:
         return api_response(success=False, error="Room ID and slot start time are required.", status=400)
     
-    user_id = session.get('user_id')
+    raw_user_id = session.get('user_id')
+    try:
+        user_id = int(raw_user_id) if raw_user_id is not None else None
+    except (ValueError, TypeError):
+        user_id = None
+        
+    if not user_id:
+        return api_response(success=False, error="Session expired. Please log in again.", status=401)
+        
     faculty = db.session.get(User, user_id)
     
     # Phase 7: Check 3-Strike 7-Day Lockout Suspension
@@ -429,79 +437,96 @@ def create_booking():
             status=403
         )
     
+    # Resolve Room robustly by integer ID or room number (e.g. 'VY527' or '527')
+    room = None
     try:
-        # slot_iso should be interpreted as IST but stored or converted
-        # The prompt says 1-hour slots like 10:00, 11:00
+        room_id_int = int(raw_room_id)
+        room = db.session.get(Room, room_id_int)
+    except (ValueError, TypeError):
+        pass
+
+    if not room and raw_room_id:
+        clean_num = str(raw_room_id).strip().upper()
+        filters = [db.func.upper(Room.number) == clean_num]
+        if not clean_num.startswith('VY'):
+            filters.append(db.func.upper(Room.number) == f"VY{clean_num}")
+        room = Room.query.filter(db.or_(*filters)).first()
+
+    if not room:
+        return api_response(success=False, error="Room not found.", status=404)
+
+    room_id = room.id
+
+    try:
         slot_start = datetime.fromisoformat(slot_iso.replace('Z', ''))
         # Normalize to the beginning of the hour
         slot_start = slot_start.replace(minute=0, second=0, microsecond=0)
-        room = db.session.get(Room, room_id)
-        if not room:
-            return api_response(success=False, error="Room not found.", status=404)
+    except (ValueError, TypeError):
+        return api_response(success=False, error="Invalid date/time format.", status=400)
 
-        is_meeting_or_conf = room and room.floor and room.floor.level in [0, 6] and (
-            room.room_type in [Room.ROOM_TYPE_CONFERENCE, Room.ROOM_TYPE_MEETING, 'conference', 'meeting', 'conference_room', 'meeting_room'] or
-            room.number.upper().startswith('MR') or
-            'conference' in (room.name or '').lower() or
-            'meeting' in (room.name or '').lower()
+    is_meeting_or_conf = room and room.floor and room.floor.level in [0, 6] and (
+        room.room_type in [Room.ROOM_TYPE_CONFERENCE, Room.ROOM_TYPE_MEETING, 'conference', 'meeting', 'conference_room', 'meeting_room'] or
+        room.number.upper().startswith('MR') or
+        'conference' in (room.name or '').lower() or
+        'meeting' in (room.name or '').lower()
+    )
+    max_duration = 4 if is_meeting_or_conf else 2
+    if duration_hours > max_duration:
+        return api_response(success=False, error=f"Maximum booking duration for this room is {max_duration} hour(s).", status=400)
+
+    # Check operating hours (7:00 AM to 7:00 PM IST; slots can start between 07:00 and 18:00)
+    if slot_start.hour < 7 or slot_start.hour > 18:
+        return api_response(
+            success=False,
+            error="Room bookings can only be scheduled between 7:00 AM and 6:00 PM. The building closes at 7:00 PM sharp.",
+            status=400
         )
-        max_duration = 4 if is_meeting_or_conf else 2
-        if duration_hours > max_duration:
-            return api_response(success=False, error=f"Maximum booking duration for this room is {max_duration} hour(s).", status=400)
 
-        # Check operating hours (7:00 AM to 7:00 PM IST; slots can start between 07:00 and 18:00)
-        if slot_start.hour < 7 or slot_start.hour > 18:
-            return api_response(
-                success=False,
-                error="Room bookings can only be scheduled between 7:00 AM and 6:00 PM. The building closes at 7:00 PM sharp.",
-                status=400
-            )
-
-        slot_end = slot_start + timedelta(hours=duration_hours)
-        if slot_end.hour > 19 or (slot_end.hour == 19 and slot_end.minute > 0) or slot_end.date() > slot_start.date():
-            return api_response(
-                success=False,
-                error=f"The building closes at 7:00 PM sharp. A {duration_hours}-hour booking starting at {slot_start.strftime('%I:%M %p')} would extend past closing hours (7:00 PM).",
-                status=400
-            )
+    slot_end = slot_start + timedelta(hours=duration_hours)
+    if slot_end.hour > 19 or (slot_end.hour == 19 and slot_end.minute > 0) or slot_end.date() > slot_start.date():
+        return api_response(
+            success=False,
+            error=f"The building closes at 7:00 PM sharp. A {duration_hours}-hour booking starting at {slot_start.strftime('%I:%M %p')} would extend past closing hours (7:00 PM).",
+            status=400
+        )
+    
+    booking_date = slot_start.date()
+    current_day = slot_start.weekday()
+    
+    # 1. Check for conflicts for ALL requested slots
+    for i in range(duration_hours):
+        current_slot = slot_start + timedelta(hours=i)
+        slot_start_time = current_slot.time()
+        slot_end_time = (current_slot + timedelta(hours=1)).time()
         
-        booking_date = slot_start.date()
-        current_day = slot_start.weekday()
-        user_id = session.get('user_id')
+        # RoomBooking conflict
+        existing_booking = RoomBooking.query.filter(
+            RoomBooking.room_id == room.id,
+            RoomBooking.date == booking_date,
+            RoomBooking.status == RoomBooking.STATUS_ACTIVE,
+            RoomBooking.slot_start < current_slot + timedelta(hours=1),
+            RoomBooking.slot_start >= current_slot
+        ).first()
         
-        # 1. Check for conflicts for ALL requested slots
-        for i in range(duration_hours):
-            current_slot = slot_start + timedelta(hours=i)
-            slot_start_time = current_slot.time()
-            slot_end_time = (current_slot + timedelta(hours=1)).time()
+        if existing_booking:
+            return api_response(success=False, error=f"Room is already booked for the {current_slot.strftime('%I:%M %p')} slot.", status=400)
             
-            # RoomBooking conflict
-            existing_booking = RoomBooking.query.filter(
-                RoomBooking.room_id == room_id,
-                RoomBooking.date == booking_date,
-                RoomBooking.status == RoomBooking.STATUS_ACTIVE,
-                RoomBooking.slot_start < current_slot + timedelta(hours=1),
-                RoomBooking.slot_start >= current_slot
-            ).first()
-            
-            if existing_booking:
-                return api_response(success=False, error=f"Room is already booked for the {current_slot.strftime('%I:%M %p')} slot.", status=400)
-                
-            # Timetable conflict
-            existing_timetable = Timetable.query.filter(
-                Timetable.room_id == room_id,
-                Timetable.day_of_week == current_day,
-                Timetable.start_time < slot_end_time,
-                Timetable.end_time > slot_start_time
-            ).first()
-            
-            if existing_timetable:
-                return api_response(success=False, error=f"Conflict with regular class: {existing_timetable.subject}.", status=400)
+        # Timetable conflict
+        existing_timetable = Timetable.query.filter(
+            Timetable.room_id == room.id,
+            Timetable.day_of_week == current_day,
+            Timetable.start_time < slot_end_time,
+            Timetable.end_time > slot_start_time
+        ).first()
+        
+        if existing_timetable:
+            return api_response(success=False, error=f"Conflict with regular class: {existing_timetable.subject}.", status=400)
 
-        # 2. Create the bookings
+    # 2. Create the bookings
+    try:
         for i in range(duration_hours):
             booking = RoomBooking(
-                room_id=room_id,
+                room_id=room.id,
                 faculty_id=user_id,
                 date=booking_date,
                 slot_start=slot_start + timedelta(hours=i),
@@ -512,14 +537,18 @@ def create_booking():
             db.session.add(booking)
         
         db.session.commit()
-        
-        # Emit status change via pusher
-        room = db.session.get(Room, room_id)
+    except Exception as e:
+        db.session.rollback()
+        logger.exception("Failed to commit room booking: %s", e)
+        return api_response(success=False, error="Unable to complete room booking at this time. Please try again.", status=500)
+    
+    # Emit status change via pusher safely
+    try:
         emit_room_status_change(room, room.current_occupancy_status)
-        
-        return api_response(success=True, message=f"Successfully reserved for {duration_hours} hour(s).")
-    except ValueError:
-        return api_response(success=False, error="Invalid date/time format.", status=400)
+    except Exception as pe:
+        logger.warning("Pusher room status emission failed: %s", pe)
+    
+    return api_response(success=True, message=f"Successfully reserved for {duration_hours} hour(s).")
 
 
 @faculty_bp.route('/api/meeting-rooms', methods=['GET'])

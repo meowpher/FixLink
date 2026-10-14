@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.16** | 2026-10-15 | **Deployed** | **Zero-Trust Cross-Tab Session Conflict Lockout Eradication** (Completely removed the disruptive "Session Conflict Detected" lockout modal, window focus/visibility integrity checks, BroadcastChannel listeners, and backend 403 `session_conflict` middleware to restore seamless, persistent multi-tab user navigation). |
 | **v1.7.15** | 2026-10-07 | **Deployed** | **Smart Classroom Pop-Up Schedule Day Selection & Legend Color Harmonization** (Removed obsolete "Today" tab from the room pop-up schedule, automatically selecting the faculty's chosen booking day or current weekday; updated the map status legend dot for "Occupied (Non-Bookable)" to gray matching the gray occupied classroom schematics). |
 | **v1.7.14** | 2026-10-07 | **Deployed** | **Building Operating Hours & Night Booking Enforcement (7 AM – 7 PM IST Boundary)** (Enforced hard operational hours across all room reservation pipelines: classrooms, conference rooms, and meeting rooms can only be booked between 7:00 AM and 6:00 PM start times, with all reservations concluding at or before 7:00 PM sharp; night instant claims and overflow multi-hour slots are strictly blocked on both backend and frontend). |
 | **v1.7.13** | 2026-10-07 | **Deployed** | **Multi-Hour Ad-Hoc Timetable Slot Merging & Grid Consolidation** (Merged contiguous 1-hour ad-hoc room reservations on the weekly schedule into a single continuous block spanning multiple columns with `colspan`, full time-range display, and unified mobile agenda cards). |
@@ -20,6 +21,23 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.16 (2026-10-15)
+- `fix(auth-session)`: **Zero-Trust Cross-Tab Session Conflict Lockout Eradication**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Eradicated "Session Conflict Detected" Lockout Modal**:
+     - Removed the intrusive `#sessionConflictModal` that was freezing the interface, clearing active pollers, and disabling UI elements on tab switches or route navigation.
+     - Deleted `app/static/js/cross_tab_guard.js` and removed its script injection along with the `<meta name="tab-guard-id">` tag from `app/templates/base.html`.
+  2. **Removed Backend Session Conflict Middleware**:
+     - Stripped `zero_trust_cross_tab_guard_middleware()` from `app/__init__.py` which was intercepting `POST`, `PUT`, `DELETE`, and `PATCH` requests and failing them with `403 {"error": "session_conflict"}` on missing or mismatched guard IDs.
+     - Purged `X-Tab-Guard-ID` response headers from `apply_performance_and_security_headers`.
+  3. **Cleaned Up Route Handlers & Session Anchors**:
+     - Cleaned up `tab_guard_id` token generation and session storage in `app/blueprints/auth/routes.py` (student, professional, and unified login flows) and `app/blueprints/superadmin/routes.py` (developer login).
+     - Simplified `/api/auth/status` endpoint to return `{ "authenticated": bool }` without stale guard ID payloads.
+  4. **Automated Verification & Test Suite Integrity**:
+     - Retired obsolete `tests/test_cross_tab_guard.py`.
+     - Executed full test suite verifying that 100% of test suites pass cleanly (61/61 tests passing).
 
 ### Release v1.7.15 (2026-10-07)
 - `feat(faculty-ui)`: **Smart Classroom Pop-Up Schedule Day Selection & Legend Color Harmonization**

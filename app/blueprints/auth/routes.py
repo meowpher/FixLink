@@ -32,8 +32,7 @@ def auth_status():
         is_authenticated = True
 
     response = jsonify({
-        "authenticated": is_authenticated,
-        "guard_id": session.get('tab_guard_id', '')
+        "authenticated": is_authenticated
     })
     response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'
@@ -202,7 +201,6 @@ def login():
                 session.pop('super_admin_email', None)
                 session.pop('user_role', None)
                 
-                session['tab_guard_id'] = secrets.token_hex(16)
                 session['professional_id'] = professional.id
                 session['professional_name'] = professional.name
                 session['professional_category'] = professional.category
@@ -262,7 +260,6 @@ def login():
                 flash('Please verify your email address before logging in.', 'warning')
                 return render_template('login.html', show_phone_hint=show_phone_hint)
                 
-            session['tab_guard_id'] = secrets.token_hex(16)
             session['user_id'] = user.id
             session['user_name'] = user.name
             session['user_email'] = user.email

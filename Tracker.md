@@ -38,6 +38,9 @@
   4. **Automated Verification & Test Suite Integrity**:
      - Retired obsolete `tests/test_cross_tab_guard.py`.
      - Executed full test suite verifying that 100% of test suites pass cleanly (61/61 tests passing).
+  5. **Duplicate Logout & Auth Flash Notification Eradication**:
+     - Resolved layout collision where flash alerts (such as "You have been logged out.") rendered twice on auth pages (once in `base.html` outside the card, and once inside the card).
+     - Encapsulated global alerts in `base.html` within `{% block flash_messages %}` and suppressed outer duplication in `login.html`, `forgot_password.html`, `superadmin/login.html`, `professional/login.html`, and `admin/signup.html`, ensuring clean single notifications.
 
 ### Release v1.7.15 (2026-10-07)
 - `feat(faculty-ui)`: **Smart Classroom Pop-Up Schedule Day Selection & Legend Color Harmonization**

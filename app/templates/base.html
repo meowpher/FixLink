@@ -660,6 +660,7 @@
 
     <!-- Main Content -->
     <main class="main-content min-vh-100 pb-5" id="main-content" role="main">
+        {% block flash_messages %}
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
             <div class="container mt-3">
@@ -672,6 +673,7 @@
             </div>
             {% endif %}
         {% endwith %}
+        {% endblock %}
         {% block content %}{% endblock %}
     </main>
 

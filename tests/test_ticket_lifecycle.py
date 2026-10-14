@@ -187,3 +187,45 @@ def test_spam_detection_and_auto_strike(client, student_user, run_app_context):
         user = db.session.get(User, student_user.id)
         assert user.is_adhoc_suspended is True
         assert user.adhoc_suspended_until is not None
+
+
+def test_api_assign_ticket_string_payload_resilience(client, admin_user, professional_user, run_app_context):
+    """Test assigning a ticket via AJAX API with string data types matching browser fetch."""
+    from app.models import Ticket, Room, Floor, Building
+
+    with run_app_context:
+        b = Building(name='Vyas Test')
+        db.session.add(b)
+        db.session.commit()
+        f = Floor(building_id=b.id, level=0, name='Ground')
+        db.session.add(f)
+        db.session.commit()
+        r = Room(number='VY099', floor_id=f.id)
+        db.session.add(r)
+        db.session.commit()
+        t = Ticket(room_id=r.id, issue_type='tables', description='broken desk', reporter_name='Student', prn='999', reporter_email='student@mitwpu.edu.in')
+        db.session.add(t)
+        db.session.commit()
+        ticket_id = t.id
+
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['user_id'] = admin_user.id
+        sess['is_admin'] = True
+
+    # Pass string IDs and string hours exactly as sent by browser
+    resp = client.post(f'/admin/api/ticket/{ticket_id}/assign', json={
+        'professional_id': str(professional_user.id),
+        'time_limit_hours': '3'
+    })
+
+    assert resp.status_code == 200
+    data = resp.get_json()
+    assert data['success'] is True
+
+    with run_app_context:
+        t_assigned = db.session.get(Ticket, ticket_id)
+        assert t_assigned.status == Ticket.STATUS_ASSIGNED
+        assert t_assigned.assigned_professional_id == professional_user.id
+        assert t_assigned.time_limit_hours == 3
+

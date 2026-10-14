@@ -41,6 +41,10 @@
   5. **Duplicate Logout & Auth Flash Notification Eradication**:
      - Resolved layout collision where flash alerts (such as "You have been logged out.") rendered twice on auth pages (once in `base.html` outside the card, and once inside the card).
      - Encapsulated global alerts in `base.html` within `{% block flash_messages %}` and suppressed outer duplication in `login.html`, `forgot_password.html`, `superadmin/login.html`, `professional/login.html`, and `admin/signup.html`, ensuring clean single notifications.
+  6. **Live Map Technician Assignment Error Fix**:
+     - Resolved internal server error (500) during technician assignment on `/admin/map` caused by string-type payloads from the browser dropdown being compared against integer columns in PostgreSQL.
+     - Implemented strict integer parsing and validation for `professional_id` and `time_limit_hours` on both backend (`app/blueprints/admin/routes.py`) and frontend (`app/static/js/modules/admin_map.js`).
+     - Added robust transaction rollback safety, resilient floor cache invalidation (`app/cache.py`), fail-safe Pusher notification dispatching, and automated unit test coverage (62/62 tests passing).
 
 ### Release v1.7.15 (2026-10-07)
 - `feat(faculty-ui)`: **Smart Classroom Pop-Up Schedule Day Selection & Legend Color Harmonization**

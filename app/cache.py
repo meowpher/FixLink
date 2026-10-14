@@ -30,14 +30,20 @@ def invalidate_floor_cache(floor_id):
     """Invalidate cached map data for a specific floor.
     Call this when a ticket is created/updated or an asset status changes.
     """
-    # Keys match the patterns used in @cache.cached() decorators
-    cache.delete(f'map_floor_{floor_id}')
-    cache.delete(f'admin_floor_{floor_id}')
+    try:
+        # Keys match the patterns used in @cache.cached() decorators
+        cache.delete(f'map_floor_{floor_id}')
+        cache.delete(f'admin_floor_{floor_id}')
+    except Exception:
+        pass
 
 
 def invalidate_all_map_cache():
     """Nuclear option: clear all cached map data."""
-    cache.clear()
+    try:
+        cache.clear()
+    except Exception:
+        pass
 
 def get_cached_floor_data(floor_id):
     """

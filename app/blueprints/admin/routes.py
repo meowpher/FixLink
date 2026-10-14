@@ -1124,14 +1124,27 @@ def api_assign_ticket(ticket_id):
     from datetime import datetime, timedelta
     from ...cache import invalidate_floor_cache
     
-    ticket = Ticket.query.get_or_404(ticket_id)
-    data = request.get_json()
+    ticket = db.session.get(Ticket, ticket_id)
+    if not ticket:
+        return api_response(success=False, error="Ticket not found", status=404)
+        
+    data = request.get_json(silent=True) or {}
     
-    professional_id = data.get('professional_id')
-    time_limit_hours = int(data.get('time_limit_hours', 2))
-    
-    if not professional_id:
+    raw_prof_id = data.get('professional_id')
+    if not raw_prof_id:
         return api_response(success=False, error="Please select a professional", status=400)
+        
+    try:
+        professional_id = int(raw_prof_id)
+    except (ValueError, TypeError):
+        return api_response(success=False, error="Invalid professional ID", status=400)
+        
+    try:
+        time_limit_hours = int(data.get('time_limit_hours', 2))
+        if time_limit_hours < 1:
+            time_limit_hours = 2
+    except (ValueError, TypeError):
+        time_limit_hours = 2
         
     professional = db.session.get(Professional, professional_id)
     if not professional or not professional.is_active:
@@ -1143,19 +1156,44 @@ def api_assign_ticket(ticket_id):
         Ticket.status.in_([Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])
     ).first()
     
-    if active_task:
-        return api_response(success=False, error=f"{professional.name} already has an active task (# {active_task.id}).", status=400)
+    if active_task and active_task.id != ticket.id:
+        return api_response(success=False, error=f"{professional.name} already has an active task (#{active_task.id}).", status=400)
 
-    ticket.assigned_professional_id = professional_id
-    ticket.time_limit_hours = time_limit_hours
-    ticket.deadline_datetime = datetime.utcnow() + timedelta(hours=time_limit_hours)
-    ticket.status = Ticket.STATUS_ASSIGNED
-    
-    db.session.commit()
-    
-    # Invalidate cache for the floor
+    # Resolve floor_id safely before committing
+    floor_id = None
     if ticket.room_id:
-        invalidate_floor_cache(ticket.room.floor_id)
+        room = db.session.get(Room, ticket.room_id)
+        if room:
+            floor_id = room.floor_id
+
+    try:
+        ticket.assigned_professional_id = professional_id
+        ticket.time_limit_hours = time_limit_hours
+        ticket.deadline_datetime = datetime.utcnow() + timedelta(hours=time_limit_hours)
+        ticket.status = Ticket.STATUS_ASSIGNED
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error assigning ticket #{ticket_id}: {e}")
+        return api_response(success=False, error="Failed to save assignment in database.", status=500)
+    
+    # Invalidate cache for the floor safely
+    if floor_id:
+        try:
+            invalidate_floor_cache(floor_id)
+        except Exception as e:
+            current_app.logger.warning(f"Error invalidating floor cache: {e}")
+        
+    # Real-time notifications (fail-safe)
+    try:
+        from ...realtime import notify_professional_assigned, emit_room_status_change
+        notify_professional_assigned(ticket, professional)
+        if ticket.room_id:
+            room = db.session.get(Room, ticket.room_id)
+            if room:
+                emit_room_status_change(room)
+    except Exception as e:
+        current_app.logger.warning(f"Error dispatching assignment notification: {e}")
         
     return api_response(success=True, message="Technician assigned successfully")
 

@@ -222,27 +222,35 @@ export function highlightRoom(roomNumber) {
 // Admin API Actions
 
 export async function assignTechnician(ticketId) {
-    const profId = document.getElementById('assignProf').value;
-    const hours = document.getElementById('assignHours').value;
+    const profId = document.getElementById('assignProf')?.value;
+    const hours = document.getElementById('assignHours')?.value;
     
     if (!profId) return alert('Please select a professional');
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
     
     try {
         const response = await fetch(`/admin/api/ticket/${ticketId}/assign`, {
             method: 'POST',
             headers: { 
                 'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                'X-CSRFToken': csrfToken
             },
-            body: JSON.stringify({ professional_id: profId, time_limit_hours: hours })
+            body: JSON.stringify({ 
+                professional_id: parseInt(profId, 10), 
+                time_limit_hours: parseInt(hours, 10) || 2 
+            })
         });
         const result = await response.json();
         if (result.success) {
             location.reload(); 
         } else {
-            alert('Error: ' + result.error);
+            alert('Error: ' + (result.error || result.message || 'Failed to assign technician'));
         }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        console.error(e);
+        alert('Network or server error while assigning technician.');
+    }
 }
 
 export async function completeTicket(ticketId) {

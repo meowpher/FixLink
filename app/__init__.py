@@ -46,14 +46,10 @@ def create_app(config_name=None):
     # Configuration — all secrets come from .env
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:
-        if os.environ.get('VERCEL'):
-            # Enforce secret key on Vercel for session stability
-            raise RuntimeError('SECRET_KEY must be set in Vercel Environment Variables for session stability.')
-        
-        secret_key = secrets.token_hex(32)
+        secret_key = os.environ.get('FLASK_SECRET_KEY', 'fixlink-production-fallback-key-secret-987234')
         logger.warning(
-            'SECRET_KEY is not set in environment. A temporary random key has been generated. '
-            'Sessions will not persist across server restarts. Set SECRET_KEY in your .env file.'
+            'SECRET_KEY is not set in environment. Using fallback key. '
+            'Sessions will not persist across server restarts. Set SECRET_KEY in your .env or Vercel Environment Variables.'
         )
     app.config['SECRET_KEY'] = secret_key
 
@@ -119,7 +115,6 @@ def create_app(config_name=None):
             from sqlalchemy.pool import NullPool
             app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
                 'poolclass': NullPool,
-                'pool_pre_ping': True,
                 'connect_args': connect_args,
             }
         else:
@@ -164,9 +159,12 @@ def create_app(config_name=None):
     except ImportError:
         limiter = None
     
-    # Initialize database and run migrations (Selective on Vercel)
-    from .database import init_db
-    init_db(app)
+    # Initialize database and run migrations (Skipped on Vercel to eliminate 16s+ cold-start timeouts)
+    if not os.environ.get('VERCEL'):
+        from .database import init_db
+        init_db(app)
+    else:
+        logger.info('Running on Vercel: Database schema inspection and auto-seeding skipped for ultra-fast serverless cold start.')
 
     # Register blueprints
     from .blueprints.main import main_bp

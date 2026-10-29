@@ -1,7 +1,7 @@
 """
 Vercel serverless entry point for FixLink.
 This file is loaded once per cold start by the @vercel/python runtime.
-It MUST export a WSGI-compatible 'app' object at module level.
+It MUST export a WSGI-compatible 'app', 'application', or 'handler' object at module level.
 """
 import os
 import sys
@@ -24,8 +24,8 @@ except Exception as e:
 
     # Emit a minimal WSGI app that returns 500 with the error message
     # so Vercel shows something useful instead of a blank 500.
-    from flask import Flask, jsonify
-    _err_msg = str(e)
+    from flask import Flask
+    _err_msg = traceback.format_exc()
 
     app = Flask(__name__)
 
@@ -35,7 +35,9 @@ except Exception as e:
         return (
             f"<h1>Application Startup Error</h1><pre>{_err_msg}</pre>",
             500,
+            {"Content-Type": "text/html"}
         )
 
-# Vercel/Gunicorn looks for 'app' at module level
+# Vercel/Gunicorn/WSGI looks for 'app', 'application', or 'handler' at module level
 application = app
+handler = app

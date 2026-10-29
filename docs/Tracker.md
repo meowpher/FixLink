@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.26** | 2026-10-30 | **Deployed** | **Frontend Integration, Static Asset Wiring & Template Routing Finalization (Phase 4)** (Scanned 55 templates to ensure 100% namespaced `url_for` blueprint resolution; fixed legacy admin signup endpoint; registered `professional_bp`; wired GSAP interactive map loader and template preloads to `app/static/svg_maps/` with automatic fallback; verified local server and test suite). |
 | **v1.7.25** | 2026-10-30 | **Deployed** | **Domain Model Decoupling & Modular Service Layer Architecture (Phase 3)** (Decoupled 19 SQLAlchemy models into domain modules inside `app/models/` under strict read-only database constraints; extracted business logic into `app/services/` with QR, interactive SVG map, real-time messaging, email, and analytics services; refactored routes to delegate to services; deleted `docs/plan.txt`). |
 | **v1.7.24** | 2026-10-30 | **Deployed** | **Root Directory Reorganization, Application Factory Skeleton & Blueprint Route Migration** (Consolidated documentation into docs/; relocated utility scripts to scripts/; organized static assets into app/static/; established clean Application Factory pattern with modular blueprints in app/routes/ and backward-compatible shims; verified all 149 URL endpoints). |
 | **v1.7.23** | 2026-10-30 | **Deployed** | **Universal Smooth Theme Curtain Transition (Login & Report Form Restoration)** (Restored smooth GSAP curtain drop/lift transition across all views by removing endpoint script exclusions in `base.html`; wired mobile theme toggles and status icons across public report and login screens). |
@@ -30,6 +31,24 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.26 (2026-10-30)
+- `feat(ui)`: **Template Routing & Blueprint Namespace Audit (`app/templates/`)**
+  - Scanned all 55 HTML templates across the application, verifying zero un-namespaced or broken `url_for()` calls.
+  - Aligned legacy form action in `app/templates/admin/signup.html` to point to `auth.signup`.
+  - Registered `professional_bp` in `create_app()` within `app/__init__.py`, preventing `BuildError` on technician views.
+
+- `fix(assets)`: **Static Asset Wiring & Vector Floor Plan Integration (`app/static/svg_maps/`)**
+  - Re-routed the primary GSAP digital twin map loader in `app/static/js/modules/render.js` to load from `app/static/svg_maps/VY${floorLevel}.svg` with automatic fallback to `app/static/images/floors/`.
+  - Updated backend zero-latency in-memory SVG loader `get_floor_svg()` in `app/__init__.py` and `app/services/map_service.py` to prioritize `static/svg_maps/`.
+  - Upgraded `<link rel="preload">` fetch tags across `app/templates/report.html`, `app/templates/status_map.html`, and `app/templates/faculty/dashboard.html` to leverage `url_for('static', filename='svg_maps/...')`.
+
+- `test(verification)`: **Local Server & Integration Testing**
+  - Verified local application execution via `python run.py` on `http://localhost:5000`.
+  - Validated that core public, administrative, and authenticated endpoints render with 200 OK without 404 or 500 errors.
+  - Executed full pytest suite with a 100% pass rate (92 passed, 1 skipped).
+
+---
 
 ### Release v1.7.25 (2026-10-30)
 - `refactor(models)`: **Domain-Driven Model Decoupling (`app/models/`)**

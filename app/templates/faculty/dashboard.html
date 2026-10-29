@@ -8,8 +8,8 @@
 
 {% block extra_css %}
 <meta name="current-user-id" content="{{ current_user_id | tojson }}">
-<link rel="preload" href="/static/images/floors/VY0.svg" as="fetch" crossorigin="anonymous">
-<link rel="preload" href="/static/images/floors/VY6.svg" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="{{ url_for('static', filename='svg_maps/VY0.svg') }}" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="{{ url_for('static', filename='svg_maps/VY6.svg') }}" as="fetch" crossorigin="anonymous">
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/render.js') }}">
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/ui.js') }}">
 <link rel="preload" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}" as="style">
@@ -3316,7 +3316,8 @@
                 try {
                     let svgText = getMeetingFloorSvg(floorStr);
                     if (!svgText) {
-                        const res = await fetch(`/static/images/floors/VY${floorStr}.svg`);
+                        let res = await fetch(`/static/svg_maps/VY${floorStr}.svg`);
+                        if (!res.ok) res = await fetch(`/static/images/floors/VY${floorStr}.svg`);
                         if (!res.ok) throw new Error("Floor SVG not found");
                         svgText = await res.text();
                         meetingFloorSvgCache.set(floorStr, svgText);

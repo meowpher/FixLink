@@ -15,7 +15,7 @@
 
 <!-- Preload Initial Floor SVG -->
 {% set initial_level = (floors | selectattr('id', 'equalto', selected_floor) | map(attribute='level') | first) if selected_floor else (floors[0].level if floors else 0) %}
-<link rel="preload" href="/static/images/floors/VY{{ initial_level }}.svg" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="{{ url_for('static', filename='svg_maps/VY' ~ initial_level ~ '.svg') }}" as="fetch" crossorigin="anonymous">
 
 <!-- Minified Report Stylesheet -->
 <link rel="preload" href="{{ url_for('static', filename='css/report.min.css') }}?v=1.0" as="style">

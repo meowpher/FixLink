@@ -216,6 +216,7 @@ def create_app(config_name=None):
     app.register_blueprint(faculty_bp, url_prefix='/faculty')
     app.register_blueprint(onboarding_bp)
     app.register_blueprint(supervisor_bp, url_prefix='/supervisor')
+    app.register_blueprint(professional_bp)
 
     # In-memory Floor Plan SVG cache for instantaneous zero-latency template rendering
     _floor_svg_memory_cache = {}
@@ -223,7 +224,9 @@ def create_app(config_name=None):
     def get_floor_svg(level):
         lvl = str(level)
         if lvl not in _floor_svg_memory_cache:
-            svg_file = os.path.join(app.root_path, 'static', 'images', 'floors', f'VY{lvl}.svg')
+            svg_file = os.path.join(app.root_path, 'static', 'svg_maps', f'VY{lvl}.svg')
+            if not os.path.isfile(svg_file):
+                svg_file = os.path.join(app.root_path, 'static', 'images', 'floors', f'VY{lvl}.svg')
             if os.path.isfile(svg_file):
                 try:
                     with open(svg_file, 'r', encoding='utf-8') as f:

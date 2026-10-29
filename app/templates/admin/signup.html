@@ -23,7 +23,7 @@
                         {% endif %}
                     {% endwith %}
                     
-                    <form method="POST" action="{{ url_for('admin.admin_signup') }}">
+                    <form method="POST" action="{{ url_for('auth.signup') }}">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="mb-3">
                             <label for="name" class="form-label">Full Name</label>

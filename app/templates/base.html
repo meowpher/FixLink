@@ -755,6 +755,36 @@
 
         const btnMobile = document.getElementById('mobileThemeToggleBtn');
         if (btnMobile) btnMobile.addEventListener('click', handleToggle);
+            // Automatically attach X-CSRFToken to mutable fetch requests if missing
+        const _origFetch = window.fetch;
+        window.fetch = function(resource, init) {
+            init = init || {};
+            const method = (init.method || 'GET').toUpperCase();
+            if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(method)) {
+                init.headers = init.headers || {};
+                let hasCsrf = false;
+                if (init.headers instanceof Headers) {
+                    hasCsrf = init.headers.has('X-CSRFToken') || init.headers.has('x-csrftoken');
+                    if (!hasCsrf) {
+                        const token = window.getCsrfToken();
+                        if (token) init.headers.set('X-CSRFToken', token);
+                    }
+                } else if (Array.isArray(init.headers)) {
+                    hasCsrf = init.headers.some(h => h[0].toLowerCase() === 'x-csrftoken');
+                    if (!hasCsrf) {
+                        const token = window.getCsrfToken();
+                        if (token) init.headers.push(['X-CSRFToken', token]);
+                    }
+                } else {
+                    hasCsrf = Object.keys(init.headers).some(k => k.toLowerCase() === 'x-csrftoken');
+                    if (!hasCsrf) {
+                        const token = window.getCsrfToken();
+                        if (token) init.headers['X-CSRFToken'] = token;
+                    }
+                }
+            }
+            return _origFetch.call(this, resource, init);
+        };
     })();
 
     // Profile Avatar — load user info and wire up photo upload
@@ -2393,6 +2423,17 @@
     <script>
     (function() {
         // Universal FixLink Dialog Helpers
+        // Universal CSRF Token Getter
+        window.getCsrfToken = function() {
+            const meta = document.querySelector('meta[name="csrf-token"]');
+            if (meta && meta.content) return meta.content;
+            if (meta && meta.getAttribute('content')) return meta.getAttribute('content');
+            const input = document.querySelector('input[name="csrf_token"]');
+            if (input && input.value) return input.value;
+            if (typeof csrfToken !== 'undefined' && csrfToken) return csrfToken;
+            return '';
+        };
+
         window.FixLinkDialog = {
             isDark: function() {
                 return document.documentElement.getAttribute('data-theme') === 'dark' || document.body.getAttribute('data-theme') === 'dark';

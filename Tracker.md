@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.22** | 2026-10-30 | **Deployed** | **Universal CSRF Token Injection & Developer Deletion Fix** (Resolved 400 "Session or security token expired" error on developer admin and professional deletions by implementing auto-attaching CSRF headers in `base.html` fetch interceptor and adding explicit `X-CSRFToken` to deletion API calls). |
 | **v1.7.21** | 2026-10-30 | **Deployed** | **Native Built-in WebApp Modal & Dialog System** (Replaced raw native browser `confirm()` and `alert()` popups with self-hosted, theme-aware FixLink SweetAlert2 modals across SuperAdmin, Admin Console, Status Map, and Faculty portals; added glassmorphism card styling and automatic Light/Dark mode palette adapting). |
 | **v1.7.20** | 2026-10-30 | **Deployed** | **Admin Map Issue Detection & Attention Card State Synchronization** (Resolved status mismatch where rooms with active open tickets erroneously rendered the "Everything is Normal" placeholder in the side panel; mapped open tickets to visual 'issue' state and enforced Needs Attention alert banner rendering with red ISSUE badge). |
 | **v1.7.19** | 2026-10-30 | **Deployed** | **Admin Status Map Room Status Payload & Null-Safe Inspection Fix** (Resolved frontend JavaScript `TypeError: Cannot read properties of undefined (reading 'toUpperCase')` on `/admin/map` by returning explicit `status` from `/admin/api/room-status/<room_number>` and adding defensive fallback properties for room and ticket details). |
@@ -26,6 +27,15 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.22 (2026-10-30)
+- `fix(security)`: **Universal Fetch CSRF Token Injection & Developer Deletion Hardening**
+  - Resolved `400 Bad Request` ("Session or security token expired. Please refresh the page.") on SuperAdmin admin and technician deletion actions.
+  - Implemented `window.getCsrfToken()` utility in `app/templates/base.html` that extracts the active token from meta tags, hidden inputs, or session scripts.
+  - Upgraded global `window.fetch` interceptor to automatically attach `X-CSRFToken` to all mutable HTTP methods (`POST`, `PUT`, `DELETE`, `PATCH`).
+  - Added explicit `X-CSRFToken` request headers to `app/templates/superadmin/list_admins.html` and `app/templates/superadmin/list_professionals.html`.
+
+---
 
 ### Release v1.7.21 (2026-10-30)
 - `feat(ui)`: **Built-in Native WebApp Modal & Dialog Engine (Browser Popup Replacement)**

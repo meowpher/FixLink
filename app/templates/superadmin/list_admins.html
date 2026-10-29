@@ -140,7 +140,8 @@
             const response = await fetch(`/developer/api/admin/${adminId}/delete`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': window.getCsrfToken()
                 }
             });
             const data = await response.json();

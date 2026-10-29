@@ -216,7 +216,8 @@
         fetch(`/developer/api/professional/${profId}/delete`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.getCsrfToken()
             }
         })
         .then(response => response.json())

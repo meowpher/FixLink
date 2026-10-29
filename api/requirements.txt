@@ -4,6 +4,8 @@ Flask-SQLAlchemy>=3.1.0
 python-dotenv>=1.0.0
 requests>=2.31.0
 psycopg2-binary>=2.9.0
+psycopg[binary]>=3.1.0
+pg8000>=1.30.0
 Flask-Caching>=2.1.0
 Flask-WTF>=1.2.0
 qrcode>=7.4.0
@@ -17,4 +19,3 @@ pytz>=2024.1
 pillow>=10.2.0
 gunicorn>=21.2.0
 gevent>=23.9.0
-

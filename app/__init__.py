@@ -101,16 +101,44 @@ def create_app(config_name=None):
             separator = '&' if '?' in database_url else '?'
             database_url += f'{separator}sslmode=require'
 
+    # Automatic PostgreSQL Driver Fallback: test available DBAPI drivers
+    if database_url.startswith(('postgresql://', 'postgres://', 'postgresql+')):
+        import re
+        base_pg_url = re.sub(r'^(postgresql|postgres)(\+[a-zA-Z0-9_-]+)?://', '', database_url)
+        try:
+            import psycopg2  # noqa: F401
+            database_url = f'postgresql+psycopg2://{base_pg_url}'
+            logger.info("PostgreSQL driver verified: psycopg2")
+        except ImportError:
+            try:
+                import psycopg  # noqa: F401
+                database_url = f'postgresql+psycopg://{base_pg_url}'
+                logger.info("PostgreSQL driver verified: psycopg (v3)")
+            except ImportError:
+                try:
+                    import pg8000  # noqa: F401
+                    clean_url = re.sub(r'[?&]sslmode=[^&]+', '', base_pg_url)
+                    if clean_url.endswith('?'):
+                        clean_url = clean_url[:-1]
+                    database_url = f'postgresql+pg8000://{clean_url}'
+                    logger.info("PostgreSQL driver verified: pg8000")
+                except ImportError:
+                    logger.warning("No PostgreSQL driver found; retaining base postgresql:// scheme")
+                    database_url = f'postgresql://{base_pg_url}'
+
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
     # 5. Serverless Pooling Hardening: Check if os.environ.get('VERCEL') == '1'
     if os.environ.get('VERCEL') == '1' or bool(os.environ.get('VERCEL')):
         from sqlalchemy.pool import NullPool
-        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        engine_opts = {
             'poolclass': NullPool,
             'pool_pre_ping': True,
         }
+        if database_url.startswith('postgresql+pg8000://'):
+            engine_opts['connect_args'] = {'ssl_context': True}
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = engine_opts
     else:
         if database_url.startswith(('postgresql', 'mysql')):
             connect_args = {'connect_timeout': 10}

@@ -25,17 +25,18 @@
 ## 2. Chronological Log of Pushed Updates
 
 ### Release v1.7.18 (2026-10-30)
-- ix(ghost-protocol): **Ghost Protocol Naive vs. Offset-Aware DateTime Bug Fix**
-  - Resolved TypeError: can't compare offset-naive and offset-aware datetimes on /admin/faculty-handle and Ghost Protocol audit logs.
-  - Harmonized database UTC timestamps with datetime.utcnow() across pp/blueprints/admin/routes.py (lines 292, 320, 2625, 2629).
+- `fix(ghost-protocol)`: **Ghost Protocol Naive vs. Offset-Aware DateTime Bug Fix**
+  - Resolved `TypeError: can't compare offset-naive and offset-aware datetimes` on `/admin/faculty-handle` and Ghost Protocol audit logs.
+  - Harmonized database UTC timestamps with `datetime.utcnow()` across `app/blueprints/admin/routes.py` (lines 292, 320, 2625, 2629).
   - Ensured consistent evaluation for faculty suspensions, 30-day strike rolling windows, and suspension logs.
 
-- eat(faculty-portal): **Live Real-Time Date & Clock Widget in Faculty Sidebar**
-  - Integrated an interactive live clock and date card into the Faculty Dashboard sidebar hero section (pp/templates/faculty/dashboard.html).
-  - Added frosted glassmorphism styling (.faculty-live-clock-card) with smooth responsiveness across Light and OLED Dark themes.
-  - Implemented 12-hour formatted time with live-ticking seconds (hh:mm:ss AM/PM) and uppercase date (DAY, DD MON YYYY) using tabular figures (	abular-nums) to prevent text jittering.
+- `feat(faculty-portal)`: **Live Real-Time Date & Clock Widget in Faculty Sidebar**
+  - Integrated an interactive live clock and date card into the Faculty Dashboard sidebar hero section (`app/templates/faculty/dashboard.html`).
+  - Replaced font icon with standalone vector SVG clock icon to eliminate font-loading delays and white disc artifacts.
+  - Added frosted glassmorphism styling (`.faculty-live-clock-card`) with smooth responsiveness across Light and OLED Dark themes.
+  - Implemented 12-hour formatted time with live-ticking seconds (`hh:mm:ss AM/PM`) and uppercase date (`DAY, DD MON YYYY`) using tabular figures (`tabular-nums`) to prevent text jittering.
 
-- docs(diagrams): **Complete Mermaid Architectural & Workflow Diagram Suite**
+- `docs(diagrams)`: **Complete Mermaid Architectural & Workflow Diagram Suite**
   - Created and cataloged 7 diagrams for system documentation: High-Level System Architecture, 19-Model Database ER, Maintenance Issue Lifecycle Sequence, 4th Floor Digital Twin Block Layout, Ticket Lifecycle State Machine, Ghost Protocol Attendance Governance Workflow, and Real-Time WebSocket Data Flow.
 
 ---

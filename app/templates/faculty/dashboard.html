@@ -96,6 +96,36 @@
 .btn-instant-checkin:active {
     transform: translateY(0);
 }
+
+/* Live Date & Time widget in Faculty Hero Card */
+.faculty-live-clock-card {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    padding: 0.75rem 1rem;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.25s ease;
+}
+[data-theme="dark"] .faculty-live-clock-card {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.faculty-live-clock-time {
+    font-size: 1.18rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+.faculty-live-clock-date {
+    font-size: 0.75rem;
+    opacity: 0.9;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
 </style>
 {% endblock %}
 
@@ -114,6 +144,17 @@
                         {{ faculty.name }}
                     </h5>
                     <p class="small opacity-75 mb-0 d-none d-lg-block">{{ (my_schedules|length) + (my_adhoc|length) }} sessions this week.</p>
+                </div>
+
+                <!-- Live Clock & Date Widget -->
+                <div class="faculty-live-clock-card mb-3 d-none d-lg-flex align-items-center gap-3 text-white shadow-sm">
+                    <div class="rounded-circle bg-white bg-opacity-20 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
+                        <i class="bi bi-clock-fill fs-5 text-white"></i>
+                    </div>
+                    <div class="lh-sm">
+                        <div class="faculty-live-clock-time" id="facultyHeroClock">--:--:-- --</div>
+                        <div class="faculty-live-clock-date" id="facultyHeroDate">Loading date...</div>
+                    </div>
                 </div>
 
                 <div class="hero-stats">
@@ -4434,6 +4475,38 @@
                 }
             }
         };
+
+        
+        // Live Date & Time ticker for Faculty Hero Card
+        (function() {
+            function updateFacultyClock() {
+                const clockEl = document.getElementById('facultyHeroClock');
+                const dateEl = document.getElementById('facultyHeroDate');
+                if (!clockEl && !dateEl) return;
+
+                const now = new Date();
+                
+                if (clockEl) {
+                    clockEl.textContent = now.toLocaleTimeString('en-US', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                        hour12: true
+                    });
+                }
+                
+                if (dateEl) {
+                    const weekday = now.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+                    const day = now.getDate();
+                    const month = now.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+                    const year = now.getFullYear();
+                    dateEl.textContent = `${weekday}, ${day} ${month} ${year}`;
+                }
+            }
+
+            updateFacultyClock();
+            setInterval(updateFacultyClock, 1000);
+        })();
 
         // Auto-initialize mobile day filter on DOM ready
         document.addEventListener('DOMContentLoaded', function() {

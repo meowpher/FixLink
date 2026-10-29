@@ -289,7 +289,7 @@ def _get_faculty_handle_context():
 
     # 3. Ghost Protocol Data
     IST = timezone(timedelta(hours=5, minutes=30))
-    now_utc = datetime.now(timezone.utc)
+    now_utc = datetime.utcnow()
     cutoff_30d = now_utc - timedelta(days=30)
 
     strike_counts = (
@@ -2622,11 +2622,11 @@ def lift_ghost_suspension(faculty_id):
     if not user:
         return api_response(success=False, error="Faculty not found.", status=404)
 
-    was_suspended = bool(user.adhoc_suspended_until and user.adhoc_suspended_until > datetime.now(timezone.utc))
+    was_suspended = bool(user.adhoc_suspended_until and (user.adhoc_suspended_until.replace(tzinfo=None) if user.adhoc_suspended_until.tzinfo else user.adhoc_suspended_until) > datetime.utcnow())
     original_suspended_until = user.adhoc_suspended_until
 
     data = request.get_json() or {}
-    cutoff_30d = datetime.now(timezone.utc) - timedelta(days=30)
+    cutoff_30d = datetime.utcnow() - timedelta(days=30)
     strike_count_now = NoShowStrike.query.filter(
         NoShowStrike.faculty_id == faculty_id,
         NoShowStrike.created_at >= cutoff_30d

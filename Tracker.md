@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.18** | 2026-10-30 | **Deployed** | **Ghost Protocol Naive/Aware DateTime Bug Fix & Faculty Live Clock Widget** (Resolved 500 TypeError on /admin/faculty-handle by harmonizing offset-naive database timestamps with UTC comparisons; integrated live real-time clock and date widget inside Faculty Dashboard hero card with glassmorphism styling and zero-jitter tabular figures). |
 | **v1.7.17** | 2026-10-22 | **Deployed** | **Architectural Pivot: Supervisor-Verified Closure (QA), Supervisor Blueprint & Role Management** (Eradicated the legacy standalone technician self-service portal, views, and login routes; locked down ticket resolution strictly to Higher Authority / Admin / Supervisor roles; upgraded the Ticket model with supervisor verification fields, audit proof file path, and technician reference string; implemented a dark-mode mobile-first camera-ready Bootstrap 5 modal `#verifyCompletionModal`; built the secure backend endpoint `/admin/issues/<ticket_id>/verify-close` and supervisor workspace). |
 | **v1.7.16** | 2026-10-15 | **Deployed** | **Zero-Trust Cross-Tab Session Conflict Lockout Eradication & Faculty Booking Fixes** (Completely removed the disruptive "Session Conflict Detected" lockout modal, window focus/visibility integrity checks, BroadcastChannel listeners, and backend 403 `session_conflict` middleware to restore seamless, persistent multi-tab user navigation; resolved 500 error on faculty slot booking). |
 | **v1.7.15** | 2026-10-07 | **Deployed** | **Smart Classroom Pop-Up Schedule Day Selection & Legend Color Harmonization** (Removed obsolete "Today" tab from the room pop-up schedule, automatically selecting the faculty's chosen booking day or current weekday; updated the map status legend dot for "Occupied (Non-Bookable)" to gray matching the gray occupied classroom schematics). |
@@ -22,6 +23,22 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.18 (2026-10-30)
+- ix(ghost-protocol): **Ghost Protocol Naive vs. Offset-Aware DateTime Bug Fix**
+  - Resolved TypeError: can't compare offset-naive and offset-aware datetimes on /admin/faculty-handle and Ghost Protocol audit logs.
+  - Harmonized database UTC timestamps with datetime.utcnow() across pp/blueprints/admin/routes.py (lines 292, 320, 2625, 2629).
+  - Ensured consistent evaluation for faculty suspensions, 30-day strike rolling windows, and suspension logs.
+
+- eat(faculty-portal): **Live Real-Time Date & Clock Widget in Faculty Sidebar**
+  - Integrated an interactive live clock and date card into the Faculty Dashboard sidebar hero section (pp/templates/faculty/dashboard.html).
+  - Added frosted glassmorphism styling (.faculty-live-clock-card) with smooth responsiveness across Light and OLED Dark themes.
+  - Implemented 12-hour formatted time with live-ticking seconds (hh:mm:ss AM/PM) and uppercase date (DAY, DD MON YYYY) using tabular figures (	abular-nums) to prevent text jittering.
+
+- docs(diagrams): **Complete Mermaid Architectural & Workflow Diagram Suite**
+  - Created and cataloged 7 diagrams for system documentation: High-Level System Architecture, 19-Model Database ER, Maintenance Issue Lifecycle Sequence, 4th Floor Digital Twin Block Layout, Ticket Lifecycle State Machine, Ghost Protocol Attendance Governance Workflow, and Real-Time WebSocket Data Flow.
+
+---
 
 ### Release v1.7.17 (2026-10-22)
 - `feat(resolution-qa)`: **Architectural Pivot: Supervisor-Verified Closure (QA) & Technician Portal Eradication**

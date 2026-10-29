@@ -1,1 +1,2 @@
-from .routes import onboarding_bp
+"""Backward compatibility shim for app.blueprints.onboarding"""
+from app.routes.onboarding import onboarding_bp

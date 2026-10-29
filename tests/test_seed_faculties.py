@@ -2,7 +2,10 @@ import pytest
 import re
 from app import create_app, db
 from app.models import User, Ticket
-from seed_faculties import clean_staff_name, generate_unique_email, extract_staff_data, find_excel_file
+try:
+    from scripts.seed_faculties import clean_staff_name, generate_unique_email, extract_staff_data, find_excel_file
+except ImportError:
+    from seed_faculties import clean_staff_name, generate_unique_email, extract_staff_data, find_excel_file
 
 
 def test_prefix_stripping():
@@ -36,7 +39,10 @@ def test_email_collision_generation():
 
 
 def test_extract_staff_data_typo_fix():
-    excel_path = find_excel_file()
+    try:
+        excel_path = find_excel_file()
+    except FileNotFoundError:
+        pytest.skip("DoCSA Excel file not present in test environment")
     df = extract_staff_data(excel_path)
     
     assert len(df) == 89

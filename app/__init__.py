@@ -34,15 +34,15 @@ SUPER_ADMIN_EMAILS = [
 
 def create_app(config_name=None):
     """Application factory pattern for creating Flask app."""
-    app = Flask(__name__, 
+    app = Flask(__name__,
                 template_folder='templates',
                 static_folder='static')
-    
+
     app.config['SUPER_ADMIN_EMAILS'] = SUPER_ADMIN_EMAILS
-    
+
     if config_name == 'testing' or os.environ.get('TESTING') == 'True':
         app.config['TESTING'] = True
-    
+
     # Configuration — all secrets come from .env
     secret_key = os.environ.get('SECRET_KEY')
     if not secret_key:
@@ -70,7 +70,7 @@ def create_app(config_name=None):
         # Trust Vercel's proxy headers (Vercel uses multiple layers of proxy)
         from werkzeug.middleware.proxy_fix import ProxyFix
         app.wsgi_app = ProxyFix(app.wsgi_app, x_for=2, x_proto=2, x_host=2, x_prefix=2)
-    
+
     if config_name == 'testing' or os.environ.get('TESTING') == 'True':
         database_url = 'sqlite:///:memory:'
         logger.info('Using in-memory SQLite for testing.')
@@ -84,11 +84,11 @@ def create_app(config_name=None):
             )
         # 2. Sanitize string: strip whitespace, quotes, and hidden newline characters
         database_url = database_url.strip().strip('"').strip("'")
-    
+
     # 3. Fix SQLAlchemy dialect: If URI starts with postgres://, replace with postgresql://
     if database_url and database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
-        
+
     # Supabase connection pooler: Port 5432 is Session mode (hard-limited to 15 clients).
     # Port 6543 is Transaction mode (supports unlimited concurrent client requests).
     if 'pooler.supabase.com:5432' in database_url:
@@ -128,7 +128,7 @@ def create_app(config_name=None):
 
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    
+
     # 5. Serverless Pooling Hardening: Check if os.environ.get('VERCEL') == '1'
     if os.environ.get('VERCEL') == '1' or bool(os.environ.get('VERCEL')):
         from sqlalchemy.pool import NullPool
@@ -157,26 +157,26 @@ def create_app(config_name=None):
                 'pool_pre_ping': True,  # Prevent connection timeouts and stale database drops
                 'connect_args': connect_args,
             }
-    
+
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
     app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
-    
+
     # Ensure upload directory exists (Skip on Vercel read-only filesystem)
     if not os.environ.get('VERCEL'):
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-    
+
     # Initialize extensions
     db.init_app(app)
     if migrate:
         migrate.init_app(app, db)  # type: ignore[arg-type]
-    
+
     # Initialize Cache
     from .cache import init_cache
     init_cache(app)
-    
+
     # Security: CSRF Protection
     csrf.init_app(app)
-    
+
     # Security: Rate Limiting (Optional)
     try:
         from flask_limiter import Limiter
@@ -189,7 +189,7 @@ def create_app(config_name=None):
         )
     except ImportError:
         limiter = None
-    
+
     # Initialize database and run migrations (Skipped on Vercel to eliminate 16s+ cold-start timeouts)
     if not os.environ.get('VERCEL'):
         from .database import init_db
@@ -197,15 +197,18 @@ def create_app(config_name=None):
     else:
         logger.info('Running on Vercel: Database schema inspection and auto-seeding skipped for ultra-fast serverless cold start.')
 
-    # Register blueprints
-    from .blueprints.main import main_bp
-    from .blueprints.admin import admin_bp
-    from .blueprints.auth import auth_bp
-    from .blueprints.superadmin import superadmin_bp
-    from .blueprints.faculty.routes import faculty_bp
-    from .blueprints.onboarding import onboarding_bp
-    from .blueprints.supervisor import supervisor_bp
-    
+    # Register blueprints from app.routes
+    from .routes import (
+        main_bp,
+        admin_bp,
+        auth_bp,
+        superadmin_bp,
+        faculty_bp,
+        onboarding_bp,
+        supervisor_bp,
+        professional_bp
+    )
+
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(auth_bp)
@@ -238,14 +241,14 @@ def create_app(config_name=None):
     app.jinja_env.globals['get_floor_svg'] = get_floor_svg  # type: ignore[assignment]
 
     # Pusher is initialized lazily in realtime.py
-    
+
     # Start background scheduler for automated alerts (disabled on Vercel)
     if not os.environ.get('VERCEL'):
         from .scheduler import start_scheduler
         start_scheduler(app)
     else:
         logger.info("Running on Vercel: Background scheduler disabled.")
-    
+
     # Global Session Sanitizer & Lifetime Hook (Zero DB queries, purely in-memory)
     @app.before_request
     def sanitize_conflicting_session():
@@ -379,7 +382,7 @@ def create_app(config_name=None):
                     pass
 
         return response
-    
+
     # Global Template Context with G-Memoization
     from flask import g
     @app.context_processor
@@ -445,7 +448,7 @@ def create_app(config_name=None):
             PUSHER_KEY=os.environ.get('PUSHER_KEY'),
             PUSHER_CLUSTER=os.environ.get('PUSHER_CLUSTER')
         )
-    
+
     # Register Jinja filters
     @app.template_filter('ist')
     def format_ist(value, format='%b %d, %H:%M'):
@@ -455,7 +458,7 @@ def create_app(config_name=None):
         # UTC to IST is +5:30
         ist_time = value + timedelta(hours=5, minutes=30)
         return ist_time.strftime(format)
-    
+
     # Graceful CSRF Error Handler
     from flask_wtf.csrf import CSRFError
     from flask import request, jsonify, redirect, url_for, flash, render_template
@@ -466,7 +469,7 @@ def create_app(config_name=None):
             return jsonify({'success': False, 'error': 'Session or security token expired. Please refresh the page.'}), 400
         flash('Your session expired or security token was invalid. Please try again.', 'warning')
         return redirect(request.referrer or url_for('auth.login'))
-    
+
     # 404 Not Found Error Handler - Custom Infrastructure Zone Not Found
     @app.errorhandler(404)
     def page_not_found(e):
@@ -500,6 +503,6 @@ def create_app(config_name=None):
         if request.is_json or request.path.startswith('/api/'):
             return jsonify({'success': False, 'error': 'Internal server error'}), 500
         return ('Internal Server Error', 500)
-    
+
     return app
 

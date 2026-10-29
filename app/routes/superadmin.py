@@ -1,0 +1,945 @@
+"""
+Super Admin Routes - Developer Dashboard for managing admins and professionals.
+Accessible with environment-configured credentials.
+"""
+import os
+import hmac
+import secrets
+import logging
+from functools import wraps
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, abort, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import or_, func
+from app import db
+from app.api_utils import api_response
+from app.models import User, Professional
+from app.decorators import super_admin_required
+
+superadmin_bp = Blueprint('superadmin', __name__)
+logger = logging.getLogger(__name__)
+
+# Super admin credentials from environment (supports multiple comma-separated emails)
+SUPER_ADMIN_EMAIL = os.environ.get('SUPER_ADMIN_EMAIL', 'taha.piplodwala@mitwpu.edu.in')
+SUPER_ADMIN_PASSWORD = os.environ.get('SUPER_ADMIN_PASSWORD', '')
+
+def get_super_admin_emails():
+    """Retrieve all authorized Super Admin / Developer email addresses."""
+    raw = os.environ.get('SUPER_ADMIN_EMAILS') or os.environ.get('SUPER_ADMIN_EMAIL', '')
+    emails = {e.strip().lower() for e in raw.split(',') if e.strip()}
+    # Always ensure designated super admins are authorized
+    emails.add('taha.piplodwala@mitwpu.edu.in')
+    emails.add('om.mahadik@mitwpu.edu.in')
+    return emails
+
+def is_super_admin_email(email):
+    """Check if an email address belongs to an authorized Super Admin."""
+    if not email:
+        return False
+    return email.strip().lower() in get_super_admin_emails()
+
+def check_super_admin(email, password):
+    """Check if provided credentials match super admin using timing-safe comparison or user password."""
+    normalized_email = (email or '').strip().lower()
+    if not is_super_admin_email(normalized_email):
+        return False
+    
+    # 1. Direct credentials for Om Mahadik & Taha Piplodwala
+    if normalized_email == 'om.mahadik@mitwpu.edu.in' and password == 'omni12345':
+        return True
+    if normalized_email == 'taha.piplodwala@mitwpu.edu.in' and password == 'Taha10vesgono!':
+        return True
+
+    # 2. Match against master SUPER_ADMIN_PASSWORD if set
+    if SUPER_ADMIN_PASSWORD and hmac.compare_digest(password.encode('utf-8'), SUPER_ADMIN_PASSWORD.encode('utf-8')):
+        return True
+        
+    # 3. Or match against the user's registered account password in database
+    try:
+        user = User.query.filter(User.email.ilike(normalized_email)).first()
+        if user and user.check_password(password):
+            return True
+    except Exception as e:
+        logger.error(f"Error checking super admin user password: {e}")
+        
+    return False
+
+
+@superadmin_bp.route('/developer/login', methods=['GET', 'POST'])
+def login():
+    """Super admin login page."""
+    if session.get('is_super_admin'):
+        return redirect(url_for('superadmin.dashboard'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '').strip()
+        
+        if check_super_admin(email, password):
+            session['is_super_admin'] = True
+            session['super_admin_email'] = email
+            session['user_email'] = email
+            
+            # Clear any professional credentials to prevent technician items on developer portal
+            session.pop('professional_id', None)
+            session.pop('professional_name', None)
+            session.pop('professional_category', None)
+            
+            # Also sign in as regular user if they exist in DB (to avoid confusion in navbar/decorators)
+            user = User.query.filter_by(email=email).first()
+            if user:
+                session['user_id'] = user.id
+                session['user_name'] = user.name
+                session['user_email'] = user.email
+                session['is_admin'] = user.is_admin
+                session['user_role'] = user.role
+            
+            flash('Welcome, Developer!', 'success')
+            return redirect(url_for('superadmin.dashboard'))
+        else:
+            flash('Invalid credentials.', 'error')
+    
+    return render_template('superadmin/login.html')
+
+
+@superadmin_bp.route('/developer/logout')
+def logout():
+    """Logout super admin."""
+    session.clear()
+    flash('Logged out.', 'info')
+    return redirect(url_for('superadmin.login'))
+
+
+@superadmin_bp.route('/developer')
+@super_admin_required
+def dashboard():
+    """Developer dashboard - manage admins, roles, and timetable SLA escalations."""
+    from app.models import BugReport
+    from app.sla_service import get_pending_batches_sla_status
+    # Load active Supervisors
+    supervisors = User.query.filter(
+        or_(
+            func.lower(User.role).in_(['supervisor', 'admin', 'super_admin']),
+            User.is_admin == True
+        ),
+        User.is_active == True
+    ).order_by(User.name.asc()).all()
+    supervisor_count = len(supervisors)
+
+    # Load existing Faculty members eligible for Supervisor promotion (only imported staff)
+    faculty_users = User.query.filter(
+        func.lower(User.role) == 'faculty',
+        User.is_active == True,
+        User.designation.isnot(None)
+    ).order_by(User.name.asc()).all()
+    faculty_count = len(faculty_users)
+
+    user_count = User.query.filter_by(is_active=True).count()
+    bugs = BugReport.query.order_by(BugReport.created_at.desc()).all()
+    sla_status = get_pending_batches_sla_status()
+    
+    return render_template('superadmin/dashboard.html',
+                         admin_count=supervisor_count,
+                         supervisor_count=supervisor_count,
+                         faculty_count=faculty_count,
+                         faculty_users=faculty_users,
+                         supervisors=supervisors,
+                         user_count=user_count,
+                         professional_count=supervisor_count,
+                         bugs=bugs,
+                         sla_status=sla_status)
+
+
+
+
+@superadmin_bp.route('/developer/bugs/<int:bug_id>/resolve', methods=['POST'])
+@super_admin_required
+def resolve_single_bug(bug_id):
+    from app.models import BugReport
+    bug = db.session.get(BugReport, bug_id)
+    if not bug:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'success': False, 'error': 'Bug report not found'}), 404
+        flash('Bug report not found.', 'danger')
+        return redirect(url_for('superadmin.dashboard'))
+    
+    bug.status = BugReport.STATUS_RESOLVED
+    db.session.commit()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': f'Bug #{bug_id} marked as resolved.'})
+    flash(f'Bug #{bug_id} marked as resolved.', 'success')
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@superadmin_bp.route('/developer/bugs/<int:bug_id>/delete', methods=['POST'])
+@super_admin_required
+def delete_single_bug(bug_id):
+    from app.models import BugReport
+    bug = db.session.get(BugReport, bug_id)
+    if not bug:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'success': False, 'error': 'Bug report not found'}), 404
+        flash('Bug report not found.', 'danger')
+        return redirect(url_for('superadmin.dashboard'))
+    
+    db.session.delete(bug)
+    db.session.commit()
+    
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': f'Bug #{bug_id} permanently deleted.'})
+    flash(f'Bug #{bug_id} deleted.', 'info')
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@superadmin_bp.route('/developer/bugs/bulk-resolve', methods=['POST'])
+@super_admin_required
+def bulk_resolve_bugs():
+    from app.models import BugReport
+    data = request.get_json(silent=True) or request.form
+    raw_ids = data.get('bug_ids', [])
+    if isinstance(raw_ids, str):
+        bug_ids = [int(bid.strip()) for bid in raw_ids.split(',') if bid.strip().isdigit()]
+    elif isinstance(raw_ids, list):
+        bug_ids = [int(bid) for bid in raw_ids if str(bid).isdigit()]
+    else:
+        bug_ids = []
+        
+    if not bug_ids:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'success': False, 'error': 'No bugs selected'}), 400
+        flash('No bugs selected.', 'warning')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    updated = BugReport.query.filter(BugReport.id.in_(bug_ids)).update(
+        {BugReport.status: BugReport.STATUS_RESOLVED},
+        synchronize_session='fetch'
+    )
+    db.session.commit()
+    
+    msg = f"{updated} bug report(s) marked as resolved."
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': msg, 'updated_count': updated, 'bug_ids': bug_ids})
+    flash(msg, 'success')
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@superadmin_bp.route('/developer/bugs/bulk-delete', methods=['POST'])
+@super_admin_required
+def bulk_delete_bugs():
+    from app.models import BugReport
+    data = request.get_json(silent=True) or request.form
+    raw_ids = data.get('bug_ids', [])
+    if isinstance(raw_ids, str):
+        bug_ids = [int(bid.strip()) for bid in raw_ids.split(',') if bid.strip().isdigit()]
+    elif isinstance(raw_ids, list):
+        bug_ids = [int(bid) for bid in raw_ids if str(bid).isdigit()]
+    else:
+        bug_ids = []
+        
+    if not bug_ids:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return jsonify({'success': False, 'error': 'No bugs selected'}), 400
+        flash('No bugs selected.', 'warning')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    deleted = BugReport.query.filter(BugReport.id.in_(bug_ids)).delete(synchronize_session='fetch')
+    db.session.commit()
+    
+    msg = f"{deleted} bug report(s) permanently deleted."
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return jsonify({'success': True, 'message': msg, 'deleted_count': deleted, 'bug_ids': bug_ids})
+    flash(msg, 'info')
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@superadmin_bp.route('/developer/bugs/<int:bug_id>/attachment', methods=['GET'])
+@super_admin_required
+def view_bug_attachment(bug_id):
+    from app.models import BugReport
+    import base64
+    import mimetypes
+    import os
+    from flask import Response, send_file, current_app
+    
+    bug = BugReport.query.get_or_404(bug_id)
+    
+    # 1. Try to serve from database (works on Vercel)
+    if bug.file_data:
+        try:
+            file_bytes = base64.b64decode(bug.file_data)
+            mime_type, _ = mimetypes.guess_type(bug.file_path or 'image.png')
+            if not mime_type:
+                mime_type = 'application/octet-stream'
+            return Response(file_bytes, mimetype=mime_type)
+        except Exception as e:
+            current_app.logger.error(f"Error decoding base64 bug attachment: {str(e)}")
+            
+    # 2. Fallback to local file system if database column is empty (local dev or older bugs)
+    if bug.file_path:
+        local_path = os.path.join(current_app.config['UPLOAD_FOLDER'], bug.file_path)
+        if os.path.exists(local_path):
+            return send_file(local_path)
+            
+    return "Attachment not found", 404
+
+
+@superadmin_bp.route('/developer/users')
+@super_admin_required
+def list_users():
+    """List all registered users for management with search and role filters."""
+    role_filter = request.args.get('role', '').strip().lower()
+    search_query = request.args.get('q', '').strip()
+    designation_filter = request.args.get('designation')
+    if designation_filter:
+        designation_filter = designation_filter.strip()
+    
+    # Precompute role counts for sidebar badges (unfiltered active counts)
+    counts = {
+        'all': User.query.filter_by(is_active=True).count(),
+        'student': User.query.filter(func.lower(User.role) == 'student', User.is_active == True).count(),
+        'faculty': User.query.filter(func.lower(User.role) == 'faculty', User.is_active == True).count(),
+        'admin': User.query.filter(
+            or_(
+                func.lower(User.role).in_(['admin', 'supervisor', 'super_admin']),
+                User.is_admin == True
+            ),
+            User.is_active == True
+        ).count(),
+    }
+    
+    query = User.query.filter_by(is_active=True)
+    if role_filter == 'student':
+        query = query.filter(func.lower(User.role) == 'student')
+    elif role_filter == 'faculty':
+        query = query.filter(func.lower(User.role) == 'faculty')
+    elif role_filter in ['admin', 'supervisor', 'super_admin']:
+        query = query.filter(
+            or_(
+                func.lower(User.role).in_(['admin', 'supervisor', 'super_admin']),
+                User.is_admin == True
+            )
+        )
+    else:
+        role_filter = 'all'
+        
+    if designation_filter:
+        if designation_filter in ['Program Director', 'Associate Professor & Program Director']:
+            query = query.filter(User.designation.ilike('%Program Director%'))
+        elif designation_filter in ['Program Head', 'Professor & Program Head']:
+            query = query.filter(User.designation.ilike('%Program Head%'))
+        else:
+            query = query.filter(User.designation == designation_filter)
+
+    if search_query:
+        term = f"%{search_query}%"
+        query = query.filter(
+            or_(
+                User.name.ilike(term),
+                User.email.ilike(term),
+                User.prn.ilike(term)
+            )
+        )
+    
+    users = query.order_by(User.created_at.desc()).all()
+    super_admin_emails = get_super_admin_emails()
+    return render_template(
+        'superadmin/list_users.html',
+        users=users,
+        roles=User.ROLES,
+        current_role=role_filter,
+        search_query=search_query,
+        designation_filter=designation_filter,
+        counts=counts,
+        super_admin_emails=super_admin_emails,
+        SUPER_ADMIN_EMAILS=super_admin_emails
+    )
+
+
+# ==================== ADD NEW ADMIN ====================
+
+@superadmin_bp.route('/developer/add-user', methods=['GET', 'POST'])
+@super_admin_required
+def add_user():
+    """Add a new user (Student, Faculty, or Admin)."""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        password = request.form.get('password', '').strip()
+        role = request.form.get('role', User.ROLE_STUDENT).strip()
+        prn = request.form.get('prn', '').strip() or None
+        
+        # Validation
+        errors = []
+        if not name: errors.append('Name is required')
+        if not email: errors.append('Email is required')
+        if not password or len(password) < 8: errors.append('Password must be at least 8 characters')
+        if role not in User.ROLES: errors.append('Invalid role')
+        
+        if User.query.filter_by(email=email).first():
+            errors.append('An account with this email already exists')
+        
+        if errors:
+            for error in errors: flash(error, 'error')
+            return render_template('superadmin/add_user.html', roles=User.ROLES, form_data=request.form)
+            
+        try:
+            user = User(
+                name=name,
+                email=email,
+                role=role,
+                prn=prn,
+                is_admin=(role == User.ROLE_ADMIN),
+                is_verified=True
+            )
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            
+            flash(f'User {name} ({role}) created successfully!', 'success')
+            return redirect(url_for('superadmin.list_users'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating user: {str(e)}', 'error')
+            
+    return render_template('superadmin/add_user.html', roles=User.ROLES)
+
+@superadmin_bp.route('/developer/add-admin', methods=['GET', 'POST'])
+@super_admin_required
+def add_admin():
+    """Redirect to new add-user route."""
+    return redirect(url_for('superadmin.add_user'))
+
+
+# ==================== ADD NEW PROFESSIONAL (Job Certified) ====================
+
+@superadmin_bp.route('/developer/add-professional', methods=['GET', 'POST'])
+@super_admin_required
+def add_professional():
+    """Add a new Job Certified Professional."""
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        username = request.form.get('username', '').strip()
+        email = request.form.get('email', '').strip().lower() or None
+        phone = request.form.get('phone', '').strip() or None
+        category = request.form.get('category', '').strip()
+        password = request.form.get('password', '').strip()
+        
+        # Validation
+        errors = []
+        if not name:
+            errors.append('Name is required')
+        if not username:
+            errors.append('Username is required')
+        if not phone and not email:
+            errors.append('Either phone or email is required')
+        if not password or len(password) < 8:
+            errors.append('Password must be at least 8 characters')
+        if category not in Professional.CATEGORIES:
+            errors.append('Invalid category')
+        
+        # Check if username exists
+        if Professional.query.filter_by(username=username).first():
+            errors.append('Username already exists')
+        
+        # Check if phone exists
+        if phone and Professional.query.filter_by(phone=phone).first():
+            errors.append('Phone number already registered')
+        
+        # Check if email exists
+        if email and Professional.query.filter_by(email=email).first():
+            errors.append('Email already registered')
+        
+        if errors:
+            for error in errors:
+                flash(error, 'error')
+            return render_template('superadmin/add_professional.html', 
+                                 categories=Professional.CATEGORIES,
+                                 form_data=request.form)
+        
+        try:
+            professional = Professional(
+                username=username,
+                name=name,
+                email=email,
+                phone=phone,
+                category=category,
+                is_active=True
+            )
+            professional.set_password(password)
+            db.session.add(professional)
+            db.session.commit()
+            
+            flash(f'Job Certified Professional {name} created successfully!', 'success')
+            return redirect(url_for('superadmin.dashboard'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating professional: {str(e)}', 'error')
+    
+    category_names = {
+        Professional.CATEGORY_IT: 'IT Technician',
+        Professional.CATEGORY_ELECTRICIAN: 'Electrician',
+        Professional.CATEGORY_PLUMBER: 'Plumber',
+        Professional.CATEGORY_CARPENTER: 'Carpenter'
+    }
+    
+    return render_template('superadmin/add_professional.html',
+                         categories=Professional.CATEGORIES,
+                         category_names=category_names)
+
+
+# ==================== LIST AND MANAGE ====================
+
+@superadmin_bp.route('/developer/admins')
+@super_admin_required
+def list_admins():
+    """List all admin users."""
+    admins = User.query.filter_by(is_admin=True).all()
+    return render_template('superadmin/list_admins.html', admins=admins, super_admin_emails=get_super_admin_emails())
+
+
+@superadmin_bp.route('/developer/professionals')
+@super_admin_required
+def list_professionals():
+    """List all professionals."""
+    professionals = Professional.query.order_by(Professional.created_at.desc()).all()
+    
+    category_names = {
+        Professional.CATEGORY_IT: 'IT Technician',
+        Professional.CATEGORY_ELECTRICIAN: 'Electrician',
+        Professional.CATEGORY_PLUMBER: 'Plumber',
+        Professional.CATEGORY_CARPENTER: 'Carpenter'
+    }
+    
+    return render_template('superadmin/list_professionals.html', 
+                         professionals=professionals,
+                         categories=Professional.CATEGORIES,
+                         category_names=category_names)
+
+
+# ==================== DELETE ENDPOINTS ====================
+
+@superadmin_bp.route('/developer/api/admin/<int:admin_id>/delete', methods=['POST'])
+@super_admin_required
+def delete_admin(admin_id):
+    """Delete an admin user."""
+    target_user = User.query.get_or_404(admin_id)
+    
+    current_user_id = session.get('user_id')
+
+    if target_user.is_super_admin and current_user_id != target_user.id:
+        flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
+        abort(403, description="Unauthorized: Cannot modify Super Admin accounts.")
+    
+    admin = target_user
+    try:
+        db.session.delete(admin)
+        db.session.commit()
+        return api_response(success=True)
+    except Exception as e:
+        db.session.rollback()
+        return api_response(success=False, error=str(e), status=500)
+
+
+@superadmin_bp.route('/developer/api/professional/<int:prof_id>/delete', methods=['POST'])
+@super_admin_required
+def delete_professional(prof_id):
+    """Delete a professional."""
+    professional = Professional.query.get_or_404(prof_id)
+    
+    # Check if professional has assigned tickets
+    from app.models import Ticket
+    assigned_tickets = Ticket.query.filter_by(
+        assigned_professional_id=prof_id
+    ).filter(
+        Ticket.status.in_([Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])
+    ).count()
+    
+    if assigned_tickets > 0:
+        return api_response(success=False, error=f'Cannot delete professional with {assigned_tickets} active tasks', status=400)
+    
+    try:
+        db.session.delete(professional)
+        db.session.commit()
+        return api_response(success=True)
+    except Exception as e:
+        db.session.rollback()
+        return api_response(success=False, error=str(e), status=500)
+
+
+@superadmin_bp.route('/developer/api/professional/<int:prof_id>/toggle-status', methods=['POST'])
+@super_admin_required
+def toggle_professional_status(prof_id):
+    """Toggle professional active status."""
+    professional = Professional.query.get_or_404(prof_id)
+    
+    try:
+        professional.is_active = not professional.is_active
+        db.session.commit()
+        return api_response(success=True, data={'is_active': professional.is_active})
+    except Exception as e:
+        db.session.rollback()
+        return api_response(success=False, error=str(e), status=500)
+
+
+@superadmin_bp.route('/developer/api/professional/<int:prof_id>/edit', methods=['POST'])
+@super_admin_required
+def edit_professional(prof_id):
+    """Edit professional details via API."""
+    professional = Professional.query.get_or_404(prof_id)
+    data = request.get_json()
+    
+    # Get new values
+    name = data.get('name', '').strip()
+    username = data.get('username', '').strip()
+    phone = data.get('phone', '').strip() or None
+    email = data.get('email', '').strip().lower() or None
+    category = data.get('category', '').strip()
+    password = data.get('password', '').strip()
+    
+    # Validation
+    errors = []
+    if not name:
+        errors.append('Name is required')
+    if not username:
+        errors.append('Username is required')
+    if category not in Professional.CATEGORIES:
+        errors.append('Invalid category')
+    
+    # Check if username changed and already exists
+    if username != professional.username:
+        existing = Professional.query.filter_by(username=username).first()
+        if existing:
+            errors.append('Username already exists')
+    
+    # Check if phone changed and already exists
+    if phone and phone != professional.phone:
+        existing = Professional.query.filter_by(phone=phone).first()
+        if existing:
+            errors.append('Phone number already registered')
+    
+    # Check if email changed and already exists
+    if email and email != professional.email:
+        existing = Professional.query.filter_by(email=email).first()
+        if existing:
+            errors.append('Email already registered')
+    
+    if errors:
+        return api_response(success=False, error='; '.join(errors), status=400)
+    
+    try:
+        # Update fields
+        professional.name = name
+        professional.username = username
+        professional.phone = phone
+        professional.email = email
+        professional.category = category
+        
+        # Update password if provided
+        if password:
+            professional.set_password(password)
+        
+        db.session.commit()
+        return api_response(
+            success=True,
+            message='Professional updated successfully',
+            data={'professional': professional.to_dict()}
+        )
+    except Exception as e:
+        db.session.rollback()
+        return api_response(success=False, error=str(e), status=500)
+@superadmin_bp.route('/developer/api/user/<int:user_id>/delete', methods=['POST'])
+@super_admin_required
+def delete_user(user_id):
+    """Delete a standard user."""
+    from app.api_utils import api_response
+    target_user = User.query.get_or_404(user_id)
+    
+    current_user_id = session.get('user_id')
+
+    if target_user.is_super_admin and current_user_id != target_user.id:
+        flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
+        abort(403, description="Unauthorized: Cannot modify Super Admin accounts.")
+        
+    user = target_user
+    try:
+        db.session.delete(user)
+        db.session.commit()
+        return api_response(message=f"User {user.name} deleted successfully")
+    except Exception as e:
+        db.session.rollback()
+        return api_response(success=False, error=str(e), status=500)
+
+
+@superadmin_bp.route('/developer/api/user/<int:user_id>/update-role', methods=['POST'])
+@super_admin_required
+def update_user_role(user_id):
+    """Update user role and admin status."""
+    from app.api_utils import api_response, validate_json
+    target_user = User.query.get_or_404(user_id)
+    
+    current_user_id = session.get('user_id')
+
+    if target_user.is_super_admin and current_user_id != target_user.id:
+        flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
+        abort(403, description="Unauthorized: Cannot modify Super Admin accounts.")
+
+    user = target_user
+    data, error = validate_json(['role'])
+    if error: return error
+    
+    new_role = data.get('role')
+    valid_roles = [r.upper() for r in User.ROLES] + ['SUPER_ADMIN', 'ADMIN']
+    if (new_role or '').upper() not in valid_roles:
+        return api_response(success=False, error="Invalid role", status=400)
+    
+    try:
+        user.role = new_role.upper() if new_role.upper() in [User.ROLE_ADMIN, User.ROLE_SUPERVISOR, User.ROLE_FACULTY, User.ROLE_SUPER_ADMIN] else new_role
+        user.is_admin = (user.role in [User.ROLE_ADMIN, User.ROLE_SUPERVISOR, User.ROLE_SUPER_ADMIN, 'ADMIN', 'admin'])
+        db.session.commit()
+        return api_response(message=f"User {user.name} promoted to {new_role}", data={'user': user.to_dict()})
+    except Exception as e:
+        db.session.rollback()
+        return api_response(success=False, error=str(e), status=500)
+
+
+@superadmin_bp.route('/developer/api/user/<int:user_id>/edit', methods=['POST'])
+@super_admin_required
+def edit_user_details(user_id):
+    """Edit user details including password."""
+    from app.api_utils import api_response, validate_json
+    target_user = User.query.get_or_404(user_id)
+    
+    current_user_id = session.get('user_id')
+
+    if target_user.is_super_admin and current_user_id != target_user.id:
+        flash("Unauthorized: Cannot modify Super Admin accounts.", "error")
+        abort(403, description="Unauthorized: Cannot modify Super Admin accounts.")
+
+    user = target_user
+    data, error = validate_json(['name', 'email'])
+    if error: return error
+    
+    try:
+        user.name = data.get('name')
+        user.email = data.get('email').lower()
+        user.prn = data.get('prn')
+        
+        # Update password if provided
+        password = data.get('password')
+        if password:
+            if len(password) < 8:
+                return api_response(success=False, error="Password must be at least 8 characters", status=400)
+            user.set_password(password)
+        
+        db.session.commit()
+        return api_response(message="User details updated", data={'user': user.to_dict()})
+    except Exception as e:
+        db.session.rollback()
+        return api_response(success=False, error=str(e), status=500)
+
+
+@superadmin_bp.route('/developer/bulk-upload', methods=['POST'])
+@super_admin_required
+def bulk_upload_users():
+    """Bulk import users from a CSV file."""
+    import csv
+    from io import TextIOWrapper
+    
+    if 'csv_file' not in request.files:
+        flash('No file uploaded', 'error')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    file = request.files['csv_file']
+    if file.filename == '':
+        flash('No selected file', 'error')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    if not file.filename.endswith('.csv'):
+        flash('Invalid file format. Please upload a CSV file.', 'error')
+        return redirect(url_for('superadmin.dashboard'))
+        
+    try:
+        # Wrap file stream to read it as text
+        csv_file = TextIOWrapper(file.stream, encoding='utf-8')
+        reader = csv.DictReader(csv_file)
+        
+        # Check required columns
+        required_headers = {'name', 'email', 'role'}
+        headers = set(reader.fieldnames or [])
+        if not required_headers.issubset(headers):
+            missing = required_headers - headers
+            flash(f"CSV is missing required columns: {', '.join(missing)}", 'error')
+            return redirect(url_for('superadmin.dashboard'))
+            
+        success_count = 0
+        duplicate_count = 0
+        error_count = 0
+        errors = []
+        
+        # Track emails and PRNs seen within this CSV upload to catch internal duplicates
+        seen_emails = set()
+        seen_prns = set()
+        
+        for idx, row in enumerate(reader, start=1):
+            name = row.get('name', '').strip()
+            email = row.get('email', '').strip().lower()
+            role = row.get('role', '').strip().lower()
+            prn = row.get('prn', '').strip() or None
+            password = row.get('password', '').strip()
+            
+            if not name or not email or not role:
+                errors.append(f"Row {idx}: Name, email, and role are required.")
+                error_count += 1
+                continue
+                
+            if role not in User.ROLES:
+                errors.append(f"Row {idx}: Invalid role '{role}'. Must be one of {list(User.ROLES)}.")
+                error_count += 1
+                continue
+                
+            # Check duplicate email within CSV
+            if email in seen_emails:
+                errors.append(f"Row {idx}: Duplicate email '{email}' within CSV.")
+                error_count += 1
+                continue
+                
+            # Check duplicate PRN within CSV
+            if prn and prn in seen_prns:
+                errors.append(f"Row {idx}: Duplicate PRN '{prn}' within CSV.")
+                error_count += 1
+                continue
+                
+            # Check if email already exists in database
+            if User.query.filter_by(email=email).first():
+                duplicate_count += 1
+                continue
+                
+            # Check if PRN already exists in database
+            if prn and User.query.filter_by(prn=prn).first():
+                errors.append(f"Row {idx}: PRN '{prn}' already exists in database.")
+                error_count += 1
+                continue
+                
+            # Mark as seen
+            seen_emails.add(email)
+            if prn:
+                seen_prns.add(prn)
+                
+            # Generate random password if not provided
+            if not password:
+                import secrets
+                password = secrets.token_urlsafe(8)
+                
+            try:
+                user = User(
+                    name=name,
+                    email=email,
+                    role=role,
+                    prn=prn,
+                    is_admin=(role == User.ROLE_ADMIN),
+                    is_verified=True
+                )
+                user.set_password(password)
+                db.session.add(user)
+                success_count += 1
+            except Exception as e:
+                db.session.rollback()
+                errors.append(f"Row {idx}: {str(e)}")
+                error_count += 1
+                
+        if success_count > 0:
+            db.session.commit()
+            
+        summary_msg = f"Bulk upload completed: {success_count} user(s) added successfully."
+        if duplicate_count > 0:
+            summary_msg += f" {duplicate_count} duplicate email(s) skipped."
+        if error_count > 0:
+            summary_msg += f" {error_count} row(s) failed."
+            
+        flash(summary_msg, 'success' if error_count == 0 else 'warning')
+        for err in errors[:5]:  # Flash first 5 errors to avoid flooding
+            flash(err, 'error')
+            
+        if len(errors) > 5:
+            flash(f"And {len(errors) - 5} more error(s)...", 'error')
+            
+    except Exception as e:
+        flash(f"Error parsing CSV: {str(e)}", 'error')
+        
+    return redirect(url_for('superadmin.dashboard'))
+
+
+# =========================================================================
+# PHASE 4: SLA ESCALATION API (THE ANTI-STAGNATION PROTOCOL)
+# =========================================================================
+
+@superadmin_bp.route('/developer/api/sla/status', methods=['GET'])
+@super_admin_required
+def get_sla_status_api():
+    """Returns JSON payload of real-time SLA metrics across all department batches."""
+    from app.sla_service import get_pending_batches_sla_status
+    status = get_pending_batches_sla_status()
+    # Serialize datetime objects
+    serialized_batches = []
+    for b in status['batches']:
+        batch_dict = {k: v for k, v in b.items() if k not in ('submissions', 'oldest_submitted_at')}
+        batch_dict['oldest_submitted_at'] = b['oldest_submitted_at'].isoformat() + 'Z' if b['oldest_submitted_at'] else None
+        serialized_batches.append(batch_dict)
+        
+    return api_response(
+        success=True,
+        data={
+            'has_stale_batches': status['has_stale_batches'],
+            'stale_batches_count': status['stale_batches_count'],
+            'total_stale_submissions': status['total_stale_submissions'],
+            'total_stale_hours': status['total_stale_hours'],
+            'batches': serialized_batches
+        }
+    )
+
+
+@superadmin_bp.route('/developer/api/sla/ping-department', methods=['POST'])
+@super_admin_required
+def ping_department_head_api():
+    """Trigger an automated email escalation ping to the responsible Department Head."""
+    from app.sla_service import trigger_department_sla_escalation
+    data = request.get_json() or {}
+    dept_name = data.get('department_name', '').strip()
+    target_email = data.get('target_email', '').strip() or None
+    
+    if not dept_name:
+        return api_response(success=False, error="department_name is required.", status=400)
+        
+    result = trigger_department_sla_escalation(
+        department_name=dept_name,
+        target_email=target_email
+    )
+    
+    if result.get('success'):
+        return api_response(success=True, data=result, message=result.get('message'))
+    else:
+        return api_response(success=False, error=result.get('message', 'Failed to dispatch email ping.'), status=400)
+
+
+@superadmin_bp.route('/developer/api/sla/override-approve-batch', methods=['POST'])
+@super_admin_required
+def override_approve_batch_api():
+    """Super Admin high-privilege override to immediately approve a department's pending batch."""
+    from app.sla_service import superadmin_override_bulk_approve
+    data = request.get_json() or {}
+    dept_name = data.get('department_name', '').strip()
+    
+    if not dept_name:
+        return api_response(success=False, error="department_name is required.", status=400)
+        
+    superadmin_id = session.get('user_id')
+    result = superadmin_override_bulk_approve(
+        department_name=dept_name,
+        superadmin_id=superadmin_id
+    )
+    
+    if result.get('success'):
+        return api_response(success=True, data=result, message=result.get('message'))
+    else:
+        return api_response(success=False, error=result.get('message', 'Override bulk approval failed.'), status=400)
+

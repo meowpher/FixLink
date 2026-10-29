@@ -83,7 +83,7 @@ def test_meeting_room_booking_full_flow(client, run_app_context):
 
     # 5. Night Instant Booking Check: Claiming at night (e.g. 11 PM IST / 17:30 UTC) should be rejected
     mock_night_utc = datetime(2026, 10, 7, 17, 30, 0)
-    with patch('app.blueprints.faculty.routes.datetime') as mock_dt:
+    with patch('app.routes.faculty.datetime') as mock_dt:
         mock_dt.utcnow.return_value = mock_night_utc
         mock_dt.combine = datetime.combine
         mock_dt.fromisoformat = datetime.fromisoformat
@@ -98,7 +98,7 @@ def test_meeting_room_booking_full_flow(client, run_app_context):
 
     # 5b. Valid 3-hour instant ad-hoc claim during operational hours (e.g. 10:00 AM IST / 04:30 UTC)
     mock_day_utc = datetime(2026, 10, 7, 4, 30, 0)
-    with patch('app.blueprints.faculty.routes.datetime') as mock_dt:
+    with patch('app.routes.faculty.datetime') as mock_dt:
         mock_dt.utcnow.return_value = mock_day_utc
         mock_dt.combine = datetime.combine
         mock_dt.fromisoformat = datetime.fromisoformat
@@ -262,7 +262,7 @@ def test_classroom_booking_operating_hours_enforcement(client, run_app_context):
 
 def test_contiguous_room_booking_merging_on_dashboard(client, run_app_context):
     """Verify that contiguous 2-hour ad-hoc room bookings are merged into a single block with colspan=2."""
-    from app.blueprints.faculty.routes import merge_contiguous_room_bookings
+    from app.routes.faculty import merge_contiguous_room_bookings
     
     with run_app_context:
         faculty = User(name="Dr. Alan Turing", email="alan.turing@mitwpu.edu.in", role=User.ROLE_FACULTY, has_accepted_terms=True)

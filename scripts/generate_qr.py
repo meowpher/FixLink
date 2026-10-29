@@ -31,7 +31,7 @@ from app.models import Building, Floor, Room
 # Configuration
 DEFAULT_HOST = "localhost"
 DEFAULT_PORT = 5000
-QR_CODE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'qr_codes')
+QR_CODE_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'app', 'static', 'qr_codes')
 
 
 def ensure_qr_directory():

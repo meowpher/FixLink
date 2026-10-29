@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.24** | 2026-10-30 | **Deployed** | **Root Directory Reorganization, Application Factory Skeleton & Blueprint Route Migration** (Consolidated documentation into docs/; relocated utility scripts to scripts/; organized static assets into pp/static/; established clean Application Factory pattern with modular blueprints in pp/routes/ and backward-compatible shims; verified all 149 URL endpoints). |
 | **v1.7.23** | 2026-10-30 | **Deployed** | **Universal Smooth Theme Curtain Transition (Login & Report Form Restoration)** (Restored smooth GSAP curtain drop/lift transition across all views by removing endpoint script exclusions in `base.html`; wired mobile theme toggles and status icons across public report and login screens). |
 | **v1.7.22** | 2026-10-30 | **Deployed** | **Universal CSRF Token Injection & Developer Deletion Fix** (Resolved 400 "Session or security token expired" error on developer admin and professional deletions by implementing auto-attaching CSRF headers in `base.html` fetch interceptor and adding explicit `X-CSRFToken` to deletion API calls). |
 | **v1.7.21** | 2026-10-30 | **Deployed** | **Native Built-in WebApp Modal & Dialog System** (Replaced raw native browser `confirm()` and `alert()` popups with self-hosted, theme-aware FixLink SweetAlert2 modals across SuperAdmin, Admin Console, Status Map, and Faculty portals; added glassmorphism card styling and automatic Light/Dark mode palette adapting). |
@@ -28,6 +29,36 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.24 (2026-10-30)
+- 
+efactor(arch): **Root Directory Reorganization & Application Factory Skeleton (Phase 1)**
+  - Consolidated documentation into docs/ (AppFlow.md, Design.md, Documentation.md, PRD.md, Rules.md, TechSpec.md, Tracker.md, plan.txt, and FixLink_Documentation.pdf), keeping only README.md in root.
+  - Relocated loose utility scripts (generate_docs_pdf.py, seed_faculties.py) to scripts/.
+  - Moved loose HTML files (google87abaa634db2f80b.html, login_dump2.html, login_output.html, 	est.html) into pp/templates/.
+  - Relocated branding logos (FixlinkLCLR.png, FLOGOCLR.png) into pp/static/images/.
+  - Moved root directories qr_codes/ and svg_maps/ to pp/static/ and updated all internal generation script references.
+  - Purged root cache directories (__pycache__, .pytest_cache) and enforced entries in .gitignore.
+  - Removed obsolete .nojekyll GitHub Pages artifact and audited dependencies, preserving 
+equirements.txt for Vercel Python runtime compatibility.
+
+- 
+efactor(routes): **Modular Blueprint & Route Migration (Phase 2)**
+  - Extracted application routes into distinct, modular Flask Blueprints in pp/routes/:
+    - uth.py: Authentication, MFA, session validation, and password reset flows.
+    - dmin.py: Facility admin maintenance dashboard, tickets, analytics, and faculty scheduling.
+    - main.py: Public issue reporting portal, interactive map view, and verification endpoints.
+    - aculty.py: Smart classroom schedules, meeting room reservations, and Ghost Protocol.
+    - superadmin.py: Developer telemetry, user/admin triage, and SLA overrides.
+    - supervisor.py: Quality assurance workspace and ticket sign-off.
+    - onboarding.py: Mandatory legal compliance clickwrap terms.
+    - professional.py: Technician work order management.
+  - Created pp/routes/__init__.py to cleanly export all blueprints.
+  - Updated create_app() in pp/__init__.py to import and register blueprints directly from .routes.
+  - Configured backward-compatible proxy re-export shims across pp/blueprints/ so existing tests and scripts continue operating seamlessly.
+  - Updated test imports and verified that all 149 URL endpoints register cleanly with a 100% test pass rate (92 passed, 1 skipped).
+
+---
 
 ### Release v1.7.23 (2026-10-30)
 - `fix(ui)`: **Theme Switch Curtain Transition Restoration (Report & Login Views)**

@@ -1,8 +1,2 @@
-"""
-Supervisor Blueprint - Dedicated Quality Assurance Workspace
-"""
-from flask import Blueprint
-
-supervisor_bp = Blueprint('supervisor', __name__)
-
-from . import routes
+"""Backward compatibility shim for app.blueprints.supervisor"""
+from app.routes.supervisor import supervisor_bp

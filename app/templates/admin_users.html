@@ -71,6 +71,40 @@
                     <a href="{{ url_for('admin.users') }}" class="btn btn-outline-secondary" title="Clear filters"><i class="bi bi-x-lg"></i></a>
                 </div>
             </div>
+
+            <!-- Designation Dropdown Toolbar Row -->
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mt-3 pt-3 border-top">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-primary dropdown-toggle" type="button" id="designationFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Filter by Designation{% if designation_filter %}: {{ designation_filter }}{% endif %}
+                        </button>
+                        <ul class="dropdown-menu shadow-sm">
+                            <li><a class="dropdown-item" href="?">Clear Filter</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="?designation=Professor">Professor</a></li>
+                            <li><a class="dropdown-item" href="?designation=Associate Professor">Associate Professor</a></li>
+                            <li><a class="dropdown-item" href="?designation=Associate Professor & Program Director">Associate Professor & Program Director</a></li>
+                            <li><a class="dropdown-item" href="?designation=Professor & Program Head">Professor & Program Head</a></li>
+                            <li><a class="dropdown-item" href="?designation=Assistant Professor">Assistant Professor</a></li>
+                            <li><a class="dropdown-item" href="?designation=PhD Scholar">PhD Scholar</a></li>
+                            <li><a class="dropdown-item" href="?designation=Lab Assistant">Lab Assistant</a></li>
+                            <li><a class="dropdown-item" href="?designation=Office Assistant">Office Assistant</a></li>
+                            <li><a class="dropdown-item" href="?designation=Executive Officer">Executive Officer</a></li>
+                            <li><a class="dropdown-item" href="?designation=Program Office executive">Program Office executive</a></li>
+                            <li><a class="dropdown-item" href="?designation=Peon">Peon</a></li>
+                        </ul>
+                    </div>
+                </div>
+                {% if designation_filter %}
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2">
+                        Filtered by: <strong>{{ designation_filter }}</strong>
+                    </span>
+                    <a href="?" class="btn btn-sm btn-link text-danger text-decoration-none">Clear Filter</a>
+                </div>
+                {% endif %}
+            </div>
         </form>
     </div>
 </section>
@@ -112,6 +146,9 @@
                                         <div>
                                             <div class="fw-semibold" style="font-size:0.9rem;">{{ user.name }}</div>
                                             <div class="text-muted small">{{ user.email }}</div>
+                                            {% if user.designation %}
+                                            <div><span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1" style="font-size: 0.72rem;">{{ user.designation }}</span></div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 </td>
@@ -191,6 +228,9 @@
                         </div>
                     </div>
                     <div class="mc-desc">{{ user.email }}</div>
+                    {% if user.designation %}
+                    <div class="mb-2"><span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 0.72rem;">{{ user.designation }}</span></div>
+                    {% endif %}
                     <div class="mc-person-row">
                         <div class="mc-person-left">
                             <div class="mc-avatar">
@@ -251,7 +291,7 @@
                         {% for p in range(1, pages + 1) %}
                         <li class="page-item {% if p == page %}active{% endif %}">
                             <a class="page-link"
-                               href="{{ url_for('admin.users', q=search_query, role=role_filter, status=status_filter, sort=sort, page=p) }}">
+                               href="{{ url_for('admin.users', q=search_query, role=role_filter, status=status_filter, sort=sort, designation=designation_filter if designation_filter else None, page=p) }}">
                                 {{ p }}
                             </a>
                         </li>

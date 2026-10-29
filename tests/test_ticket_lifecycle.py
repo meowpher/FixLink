@@ -2,8 +2,10 @@ import pytest
 from app import db
 from app.models import Ticket, Room, Floor, Building
 
-def test_full_ticket_lifecycle(client, student_user, admin_user, professional_user, run_app_context):
-    """Simulate ticket creation, admin assignment, and professional completion."""
+def test_full_ticket_lifecycle(client, student_user, admin_user, run_app_context):
+    """Simulate ticket creation and Supervisor-Verified Quality Assurance Closure."""
+    import io
+    from app.models import AuditLog
     
     # Setup initial infrastructure
     with run_app_context:
@@ -13,7 +15,6 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, professional_us
         db.session.add_all([b, f, r])
         db.session.commit()
         room_id = r.id
-        prof_id = professional_user.id
 
     # 1. Student creates ticket
     with client.session_transaction() as sess:
@@ -35,50 +36,44 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, professional_us
         assert t.status == Ticket.STATUS_OPEN
         assert t.reporter_id == student_user.id
         
-    # 2. Admin assigns ticket to professional
+    # 2. Supervisor inspects work, uploads proof image, and commits verified closure
     with client.session_transaction() as sess:
         sess.clear()
         sess['user_id'] = admin_user.id
         sess['is_admin'] = True
+        sess['tab_guard_id'] = 'secure_tab_token_123'
         
-    response = client.post(f'/admin/api/ticket/{ticket_id}/assign', json={
-        'ticket_id': ticket_id,
-        'professional_id': prof_id,
-        'time_limit_hours': 24
+    test_img = (io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"), 'proof.png')
+    response = client.post(f'/admin/issues/{ticket_id}/verify-close', data={
+        'technician_name': 'Ramesh (Electrical)',
+        'resolution_notes': 'Physically inspected Room TEST101. Bulb replaced and circuit tested successfully.',
+        'proof_image': test_img
+    }, headers={
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Tab-Guard-ID': 'secure_tab_token_123'
     })
     
     assert response.status_code == 200
+    res_data = response.get_json()
+    assert res_data['success'] is True
+    assert res_data['data']['status'] == Ticket.STATUS_RESOLVED
+    assert 'proof_url' in res_data['data']
+
+    # 3. Verify Database State and Immutable AuditLog entry
     with run_app_context:
         t = db.session.get(Ticket, ticket_id)
-        assert t.status == Ticket.STATUS_ASSIGNED
-        assert t.assigned_professional_id == prof_id
-        
-    # 3. Professional starts job
-    with client.session_transaction() as sess:
-        sess.clear()
-        sess['professional_id'] = prof_id
-        
-    response = client.post(f'/professional/api/task/{ticket_id}/start')
-    assert response.status_code == 200
-    with run_app_context:
-        t = db.session.get(Ticket, ticket_id)
-        assert t.status == Ticket.STATUS_IN_PROGRESS
-        assert t.job_started_at is not None
-        
-    # 4. Professional completes job
-    response = client.post(f'/professional/api/task/{ticket_id}/complete', data={
-        # Mock file upload not strictly needed if not required, but good practice
-        # 'completion_photo': (io.BytesIO(b"abcdef"), 'test.jpg')
-    })
-    
-    # Status code might be 400 if image is missing and required, modify route if necessary
-    # Assuming route handles no image gracefully or we mock it.
-    # We will assume it succeeds or adjust test if failing.
-    if response.status_code == 200:
-        with run_app_context:
-            t = db.session.get(Ticket, ticket_id)
-            assert t.status == Ticket.STATUS_FIXED
-            assert t.job_completed_at is not None
+        assert t.status == Ticket.STATUS_RESOLVED
+        assert t.verified_by_id == admin_user.id
+        assert t.assigned_vendor_or_tech_name == 'Ramesh (Electrical)'
+        assert 'Physically inspected' in t.resolution_notes
+        assert t.proof_of_completion_url is not None
+        assert t.resolved_at is not None
+
+        audit = AuditLog.query.filter_by(target_type='Ticket', target_id=ticket_id).first()
+        assert audit is not None
+        assert audit.action == 'TICKET_VERIFIED_CLOSED'
+        assert f"Ticket #{ticket_id} inspected, verified, and closed by Supervisor" in audit.details
+        assert audit.user_id == admin_user.id
 
 
 def test_daily_report_limit(client, student_user, admin_user, run_app_context):
@@ -189,43 +184,98 @@ def test_spam_detection_and_auto_strike(client, student_user, run_app_context):
         assert user.adhoc_suspended_until is not None
 
 
-def test_api_assign_ticket_string_payload_resilience(client, admin_user, professional_user, run_app_context):
-    """Test assigning a ticket via AJAX API with string data types matching browser fetch."""
-    from app.models import Ticket, Room, Floor, Building
+def test_supervisor_verification_security_and_validation(client, student_user, admin_user, run_app_context):
+    """Verify security controls, Zero-Trust validation, and AuditLog formatting for Supervisor Verification."""
+    import io
+    from app.models import AuditLog
 
     with run_app_context:
-        b = Building(name='Vyas Test')
-        db.session.add(b)
+        b = Building(name="QA Building")
+        f = Floor(level=3, name="3rd Floor", building=b)
+        r = Room(number="QA301", floor=f)
+        db.session.add_all([b, f, r])
         db.session.commit()
-        f = Floor(building_id=b.id, level=0, name='Ground')
-        db.session.add(f)
-        db.session.commit()
-        r = Room(number='VY099', floor_id=f.id)
-        db.session.add(r)
-        db.session.commit()
-        t = Ticket(room_id=r.id, issue_type='tables', description='broken desk', reporter_name='Student', prn='999', reporter_email='student@mitwpu.edu.in')
-        db.session.add(t)
-        db.session.commit()
-        ticket_id = t.id
 
+        ticket = Ticket(
+            room_id=r.id,
+            issue_type='ac',
+            description='AC not cooling in lecture hall',
+            reporter_id=student_user.id,
+            reporter_name=student_user.name,
+            prn='12345678',
+            reporter_email=student_user.email,
+            status=Ticket.STATUS_OPEN
+        )
+        db.session.add(ticket)
+        db.session.commit()
+        ticket_id = ticket.id
+
+    # 1. Non-admin user access attempt is blocked
+    with client.session_transaction() as sess:
+        sess.clear()
+        sess['user_id'] = student_user.id
+        sess['is_admin'] = False
+
+    test_img = (io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"), 'proof.png')
+    res_unauth = client.post(f'/admin/issues/{ticket_id}/verify-close', data={
+        'technician_name': 'Vendor Tech',
+        'resolution_notes': 'Fixed by non-admin',
+        'proof_image': test_img
+    }, headers={'X-Requested-With': 'XMLHttpRequest'})
+    assert res_unauth.status_code in [403, 302]
+
+    # 2. Admin Zero-Trust Tab Guard token mismatch is rejected (403)
     with client.session_transaction() as sess:
         sess.clear()
         sess['user_id'] = admin_user.id
         sess['is_admin'] = True
+        sess['tab_guard_id'] = 'legitimate_server_guard_token'
 
-    # Pass string IDs and string hours exactly as sent by browser
-    resp = client.post(f'/admin/api/ticket/{ticket_id}/assign', json={
-        'professional_id': str(professional_user.id),
-        'time_limit_hours': '3'
+    test_img = (io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"), 'proof.png')
+    res_mismatch = client.post(f'/admin/issues/{ticket_id}/verify-close', data={
+        'technician_name': 'Vendor Tech',
+        'resolution_notes': 'Fixed',
+        'proof_image': test_img
+    }, headers={
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Tab-Guard-ID': 'forged_or_corrupt_tab_token'
     })
+    assert res_mismatch.status_code == 403
 
-    assert resp.status_code == 200
-    data = resp.get_json()
-    assert data['success'] is True
+    # 3. Missing proof image is rejected with 400
+    res_no_img = client.post(f'/admin/issues/{ticket_id}/verify-close', data={
+        'technician_name': 'Vendor Tech',
+        'resolution_notes': 'Fixed without image'
+    }, headers={
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Tab-Guard-ID': 'legitimate_server_guard_token'
+    })
+    assert res_no_img.status_code == 400
 
+    # 4. Valid verification with correct Tab Guard and camera proof
+    test_valid_img = (io.BytesIO(b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4"), 'proof_camera.png')
+    res_valid = client.post(f'/admin/issues/{ticket_id}/verify-close', data={
+        'technician_name': 'Voltas External Services',
+        'resolution_notes': 'Compressor capacitor replaced and thermostat calibrated to 22C.',
+        'proof_image': test_valid_img
+    }, headers={
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-Tab-Guard-ID': 'legitimate_server_guard_token'
+    })
+    assert res_valid.status_code == 200
+    valid_data = res_valid.get_json()
+    assert valid_data['success'] is True
+
+    # 5. Verify immutable Audit Log entry format
     with run_app_context:
-        t_assigned = db.session.get(Ticket, ticket_id)
-        assert t_assigned.status == Ticket.STATUS_ASSIGNED
-        assert t_assigned.assigned_professional_id == professional_user.id
-        assert t_assigned.time_limit_hours == 3
+        ticket_db = db.session.get(Ticket, ticket_id)
+        assert ticket_db.status == Ticket.STATUS_RESOLVED
+        assert ticket_db.verified_by_id == admin_user.id
+        assert ticket_db.assigned_vendor_or_tech_name == 'Voltas External Services'
+        assert 'Compressor capacitor replaced' in ticket_db.resolution_notes
+        assert ticket_db.proof_of_completion_url.startswith('/static/uploads/proofs/proof_')
 
+        audit_entry = AuditLog.query.filter_by(target_type='Ticket', target_id=ticket_id).first()
+        assert audit_entry is not None
+        expected_msg = f"Ticket #{ticket_id} inspected, verified, and closed by Supervisor {admin_user.name} with proof attached."
+        assert audit_entry.details == expected_msg

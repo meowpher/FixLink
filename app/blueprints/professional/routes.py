@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, current_app
 from werkzeug.utils import secure_filename
 from ... import db
-from ...models import Professional, Ticket, HelpRequest, ChatMessage, Room, Asset, User, Notification
+from ...models import Professional, Ticket, HelpRequest, Room, Asset, User, Notification
 from ...utils import allowed_file, save_webapp_file
 from ...decorators import professional_login_required
 from ...api_utils import handle_api_errors, api_response
@@ -107,28 +107,6 @@ def dashboard():
                          vapid_public_key=os.environ.get('VAPID_PUBLIC_KEY', ''))
 
 
-@professional_bp.route('/chat')
-@professional_login_required
-def chat():
-    """Professional chat page."""
-    professional = db.session.get(Professional, session['professional_id'])
-    if not professional:
-        session.pop('professional_id', None)
-        session.pop('professional_name', None)
-        session.pop('professional_category', None)
-        return redirect(url_for('professional.login'))
-    
-    # Category display names
-    category_names = {
-        Professional.CATEGORY_IT: 'IT Technician',
-        Professional.CATEGORY_ELECTRICIAN: 'Electrician',
-        Professional.CATEGORY_PLUMBER: 'Plumber',
-        Professional.CATEGORY_CARPENTER: 'Carpenter'
-    }
-    
-    return render_template('professional/chat.html',
-                         professional=professional,
-                         category_name=category_names.get(professional.category, professional.category))
 
 
 @professional_bp.route('/history')
@@ -258,19 +236,9 @@ def task_detail(ticket_id):
         flash('You do not have permission to view this task.', 'error')
         return redirect(url_for('professional.dashboard'))
     
-    # Get chat history with admin
-    chat_messages = ChatMessage.query.filter(
-        ((ChatMessage.sender_type == 'professional') & (ChatMessage.sender_id == professional.id)) |
-        ((ChatMessage.receiver_type == 'professional') & (ChatMessage.receiver_id == professional.id))
-    ).order_by(ChatMessage.timestamp.asc()).limit(50).all()
-    
-    # Get help requests for this ticket
-    help_requests = HelpRequest.query.filter_by(ticket_id=ticket_id).all()
-    
     return render_template('professional/task_detail.html',
                          professional=professional,
                          ticket=ticket,
-                         chat_messages=chat_messages,
                          help_requests=help_requests)
 
 
@@ -462,71 +430,7 @@ def request_help(ticket_id):
     return api_response(success=True, message="Help request submitted for admin approval", data={'help_request_id': help_request.id})
 
 
-# Chat Endpoints
 
-@professional_bp.route('/api/chat/history', methods=['GET'])
-@professional_login_required
-def get_chat_history():
-    """Get chat history with admin."""
-    professional = db.session.get(Professional, session['professional_id'])
-    
-    # Get messages where professional is sender or receiver
-    messages = ChatMessage.query.filter(
-        ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & 
-         (ChatMessage.sender_id == professional.id)) |
-        ((ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & 
-         (ChatMessage.receiver_id == professional.id))
-    ).order_by(ChatMessage.timestamp.asc()).all()
-    
-    # Mark messages from admin as read
-    for msg in messages:
-        if msg.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL and msg.receiver_id == professional.id:
-            msg.is_read = True
-    db.session.commit()
-    
-    return api_response(success=True, data={'messages': [msg.to_dict() for msg in messages]})
-
-
-@professional_bp.route('/api/chat/send', methods=['POST'])
-@professional_login_required
-def send_chat_message():
-    """Send a chat message to admin."""
-    professional = db.session.get(Professional, session['professional_id'])
-    
-    data = request.get_json()
-    message_text = data.get('message', '').strip()
-    
-    if not message_text:
-        return api_response(success=False, error='Message cannot be empty', status=400)
-    
-    try:
-        # Find an admin to send to (first available admin)
-        admin = User.query.filter_by(is_admin=True).first()
-        if not admin:
-            return api_response(success=False, error='No admin available', status=400)
-        
-        chat_message = ChatMessage(
-            sender_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
-            sender_id=professional.id,
-            receiver_type=ChatMessage.SENDER_TYPE_ADMIN,
-            receiver_id=admin.id,
-            message=message_text
-        )
-        db.session.add(chat_message)
-        db.session.commit()
-        
-        # Emit via WebSocket
-        from ...realtime import emit_chat_message
-        emit_chat_message(chat_message)
-        
-        return api_response(
-            success=True,
-            message='Message sent successfully',
-            data={'chat_message': chat_message.to_dict()}
-        )
-    except Exception as e:
-        db.session.rollback()
-        return api_response(success=False, error=str(e), status=500)
 
 
 @professional_bp.route('/api/task/<int:ticket_id>')
@@ -542,15 +446,3 @@ def get_task_detail_api(ticket_id):
     return api_response(success=True, data={'ticket': ticket.to_dict()})
 
 
-@professional_bp.route('/api/chat/reset', methods=['POST'])
-@professional_login_required
-@handle_api_errors
-def reset_chat_history():
-    """Clear chat history for the current professional."""
-    prof_id = session['professional_id']
-    ChatMessage.query.filter(
-        ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.sender_id == prof_id)) |
-        ((ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_id == prof_id))
-    ).delete(synchronize_session=False)
-    db.session.commit()
-    return api_response(success=True, message="Chat history reset successfully")

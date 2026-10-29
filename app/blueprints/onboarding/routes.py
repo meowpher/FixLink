@@ -28,9 +28,17 @@ def get_dashboard_redirect(user):
     """Direct user to their designated portal dashboard upon compliance clearance."""
     if not user:
         return redirect(url_for('auth.login'))
-    if getattr(user, 'is_admin', False):
+    if getattr(user, 'is_super_admin', False) or session.get('is_super_admin'):
+        return redirect(url_for('superadmin.dashboard'))
+    elif getattr(user, 'role', '').upper() == User.ROLE_SUPERVISOR:
+        return redirect(url_for('supervisor.dashboard'))
+    elif getattr(user, 'is_admin', False):
         return redirect(url_for('admin.dashboard'))
-    elif getattr(user, 'role', '') == 'faculty':
+    elif getattr(user, 'role', '').upper() == 'FACULTY':
+        if getattr(user, 'email', '') and ('student' in user.email.lower() or (user.prn and user.prn.isdigit())):
+            return redirect(url_for('main.report_form'))
+        if (getattr(user, 'designation', '') or '').strip().lower() == 'peon':
+            return redirect(url_for('main.report_form'))
         return redirect(url_for('faculty.dashboard'))
     else:
         return redirect(url_for('main.report_form'))

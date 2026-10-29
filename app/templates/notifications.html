@@ -461,7 +461,7 @@
 
                         <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2">
                             {% if notif.link and notif.link != '#' %}
-                                <a href="{{ notif.link }}" class="btn btn-sm btn-primary notif-action-btn" onclick="markAndNavigate({{ notif.id }}, '{{ notif.link }}', event)">
+                                <a href="{{ notif.link }}" class="btn btn-sm btn-primary notif-action-btn" data-action="markAndNavigate" data-notif-id="{{ notif.id }}" data-notif-link="{{ notif.link }}">
                                     <span>View Details</span>
                                     <i class="bi bi-arrow-right"></i>
                                 </a>
@@ -470,7 +470,7 @@
                             {% endif %}
 
                             {% if not notif.is_read %}
-                                <button type="button" class="notif-mark-read-btn ms-auto" onclick="markSingleAsRead({{ notif.id }})" title="Mark as read">
+                                <button type="button" class="notif-mark-read-btn ms-auto" data-action="markSingleAsRead" data-notif-id="{{ notif.id }}" title="Mark as read">
                                     <i class="bi bi-check2"></i><span>Mark read</span>
                                 </button>
                             {% endif %}
@@ -653,6 +653,19 @@
             }
         }
     }
+    // Delegated listener for notification action buttons (avoids Jinja expressions in onclick attrs)
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var action = btn.dataset.action;
+        var notifId = parseInt(btn.dataset.notifId, 10);
+        if (action === 'markSingleAsRead' && window.markSingleAsRead) {
+            window.markSingleAsRead(notifId);
+        } else if (action === 'markAndNavigate' && window.markAndNavigate) {
+            var link = btn.dataset.notifLink || btn.getAttribute('href') || '#';
+            window.markAndNavigate(notifId, link, e);
+        }
+    });
 })();
 </script>
 {% endblock %}

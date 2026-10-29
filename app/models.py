@@ -7,21 +7,27 @@ from . import db
 
 
 class User(db.Model):
-    """User model - unified auth for admins and reporters."""
+    """User model - strict 3-Tier RBAC: FACULTY, SUPERVISOR, SUPER_ADMIN."""
     __tablename__ = 'users'
     
-    ROLE_STUDENT = 'student'
-    ROLE_FACULTY = 'faculty'
-    ROLE_ADMIN = 'admin'
+    ROLE_FACULTY = 'FACULTY'
+    ROLE_SUPERVISOR = 'SUPERVISOR'
+    ROLE_ADMIN = 'ADMIN'
+    ROLE_SUPER_ADMIN = 'SUPER_ADMIN'
     
-    ROLES = [ROLE_STUDENT, ROLE_FACULTY, ROLE_ADMIN]
+    # Backwards-compatible aliases
+    ROLE_STUDENT = 'student'
+    
+    ROLES = [ROLE_FACULTY, ROLE_SUPERVISOR, ROLE_ADMIN]
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     prn = db.Column(db.String(20), nullable=True)
     email = db.Column(db.String(120), nullable=False, unique=True)
     password_hash = db.Column(db.String(255), nullable=True)
-    role = db.Column(db.String(20), default=ROLE_STUDENT, nullable=False)
+    role = db.Column(db.String(20), default=ROLE_FACULTY, nullable=False)
+    designation = db.Column(db.String(100), nullable=True)
+    is_active = db.Column(db.Boolean, default=True)
     is_admin = db.Column(db.Boolean, default=False)
     is_verified = db.Column(db.Boolean, default=False)
     verification_token = db.Column(db.String(100), nullable=True)
@@ -32,19 +38,36 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationships
-    tickets = db.relationship('Ticket', backref='reporter', lazy=True)
+    tickets = db.relationship('Ticket', backref='reporter', lazy=True, foreign_keys='Ticket.reporter_id')
     
-    def __init__(self, name=None, email=None, role=ROLE_STUDENT, prn=None, is_admin=False, is_verified=False, verification_token=None, profile_photo=None, adhoc_suspended_until=None, adhoc_suspension_reason=None, has_accepted_terms=False, **kwargs):
+    def __init__(self, name=None, email=None, role=ROLE_FACULTY, prn=None, designation=None, is_active=True, is_admin=False, is_verified=False, verification_token=None, profile_photo=None, adhoc_suspended_until=None, adhoc_suspension_reason=None, has_accepted_terms=False, **kwargs):
         super().__init__(**kwargs)
         if name is not None:
             self.name = name
         if email is not None:
             self.email = email
+        if designation is not None:
+            self.designation = designation
+        self.is_active = is_active
         if role is not None:
-            self.role = role
+            role_str = str(role).strip().upper()
+            if role_str == 'STUDENT':
+                self.role = 'student'
+            elif role_str == 'FACULTY':
+                self.role = self.ROLE_FACULTY
+            elif role_str == 'SUPERVISOR':
+                self.role = self.ROLE_SUPERVISOR
+            elif role_str == 'ADMIN':
+                self.role = self.ROLE_ADMIN
+            elif role_str in ['SUPERADMIN', 'SUPER_ADMIN']:
+                self.role = self.ROLE_SUPER_ADMIN
+            else:
+                self.role = role_str
+        else:
+            self.role = self.ROLE_FACULTY
         if prn is not None:
             self.prn = prn
-        self.is_admin = is_admin
+        self.is_admin = is_admin or (str(self.role or '').upper() in [self.ROLE_SUPERVISOR, self.ROLE_ADMIN, self.ROLE_SUPER_ADMIN, 'ADMIN', 'SUPERVISOR'])
         self.is_verified = is_verified
         self.has_accepted_terms = has_accepted_terms
         if verification_token is not None:
@@ -96,10 +119,22 @@ class User(db.Model):
 
 
     @property
+    def is_faculty(self):
+        """Returns True if the user has FACULTY role."""
+        return (self.role or '').upper() in [self.ROLE_FACULTY, 'STUDENT']
+
+    @property
+    def is_supervisor(self):
+        """Returns True if the user has SUPERVISOR or SUPER_ADMIN role, or is_admin flag."""
+        return (self.role or '').upper() in [self.ROLE_SUPERVISOR, self.ROLE_SUPER_ADMIN, 'ADMIN'] or self.is_admin or self.is_super_admin
+
+    @property
     def is_super_admin(self):
-        """Dynamic check against hardcoded config to prevent database manipulation."""
+        """Dynamic check against hardcoded config or strict SUPER_ADMIN role."""
         if not self.email:
             return False
+        if (self.role or '').upper() == self.ROLE_SUPER_ADMIN:
+            return True
         from . import SUPER_ADMIN_EMAILS
         normalized_email = self.email.strip().lower()
         return normalized_email in [admin_email.strip().lower() for admin_email in SUPER_ADMIN_EMAILS]
@@ -111,7 +146,11 @@ class User(db.Model):
             'email': self.email,
             'prn': self.prn,
             'role': self.role,
-            'is_admin': self.is_admin,
+            'designation': self.designation,
+            'is_active': self.is_active,
+            'is_faculty': self.is_faculty,
+            'is_supervisor': self.is_supervisor,
+            'is_admin': self.is_admin or self.is_supervisor,
             'is_super_admin': self.is_super_admin,
             'is_verified': self.is_verified,
             'has_accepted_terms': self.has_accepted_terms,
@@ -674,8 +713,10 @@ class Ticket(db.Model):
     STATUS_FIXED = 'fixed'
     STATUS_CANCELLED = 'cancelled'
     STATUS_ASSIGNED = 'assigned'
+    STATUS_RESOLVED = 'resolved'
+    STATUS_CLOSED = 'closed'
     
-    STATUS_CHOICES = [STATUS_OPEN, STATUS_IN_PROGRESS, STATUS_FIXED, STATUS_CANCELLED, STATUS_ASSIGNED]
+    STATUS_CHOICES = [STATUS_OPEN, STATUS_IN_PROGRESS, STATUS_FIXED, STATUS_CANCELLED, STATUS_ASSIGNED, STATUS_RESOLVED, STATUS_CLOSED]
     
     COMPLEXITY_LOW = 'low'
     COMPLEXITY_MEDIUM = 'medium'
@@ -687,8 +728,17 @@ class Ticket(db.Model):
     room_id = db.Column(db.Integer, db.ForeignKey('rooms.id'), nullable=False)
     asset_id = db.Column(db.Integer, db.ForeignKey('assets.id'), nullable=True)
     
-    # Assignment to professional
+    # Assignment to professional / vendor (Non-authenticated reference for on-ground staff)
     assigned_professional_id = db.Column(db.Integer, db.ForeignKey('professionals.id'), nullable=True)
+    assigned_vendor_or_tech_name = db.Column(db.String(150), nullable=True)
+    
+    # Supervisor QA Verification & Closure Tracking (QA Architecture Upgrade)
+    verified_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    verified_by = db.relationship('User', foreign_keys=[verified_by_id], backref=db.backref('verified_tickets', lazy=True))
+    proof_image_url = db.Column(db.String(500), nullable=True)
+    proof_of_completion_url = db.Column(db.String(500), nullable=True)
+    resolution_notes = db.Column(db.Text, nullable=True)
+    resolved_at = db.Column(db.DateTime, nullable=True)
     
     issue_type = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text, nullable=False)
@@ -815,8 +865,98 @@ class Ticket(db.Model):
             'is_overdue': self.is_overdue,
             'time_remaining': self.time_remaining,
             'rating': self.rating,
-            'rating_comment': self.rating_comment
+            'rating_comment': self.rating_comment,
+            'assigned_vendor_or_tech_name': self.assigned_vendor_or_tech_name,
+            'verified_by_id': self.verified_by_id,
+            'verified_by_name': self.verified_by.name if self.verified_by else None,
+            'proof_image_url': self.proof_image_url or self.proof_of_completion_url,
+            'proof_of_completion_url': self.proof_of_completion_url or self.proof_image_url,
+            'resolution_notes': self.resolution_notes,
+            'resolved_at': self.resolved_at.isoformat() + 'Z' if self.resolved_at else None
         }
+
+
+class AuditLog(db.Model):
+    """System Audit Log for security and quality assurance events."""
+    __tablename__ = 'audit_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_id = db.Column(db.Integer, db.ForeignKey('tickets.id'), nullable=True)
+    action = db.Column(db.String(100), nullable=False)
+    performed_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    details = db.Column(db.Text, nullable=False)
+
+    # Backwards-compatible aliases / legacy columns
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    target_type = db.Column(db.String(50), nullable=True)
+    target_id = db.Column(db.Integer, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    # Relationships
+    ticket = db.relationship('Ticket', foreign_keys=[ticket_id], backref=db.backref('audit_logs', lazy=True))
+    performed_by = db.relationship('User', foreign_keys=[performed_by_id], backref=db.backref('performed_audit_logs', lazy=True))
+    user = db.relationship('User', foreign_keys=[user_id], backref=db.backref('audit_logs', lazy=True))
+
+    def __init__(self, action=None, details=None, ticket_id=None, performed_by_id=None, user_id=None, target_type=None, target_id=None, timestamp=None, created_at=None, **kwargs):
+        super().__init__(**kwargs)
+        self.action = action
+        self.details = details
+        resolved_ticket_id = ticket_id if ticket_id is not None else (target_id if target_type == 'Ticket' else None)
+        self.ticket_id = resolved_ticket_id
+        self.target_id = target_id if target_id is not None else resolved_ticket_id
+        if not target_type and resolved_ticket_id is not None:
+            self.target_type = 'Ticket'
+        else:
+            self.target_type = target_type
+        
+        resolved_user_id = performed_by_id if performed_by_id is not None else user_id
+        self.performed_by_id = resolved_user_id
+        self.user_id = resolved_user_id
+        
+        ts = timestamp or created_at or datetime.utcnow()
+        self.timestamp = ts
+        self.created_at = ts
+
+    @property
+    def related_ticket(self):
+        """Resolve ticket relationship safely even for legacy logs with target_type='Ticket'."""
+        if self.ticket:
+            return self.ticket
+        if self.target_type == 'Ticket' and self.target_id:
+            from .models import Ticket
+            return db.session.get(Ticket, self.target_id)
+        return None
+
+    def __repr__(self):
+        return f'<AuditLog #{self.id} - {self.action} (Ticket #{self.ticket_id})>'
+
+    def to_dict(self):
+        user_actor = self.performed_by or self.user
+        rel_ticket = getattr(self, '_resolved_ticket', None) or self.related_ticket
+        ticket_id = self.ticket_id or (self.target_id if self.target_type == 'Ticket' else None)
+        proof_url = (rel_ticket.proof_of_completion_url or rel_ticket.proof_image_url) if rel_ticket else None
+        supervisor_name = (rel_ticket.verified_by.name if (rel_ticket and rel_ticket.verified_by) else (user_actor.name if user_actor else None))
+        return {
+            'id': self.id,
+            'ticket_id': ticket_id,
+            'action': self.action,
+            'performed_by_id': self.performed_by_id or self.user_id,
+            'user_id': self.user_id or self.performed_by_id,
+            'user_name': user_actor.name if user_actor else None,
+            'user_role': getattr(user_actor, 'role', 'ADMIN') if user_actor else None,
+            'timestamp': (self.timestamp or self.created_at).isoformat() + 'Z' if (self.timestamp or self.created_at) else None,
+            'created_at': (self.created_at or self.timestamp).isoformat() + 'Z' if (self.created_at or self.timestamp) else None,
+            'details': self.details,
+            'target_type': self.target_type,
+            'target_id': self.target_id,
+            'proof_url': proof_url,
+            'resolution_notes': rel_ticket.resolution_notes if rel_ticket else None,
+            'supervisor_name': supervisor_name,
+            'ticket_issue_type': rel_ticket.issue_type if rel_ticket else None,
+            'ticket_resolved_at': rel_ticket.resolved_at.isoformat() + 'Z' if (rel_ticket and rel_ticket.resolved_at) else None
+        }
+
 
 
 class Professional(db.Model):
@@ -984,53 +1124,6 @@ class HelpRequest(db.Model):
         }
 
 
-class ChatMessage(db.Model):
-    """ChatMessage model - real-time chat between professionals and admins."""
-    __tablename__ = 'chat_messages'
-    
-    SENDER_TYPE_ADMIN = 'admin'
-    SENDER_TYPE_PROFESSIONAL = 'professional'
-    
-    SENDER_TYPES = [SENDER_TYPE_ADMIN, SENDER_TYPE_PROFESSIONAL]
-    
-    id = db.Column(db.Integer, primary_key=True)
-    sender_type = db.Column(db.String(20), nullable=False)
-    sender_id = db.Column(db.Integer, nullable=False)
-    receiver_type = db.Column(db.String(20), nullable=False)
-    receiver_id = db.Column(db.Integer, nullable=False)
-    message = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    is_read = db.Column(db.Boolean, default=False)
-    
-    __table_args__ = (
-        db.Index('idx_chat_sender_read', 'sender_type', 'sender_id', 'is_read'),
-        db.Index('idx_chat_receiver_read', 'receiver_type', 'receiver_id', 'is_read'),
-    )
-    
-    def __init__(self, sender_type=None, sender_id=None, receiver_type=None, receiver_id=None, message=None, **kwargs):
-        super().__init__(**kwargs)
-        if sender_type is not None: self.sender_type = sender_type
-        if sender_id is not None: self.sender_id = sender_id
-        if receiver_type is not None: self.receiver_type = receiver_type
-        if receiver_id is not None: self.receiver_id = receiver_id
-        if message is not None: self.message = message
-        for k, v in kwargs.items():
-            setattr(self, k, v)
-    
-    def __repr__(self):
-        return f'<ChatMessage #{self.id}>'
-    
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'sender_type': self.sender_type,
-            'sender_id': self.sender_id,
-            'receiver_type': self.receiver_type,
-            'receiver_id': self.receiver_id,
-            'message': self.message,
-            'timestamp': self.timestamp.isoformat() + 'Z' if self.timestamp else None,
-            'is_read': self.is_read
-        }
 
 class Notification(db.Model):
     """Notification model - persistent alerts for users (Admins/Professionals)."""

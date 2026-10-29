@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, abort, current_app
 from sqlalchemy import or_, func, case
 from ... import db
-from ...models import Building, Floor, Room, Asset, Ticket, User, Professional, HelpRequest, ChatMessage, Timetable, Notification, ScheduleSubmission
-from ...utils import send_ticket_email
+from ...models import Building, Floor, Room, Asset, Ticket, User, Professional, HelpRequest, Timetable, Notification, ScheduleSubmission, AuditLog
+from ...utils import send_ticket_email, allowed_file, save_webapp_file
 from ...decorators import admin_required
 from ...analytics import get_technician_efficiency, get_system_trends, get_critical_assets
 from ...api_utils import handle_api_errors, api_response
@@ -223,7 +223,7 @@ def _get_faculty_handle_context():
         Timetable.faculty_id.is_(None)
     ).order_by(Timetable.day_of_week, Timetable.start_time).all()
 
-    all_faculties = User.query.filter_by(role=User.ROLE_FACULTY).order_by(User.name).all()
+    all_faculties = User.query.filter_by(role=User.ROLE_FACULTY, is_active=True).order_by(User.name).all()
 
     vyas = Building.query.filter_by(name='Vyas').first()
     if vyas:
@@ -559,10 +559,19 @@ def users():
     role_filter = request.args.get('role', 'all')
     status_filter = request.args.get('status', 'all')
     sort_filter = request.args.get('sort', 'newest')
+    designation_filter = request.args.get('designation')
     page = request.args.get('page', 1, type=int)
     per_page = 20
 
-    query = User.query
+    query = User.query.filter_by(is_active=True)
+
+    if designation_filter:
+        if designation_filter in ['Program Director', 'Associate Professor & Program Director']:
+            query = query.filter(User.designation.ilike('%Program Director%'))
+        elif designation_filter in ['Program Head', 'Professor & Program Head']:
+            query = query.filter(User.designation.ilike('%Program Head%'))
+        else:
+            query = query.filter(User.designation == designation_filter)
 
     if search_query:
         search = f"%{search_query}%"
@@ -573,7 +582,7 @@ def users():
                 User.prn.ilike(search)
             )
         )
-    
+
     if role_filter == 'admin':
         query = query.filter_by(is_admin=True)
     elif role_filter == 'reporter':
@@ -603,7 +612,335 @@ def users():
                            search_query=search_query,
                            role_filter=role_filter,
                            status_filter=status_filter,
+                           designation_filter=designation_filter,
                            sort=sort_filter)
+
+
+@admin_bp.route('/users/promote', methods=['POST'])
+def promote_user():
+    """
+    Promote a Faculty user to SUPERVISOR role (Phase 2).
+    Strictly verifies that the requester has SUPER_ADMIN authorization.
+    Updates role to SUPERVISOR and commits immutable AuditLog record.
+    """
+    from ...models import AuditLog
+    
+    # 1. Strictly verify Super Admin privileges
+    is_super_admin = session.get('is_super_admin')
+    if not is_super_admin and 'user_id' in session:
+        requester = db.session.get(User, session['user_id'])
+        if requester and requester.is_super_admin:
+            is_super_admin = True
+            session['is_super_admin'] = True
+
+    if not is_super_admin:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return api_response(success=False, error="Unauthorized: Super Admin privileges required.", status=403)
+        flash("Unauthorized: Super Admin privileges required to assign Supervisor role.", "error")
+        return redirect(url_for('superadmin.dashboard'))
+
+    # 2. Extract target user identity (supports user_id or email)
+    data = request.get_json(silent=True) or {}
+    user_id = data.get('user_id') or request.form.get('user_id')
+    email = data.get('email') or request.form.get('email')
+
+    target_user = None
+    if user_id:
+        try:
+            target_user = db.session.get(User, int(user_id))
+        except (ValueError, TypeError):
+            pass
+    if not target_user and email:
+        target_user = User.query.filter(db.func.lower(User.email) == str(email).strip().lower()).first()
+
+    if not target_user:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return api_response(success=False, error="Target user not found.", status=404)
+        flash("Target user not found.", "error")
+        return redirect(url_for('superadmin.dashboard'))
+
+    # 3. Update target user's role to SUPERVISOR and grant admin privileges
+    target_user.role = User.ROLE_SUPERVISOR
+    target_user.is_admin = True
+
+    # 4. Write immutable AuditLog record
+    admin_id = session.get('user_id')
+    admin_user = db.session.get(User, admin_id) if admin_id else None
+    promoter_name = admin_user.name if admin_user else session.get('super_admin_email', 'Super Admin')
+
+    audit_entry = AuditLog(
+        action="USER_PROMOTED_TO_SUPERVISOR",
+        details=f"Faculty {target_user.name} ({target_user.email}) was promoted to SUPERVISOR by Super Admin {promoter_name}.",
+        user_id=admin_id,
+        target_type="User",
+        target_id=target_user.id,
+        created_at=datetime.utcnow()
+    )
+    db.session.add(audit_entry)
+    db.session.commit()
+
+    success_msg = f"User {target_user.name} ({target_user.email}) successfully promoted to SUPERVISOR."
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return api_response(success=True, message=success_msg, data={
+            'user': {
+                'id': target_user.id,
+                'name': target_user.name,
+                'email': target_user.email,
+                'role': target_user.role,
+                'is_supervisor': target_user.is_supervisor,
+                'is_admin': target_user.is_admin
+            }
+        })
+
+    flash(success_msg, "success")
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@admin_bp.route('/users/demote', methods=['POST'])
+def demote_user():
+    """
+    Demote a SUPERVISOR user to FACULTY role (Phase 2).
+    Strictly verifies that the requester has SUPER_ADMIN authorization.
+    Protects Super Admin accounts from demotion.
+    Updates target user role to FACULTY, sets is_admin to False,
+    and writes an immutable AuditLog record in a single atomic db.session.commit().
+    """
+    from ...models import AuditLog
+
+    # 1. Strictly verify Super Admin privileges
+    is_super_admin = session.get('is_super_admin')
+    if not is_super_admin and 'user_id' in session:
+        requester = db.session.get(User, session['user_id'])
+        if requester and requester.is_super_admin:
+            is_super_admin = True
+            session['is_super_admin'] = True
+
+    if not is_super_admin:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return api_response(success=False, error="Unauthorized: Super Admin privileges required.", status=403)
+        flash("Unauthorized: Super Admin privileges required to demote users.", "error")
+        return redirect(url_for('superadmin.dashboard'))
+
+    # 2. Extract target user identity (supports user_id or email)
+    data = request.get_json(silent=True) or {}
+    user_id = data.get('user_id') or request.form.get('user_id')
+    email = data.get('email') or request.form.get('email')
+
+    target_user = None
+    if user_id:
+        try:
+            target_user = db.session.get(User, int(user_id))
+        except (ValueError, TypeError):
+            pass
+    if not target_user and email:
+        target_user = User.query.filter(db.func.lower(User.email) == str(email).strip().lower()).first()
+
+    if not target_user:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return api_response(success=False, error="Target user not found.", status=404)
+        flash("Target user not found.", "error")
+        return redirect(url_for('superadmin.dashboard'))
+
+    # 3. Safeguard: Super Admins cannot be demoted
+    if target_user.is_super_admin or (target_user.role or '').upper() == User.ROLE_SUPER_ADMIN:
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return api_response(success=False, error="Security violation: Super Admin accounts cannot be demoted.", status=400)
+        flash("Security violation: Super Admin accounts cannot be demoted.", "error")
+        return redirect(url_for('superadmin.dashboard'))
+
+    # 4. Update target user's role to FACULTY and revoke supervisor/admin privileges
+    target_user.role = User.ROLE_FACULTY
+    target_user.is_admin = False
+
+    # 5. Write immutable AuditLog record
+    admin_id = session.get('user_id')
+    admin_user = db.session.get(User, admin_id) if admin_id else None
+    demoter_name = admin_user.name if admin_user else session.get('super_admin_email', 'Super Admin')
+
+    audit_entry = AuditLog(
+        ticket_id=None,
+        action="USER_DEMOTED_TO_FACULTY",
+        performed_by_id=admin_id,
+        timestamp=datetime.utcnow(),
+        details=f"Supervisor {target_user.name} ({target_user.email}) was demoted to FACULTY by Super Admin {demoter_name}.",
+        user_id=admin_id,
+        target_type="User",
+        target_id=target_user.id,
+        created_at=datetime.utcnow()
+    )
+    db.session.add(audit_entry)
+    db.session.commit()
+
+    success_msg = f"User {target_user.name} ({target_user.email}) successfully demoted to FACULTY."
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+        return api_response(success=True, message=success_msg, data={
+            'user': {
+                'id': target_user.id,
+                'name': target_user.name,
+                'email': target_user.email,
+                'role': target_user.role,
+                'is_supervisor': target_user.is_supervisor,
+                'is_admin': target_user.is_admin
+            }
+        })
+
+    flash(success_msg, "success")
+    return redirect(url_for('superadmin.dashboard'))
+
+
+@admin_bp.route('/audit-trail', methods=['GET'])
+@admin_bp.route('/audit-logs', methods=['GET'])
+@admin_required
+def audit_trail():
+    """
+    Audit Trail View (Phase 2).
+    Streams immutable system audit events.
+    To prevent memory crashes under load, this data table MUST be paginated using
+    SQLAlchemy's .paginate(page=page, per_page=20) without loading all records into memory at once.
+    """
+    from ...models import AuditLog, Ticket
+    from sqlalchemy.orm import joinedload
+
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    action_filter = request.args.get('action', '').strip()
+    ticket_filter = request.args.get('ticket_id', type=int)
+
+    query = AuditLog.query
+
+    if action_filter:
+        query = query.filter(AuditLog.action == action_filter)
+    if ticket_filter:
+        query = query.filter(
+            (AuditLog.ticket_id == ticket_filter) |
+            ((AuditLog.target_type == 'Ticket') & (AuditLog.target_id == ticket_filter))
+        )
+
+    # Eager load relationships to prevent N+1 queries
+    query = query.options(
+        joinedload(AuditLog.ticket),
+        joinedload(AuditLog.performed_by),
+        joinedload(AuditLog.user)
+    )
+
+    # Ensure uniqueness: For TICKET_VERIFIED_CLOSED, only show the latest verification log per ticket
+    unique_verified_subquery = (
+        db.session.query(func.max(AuditLog.id))
+        .filter(AuditLog.action == "TICKET_VERIFIED_CLOSED")
+        .group_by(func.coalesce(AuditLog.ticket_id, AuditLog.target_id))
+    )
+    query = query.filter(
+        or_(
+            AuditLog.action != "TICKET_VERIFIED_CLOSED",
+            AuditLog.id.in_(unique_verified_subquery)
+        )
+    )
+
+    # Strictly paginate query at the database level (LIMIT 20 OFFSET ...) to protect memory
+    pagination = query.order_by(AuditLog.id.desc()).paginate(page=page, per_page=per_page, error_out=False)
+    audit_logs = pagination.items
+
+    # Pre-resolve any Ticket objects for logs where ticket_id wasn't a direct foreign key but target_id was
+    needed_ticket_ids = {
+        log.target_id for log in audit_logs
+        if not log.ticket and log.target_type == 'Ticket' and log.target_id
+    }
+    additional_tickets = {}
+    if needed_ticket_ids:
+        additional_tickets = {t.id: t for t in Ticket.query.filter(Ticket.id.in_(needed_ticket_ids)).all()}
+
+    for log in audit_logs:
+        if not log.ticket and log.target_type == 'Ticket' and log.target_id in additional_tickets:
+            log._resolved_ticket = additional_tickets[log.target_id]
+        else:
+            log._resolved_ticket = log.ticket
+
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.args.get('format') == 'json':
+        return api_response(
+            success=True,
+            data={
+                'logs': [log.to_dict() for log in audit_logs],
+                'pagination': {
+                    'page': pagination.page,
+                    'per_page': pagination.per_page,
+                    'total': pagination.total,
+                    'pages': pagination.pages,
+                    'has_prev': pagination.has_prev,
+                    'has_next': pagination.has_next,
+                    'prev_num': pagination.prev_num,
+                    'next_num': pagination.next_num
+                }
+            }
+        )
+
+    # Standard human-readable action definitions
+    SYSTEM_ACTIONS = [
+        ('TICKET_VERIFIED_CLOSED', 'Ticket Verified & Closed (Supervisor QA)'),
+        ('USER_PROMOTED_TO_SUPERVISOR', 'User Promoted to Supervisor'),
+        ('USER_DEMOTED_TO_FACULTY', 'User Demoted to Faculty'),
+        ('FACULTY_EVENT_APPROVED', 'Faculty Reservation Approved'),
+        ('FACULTY_EVENT_REJECTED', 'Faculty Reservation Rejected'),
+        ('SUSPENSION_LIFTED', 'Ghost Protocol Suspension Lifted'),
+        ('STRIKES_CLEARED', 'No-Show Strikes Reset'),
+        ('TIMETABLE_IMPORTED', 'Academic Timetable Imported'),
+    ]
+    try:
+        db_actions = [r[0] for r in db.session.query(AuditLog.action).distinct().all() if r[0]]
+    except Exception as e:
+        logger.warning(f"Failed to query distinct AuditLog actions: {e}")
+        db_actions = []
+
+    action_dict = dict(SYSTEM_ACTIONS)
+    for act in db_actions:
+        if act not in action_dict:
+            action_dict[act] = act.replace('_', ' ').title()
+
+    distinct_actions = [(act, action_dict[act]) for act in sorted(action_dict.keys(), key=lambda k: action_dict[k])]
+
+    return render_template(
+        'admin/audit_trail.html',
+        pagination=pagination,
+        audit_logs=audit_logs,
+        action_filter=action_filter,
+        ticket_filter=ticket_filter,
+        distinct_actions=distinct_actions,
+        page=page,
+        pages=pagination.pages,
+        total=pagination.total
+    )
+
+
+@admin_bp.route('/tickets/<int:ticket_id>/proof', methods=['GET'])
+@admin_required
+def get_ticket_proof_details(ticket_id):
+    """Fetch supervisor proof image and QA verification details for a ticket."""
+    ticket = db.session.get(Ticket, ticket_id)
+    if not ticket:
+        return api_response(success=False, message="Ticket not found", status_code=404)
+
+    supervisor = ticket.verified_by
+    proof_url = ticket.proof_of_completion_url or ticket.proof_image_url
+    initial_img = f"/static/uploads/{ticket.image_filename}" if ticket.image_filename else None
+
+    return api_response(
+        success=True,
+        data={
+            'ticket_id': ticket.id,
+            'issue_type': ticket.issue_type,
+            'description': ticket.description,
+            'status': ticket.status,
+            'proof_url': proof_url,
+            'initial_image_url': initial_img,
+            'resolution_notes': ticket.resolution_notes or "Verified on-site and confirmed fully operational.",
+            'resolved_at': ticket.resolved_at.strftime('%Y-%m-%d %H:%M:%S UTC') if ticket.resolved_at else (ticket.fixed_at.strftime('%Y-%m-%d %H:%M:%S UTC') if ticket.fixed_at else None),
+            'supervisor_name': supervisor.name if supervisor else (ticket.assigned_vendor_or_tech_name or 'Supervisor'),
+            'supervisor_role': getattr(supervisor, 'role', 'SUPERVISOR') if supervisor else 'SUPERVISOR',
+            'room_number': ticket.room.number if ticket.room else None,
+            'floor_name': ticket.room.floor.name if (ticket.room and ticket.room.floor) else None
+        }
+    )
+
+
 
 
 def generate_sparkline_svg(data_points, width=100, height=30, padding=4):
@@ -988,13 +1325,41 @@ def update_ticket_status(ticket_id):
     ticket.status = new_status
     ticket.updated_at = datetime.utcnow()
     
-    # If marking as fixed, update asset status and set fixed_at
-    if new_status == Ticket.STATUS_FIXED:
+    # If marking as fixed or resolved, update asset status and record audit log
+    if new_status in [Ticket.STATUS_FIXED, Ticket.STATUS_RESOLVED, Ticket.STATUS_CLOSED]:
         ticket.fixed_at = datetime.utcnow()
+        if not ticket.resolved_at:
+            ticket.resolved_at = datetime.utcnow()
+        if not ticket.verified_by_id and session.get('user_id'):
+            ticket.verified_by_id = session['user_id']
         if ticket.asset_id:
             asset = db.session.get(Asset, ticket.asset_id)
             if asset:
                 asset.status = Asset.STATUS_WORKING
+
+        supervisor = db.session.get(User, session.get('user_id'))
+        supervisor_name = supervisor.name if supervisor else f"Supervisor #{session.get('user_id')}"
+        existing_audit = AuditLog.query.filter(
+            AuditLog.action == "TICKET_VERIFIED_CLOSED",
+            or_(AuditLog.ticket_id == ticket.id, (AuditLog.target_type == 'Ticket') & (AuditLog.target_id == ticket.id))
+        ).first()
+
+        if existing_audit:
+            existing_audit.user_id = session.get('user_id')
+            existing_audit.performed_by_id = session.get('user_id')
+            existing_audit.details = f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached."
+            existing_audit.timestamp = datetime.utcnow()
+            existing_audit.created_at = datetime.utcnow()
+        elif ticket.proof_of_completion_url or ticket.proof_image_url:
+            audit_entry = AuditLog(
+                action="TICKET_VERIFIED_CLOSED",
+                details=f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached.",
+                user_id=session.get('user_id'),
+                target_type="Ticket",
+                target_id=ticket.id,
+                created_at=datetime.utcnow()
+            )
+            db.session.add(audit_entry)
     
     db.session.commit()
     
@@ -1014,6 +1379,126 @@ def update_ticket_status(ticket_id):
         data={
             'ticket_id': ticket.id,
             'status': ticket.status
+        }
+    )
+
+
+@admin_bp.route('/issues/<int:ticket_id>/verify-close', methods=['POST'])
+@admin_bp.route('/tickets/<int:ticket_id>/verify-close', methods=['POST'])
+@admin_required
+@handle_api_errors
+def verify_and_close_ticket(ticket_id):
+    """
+    Supervisor Quality Assurance Verification & Closure Endpoint (Phase 4).
+    Enforces Admin authentication and X-Tab-Guard-ID Zero-Trust validation.
+    Saves camera/proof image, updates ticket, and commits immutable AuditLog record.
+    """
+    import os, time, uuid
+    from werkzeug.utils import secure_filename
+
+    # Strictly enforce Zero-Trust Tab Guard validation
+    client_guard_id = request.headers.get('X-Tab-Guard-ID') or request.form.get('X-Tab-Guard-ID')
+    server_guard_id = session.get('tab_guard_id')
+    if server_guard_id and client_guard_id != server_guard_id:
+        return api_response(success=False, error="Security violation: Zero-Trust Tab Guard mismatch. Please refresh.", status=403)
+
+    ticket = Ticket.query.get_or_404(ticket_id)
+
+    # Validate proof of completion image
+    if 'proof_image' not in request.files:
+        return api_response(success=False, error="Proof of completion image is required.", status=400)
+    file = request.files['proof_image']
+    if not file or not file.filename:
+        return api_response(success=False, error="A valid proof image file is required.", status=400)
+    if not allowed_file(file.filename):
+        return api_response(success=False, error="Invalid file format. Allowed formats: PNG, JPG, JPEG, WEBP, GIF.", status=400)
+
+    # Sanitize filename and append unique timestamp/UUID to prevent collisions
+    safe_name = secure_filename(file.filename) or 'proof.jpg'
+    unique_filename = f"proof_{ticket_id}_{int(time.time())}_{uuid.uuid4().hex[:8]}_{safe_name}"
+    upload_dir = os.path.join(current_app.config.get('UPLOAD_FOLDER', os.path.join(current_app.root_path, 'static', 'uploads')), 'proofs')
+    os.makedirs(upload_dir, exist_ok=True)
+    full_save_path = os.path.join(upload_dir, unique_filename)
+    save_webapp_file(file, full_save_path)
+    proof_url = f"/static/uploads/proofs/{unique_filename}"
+
+    # Extract supervisor remarks and technician name
+    technician_name = (request.form.get('technician_name') or request.form.get('vendor_name') or '').strip() or "On-ground Technician"
+    resolution_notes = (request.form.get('resolution_notes') or request.form.get('notes') or '').strip()
+    if not resolution_notes:
+        return api_response(success=False, error="Supervisor inspection notes are required.", status=400)
+
+    now_utc = datetime.utcnow()
+    supervisor_id = session.get('user_id')
+    supervisor = db.session.get(User, supervisor_id) if supervisor_id else None
+    if not supervisor and session.get('super_admin_email'):
+        supervisor = User.query.filter_by(email=session['super_admin_email']).first()
+        if supervisor:
+            supervisor_id = supervisor.id
+    supervisor_name = supervisor.name if supervisor else (session.get('super_admin_email') or f"Supervisor #{supervisor_id}")
+
+    # Atomic ticket update and audit commit
+    ticket.status = Ticket.STATUS_RESOLVED
+    ticket.assigned_vendor_or_tech_name = technician_name
+    ticket.verified_by_id = supervisor_id
+    ticket.proof_image_url = proof_url
+    ticket.proof_of_completion_url = proof_url
+    ticket.completion_photo_filename = unique_filename
+    ticket.resolution_notes = resolution_notes
+    ticket.resolved_at = now_utc
+    ticket.fixed_at = now_utc
+    ticket.job_completed_at = now_utc
+    ticket.updated_at = now_utc
+
+    if ticket.asset_id:
+        asset = db.session.get(Asset, ticket.asset_id)
+        if asset:
+            asset.status = Asset.STATUS_WORKING
+
+    # Unique Audit Log entry per ticket (maintaining strict 1:1 uniqueness)
+    existing_audit = AuditLog.query.filter(
+        AuditLog.action == "TICKET_VERIFIED_CLOSED",
+        or_(AuditLog.ticket_id == ticket.id, (AuditLog.target_type == 'Ticket') & (AuditLog.target_id == ticket.id))
+    ).first()
+
+    if existing_audit:
+        existing_audit.user_id = supervisor_id
+        existing_audit.performed_by_id = supervisor_id
+        existing_audit.details = f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached."
+        existing_audit.timestamp = now_utc
+        existing_audit.created_at = now_utc
+    else:
+        audit_entry = AuditLog(
+            action="TICKET_VERIFIED_CLOSED",
+            details=f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached.",
+            user_id=supervisor_id,
+            target_type="Ticket",
+            target_id=ticket.id,
+            created_at=now_utc
+        )
+        db.session.add(audit_entry)
+    db.session.commit()
+
+    # Invalidate map cache for affected floor
+    if ticket.room_id:
+        room = db.session.get(Room, ticket.room_id)
+        if room:
+            from ...cache import invalidate_floor_cache
+            invalidate_floor_cache(room.floor_id)
+
+    try:
+        send_ticket_email(ticket, action='resolved')
+    except Exception:
+        pass
+
+    return api_response(
+        success=True,
+        message=f"Ticket #{ticket.id} verified and committed to audit log.",
+        data={
+            'ticket_id': ticket.id,
+            'status': ticket.status,
+            'verified_by': supervisor_name,
+            'proof_url': proof_url
         }
     )
 
@@ -1073,129 +1558,10 @@ def api_room_status(room_number):
         Ticket.status.in_([Ticket.STATUS_OPEN, Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])
     ).order_by(Ticket.created_at.desc()).first()
     
-    # Get all active professionals for assignment
-    all_profs = Professional.query.filter_by(is_active=True).all()
-    profs_by_category = {}
-    
-    category_names = {
-        Professional.CATEGORY_IT: 'IT Technician',
-        Professional.CATEGORY_ELECTRICIAN: 'Electrician',
-        Professional.CATEGORY_PLUMBER: 'Plumber',
-        Professional.CATEGORY_CARPENTER: 'Carpenter'
-    }
-    
-    best_professional_id = None
-    if active_ticket:
-        best_rating = -1
-        target_cat = map_issue_to_category(active_ticket.issue_type, active_ticket.description)
-        
-        matching_profs = [p for p in all_profs if p.category == target_cat] if target_cat else all_profs
-        if not matching_profs:
-            matching_profs = all_profs
-            
-        for p in matching_profs:
-            is_busy = any(t.status in [Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS] for t in p.assigned_tickets)
-            if not is_busy and p.overall_rating >= best_rating:
-                best_rating = p.overall_rating
-                best_professional_id = p.id
-
-    for p in all_profs:
-        cat_name = category_names.get(p.category, p.category.title())
-        if cat_name not in profs_by_category:
-            profs_by_category[cat_name] = []
-        profs_by_category[cat_name].append({
-            'id': p.id,
-            'name': p.name,
-            'rating': round(p.overall_rating, 1)
-        })
-    
-    return api_response(success=True, data={'room': room.to_dict(),
-        'status': room.status,
-        'active_ticket': active_ticket.to_dict() if active_ticket else None,
-        'professionals': profs_by_category,
-        'suggested_professional_id': best_professional_id})
-
-
-@admin_bp.route('/api/ticket/<int:ticket_id>/assign', methods=['POST'])
-@admin_required
-@handle_api_errors
-def api_assign_ticket(ticket_id):
-    """Assign a ticket to a professional via AJAX."""
-    from datetime import datetime, timedelta
-    from ...cache import invalidate_floor_cache
-    
-    ticket = db.session.get(Ticket, ticket_id)
-    if not ticket:
-        return api_response(success=False, error="Ticket not found", status=404)
-        
-    data = request.get_json(silent=True) or {}
-    
-    raw_prof_id = data.get('professional_id')
-    if not raw_prof_id:
-        return api_response(success=False, error="Please select a professional", status=400)
-        
-    try:
-        professional_id = int(raw_prof_id)
-    except (ValueError, TypeError):
-        return api_response(success=False, error="Invalid professional ID", status=400)
-        
-    try:
-        time_limit_hours = int(data.get('time_limit_hours', 2))
-        if time_limit_hours < 1:
-            time_limit_hours = 2
-    except (ValueError, TypeError):
-        time_limit_hours = 2
-        
-    professional = db.session.get(Professional, professional_id)
-    if not professional or not professional.is_active:
-        return api_response(success=False, error="Selected professional is not available", status=400)
-        
-    # Check if professional already has an active task
-    active_task = Ticket.query.filter(
-        Ticket.assigned_professional_id == professional_id,
-        Ticket.status.in_([Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])
-    ).first()
-    
-    if active_task and active_task.id != ticket.id:
-        return api_response(success=False, error=f"{professional.name} already has an active task (#{active_task.id}).", status=400)
-
-    # Resolve floor_id safely before committing
-    floor_id = None
-    if ticket.room_id:
-        room = db.session.get(Room, ticket.room_id)
-        if room:
-            floor_id = room.floor_id
-
-    try:
-        ticket.assigned_professional_id = professional_id
-        ticket.time_limit_hours = time_limit_hours
-        ticket.deadline_datetime = datetime.utcnow() + timedelta(hours=time_limit_hours)
-        ticket.status = Ticket.STATUS_ASSIGNED
-        db.session.commit()
-    except Exception as e:
-        db.session.rollback()
-        current_app.logger.error(f"Error assigning ticket #{ticket_id}: {e}")
-        return api_response(success=False, error="Failed to save assignment in database.", status=500)
-    
-    # Invalidate cache for the floor safely
-    if floor_id:
-        try:
-            invalidate_floor_cache(floor_id)
-        except Exception as e:
-            current_app.logger.warning(f"Error invalidating floor cache: {e}")
-        
-    # Real-time notifications (fail-safe)
-    try:
-        from ...realtime import notify_professional_assigned, emit_room_status_change
-        notify_professional_assigned(ticket, professional)
-        if ticket.room_id:
-            room = db.session.get(Room, ticket.room_id)
-            if room:
-                emit_room_status_change(room)
-    except Exception as e:
-        current_app.logger.warning(f"Error dispatching assignment notification: {e}")
-        
-    return api_response(success=True, message="Technician assigned successfully")
+    return api_response(success=True, data={
+        'room': room.to_dict(),
+        'active_ticket': active_ticket.to_dict() if active_ticket else None
+    })
 
 
 @admin_bp.route('/tickets/<int:ticket_id>/delete', methods=['POST'])
@@ -1245,58 +1611,9 @@ def rate_ticket(ticket_id):
 @admin_bp.route('/professionals')
 @admin_required
 def professionals():
-    """Professional Management page."""
-    category_filter = request.args.get('category', 'all')
-    status_filter = request.args.get('status', 'all')
-    search_query = request.args.get('q', request.args.get('search', '')).strip()
-    page = request.args.get('page', 1, type=int)
-    per_page = 20
-    
-    query = Professional.query
-    
-    if search_query:
-        search = f"%{search_query}%"
-        query = query.filter(
-            or_(
-                Professional.name.ilike(search),
-                Professional.email.ilike(search),
-                Professional.phone.ilike(search),
-                Professional.username.ilike(search),
-                Professional.category.ilike(search)
-            )
-        )
-    
-    if category_filter != 'all' and category_filter in Professional.CATEGORIES:
-        query = query.filter_by(category=category_filter)
-    
-    if status_filter == 'active':
-        query = query.filter_by(is_active=True)
-    elif status_filter == 'inactive':
-        query = query.filter_by(is_active=False)
-    
-    query = query.order_by(Professional.created_at.desc())
-    
-    total = query.count()
-    professionals_paginated = query.paginate(page=page, per_page=per_page, error_out=False)
-    
-    category_names = {
-        Professional.CATEGORY_IT: 'IT Technician',
-        Professional.CATEGORY_ELECTRICIAN: 'Electrician',
-        Professional.CATEGORY_PLUMBER: 'Plumber',
-        Professional.CATEGORY_CARPENTER: 'Carpenter'
-    }
-    
-    return render_template('admin/professionals.html',
-                         professionals=professionals_paginated.items,
-                         total=total,
-                         page=page,
-                         pages=professionals_paginated.pages,
-                         per_page=per_page,
-                         search_query=search_query,
-                         category_filter=category_filter,
-                         status_filter=status_filter,
-                         categories=Professional.CATEGORIES,
-                         category_names=category_names)
+    """Professional Management decommissioned under Supervisor-Verified QA model."""
+    flash("Technician account management has been decommissioned under the Supervisor-Verified QA model.", "info")
+    return redirect(url_for('admin.dashboard'))
 
 
 @admin_bp.route('/professionals/<int:prof_id>/history')
@@ -1553,28 +1870,9 @@ def assign_ticket(ticket_id):
 @admin_bp.route('/help-requests')
 @admin_required
 def help_requests():
-    """View all help requests."""
-    status_filter = request.args.get('status', 'pending')
-    
-    # Use efficient DB-level aggregation for counts
-    counts = {
-        'pending': HelpRequest.query.filter_by(status='pending').count(),
-        'approved': HelpRequest.query.filter_by(status='approved').count(),
-        'rejected': HelpRequest.query.filter_by(status='rejected').count(),
-        'total': HelpRequest.query.count()
-    }
-    
-    # Efficient DB-level filtering and sorting
-    query = HelpRequest.query
-    if status_filter != 'all':
-        query = query.filter_by(status=status_filter)
-    
-    help_requests_list = query.order_by(HelpRequest.requested_at.desc()).all()
-    
-    return render_template('admin/help_requests.html',
-                         help_requests=help_requests_list,
-                         status_filter=status_filter,
-                         counts=counts)
+    """Technician help requests decommissioned under Supervisor-Verified QA model."""
+    flash("Technician help requests have been decommissioned under the Supervisor-Verified QA model.", "info")
+    return redirect(url_for('admin.dashboard'))
 
 
 @admin_bp.route('/api/help-request/<int:help_request_id>/respond', methods=['POST'])
@@ -1912,155 +2210,7 @@ def export_report(fmt):
     return redirect(url_for('admin.dashboard'))
 
 
-# ==================== CHAT ENDPOINTS ====================
 
-@admin_bp.route('/chat')
-@admin_required
-def chat():
-    """Admin chat interface."""
-    professional_id = request.args.get('professional_id', type=int)
-    return render_template('admin/chat.html', professional_id=professional_id)
-
-
-@admin_bp.route('/api/chat/professionals')
-@admin_required
-@handle_api_errors
-def get_professionals_for_chat():
-    """Get list of professionals for admin to chat with."""
-    from sqlalchemy import func, or_, case
-    from ...models import ChatMessage, Professional
-    
-    # 1. Unread Counts Subquery
-    unread_subquery = db.session.query(
-        ChatMessage.sender_id.label('prof_id'),
-        func.count(ChatMessage.id).label('unread_count')
-    ).filter(
-        ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL,
-        ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_ADMIN,
-        ChatMessage.is_read == False
-    ).group_by(ChatMessage.sender_id).subquery()
-    
-    # 2. Last Message Time Subquery
-    # A professional is involved if they are sender OR receiver
-    prof_id_col = case(
-        (ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL, ChatMessage.sender_id),
-        else_=ChatMessage.receiver_id
-    )
-    
-    last_msg_subquery = db.session.query(
-        prof_id_col.label('prof_id'),
-        func.max(ChatMessage.timestamp).label('last_msg_time')
-    ).filter(
-        or_(
-            (ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_ADMIN),
-            (ChatMessage.sender_type == ChatMessage.SENDER_TYPE_ADMIN) & (ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL)
-        )
-    ).group_by(prof_id_col).subquery()
-    
-    # 3. Main Query joining Professional with Subqueries
-    professionals_data = db.session.query(
-        Professional,
-        func.coalesce(unread_subquery.c.unread_count, 0).label('unread'),
-        last_msg_subquery.c.last_msg_time.label('last_time')
-    ).outerjoin(
-        unread_subquery, Professional.id == unread_subquery.c.prof_id
-    ).outerjoin(
-        last_msg_subquery, Professional.id == last_msg_subquery.c.prof_id
-    ).filter(Professional.is_active == True).all()
-    
-    result = []
-    for prof, unread, last_time in professionals_data:
-        result.append({
-            'id': prof.id,
-            'name': prof.name,
-            'category': prof.category,
-            'unread_count': unread,
-            'last_message_time': last_time.timestamp() if last_time else 0
-        })
-        
-    # Sort professionals so recent chats are at the top
-    result.sort(key=lambda x: x['last_message_time'], reverse=True)
-    
-    return api_response(success=True, data={'professionals': result})
-
-
-@admin_bp.route('/api/chat/history/<int:professional_id>')
-@admin_required
-@handle_api_errors
-def get_chat_history_with_professional(professional_id):
-    """Get chat history with a specific professional."""
-    from ...models import ChatMessage
-    admin = db.session.get(User, session['user_id'])
-    professional = Professional.query.get_or_404(professional_id)
-    
-    messages = ChatMessage.query.filter(
-        (
-            ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_ADMIN) & (ChatMessage.sender_id == admin.id)) |
-            ((ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_ADMIN) & (ChatMessage.receiver_id == admin.id))
-        ) &
-        (
-            ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.sender_id == professional.id)) |
-            ((ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_id == professional.id))
-        )
-    ).order_by(ChatMessage.timestamp.asc()).all()
-    
-    # Mark messages from professional to admin as read
-    for msg in messages:
-        if msg.receiver_type == ChatMessage.SENDER_TYPE_ADMIN:
-            msg.is_read = True
-    db.session.commit()
-    
-    return api_response(success=True, data={'messages': [msg.to_dict() for msg in messages],
-        'professional': professional.to_dict()})
-
-
-@admin_bp.route('/api/chat/send', methods=['POST'])
-@admin_required
-@handle_api_errors
-def admin_send_chat_message():
-    """Admin sends a chat message to professional."""
-    from ...models import ChatMessage
-    from ...api_utils import validate_json
-    
-    admin = db.session.get(User, session['user_id'])
-    data, error = validate_json(['professional_id', 'message'])
-    if error: return error
-    
-    professional_id = data.get('professional_id')
-    message_text = data.get('message', '').strip()
-    
-    professional = db.session.get(Professional, professional_id)
-    if not professional:
-        return api_response(success=False, error="Professional not found", status=404)
-    
-    chat_message = ChatMessage(
-        sender_type=ChatMessage.SENDER_TYPE_ADMIN,
-        sender_id=admin.id,
-        receiver_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
-        receiver_id=professional_id,
-        message=message_text
-    )
-    db.session.add(chat_message)
-    db.session.commit()
-    
-    from ...realtime import emit_chat_message
-    emit_chat_message(chat_message)
-    
-    return api_response(success=True, message='Message sent successfully', data={'chat_message': chat_message.to_dict()})
-
-
-@admin_bp.route('/api/chat/reset/<int:prof_id>', methods=['POST'])
-@admin_required
-@handle_api_errors
-def reset_professional_chat(prof_id):
-    """Reset chat history for a specific professional."""
-    from ...models import ChatMessage
-    ChatMessage.query.filter(
-        ((ChatMessage.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.sender_id == prof_id)) |
-        ((ChatMessage.receiver_type == ChatMessage.SENDER_TYPE_PROFESSIONAL) & (ChatMessage.receiver_id == prof_id))
-    ).delete(synchronize_session=False)
-    db.session.commit()
-    return api_response(success=True, message="Chat history reset successfully")
 
 
 # ==================== TIMETABLE IMPORT ====================

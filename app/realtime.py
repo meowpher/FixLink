@@ -210,46 +210,6 @@ def notify_help_request_approved(help_request):
             'requester_name': help_request.requester.name if help_request.requester else None
         })
 
-def emit_chat_message(chat_message):
-    """Emit a chat message to the involved parties."""
-    from .models import ChatMessage, Notification, User, Professional
-    from . import db
-    
-    data = {
-        'id': chat_message.id,
-        'sender_type': chat_message.sender_type,
-        'sender_id': chat_message.sender_id,
-        'receiver_type': chat_message.receiver_type,
-        'receiver_id': chat_message.receiver_id,
-        'message': chat_message.message,
-        'timestamp': chat_message.timestamp.isoformat() + 'Z',
-        'is_read': chat_message.is_read
-    }
-    
-    # 1. Always notify admins
-    trigger_event('private-admins', 'new_chat_message', data)
-    
-    # 2. Notify the involved professional
-    prof_id = chat_message.sender_id if chat_message.sender_type == ChatMessage.SENDER_TYPE_PROFESSIONAL else chat_message.receiver_id
-    trigger_event(f'private-professional-{prof_id}', 'new_chat_message', data)
-    
-            # 3. Create persistent notification if admin is receiver
-    if chat_message.receiver_type == ChatMessage.SENDER_TYPE_ADMIN:
-        sender = db.session.get(Professional, chat_message.sender_id)
-        sender_name = sender.name if sender else "Technician"
-        
-        admins = User.query.filter_by(is_admin=True).all()
-        for admin in admins:
-            notif = Notification(
-                user_id=admin.id,
-                title="New Message",
-                message=f"New message from {sender_name}: {chat_message.message[:50]}...",
-                type=Notification.TYPE_CHAT,
-                link=f"/admin/chat?professional_id={chat_message.sender_id}"
-            )
-            db.session.add(notif)
-        db.session.commit()
-
 def emit_room_status_change(room, status_data):
     """Emit a room occupancy status change to all clients."""
     data = {

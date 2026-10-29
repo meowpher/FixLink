@@ -4,10 +4,12 @@ Accessible with environment-configured credentials.
 """
 import os
 import hmac
+import secrets
 import logging
 from functools import wraps
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, abort, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy import or_, func
 from ... import db
 from ...api_utils import api_response
 from ...models import User, Professional
@@ -110,21 +112,39 @@ def logout():
 @superadmin_bp.route('/developer')
 @super_admin_required
 def dashboard():
-    """Developer dashboard - manage admins, professionals, and timetable SLA escalations."""
+    """Developer dashboard - manage admins, roles, and timetable SLA escalations."""
     from ...models import BugReport
     from ...sla_service import get_pending_batches_sla_status
-    admin_count = User.query.filter_by(is_admin=True, role=User.ROLE_ADMIN).count()
-    faculty_count = User.query.filter_by(role=User.ROLE_FACULTY).count()
-    professional_count = Professional.query.filter_by(is_active=True).count()
-    user_count = User.query.count()
+    # Load active Supervisors
+    supervisors = User.query.filter(
+        or_(
+            func.lower(User.role).in_(['supervisor', 'admin', 'super_admin']),
+            User.is_admin == True
+        ),
+        User.is_active == True
+    ).order_by(User.name.asc()).all()
+    supervisor_count = len(supervisors)
+
+    # Load existing Faculty members eligible for Supervisor promotion (only imported staff)
+    faculty_users = User.query.filter(
+        func.lower(User.role) == 'faculty',
+        User.is_active == True,
+        User.designation.isnot(None)
+    ).order_by(User.name.asc()).all()
+    faculty_count = len(faculty_users)
+
+    user_count = User.query.filter_by(is_active=True).count()
     bugs = BugReport.query.order_by(BugReport.created_at.desc()).all()
     sla_status = get_pending_batches_sla_status()
     
     return render_template('superadmin/dashboard.html',
-                         admin_count=admin_count,
+                         admin_count=supervisor_count,
+                         supervisor_count=supervisor_count,
                          faculty_count=faculty_count,
-                         professional_count=professional_count,
+                         faculty_users=faculty_users,
+                         supervisors=supervisors,
                          user_count=user_count,
+                         professional_count=supervisor_count,
                          bugs=bugs,
                          sla_status=sla_status)
 
@@ -269,25 +289,51 @@ def list_users():
     """List all registered users for management with search and role filters."""
     role_filter = request.args.get('role', '').strip().lower()
     search_query = request.args.get('q', '').strip()
+    designation_filter = request.args.get('designation')
+    if designation_filter:
+        designation_filter = designation_filter.strip()
     
-    # Precompute role counts for sidebar badges (unfiltered total counts)
+    # Precompute role counts for sidebar badges (unfiltered active counts)
     counts = {
-        'all': User.query.count(),
-        'student': User.query.filter_by(role=User.ROLE_STUDENT).count(),
-        'faculty': User.query.filter_by(role=User.ROLE_FACULTY).count(),
-        'admin': User.query.filter_by(role=User.ROLE_ADMIN).count(),
+        'all': User.query.filter_by(is_active=True).count(),
+        'student': User.query.filter(func.lower(User.role) == 'student', User.is_active == True).count(),
+        'faculty': User.query.filter(func.lower(User.role) == 'faculty', User.is_active == True).count(),
+        'admin': User.query.filter(
+            or_(
+                func.lower(User.role).in_(['admin', 'supervisor', 'super_admin']),
+                User.is_admin == True
+            ),
+            User.is_active == True
+        ).count(),
     }
     
-    query = User.query
-    if role_filter in User.ROLES:
-        query = query.filter_by(role=role_filter)
+    query = User.query.filter_by(is_active=True)
+    if role_filter == 'student':
+        query = query.filter(func.lower(User.role) == 'student')
+    elif role_filter == 'faculty':
+        query = query.filter(func.lower(User.role) == 'faculty')
+    elif role_filter in ['admin', 'supervisor', 'super_admin']:
+        query = query.filter(
+            or_(
+                func.lower(User.role).in_(['admin', 'supervisor', 'super_admin']),
+                User.is_admin == True
+            )
+        )
     else:
         role_filter = 'all'
         
+    if designation_filter:
+        if designation_filter in ['Program Director', 'Associate Professor & Program Director']:
+            query = query.filter(User.designation.ilike('%Program Director%'))
+        elif designation_filter in ['Program Head', 'Professor & Program Head']:
+            query = query.filter(User.designation.ilike('%Program Head%'))
+        else:
+            query = query.filter(User.designation == designation_filter)
+
     if search_query:
         term = f"%{search_query}%"
         query = query.filter(
-            db.or_(
+            or_(
                 User.name.ilike(term),
                 User.email.ilike(term),
                 User.prn.ilike(term)
@@ -295,14 +341,17 @@ def list_users():
         )
     
     users = query.order_by(User.created_at.desc()).all()
+    super_admin_emails = get_super_admin_emails()
     return render_template(
         'superadmin/list_users.html',
         users=users,
         roles=User.ROLES,
         current_role=role_filter,
         search_query=search_query,
+        designation_filter=designation_filter,
         counts=counts,
-        super_admin_emails=get_super_admin_emails()
+        super_admin_emails=super_admin_emails,
+        SUPER_ADMIN_EMAILS=super_admin_emails
     )
 
 
@@ -639,12 +688,13 @@ def update_user_role(user_id):
     if error: return error
     
     new_role = data.get('role')
-    if new_role not in User.ROLES:
+    valid_roles = [r.upper() for r in User.ROLES] + ['SUPER_ADMIN', 'ADMIN']
+    if (new_role or '').upper() not in valid_roles:
         return api_response(success=False, error="Invalid role", status=400)
     
     try:
-        user.role = new_role
-        user.is_admin = (new_role == User.ROLE_ADMIN)
+        user.role = new_role.upper() if new_role.upper() in [User.ROLE_ADMIN, User.ROLE_SUPERVISOR, User.ROLE_FACULTY, User.ROLE_SUPER_ADMIN] else new_role
+        user.is_admin = (user.role in [User.ROLE_ADMIN, User.ROLE_SUPERVISOR, User.ROLE_SUPER_ADMIN, 'ADMIN', 'admin'])
         db.session.commit()
         return api_response(message=f"User {user.name} promoted to {new_role}", data={'user': user.to_dict()})
     except Exception as e:

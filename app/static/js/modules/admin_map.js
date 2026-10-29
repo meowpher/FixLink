@@ -83,7 +83,7 @@ export function showRoomDetails(roomNumber, roomId) {
 }
 
 function renderRoomDetails(container, data) {
-    const { room, status, active_ticket, professionals, suggested_professional_id } = data;
+    const { room, status, active_ticket } = data;
     
     let html = `
         <div class="mb-3 px-3 pt-3">
@@ -100,14 +100,9 @@ function renderRoomDetails(container, data) {
 
         <div class="px-3">
             <div class="action-bar d-flex flex-column gap-2 mb-4">
-                ${status === 'issue' ? `
-                    <button onclick="toggleAssignForm()" class="btn btn-primary w-100 fw-bold py-2" title="Assign Technician">
-                        <i class="bi bi-person-plus-fill me-2"></i>Assign Technician
-                    </button>
-                ` : ''}
                 ${active_ticket ? `
-                    <button onclick="completeTicket(${active_ticket.id})" class="btn btn-success w-100 fw-bold py-2" title="Mark as Fixed">
-                        <i class="bi bi-check-lg me-2"></i>Resolve Issue
+                    <button onclick="openVerifyCompletionModal(${active_ticket.id}, '${(active_ticket.assigned_vendor_or_tech_name || '').replace(/'/g, "\\'")}')" class="btn btn-success w-100 fw-bold py-2 shadow-sm d-flex align-items-center justify-content-center gap-2" title="Verify & Log Completion">
+                        <i class="bi bi-patch-check-fill fs-5"></i><span>Verify & Log Completion</span>
                     </button>
                     <button onclick="deleteTicketFromMap(${active_ticket.id})" class="btn btn-outline-danger w-100 fw-bold py-2" title="Delete Ticket">
                         <i class="bi bi-trash-fill me-2"></i>Remove Ticket
@@ -129,53 +124,6 @@ function renderRoomDetails(container, data) {
                 <div class="mb-1"><strong>${active_ticket.issue_type.toUpperCase()}</strong></div>
                 <div class="small opacity-75">${active_ticket.description}</div>
             </div>
-            
-            <div id="assignmentFormContainer" class="assignment-card bg-light rounded p-3 border mb-3" style="display:none;">
-                <h6 class="small text-uppercase fw-bold text-muted mb-3">Assign Technician</h6>
-                
-                ${suggested_professional_id ? (() => {
-                    let recommendedName = 'Professional';
-                    let recommendedRating = 'No ratings';
-                    Object.values(professionals).forEach(profs => {
-                        const found = profs.find(p => p.id === suggested_professional_id);
-                        if (found) {
-                            recommendedName = found.name;
-                            recommendedRating = found.rating > 0 ? `${found.rating} ★` : 'No ratings';
-                        }
-                    });
-                    return `
-                    <div class="alert alert-info py-2 px-3 mb-3 small d-flex align-items-center border-0 shadow-sm">
-                        <i class="bi bi-robot fs-5 me-2 text-primary"></i>
-                        <div>
-                            <strong>AI Suggestion:</strong> We recommend <strong>${recommendedName}</strong> (${recommendedRating}).
-                        </div>
-                    </div>
-                    `;
-                })() : ''}
-
-                <div class="mb-2">
-                    <label class="form-label x-small text-muted mb-1 uppercase fw-bold">Professional</label>
-                    <select id="assignProf" class="form-select form-select-sm">
-                        <option value="">Select Professional...</option>
-                        ${Object.entries(professionals).map(([cat, profs]) => `
-                            <optgroup label="${cat}">
-                                ${profs.map(p => {
-                                    const stars = p.rating > 0 ? `(${p.rating} ★)` : '';
-                                    const selected = p.id === suggested_professional_id ? 'selected' : '';
-                                    return `<option value="${p.id}" ${selected}>${p.name} ${stars}</option>`;
-                                }).join('')}
-                            </optgroup>
-                        `).join('')}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label x-small text-muted mb-1 uppercase fw-bold">Hours</label>
-                    <input type="number" id="assignHours" class="form-control form-control-sm" value="2" min="1">
-                </div>
-                <button onclick="assignTechnician(${active_ticket.id})" class="btn btn-primary btn-sm w-100 shadow-sm">
-                    Confirm Assignment
-                </button>
-            </div>
         `;
     } else if (['in-progress', 'assigned'].includes(status) && active_ticket) {
         html += `
@@ -185,12 +133,7 @@ function renderRoomDetails(container, data) {
                     <strong>Under Maintenance</strong>
                 </div>
                 <div class="small mb-1"><strong>${active_ticket.issue_type.toUpperCase()}</strong></div>
-                <div class="small opacity-75 mb-3">${active_ticket.description}</div>
-                <div class="p-2 bg-white bg-opacity-50 rounded border border-warning border-opacity-25">
-                    <div class="x-small text-muted text-uppercase fw-bold">Assigned To</div>
-                    <div class="small font-weight-bold">${active_ticket.assigned_professional_name}</div>
-                    <div class="x-small text-muted">${active_ticket.assigned_professional_category}</div>
-                </div>
+                <div class="small opacity-75">${active_ticket.description}</div>
             </div>
         `;
     } else {
@@ -252,7 +195,6 @@ export async function assignTechnician(ticketId) {
         alert('Network or server error while assigning technician.');
     }
 }
-
 export async function completeTicket(ticketId) {
     if (!confirm('Mark this ticket as resolved?')) return;
     try {
@@ -286,13 +228,6 @@ export async function deleteTicketFromMap(ticketId) {
 
 // UI Helpers
 
-export function toggleAssignForm() {
-    const container = document.getElementById('assignmentFormContainer');
-    if (container) {
-        container.style.display = container.style.display === 'none' ? 'block' : 'none';
-    }
-}
-
 export function closeRoomDetails() {
     const panel = document.getElementById('roomDetailsPanel');
     if (panel) panel.style.display = 'none';
@@ -307,10 +242,34 @@ function renderError(container, msg) {
     container.innerHTML = `<div class="alert alert-danger m-auto">${msg}</div>`;
 }
 
+export function openVerifyCompletionModal(ticketId, defaultTechName = '') {
+    const modalEl = document.getElementById('verifyCompletionModal');
+    if (!modalEl) {
+        console.warn('verifyCompletionModal element not found');
+        return;
+    }
+    const idInput = document.getElementById('verifyTicketId');
+    const displaySpan = document.getElementById('verifyTicketDisplayId');
+    const techInput = document.getElementById('verifyTechName');
+    const proofInput = document.getElementById('verifyProofImage');
+    const notesInput = document.getElementById('verifyNotes');
+
+    if (idInput) idInput.value = ticketId;
+    if (displaySpan) displaySpan.textContent = `Ticket #${ticketId}`;
+    if (techInput) techInput.value = defaultTechName || '';
+    if (proofInput) proofInput.value = '';
+    if (notesInput) notesInput.value = '';
+
+    if (window.bootstrap && bootstrap.Modal) {
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.show();
+    }
+}
+
 // Export to window for HTML event handlers
 window.assignTechnician = assignTechnician;
+window.openVerifyCompletionModal = openVerifyCompletionModal;
 window.completeTicket = completeTicket;
 window.deleteTicketFromMap = deleteTicketFromMap;
-window.toggleAssignForm = toggleAssignForm;
 window.closeRoomDetails = closeRoomDetails;
 window.showRoomDetails = showRoomDetails;

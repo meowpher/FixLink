@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{% if show_phone_hint %}Professional Login - MIT-WPU FixLink{% else %}Login - MIT-WPU FixLink{% endif %}{% endblock %}
-{% block meta_description %}{% if show_phone_hint %}Technician login portal for MIT-WPU FixLink. Access your assigned maintenance jobs and task history.{% else %}Sign in to MIT-WPU FixLink to report and track smart room maintenance issues at MIT World Peace University.{% endif %}{% endblock %}
+{% block title %}Login - MIT-WPU FixLink{% endblock %}
+{% block meta_description %}Sign in to MIT-WPU FixLink to report and track smart room maintenance issues at MIT World Peace University.{% endblock %}
 {% block flash_messages %}{% endblock %}
 
 
@@ -544,10 +544,10 @@
 </div>
 
 
-<div class="glass-login-card p-4 p-sm-5 text-start {% if show_phone_hint %}pro-card{% else %}user-card{% endif %}">
+<div class="glass-login-card p-4 p-sm-5 text-start user-card">
     <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU Logo" class="form-logo mitwpu-logo d-block mx-auto mb-4" loading="eager" fetchpriority="high" width="200" height="57">
-    <h1 class="login-heading fs-4 fw-bold text-start mb-1">{% if show_phone_hint %}Technician Portal{% else %}Welcome Back{% endif %}</h1>
-    <p class="subtext text-muted text-start mb-4">{% if show_phone_hint %}Sign in to access your jobs{% else %}Sign in to your account{% endif %}</p>
+    <h1 class="login-heading fs-4 fw-bold text-start mb-1">Welcome Back</h1>
+    <p class="subtext text-muted text-start mb-4">Sign in to your account</p>
     
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -560,25 +560,14 @@
         {% endif %}
     {% endwith %}
     
-    <form method="POST" action="{{ url_for('auth.login') }}{% if show_phone_hint %}?pro=1{% endif %}" aria-label="Sign in form">
+    <form method="POST" action="{{ url_for('auth.login') }}" aria-label="Sign in form">
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         
         <div class="mb-3 text-start">
-            <label class="form-label small fw-semibold mb-1" for="loginInput">
-                {% if show_phone_hint %}
-                    Email, Username, or Phone
-                {% else %}
-                    Email Address
-                {% endif %}
-            </label>
+            <label class="form-label small fw-semibold mb-1" for="loginInput">Email Address</label>
             <input type="text" name="email" id="loginInput" class="form-control" required autocomplete="username"
-                   placeholder="{% if show_phone_hint %}name@mitwpu.edu.in or username or 9876543210{% else %}name@mitwpu.edu.in{% endif %}"
-                   aria-required="true" aria-label="{% if show_phone_hint %}Email, Username, or Phone{% else %}Email Address{% endif %}">
-            {% if show_phone_hint %}
-            <div class="form-text mt-1 text-muted small" style="font-size: 12px;">
-                <i class="bi bi-info-circle me-1"></i>Job Certified Professionals can use their username or phone number
-            </div>
-            {% endif %}
+                   placeholder="name@mitwpu.edu.in"
+                   aria-required="true" aria-label="Email Address">
         </div>
         
         <div class="mb-3 text-start">
@@ -595,34 +584,22 @@
             <a href="{{ url_for('auth.forgot_password') }}" class="forgot-pwd small text-decoration-none">Forgot password?</a>
         </div>
 
-        <!-- Google-Style Clickwrap Scroll-To-Accept Checkbox -->
+        <!-- Terms & Conditions Checkbox Component -->
         <div class="mb-4 text-start">
             <div class="form-check terms-check-group d-flex align-items-start gap-2" id="termsCheckGroup">
-                <input class="form-check-input mt-1" type="checkbox" name="accept_terms" id="loginTermsCheckbox" value="1" checked>
-                <span class="form-check-label terms-trigger-label" id="termsTriggerLabel" data-bs-toggle="modal" data-bs-target="#loginTermsModal" role="button" tabindex="0" aria-label="Open terms and conditions modal">
-                    <span id="termsCheckboxLabelText">I accept the <span class="terms-link">Terms &amp; Conditions</span>.</span>
-                </span>
+                <input class="form-check-input mt-1" type="checkbox" name="accept_terms" id="loginTermsCheckbox" value="1" required>
+                <label class="form-check-label terms-trigger-label" for="loginTermsCheckbox" id="termsTriggerLabel" data-bs-target="#loginTermsModal">
+                    <span id="termsCheckboxLabelText">I accept the <a href="{{ url_for('main.terms') }}" target="_blank" rel="noopener noreferrer" class="terms-link text-decoration-none fw-semibold" onclick="event.stopPropagation();">Terms &amp; Conditions</a>.</span>
+                </label>
             </div>
         </div>
         
         <button type="submit" id="loginSubmitBtn" class="btn btn-primary w-100 fw-semibold mb-3" aria-label="Sign in to your account">Login</button>
     </form>
     
-    {% if not show_phone_hint %}
     <div class="footer-links text-start small mb-3">
         <span class="footer-text text-muted">Don't have an account?</span> 
         <a href="{{ url_for('auth.signup') }}" class="footer-link fw-semibold ms-1">Sign Up</a>
-    </div>
-    {% endif %}
-    
-    <div class="pro-link-group pt-3 border-top text-start small">
-        {% if show_phone_hint %}
-            <span class="pro-text text-muted">Are you a <span class="pro-highlight">Student or Admin</span>?</span> 
-            <a href="{{ url_for('auth.login') }}" class="pro-link fw-semibold ms-1">Click here</a>
-        {% else %}
-            <span class="pro-text text-muted">Are you a <span class="pro-highlight">Job Certified Professional</span>?</span> 
-            <a href="?pro=1" class="pro-link fw-semibold ms-1">Click here</a>
-        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -1101,6 +1078,8 @@ function togglePwd() {
             return null;
         }
 
+        const termsLinkHtml = '<a href="{{ url_for("main.terms") }}" target="_blank" rel="noopener noreferrer" class="terms-link text-decoration-none fw-semibold" onclick="event.stopPropagation();">Terms &amp; Conditions</a>';
+
         // Dynamic Role Detection based on email / credentials input
         function updateTermsForRole() {
             const val = (loginInput ? loginInput.value : '').trim().toLowerCase();
@@ -1118,14 +1097,14 @@ function togglePwd() {
 
             if (isFacultyOrAdmin && val.length > 0) {
                 if (termsCheckboxLabelText) {
-                    termsCheckboxLabelText.innerHTML = 'I accept the <span class="terms-link">Terms &amp; Conditions</span> and Ghost Protocol.';
+                    termsCheckboxLabelText.innerHTML = 'I accept the ' + termsLinkHtml + ' and Ghost Protocol.';
                 }
                 if (tabFacultyBtn && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
                     bootstrap.Tab.getOrCreateInstance(tabFacultyBtn).show();
                 }
             } else {
                 if (termsCheckboxLabelText) {
-                    termsCheckboxLabelText.innerHTML = 'I accept the <span class="terms-link">Terms &amp; Conditions</span>.';
+                    termsCheckboxLabelText.innerHTML = 'I accept the ' + termsLinkHtml + '.';
                 }
                 if (tabStudentBtn && typeof bootstrap !== 'undefined' && bootstrap.Tab) {
                     bootstrap.Tab.getOrCreateInstance(tabStudentBtn).show();
@@ -1142,7 +1121,7 @@ function togglePwd() {
         if (tabStudentBtn) {
             tabStudentBtn.addEventListener('shown.bs.tab', function() {
                 if (termsCheckboxLabelText) {
-                    termsCheckboxLabelText.innerHTML = 'I accept the <span class="terms-link">Terms &amp; Conditions</span>.';
+                    termsCheckboxLabelText.innerHTML = 'I accept the ' + termsLinkHtml + '.';
                 }
                 handleScrollEvent();
             });
@@ -1150,7 +1129,7 @@ function togglePwd() {
         if (tabFacultyBtn) {
             tabFacultyBtn.addEventListener('shown.bs.tab', function() {
                 if (termsCheckboxLabelText) {
-                    termsCheckboxLabelText.innerHTML = 'I accept the <span class="terms-link">Terms &amp; Conditions</span> and Ghost Protocol.';
+                    termsCheckboxLabelText.innerHTML = 'I accept the ' + termsLinkHtml + ' and Ghost Protocol.';
                 }
                 handleScrollEvent();
             });
@@ -1193,14 +1172,14 @@ function togglePwd() {
             }
         });
 
-        // If user clicks directly on the checkbox, open the modal via Bootstrap
-        loginTermsCheckbox.addEventListener('click', function(e) {
-            e.preventDefault();
-            const modalInst = getModalInstance();
-            if (modalInst) {
-                modalInst.show();
-            }
-        });
+        // Ensure clicking the Terms & Conditions anchor tag never toggles the checkbox
+        if (termsCheckGroup) {
+            termsCheckGroup.addEventListener('click', function(e) {
+                if (e.target.closest('a')) {
+                    e.stopPropagation();
+                }
+            });
+        }
 
         // Anti-Spam & Double Submit Lock on form submission
         if (loginForm) {

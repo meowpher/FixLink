@@ -40,6 +40,30 @@
         padding-bottom: 90px;
     }
 
+    /* ── Progressive Loading Friendly Animations & Footers ── */
+    @keyframes bookingRowFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .booking-row-animated {
+        animation: bookingRowFadeIn 0.22s ease-out forwards;
+    }
+    #bookingLoadMoreFooter {
+        background-color: var(--fh-surface, #ffffff) !important;
+        border-color: var(--fh-border, #e2e8f0) !important;
+    }
+    [data-theme="dark"] #bookingLoadMoreFooter,
+    [data-bs-theme="dark"] #bookingLoadMoreFooter {
+        background-color: var(--fh-surface, #111111) !important;
+        border-color: var(--fh-border, #222222) !important;
+    }
+
     /* ── Custom Spacing & Utility Fixes ── */
     .gap-1-5 { gap: 0.375rem !important; }
     .gap-2-5 { gap: 0.75rem !important; }
@@ -1058,10 +1082,10 @@
                                 </div>
 
                                 <div class="border-top pt-3 mt-3 d-flex justify-content-end gap-2" style="border-color: var(--fh-border) !important;">
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold" onclick="rejectEvent({{ event.id }})">
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold" data-action="rejectEvent" data-event-id="{{ event.id }}">
                                         <i class="bi bi-x-circle me-1"></i>Reject
                                     </button>
-                                    <button class="btn btn-success btn-sm rounded-pill px-3.5 py-1.5 fw-semibold" onclick="approveEvent({{ event.id }})">
+                                    <button class="btn btn-success btn-sm rounded-pill px-3 py-1 fw-semibold" data-action="approveEvent" data-event-id="{{ event.id }}">
                                         <i class="bi bi-check-circle me-1"></i>Approve & Commit
                                     </button>
                                 </div>
@@ -1127,7 +1151,7 @@
                                     </div>
                                 </div>
                                 <div class="mt-3 pt-2 border-top d-flex justify-content-end" style="border-color: var(--fh-border) !important;">
-                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1.5 fw-semibold" onclick="rejectEvent({{ event.id }}, true)">
+                                    <button class="btn btn-outline-danger btn-sm rounded-pill px-3 py-1 fw-semibold" data-action="rejectEvent" data-event-id="{{ event.id }}" data-revoke="true">
                                         <i class="bi bi-x-circle me-1"></i>Reject / Revoke Event
                                     </button>
                                 </div>
@@ -1708,7 +1732,7 @@
                     </thead>
                     <tbody id="bookingHistoryTableBody">
                         {% for b in booking_history_list %}
-                        <tr data-faculty="{{ b.faculty.name if b.faculty else '' }}" data-room="{{ b.room.number if b.room else '' }}" data-subject="{{ b.subject or '' }}" data-course="{{ b.course or '' }}" data-status="{{ b.status or 'Active' }}">
+                        <tr class="booking-row {% if loop.index > 4 %}d-none{% endif %}" data-faculty="{{ b.faculty.name if b.faculty else '' }}" data-room="{{ b.room.number if b.room else '' }}" data-subject="{{ b.subject or '' }}" data-course="{{ b.course or '' }}" data-status="{{ b.status or 'Active' }}">
                             <td class="ps-4">
                                 <div class="fw-semibold text-body">{{ b.faculty.name if b.faculty else 'Unknown Faculty' }}</div>
                                 <div class="text-muted small">{{ b.faculty.email if b.faculty else '' }}</div>
@@ -1749,6 +1773,26 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Progressive Loading Friendly Footer -->
+            <div class="card-footer border-top d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 py-3 px-4" id="bookingLoadMoreFooter">
+                <div class="text-muted small" id="bookingShowingText">
+                    Showing <strong id="bookingVisibleCount">{{ [booking_history_list|length, 4]|min }}</strong> of <strong id="bookingTotalCount">{{ booking_history_list|length }}</strong> bookings
+                </div>
+                <div class="d-flex align-items-center gap-2" id="bookingLoadMoreControls">
+                    {% if booking_history_list|length > 4 %}
+                    {% set next_batch = [booking_history_list|length - 4, 8]|min %}
+                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" id="btnBookingLoadMore" onclick="window.handleLoadMoreBookings ? window.handleLoadMoreBookings() : null">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        <span>Load More (+{{ next_batch }})</span>
+                    </button>
+                    {% else %}
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" id="bookingAllLoadedBadge">
+                        <i class="bi bi-check2-circle"></i> All {{ booking_history_list|length }} bookings loaded
+                    </span>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% else %}
@@ -2099,6 +2143,11 @@
             }
         });
 
+        // Trigger filter/pagination refresh if switching into Bookings pane
+        if (tabKey === 'bookings' && typeof window.applyBookingFilters === 'function') {
+            window.applyBookingFilters(false);
+        }
+
         // 4. Update Active states in Drawer
         drawerNavItems.forEach(item => {
             if (item.getAttribute('data-tab-target') === tabKey) {
@@ -2152,6 +2201,20 @@
     const urlParams = new URLSearchParams(window.location.search);
     const initialTab = urlParams.get('tab') || '{{ active_tab }}' || 'events';
     switchHandleTab(initialTab);
+
+    // Delegated listener for event action buttons (avoids Jinja expressions in onclick attrs)
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var action = btn.dataset.action;
+        var eventId = parseInt(btn.dataset.eventId, 10);
+        if (action === 'approveEvent' && window.approveEvent) {
+            window.approveEvent(eventId);
+        } else if (action === 'rejectEvent' && window.rejectEvent) {
+            var isRevoke = btn.dataset.revoke === 'true';
+            window.rejectEvent(eventId, isRevoke);
+        }
+    });
 
     // ── EVENT APPROVALS ACTIONS ──
     window.approveEvent = async function(eventId) {
@@ -2569,9 +2632,13 @@
         }
     });
 
-    // Single / Bulk Assign modal trigger
+    // Single / Bulk Assign modal trigger (Safely guarded against deferred Bootstrap)
     const assignModalEl = document.getElementById('assignFacultyModal');
-    const assignModal = assignModalEl ? new bootstrap.Modal(assignModalEl) : null;
+    function getAssignModal() {
+        if (!assignModalEl || typeof bootstrap === 'undefined') return null;
+        return bootstrap.Modal.getOrCreateInstance(assignModalEl);
+    }
+
     if (assignModalEl) {
         assignModalEl.addEventListener('shown.bs.modal', function() {
             if (window.initCustomDropdowns) {
@@ -2582,13 +2649,16 @@
 
     tableBody?.addEventListener('click', (e) => {
         const btn = e.target.closest('.assign-single-btn');
-        if (btn && assignModal) {
-            const id = btn.getAttribute('data-id');
-            const subj = btn.getAttribute('data-subject');
-            document.getElementById('assignClassId').value = id;
-            document.getElementById('assignBulkMode').value = 'false';
-            document.getElementById('assignClassSummary').textContent = `Assign faculty to ${subj || 'selected class'}`;
-            assignModal.show();
+        if (btn) {
+            const modal = getAssignModal();
+            if (modal) {
+                const id = btn.getAttribute('data-id');
+                const subj = btn.getAttribute('data-subject');
+                document.getElementById('assignClassId').value = id;
+                document.getElementById('assignBulkMode').value = 'false';
+                document.getElementById('assignClassSummary').textContent = `Assign faculty to ${subj || 'selected class'}`;
+                modal.show();
+            }
         }
     });
 
@@ -2606,7 +2676,7 @@
             });
             const data = await res.json();
             if (data.success) {
-                if (assignModal) assignModal.hide();
+                getAssignModal()?.hide();
                 Swal.fire('Success', data.message || 'Faculty assigned successfully.', 'success').then(() => location.reload());
             } else {
                 Swal.fire('Error', data.error || 'Assignment failed.', 'error');
@@ -2758,17 +2828,33 @@
         }
     });
 
-    // ── BOOKING HISTORY SCRIPT LOGIC ──
+    // ── BOOKING HISTORY SCRIPT LOGIC (Progressive Loading: 4 Initial, +8 on Demand) ──
     const bookingSearchInput = document.getElementById('bookingSearchInput');
     const bookingStatusFilter = document.getElementById('bookingStatusFilter');
     const bookingTableBody = document.getElementById('bookingHistoryTableBody');
+    const bookingVisibleCount = document.getElementById('bookingVisibleCount');
+    const bookingTotalCount = document.getElementById('bookingTotalCount');
+    const bookingLoadMoreControls = document.getElementById('bookingLoadMoreControls');
 
-    function applyBookingFilters() {
+    const INITIAL_LOAD_COUNT = 4;
+    const INCREMENT_LOAD_COUNT = 8;
+    let currentBookingLimit = INITIAL_LOAD_COUNT;
+
+    function applyBookingFilters(resetLimit = false) {
+        if (resetLimit) {
+            currentBookingLimit = INITIAL_LOAD_COUNT;
+        }
+
         const query = (bookingSearchInput?.value || '').toLowerCase().trim();
         const status = (bookingStatusFilter?.value || '').toLowerCase().trim();
 
-        const rows = bookingTableBody?.querySelectorAll('tr') || [];
-        rows.forEach(r => {
+        const allRows = Array.from(bookingTableBody?.querySelectorAll('tr.booking-row') || []);
+        
+        // Remove existing "No results" row if any
+        document.getElementById('noBookingMatchesRow')?.remove();
+
+        const matchingRows = [];
+        allRows.forEach(r => {
             const faculty = (r.getAttribute('data-faculty') || '').toLowerCase();
             const room = (r.getAttribute('data-room') || '').toLowerCase();
             const subject = (r.getAttribute('data-subject') || '').toLowerCase();
@@ -2779,15 +2865,113 @@
             const matchesStatus = !status || rStatus.includes(status);
 
             if (matchesQuery && matchesStatus) {
-                r.classList.remove('d-none');
+                matchingRows.push(r);
             } else {
                 r.classList.add('d-none');
+                r.classList.remove('booking-row-animated');
             }
         });
+
+        const totalMatching = matchingRows.length;
+
+        if (totalMatching === 0) {
+            const emptyTr = document.createElement('tr');
+            emptyTr.id = 'noBookingMatchesRow';
+            emptyTr.innerHTML = `
+                <td colspan="6" class="text-center py-5 text-muted">
+                    <i class="bi bi-calendar-x display-6 d-block mb-2 text-muted opacity-50"></i>
+                    No reservations found matching your criteria.
+                </td>
+            `;
+            bookingTableBody?.appendChild(emptyTr);
+
+            if (bookingVisibleCount) bookingVisibleCount.textContent = '0';
+            if (bookingTotalCount) bookingTotalCount.textContent = '0';
+            if (bookingLoadMoreControls) {
+                bookingLoadMoreControls.innerHTML = '';
+            }
+            return;
+        }
+
+        // Display up to currentBookingLimit matching rows
+        matchingRows.forEach((r, idx) => {
+            if (idx < currentBookingLimit) {
+                const wasHidden = r.classList.contains('d-none');
+                r.classList.remove('d-none');
+                if (wasHidden && !resetLimit) {
+                    r.classList.add('booking-row-animated');
+                }
+            } else {
+                r.classList.add('d-none');
+                r.classList.remove('booking-row-animated');
+            }
+        });
+
+        const visibleCount = Math.min(currentBookingLimit, totalMatching);
+        if (bookingVisibleCount) bookingVisibleCount.textContent = visibleCount;
+        if (bookingTotalCount) bookingTotalCount.textContent = totalMatching;
+
+        // Render Load More Controls
+        if (bookingLoadMoreControls) {
+            if (visibleCount < totalMatching) {
+                const remaining = totalMatching - visibleCount;
+                const nextBatch = Math.min(remaining, INCREMENT_LOAD_COUNT);
+                bookingLoadMoreControls.innerHTML = `
+                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" id="btnBookingLoadMore" onclick="window.handleLoadMoreBookings ? window.handleLoadMoreBookings() : null">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        <span>Load More (+${nextBatch})</span>
+                    </button>
+                `;
+            } else {
+                bookingLoadMoreControls.innerHTML = `
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" id="bookingAllLoadedBadge">
+                        <i class="bi bi-check2-circle"></i> All ${totalMatching} bookings loaded
+                    </span>
+                `;
+            }
+        }
     }
 
-    bookingSearchInput?.addEventListener('input', applyBookingFilters);
-    bookingStatusFilter?.addEventListener('change', applyBookingFilters);
+    function handleLoadMoreBookings() {
+        const btn = document.getElementById('btnBookingLoadMore');
+        if (!btn || btn.disabled) return;
+
+        // Loading-friendly tactile feedback
+        btn.disabled = true;
+        btn.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span>Loading...</span>
+        `;
+
+        setTimeout(() => {
+            currentBookingLimit += INCREMENT_LOAD_COUNT;
+            applyBookingFilters(false);
+        }, 120);
+    }
+
+    // Expose globally so inline onclick always works
+    window.handleLoadMoreBookings = handleLoadMoreBookings;
+    window.applyBookingFilters = applyBookingFilters;
+
+    // Global document click delegation for Load More
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('#btnBookingLoadMore');
+        if (btn) {
+            e.preventDefault();
+            handleLoadMoreBookings();
+        }
+    });
+
+    // Attach search and filter events
+    bookingSearchInput?.addEventListener('input', () => applyBookingFilters(true));
+    bookingStatusFilter?.addEventListener('change', () => applyBookingFilters(true));
+
+    // Initial progressive load setup (run immediately and on DOMContentLoaded)
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => applyBookingFilters(false));
+    } else {
+        applyBookingFilters(false);
+    }
 
 })();
 </script>

@@ -751,7 +751,7 @@
         color: var(--sub-text, #8A8A96);
     }
 
-    /* Enhanced Reported Bugs Section */
+    /* Bug Tracking Card Styles */
     .bugs-tracking-card {
         background: var(--bg-card);
         border: 1px solid var(--border-color);
@@ -1521,6 +1521,55 @@
         0%, 100% { opacity: 1; transform: scale(1); }
         50% { opacity: 0.3; transform: scale(0.8); }
     }
+
+    /* Role Management Section Styles (Phase 2 RBAC) */
+    .role-management-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    [data-theme="dark"] .role-management-card {
+        background: linear-gradient(160deg, rgba(22, 22, 24, 0.95) 0%, rgba(15, 15, 17, 0.95) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .supervisor-avatar-circle {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(79, 70, 229, 0.1) 100%);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        color: #6366f1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.85rem;
+        flex-shrink: 0;
+    }
+
+    [data-theme="dark"] .supervisor-avatar-circle {
+        background: rgba(99, 102, 241, 0.2);
+        color: #818cf8;
+        border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .supervisor-row {
+        transition: background-color 0.2s ease;
+    }
+
+    .supervisor-row:hover {
+        background-color: rgba(99, 102, 241, 0.04);
+    }
+
+    [data-theme="dark"] .supervisor-row:hover {
+        background-color: rgba(99, 102, 241, 0.1);
+    }
 </style>
 {% endblock %}
 
@@ -1549,11 +1598,21 @@
                 <h1 class="dev-hero-title">
                     <i class="bi bi-code-square me-3 hero-code-icon"></i>
                     <span class="flip-cylinder">
-                        <span class="flip-face flip-front">Developer Center</span>
+                        <span class="flip-face flip-front">
+                            {% if current_user.email in ['om.mahadik@mitwpu.edu.in', 'taha.piplodwala@mitwpu.edu.in'] %}
+                            Developer Center
+                            {% else %}
+                            Admin Center
+                            {% endif %}
+                        </span>
                         <span class="flip-face flip-back">
+                            {% if current_user.email in ['om.mahadik@mitwpu.edu.in', 'taha.piplodwala@mitwpu.edu.in'] %}
                             <span class="name-om">Om</span>
                             <span class="name-ampersand">&amp;</span>
                             <span class="name-taha">Taha</span>
+                            {% else %}
+                            <span>Admin Center</span>
+                            {% endif %}
                         </span>
                     </span>
                 </h1>
@@ -1603,13 +1662,13 @@
             <div class="dev-stat-card stat-card-prof">
                 <div>
                     <div class="stat-icon-wrapper">
-                        <i class="bi bi-tools"></i>
+                        <i class="bi bi-shield-check"></i>
                     </div>
-                    <div class="stats-label">Certified Professionals</div>
-                    <div class="stats-value">{{ professional_count }}</div>
+                    <div class="stats-label">Active Supervisors</div>
+                    <div class="stats-value">{{ supervisor_count }}</div>
                 </div>
-                <a href="{{ url_for('superadmin.list_professionals') }}" class="stats-link">
-                    <span>Manage Workforce</span> <i class="bi bi-arrow-right"></i>
+                <a href="#roleManagementSection" class="stats-link">
+                    <span>Manage Roles</span> <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
         </div>
@@ -1632,7 +1691,7 @@
 
     <!-- Main Actions -->
     <div class="row g-4 mb-5">
-        <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+        <div class="col-lg-4 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
             <div class="dev-action-card action-card-admin">
                 <div class="action-icon-badge">
                     <i class="bi bi-person-plus-fill"></i>
@@ -1646,7 +1705,7 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+        <div class="col-lg-4 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
             <div class="dev-action-card action-card-faculty">
                 <div class="action-icon-badge">
                     <i class="bi bi-mortarboard-fill"></i>
@@ -1660,21 +1719,7 @@
             </div>
         </div>
 
-        <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
-            <div class="dev-action-card action-card-prof">
-                <div class="action-icon-badge">
-                    <i class="bi bi-wrench-adjustable-circle-fill"></i>
-                </div>
-                <h3>Enroll Professional</h3>
-                <p>Initialize a new Job Certified Professional for field maintenance tasks.</p>
-                <a href="{{ url_for('superadmin.add_professional') }}" class="btn-action mt-auto">
-                    <i class="bi bi-plus-lg"></i>
-                    <span>Add Professional</span>
-                </a>
-            </div>
-        </div>
-
-        <div class="col-lg-3 col-md-6 animate-on-load" style="opacity: 0; transform: translateY(20px);">
+        <div class="col-lg-4 col-md-12 animate-on-load" style="opacity: 0; transform: translateY(20px);">
             <div class="dev-action-card action-card-bulk">
                 <div class="action-icon-badge">
                     <i class="bi bi-file-earmark-spreadsheet-fill"></i>
@@ -1691,6 +1736,217 @@
                         <span>Upload CSV</span>
                     </button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Management: Supervisor Elevation (Phase 2 RBAC) -->
+    <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);" id="roleManagementSection">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div>
+                <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
+                    <span class="d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(79, 70, 229, 0.1) 100%); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8;">
+                        <i class="bi bi-person-gear"></i>
+                    </span>
+                    <span>Role Management: Supervisor Privileges</span>
+                </h5>
+                <p class="text-muted small mb-0 mt-1">Manual assignment of Supervisor roles to existing Faculty accounts for quality assurance.</p>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <a href="{{ url_for('admin.audit_trail') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-shield-shaded me-1"></i>Audit Trail
+                </a>
+                <span class="badge border rounded-pill px-3 py-1.5 fw-semibold" style="background: rgba(99, 102, 241, 0.12); color: #6366f1; border-color: rgba(99, 102, 241, 0.25);">
+                    <i class="bi bi-shield-check me-1"></i><span id="supervisorsHeaderCount">{{ supervisors|length }}</span> Active Supervisors
+                </span>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1.5 fw-semibold">
+                    <i class="bi bi-mortarboard me-1"></i><span id="facultyHeaderCount">{{ faculty_users|length }}</span> Eligible Faculty
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left: Promote Faculty Member Form -->
+            <div class="col-lg-6">
+                <div class="role-management-card h-100 p-4">
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                        <div class="d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                            <i class="bi bi-person-up fs-5"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0" style="color: var(--text-main);">Promote Faculty to Supervisor</h6>
+                            <p class="text-muted small mb-0">Select a faculty member or enter their email address.</p>
+                        </div>
+                    </div>
+
+                    <!-- Instant Feedback Container -->
+                    <div id="promoteFeedback" class="d-none alert alert-dismissible fade show mb-3" role="alert">
+                        <div class="d-flex align-items-center gap-2">
+                            <i id="promoteFeedbackIcon" class="bi bi-check-circle-fill"></i>
+                            <span id="promoteFeedbackMsg"></span>
+                        </div>
+                        <button type="button" class="btn-close" onclick="document.getElementById('promoteFeedback').classList.add('d-none');"></button>
+                    </div>
+
+                    <form id="promoteUserForm" action="{{ url_for('admin.promote_user') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                        <!-- Search Faculty by Name -->
+                        <div class="mb-3">
+                            <label for="promoteNameSearch" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
+                                <i class="bi bi-search me-1"></i>Search Faculty by Name
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="bi bi-search text-muted"></i>
+                                </span>
+                                <input type="text" id="promoteNameSearch" class="form-control border-start-0" 
+                                       placeholder="Type name to filter (e.g. Anuradha, Swapna, Sachin...)" autocomplete="off">
+                                <button class="btn btn-outline-secondary border-start-0 d-none" type="button" id="clearPromoteNameSearch" title="Clear search">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Option A: Select from eligible faculty dropdown -->
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label for="promoteUserSelect" class="form-label small fw-bold text-muted text-uppercase mb-0" style="letter-spacing: 0.5px;">
+                                    <i class="bi bi-person-lines-fill me-1"></i>Select Eligible Faculty Member
+                                </label>
+                                <span id="facultyFilterBadge" class="badge bg-secondary-subtle text-secondary small fw-normal">{{ faculty_users|length }} Imported Staff</span>
+                            </div>
+                            <select id="promoteUserSelect" name="user_id" class="form-select form-select-lg rounded-3">
+                                <option value="" selected>-- Choose faculty from registered list --</option>
+                                {% for fac in faculty_users %}
+                                <option value="{{ fac.id }}" data-name="{{ fac.name }}" data-email="{{ fac.email }}" data-designation="{{ fac.designation or '' }}">
+                                    {{ fac.name }} ({{ fac.email }}){% if fac.designation %} [{{ fac.designation }}]{% endif %}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="d-flex align-items-center my-3">
+                            <hr class="flex-grow-1 my-0 opacity-25">
+                            <span class="px-3 small text-muted text-uppercase fw-semibold" style="letter-spacing: 0.8px; font-size: 0.72rem;">OR LOOK UP BY EMAIL</span>
+                            <hr class="flex-grow-1 my-0 opacity-25">
+                        </div>
+
+                        <!-- Option B: Direct Email Lookup -->
+                        <div class="mb-4">
+                            <label for="promoteEmailInput" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
+                                <i class="bi bi-envelope-at me-1"></i>Faculty Email Address
+                            </label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-transparent border-end-0">
+                                    <i class="bi bi-search text-muted"></i>
+                                </span>
+                                <input type="email" id="promoteEmailInput" name="email" class="form-control border-start-0" 
+                                       placeholder="e.g., faculty.member@mitwpu.edu.in" autocomplete="off">
+                            </div>
+                            <div class="form-text small text-muted">
+                                Entering a registered faculty email will automatically select or look up their account.
+                            </div>
+                        </div>
+
+                        <!-- Security Note -->
+                        <div class="p-3 rounded-3 mb-4" style="background: rgba(99, 102, 241, 0.05); border: 1px dashed rgba(99, 102, 241, 0.25);">
+                            <div class="d-flex gap-2">
+                                <i class="bi bi-shield-shaded fs-5" style="color: #6366f1;"></i>
+                                <div class="small" style="color: var(--text-muted);">
+                                    <strong>Access Control Policy:</strong> Promoted users transition to the <code class="fw-bold">SUPERVISOR</code> role and gain authorization to physically inspect maintenance work, take camera proof, and commit verified resolutions to the system audit trail.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="promoteSubmitBtn" class="btn btn-primary btn-lg rounded-pill w-100 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm">
+                            <i class="bi bi-shield-plus"></i>
+                            <span>Promote to Supervisor</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right: Active Supervisors Directory -->
+            <div class="col-lg-6">
+                <div class="role-management-card h-100 p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <div class="d-inline-flex align-items-center justify-content-center" style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                                <i class="bi bi-shield-lock-fill fs-5"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0" style="color: var(--text-main);">Active Supervisors Registry</h6>
+                                <p class="text-muted small mb-0">Authorized to verify work and close tickets.</p>
+                            </div>
+                        </div>
+                        <div class="supervisor-search-wrapper" style="min-width: 160px;">
+                            <input type="text" id="supervisorFilterInput" class="form-control form-control-sm rounded-pill" placeholder="Filter supervisors...">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive flex-grow-1" style="max-height: 410px; overflow-y: auto;">
+                        <table class="table align-middle mb-0" id="supervisorsTable">
+                            <thead>
+                                <tr>
+                                    <th style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Supervisor</th>
+                                    <th style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Role & Privileges</th>
+                                    <th style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); text-align: center;">Status</th>
+                                    <th style="font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="supervisorsTableBody">
+                                {% for sup in supervisors %}
+                                <tr class="supervisor-row" data-name="{{ sup.name|lower }}" data-email="{{ sup.email|lower }}" data-user-id="{{ sup.id }}">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2.5">
+                                            <div class="supervisor-avatar-circle">
+                                                {{ (sup.name[:1] if sup.name else 'S')|upper }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold supervisor-name" style="color: var(--text-main); font-size: 0.92rem;">
+                                                    {{ sup.name }}
+                                                </div>
+                                                <div class="text-muted small font-monospace" style="font-size: 0.76rem;">
+                                                    {{ sup.email }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge rounded-pill px-2.5 py-1" style="background: rgba(99, 102, 241, 0.12); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.25); font-size: 0.74rem;">
+                                            <i class="bi bi-shield-check me-1"></i>SUPERVISOR
+                                        </span>
+                                        <div class="small text-muted mt-1" style="font-size: 0.7rem;">Verification Authority</div>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Active
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 py-1 demote-user-btn"
+                                                data-user-id="{{ sup.id }}"
+                                                data-user-name="{{ sup.name }}"
+                                                data-user-email="{{ sup.email }}"
+                                                title="Demote Supervisor to Faculty">
+                                            <i class="bi bi-arrow-down-circle me-1"></i>Demote
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr id="noSupervisorsRow">
+                                    <td colspan="4" class="text-center py-4 text-muted small">
+                                        <i class="bi bi-info-circle me-1"></i>No supervisors assigned yet. Promote faculty using the form on the left.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1793,6 +2049,7 @@
     </div>
 
     <!-- Bug Tracking Section -->
+    {% if current_user.email in ['om.mahadik@mitwpu.edu.in', 'taha.piplodwala@mitwpu.edu.in'] %}
     <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);" id="reportedBugsSection">
         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
             <div class="d-flex align-items-center gap-2">
@@ -1936,6 +2193,7 @@
             </div>
         </div>
     </div>
+    {% endif %}
 
     <!-- Quick Access Grid -->
     <div class="mb-4 animate-on-load" style="opacity: 0; transform: translateY(20px);">
@@ -2464,6 +2722,325 @@
                 btn.innerHTML = origHtml;
             }
         });
+
+        // Role Manager - Promote Faculty to Supervisor (Phase 2 RBAC)
+        const promoteForm = document.getElementById('promoteUserForm');
+        const promoteSubmitBtn = document.getElementById('promoteSubmitBtn');
+        const promoteUserSelect = document.getElementById('promoteUserSelect');
+        const promoteEmailInput = document.getElementById('promoteEmailInput');
+        const promoteFeedback = document.getElementById('promoteFeedback');
+        const promoteFeedbackMsg = document.getElementById('promoteFeedbackMsg');
+        const promoteFeedbackIcon = document.getElementById('promoteFeedbackIcon');
+        const supervisorsTableBody = document.getElementById('supervisorsTableBody');
+        const supervisorsHeaderCount = document.getElementById('supervisorsHeaderCount');
+        const facultyHeaderCount = document.getElementById('facultyHeaderCount');
+
+        const promoteNameSearch = document.getElementById('promoteNameSearch');
+        const clearPromoteNameSearch = document.getElementById('clearPromoteNameSearch');
+        const facultyFilterBadge = document.getElementById('facultyFilterBadge');
+
+        // Cache all imported faculty options for instant client-side search
+        let allFacultyOptions = [];
+        if (promoteUserSelect) {
+            allFacultyOptions = Array.from(promoteUserSelect.options).slice(1).map(opt => ({
+                value: opt.value,
+                text: opt.textContent.trim(),
+                name: opt.getAttribute('data-name') || '',
+                email: opt.getAttribute('data-email') || '',
+                designation: opt.getAttribute('data-designation') || ''
+            }));
+        }
+
+        function filterFacultyDropdown(searchTerm) {
+            if (!promoteUserSelect) return;
+            const term = (searchTerm || '').trim().toLowerCase();
+            const currentSelectedVal = promoteUserSelect.value;
+
+            // Rebuild options with filtered subset
+            promoteUserSelect.innerHTML = '<option value="">-- Choose faculty from registered list --</option>';
+
+            const matches = allFacultyOptions.filter(f => {
+                if (!term) return true;
+                return f.name.toLowerCase().includes(term) ||
+                       f.email.toLowerCase().includes(term) ||
+                       f.designation.toLowerCase().includes(term);
+            });
+
+            matches.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value = f.value;
+                opt.textContent = f.text;
+                opt.setAttribute('data-name', f.name);
+                opt.setAttribute('data-email', f.email);
+                opt.setAttribute('data-designation', f.designation);
+                if (f.value === currentSelectedVal) {
+                    opt.selected = true;
+                }
+                promoteUserSelect.appendChild(opt);
+            });
+
+            // If exactly one match, select it and update email input
+            if (term && matches.length === 1) {
+                promoteUserSelect.selectedIndex = 1;
+                if (promoteEmailInput) promoteEmailInput.value = matches[0].email;
+            } else if (!promoteUserSelect.value) {
+                promoteUserSelect.selectedIndex = 0;
+            }
+
+            if (facultyFilterBadge) {
+                facultyFilterBadge.textContent = term ? `${matches.length} of ${allFacultyOptions.length} Matches` : `${allFacultyOptions.length} Imported Staff`;
+            }
+
+            if (clearPromoteNameSearch) {
+                if (term) {
+                    clearPromoteNameSearch.classList.remove('d-none');
+                } else {
+                    clearPromoteNameSearch.classList.add('d-none');
+                }
+            }
+        }
+
+        if (promoteNameSearch) {
+            promoteNameSearch.addEventListener('input', function() {
+                filterFacultyDropdown(this.value);
+            });
+        }
+
+        if (clearPromoteNameSearch && promoteNameSearch) {
+            clearPromoteNameSearch.addEventListener('click', function() {
+                promoteNameSearch.value = '';
+                filterFacultyDropdown('');
+                promoteNameSearch.focus();
+            });
+        }
+
+        if (promoteUserSelect && promoteEmailInput) {
+            promoteUserSelect.addEventListener('change', function() {
+                if (this.value) {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const email = selectedOption.getAttribute('data-email');
+                    if (email) promoteEmailInput.value = email;
+                }
+            });
+
+            promoteEmailInput.addEventListener('input', function() {
+                const enteredEmail = this.value.trim().toLowerCase();
+                if (!enteredEmail) return;
+                for (let i = 0; i < promoteUserSelect.options.length; i++) {
+                    const optEmail = (promoteUserSelect.options[i].getAttribute('data-email') || '').toLowerCase();
+                    if (optEmail === enteredEmail) {
+                        promoteUserSelect.selectedIndex = i;
+                        return;
+                    }
+                }
+                promoteUserSelect.selectedIndex = 0;
+            });
+        }
+
+        if (promoteForm) {
+            promoteForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const userId = promoteUserSelect.value;
+                const email = promoteEmailInput.value.trim();
+
+                if (!userId && !email) {
+                    showPromoteFeedback(false, "Please select an eligible faculty member from the dropdown or enter an email address.");
+                    return;
+                }
+
+                const origHtml = promoteSubmitBtn.innerHTML;
+                promoteSubmitBtn.disabled = true;
+                promoteSubmitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span>Promoting...';
+
+                try {
+                    const resp = await fetch("{{ url_for('admin.promote_user') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': CSRF_TOKEN,
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            user_id: userId || null,
+                            email: email || null
+                        })
+                    });
+
+                    const data = await resp.json();
+                    if (resp.ok && data.success) {
+                        showPromoteFeedback(true, data.message || "User successfully promoted to SUPERVISOR.");
+                        
+                        const user = data.data && data.data.user ? data.data.user : null;
+                        const userName = user ? user.name : (promoteUserSelect.options[promoteUserSelect.selectedIndex]?.getAttribute('data-name') || 'Faculty');
+                        const userEmail = user ? user.email : email;
+                        const uid = user ? user.id : userId;
+
+                        // Remove from faculty dropdown and cached options
+                        const remIdx = allFacultyOptions.findIndex(o => o.value == uid || o.email.toLowerCase() === userEmail.toLowerCase());
+                        if (remIdx !== -1) {
+                            allFacultyOptions.splice(remIdx, 1);
+                        }
+                        filterFacultyDropdown(promoteNameSearch ? promoteNameSearch.value : '');
+                        promoteEmailInput.value = '';
+
+                        // Add to Active Supervisors Table
+                        if (supervisorsTableBody) {
+                            const noRow = document.getElementById('noSupervisorsRow');
+                            if (noRow) noRow.remove();
+
+                            const tr = document.createElement('tr');
+                            tr.className = 'supervisor-row';
+                            tr.dataset.name = userName.toLowerCase();
+                            tr.dataset.email = userEmail.toLowerCase();
+                            tr.innerHTML = `
+                                <td>
+                                    <div class="d-flex align-items-center gap-2.5">
+                                        <div class="supervisor-avatar-circle">
+                                            ${(userName.charAt(0) || 'S').toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold supervisor-name" style="color: var(--text-main); font-size: 0.92rem;">
+                                                ${userName}
+                                            </div>
+                                            <div class="text-muted small font-monospace" style="font-size: 0.76rem;">
+                                                ${userEmail}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge rounded-pill px-2.5 py-1" style="background: rgba(99, 102, 241, 0.12); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.25); font-size: 0.74rem;">
+                                        <i class="bi bi-shield-check me-1"></i>SUPERVISOR
+                                    </span>
+                                    <div class="small text-muted mt-1" style="font-size: 0.7rem;">Verification Authority</div>
+                                </td>
+                                <td class="text-end">
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                        <i class="bi bi-check-circle-fill me-1"></i>Active
+                                    </span>
+                                </td>
+                            `;
+                            supervisorsTableBody.prepend(tr);
+                        }
+
+                        // Update header count badges
+                        if (supervisorsHeaderCount) {
+                            supervisorsHeaderCount.textContent = (parseInt(supervisorsHeaderCount.textContent) || 0) + 1;
+                        }
+                        if (facultyHeaderCount && (parseInt(facultyHeaderCount.textContent) || 0) > 0) {
+                            facultyHeaderCount.textContent = (parseInt(facultyHeaderCount.textContent) || 0) - 1;
+                        }
+                    } else {
+                        showPromoteFeedback(false, data.error || data.message || "Failed to promote user.");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showPromoteFeedback(false, "Network error occurred while communicating with the promotion endpoint.");
+                } finally {
+                    promoteSubmitBtn.disabled = false;
+                    promoteSubmitBtn.innerHTML = origHtml;
+                }
+            });
+        }
+
+        function showPromoteFeedback(isSuccess, message) {
+            if (!promoteFeedback) return;
+            promoteFeedback.className = `alert alert-${isSuccess ? 'success' : 'danger'} alert-dismissible fade show mb-3 shadow-sm`;
+            promoteFeedbackMsg.textContent = message;
+            promoteFeedbackIcon.className = `bi ${isSuccess ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-1`;
+            promoteFeedback.classList.remove('d-none');
+        }
+
+        // Live Demote action handler for Active Supervisors Registry
+        document.addEventListener('click', async function(e) {
+            const btn = e.target.closest('.demote-user-btn');
+            if (!btn) return;
+
+            const uid = btn.getAttribute('data-user-id');
+            const uname = btn.getAttribute('data-user-name') || 'this user';
+            const uemail = btn.getAttribute('data-user-email') || '';
+
+            if (!confirm(`Are you sure you want to demote Supervisor "${uname}" back to the FACULTY role?`)) {
+                return;
+            }
+
+            const origHtml = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span>';
+
+            try {
+                const resp = await fetch("{{ url_for('admin.demote_user') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRFToken': "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({ user_id: uid })
+                });
+
+                const data = await resp.json();
+                if (resp.ok && data.success) {
+                    showPromoteFeedback(true, data.message || `User ${uname} demoted to FACULTY.`);
+
+                    // Remove row from supervisors table
+                    const row = btn.closest('.supervisor-row');
+                    if (row) row.remove();
+
+                    // Check if table empty
+                    const tbody = document.getElementById('supervisorsTableBody');
+                    if (tbody && tbody.querySelectorAll('.supervisor-row').length === 0) {
+                        tbody.innerHTML = `<tr id="noSupervisorsRow"><td colspan="4" class="text-center py-4 text-muted small"><i class="bi bi-info-circle me-1"></i>No supervisors assigned yet. Promote faculty using the form on the left.</td></tr>`;
+                    }
+
+                    // Add back to eligible faculty dropdown
+                    if (promoteUserSelect) {
+                        const opt = document.createElement('option');
+                        opt.value = uid;
+                        opt.setAttribute('data-name', uname);
+                        opt.setAttribute('data-email', uemail);
+                        opt.textContent = `${uname} (${uemail})`;
+                        promoteUserSelect.appendChild(opt);
+                    }
+
+                    // Update count badges
+                    if (supervisorsHeaderCount && (parseInt(supervisorsHeaderCount.textContent) || 0) > 0) {
+                        supervisorsHeaderCount.textContent = (parseInt(supervisorsHeaderCount.textContent) || 0) - 1;
+                    }
+                    if (facultyHeaderCount) {
+                        facultyHeaderCount.textContent = (parseInt(facultyHeaderCount.textContent) || 0) + 1;
+                    }
+                } else {
+                    showPromoteFeedback(false, data.error || data.message || "Failed to demote user.");
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                }
+            } catch (err) {
+                console.error(err);
+                showPromoteFeedback(false, "Network error occurred while communicating with the demotion endpoint.");
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+            }
+        });
+
+        // Live filter for supervisors registry table
+        const supervisorFilterInput = document.getElementById('supervisorFilterInput');
+        if (supervisorFilterInput) {
+            supervisorFilterInput.addEventListener('input', function() {
+                const query = this.value.trim().toLowerCase();
+                const rows = document.querySelectorAll('.supervisor-row');
+                rows.forEach(r => {
+                    const name = r.dataset.name || '';
+                    const email = r.dataset.email || '';
+                    if (name.includes(query) || email.includes(query)) {
+                        r.style.display = '';
+                    } else {
+                        r.style.display = 'none';
+                    }
+                });
+            });
+        }
 
         // Staggered entry animation using GSAP
         if (window.gsap) {

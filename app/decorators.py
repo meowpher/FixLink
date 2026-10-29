@@ -3,14 +3,40 @@ Centralized Authentication Decorators for FixLink.
 Provides wraps for Admin, Professional, User, and SuperAdmin access control.
 """
 from functools import wraps
-from flask import session, redirect, url_for, flash, request
+from flask import session, redirect, url_for, flash, request, g
 from .api_utils import api_response
 
+def _get_authenticated_user():
+    """Retrieve authenticated user using g cache or resilient database session query."""
+    user_id = session.get('user_id')
+    if not user_id:
+        return None
+    if getattr(g, '_current_user_id', None) == user_id and getattr(g, '_current_user_cached', None) is not None:
+        return g._current_user_cached
+    from . import db
+    from .models import User
+    try:
+        user = db.session.get(User, user_id)
+    except Exception:
+        try:
+            db.session.rollback()
+            db.session.remove()
+            user = db.session.get(User, user_id)
+        except Exception:
+            user = None
+    if user:
+        g._current_user_cached = user
+        g._current_user_id = user.id
+    else:
+        g._current_user_cached = None
+        g._current_user_id = None
+    return user
+
 def login_required(f):
-    """Decorator to require any valid login (User, Admin, or Professional)."""
+    """Decorator to require any valid user login (Student, Faculty, or Admin)."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in session and 'professional_id' not in session:
+        if 'user_id' not in session:
             # Handle AJAX or JSON requests
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Authentication required. Please log in.', status=401)
@@ -22,17 +48,26 @@ def admin_required(f):
     """Decorator to require admin login."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'user_id' not in session or not session.get('is_admin'):
+        is_admin_session = session.get('is_admin') or session.get('is_super_admin')
+        if ('user_id' not in session and not session.get('is_super_admin')) or not is_admin_session:
             # Handle AJAX or JSON API requests
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                 return api_response(success=False, error='Admin access required. Please log in again.', status=403)
             flash('Admin access required.', 'error')
             return redirect(url_for('auth.login'))
         
-        from . import db
-        from .models import User
-        user = db.session.get(User, session['user_id'])
-        if not user or not user.is_admin:
+        user = _get_authenticated_user()
+        if not user and session.get('super_admin_email'):
+            from .models import User
+            try:
+                user = User.query.filter_by(email=session['super_admin_email']).first()
+            except Exception:
+                user = None
+            if user:
+                session['user_id'] = user.id
+                session['is_admin'] = user.is_admin or True
+        
+        if not session.get('is_super_admin') and (not user or not (user.is_admin or user.is_supervisor or user.is_super_admin)):
             session.pop('user_id', None)
             session.pop('is_admin', None)
             session.pop('user_name', None)
@@ -54,9 +89,7 @@ def user_login_required(f):
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
             return redirect(url_for('auth.login'))
         
-        from . import db
-        from .models import User
-        user = db.session.get(User, session['user_id'])
+        user = _get_authenticated_user()
         if not user:
             session.pop('user_id', None)
             session.pop('is_admin', None)
@@ -69,7 +102,7 @@ def user_login_required(f):
     return decorated_function
 
 def faculty_login_required(f):
-    """Decorator to require faculty login (or admin for testing)."""
+    """Decorator to require faculty login (or admin for testing). Disallows students and peons."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
         from .models import User
@@ -78,39 +111,40 @@ def faculty_login_required(f):
                 return api_response(success=False, error='Session expired. Please log in again.', status=401)
             return redirect(url_for('auth.login'))
             
-        role = session.get('user_role')
-        is_admin = session.get('is_admin')
-        if role != User.ROLE_FACULTY and not is_admin:
+        role = str(session.get('user_role') or '').upper()
+        is_admin = session.get('is_admin') or session.get('is_super_admin')
+
+        # Check designation (from session or database fallback)
+        designation = str(session.get('user_designation') or '').strip().lower()
+        if not designation:
+            user = _get_authenticated_user()
+            if user:
+                designation = (user.designation or '').strip().lower()
+                session['user_designation'] = user.designation
+
+        is_peon = (designation == 'peon')
+
+        # Strictly allow ONLY faculties (excluding peons) and administrators
+        if (role != User.ROLE_FACULTY or is_peon) and not is_admin:
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
-                return api_response(success=False, error='Faculty access required.', status=403)
-            flash('Faculty access required.', 'error')
+                return api_response(success=False, error='Faculty access required. Peons and students are not authorized.', status=403)
+            flash('Faculty portal access is restricted to teaching and administrative faculty.', 'error')
             return redirect(url_for('main.report_form'))
         return f(*args, **kwargs)
     return decorated_function
 
 def professional_login_required(f):
-    """Decorator to require professional login."""
+    """Decommissioned. Technician self-service portal has been eradicated; resolution is locked down to Admin/Higher Authority."""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if 'professional_id' not in session:
-            # Handle AJAX requests by returning 401 JSON instead of redirect
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
-                return api_response(success=False, error='Session expired. Please log in again.', status=401)
-            return redirect(url_for('auth.login', pro=1))
-        
-        from . import db
-        from .models import Professional
-        prof = db.session.get(Professional, session['professional_id'])
-        if not prof:
-            session.pop('professional_id', None)
-            session.pop('professional_name', None)
-            session.pop('professional_category', None)
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return api_response(success=False, error='Account not found. Please log in again.', status=401)
-            flash('Professional account not found or session expired. Please log in again.', 'warning')
-            return redirect(url_for('auth.login', pro=1))
-        return f(*args, **kwargs)
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+            return api_response(success=False, error='Technician portal access has been decommissioned. Higher Authority / Admin access required.', status=403)
+        flash('Technician portal access has been decommissioned. Higher Authority / Admin access required.', 'error')
+        return redirect(url_for('auth.login'))
     return decorated_function
+
+# Clean up technician RBAC decorator alias
+technician_required = professional_login_required
 
 def super_admin_required(f):
     """Decorator to require super admin login."""
@@ -121,13 +155,39 @@ def super_admin_required(f):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return api_response(success=False, error='SuperAdmin access required.', status=401)
             return redirect(url_for('superadmin.login'))
-        
-        # Clean up any lingering professional session keys on developer's site
-        if 'professional_id' in session:
-            session.pop('professional_id', None)
-            session.pop('professional_name', None)
-            session.pop('professional_category', None)
-            
+        return f(*args, **kwargs)
+    return decorated_function
+
+def supervisor_required(f):
+    """
+    Decorator to require Supervisor or Higher Authority access.
+    Allowed roles: SUPERVISOR, SUPER_ADMIN, or users with is_supervisor / is_admin / is_super_admin.
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session and not session.get('is_super_admin'):
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+                return api_response(success=False, error='Authentication required. Please log in.', status=401)
+            flash('Supervisor access required. Please log in.', 'error')
+            return redirect(url_for('auth.login'))
+
+        user = _get_authenticated_user()
+
+        from .models import User
+        is_authorized = False
+        if session.get('is_super_admin'):
+            is_authorized = True
+        elif user and (user.is_supervisor or user.is_super_admin or user.is_admin):
+            is_authorized = True
+        elif session.get('is_admin') or str(session.get('user_role') or '').upper() in [getattr(User, 'ROLE_SUPERVISOR', 'SUPERVISOR'), getattr(User, 'ROLE_SUPER_ADMIN', 'SUPER_ADMIN'), 'ADMIN', 'SUPERVISOR']:
+            is_authorized = True
+
+        if not is_authorized:
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
+                return api_response(success=False, error='Supervisor privileges required.', status=403)
+            flash('Supervisor privileges required to access this workspace.', 'error')
+            return redirect(url_for('main.report_form'))
+
         return f(*args, **kwargs)
     return decorated_function
 
@@ -145,7 +205,7 @@ def require_ownership(model_class, id_param='id', owner_field='user_id', allow_a
         @wraps(f)
         def decorated_function(*args, **kwargs):
             # 1. Verify user is authenticated
-            current_user_id = session.get('user_id') or session.get('professional_id')
+            current_user_id = session.get('user_id')
             if not current_user_id:
                 if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or request.is_json:
                     return api_response(success=False, error='Authentication required.', status=401)

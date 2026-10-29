@@ -341,24 +341,53 @@
                     </span>
 
                     {% if current_role and current_role != 'all' %}
-                    <a href="{{ url_for('superadmin.list_users', q=search_query if search_query else None) }}" class="filter-tag-pill" title="Remove role filter">
+                    <a href="{{ url_for('superadmin.list_users', q=search_query if search_query else None, designation=designation_filter if designation_filter else None) }}" class="filter-tag-pill" title="Remove role filter">
                         <span>Role: <strong>{{ current_role.capitalize() }}</strong></span>
                         <i class="bi bi-x ms-1 fs-6"></i>
                     </a>
                     {% endif %}
 
+                    {% if designation_filter %}
+                    <a href="{{ url_for('superadmin.list_users', role=current_role if current_role != 'all' else None, q=search_query if search_query else None) }}" class="filter-tag-pill" title="Remove designation filter">
+                        <span>Designation: <strong>{{ designation_filter }}</strong></span>
+                        <i class="bi bi-x ms-1 fs-6"></i>
+                    </a>
+                    {% endif %}
+
                     {% if search_query %}
-                    <a href="{{ url_for('superadmin.list_users', role=current_role if current_role != 'all' else None) }}" class="filter-tag-pill" title="Remove search keyword">
+                    <a href="{{ url_for('superadmin.list_users', role=current_role if current_role != 'all' else None, designation=designation_filter if designation_filter else None) }}" class="filter-tag-pill" title="Remove search keyword">
                         <span>Search: "<strong>{{ search_query }}</strong>"</span>
                         <i class="bi bi-x ms-1 fs-6"></i>
                     </a>
                     {% endif %}
 
-                    {% if (current_role and current_role != 'all') or search_query %}
+                    {% if (current_role and current_role != 'all') or search_query or designation_filter %}
                     <a href="{{ url_for('superadmin.list_users') }}" class="btn btn-sm btn-link text-decoration-none text-muted p-0 small ms-1">
                         Clear all
                     </a>
                     {% endif %}
+                </div>
+
+                <!-- Designation Filter Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-primary dropdown-toggle" type="button" id="designationFilterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        Filter by Designation{% if designation_filter %}: {{ designation_filter }}{% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="designationFilterDropdown">
+                        <li><a class="dropdown-item" href="?">Clear Filter</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="?designation=Professor">Professor</a></li>
+                        <li><a class="dropdown-item" href="?designation=Associate Professor">Associate Professor</a></li>
+                        <li><a class="dropdown-item" href="?designation=Associate Professor & Program Director">Associate Professor & Program Director</a></li>
+                        <li><a class="dropdown-item" href="?designation=Professor & Program Head">Professor & Program Head</a></li>
+                        <li><a class="dropdown-item" href="?designation=Assistant Professor">Assistant Professor</a></li>
+                        <li><a class="dropdown-item" href="?designation=PhD Scholar">PhD Scholar</a></li>
+                        <li><a class="dropdown-item" href="?designation=Lab Assistant">Lab Assistant</a></li>
+                        <li><a class="dropdown-item" href="?designation=Office Assistant">Office Assistant</a></li>
+                        <li><a class="dropdown-item" href="?designation=Executive Officer">Executive Officer</a></li>
+                        <li><a class="dropdown-item" href="?designation=Program Office executive">Program Office executive</a></li>
+                        <li><a class="dropdown-item" href="?designation=Peon">Peon</a></li>
+                    </ul>
                 </div>
             </div>
 
@@ -397,6 +426,9 @@
                                                 <div>
                                                     <div class="fw-bold text-body user-name-text">{{ user.name }}</div>
                                                     <div class="text-muted small user-email-text">{{ user.email }}</div>
+                                                    {% if user.designation %}
+                                                    <div><span class="badge bg-primary-subtle text-primary border border-primary-subtle mt-1" style="font-size: 0.72rem;">{{ user.designation }}</span></div>
+                                                    {% endif %}
                                                 </div>
                                             </div>
                                         </td>
@@ -410,8 +442,11 @@
                                             <select class="form-select form-select-sm border-0 bg-light role-select" 
                                                     style="width: 130px; font-weight: 500;" 
                                                     data-id="{{ user.id }}">
+                                                {% if user.role.upper() not in ['FACULTY', 'SUPERVISOR', 'ADMIN', 'SUPER_ADMIN'] %}
+                                                <option value="{{ user.role }}" selected>{{ user.role.capitalize() }}</option>
+                                                {% endif %}
                                                 {% for role in roles %}
-                                                <option value="{{ role }}" {% if user.role == role %}selected{% endif %}>
+                                                <option value="{{ role }}" {% if user.role.upper() == role.upper() or (role.upper() == 'ADMIN' and user.role.upper() in ['ADMIN', 'SUPER_ADMIN']) %}selected{% endif %}>
                                                     {{ role.capitalize() }}
                                                 </option>
                                                 {% endfor %}
@@ -474,9 +509,9 @@
                                     <span class="mc-title">{{ user.name }}</span>
                                 </div>
                                 <div class="mc-status">
-                                    {% if user.role == 'admin' %}
+                                    {% if user.role.lower() in ['admin', 'supervisor', 'super_admin'] or user.is_admin %}
                                     <span class="badge bg-danger-subtle text-danger">Admin</span>
-                                    {% elif user.role == 'faculty' %}
+                                    {% elif user.role.lower() == 'faculty' %}
                                     <span class="badge bg-warning-subtle text-warning">Faculty</span>
                                     {% else %}
                                     <span class="badge bg-primary-subtle text-primary">Student</span>

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - Maintenance Dispatch & Tickets | FixLink{% endblock %}
+{% block title %}{% if (session.get('user_role') or '').upper() == 'SUPERVISOR' %}Supervisor Dashboard{% else %}Admin Dashboard{% endif %} - Maintenance Dispatch & Tickets | FixLink{% endblock %}
 {% block meta_robots %}noindex, nofollow{% endblock %}
 {% block meta_description %}Administrator dispatch dashboard for MIT-WPU FixLink smart room maintenance management.{% endblock %}
 
@@ -25,6 +25,402 @@
     }
     .modal-backdrop {
         z-index: 1050 !important;
+    }
+
+    /* Ticket Details Modal Container Styling */
+    #ticketModal .modal-content {
+        border-radius: 18px;
+        border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+        background-color: var(--bg-card, #0f172a);
+        color: var(--text-main, #f8fafc);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+    }
+    #ticketModal .modal-header {
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(15, 23, 42, 0.95));
+        border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+        padding: 1.1rem 1.5rem;
+    }
+    #ticketModal .modal-header .btn-close {
+        filter: invert(1) grayscale(100%) brightness(200%);
+    }
+    [data-theme="light"] #ticketModal .modal-content {
+        background-color: #ffffff;
+        color: #1e293b;
+        border-color: #e2e8f0;
+    }
+    [data-theme="light"] #ticketModal .modal-header {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    [data-theme="light"] #ticketModal .modal-header .btn-close {
+        filter: none;
+    }
+
+    .ticket-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1rem;
+    }
+    [data-theme="light"] .ticket-info-grid {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .ticket-info-grid .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        min-width: 0;
+    }
+    .ticket-info-grid .info-item.col-span-2 {
+        grid-column: span 2;
+    }
+    .ticket-info-grid .info-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted, #94a3b8);
+    }
+    .ticket-info-grid .info-value {
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--text-main, #f1f5f9);
+    }
+    [data-theme="light"] .ticket-info-grid .info-value {
+        color: #0f172a;
+    }
+
+    .description-section {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+    }
+    [data-theme="light"] .description-section {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+    }
+    .description-section .info-label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted, #94a3b8);
+        display: block;
+        margin-bottom: 0.25rem;
+    }
+    .description-section .description-text {
+        font-size: 0.88rem;
+        line-height: 1.5;
+        margin-bottom: 0;
+        color: var(--text-main, #e2e8f0);
+    }
+    [data-theme="light"] .description-section .description-text {
+        color: #334155;
+    }
+
+    .ticket-image-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 0.75rem;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .ticket-image-preview-wrapper {
+        position: relative;
+        flex: 1;
+        min-height: 150px;
+        max-height: 220px;
+        border-radius: 8px;
+        overflow: hidden;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+    }
+    .ticket-image-preview-wrapper .ticket-thumbnail {
+        max-width: 100%;
+        max-height: 220px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+    .ticket-image-preview-wrapper:hover .ticket-thumbnail {
+        transform: scale(1.04);
+    }
+    .ticket-image-preview-wrapper .image-hover-hint {
+        position: absolute;
+        bottom: 6px;
+        right: 6px;
+        background: rgba(0, 0, 0, 0.7);
+        color: #fff;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        pointer-events: none;
+    }
+
+    .modal-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+        gap: 0.65rem;
+    }
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        padding: 0.55rem 1rem;
+        font-size: 0.84rem;
+        font-weight: 600;
+        border-radius: 10px;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+    .action-btn.btn-verify-closure {
+        background: #10b981;
+        color: #fff;
+    }
+    .action-btn.btn-verify-closure:hover {
+        background: #059669;
+        color: #fff;
+    }
+    .action-btn.btn-map {
+        background: rgba(59, 130, 246, 0.15);
+        color: #60a5fa;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+    .action-btn.btn-map:hover {
+        background: #3b82f6;
+        color: #fff;
+    }
+    .action-btn.btn-delete {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+    .action-btn.btn-delete:hover {
+        background: #ef4444;
+        color: #fff;
+    }
+    .action-btn.btn-close-modal {
+        background: rgba(148, 163, 184, 0.12);
+        color: var(--text-muted, #94a3b8);
+        border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+    .action-btn.btn-close-modal:hover {
+        background: rgba(148, 163, 184, 0.25);
+        color: var(--text-main, #f8fafc);
+    }
+    .action-btn.btn-in-progress {
+        background: rgba(245, 158, 11, 0.15);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .action-btn.btn-in-progress:hover:not(:disabled) {
+        background: #f59e0b;
+        color: #000;
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+    }
+    .action-btn.btn-in-progress.active,
+    .action-btn.btn-in-progress:disabled {
+        background: rgba(245, 158, 11, 0.25);
+        color: #f59e0b;
+        opacity: 0.75;
+        cursor: not-allowed;
+    }
+    [data-theme="light"] .action-btn.btn-in-progress {
+        background: #fffbeb;
+        color: #d97706;
+        border-color: #fde68a;
+    }
+    [data-theme="light"] .action-btn.btn-in-progress:hover:not(:disabled) {
+        background: #f59e0b;
+        color: #ffffff;
+    }
+    [data-theme="light"] .action-btn.btn-close-modal {
+        background: #f1f5f9;
+        color: #475569;
+        border-color: #cbd5e1;
+    }
+    [data-theme="light"] .action-btn.btn-close-modal:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+    .btn-ticket-load-more {
+        transition: all 0.2s ease;
+    }
+    [data-theme="dark"] .btn-ticket-load-more,
+    [data-bs-theme="dark"] .btn-ticket-load-more {
+        color: #60a5fa;
+        border-color: rgba(96, 165, 250, 0.4);
+        background: rgba(59, 130, 246, 0.1);
+    }
+    [data-theme="dark"] .btn-ticket-load-more:hover,
+    [data-bs-theme="dark"] .btn-ticket-load-more:hover {
+        background: #3b82f6;
+        color: #ffffff;
+        border-color: #3b82f6;
+    }
+    [data-theme="dark"] .ticket-load-more-footer {
+        border-color: rgba(255, 255, 255, 0.08) !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       ENTERPRISE MINIMALIST SAAS VERIFICATION MODAL
+       ═══════════════════════════════════════════════════════════ */
+    .verify-modal-content {
+        background: #111827 !important;
+        border: 1px solid #374151 !important;
+        border-radius: 8px !important;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+        color: #f3f4f6;
+        overflow: hidden;
+    }
+    .verify-modal-header {
+        background: #111827 !important;
+        border-bottom: 1px solid #1f2937 !important;
+        padding: 1rem 1.25rem !important;
+    }
+    .verify-header-icon-box {
+        width: 36px;
+        height: 36px;
+        border-radius: 6px;
+        background: #1f2937;
+        border: 1px solid #374151;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #10b981;
+        font-size: 1.15rem;
+        box-shadow: none !important;
+        flex-shrink: 0;
+    }
+    .verify-ticket-banner {
+        background: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        border-radius: 6px !important;
+        padding: 0.65rem 0.85rem !important;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: none !important;
+    }
+    .verify-field-label {
+        font-size: 0.8125rem !important;
+        font-weight: 500 !important;
+        color: #9ca3af !important;
+        margin-bottom: 0.35rem !important;
+        display: block !important;
+        text-transform: none !important;
+        letter-spacing: normal !important;
+    }
+    .verify-input-field {
+        background: #111827 !important;
+        border: 1px solid #374151 !important;
+        border-radius: 6px !important;
+        color: #f3f4f6 !important;
+        font-size: 0.875rem !important;
+        padding: 0.55rem 0.75rem !important;
+        box-shadow: none !important;
+        transition: border-color 0.15s ease;
+    }
+    .verify-input-field:focus {
+        background: #111827 !important;
+        border-color: #4b5563 !important;
+        box-shadow: none !important;
+        color: #ffffff !important;
+        outline: none !important;
+    }
+    .verify-input-field::placeholder {
+        color: #6b7280 !important;
+    }
+    .verify-upload-dropzone {
+        border: 2px dashed #444 !important;
+        background: #111827 !important;
+        border-radius: 6px !important;
+        padding: 1.35rem 1rem !important;
+        text-align: center !important;
+        cursor: pointer !important;
+        box-shadow: none !important;
+        transition: border-color 0.15s ease, background-color 0.15s ease !important;
+    }
+    .verify-upload-dropzone:hover,
+    .verify-upload-dropzone.dragover {
+        border-color: #666 !important;
+        background: #1f2937 !important;
+        box-shadow: none !important;
+        transform: none !important;
+    }
+    .verify-preview-box {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        border-radius: 6px !important;
+        padding: 0.5rem 0.75rem !important;
+        text-align: left;
+    }
+    .verify-preview-img {
+        width: 44px;
+        height: 44px;
+        border-radius: 4px;
+        object-fit: cover;
+        border: 1px solid #374151;
+    }
+    .verify-modal-footer {
+        background: #111827 !important;
+        border-top: 1px solid #1f2937 !important;
+        padding: 0.85rem 1.25rem !important;
+    }
+    .verify-btn-cancel {
+        background: #1f2937 !important;
+        border: 1px solid #374151 !important;
+        color: #9ca3af !important;
+        border-radius: 6px !important;
+        padding: 0.45rem 1rem !important;
+        font-weight: 500 !important;
+        font-size: 0.875rem !important;
+        box-shadow: none !important;
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
+    .verify-btn-cancel:hover {
+        background: #374151 !important;
+        color: #f3f4f6 !important;
+        box-shadow: none !important;
+    }
+    .verify-btn-submit {
+        background: #16a34a !important;
+        border: 1px solid #15803d !important;
+        color: #ffffff !important;
+        border-radius: 6px !important;
+        padding: 0.45rem 1.15rem !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+        transform: none !important;
+        transition: background-color 0.15s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+    .verify-btn-submit:hover:not(:disabled) {
+        background: #15803d !important;
+        border-color: #166534 !important;
+        box-shadow: none !important;
+        transform: none !important;
+        color: #ffffff !important;
     }
     [data-theme="dark"] .stat-number,
     [data-bs-theme="dark"] .stat-number,
@@ -540,9 +936,24 @@
         <div class="row align-items-center text-center text-md-start">
             <div class="col-md-6 text-center text-md-start">
                 <h1 class="admin-title d-flex align-items-center justify-content-center justify-content-md-start">
-                    <i class="bi bi-speedometer2 me-2"></i>Admin Dashboard
+                    <i class="bi bi-speedometer2 me-2"></i>
+                    {% if (session.get('user_role') or '').upper() == 'SUPERVISOR' %}
+                        Supervisor Dashboard
+                    {% else %}
+                        Admin Dashboard
+                    {% endif %}
                 </h1>
                 <p class="admin-subtitle">Vyas Building Maintenance Management</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end mt-3 mt-md-0 d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
+                <a href="{{ url_for('admin.audit_trail') }}" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold">
+                    <i class="bi bi-shield-shaded me-1"></i>Audit Trail
+                </a>
+                {% if session.get('is_super_admin') or (session.get('user_role') or '').upper() == 'SUPER_ADMIN' %}
+                <a href="{{ url_for('superadmin.dashboard') }}" class="btn btn-light btn-sm rounded-pill px-3 fw-semibold text-primary">
+                    <i class="bi bi-person-gear me-1"></i>Role Manager
+                </a>
+                {% endif %}
             </div>
 
         </div>
@@ -709,7 +1120,7 @@
                             </thead>
                             <tbody>
                                 {% for ticket in filtered_tickets %}
-                                <tr data-ticket-id="{{ ticket.id }}" class="clickable-row" onclick="viewTicket(this.dataset.ticketId)">
+                                <tr data-ticket-id="{{ ticket.id }}" class="clickable-row ticket-item-row {% if loop.index > 4 %}d-none ticket-overflow-item{% endif %}" onclick="viewTicket(this.dataset.ticketId)">
                                     <td><span class="ticket-id">#{{ ticket.id }}</span></td>
                                     <td>
                                         <div class="reporter-info">
@@ -741,14 +1152,20 @@
                                                 <i class="bi bi-exclamation-triangle-fill me-1"></i> CANCELLED
                                             </button>
                                             {% else %}
-                                            <span class="status-badge status-{{ ticket.status }}">
-                                                {{ ticket.status|title }}
-                                                {% if ticket.assigned_professional_id %}
-                                                <div class="small text-muted mt-1">
-                                                    <i class="bi bi-person"></i> {{ ticket.assigned_professional.name }}
-                                                </div>
+                                            <div class="d-flex align-items-center gap-1">
+                                                <span class="status-badge status-{{ ticket.status }}">
+                                                    {{ ticket.status|title }}
+                                                </span>
+                                                {% if ticket.status in ['open', 'assigned', 'in-progress'] %}
+                                                <button type="button" class="btn btn-sm btn-outline-success px-2 py-0.5 shadow-sm fw-semibold d-inline-flex align-items-center gap-1"
+                                                        data-ticket-id="{{ ticket.id }}"
+                                                        data-tech-name="{{ ticket.assigned_vendor_or_tech_name or (ticket.assigned_professional.name if ticket.assigned_professional else '') }}"
+                                                        onclick="event.stopPropagation(); openVerifyCompletionModal(this.dataset.ticketId, this.dataset.techName)"
+                                                        title="Verify & Log Completion">
+                                                    <i class="bi bi-patch-check-fill"></i><span>Verify</span>
+                                                </button>
                                                 {% endif %}
-                                            </span>
+                                            </div>
                                             {% endif %}
                                         </div>
                                     </td>
@@ -770,7 +1187,7 @@
                 <!-- Mobile Cards — hidden on tablet/desktop -->
                 <div class="mobile-card-list d-md-none p-2 p-sm-3">
                     {% for ticket in filtered_tickets %}
-                    <div class="mc-card" onclick="viewTicket('{{ ticket.id }}')" data-ticket-id="{{ ticket.id }}">
+                    <div class="mc-card ticket-item-card {% if loop.index > 4 %}d-none ticket-overflow-item{% endif %}" onclick="viewTicket('{{ ticket.id }}')" data-ticket-id="{{ ticket.id }}">
                         <div class="mc-left-col">
                             <div class="mc-primary-row">
                                 <span class="mc-id">#{{ ticket.id }}</span>
@@ -789,10 +1206,6 @@
                             </div>
                             <div class="mc-meta-row">
                                 <span class="mc-date-text"><i class="bi bi-calendar3"></i> {{ ticket.created_at.strftime('%d %b %Y') }}</span>
-                                {% if ticket.assigned_professional_id %}
-                                <span class="mc-sep">&bull;</span>
-                                <span class="mc-assigned-text"><i class="bi bi-person"></i> {{ ticket.assigned_professional.name }}</span>
-                                {% endif %}
                             </div>
                         </div>
                         <div class="mc-right-col">
@@ -807,6 +1220,14 @@
                                 <span class="badge bg-primary">In Progress</span>
                                 {% else %}
                                 <span class="badge bg-success">{{ ticket.status|title }}</span>
+                                {% endif %}
+                                {% if ticket.status in ['open', 'assigned', 'in-progress'] %}
+                                <button type="button" class="btn btn-sm btn-success text-white py-0.5 px-2 mt-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
+                                        data-ticket-id="{{ ticket.id }}"
+                                        data-tech-name="{{ ticket.assigned_vendor_or_tech_name or (ticket.assigned_professional.name if ticket.assigned_professional else '') }}"
+                                        onclick="event.stopPropagation(); openVerifyCompletionModal(this.dataset.ticketId, this.dataset.techName)">
+                                    <i class="bi bi-patch-check-fill"></i><span>Verify</span>
+                                </button>
                                 {% endif %}
                             </div>
                             {% if ticket.status == 'cancelled' %}
@@ -828,6 +1249,28 @@
                     </div>
                     {% endfor %}
                 </div>
+
+                {% if filtered_tickets|length > 0 %}
+                <!-- Load More Progressive Footer -->
+                <div class="card-footer bg-transparent border-top p-3 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 ticket-load-more-footer">
+                    <div class="small text-muted ticket-showing-text">
+                        Showing <strong class="ticket-visible-count">{{ [filtered_tickets|length, 4]|min }}</strong> of <strong class="ticket-total-count">{{ filtered_tickets|length }}</strong> tickets
+                    </div>
+                    <div class="ticket-load-more-controls">
+                        {% if filtered_tickets|length > 4 %}
+                        {% set next_batch = [filtered_tickets|length - 4, 4]|min %}
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm btn-ticket-load-more">
+                            <i class="bi bi-arrow-down-circle"></i>
+                            <span>Load More (+{{ next_batch }})</span>
+                        </button>
+                        {% else %}
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+                            <i class="bi bi-check2-circle"></i> All {{ filtered_tickets|length }} tickets loaded
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
                 {% endmacro %}
 
                 <!-- Legacy macro: filters from the paginated tickets list by status -->
@@ -851,19 +1294,7 @@
                     {{ ticket_table_from(open_tickets) }}
                 </div>
                 {% endif %}
-                
-                {% if status_filter in ['all', 'assigned'] %}
-                <!-- ASSIGNED TICKETS BOX -->
-                <div class="tickets-card">
-                    <div class="tickets-header bg-info bg-opacity-10 border-bottom border-info">
-                        <h5 class="mb-0 text-info">
-                            <i class="bi bi-person-check me-2"></i>Assigned Tickets
-                        </h5>
-                        <span class="badge bg-info">{{ assigned_tickets | length }}</span>
-                    </div>
-                    {{ ticket_table_from(assigned_tickets) }}
-                </div>
-                {% endif %}
+
                 
                 {% if status_filter in ['all', 'in-progress'] %}
                 <!-- IN-PROGRESS TICKETS BOX -->
@@ -899,21 +1330,19 @@
 {% endblock %}
 
 {% block extra_modals %}
-<!-- Ticket Detail Modal — Direct <body> child, z-index:1055 (Phase 1+2 Fix) -->
+<!-- Ticket Detail Modal — Direct <body> child, z-index:1055 -->
 <div class="modal fade" id="ticketModal" tabindex="-1" aria-labelledby="ticketModalLabel" aria-hidden="true" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:1055;">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="ticketModalLabel">
-                    <i class="bi bi-ticket-detailed me-2"></i>Ticket Details
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header d-flex justify-content-between align-items-center">
+                <h5 class="modal-title d-flex align-items-center gap-2 mb-0" id="ticketModalLabel">
+                    <i class="bi bi-ticket-detailed-fill text-primary fs-4"></i>
+                    <span class="fw-bold">Report Details &amp; Inspection</span>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="ticketModalBody">
+            <div class="modal-body p-3 p-md-4" id="ticketModalBody">
                 <!-- Content loaded dynamically -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -935,6 +1364,136 @@
             <div class="modal-footer border-0 justify-content-center pb-4">
                 <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 10px;">Close</button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Supervisor Verify & Log Completion Modal (Enterprise SaaS Redesign) -->
+<div class="modal fade" id="verifyCompletionModal" tabindex="-1" aria-labelledby="verifyCompletionModalLabel" aria-hidden="true" data-bs-theme="dark" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content verify-modal-content border-0">
+            <div class="modal-header verify-modal-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="verify-header-icon-box">
+                        <i class="bi bi-check2"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-semibold mb-0 text-white fs-6" id="verifyCompletionModalLabel">
+                            Verify &amp; Log Completion
+                        </h5>
+                        <small class="text-muted d-block" style="font-size: 0.78rem;">
+                            Supervisor Quality Assurance Sign-Off
+                        </small>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="verifyCompletionForm" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="X-Tab-Guard-ID" value="{{ session.get('tab_guard_id', '') }}">
+                <input type="hidden" id="verifyTicketId" name="ticket_id" value="">
+
+                <div class="modal-body p-3 p-md-4 d-flex flex-column gap-3">
+                    <!-- Ticket Context Banner -->
+                    <div class="verify-ticket-banner">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge bg-secondary bg-opacity-25 text-light border border-secondary border-opacity-25 px-2 py-1 fw-medium" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                                QA INSPECTION
+                            </span>
+                            <span class="small text-muted">Closing</span>
+                            <strong id="verifyTicketDisplayId" class="text-light font-monospace small">Ticket #--</strong>
+                        </div>
+                        <span class="badge bg-dark border border-secondary border-opacity-50 text-muted px-2 py-1 fw-normal" style="font-size: 0.7rem;">
+                            On-Ground Check
+                        </span>
+                    </div>
+
+                    <!-- Technician / Vendor Name -->
+                    <div>
+                        <label for="verifyTechName" class="form-label text-muted small fw-medium mb-1">
+                            Technician / Vendor Name <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control verify-input-field w-100" 
+                               id="verifyTechName" 
+                               name="technician_name" 
+                               placeholder="e.g., Ramesh (Electrical) or External Vendor" 
+                               required>
+                    </div>
+
+                    <!-- Proof of Completion Upload Box -->
+                    <div>
+                        <label class="form-label text-muted small fw-medium mb-1">
+                            Proof of Completion (Camera-Ready) <span class="text-danger">*</span>
+                        </label>
+
+                        <!-- Interactive Dropzone -->
+                        <div class="verify-upload-dropzone" id="verifyProofDropzone" onclick="document.getElementById('verifyProofImage').click()">
+                            <!-- Hidden actual file input -->
+                            <input type="file" 
+                                   class="d-none" 
+                                   id="verifyProofImage" 
+                                   name="proof_image" 
+                                   accept="image/*" 
+                                   capture="environment" 
+                                   required>
+
+                            <!-- Empty Prompt State -->
+                            <div id="verifyDropzonePrompt">
+                                <i class="bi bi-camera text-muted fs-3 mb-1 d-block"></i>
+                                <div class="text-light small fw-medium mb-1">
+                                    Snap photo or choose image
+                                </div>
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                    Tap to open rear camera on phone, or browse files on desktop
+                                </div>
+                            </div>
+
+                            <!-- Selected File State (Hidden by default) -->
+                            <div id="verifyDropzonePreview" class="d-none">
+                                <div class="verify-preview-box">
+                                    <img id="verifyPreviewThumbnail" src="" alt="Proof Preview" class="verify-preview-img">
+                                    <div class="flex-grow-1 min-w-0">
+                                        <div class="text-light text-truncate small fw-medium" id="verifyPreviewFileName">proof.jpg</div>
+                                        <div class="d-flex align-items-center gap-2 mt-0.5">
+                                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-25" style="font-size: 0.68rem;">
+                                                Ready
+                                            </span>
+                                            <span class="text-muted" id="verifyPreviewFileSize" style="font-size: 0.72rem;">0 KB</span>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm p-1 ms-2" id="btnRemoveVerifyProof" onclick="event.stopPropagation(); window.resetVerifyProof();" title="Remove photo">
+                                        <i class="bi bi-x-lg" style="font-size: 0.75rem;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Supervisor Inspection Notes -->
+                    <div>
+                        <label for="verifyNotes" class="form-label text-muted small fw-medium mb-1">
+                            Supervisor Inspection Notes <span class="text-danger">*</span>
+                        </label>
+                        <textarea class="form-control verify-input-field w-100" 
+                                  id="verifyNotes" 
+                                  name="resolution_notes" 
+                                  rows="3" 
+                                  placeholder="Detail physical inspection results, test run verification, and QA sign-off remarks..." 
+                                  required></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer verify-modal-footer d-flex justify-content-end align-items-center gap-2">
+                    <button type="button" class="btn verify-btn-cancel" data-bs-dismiss="modal">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn verify-btn-submit" id="verifySubmitBtn">
+                        <i class="bi bi-check2"></i>
+                        <span>Verify Work &amp; Commit to Log</span>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -1158,6 +1717,7 @@
     const ModalManager = (() => {
         let _ticketModal = null;
         let _cancellationModal = null;
+        let _verifyModal = null;
         let _loading = false;
 
         function _getInstance(id) {
@@ -1172,9 +1732,10 @@
             // Cache instances BEFORE any innerHTML is ever written to modal bodies.
             _ticketModal = _getInstance('ticketModal');
             _cancellationModal = _getInstance('cancellationModal');
+            _verifyModal = _getInstance('verifyCompletionModal');
 
             // Attach hidden listeners to guarantee backdrop+body cleanup.
-            ['ticketModal', 'cancellationModal'].forEach(id => {
+            ['ticketModal', 'cancellationModal', 'verifyCompletionModal'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
                 el.addEventListener('hidden.bs.modal', () => {
@@ -1187,13 +1748,16 @@
         }
 
         function showTicket() {
-            // Re-acquire in case Bootstrap lost the instance (e.g., after hot-reload)
-            if (!_ticketModal) _ticketModal = _getInstance('ticketModal');
+            const el = document.getElementById('ticketModal');
+            if (!el) return;
+            _ticketModal = bootstrap.Modal.getInstance(el) || bootstrap.Modal.getOrCreateInstance(el, { backdrop: true, keyboard: true });
             if (_ticketModal) _ticketModal.show();
         }
 
         function hideTicket() {
-            if (!_ticketModal) _ticketModal = _getInstance('ticketModal');
+            const el = document.getElementById('ticketModal');
+            if (!el) return;
+            _ticketModal = bootstrap.Modal.getInstance(el) || bootstrap.Modal.getOrCreateInstance(el, { backdrop: true, keyboard: true });
             if (_ticketModal) _ticketModal.hide();
         }
 
@@ -1207,10 +1771,24 @@
             if (_cancellationModal) _cancellationModal.hide();
         }
 
+        function showVerify() {
+            const el = document.getElementById('verifyCompletionModal');
+            if (!el) return;
+            _verifyModal = bootstrap.Modal.getInstance(el) || bootstrap.Modal.getOrCreateInstance(el, { backdrop: true, keyboard: true });
+            if (_verifyModal) _verifyModal.show();
+        }
+
+        function hideVerify() {
+            const el = document.getElementById('verifyCompletionModal');
+            if (!el) return;
+            _verifyModal = bootstrap.Modal.getInstance(el) || bootstrap.Modal.getOrCreateInstance(el, { backdrop: true, keyboard: true });
+            if (_verifyModal) _verifyModal.hide();
+        }
+
         function isLoading() { return _loading; }
         function setLoading(v) { _loading = v; }
 
-        return { init, showTicket, hideTicket, showCancellation, hideCancellation, isLoading, setLoading };
+        return { init, showTicket, hideTicket, showCancellation, hideCancellation, showVerify, hideVerify, isLoading, setLoading };
     })();
 
     document.addEventListener('DOMContentLoaded', () => ModalManager.init());
@@ -1222,8 +1800,22 @@
         if (ModalManager.isLoading()) return;
         ModalManager.setLoading(true);
 
+        const modalBody = document.getElementById('ticketModalBody');
+        if (modalBody) {
+            modalBody.innerHTML = `
+                <div class="d-flex flex-column align-items-center justify-content-center py-5">
+                    <div class="spinner-border text-primary mb-3" role="status" style="width: 2.2rem; height: 2.2rem;"></div>
+                    <div class="text-white-50 small fw-semibold">Loading Report #${ticketId} details...</div>
+                </div>
+            `;
+        }
+        ModalManager.showTicket();
+
         fetch(`/admin/ticket/${ticketId}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 const ticket = (data.data && data.data.ticket) || data.ticket;
@@ -1372,15 +1964,37 @@
                             ${ticket.rating_comment ? `<p class="fst-italic text-muted mb-0 small">"${ticket.rating_comment}"</p>` : ''}
                         </div>
                     ` : ''}
+                    ${(ticket.verified_by_name || ticket.proof_of_completion_url || ticket.resolution_notes) ? `
+                        <div class="w-100 mt-2 p-3 bg-dark bg-opacity-25 rounded-3 border border-success border-opacity-50 text-start">
+                            <div class="d-flex align-items-center gap-2 mb-2 text-success fw-bold small">
+                                <i class="bi bi-shield-check fs-5"></i>
+                                <span>Supervisor Verified Quality Assurance</span>
+                            </div>
+                            ${ticket.verified_by_name ? `<div class="small mb-1"><strong>Inspected & Verified By:</strong> <span class="badge bg-success bg-opacity-75">${ticket.verified_by_name}</span></div>` : ''}
+                            ${ticket.assigned_vendor_or_tech_name ? `<div class="small mb-1"><strong>On-Ground Tech / Vendor:</strong> ${ticket.assigned_vendor_or_tech_name}</div>` : ''}
+                            ${ticket.resolution_notes ? `<div class="small mb-2"><strong>Inspection Remarks:</strong> <span class="text-light">"${ticket.resolution_notes}"</span></div>` : ''}
+                            ${ticket.resolved_at ? `<div class="small text-muted mb-2"><strong>Resolved At:</strong> ${new Date(ticket.resolved_at).toLocaleString()}</div>` : ''}
+                            ${ticket.proof_of_completion_url ? `
+                                <div>
+                                    <strong class="small d-block mb-1">Proof of Completion:</strong>
+                                    <a href="${ticket.proof_of_completion_url}" target="_blank" rel="noopener noreferrer" class="d-inline-block">
+                                        <img src="${ticket.proof_of_completion_url}" alt="Proof of completion" class="img-thumbnail" style="max-height: 140px; max-width: 100%; object-fit: cover; border-radius: 8px;">
+                                    </a>
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
                     <div class="modal-actions-grid mt-3 pt-2">
-                        <a href="/admin/ticket/${ticket.id}/assign"
-                           class="action-btn btn-assign ${(!ticket.assigned_professional_id && ['open','cancelled'].includes(ticket.status)) ? '' : 'disabled'}">
-                            <i class="bi bi-person-plus-fill"></i> <span>Assign Tech</span>
-                        </a>
-                        <button onclick="updateStatus(${ticket.id}, 'fixed')"
-                                class="action-btn btn-resolve ${ticket.status !== 'fixed' ? '' : 'disabled'}">
-                            <i class="bi bi-check-lg"></i> <span>Resolve</span>
+                        ${(!['fixed', 'resolved', 'closed'].includes(ticket.status)) ? `
+                        <button type="button" onclick="openVerifyCompletionModal(${ticket.id}, '${(ticket.assigned_vendor_or_tech_name || ticket.assigned_professional_name || '').replace(/'/g, "\\'")}')"
+                                class="action-btn btn-verify-closure btn-success text-white shadow-sm">
+                            <i class="bi bi-patch-check-fill me-1"></i> <span>Verify & Log Completion</span>
                         </button>
+                        ` : `
+                        <button type="button" class="action-btn btn-verified-badge btn-secondary disabled" disabled>
+                            <i class="bi bi-check2-all text-success me-1"></i> <span>Verified & Closed</span>
+                        </button>
+                        `}
                         <a href="/admin/map?floor=${ticket.room_floor_id}&room=${ticket.room_number}"
                            class="action-btn btn-map">
                             <i class="bi bi-geo-alt-fill"></i> <span>View Map</span>
@@ -1389,16 +2003,36 @@
                                 class="action-btn btn-delete">
                             <i class="bi bi-trash-fill"></i> <span>Delete</span>
                         </button>
+                        ${(ticket.status === 'in-progress') ? `
+                        <button type="button" class="action-btn btn-in-progress active" disabled title="Ticket is already In-Progress">
+                            <i class="bi bi-arrow-repeat"></i> <span>In-Progress</span>
+                        </button>
+                        ` : `
+                        <button type="button" onclick="markTicketInProgress(${ticket.id})" class="action-btn btn-in-progress" title="Move ticket to In-Progress">
+                            <i class="bi bi-arrow-repeat"></i> <span>In-Progress</span>
+                        </button>
+                        `}
                     </div>
                 `;
 
-                // Use the CACHED instance — not getOrCreateInstance() after innerHTML change.
+                // Re-affirm modal visibility with fresh content
                 ModalManager.showTicket();
             }
         })
         .catch(error => {
             console.error('Error loading ticket:', error);
-            alert('Failed to load ticket details');
+            const modalBody = document.getElementById('ticketModalBody');
+            if (modalBody) {
+                modalBody.innerHTML = `
+                    <div class="alert alert-danger d-flex align-items-center gap-2 mb-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+                        <div>Failed to load report details for #${ticketId}. Please try again.</div>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+                    </div>
+                `;
+            }
         })
         .finally(() => ModalManager.setLoading(false));
     }
@@ -1458,6 +2092,203 @@
     window.deleteTicket = deleteTicket;
     window.setRating = setRating;
     window.submitRating = submitRating;
+
+    async function markTicketInProgress(ticketId) {
+        try {
+            const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = (csrfMeta && csrfMeta.content) ? csrfMeta.content : '{{ csrf_token() }}';
+            const tabGuardMeta = document.querySelector('meta[name="tab-guard-id"]');
+            const tabGuardId = (tabGuardMeta && tabGuardMeta.content) ? tabGuardMeta.content : (sessionStorage.getItem('fixlink_tab_id') || "{{ session.get('tab_guard_id', '') }}");
+
+            const headers = {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            };
+            if (csrfToken) headers['X-CSRFToken'] = csrfToken;
+            if (tabGuardId) headers['X-Tab-Guard-ID'] = tabGuardId;
+
+            const res = await fetch(`/admin/tickets/${ticketId}/update-status`, {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({ status: 'in-progress' })
+            });
+            const data = await res.json();
+            if (data.success) {
+                try {
+                    ModalManager.hideTicket();
+                } catch (e) {}
+                window.location.reload();
+            } else {
+                alert('Error: ' + (data.error || 'Failed to update ticket status'));
+            }
+        } catch (err) {
+            console.error('Error marking ticket in-progress:', err);
+            alert('An error occurred while moving ticket to In-Progress');
+        }
+    }
+    window.markTicketInProgress = markTicketInProgress;
+
+    function resetVerifyProof() {
+        const fileInput = document.getElementById('verifyProofImage');
+        const promptEl = document.getElementById('verifyDropzonePrompt');
+        const previewEl = document.getElementById('verifyDropzonePreview');
+        const thumbEl = document.getElementById('verifyPreviewThumbnail');
+        const nameEl = document.getElementById('verifyPreviewFileName');
+        const sizeEl = document.getElementById('verifyPreviewFileSize');
+
+        if (fileInput) fileInput.value = '';
+        if (thumbEl) thumbEl.src = '';
+        if (promptEl) promptEl.classList.remove('d-none');
+        if (previewEl) previewEl.classList.add('d-none');
+    }
+    window.resetVerifyProof = resetVerifyProof;
+
+    function openVerifyCompletionModal(ticketId, defaultTechName = '') {
+        try {
+            ModalManager.hideTicket();
+        } catch (e) {
+            console.warn('ModalManager.hideTicket warning:', e);
+        }
+        const idInput = document.getElementById('verifyTicketId');
+        const displaySpan = document.getElementById('verifyTicketDisplayId');
+        const techInput = document.getElementById('verifyTechName');
+        const notesInput = document.getElementById('verifyNotes');
+
+        if (idInput) idInput.value = ticketId;
+        if (displaySpan) displaySpan.textContent = `Ticket #${ticketId}`;
+        if (techInput) techInput.value = defaultTechName || '';
+        if (notesInput) notesInput.value = '';
+        resetVerifyProof();
+
+        ModalManager.showVerify();
+    }
+    window.openVerifyCompletionModal = openVerifyCompletionModal;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const fileInput = document.getElementById('verifyProofImage');
+        const dropzone = document.getElementById('verifyProofDropzone');
+        const promptEl = document.getElementById('verifyDropzonePrompt');
+        const previewEl = document.getElementById('verifyDropzonePreview');
+        const thumbEl = document.getElementById('verifyPreviewThumbnail');
+        const nameEl = document.getElementById('verifyPreviewFileName');
+        const sizeEl = document.getElementById('verifyPreviewFileSize');
+
+        if (fileInput) {
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const file = this.files[0];
+                    if (nameEl) nameEl.textContent = file.name;
+                    if (sizeEl) {
+                        const kb = (file.size / 1024).toFixed(1);
+                        sizeEl.textContent = kb > 1024 ? (kb / 1024).toFixed(1) + ' MB' : kb + ' KB';
+                    }
+                    if (thumbEl) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            thumbEl.src = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                    if (promptEl) promptEl.classList.add('d-none');
+                    if (previewEl) previewEl.classList.remove('d-none');
+                } else {
+                    resetVerifyProof();
+                }
+            });
+        }
+
+        if (dropzone) {
+            ['dragenter', 'dragover'].forEach(evt => {
+                dropzone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.add('dragover');
+                });
+            });
+            ['dragleave', 'drop'].forEach(evt => {
+                dropzone.addEventListener(evt, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    dropzone.classList.remove('dragover');
+                });
+            });
+            dropzone.addEventListener('drop', (e) => {
+                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileInput.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+
+        const verifyForm = document.getElementById('verifyCompletionForm');
+        if (verifyForm) {
+            verifyForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const ticketId = document.getElementById('verifyTicketId').value;
+                const submitBtn = document.getElementById('verifySubmitBtn');
+                const originalBtnHtml = submitBtn.innerHTML;
+
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span> Verifying...';
+
+                const formData = new FormData(verifyForm);
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = (csrfMeta && csrfMeta.content) ? csrfMeta.content : '{{ csrf_token() }}';
+                if (!formData.has('csrf_token') && csrfToken) {
+                    formData.append('csrf_token', csrfToken);
+                }
+
+                const tabGuardMeta = document.querySelector('meta[name="tab-guard-id"]');
+                const tabGuardId = (tabGuardMeta && tabGuardMeta.content) ? tabGuardMeta.content : (sessionStorage.getItem('fixlink_tab_id') || "{{ session.get('tab_guard_id', '') }}");
+                if (tabGuardId && !formData.has('X-Tab-Guard-ID')) {
+                    formData.append('X-Tab-Guard-ID', tabGuardId);
+                }
+
+                const headers = { 
+                    'X-Requested-With': 'XMLHttpRequest'
+                };
+                if (csrfToken) {
+                    headers['X-CSRFToken'] = csrfToken;
+                }
+                if (tabGuardId) {
+                    headers['X-Tab-Guard-ID'] = tabGuardId;
+                }
+
+                fetch(`/admin/issues/${ticketId}/verify-close`, {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                })
+                .then(async res => {
+                    const contentType = res.headers.get('content-type') || '';
+                    if (contentType.includes('application/json')) {
+                        const data = await res.json();
+                        return { ok: res.ok, status: res.status, data };
+                    } else {
+                        const text = await res.text();
+                        return { ok: false, status: res.status, data: { error: `Server returned non-JSON response (${res.status}). Please check your login session.` } };
+                    }
+                })
+                .then(({ ok, status, data }) => {
+                    if (ok && data.success) {
+                        alert(`Quality Assurance Verified! ${data.message || 'Ticket verified and committed to audit log.'}`);
+                        ModalManager.hideVerify();
+                        window.location.reload();
+                    } else {
+                        alert(`Verification failed: ${data.error || 'Unknown error occurred.'}`);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnHtml;
+                    }
+                })
+                .catch(err => {
+                    console.error('Error verifying ticket:', err);
+                    alert('Network error while committing verification: ' + (err.message || 'Please check your connection and retry.'));
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                });
+            });
+        }
+    });
 
     // Check for ticket_id in URL to auto-open modal on load
     window.addEventListener('load', function() {
@@ -1558,6 +2389,66 @@
                 assignBtn.innerHTML = originalBtnHtml;
             });
         });
+    });
+
+    // ==================== TICKETS PROGRESSIVE LOAD MORE ====================
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-ticket-load-more');
+        if (!btn || btn.disabled) return;
+
+        e.preventDefault();
+        const card = btn.closest('.tickets-card');
+        if (!card) return;
+
+        // Visual loading tactile state
+        btn.disabled = true;
+        btn.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span>Loading...</span>
+        `;
+
+        setTimeout(() => {
+            const hiddenDesktopRows = card.querySelectorAll('tbody tr.ticket-overflow-item.d-none');
+            const hiddenMobileCards = card.querySelectorAll('.mobile-card-list .mc-card.ticket-overflow-item.d-none');
+            const BATCH_SIZE = 4;
+
+            for (let i = 0; i < Math.min(BATCH_SIZE, hiddenDesktopRows.length); i++) {
+                hiddenDesktopRows[i].classList.remove('d-none');
+            }
+            for (let i = 0; i < Math.min(BATCH_SIZE, hiddenMobileCards.length); i++) {
+                hiddenMobileCards[i].classList.remove('d-none');
+            }
+
+            const totalItems = card.querySelectorAll('tbody tr.clickable-row').length || 
+                               card.querySelectorAll('.mobile-card-list .mc-card').length;
+            const visibleItems = card.querySelectorAll('tbody tr.clickable-row:not(.d-none)').length || 
+                                 card.querySelectorAll('.mobile-card-list .mc-card:not(.d-none)').length;
+
+            const visibleCountEl = card.querySelector('.ticket-visible-count');
+            const totalCountEl = card.querySelector('.ticket-total-count');
+            if (visibleCountEl) visibleCountEl.textContent = visibleItems;
+            if (totalCountEl) totalCountEl.textContent = totalItems;
+
+            const controls = card.querySelector('.ticket-load-more-controls');
+            if (controls) {
+                const remaining = totalItems - visibleItems;
+                if (remaining > 0) {
+                    const nextBatch = Math.min(remaining, BATCH_SIZE);
+                    controls.innerHTML = `
+                        <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm btn-ticket-load-more">
+                            <i class="bi bi-arrow-down-circle"></i>
+                            <span>Load More (+${nextBatch})</span>
+                        </button>
+                    `;
+                } else {
+                    controls.innerHTML = `
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+                            <i class="bi bi-check2-circle"></i> All ${totalItems} tickets loaded
+                        </span>
+                    `;
+                }
+            }
+        }, 120);
     });
 </script>
 {% endblock %}

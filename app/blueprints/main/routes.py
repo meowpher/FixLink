@@ -115,10 +115,11 @@ def ticket_form():
 
 
 @main_bp.route('/report', methods=['GET'])
-@user_login_required
+@login_required
 def report_form():
     """
-    Student portal - report room issues with visual map.
+    Universal issue reporting portal with visual map.
+    Protected ONLY by standard login_required authentication check (accessible to all ranks: Faculty, Supervisor, Super Admin).
     Supports auto-selection via ?room=VY404 query parameter.
     """
     room_param = request.args.get('room', '').strip().upper()
@@ -196,10 +197,11 @@ def report_form():
 
 
 @main_bp.route('/report', methods=['POST'])
-@user_login_required
+@login_required
 def submit_report():
     """
     Submit a new maintenance ticket.
+    Protected ONLY by standard login_required authentication check (accessible to all ranks: Faculty, Supervisor, Super Admin).
     Handles both AJAX and form submissions.
     Enforces maximum 3 reports/day and automated spam detection / strikes.
     """
@@ -592,38 +594,6 @@ def report_bug():
         return redirect(origin if origin else url_for('main.index'))
         
     return redirect(url_for('main.index'))
-
-@main_bp.route('/api/chat/unread_total')
-@handle_api_errors
-def get_unread_chat_total():
-    from ...models import ChatMessage
-    
-    if not session.get('user_id') and not session.get('professional_id'):
-        return api_response(success=True, data={'unread_count': 0})
-        
-    unread_count = 0
-    if session.get('is_admin'):
-        # For Admin, get all unread messages sent by professionals to admin
-        unread_count = ChatMessage.query.filter_by(
-            sender_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
-            receiver_type=ChatMessage.SENDER_TYPE_ADMIN,
-            is_read=False
-        ).count()
-    elif session.get('professional_id'):
-        # For Professional, get all unread messages sent by admin to professional
-        prof_id = session.get('professional_id')
-        unread_count = ChatMessage.query.filter_by(
-            sender_type=ChatMessage.SENDER_TYPE_ADMIN,
-            receiver_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
-            receiver_id=prof_id,
-            is_read=False
-        ).count()
-        
-    return api_response(
-        success=True,
-        data={'unread_count': unread_count},
-        unread_count=unread_count
-    )
 
 @main_bp.route('/api/notifications/recent', methods=['GET'])
 def get_recent_notifications():

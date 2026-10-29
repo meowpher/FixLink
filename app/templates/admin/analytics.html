@@ -115,7 +115,7 @@
                                         <td>
                                             {% set efficiency = 100 - (pro.avg_ttr_hours * 2) %}
                                             <div class="progress" style="height: 6px;">
-                                                <div class="progress-bar bg-success" style="width: {{ [0, [100, efficiency]|min]|max }}%"></div>
+                                                <div class="progress-bar bg-success" data-width="{{ [0, [100, efficiency]|min]|max }}" style="width: 0%"></div>
                                             </div>
                                         </td>
                                     </tr>
@@ -161,15 +161,24 @@
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    // Jinja-rendered data hoisted into variables so the JS linter sees valid syntax
+    var trendsLabels = {{ system_trends.labels|tojson }};
+    var trendsValues = {{ system_trends.values|tojson }};
+
     document.addEventListener('DOMContentLoaded', function() {
-        const ctx = document.getElementById('trendsChart').getContext('2d');
+        // Animate progress bars that use data-width
+        document.querySelectorAll('.progress-bar[data-width]').forEach(function(bar) {
+            bar.style.width = bar.dataset.width + '%';
+        });
+
+        var ctx = document.getElementById('trendsChart').getContext('2d');
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: {{ system_trends.labels|tojson }},
+                labels: trendsLabels,
                 datasets: [{
                     label: 'New Tickets',
-                    data: {{ system_trends.values|tojson }},
+                    data: trendsValues,
                     borderColor: '#3498db',
                     backgroundColor: 'rgba(52, 152, 219, 0.1)',
                     borderWidth: 3,

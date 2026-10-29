@@ -86,34 +86,50 @@ def create_app(config_name=None):
                 'connection is required for the application to start.'
             )
     
-    # Supabase Connection Hardening (especially for Vercel/SSL)
+    # Supabase Connection Hardening (Vercel/SSL & Transaction Pooler Migration)
     if database_url and database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
         
-    # Add SSL mode if on Vercel and it's missing
-    if os.environ.get('VERCEL') and 'sslmode=' not in database_url:
+    # Supabase connection pooler: Port 5432 is Session mode (hard-limited to 15 clients).
+    # Port 6543 is Transaction mode (supports unlimited concurrent client requests).
+    if 'pooler.supabase.com:5432' in database_url:
+        logger.info("Routing Supabase pooler connection from Session port 5432 to Transaction port 6543.")
+        database_url = database_url.replace('pooler.supabase.com:5432', 'pooler.supabase.com:6543')
+
+    # Add SSL mode if missing for Supabase/Vercel
+    if 'sslmode=' not in database_url and ('pooler.supabase.com' in database_url or os.environ.get('VERCEL')):
         separator = '&' if '?' in database_url else '?'
         database_url += f'{separator}sslmode=require'
 
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # PostgreSQL connection pool settings
-    if database_url.startswith('postgresql'):
+    # High-concurrency SQLAlchemy connection pooling (100+ concurrent users)
+    if database_url.startswith(('postgresql', 'mysql')):
+        connect_args = {'connect_timeout': 10}
+        if database_url.startswith('postgresql'):
+            connect_args.update({
+                'keepalives': 1,
+                'keepalives_idle': 30,
+                'keepalives_interval': 10,
+                'keepalives_count': 5,
+            })
         if os.environ.get('VERCEL'):
             # Vercel is serverless — use NullPool to avoid stale connections
             from sqlalchemy.pool import NullPool
             app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
                 'poolclass': NullPool,
                 'pool_pre_ping': True,
+                'connect_args': connect_args,
             }
         else:
             app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-                'pool_size': 2,
-                'max_overflow': 3,
-                'pool_recycle': 60,       # Recycle connections every 1 min
-                'pool_timeout': 15,       # Wait up to 15s for a connection
-                'pool_pre_ping': True,    # Test connection health before use
+                'pool_size': int(os.environ.get('DB_POOL_SIZE', 5)),
+                'max_overflow': int(os.environ.get('DB_MAX_OVERFLOW', 10)),
+                'pool_recycle': int(os.environ.get('DB_POOL_RECYCLE', 280)),  # 280s to stay below 300s cloud idle timeout
+                'pool_timeout': int(os.environ.get('DB_POOL_TIMEOUT', 30)),
+                'pool_pre_ping': True,  # Prevent connection timeouts and stale database drops
+                'connect_args': connect_args,
             }
     
     app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static', 'uploads')
@@ -156,18 +172,41 @@ def create_app(config_name=None):
     from .blueprints.main import main_bp
     from .blueprints.admin import admin_bp
     from .blueprints.auth import auth_bp
-    from .blueprints.professional import professional_bp
     from .blueprints.superadmin import superadmin_bp
     from .blueprints.faculty.routes import faculty_bp
     from .blueprints.onboarding import onboarding_bp
+    from .blueprints.supervisor import supervisor_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(auth_bp)
-    app.register_blueprint(professional_bp)
     app.register_blueprint(superadmin_bp)
     app.register_blueprint(faculty_bp, url_prefix='/faculty')
     app.register_blueprint(onboarding_bp)
+    app.register_blueprint(supervisor_bp, url_prefix='/supervisor')
+
+    # In-memory Floor Plan SVG cache for instantaneous zero-latency template rendering
+    _floor_svg_memory_cache = {}
+
+    def get_floor_svg(level):
+        lvl = str(level)
+        if lvl not in _floor_svg_memory_cache:
+            svg_file = os.path.join(app.root_path, 'static', 'images', 'floors', f'VY{lvl}.svg')
+            if os.path.isfile(svg_file):
+                try:
+                    with open(svg_file, 'r', encoding='utf-8') as f:
+                        _floor_svg_memory_cache[lvl] = f.read()
+                except Exception:
+                    _floor_svg_memory_cache[lvl] = ''
+            else:
+                _floor_svg_memory_cache[lvl] = ''
+        return _floor_svg_memory_cache.get(lvl, '')
+
+    @app.context_processor
+    def inject_floor_svg_processor():
+        return dict(get_floor_svg=get_floor_svg)
+
+    app.jinja_env.globals['get_floor_svg'] = get_floor_svg
 
     # Pusher is initialized lazily in realtime.py
     
@@ -183,11 +222,12 @@ def create_app(config_name=None):
     def sanitize_conflicting_session():
         # Enforce permanent session lifecycle so 2-hour idle timeout is applied
         session.permanent = True
-        # Prevent technician keys from polluting admin/user sessions
-        if session.get('user_id') and session.get('professional_id'):
+        # Eradicate any legacy professional session keys
+        if session.get('professional_id'):
             session.pop('professional_id', None)
             session.pop('professional_name', None)
             session.pop('professional_category', None)
+
 
 
     # Phase 2: Clickwrap Legal Compliance Middleware Interceptor
@@ -199,24 +239,49 @@ def create_app(config_name=None):
 
         # Resolve authenticated user (via cached g or session)
         user = None
-        if hasattr(g, '_current_user_cached') and g._current_user_cached:
+        user_id = session.get('user_id')
+        if user_id and getattr(g, '_current_user_id', None) == user_id and getattr(g, '_current_user_cached', None) is not None:
             user = g._current_user_cached
-        elif session.get('user_id'):
+        elif user_id:
             from .models import User
-            user = db.session.get(User, session['user_id'])
+            try:
+                user = db.session.get(User, user_id)
+            except Exception as e:
+                logger.warning(f"Database session get user failed ({e}), refreshing connection...")
+                try:
+                    db.session.rollback()
+                    db.session.remove()
+                    user = db.session.get(User, user_id)
+                except Exception as inner_e:
+                    logger.error(f"Failed to fetch user {user_id} after connection reset: {inner_e}")
+                    user = None
         elif session.get('super_admin_email'):
             from .models import User
-            user = User.query.filter_by(email=session['super_admin_email']).first()
+            try:
+                user = User.query.filter_by(email=session['super_admin_email']).first()
+            except Exception as e:
+                logger.warning(f"Database session query superadmin failed ({e}), refreshing connection...")
+                try:
+                    db.session.rollback()
+                    db.session.remove()
+                    user = User.query.filter_by(email=session['super_admin_email']).first()
+                except Exception as inner_e:
+                    logger.error(f"Failed to fetch superadmin after connection reset: {inner_e}")
+                    user = None
 
         if user:
             g._current_user_cached = user
+            g._current_user_id = user.id
+        else:
+            g._current_user_cached = None
+            g._current_user_id = None
 
         # Logic: If current_user.is_authenticated AND current_user.has_accepted_terms == False:
         is_authenticated = user is not None and getattr(user, 'is_authenticated', True)
         if is_authenticated and not getattr(user, 'has_accepted_terms', False):
             # Whitelist: static, logout, and your login/auth routes
             if request.endpoint.startswith('static') or \
-               request.endpoint in {'static', 'logout', 'auth.logout', 'superadmin.logout', 'professional.logout', 'onboarding.terms', 'onboarding.accept'} or \
+               request.endpoint in {'static', 'logout', 'auth.logout', 'superadmin.logout', 'onboarding.terms', 'onboarding.accept'} or \
                request.endpoint.startswith('auth.') or \
                request.endpoint.startswith('onboarding.'):
                 return None
@@ -291,16 +356,58 @@ def create_app(config_name=None):
     @app.context_processor
     def inject_globals():
         current_user_obj = None
-        if hasattr(g, '_current_user_cached'):
+        user_id = session.get('user_id')
+        if user_id and getattr(g, '_current_user_id', None) == user_id and getattr(g, '_current_user_cached', None) is not None:
             current_user_obj = g._current_user_cached
-        elif session.get('user_id'):
-            from .models import User
-            current_user_obj = db.session.get(User, session['user_id'])
-            g._current_user_cached = current_user_obj
-        elif session.get('super_admin_email'):
-            from .models import User
-            current_user_obj = User.query.filter_by(email=session['super_admin_email']).first()
-            g._current_user_cached = current_user_obj
+        else:
+            if user_id:
+                from .models import User
+                try:
+                    current_user_obj = db.session.get(User, user_id)
+                except Exception:
+                    try:
+                        db.session.rollback()
+                        db.session.remove()
+                        current_user_obj = db.session.get(User, user_id)
+                    except Exception:
+                        current_user_obj = None
+            if not current_user_obj and session.get('super_admin_email'):
+                from .models import User
+                try:
+                    current_user_obj = User.query.filter_by(email=session['super_admin_email']).first()
+                except Exception:
+                    try:
+                        db.session.rollback()
+                        db.session.remove()
+                        current_user_obj = User.query.filter_by(email=session['super_admin_email']).first()
+                    except Exception:
+                        current_user_obj = None
+                if not current_user_obj:
+                    class SuperAdminUserProxy:
+                        def __init__(self, email):
+                            self.email = email
+                            self.role = 'SUPER_ADMIN'
+                            self.id = None
+                            self.name = 'Super Admin'
+                            self.has_accepted_terms = True
+                            self.is_authenticated = True
+                    current_user_obj = SuperAdminUserProxy(session['super_admin_email'])
+            elif not current_user_obj and session.get('user_email'):
+                from .models import User
+                current_user_obj = User.query.filter_by(email=session['user_email']).first()
+                if not current_user_obj:
+                    class UserProxy:
+                        def __init__(self, email):
+                            self.email = email
+                            self.role = 'ADMIN'
+                            self.id = None
+                            self.name = 'Admin'
+                            self.has_accepted_terms = True
+                            self.is_authenticated = True
+                    current_user_obj = UserProxy(session['user_email'])
+            if current_user_obj:
+                g._current_user_cached = current_user_obj
+                g._current_user_id = getattr(current_user_obj, 'id', None)
 
         return dict(
             SUPER_ADMIN_EMAIL=SUPER_ADMIN_EMAILS[0],
@@ -335,6 +442,35 @@ def create_app(config_name=None):
     @app.errorhandler(404)
     def page_not_found(e):
         return render_template('404.html'), 404
+
+    # Database resilience: catch dropped/stale connections and gracefully recover
+    from sqlalchemy.exc import OperationalError, DBAPIError
+    @app.errorhandler(OperationalError)
+    @app.errorhandler(DBAPIError)
+    @app.errorhandler(500)
+    def handle_database_connection_error(e):
+        original_exc = getattr(e, 'original_exception', e)
+        is_db_err = isinstance(original_exc, (OperationalError, DBAPIError)) or 'server closed the connection' in str(e).lower()
+        if is_db_err:
+            logger.warning(f"Database connection error intercepted ({original_exc}). Evicting stale connection.")
+            try:
+                db.session.rollback()
+                db.session.remove()
+            except Exception:
+                pass
+
+            if request.is_json or request.path.startswith('/api/'):
+                return jsonify({'success': False, 'error': 'Database connection refreshed. Please retry.'}), 503
+
+            if request.method == 'GET':
+                return redirect(request.url)
+
+            flash('Database connection was refreshed. Please try again.', 'warning')
+            return redirect(request.referrer or url_for('main.index'))
+
+        if request.is_json or request.path.startswith('/api/'):
+            return jsonify({'success': False, 'error': 'Internal server error'}), 500
+        return ('Internal Server Error', 500)
     
     return app
 

@@ -8,10 +8,95 @@
 
 {% block extra_css %}
 <meta name="current-user-id" content="{{ current_user_id | tojson }}">
+<link rel="preload" href="/static/images/floors/VY0.svg" as="fetch" crossorigin="anonymous">
+<link rel="preload" href="/static/images/floors/VY6.svg" as="fetch" crossorigin="anonymous">
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/render.js') }}">
 <link rel="modulepreload" href="{{ url_for('static', filename='js/modules/ui.js') }}">
 <link rel="preload" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}" as="style">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/faculty_dashboard.min.css') }}">
+<style>
+/* Remove glowy drop-shadow blur effect from all room boxes across all floors */
+#facultyMapContainer .interactive-map-wrapper .room-poly,
+#facultyMapContainer .interactive-map-wrapper .vacant-status,
+#facultyMapContainer .interactive-map-wrapper [data-room],
+#facultyMapContainer .interactive-map-wrapper [data-room] .room-poly,
+#facultyMapContainer .interactive-map-wrapper [data-room] rect,
+#facultyMapContainer .interactive-map-wrapper [data-room] path,
+#facultyMapContainer .interactive-map-wrapper [data-room] polygon,
+#facultyMapContainer .interactive-map-wrapper .room-poly.vacant-status,
+#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status,
+#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status .room-poly,
+#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status rect,
+#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status path,
+#facultyMapContainer .interactive-map-wrapper [data-room].vacant-status polygon,
+#facultyMapContainer .room-pulse-highlight,
+#facultyMapContainer .room-poly.room-pulse-highlight {
+    filter: none !important;
+    -webkit-filter: none !important;
+    box-shadow: none !important;
+}
+
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .room-poly,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .vacant-status,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room],
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room] .room-poly,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room] rect,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room] path,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room] polygon,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper .room-poly.vacant-status,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status .room-poly,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status rect,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status path,
+[data-theme="dark"] #facultyMapContainer .interactive-map-wrapper [data-room].vacant-status polygon,
+[data-theme="dark"] #facultyMapContainer .room-pulse-highlight,
+[data-theme="dark"] #facultyMapContainer .room-poly.room-pulse-highlight {
+    filter: none !important;
+    -webkit-filter: none !important;
+    box-shadow: none !important;
+}
+
+/* ── Ghost Protocol Check-in Banner & Explainer Capsule Styles ── */
+.ghost-checkin-helper-card {
+    background: rgba(14, 165, 233, 0.08);
+    border: 1px solid rgba(14, 165, 233, 0.22);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+.ghost-checkin-helper-card:hover {
+    background: rgba(14, 165, 233, 0.15);
+    border-color: #0ea5e9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+}
+[data-theme="dark"] .ghost-checkin-helper-card,
+[data-bs-theme="dark"] .ghost-checkin-helper-card {
+    background: rgba(14, 165, 233, 0.12) !important;
+    border-color: rgba(56, 189, 248, 0.25) !important;
+}
+.ghost-shield-pulse {
+    animation: ghostPulse 2s infinite ease-in-out;
+}
+@keyframes ghostPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.12); }
+}
+.pending-checkin-card {
+    transition: all 0.25s ease;
+}
+.btn-instant-checkin {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    letter-spacing: 0.2px;
+}
+.btn-instant-checkin:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.35) !important;
+}
+.btn-instant-checkin:active {
+    transform: translateY(0);
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -113,6 +198,53 @@
             </div>
         </div>
         {% endif %}
+        
+        {% if pending_checkins %}
+        <!-- ⚡ 1-Tap Ghost Protocol Quick Check-In Action Banner -->
+        <div class="mb-3.5">
+            {% for pc in pending_checkins %}
+            <div class="pending-checkin-card card border-0 shadow-sm rounded-4 p-3 mb-2.5 {% if pc.can_check_in_now %}border-start border-4 border-warning bg-warning bg-opacity-10{% else %}border-start border-4 border-info bg-info bg-opacity-10{% endif %}" id="pendingCheckinCard_{{ pc.id }}">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="checkin-icon-bubble {% if pc.can_check_in_now %}bg-warning text-dark ghost-shield-pulse{% else %}bg-info text-white{% endif %} rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 42px; height: 42px; font-size: 1.2rem; flex-shrink: 0;">
+                            <i class="bi {% if pc.can_check_in_now %}bi-lightning-charge-fill{% else %}bi-shield-check{% endif %}"></i>
+                        </div>
+                        <div>
+                            <div class="d-flex align-items-center gap-2 flex-wrap mb-0.5">
+                                <span class="badge {% if pc.can_check_in_now %}bg-warning text-dark{% else %}bg-info text-white{% endif %} font-monospace fw-bold" style="font-size: 0.72rem;">
+                                    {% if pc.is_live %}🔴 LIVE NOW — CHECK IN REQUIRED{% elif pc.can_check_in_now %}⚡ CHECK IN OPEN NOW{% else %}UPCOMING RESERVATION{% endif %}
+                                </span>
+                                <strong class="text-body" style="font-size: 0.88rem;">{{ pc.subject }}</strong>
+                            </div>
+                            <div class="small text-muted d-flex align-items-center gap-2 flex-wrap" style="font-size: 0.78rem;">
+                                <span><i class="bi bi-geo-alt-fill text-primary me-1"></i>VY{{ pc.room_number }} ({{ pc.room_name or 'Room' }})</span>
+                                <span>•</span>
+                                <span><i class="bi bi-clock me-1"></i>{{ pc.time_str }}</span>
+                                {% if pc.can_check_in_now %}
+                                <span class="text-danger fw-semibold"><i class="bi bi-exclamation-circle me-1"></i>Check in to prevent auto-cancellation</span>
+                                {% else %}
+                                <span class="text-muted"><i class="bi bi-hourglass-split me-1"></i>Check-in opens in {{ pc.minutes_to_start }} mins</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2 flex-shrink-0 w-100 w-sm-auto">
+                        {% if pc.can_check_in_now %}
+                        <button type="button" class="btn btn-warning text-dark fw-bold px-4 py-2 rounded-pill shadow-sm d-flex align-items-center justify-content-center gap-2 flex-grow-1 flex-sm-grow-0 btn-instant-checkin" onclick="instantDirectCheckIn({{ pc.id }}, this)">
+                            <i class="bi bi-lightning-charge-fill"></i><span>Check In Now</span>
+                        </button>
+                        {% else %}
+                        <button type="button" class="btn btn-outline-secondary px-3 py-2 rounded-pill small fw-semibold flex-grow-1 flex-sm-grow-0" disabled style="font-size: 0.78rem;">
+                            <i class="bi bi-lock me-1"></i>Check-in opens 10m before start
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <div class="row">
             <div class="col-12">
                 <div class="d-flex align-items-center justify-content-between gap-2 mb-3 mb-md-4">
@@ -1205,10 +1337,12 @@
                                         </button>
                                     </div>
 
-                                    <div id="meetingModalMapContainer" class="meeting-map-panzoom-target">
-                                        <div class="d-flex align-items-center justify-content-center py-4 text-muted small">
-                                            <span class="spinner-border spinner-border-sm text-primary me-2"></span>Loading interactive floor map...
-                                        </div>
+                                    <!-- Embedded Floor SVGs for Instant Zero-Latency Map Rendering -->
+                                    <template id="meetingFloorSvgTemplate_0">{{ get_floor_svg(0) | safe }}</template>
+                                    <template id="meetingFloorSvgTemplate_6">{{ get_floor_svg(6) | safe }}</template>
+
+                                    <div id="meetingModalMapContainer" class="meeting-map-panzoom-target" data-loaded-floor="0">
+                                        {{ get_floor_svg(0) | safe }}
                                     </div>
                                 </div>
 
@@ -1306,7 +1440,9 @@
                                 <!-- Booking Mode & Duration Row -->
                                 <div class="row g-3 mb-3">
                                     <div class="col-6">
-                                        <label class="form-label text-muted small fw-semibold mb-1.5" style="font-size: 0.78rem;">Booking Mode</label>
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <label class="form-label text-muted small fw-semibold mb-0" style="font-size: 0.78rem;">Booking Mode</label>
+                                        </div>
                                         <div class="custom-dropdown-container" id="bookingModeDropdownContainer">
                                             <button type="button" class="custom-dropdown-trigger" id="bookingModeDropdownBtn" aria-expanded="false">
                                                 <span class="dropdown-selected-label" id="bookingModeSelectedDisplay">Instant meeting</span>
@@ -1326,7 +1462,7 @@
                                         </div>
                                     </div>
                                     <div class="col-6">
-                                        <div class="d-flex align-items-center justify-content-between mb-1.5">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
                                             <label class="form-label text-muted small fw-semibold mb-0" style="font-size: 0.78rem;">Duration</label>
                                             <span class="text-muted small font-monospace opacity-75" id="meetingDurationEndTime" style="font-size: 0.72rem;">~--:--</span>
                                         </div>
@@ -1361,11 +1497,11 @@
                                 <!-- Scheduled Date & Time Container (hidden by default for instant claim) -->
                                 <div class="row g-3 mb-3 d-none" id="meetingScheduledFields">
                                     <div class="col-6">
-                                        <label class="form-label text-muted small fw-semibold mb-1.5" for="meetingDate" style="font-size: 0.78rem;"><i class="bi bi-calendar-event me-1 text-primary"></i>Reservation Date</label>
+                                        <label class="form-label text-muted small fw-semibold mb-1" for="meetingDate" style="font-size: 0.78rem;"><i class="bi bi-calendar-event me-1 text-primary"></i>Reservation Date</label>
                                         <input type="date" class="form-control" id="meetingDate">
                                     </div>
                                     <div class="col-6">
-                                        <label class="form-label text-muted small fw-semibold mb-1.5" for="meetingTime" style="font-size: 0.78rem;"><i class="bi bi-clock me-1 text-primary"></i>Start Time</label>
+                                        <label class="form-label text-muted small fw-semibold mb-1" for="meetingTime" style="font-size: 0.78rem;"><i class="bi bi-clock me-1 text-primary"></i>Start Time</label>
                                         <select class="form-select" id="meetingTime">
                                             <option value="07:00">07:00 AM</option>
                                             <option value="08:00">08:00 AM</option>
@@ -1385,14 +1521,24 @@
 
                                 <!-- Meeting Subject / Agenda -->
                                 <div class="mb-3">
-                                    <label class="form-label text-muted small fw-semibold mb-1.5" for="meetingSubject" style="font-size: 0.78rem;">Meeting Subject / Agenda</label>
+                                    <label class="form-label text-muted small fw-semibold mb-1" for="meetingSubject" style="font-size: 0.78rem;">Meeting Subject / Agenda</label>
                                     <input type="text" class="form-control" id="meetingSubject" placeholder="e.g. Faculty Sync, Academic Review" required>
                                 </div>
 
-                                <!-- Ghost Protocol Subtext Note -->
-                                <div class="d-flex align-items-center gap-1.5 text-muted small px-0.5 mb-2" style="font-size: 0.74rem;">
-                                    <i class="bi bi-shield-check text-info flex-shrink-0"></i>
-                                    <span>Check in within 10 mins of start time to prevent cancellation.</span>
+                                <!-- Ghost Protocol Interactive Info & Explainer Capsule -->
+                                <div class="ghost-checkin-helper-card d-flex align-items-center justify-content-between p-2.5 rounded-3 mb-2.5" id="btnGhostInfoExplain" role="button" tabindex="0" onclick="showGhostProtocolExplainer()" title="Click to view how check-in works">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div class="ghost-shield-bubble bg-info bg-opacity-10 text-info rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; flex-shrink: 0;">
+                                            <i class="bi bi-shield-check"></i>
+                                        </div>
+                                        <div class="lh-xs">
+                                            <span class="d-block fw-semibold text-body" style="font-size: 0.76rem;">Ghost Protocol Check-In</span>
+                                            <span class="text-muted" style="font-size: 0.68rem;">1-tap check-in button activates 10 mins before start</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-info bg-opacity-10 text-info border border-info border-opacity-25 rounded-pill px-2 py-1 flex-shrink-0" style="font-size: 0.68rem;">
+                                        <i class="bi bi-question-circle me-1"></i>How to Check In
+                                    </span>
                                 </div>
                             </div>
 
@@ -3087,6 +3233,26 @@
                 });
             };
 
+            // Fast in-memory SVG cache for meeting floor plans seeded directly from embedded templates
+            const meetingFloorSvgCache = new Map();
+
+            const getMeetingFloorSvg = (floorStr) => {
+                if (meetingFloorSvgCache.has(floorStr)) return meetingFloorSvgCache.get(floorStr);
+                const tpl = document.getElementById(`meetingFloorSvgTemplate_${floorStr}`);
+                if (tpl && tpl.innerHTML.trim().length > 0) {
+                    const svgText = tpl.innerHTML.trim();
+                    meetingFloorSvgCache.set(floorStr, svgText);
+                    return svgText;
+                }
+                return null;
+            };
+
+            // Pre-seed cache from embedded templates immediately
+            const tpl0 = document.getElementById('meetingFloorSvgTemplate_0');
+            if (tpl0 && tpl0.innerHTML.trim()) meetingFloorSvgCache.set('0', tpl0.innerHTML.trim());
+            const tpl6 = document.getElementById('meetingFloorSvgTemplate_6');
+            if (tpl6 && tpl6.innerHTML.trim()) meetingFloorSvgCache.set('6', tpl6.innerHTML.trim());
+
             const loadMeetingModalFloorMap = async (floorLevel) => {
                 const container = document.getElementById('meetingModalMapContainer');
                 const labelEl = document.getElementById('meetingMapFloorLabel');
@@ -3095,20 +3261,33 @@
                 initMeetingMapZoomPanListeners();
                 resetMeetingMapZoomAndPan();
 
-                currentModalFloor = floorLevel.toString();
+                const floorStr = floorLevel.toString();
+                currentModalFloor = floorStr;
                 if (labelEl) {
-                    labelEl.innerHTML = floorLevel.toString() === '0' 
+                    labelEl.innerHTML = floorStr === '0' 
                         ? '<i class="bi bi-map me-1"></i>Ground Floor (L0) • Conference' 
                         : '<i class="bi bi-map me-1"></i>6th Floor (L6) • Meeting Rooms';
                 }
 
-                container.innerHTML = `<div class="d-flex align-items-center justify-content-center py-4 text-muted small"><span class="spinner-border spinner-border-sm text-primary me-2"></span>Loading interactive floor map...</div>`;
-
                 try {
-                    const res = await fetch(`/static/images/floors/VY${floorLevel}.svg`);
-                    if (!res.ok) throw new Error("Floor SVG not found");
-                    const svgText = await res.text();
-                    container.innerHTML = svgText;
+                    let svgText = getMeetingFloorSvg(floorStr);
+                    if (!svgText) {
+                        const res = await fetch(`/static/images/floors/VY${floorStr}.svg`);
+                        if (!res.ok) throw new Error("Floor SVG not found");
+                        svgText = await res.text();
+                        meetingFloorSvgCache.set(floorStr, svgText);
+                    }
+
+                    if (currentModalFloor !== floorStr) return;
+
+                    // Only replace container HTML if switching floors or not yet populated
+                    const loadedFloor = container.getAttribute('data-loaded-floor');
+                    const hasSvg = container.querySelector('svg');
+                    if (!hasSvg || loadedFloor !== floorStr) {
+                        container.innerHTML = svgText;
+                        container.setAttribute('data-loaded-floor', floorStr);
+                    }
+
                     const svgDoc = container.querySelector('svg');
                     if (!svgDoc) return;
 
@@ -3162,11 +3341,11 @@
                                 shape.classList.add('map-room-active');
                             }
 
-                            shape.addEventListener('click', (e) => {
+                            shape.onclick = (e) => {
                                 e.stopPropagation();
                                 if (meetingMapDragMoved) return; // Prevent selection on drag/pan
                                 selectMeetingRoomById(roomId);
-                            });
+                            };
                         }
 
                         if (label) {
@@ -3194,6 +3373,9 @@
                     container.innerHTML = `<div class="text-center text-muted small py-3"><i class="bi bi-info-circle me-1"></i>Interactive map preview not available. Please select from the list.</div>`;
                 }
             };
+
+            // Pre-process Ground Floor map right away on DOM ready
+            loadMeetingModalFloorMap('0');
 
             const selectMeetingRoomById = (roomId) => {
                 if (!roomId) return;
@@ -3288,10 +3470,10 @@
                 });
             });
 
-            // Modal open event listener: Load Ground Floor map automatically
+            // Modal open event listener: Start rendering Ground Floor map instantly on 'show.bs.modal'
             const meetingRoomModalEl = document.getElementById('meetingRoomModal');
             if (meetingRoomModalEl) {
-                meetingRoomModalEl.addEventListener('shown.bs.modal', () => {
+                meetingRoomModalEl.addEventListener('show.bs.modal', () => {
                     const activeTab = document.querySelector('.meeting-floor-tab.active');
                     const floor = activeTab ? activeTab.getAttribute('data-floor') : '0';
                     loadMeetingModalFloorMap(floor);
@@ -4129,6 +4311,126 @@
                 const emptyNameEl = document.getElementById('mobileEmptyDayName');
                 if (emptyNameEl) {
                     emptyNameEl.textContent = dayIdx !== 'all' ? (dayNames[dayIdx] || 'this day') : 'this week';
+                }
+            }
+        };
+
+        // ── Ghost Protocol Quick Explainer Popup ──
+        window.showGhostProtocolExplainer = function() {
+            if (typeof Swal === 'undefined') return;
+            Swal.fire({
+                icon: 'info',
+                title: 'How Check-In Works (Ghost Protocol)',
+                html: `
+                    <div class="text-start small text-muted lh-base">
+                        <p class="mb-3 text-body" style="font-size: 0.85rem;">To ensure rooms are never left vacant or blocked by forgotten reservations, every booking uses <strong>1-Tap Ghost Protocol Check-In</strong>:</p>
+                        <div class="d-flex gap-2.5 mb-2.5 p-2.5 bg-light rounded-3 border">
+                            <i class="bi bi-clock-history text-primary fs-5 flex-shrink-0"></i>
+                            <div>
+                                <strong class="text-body d-block" style="font-size: 0.82rem;">1. Activates 10 Minutes Before Start</strong>
+                                <span style="font-size: 0.75rem;">A prominent <strong>⚡ Check In Now</strong> banner automatically appears at the top of your Dashboard Agenda and on your booking card.</span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2.5 mb-2.5 p-2.5 bg-light rounded-3 border">
+                            <i class="bi bi-lightning-charge-fill text-warning fs-5 flex-shrink-0"></i>
+                            <div>
+                                <strong class="text-body d-block" style="font-size: 0.82rem;">2. 1-Tap Confirmation</strong>
+                                <span style="font-size: 0.75rem;">Simply tap the button once to instantly confirm your presence. No complex forms or QR codes required.</span>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-2.5 p-2.5 bg-light rounded-3 border">
+                            <i class="bi bi-shield-check text-success fs-5 flex-shrink-0"></i>
+                            <div>
+                                <strong class="text-body d-block" style="font-size: 0.82rem;">3. Guaranteed Room Lock</strong>
+                                <span style="font-size: 0.75rem;">Your room stays locked for your full session duration with zero risk of automated release.</span>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                confirmButtonText: 'Got It!',
+                confirmButtonColor: '#2563eb'
+            });
+        };
+
+        // ── 1-Tap Direct Check-In Action Handler ──
+        window.instantDirectCheckIn = async function(bookingId, btnEl) {
+            if (!bookingId) return;
+            const originalHtml = btnEl ? btnEl.innerHTML : '';
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = '<span class="spinner-border spinner-border-sm me-1.5" role="status"></span>Securing...';
+            }
+
+            try {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch(`/faculty/api/bookings/${bookingId}/check_in`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    if (btnEl) {
+                        btnEl.className = 'btn btn-success text-white fw-bold px-3 py-2 rounded-pill shadow-sm';
+                        btnEl.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Checked In &amp; Secured!';
+                    }
+                    const card = document.getElementById(`pendingCheckinCard_${bookingId}`);
+                    if (card) {
+                        card.classList.remove('border-warning', 'bg-warning', 'bg-opacity-10');
+                        card.classList.add('border-success', 'bg-success', 'bg-opacity-10');
+                        const bubble = card.querySelector('.checkin-icon-bubble');
+                        if (bubble) {
+                            bubble.className = 'checkin-icon-bubble bg-success text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm';
+                            bubble.innerHTML = '<i class="bi bi-check-circle-fill"></i>';
+                        }
+                    }
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Room Checked In!',
+                            text: 'Your reservation is secured.',
+                            showConfirmButton: false,
+                            timer: 3000
+                        });
+                    }
+                    // Update any cards/badges on the page
+                    document.querySelectorAll(`[data-entry-id="${bookingId}"]`).forEach(el => {
+                        el.setAttribute('data-checked-in', 'true');
+                        const badge = el.querySelector('.badge-adhoc-pill, .chip-adhoc');
+                        if (badge) {
+                            badge.className = 'badge bg-success font-monospace px-2 py-0.5 text-white';
+                            badge.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i>Checked In';
+                        }
+                    });
+                } else {
+                    if (btnEl) {
+                        btnEl.disabled = false;
+                        btnEl.innerHTML = originalHtml;
+                    }
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Check-In Failed',
+                            text: data.error || 'Failed to check in.'
+                        });
+                    }
+                }
+            } catch (err) {
+                if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = originalHtml;
+                }
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Network Error',
+                        text: 'Could not connect to the server. Please check your connection.'
+                    });
                 }
             }
         };

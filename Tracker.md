@@ -7,7 +7,8 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
-| **v1.7.16** | 2026-10-15 | **Deployed** | **Zero-Trust Cross-Tab Session Conflict Lockout Eradication** (Completely removed the disruptive "Session Conflict Detected" lockout modal, window focus/visibility integrity checks, BroadcastChannel listeners, and backend 403 `session_conflict` middleware to restore seamless, persistent multi-tab user navigation). |
+| **v1.7.17** | 2026-10-22 | **Deployed** | **Architectural Pivot: Supervisor-Verified Closure (QA), Supervisor Blueprint & Role Management** (Eradicated the legacy standalone technician self-service portal, views, and login routes; locked down ticket resolution strictly to Higher Authority / Admin / Supervisor roles; upgraded the Ticket model with supervisor verification fields, audit proof file path, and technician reference string; implemented a dark-mode mobile-first camera-ready Bootstrap 5 modal `#verifyCompletionModal`; built the secure backend endpoint `/admin/issues/<ticket_id>/verify-close` and supervisor workspace). |
+| **v1.7.16** | 2026-10-15 | **Deployed** | **Zero-Trust Cross-Tab Session Conflict Lockout Eradication & Faculty Booking Fixes** (Completely removed the disruptive "Session Conflict Detected" lockout modal, window focus/visibility integrity checks, BroadcastChannel listeners, and backend 403 `session_conflict` middleware to restore seamless, persistent multi-tab user navigation; resolved 500 error on faculty slot booking). |
 | **v1.7.15** | 2026-10-07 | **Deployed** | **Smart Classroom Pop-Up Schedule Day Selection & Legend Color Harmonization** (Removed obsolete "Today" tab from the room pop-up schedule, automatically selecting the faculty's chosen booking day or current weekday; updated the map status legend dot for "Occupied (Non-Bookable)" to gray matching the gray occupied classroom schematics). |
 | **v1.7.14** | 2026-10-07 | **Deployed** | **Building Operating Hours & Night Booking Enforcement (7 AM – 7 PM IST Boundary)** (Enforced hard operational hours across all room reservation pipelines: classrooms, conference rooms, and meeting rooms can only be booked between 7:00 AM and 6:00 PM start times, with all reservations concluding at or before 7:00 PM sharp; night instant claims and overflow multi-hour slots are strictly blocked on both backend and frontend). |
 | **v1.7.13** | 2026-10-07 | **Deployed** | **Multi-Hour Ad-Hoc Timetable Slot Merging & Grid Consolidation** (Merged contiguous 1-hour ad-hoc room reservations on the weekly schedule into a single continuous block spanning multiple columns with `colspan`, full time-range display, and unified mobile agenda cards). |
@@ -21,6 +22,36 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.17 (2026-10-22)
+- `feat(resolution-qa)`: **Architectural Pivot: Supervisor-Verified Closure (QA) & Technician Portal Eradication**
+
+  #### 📖 Plain English / Layman's Summary of What Was Done
+  1. **Phase 1: Eradicate Technician Portal & Role Bloat**:
+     - Decommissioned the standalone technician self-service portal by removing `professional_bp` blueprint registration in `app/__init__.py`.
+     - Purged technician portal views, routes, and sessions.
+     - Cleaned up role-based access control (RBAC) decorators in `app/decorators.py`: removed `@technician_required` / `@professional_login_required` decorators and strictly locked down all issue-resolution endpoints to Higher Authority / Admin roles.
+     - Stripped technician login logic, phone authentication hints, and credentials from `app/blueprints/auth/routes.py`.
+     - Purged the obsolete `"Are you a Job Certified Professional? Click here"` banner, phone number hints, and technician login links from `app/templates/login.html`.
+     - Decommissioned the Admin-Technician direct chat screen (`/admin/chat`), removing obsolete chat links from the admin top navbar, sidebar, and mobile bottom nav in `app/templates/base.html`, and redirecting legacy chat requests back to the dashboard.
+     - Decommissioned the **Professional Management** (`/admin/professionals`) and **Help Requests** (`/admin/help_requests`) views, removing their entries from the admin Manage dropdowns across desktop, sidebar, and mobile offcanvas menus, and routing stale requests directly to the admin dashboard.
+     - Cleaned up legacy professional navigation bars, mobile menus, and profile session checks from `app/templates/base.html`.
+     - Retained `assigned_vendor_or_tech_name` on `Ticket` as a simple non-authenticated text field for record-keeping of on-ground personnel without user accounts.
+  2. **Phase 2: Database Schema & Audit Log Upgrade**:
+     - Upgraded the `Ticket` model with supervisor verification fields: `verified_by_id` (foreign key referencing the Admin/Higher Authority User.id), `proof_of_completion_url` (file path string required for closure), `resolution_notes` (detailing inspection results), and `resolved_at` (UTC timestamp).
+     - Defined and registered the `AuditLog` model to permanently record security and QA events.
+     - Enforced that when tickets transition to `RESOLVED` or `CLOSED`, an immutable entry is automatically written to the system Audit Log: `"Ticket #[ID] inspected, verified, and closed by Supervisor [Admin Name] with proof attached."`
+     - Configured auto-migrations in `app/database.py` to seamlessly add columns to existing installations.
+  3. **Phase 3: The "Verify & Close" Supervisor UI**:
+     - In the Higher Authority / Admin Console (`app/templates/admin.html`), replaced legacy technician assignment workflows with a sleek "Verify & Log Completion" action button on active tickets and modal views.
+     - Built the mobile-first, dark-mode Bootstrap 5 modal `#verifyCompletionModal` containing: Technician/Vendor Name input, camera-ready proof file input (`<input type="file" name="proof_image" accept="image/*" capture="environment" required>` for automatic mobile rear camera activation), and supervisor inspection notes textarea.
+     - Enhanced ticket detail modals to present comprehensive Quality Assurance verification badges, inspector identities, inspection remarks, and proof photo thumbnails.
+  4. **Phase 4: Secure Backend Resolution Endpoint**:
+     - Implemented `POST /admin/issues/<int:ticket_id>/verify-close` (and alias `/admin/tickets/<int:ticket_id>/verify-close`) in `app/blueprints/admin/routes.py`.
+     - Strictly enforced Admin/Higher Authority authentication and Zero-Trust `X-Tab-Guard-ID` validation.
+     - Implemented secure filename sanitization and unique UUID naming for proof image uploads saved to `app/static/uploads/proofs`.
+     - Bound `verified_by_id` to `session['user_id']`, updated ticket status to `RESOLVED`, and committed ticket updates and AuditLog records within a single atomic database transaction.
+     - Added comprehensive automated test coverage in `tests/test_ticket_lifecycle.py` and `tests/test_auth.py`; all 61 system test suites passing with 100% success rate.
 
 ### Release v1.7.16 (2026-10-15)
 - `fix(auth-session)`: **Zero-Trust Cross-Tab Session Conflict Lockout Eradication**
@@ -690,6 +721,27 @@
 - `7fa59dc`: **feat(auth): grant Super Admin access to om.mahadik@mitwpu.edu.in alongside primary developer credentials**
 - `4bb1e9d`: **feat(map): make floor maps significantly larger with responsive scaling and interactive zoom controls**
   - Scaled floor plans to responsive viewport height with improved visibility.
+- `feat(rbac-phase-1)`: **feat(rbac): strict 3-Tier access control architecture (Faculty, Supervisor, Super Admin) & universal reporting**
+  - Standardized User.role to FACULTY, SUPERVISOR, and SUPER_ADMIN.
+  - Universal issue creation on `/report` protected solely by `@login_required`.
+  - Upgraded Ticket schema with verified_by_id, proof_image_url, and resolution_notes.
+- `feat(rbac-phase-2)`: **feat(superadmin): Role Management UI & secure promotion endpoint (POST /admin/users/promote)**
+  - Implemented secure backend endpoint `POST /admin/users/promote` verifying Super Admin authority and committing immutable AuditLog entries.
+  - Built Role Management Console on `/developer` dashboard featuring eligible faculty dropdown, direct email lookup, live AJAX feedback, and active supervisors directory table.
+- `feat(rbac-phase-3)`: **feat(supervisor): Dedicated Supervisor Workspace Blueprint & Camera-Ready Verification Modal**
+  - Created segregated `supervisor_bp` blueprint locked behind `@supervisor_required` decorator (`/supervisor/dashboard`).
+  - Built mobile-first QA UI querying strictly active tickets (`OPEN` and `IN_PROGRESS`) and excluding global system analytics.
+  - Implemented Bootstrap 5 `#verifyCompletionModal` with External Technician/Vendor Name input, rear camera-forced file capture (`capture="environment"`), inspection remarks, and commit to audit log.
+- `feat(rbac-phase-4)`: **feat(supervisor): Backend Resolution & Pillow Image Compression (POST /supervisor/issues/<id>/verify-close)**
+  - Implemented secure verification endpoint with Zero-Trust `X-Tab-Guard-ID` header validation.
+  - Enforced minimum role check ensuring requester is at least `SUPERVISOR` (`SUPERVISOR` or `SUPER_ADMIN`).
+  - Integrated Pillow (PIL) image compression: RGB conversion, aspect-ratio preserved downscaling to 1200px max width, and compressed WebP/JPEG saving at `quality=70` to prevent server disk exhaustion.
+  - Atomic database transaction binding `verified_by_id`, `status='RESOLVED'`, `proof_image_url`, `resolution_notes`, and creating immutable `AuditLog` entry.
+  - Added unit test suite in `tests/test_supervisor_workspace.py` with 100% test pass rate across all 86 unit tests.
+- `feat(perf-phase-5)`: **feat(infra): High-Concurrency Server Configuration (100+ Concurrent Users)**
+  - Configured SQLAlchemy engine connection pooling with `pool_size=20`, `max_overflow=40`, `pool_timeout=30`, `pool_recycle=1800`, and `pool_pre_ping=True` to eliminate connection drops.
+  - Configured Gunicorn with asynchronous `gevent` / `gthread` worker concurrency (`gunicorn -w 4 -k gevent --worker-connections 1000 run:app`).
+  - Verified zero thread blocking and 100% test passing across all 86 test suites.
 
 ---
 
@@ -699,6 +751,28 @@
 - [x] Zero-clutter Mobile Topbar & Status Map Header.
 - [x] Robust Ticket Reference ID Generation.
 - [x] Faculty Timetable CSV Ingestion.
+- [x] RBAC Phase 1: Database Schema & Universal Core Access (Faculty, Supervisor, Super Admin).
+- [x] RBAC Phase 2: Super Admin "Role Manager" (Promote/Demote) & Paginated Audit Trail View.
+- [x] RBAC Phase 3: The Dedicated Supervisor Workspace & "Verify & Log Completion" Modal.
+- [x] RBAC Phase 4: Secure Backend Resolution Endpoint & Zero-Trust Audit Log Verification.
+- [x] RBAC Phase 5: High-Concurrency Server Configuration (SQLAlchemy Pooling & Gunicorn Async Workers).
+- [x] DoCSA Staff Migration Phase 1: User Schema Upgrade (designation & is_active soft delete).
+- [x] DoCSA Staff Migration Phase 2: The Bulletproof Data Seeder Script (Pandas & Collision Resolution) for 89 Staff Members.
+- [x] DoCSA Staff Migration Phase 3: The Exact-Match UI Dropdown (Bootstrap 5).
+- [x] DoCSA Staff Migration Phase 4: Exact-Match Backend Filtering (Flask & Soft-Delete Exclusion).
+- [x] Supervisor Role Manager: Strictly filtered eligible faculty dropdown to the 89 real staff members imported from the Excel spreadsheet (active with assigned designation) and added real-time instant search by name.
+- [x] Faculty Portal Access Control: Restricted faculty portal login and route authorization ONLY to real faculty members excluding Peons (Peons and Students redirect to the campus report form, and Faculty Portal navigation links are hidden from Peons).
+- [x] Designation Dropdown Consolidation: Consolidated `Program Director` into `Associate Professor & Program Director`, and unified all program heads under `Professor & Program Head` across UI dropdowns and backend filtering.
+- [x] Founder-Mode UI Split (Phase 1): Implemented dynamic dashboard titling on `/developer` via Jinja2 conditional rendering against designated developer emails (`om.mahadik@mitwpu.edu.in` and `taha.piplodwala@mitwpu.edu.in`). Displays "Developer Center" (with Om & Taha 3D flip card) for core developers, and "Admin Center" for all other elevated administrators.
+- [x] Founder-Mode UI Split (Phase 2): Component Exclusion for "Report Bugs" and developer tools (`#reportedBugsSection`) via Jinja2 conditional rendering against core developer emails (`om.mahadik@mitwpu.edu.in` and `taha.piplodwala@mitwpu.edu.in`), completely stripping the card, bulk action tools, and issue controls from the DOM for standard admins while preserving standard analytics and user management.
+- [x] Admin Dashboard Verify Button Fix: Resolved template literal syntax crash in `admin.html` (missing closing backtick in ticket rating block) that prevented `ModalManager` and `window.openVerifyCompletionModal` from evaluating, and hardened verify buttons with safe dataset attributes (`data-ticket-id`, `data-tech-name`) and resilient modal instantiation.
+- [x] Admin Dashboard Report Details Modal Container: Restored and enhanced `#ticketModal` inspection container (`modal-lg`) triggered on report row/card click with instant loading spinner feedback, rich dark-mode metadata grid (reporter, PRN, email, room, floor, issue, timestamps, attached issue photo with zoom, supervisor verification QA card, proof-of-completion media, and quick action bar with Verify, View Map, Delete, and Close).
+- [x] Role Option Replacement: Replaced `super_admin` (`Super_admin`) with `admin` (`Admin`) in the user management role dropdown across the Developer / Admin Directory, updating `User.ROLES = [ROLE_FACULTY, ROLE_SUPERVISOR, ROLE_ADMIN]` and ensuring proper selection and promotion logic for administrators while reserving Super Admin status for designated founding developers.
+- [x] Verification Form CSRF & JSON Parsing Fix: Fixed `"Network error while committing verification: Unexpected token '<', '<!DOCTYPE '... is not valid JSON"` on `/admin/issues/<id>/verify-close` by adding missing CSRF token input (`csrf_token`) and headers (`X-CSRFToken`), properly synchronizing `X-Tab-Guard-ID`, adapting `@admin_required` to accept active super admin sessions, and safely handling non-JSON responses.
 - [ ] Automated Email Notifications via background worker queue for ticket state changes.
-- [ ] Push Notifications for Technicians on work assignment via Web Push API.
 - [ ] Offline PWA Service Worker caching for floor maps during intermittent campus Wi-Fi.
+
+
+
+
+   

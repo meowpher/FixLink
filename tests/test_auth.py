@@ -34,98 +34,23 @@ def test_admin_dashboard_access(client, admin_user, student_user, professional_u
     assert response.status_code == 200 # OK
 
 
-def test_professional_profile_access(client, professional_user):
-    """Test access to the professional profile page and verification of navigation structure."""
-    # 1. Unauthenticated request -> redirects to login
+def test_technician_portal_eradication(client, professional_user):
+    """Phase 1 Verification: Standalone Technician Portal routes are completely eradicated and logins rejected."""
+    # 1. Access to /professional/* returns 404 or redirect to login
     response = client.get('/professional/profile')
-    assert response.status_code == 302
+    assert response.status_code in [404, 302]
 
-    # 2. Professional logged in -> 200 OK
-    with client.session_transaction() as sess:
-        sess.clear()
-        sess['professional_id'] = professional_user.id
-        sess['professional_name'] = professional_user.name
-        sess['professional_category'] = professional_user.category
-
-    response = client.get('/professional/profile')
-    assert response.status_code == 200
-    html = response.get_data(as_text=True)
-
-    # Verify Profile content
-    assert "My Profile" in html
-    assert professional_user.name in html
-    assert "Admin Chat Support" in html
-    assert "href=\"/professional/profile\"" in html
-
-    # Verify top nav avatar and back button are removed for professionals
-    assert "id=\"mobileNavAvatar\"" not in html
-    assert "id=\"mobile-topbar-back-btn\"" not in html
-
-    # Verify dashboard renders 200 without the old duplicate card
     dash_response = client.get('/professional/dashboard')
-    assert dash_response.status_code == 200
-    dash_html = dash_response.get_data(as_text=True)
-    # The dashboard now has My Assigned Tasks and Help Requests, but the old sidebar "My Profile" card was removed
-    assert "id=\"mobileNavAvatar\"" not in dash_html
-    assert "id=\"mobile-topbar-back-btn\"" not in dash_html
+    assert dash_response.status_code in [404, 302]
 
-
-def test_bottlesingh_professional_login(client, run_app_context):
-    """Test login with Bottle Singh username and fallback password."""
-    from app.models import Professional
-    with run_app_context:
-        prof = Professional.query.filter_by(username='bottlesingh#pro').first()
-        if not prof:
-            prof = Professional(
-                name='Bottle Singh',
-                username='bottlesingh#pro',
-                email='bottle.singh@fixlink.com',
-                phone='2424242424',
-                category='it_technician',
-                is_active=True
-            )
-            prof.set_password('2424242424')
-            db.session.add(prof)
-            db.session.commit()
-
-    # Attempt login via username
+    # 2. On-ground technician credentials cannot log in
     response = client.post('/login', data={
         'email': 'bottlesingh#pro',
         'password': 'anypassword123'
     }, follow_redirects=True)
     assert response.status_code == 200
     html = response.get_data(as_text=True)
-    assert "Bottle Singh" in html or "Dashboard" in html or "My Tasks" in html
-
-
-def test_professional_profile_picture_upload_and_remove(client, professional_user):
-    """Test updating and removing professional profile picture via API."""
-    with client.session_transaction() as sess:
-        sess.clear()
-        sess['professional_id'] = professional_user.id
-        sess['professional_name'] = professional_user.name
-        sess['professional_category'] = professional_user.category
-
-    # 1. Upload valid data URL
-    sample_data_url = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
-    res = client.post('/professional/api/profile/picture', json={'avatar': sample_data_url})
-    assert res.status_code == 200
-    data = res.get_json()
-    assert data['success'] is True
-    assert data['profile_picture'] == sample_data_url
-
-    # 2. View profile page to see image rendered
-    page_res = client.get('/professional/profile')
-    assert page_res.status_code == 200
-    page_html = page_res.get_data(as_text=True)
-    assert 'id="profileAvatarImg"' in page_html
-
-    # 3. Remove profile picture
-    remove_res = client.post('/professional/api/profile/picture', json={'action': 'remove'})
-    assert remove_res.status_code == 200
-    remove_data = remove_res.get_json()
-    assert remove_data['success'] is True
-    assert remove_data['profile_picture'] is None
+    assert "Invalid email or password." in html
 
 
 def test_om_mahadik_credential_guarantee_and_login(client, app):
@@ -248,46 +173,22 @@ def test_root_redirects_to_login_and_profile_button_present(client, admin_user, 
         assert 'professional_id' not in sess
 
 
-def test_unread_chat_notifications(client, admin_user, professional_user):
-    """Test unread chat count API and badge element presence."""
-    from app.models import ChatMessage
+def test_unread_system_notifications(client, admin_user):
+    """Test notifications API."""
+    # 1. Unauthenticated -> 401
+    res = client.get('/api/notifications/recent')
+    assert res.status_code == 401
 
-    # 1. Check unauthenticated -> 0 count
-    res = client.get('/api/chat/unread_total')
-    assert res.status_code == 200
-    data = res.get_json()
-    assert data['success'] is True
-    assert data['data']['unread_count'] == 0
-
-    # 2. Add an unread message from professional to admin
-    msg = ChatMessage(
-        sender_type=ChatMessage.SENDER_TYPE_PROFESSIONAL,
-        sender_id=professional_user.id,
-        receiver_type=ChatMessage.SENDER_TYPE_ADMIN,
-        receiver_id=admin_user.id,
-        message="Hello admin, need assistance",
-        is_read=False
-    )
-    db.session.add(msg)
-    db.session.commit()
-
-    # Admin check unread
+    # 2. Authenticated Admin
     with client.session_transaction() as sess:
         sess.clear()
         sess['user_id'] = admin_user.id
         sess['is_admin'] = True
 
-    res = client.get('/api/chat/unread_total')
+    res = client.get('/api/notifications/recent')
     assert res.status_code == 200
     data = res.get_json()
-    assert data['data']['unread_count'] >= 1
-    assert data['unread_count'] >= 1
-
-    # Check dashboard HTML has global-chat-badge
-    res_admin = client.get('/admin/')
-    assert res_admin.status_code == 200
-    html = res_admin.get_data(as_text=True)
-    assert 'global-chat-badge' in html
+    assert data['success'] is True
 
 
 def test_terms_compliance_middleware_interceptor(client, app, run_app_context):
@@ -331,7 +232,7 @@ def test_terms_compliance_middleware_interceptor(client, app, run_app_context):
         sess['user_id'] = unconsented_id
         sess['user_role'] = User.ROLE_FACULTY
 
-    res_api = client.get('/api/chat/unread_total')
+    res_api = client.get('/api/notifications/recent')
     assert res_api.status_code == 403
     api_data = res_api.get_json()
     assert api_data['error'] == 'terms_required'
@@ -422,6 +323,90 @@ def test_login_post_requires_accept_terms_and_persists_consent(client, run_app_c
     assert res_subsequent_login.status_code == 302
     assert not res_subsequent_login.headers['Location'].endswith('/onboarding/terms')
     assert res_subsequent_login.headers['Location'].endswith('/report')
+
+
+def test_faculty_portal_access_restricted_to_faculty_except_peons(client, app, run_app_context):
+    """Verify ONLY non-peon faculty log in to faculty portal, while peons and students log in to /report."""
+    from app.models import User
+
+    with run_app_context:
+        prof = User(
+            name="Prof. Test User",
+            email="prof.test@mitwpu.edu.in",
+            role=User.ROLE_FACULTY,
+            designation="Professor",
+            is_active=True,
+            is_verified=True,
+            has_accepted_terms=True
+        )
+        prof.set_password("ProfPass123!")
+
+        peon = User(
+            name="Peon Test User",
+            email="peon.test@mitwpu.edu.in",
+            role=User.ROLE_FACULTY,
+            designation="Peon",
+            is_active=True,
+            is_verified=True,
+            has_accepted_terms=True
+        )
+        peon.set_password("PeonPass123!")
+
+        student = User(
+            name="Student Test User",
+            email="student.test@mitwpu.edu.in",
+            role="student",
+            prn="1234567890",
+            is_active=True,
+            is_verified=True,
+            has_accepted_terms=True
+        )
+        student.set_password("StudentPass123!")
+
+        db.session.add_all([prof, peon, student])
+        db.session.commit()
+
+    # 1. Faculty (Professor) login -> redirects straight to personal faculty portal (/faculty/dashboard)
+    client.get('/logout')
+    res_prof_login = client.post('/login', data={
+        'email': 'prof.test@mitwpu.edu.in',
+        'password': 'ProfPass123!'
+    }, follow_redirects=False)
+    assert res_prof_login.status_code == 302
+    assert res_prof_login.headers['Location'].endswith('/faculty/dashboard')
+
+    # Access faculty dashboard
+    res_prof_dash = client.get('/faculty/dashboard')
+    assert res_prof_dash.status_code == 200
+
+    # 2. Peon login -> redirects to campus report form (/report), NOT faculty portal
+    client.get('/logout')
+    res_peon_login = client.post('/login', data={
+        'email': 'peon.test@mitwpu.edu.in',
+        'password': 'PeonPass123!'
+    }, follow_redirects=False)
+    assert res_peon_login.status_code == 302
+    assert res_peon_login.headers['Location'].endswith('/report')
+
+    # Peon attempts direct access to /faculty/dashboard -> blocked by faculty_login_required
+    res_peon_direct = client.get('/faculty/dashboard', follow_redirects=False)
+    assert res_peon_direct.status_code == 302
+    assert res_peon_direct.headers['Location'].endswith('/report')
+
+    # 3. Student login -> redirects to /report
+    client.get('/logout')
+    res_student_login = client.post('/login', data={
+        'email': 'student.test@mitwpu.edu.in',
+        'password': 'StudentPass123!'
+    }, follow_redirects=False)
+    assert res_student_login.status_code == 302
+    assert res_student_login.headers['Location'].endswith('/report')
+
+    # Student attempts direct access to /faculty/dashboard -> blocked
+    res_student_direct = client.get('/faculty/dashboard', follow_redirects=False)
+    assert res_student_direct.status_code == 302
+    assert res_student_direct.headers['Location'].endswith('/report')
+
 
 
 

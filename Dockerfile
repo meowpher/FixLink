@@ -34,5 +34,5 @@ EXPOSE 5000
 ENV FLASK_APP=run.py
 ENV FLASK_ENV=production
 
-# Run migrations and start the server using gunicorn with eventlet worker
-CMD ["sh", "-c", "flask db upgrade && gunicorn --worker-class eventlet -w 1 --bind 0.0.0.0:5000 run:app"]
+# Run migrations and start the server using high-concurrency gunicorn with gevent async workers
+CMD ["sh", "-c", "flask db upgrade && gunicorn -w 4 -k gevent --worker-connections 1000 --timeout 60 --bind 0.0.0.0:5000 run:app"]

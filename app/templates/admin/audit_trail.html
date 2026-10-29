@@ -1,0 +1,604 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Trail - System Activity Logs - FixLink{% endblock %}
+{% block meta_description %}Immutable Audit Trail tracking ticket resolutions, role changes, and system compliance events across FixLink.{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-md-4">
+    <!-- Header Section -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}" class="text-decoration-none text-muted">Admin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Audit Trail</li>
+                </ol>
+            </nav>
+            <h1 class="h3 fw-bold mb-1 d-flex align-items-center gap-2" style="color: var(--text-main, #1e293b);">
+                <i class="bi bi-shield-shaded text-primary"></i>
+                <span>Enterprise Audit Trail</span>
+            </h1>
+            <p class="text-muted small mb-0">Immutable, cryptographically verifiable log of all ticket resolutions, role changes, and administrative actions. Paginated (20 records/page).</p>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            {% if session.get('is_super_admin') or (session.get('user_role') or '').upper() == 'SUPER_ADMIN' %}
+            <a href="{{ url_for('superadmin.dashboard') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold">
+                <i class="bi bi-person-gear me-1"></i>Role Manager
+            </a>
+            {% endif %}
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>{% if (session.get('user_role') or '').upper() == 'SUPERVISOR' %}Supervisor Dashboard{% else %}Admin Console{% endif %}
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="card border-0 shadow-sm rounded-4 mb-4 position-relative" style="background: var(--bg-card, #ffffff); z-index: 25;">
+        <div class="card-body p-3 p-md-4">
+            <form method="GET" action="{{ url_for('admin.audit_trail') }}" class="row g-3 align-items-end" id="auditFilterForm">
+                <div class="col-md-4 col-sm-6">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">Filter by Action</label>
+                    <select name="action" id="actionFilterSelect" class="form-select form-select-sm rounded-3 shadow-none" onchange="this.form.submit()">
+                        <option value="">All Actions</option>
+                        {% set fallback_actions = [
+                            ('TICKET_VERIFIED_CLOSED', 'Ticket Verified & Closed (Supervisor QA)'),
+                            ('USER_PROMOTED_TO_SUPERVISOR', 'User Promoted to Supervisor'),
+                            ('USER_DEMOTED_TO_FACULTY', 'User Demoted to Faculty'),
+                            ('FACULTY_EVENT_APPROVED', 'Faculty Reservation Approved'),
+                            ('FACULTY_EVENT_REJECTED', 'Faculty Reservation Rejected'),
+                            ('SUSPENSION_LIFTED', 'Ghost Protocol Suspension Lifted'),
+                            ('STRIKES_CLEARED', 'No-Show Strikes Reset'),
+                            ('TIMETABLE_IMPORTED', 'Academic Timetable Imported')
+                        ] %}
+                        {% set active_action_list = distinct_actions if (distinct_actions and distinct_actions|length > 0) else fallback_actions %}
+                        {% for item in active_action_list %}
+                            {% if item is string %}
+                                <option value="{{ item }}" {% if action_filter == item %}selected{% endif %}>
+                                    {{ item.replace('_', ' ').title() }}
+                                </option>
+                            {% else %}
+                                <option value="{{ item[0] }}" {% if action_filter == item[0] %}selected{% endif %}>
+                                    {{ item[1] }}
+                                </option>
+                            {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">Ticket ID</label>
+                    <input type="number" name="ticket_id" class="form-control form-control-sm rounded-3" placeholder="e.g. 1024" value="{{ ticket_filter or '' }}">
+                </div>
+                <div class="col-md-5 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-3 fw-semibold flex-grow-1 flex-md-grow-0">
+                        <i class="bi bi-funnel me-1"></i>Filter Logs
+                    </button>
+                    {% if action_filter or ticket_filter %}
+                    <a href="{{ url_for('admin.audit_trail') }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold">
+                        <i class="bi bi-x-circle me-1"></i>Reset
+                    </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Audit Records Table -->
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden position-relative" style="background: var(--bg-card, #ffffff); z-index: 1;">
+        <div class="card-header bg-transparent border-bottom p-3 d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1 fw-semibold">
+                    {{ total }} Total Log Entries
+                </span>
+                <span class="badge rounded-pill bg-light text-muted border px-2 py-1 small">
+                    Showing <strong id="auditVisibleHeaderCount" class="text-body">{{ [audit_logs|length, 4]|min }}</strong> of {{ total }}
+                </span>
+                <span class="badge rounded-pill bg-light text-muted border px-2 py-1 small d-none d-md-inline-block">
+                    Page {{ page }} of {{ pages or 1 }}
+                </span>
+            </div>
+            <div class="small text-muted font-monospace d-none d-sm-block">
+                Progressive Load (4 Initial, +8 on Demand)
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="auditTrailTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="width: 80px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Log ID</th>
+                        <th scope="col" style="width: 170px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Timestamp (UTC)</th>
+                        <th scope="col" style="width: 190px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Action</th>
+                        <th scope="col" style="width: 130px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Ticket</th>
+                        <th scope="col" style="width: 220px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Performed By</th>
+                        <th scope="col" style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px;">Audit Details</th>
+                    </tr>
+                </thead>
+                <tbody id="auditTrailTbody">
+                    {% for log in audit_logs %}
+                    {% set ticket = log._resolved_ticket or log.ticket or log.related_ticket %}
+                    {% set tid = log.ticket_id or (log.target_id if log.target_type == 'Ticket' else None) %}
+                    {% set proof_url = (ticket.proof_of_completion_url or ticket.proof_image_url) if ticket else None %}
+                    {% set actor = log.performed_by or log.user %}
+                    {% set supervisor_name = (ticket.verified_by.name if ticket and ticket.verified_by else (actor.name if actor else 'Supervisor')) %}
+                    {% set resolution_notes = (ticket.resolution_notes or '') if ticket else '' %}
+                    {% set resolved_ts = ((ticket.resolved_at or log.timestamp or log.created_at).strftime('%Y-%m-%d %H:%M:%S UTC') if (ticket and ticket.resolved_at) or log.timestamp or log.created_at else '') %}
+                    {% set issue_type = (ticket.issue_type or '') if ticket else '' %}
+                    {% set initial_image = ('/static/uploads/' ~ ticket.image_filename) if (ticket and ticket.image_filename) else '' %}
+                    <tr class="audit-log-row {% if loop.index > 4 %}d-none{% endif %}" data-log-index="{{ loop.index }}" data-log-id="{{ log.id }}">
+                        <td class="font-monospace fw-bold text-muted small">
+                            #{{ log.id }}
+                        </td>
+                        <td class="small text-nowrap">
+                            <i class="bi bi-clock me-1 text-muted"></i>
+                            {{ (log.timestamp or log.created_at).strftime('%Y-%m-%d %H:%M:%S') if (log.timestamp or log.created_at) else '—' }}
+                        </td>
+                        <td>
+                            {% set act = log.action %}
+                            {% if 'PROMOTED' in act %}
+                                <span class="badge rounded-pill bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">
+                                    <i class="bi bi-person-up me-1"></i>{{ act }}
+                                </span>
+                            {% elif 'DEMOTED' in act %}
+                                <span class="badge rounded-pill bg-warning-subtle text-warning border border-warning-subtle px-2.5 py-1">
+                                    <i class="bi bi-person-down me-1"></i>{{ act }}
+                                </span>
+                            {% elif 'VERIFIED' in act or 'CLOSED' in act or 'RESOLVED' in act %}
+                                <span class="badge rounded-pill bg-success-subtle text-success border border-success-subtle px-2.5 py-1">
+                                    <i class="bi bi-check-circle me-1"></i>{{ act }}
+                                </span>
+                            {% elif 'CANCEL' in act or 'DELETE' in act %}
+                                <span class="badge rounded-pill bg-danger-subtle text-danger border border-danger-subtle px-2.5 py-1">
+                                    <i class="bi bi-x-circle me-1"></i>{{ act }}
+                                </span>
+                            {% else %}
+                                <span class="badge rounded-pill bg-secondary-subtle text-secondary border border-secondary-subtle px-2.5 py-1">
+                                    <i class="bi bi-info-circle me-1"></i>{{ act }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if tid %}
+                                {% if proof_url %}
+                                <div class="d-flex flex-column align-items-start gap-1">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-success rounded-pill px-2.5 py-1 fw-bold font-monospace shadow-sm d-inline-flex align-items-center gap-1.5 btn-proof-trigger text-nowrap"
+                                            data-ticket-id="{{ tid }}"
+                                            data-proof-url="{{ proof_url }}"
+                                            data-initial-image="{{ initial_image }}"
+                                            data-supervisor="{{ supervisor_name|e }}"
+                                            data-notes="{{ resolution_notes|e }}"
+                                            data-time="{{ resolved_ts }}"
+                                            data-issue="{{ issue_type|e }}"
+                                            title="View supervisor proof image & verification details">
+                                        <i class="bi bi-shield-check text-success"></i>
+                                        <span>#{{ tid }}</span>
+                                        <span class="badge bg-success text-white rounded-pill ms-1 px-1.5 py-0.5" style="font-size: 0.62rem;">Proof</span>
+                                    </button>
+                                </div>
+                                {% else %}
+                                <span class="badge bg-light text-dark border font-monospace px-2.5 py-1">
+                                    <i class="bi bi-ticket-detailed me-1 text-primary"></i>#{{ tid }}
+                                </span>
+                                {% endif %}
+                            {% else %}
+                                <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if actor %}
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 26px; height: 26px; font-size: 0.72rem;">
+                                        {{ (actor.name[:1] if actor.name else 'U')|upper }}
+                                    </div>
+                                    <div class="lh-sm">
+                                        <div class="fw-semibold small text-truncate" style="max-width: 170px;">{{ actor.name }}</div>
+                                        <div class="text-muted" style="font-size: 0.7rem;">{{ actor.role or 'ADMIN' }}</div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <span class="badge bg-light text-muted border">System / Automated</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="small text-break" style="max-width: 500px;">
+                                {{ log.details }}
+                            </div>
+                            {% if proof_url %}
+                            <div class="mt-1.5 pt-1">
+                                <button type="button" 
+                                        class="btn btn-xs btn-outline-success rounded-pill px-2.5 py-0.5 fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs btn-proof-trigger text-nowrap"
+                                        data-ticket-id="{{ tid }}"
+                                        data-proof-url="{{ proof_url }}"
+                                        data-initial-image="{{ initial_image }}"
+                                        data-supervisor="{{ supervisor_name|e }}"
+                                        data-notes="{{ resolution_notes|e }}"
+                                        data-time="{{ resolved_ts }}"
+                                        data-issue="{{ issue_type|e }}"
+                                        style="font-size: 0.72rem;">
+                                    <i class="bi bi-image"></i>
+                                    <span>View Supervisor Proof</span>
+                                    <i class="bi bi-arrow-up-right-square ms-0.5 opacity-75" style="font-size: 0.65rem;"></i>
+                                </button>
+                            </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-5 text-muted">
+                            <i class="bi bi-clipboard-x fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                            <div class="fw-semibold">No Audit Trail Records Found</div>
+                            <div class="small">Try clearing your filters or check back after system activities occur.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Progressive Loading Friendly Footer -->
+        <div class="card-footer bg-transparent border-top p-3 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2" id="auditLoadMoreFooter">
+            <div class="small text-muted" id="auditShowingText">
+                Showing <strong id="auditVisibleCount">{{ [audit_logs|length, 4]|min }}</strong> of <strong id="auditTotalCount">{{ audit_logs|length }}</strong> log entries on this page
+            </div>
+
+            <div class="d-flex align-items-center gap-2" id="auditLoadMoreControls">
+                {% if audit_logs|length > 4 %}
+                {% set next_batch = [audit_logs|length - 4, 8]|min %}
+                <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" id="btnAuditLoadMore" onclick="window.handleLoadMoreAuditLogs ? window.handleLoadMoreAuditLogs() : null">
+                    <i class="bi bi-arrow-down-circle"></i>
+                    <span>Load More (+{{ next_batch }})</span>
+                </button>
+                {% else %}
+                <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" id="auditAllLoadedBadge">
+                    <i class="bi bi-check2-circle"></i> All {{ audit_logs|length }} entries on this page loaded
+                </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Standard Pagination Navigation (Fallback / Direct Jump) -->
+        {% if pages > 1 %}
+        <div class="p-3 border-top bg-light bg-opacity-25 d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3">
+            <div class="small text-muted">
+                Showing {{ (page - 1) * 20 + 1 }} to {{ page * 20 if page * 20 < total else total }} of {{ total }} records
+            </div>
+
+            <nav aria-label="Audit log pagination">
+                <ul class="pagination pagination-sm mb-0">
+                    <!-- Previous -->
+                    <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                        <a class="page-link rounded-start-pill" href="{{ url_for('admin.audit_trail', page=pagination.prev_num, action=action_filter, ticket_id=ticket_filter) if pagination.has_prev else '#' }}" tabindex="{% if not pagination.has_prev %}-1{% endif %}">
+                            <i class="bi bi-chevron-left me-1"></i>Prev
+                        </a>
+                    </li>
+
+                    <!-- Page Numbers -->
+                    {% for p in pagination.iter_pages(left_edge=2, left_current=2, right_current=3, right_edge=2) %}
+                        {% if p %}
+                            {% if p == page %}
+                                <li class="page-item active" aria-current="page">
+                                    <span class="page-link">{{ p }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.audit_trail', page=p, action=action_filter, ticket_id=ticket_filter) }}">{{ p }}</a>
+                                </li>
+                            {% endif %}
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">…</span></li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Next -->
+                    <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                        <a class="page-link rounded-end-pill" href="{{ url_for('admin.audit_trail', page=pagination.next_num, action=action_filter, ticket_id=ticket_filter) if pagination.has_next else '#' }}" tabindex="{% if not pagination.has_next %}-1{% endif %}">
+                            Next<i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Supervisor Proof Modal -->
+<div class="modal fade" id="supervisorProofModal" tabindex="-1" aria-labelledby="supervisorProofModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden" style="background: var(--bg-card, #ffffff);">
+            <div class="modal-header border-bottom p-3 p-md-4">
+                <div class="d-flex align-items-center gap-2.5">
+                    <div class="rounded-circle bg-success bg-opacity-10 text-success p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <i class="bi bi-patch-check-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title fw-bold mb-0 d-flex align-items-center gap-2" id="supervisorProofModalLabel">
+                            <span>Supervisor Proof of Completion</span>
+                            <span class="badge bg-light text-dark border font-monospace" id="proofModalTicketBadge">#0</span>
+                        </h5>
+                        <p class="text-muted small mb-0">Quality assurance & on-site resolution verification submitted by supervisor</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-3 p-md-4">
+                <!-- Supervisor & Inspection Metadata Banner -->
+                <div class="card border rounded-3 p-3 mb-3 bg-light bg-opacity-50">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-sm-6">
+                            <div class="d-flex align-items-center gap-2.5">
+                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold shadow-xs" id="proofModalSupervisorAvatar" style="width: 38px; height: 38px; font-size: 0.88rem;">
+                                    S
+                                </div>
+                                <div>
+                                    <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.5px;">Verified By Supervisor</div>
+                                    <div class="fw-bold text-body" id="proofModalSupervisorName">Supervisor Name</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <div class="small text-muted text-uppercase fw-semibold" style="font-size: 0.68rem; letter-spacing: 0.5px;">Verification Timestamp</div>
+                            <div class="small fw-semibold text-body font-monospace" id="proofModalTimestamp">
+                                <i class="bi bi-clock me-1 text-muted"></i>—
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Supervisor Inspection Remarks -->
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
+                        <i class="bi bi-chat-left-quote me-1 text-success"></i>Supervisor Inspection Remarks
+                    </label>
+                    <div class="p-3 rounded-3 border bg-body-tertiary fst-italic small text-body" id="proofModalRemarks">
+                        "Verified on-site and confirmed fully operational."
+                    </div>
+                </div>
+
+                <!-- Proof Photo Container -->
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label small fw-bold text-muted text-uppercase mb-0" style="letter-spacing: 0.5px;">
+                            <i class="bi bi-camera me-1 text-primary"></i>On-Ground Proof Photograph
+                        </label>
+                        <div class="d-flex gap-2">
+                            <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary btn-sm rounded-pill px-2.5 py-0.5 fw-semibold small" id="proofModalOpenNewTab">
+                                <i class="bi bi-arrows-fullscreen me-1"></i>Full Size
+                            </a>
+                            <a href="#" download class="btn btn-outline-primary btn-sm rounded-pill px-2.5 py-0.5 fw-semibold small" id="proofModalDownloadBtn">
+                                <i class="bi bi-download me-1"></i>Download
+                            </a>
+                        </div>
+                    </div>
+                    <div class="text-center rounded-3 overflow-hidden border bg-dark bg-opacity-10 position-relative p-2" style="min-height: 280px; max-height: 520px; display: flex; align-items: center; justify-content: center;">
+                        <img id="proofModalImage" src="" alt="Supervisor Resolution Proof" class="img-fluid rounded-2 shadow-sm proof-zoom-hover" style="max-height: 500px; object-fit: contain; width: auto; display: none;" onload="this.style.display='block'; document.getElementById('proofModalImageSpinner').style.display='none';" onerror="this.style.display='none'; document.getElementById('proofModalImageFallback').style.display='block'; document.getElementById('proofModalImageSpinner').style.display='none';">
+                        <div id="proofModalImageSpinner" class="spinner-border text-primary my-5" role="status">
+                            <span class="visually-hidden">Loading proof photo...</span>
+                        </div>
+                        <div id="proofModalImageFallback" class="text-muted my-5" style="display: none;">
+                            <i class="bi bi-image-alt fs-1 d-block mb-2 opacity-50"></i>
+                            <span>Proof photograph could not be loaded or is in an unsupported format.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top p-3 bg-light bg-opacity-25 d-flex justify-content-between align-items-center">
+                <div class="small text-muted">
+                    <i class="bi bi-shield-check text-success me-1"></i>Cryptographically verified and logged in FixLink audit records.
+                </div>
+                <button type="button" class="btn btn-secondary btn-sm rounded-pill px-4 fw-semibold" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.audit-log-row {
+    transition: opacity 0.2s ease-in-out;
+}
+.btn-proof-trigger {
+    transition: all 0.2s ease-in-out;
+}
+.btn-proof-trigger:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(16, 185, 129, 0.25) !important;
+}
+.proof-zoom-hover {
+    transition: transform 0.25s ease;
+    cursor: zoom-in;
+}
+.proof-zoom-hover:hover {
+    transform: scale(1.015);
+}
+#actionFilterSelect {
+    cursor: pointer;
+    background-color: var(--bg-card, #ffffff);
+    color: var(--text-main, #0f172a);
+}
+@media (prefers-color-scheme: dark) {
+    #actionFilterSelect {
+        background-color: #1e293b !important;
+        color: #f8fafc !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+    }
+    #actionFilterSelect option {
+        background-color: #1e293b !important;
+        color: #f8fafc !important;
+    }
+}
+[data-theme="dark"] #actionFilterSelect,
+[data-bs-theme="dark"] #actionFilterSelect,
+.dark-theme #actionFilterSelect,
+body.dark #actionFilterSelect {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+}
+#actionFilterSelect option {
+    background-color: var(--bg-card, #ffffff);
+    color: var(--text-main, #0f172a);
+    padding: 6px 10px;
+}
+[data-theme="dark"] #actionFilterSelect option,
+[data-bs-theme="dark"] #actionFilterSelect option,
+.dark-theme #actionFilterSelect option,
+body.dark #actionFilterSelect option {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+}
+.custom-dropdown-container.open {
+    position: relative;
+    z-index: 1060 !important;
+}
+.custom-dropdown-menu {
+    z-index: 9999 !important;
+}
+</style>
+
+<script>
+(function() {
+    const INITIAL_AUDIT_LIMIT = 4;
+    const INCREMENT_AUDIT_COUNT = 8;
+    let currentAuditLimit = INITIAL_AUDIT_LIMIT;
+
+    const auditVisibleCount = document.getElementById('auditVisibleCount');
+    const auditVisibleHeaderCount = document.getElementById('auditVisibleHeaderCount');
+    const auditTotalCount = document.getElementById('auditTotalCount');
+    const auditLoadMoreControls = document.getElementById('auditLoadMoreControls');
+    const auditTrailTbody = document.getElementById('auditTrailTbody');
+
+    // Progressive loading state updater
+    function updateAuditProgressiveState() {
+        const rows = document.querySelectorAll('.audit-log-row');
+        const totalRows = rows.length;
+
+        rows.forEach((row, index) => {
+            if (index < currentAuditLimit) {
+                row.classList.remove('d-none');
+            } else {
+                row.classList.add('d-none');
+            }
+        });
+
+        const visibleCount = Math.min(currentAuditLimit, totalRows);
+        if (auditVisibleCount) auditVisibleCount.textContent = visibleCount;
+        if (auditVisibleHeaderCount) auditVisibleHeaderCount.textContent = visibleCount;
+        if (auditTotalCount) auditTotalCount.textContent = totalRows;
+
+        if (auditLoadMoreControls) {
+            if (visibleCount < totalRows) {
+                const remaining = totalRows - visibleCount;
+                const nextBatch = Math.min(remaining, INCREMENT_AUDIT_COUNT);
+                auditLoadMoreControls.innerHTML = `
+                    <button type="button" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm" id="btnAuditLoadMore">
+                        <i class="bi bi-arrow-down-circle"></i>
+                        <span>Load More (+${nextBatch})</span>
+                    </button>
+                `;
+            } else {
+                auditLoadMoreControls.innerHTML = `
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5" id="auditAllLoadedBadge">
+                        <i class="bi bi-check2-circle"></i> All ${totalRows} entries loaded
+                    </span>
+                `;
+            }
+        }
+    }
+
+    function handleLoadMoreAuditLogs() {
+        const btn = document.getElementById('btnAuditLoadMore');
+        if (!btn || btn.disabled) return;
+
+        // Tactile loading feedback
+        btn.disabled = true;
+        btn.innerHTML = `
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            <span>Loading...</span>
+        `;
+
+        setTimeout(() => {
+            currentAuditLimit += INCREMENT_AUDIT_COUNT;
+            updateAuditProgressiveState();
+        }, 120);
+    }
+
+    // Proof Modal Inspection Handler
+    function openSupervisorProofModal(btn) {
+        if (!btn) return;
+        const ticketId = btn.getAttribute('data-ticket-id') || '—';
+        const proofUrl = btn.getAttribute('data-proof-url') || '';
+        const supervisor = btn.getAttribute('data-supervisor') || 'Supervisor';
+        const notes = btn.getAttribute('data-notes') || '';
+        const time = btn.getAttribute('data-time') || '';
+        const issue = btn.getAttribute('data-issue') || '';
+
+        // Populate modal fields
+        const badgeEl = document.getElementById('proofModalTicketBadge');
+        const nameEl = document.getElementById('proofModalSupervisorName');
+        const avatarEl = document.getElementById('proofModalSupervisorAvatar');
+        const timeEl = document.getElementById('proofModalTimestamp');
+        const remarksEl = document.getElementById('proofModalRemarks');
+        const imgEl = document.getElementById('proofModalImage');
+        const spinnerEl = document.getElementById('proofModalImageSpinner');
+        const fallbackEl = document.getElementById('proofModalImageFallback');
+        const openTabEl = document.getElementById('proofModalOpenNewTab');
+        const downloadEl = document.getElementById('proofModalDownloadBtn');
+
+        if (badgeEl) badgeEl.textContent = `#${ticketId}`;
+        if (nameEl) nameEl.textContent = supervisor;
+        if (avatarEl) avatarEl.textContent = (supervisor.trim()[0] || 'S').toUpperCase();
+        if (timeEl) timeEl.innerHTML = `<i class="bi bi-clock me-1 text-muted"></i>${time || 'Verified in Audit Record'}`;
+        if (remarksEl) {
+            remarksEl.textContent = notes && notes.trim() ? `"${notes.trim()}"` : `"Verified on-site and confirmed fully operational."`;
+        }
+
+        if (spinnerEl) spinnerEl.style.display = 'block';
+        if (fallbackEl) fallbackEl.style.display = 'none';
+        if (imgEl) {
+            imgEl.style.display = 'none';
+            imgEl.src = proofUrl;
+        }
+
+        if (openTabEl) openTabEl.href = proofUrl || '#';
+        if (downloadEl) downloadEl.href = proofUrl || '#';
+
+        const modalEl = document.getElementById('supervisorProofModal');
+        if (modalEl && window.bootstrap && window.bootstrap.Modal) {
+            const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modalInstance.show();
+        }
+    }
+
+    // Expose handlers globally
+    window.handleLoadMoreAuditLogs = handleLoadMoreAuditLogs;
+    window.openSupervisorProofModal = openSupervisorProofModal;
+
+    // Global document click delegation
+    document.addEventListener('click', function(e) {
+        const loadMoreBtn = e.target.closest('#btnAuditLoadMore');
+        if (loadMoreBtn) {
+            e.preventDefault();
+            handleLoadMoreAuditLogs();
+            return;
+        }
+
+        const proofBtn = e.target.closest('.btn-proof-trigger');
+        if (proofBtn) {
+            e.preventDefault();
+            openSupervisorProofModal(proofBtn);
+            return;
+        }
+    });
+
+    // Initialize progressive view
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', updateAuditProgressiveState);
+    } else {
+        updateAuditProgressiveState();
+    }
+})();
+</script>
+{% endblock %}
+

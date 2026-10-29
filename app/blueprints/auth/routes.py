@@ -96,11 +96,13 @@ def confirm_verification_token(token, expiration=3600):
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    """Unified login for students, admins, and Job Certified Professionals."""
+    """User login for students, faculty, and admins."""
     # Redirect if already logged in
     if 'user_id' in session:
         user = db.session.get(User, session['user_id'])
         if user:
+            if (user.role or '').upper() == User.ROLE_SUPERVISOR:
+                return redirect(url_for('supervisor.dashboard'))
             return redirect(url_for('admin.dashboard')) if user.is_admin else redirect(url_for('main.report_form'))
         else:
             session.pop('user_id', None)
@@ -108,42 +110,17 @@ def login():
             session.pop('user_name', None)
             session.pop('user_role', None)
 
+    # Purge any legacy professional credentials
     if 'professional_id' in session:
-        prof = db.session.get(Professional, session['professional_id'])
-        if prof:
-            return redirect(url_for('professional.dashboard'))
-        else:
-            session.pop('professional_id', None)
-            session.pop('professional_name', None)
-            session.pop('professional_category', None)
-    
-    # Check for special query parameter or professional path to show phone login (for professionals only)
-    show_phone_hint = request.args.get('pro') == '1' or request.path.startswith('/professional')
+        session.pop('professional_id', None)
+        session.pop('professional_name', None)
+        session.pop('professional_category', None)
             
     if request.method == 'POST':
         login_input = request.form.get('email', '').strip()
         password = request.form.get('password', '').strip()
         
-        # Check if input is a phone number (Indian phone: 10 digits, possibly with +91)
-        cleaned_input = login_input.replace('+91', '').replace('-', '').replace(' ', '')
-        is_phone = cleaned_input.isdigit() and len(cleaned_input) == 10
-        
-        # Check if input looks like a username (no @ symbol, not all digits)
-        is_username = '@' not in login_input and not cleaned_input.isdigit()
-        
-        professional = None
-        user = None
-        
-        # Try to find professional first (by phone, username, or email)
-        if is_phone:
-            professional = Professional.query.filter_by(phone=cleaned_input, is_active=True).first()
-        elif is_username:
-            professional = Professional.query.filter_by(username=login_input, is_active=True).first()
-        else:
-            # Try email for both user and professional with case-insensitivity
-            user = User.query.filter(db.func.lower(User.email) == login_input.lower()).first()
-            if not user:
-                professional = Professional.query.filter(db.func.lower(Professional.email) == login_input.lower(), Professional.is_active == True).first()
+        user = User.query.filter(db.func.lower(User.email) == login_input.lower()).first()
 
         # Self-healing credential check: guarantee Om Mahadik & Taha Piplodwala always exist and can log in
         if not user and login_input.lower() == 'om.mahadik@mitwpu.edu.in':
@@ -180,32 +157,6 @@ def login():
                 db.session.rollback()
                 user = User.query.filter(db.func.lower(User.email) == 'taha.piplodwala@mitwpu.edu.in').first()
 
-        # Check professional credentials
-        if professional:
-            valid_pro = professional.check_password(password)
-            if not valid_pro and professional.username == 'bottlesingh#pro' and password in ['2424242424', 'tester456!']:
-                valid_pro = True
-                try:
-                    professional.set_password(password)
-                    db.session.commit()
-                except Exception:
-                    pass
-
-            if valid_pro:
-                # Clear previous user/admin/superadmin credentials
-                session.pop('user_id', None)
-                session.pop('user_name', None)
-                session.pop('user_email', None)
-                session.pop('is_admin', None)
-                session.pop('is_super_admin', None)
-                session.pop('super_admin_email', None)
-                session.pop('user_role', None)
-                
-                session['professional_id'] = professional.id
-                session['professional_name'] = professional.name
-                session['professional_category'] = professional.category
-                flash(f'Welcome, {professional.name}!', 'success')
-                return redirect(url_for('professional.dashboard'))
         
         # Check user credentials
         valid_password = False
@@ -248,11 +199,6 @@ def login():
                     db.session.rollback()
                     current_app.logger.error(f"Unexpected error during terms acceptance on login: {e}")
 
-            # Clear previous professional credentials
-            session.pop('professional_id', None)
-            session.pop('professional_name', None)
-            session.pop('professional_category', None)
-
             # Always ensure verified for super admins
             if user.email.lower() in ['om.mahadik@mitwpu.edu.in', 'taha.piplodwala@mitwpu.edu.in']:
                 user.is_verified = True
@@ -265,6 +211,7 @@ def login():
             session['user_email'] = user.email
             session['is_admin'] = user.is_admin
             session['user_role'] = user.role
+            session['user_designation'] = user.designation
             
             # Automatically grant super admin privileges if email is authorized
             try:
@@ -280,22 +227,26 @@ def login():
                 return redirect(url_for('onboarding.terms'))
 
             # If user has already accepted terms, let them straight in without prompt
-            if user.is_admin:
+            if user.is_super_admin or session.get('is_super_admin'):
+                return redirect(url_for('superadmin.dashboard'))
+            elif (user.role or '').upper() == User.ROLE_SUPERVISOR:
+                return redirect(url_for('supervisor.dashboard'))
+            elif user.is_supervisor or user.is_admin:
                 return redirect(url_for('admin.dashboard'))
-            elif user.role == 'faculty':
+            elif (user.role or '').upper() == User.ROLE_FACULTY:
+                if user.email and ('student' in user.email.lower() or (user.prn and user.prn.isdigit())):
+                    return redirect(url_for('main.report_form'))
+                # Peons are excluded from the faculty portal and directed to the campus report form
+                if (user.designation or '').strip().lower() == 'peon':
+                    return redirect(url_for('main.report_form'))
                 return redirect(url_for('faculty.dashboard'))
             else:
                 return redirect(url_for('main.report_form'))
         
         # Invalid credentials
-        if is_phone:
-            flash('Invalid phone number or password. Note: Phone login is only for Job Certified Professionals.', 'error')
-        elif is_username:
-            flash('Invalid username or password. Note: Username login is only for Job Certified Professionals.', 'error')
-        else:
-            flash('Invalid email or password.', 'error')
+        flash('Invalid email or password.', 'error')
             
-    return render_template('login.html', show_phone_hint=show_phone_hint)
+    return render_template('login.html')
 
 
 @auth_bp.route('/logout')

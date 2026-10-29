@@ -120,7 +120,7 @@
                 request.endpoint == 'admin.dashboard' or 
                 request.endpoint == 'admin.status_map' or 
                 request.endpoint == 'admin.analytics' or
-                request.endpoint in ['admin.chat', 'professional.chat', 'main.report_form', 'main.index', 'admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history', 'admin.add_professional', 'admin.professional_history', 'main.report_bug', 'main.notifications_page']
+                request.endpoint in ['main.report_form', 'main.index', 'admin.history', 'admin.booking_history', 'main.report_bug', 'main.notifications_page']
             ))) %}
             <button class="top-bar-btn" id="mobile-topbar-back-btn" onclick="handleTopbarBack()" aria-label="Go back to previous page">
                 <i class="bi bi-chevron-left"></i> Back
@@ -128,11 +128,6 @@
             {% endif %}
             {% if session.get('is_super_admin') %}
             <a href="{{ url_for('superadmin.dashboard') }}" class="top-bar-brand text-decoration-none">
-                <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU FixLink Logo" width="100" height="28" loading="eager">
-                <span>FixLink</span>
-            </a>
-            {% elif session.get('professional_id') and not (request.blueprint == 'superadmin') %}
-            <a href="{{ url_for('professional.dashboard') }}" class="top-bar-brand text-decoration-none">
                 <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" class="mitwpu-logo" alt="MIT-WPU FixLink Logo" width="100" height="28" loading="eager">
                 <span>FixLink</span>
             </a>
@@ -213,7 +208,7 @@
                 <span>Map</span>
             </a>
             <!-- Manage triggers an offcanvas sheet -->
-            <button class="bottom-nav-item border-0 bg-transparent {% if request.endpoint in ['admin.professionals', 'admin.help_requests', 'admin.history', 'admin.booking_history'] %}active{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#manageOffcanvas" aria-controls="manageOffcanvas">
+            <button class="bottom-nav-item border-0 bg-transparent {% if request.endpoint in ['admin.history', 'admin.booking_history', 'admin.faculty_admin_handle'] %}active{% endif %}" data-bs-toggle="offcanvas" data-bs-target="#manageOffcanvas" aria-controls="manageOffcanvas">
                 <i class="bi bi-grid"></i>
                 <span>Manage</span>
             </button>
@@ -221,30 +216,16 @@
                 <i class="bi bi-bar-chart-line"></i>
                 <span>Analytics</span>
             </a>
-            <a href="{{ url_for('admin.chat') }}" class="bottom-nav-item position-relative {% if request.endpoint == 'admin.chat' %}active{% endif %}">
-                <div class="position-relative d-inline-flex align-items-center justify-content-center">
-                    <i class="bi bi-chat-dots"></i>
-                    <span class="badge rounded-pill bg-danger d-none global-chat-badge bottom-nav-chat-badge">0</span>
-                </div>
-                <span>Chat</span>
+        {% elif session.get('user_role') in ['supervisor', 'SUPERVISOR'] %}
+            <a href="{{ url_for('supervisor.dashboard') }}" class="bottom-nav-item {% if request.endpoint and request.endpoint.startswith('supervisor.') %}active{% endif %}">
+                <i class="bi bi-shield-check text-success"></i>
+                <span>Inspection</span>
             </a>
-        {% elif session.get('professional_id') and not session.get('is_super_admin') and not (request.blueprint == 'superadmin') %}
-            <a href="{{ url_for('professional.dashboard') }}" class="bottom-nav-item {% if request.endpoint == 'professional.dashboard' %}active{% endif %}">
-                <i class="bi bi-tools"></i>
-                <span>Tasks</span>
+            <a href="{{ url_for('main.report_form') }}" class="bottom-nav-item {% if request.endpoint == 'main.report_form' %}active{% endif %}">
+                <i class="bi bi-plus-circle"></i>
+                <span>Report</span>
             </a>
-            <a href="{{ url_for('professional.chat') }}" class="bottom-nav-item position-relative {% if request.endpoint == 'professional.chat' %}active{% endif %}">
-                <div class="position-relative d-inline-flex align-items-center justify-content-center">
-                    <i class="bi bi-chat-dots"></i>
-                    <span class="badge rounded-pill bg-danger d-none global-chat-badge bottom-nav-chat-badge">0</span>
-                </div>
-                <span>Chat</span>
-            </a>
-            <a href="{{ url_for('professional.profile') }}" class="bottom-nav-item {% if request.endpoint == 'professional.profile' %}active{% endif %}">
-                <i class="bi bi-person-badge"></i>
-                <span>Profile</span>
-            </a>
-        {% elif session.get('user_role') == 'faculty' %}
+        {% elif (session.get('user_role')|string|upper) == 'FACULTY' and (session.get('user_designation')|string|lower) != 'peon' %}
             <a href="{{ url_for('faculty.dashboard') }}" class="bottom-nav-item {% if request.endpoint and request.endpoint.startswith('faculty.') %}active{% endif %}">
                 <i class="bi bi-calendar-check"></i>
                 <span>Faculty</span>
@@ -308,14 +289,7 @@
         </div>
         <div class="offcanvas-body px-3 pb-4">
             <div class="d-grid gap-2">
-                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.professionals') }}">
-                    <i class="bi bi-people fs-5"></i>
-                    <div><div class="manage-item-title">Professionals</div><div class="manage-item-desc">View & manage staff</div></div>
-                </a>
-                <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.help_requests') }}">
-                    <i class="bi bi-hand-thumbs-up fs-5"></i>
-                    <div><div class="manage-item-title">Help Requests</div><div class="manage-item-desc">Pending assistance requests</div></div>
-                </a>
+
                 <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('admin.history') }}">
                     <i class="bi bi-clock-history fs-5"></i>
                     <div><div class="manage-item-title">Full History</div><div class="manage-item-desc">All resolved tickets</div></div>
@@ -325,7 +299,7 @@
                     <i class="bi bi-person-workspace fs-5 text-primary"></i>
                     <div><div class="manage-item-title">Faculty Admin Handle</div><div class="manage-item-desc">Event Approvals, CMM, Ghost Protocol &amp; Bookings</div></div>
                 </a>
-                {% elif session.get('user_role') == 'faculty' %}
+                {% elif (session.get('user_role')|string|upper) == 'FACULTY' and (session.get('user_designation')|string|lower) != 'peon' %}
                 <a class="manage-item-btn text-start d-flex align-items-center gap-3" href="{{ url_for('faculty.dashboard') }}">
                     <i class="bi bi-calendar-check fs-5"></i>
                     <div><div class="manage-item-title">Faculty Portal</div><div class="manage-item-desc">Room bookings & schedules</div></div>
@@ -340,7 +314,7 @@
     </div>
     {% endif %}
     
-    {% if session.get('is_admin') and request.endpoint not in ['main.report_form', 'admin.add_professional', 'admin.professional_history', 'admin.professionals', 'admin.chat', 'professional.chat'] and 'chat' not in (request.endpoint or '') %}
+    {% if session.get('is_admin') and request.endpoint not in ['main.report_form'] %}
     <a href="{{ url_for('main.report_form') }}" id="mobile-fab" class="d-md-none" aria-label="Report a new issue">
         <i class="bi bi-plus" aria-hidden="true"></i>
     </a>
@@ -420,8 +394,7 @@
                     </button>
                     <ul id="msb-manage-sub" class="msb-sub" aria-hidden="true">
                         <li><a class="msb-subitem {% if request.endpoint == 'admin.faculty_admin_handle' %}msb-active{% endif %}" href="{{ url_for('admin.faculty_admin_handle') }}"><i class="bi bi-person-workspace text-primary"></i>Faculty Admin Handle</a></li>
-                        <li><a class="msb-subitem" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people"></i>Professionals</a></li>
-                        <li><a class="msb-subitem" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up"></i>Help Requests</a></li>
+
                         <li><a class="msb-subitem" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history"></i>Full History</a></li>
                     </ul>
                 </li>
@@ -432,12 +405,12 @@
                         {% if request.endpoint == 'admin.analytics' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
+
                 <li>
-                    <a class="msb-item {% if request.endpoint == 'admin.chat' %}msb-active{% endif %}" href="{{ url_for('admin.chat') }}">
-                        <i class="bi bi-chat-dots"></i>
-                        <span>Chat</span>
-                        <span class="msb-badge d-none global-chat-badge bg-danger text-white">0</span>
-                        {% if request.endpoint == 'admin.chat' %}<span class="msb-dot"></span>{% endif %}
+                    <a class="msb-item {% if request.endpoint == 'supervisor.dashboard' %}msb-active{% endif %}" href="{{ url_for('supervisor.dashboard') }}">
+                        <i class="bi bi-shield-check text-success"></i>
+                        <span>Supervisor QA</span>
+                        {% if request.endpoint == 'supervisor.dashboard' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
                 <li>
@@ -448,31 +421,23 @@
                     </a>
                 </li>
 
-                {% elif session.get('professional_id') %}
+                {% elif session.get('user_role') in ['supervisor', 'SUPERVISOR'] %}
                 <li>
-                    <a class="msb-item {% if request.endpoint == 'professional.dashboard' %}msb-active{% endif %}" href="{{ url_for('professional.dashboard') }}">
-                        <i class="bi bi-tools"></i>
-                        <span>My Tasks</span>
-                        {% if request.endpoint == 'professional.dashboard' %}<span class="msb-dot"></span>{% endif %}
+                    <a class="msb-item {% if request.endpoint == 'supervisor.dashboard' %}msb-active{% endif %}" href="{{ url_for('supervisor.dashboard') }}">
+                        <i class="bi bi-shield-check text-success"></i>
+                        <span>Supervisor QA</span>
+                        {% if request.endpoint == 'supervisor.dashboard' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
                 <li>
-                    <a class="msb-item {% if request.endpoint == 'professional.chat' %}msb-active{% endif %}" href="{{ url_for('professional.chat') }}">
-                        <i class="bi bi-chat-dots"></i>
-                        <span>Chat</span>
-                        <span class="msb-badge d-none global-chat-badge bg-danger text-white">0</span>
-                        {% if request.endpoint == 'professional.chat' %}<span class="msb-dot"></span>{% endif %}
-                    </a>
-                </li>
-                <li>
-                    <a class="msb-item {% if request.endpoint == 'professional.profile' %}msb-active{% endif %}" href="{{ url_for('professional.profile') }}">
-                        <i class="bi bi-person-badge"></i>
-                        <span>Profile</span>
-                        {% if request.endpoint == 'professional.profile' %}<span class="msb-dot"></span>{% endif %}
+                    <a class="msb-item {% if request.endpoint == 'main.report_form' %}msb-active{% endif %}" href="{{ url_for('main.report_form') }}">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Report Issue</span>
+                        {% if request.endpoint == 'main.report_form' %}<span class="msb-dot"></span>{% endif %}
                     </a>
                 </li>
 
-                {% elif session.get('user_role') == 'faculty' %}
+                {% elif (session.get('user_role')|string|upper) == 'FACULTY' and (session.get('user_designation')|string|lower) != 'peon' %}
                 <li>
                     <a class="msb-item {% if request.endpoint == 'faculty.dashboard' %}msb-active{% endif %}" href="{{ url_for('faculty.dashboard') }}">
                         <i class="bi bi-calendar-check"></i>
@@ -553,7 +518,7 @@
     <div class="fixed-top mt-4 d-none d-lg-flex justify-content-center pointer-events-none" style="z-index: 1040;">
         <div class="nav-capsule pointer-events-auto">
             <!-- Brand -->
-            <a class="d-flex align-items-center me-3 text-decoration-none" href="{% if session.get('is_super_admin') %}{{ url_for('superadmin.dashboard') }}{% elif session.get('professional_id') and not (request.blueprint == 'superadmin') %}{{ url_for('professional.dashboard') }}{% else %}{{ url_for('main.index') }}{% endif %}">
+            <a class="d-flex align-items-center me-3 text-decoration-none" href="{% if session.get('is_super_admin') %}{{ url_for('superadmin.dashboard') }}{% else %}{{ url_for('main.index') }}{% endif %}">
                 <img src="{{ url_for('static', filename='images/logo-lm.webp') }}" alt="MIT-WPU FixLink Logo" class="mitwpu-logo me-2" style="height: 28px; width: auto;" width="100" height="28" loading="eager" fetchpriority="high" decoding="sync">
                 <span class="brand-text-capsule">FixLink</span>
             </a>
@@ -573,23 +538,16 @@
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"><i class="bi bi-gear"></i> Manage</a>
                         <ul class="dropdown-menu shadow rounded-4 border-0">
                             <li><a class="dropdown-item {% if request.endpoint == 'admin.faculty_admin_handle' %}active{% endif %}" href="{{ url_for('admin.faculty_admin_handle') }}"><i class="bi bi-person-workspace me-2 text-primary"></i>Faculty Admin Handle</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin.professionals') }}"><i class="bi bi-people me-2"></i>Professionals</a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('admin.help_requests') }}"><i class="bi bi-hand-thumbs-up me-2"></i>Help Requests</a></li>
+
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('admin.history') }}"><i class="bi bi-clock-history me-2"></i>Full History</a></li>
                         </ul>
                     </li>
 
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.analytics' %}active{% endif %}" href="{{ url_for('admin.analytics') }}"><i class="bi bi-graph-up"></i> Insights</a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'admin.chat' %}active{% endif %}" href="{{ url_for('admin.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
 
-                {% elif session.get('professional_id') %}
-                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.dashboard' %}active{% endif %}" href="{{ url_for('professional.dashboard') }}"><i class="bi bi-tools"></i> My Tasks</a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.chat' %}active{% endif %}" href="{{ url_for('professional.chat') }}"><i class="bi bi-chat-dots"></i> Chat <span class="badge rounded-pill bg-danger d-none ms-1 global-chat-badge">0</span></a></li>
-                    <li class="nav-item"><a class="nav-link {% if request.endpoint == 'professional.profile' %}active{% endif %}" href="{{ url_for('professional.profile') }}"><i class="bi bi-person-badge"></i> Profile</a></li>
-
-                {% elif session.get('user_role') == 'faculty' %}
+                {% elif (session.get('user_role')|string|upper) == 'FACULTY' and (session.get('user_designation')|string|lower) != 'peon' %}
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'faculty.dashboard' %}active{% endif %}" href="{{ url_for('faculty.dashboard') }}"><i class="bi bi-calendar-check"></i> Faculty Portal</a></li>
                     <li class="nav-item"><a class="nav-link {% if request.endpoint == 'main.report_form' %}active{% endif %}" href="{{ url_for('main.report_form') }}"><i class="bi bi-plus-circle"></i> Report Issue</a></li>
 
@@ -641,13 +599,9 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-4 border-0 mt-2" style="max-height: 80vh; overflow-y: auto;">
                             <li class="px-3 py-3 border-bottom">
-                                <div class="fw-bold" id="profileName">{{ session.get('user_name') or session.get('professional_name') or 'User' }}</div>
-                                <div class="text-muted small" id="profileEmail">{{ session.get('user_email') or session.get('professional_email') or '' }}</div>
+                                <div class="fw-bold" id="profileName">{{ session.get('user_name') or 'User' }}</div>
+                                <div class="text-muted small" id="profileEmail">{{ session.get('user_email') or '' }}</div>
                             </li>
-                            {% if session.get('professional_id') %}
-                                <li><a class="dropdown-item py-2" href="{{ url_for('professional.profile') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                            {% endif %}
                             <li><a class="dropdown-item py-2 text-danger" href="{{ url_for('auth.logout') }}"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                         </ul>
                     </div>
@@ -1239,105 +1193,7 @@
     })();
     </script>
 
-    <meta name="user-logged-in" content="{{ 'true' if session.get('user_id') or session.get('professional_id') else 'false' }}">
-    <meta name="chat-channel" content="{% if session.get('is_admin') %}private-admins{% elif session.get('professional_id') %}private-professional-{{ session.get('professional_id') }}{% endif %}">
     <script defer src="{{ url_for('static', filename='js/pusher.min.js') }}"></script>
-    <script>
-    // Global Chat Notification Logic (Non-blocking idle execution without forced reflows)
-    (function() {
-        function updateGlobalChatBadges(count) {
-            const numCount = parseInt(count, 10) || 0;
-            const badges = document.querySelectorAll('.global-chat-badge');
-            badges.forEach(badge => {
-                if (numCount > 0) {
-                    const text = numCount > 99 ? '99+' : (numCount > 9 ? '9+' : String(numCount));
-                    if (badge.textContent !== text) {
-                        badge.textContent = text;
-                        badge.classList.remove('chat-badge-pulse');
-                        requestAnimationFrame(() => {
-                            badge.classList.add('chat-badge-pulse');
-                        });
-                    }
-                    badge.classList.remove('d-none');
-                } else {
-                    badge.classList.add('d-none');
-                    badge.textContent = '0';
-                }
-            });
-        }
-
-        const runDeferredChatSetup = function() {
-            // Only run if logged in
-            if (document.querySelector('meta[name="user-logged-in"]')?.content === 'true') {
-                window.refreshGlobalChatBadges = function() {
-                    fetch('/api/chat/unread_total')
-                        .then(r => r.json())
-                        .then(data => {
-                            if (data && data.success) {
-                                const count = (data.data && typeof data.data.unread_count !== 'undefined') 
-                                    ? data.data.unread_count 
-                                    : (typeof data.unread_count !== 'undefined' ? data.unread_count : 0);
-                                updateGlobalChatBadges(count);
-                            }
-                        })
-                        .catch(e => console.error('Failed to fetch unread chat count:', e));
-                };
-                
-                // Initial fetch
-                window.refreshGlobalChatBadges();
-
-                // Periodic background sync every 15 seconds for real-time fallback
-                setInterval(function() {
-                    if (!window.location.pathname.includes('/chat')) {
-                        window.refreshGlobalChatBadges();
-                    }
-                }, 15000);
-                    
-                // Setup global Pusher for live chat pings
-                const pKey = '{{ config["PUSHER_KEY"] }}';
-                let channelName = document.querySelector('meta[name="chat-channel"]')?.content;
-                if (channelName && pKey && pKey !== 'dummy-key' && pKey !== 'None' && typeof Pusher !== 'undefined') {
-                    try {
-                        Pusher.logToConsole = false;
-                        const pusher = new Pusher('{{ config["PUSHER_KEY"] }}', {
-                            cluster: '{{ config["PUSHER_CLUSTER"] }}',
-                            authEndpoint: '/pusher/auth',
-                            auth: {
-                                headers: {
-                                    'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                                }
-                            }
-                        });
-                        
-                        const channel = pusher.subscribe(channelName);
-                        channel.bind('new_chat_message', function(data) {
-                            if (!window.location.pathname.includes('/chat')) {
-                                window.refreshGlobalChatBadges();
-                                try {
-                                    const audio = new Audio('/static/sounds/notification.mp3');
-                                    audio.volume = 0.5;
-                                    audio.play().catch(e => {});
-                                } catch (e) {}
-                            }
-                        });
-                    } catch (e) {
-                        console.error('Global Pusher init error:', e);
-                    }
-                }
-            }
-        };
-
-        if ('requestIdleCallback' in window) {
-            window.addEventListener('load', () => {
-                requestIdleCallback(runDeferredChatSetup, { timeout: 2000 });
-            });
-        } else {
-            window.addEventListener('load', () => {
-                setTimeout(runDeferredChatSetup, 1000);
-            });
-        }
-    })();
-    </script>
 
     <!-- Global Floating Report Bug Button & Modern Modal -->
     <style>
@@ -1807,6 +1663,179 @@
                 pointer-events: none !important;
             }
         }
+
+        /* ═══════════════════════════════════════════════════════════
+           UNIVERSAL CUSTOM DROPDOWN SYSTEM
+           ═══════════════════════════════════════════════════════════ */
+        .custom-dropdown-container {
+            position: relative;
+            user-select: none;
+            display: inline-block;
+            width: 100%;
+            vertical-align: middle;
+        }
+        .custom-dropdown-container.open {
+            position: relative;
+            z-index: 1060 !important;
+        }
+        .custom-dropdown-trigger {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            min-height: 38px;
+            padding: 0.42rem 0.85rem;
+            background: var(--bg-card, #ffffff);
+            border: 1.5px solid var(--border-color, #cbd5e1);
+            border-radius: 10px;
+            font-size: 0.86rem;
+            font-weight: 500;
+            color: var(--text-primary, #1e293b);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-align: left;
+            box-sizing: border-box;
+        }
+        .custom-dropdown-trigger .dropdown-selected-label {
+            display: inline-flex;
+            align-items: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex-grow: 1;
+            min-width: 0;
+        }
+        .custom-dropdown-trigger:hover,
+        .custom-dropdown-trigger:focus,
+        .custom-dropdown-container.open .custom-dropdown-trigger {
+            border-color: #2563eb !important;
+            background: var(--bg-card, #ffffff) !important;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+            outline: none;
+        }
+        .custom-dropdown-trigger .dropdown-caret {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            color: var(--text-muted, #64748b);
+            font-size: 0.75rem;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+        .custom-dropdown-container.open .custom-dropdown-trigger .dropdown-caret {
+            transform: rotate(180deg);
+            color: #2563eb;
+        }
+        .custom-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            right: 0;
+            background: var(--bg-card, #ffffff);
+            border: 1px solid var(--border-color, #e2e8f0);
+            border-radius: 12px;
+            box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.25), 0 4px 10px -2px rgba(0, 0, 0, 0.1);
+            z-index: 9999 !important;
+            padding: 6px;
+            display: none;
+            max-height: 240px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        .custom-dropdown-container.open .custom-dropdown-menu {
+            display: block;
+            animation: dropMenuFadeIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes dropMenuFadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .custom-dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 0.84rem;
+            font-weight: 500;
+            color: var(--text-primary, #334155);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            gap: 0.5rem;
+        }
+        .custom-dropdown-item:hover {
+            background: rgba(37, 99, 235, 0.08);
+            color: #2563eb;
+        }
+        .custom-dropdown-item.selected {
+            background: rgba(37, 99, 235, 0.12);
+            color: #2563eb;
+            font-weight: 600;
+        }
+        .custom-dropdown-item.disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .custom-dropdown-item .item-check {
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        /* Compact sizing modifier for small selects */
+        .custom-dropdown-container.dropdown-sm .custom-dropdown-trigger {
+            min-height: 32px;
+            padding: 0.25rem 0.65rem;
+            font-size: 0.8rem;
+            border-radius: 8px;
+        }
+        .custom-dropdown-container.dropdown-sm .custom-dropdown-item {
+            padding: 0.35rem 0.6rem;
+            font-size: 0.78rem;
+        }
+
+        /* Dark Mode */
+        [data-theme="dark"] .custom-dropdown-trigger,
+        [data-bs-theme="dark"] .custom-dropdown-trigger,
+        body.dark-mode .custom-dropdown-trigger {
+            background: #181818 !important;
+            border-color: #262626 !important;
+            color: #f4f4f5 !important;
+        }
+        [data-theme="dark"] .custom-dropdown-trigger:hover,
+        [data-theme="dark"] .custom-dropdown-trigger:focus,
+        [data-theme="dark"] .custom-dropdown-container.open .custom-dropdown-trigger,
+        [data-bs-theme="dark"] .custom-dropdown-trigger:hover,
+        [data-bs-theme="dark"] .custom-dropdown-trigger:focus,
+        [data-bs-theme="dark"] .custom-dropdown-container.open .custom-dropdown-trigger,
+        body.dark-mode .custom-dropdown-trigger:hover,
+        body.dark-mode .custom-dropdown-trigger:focus,
+        body.dark-mode .custom-dropdown-container.open .custom-dropdown-trigger {
+            border-color: #3b82f6 !important;
+            background: #1e1e1e !important;
+        }
+        [data-theme="dark"] .custom-dropdown-menu,
+        [data-bs-theme="dark"] .custom-dropdown-menu,
+        body.dark-mode .custom-dropdown-menu {
+            background: #181818 !important;
+            border-color: #262626 !important;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7) !important;
+        }
+        [data-theme="dark"] .custom-dropdown-item,
+        [data-bs-theme="dark"] .custom-dropdown-item,
+        body.dark-mode .custom-dropdown-item {
+            color: #d4d4d8 !important;
+        }
+        [data-theme="dark"] .custom-dropdown-item:hover,
+        [data-bs-theme="dark"] .custom-dropdown-item:hover,
+        body.dark-mode .custom-dropdown-item:hover {
+            background: #222222 !important;
+            color: #60a5fa !important;
+        }
+        [data-theme="dark"] .custom-dropdown-item.selected,
+        [data-bs-theme="dark"] .custom-dropdown-item.selected,
+        body.dark-mode .custom-dropdown-item.selected {
+            background: rgba(59, 130, 246, 0.2) !important;
+            color: #60a5fa !important;
+        }
     </style>
 
     {% if not (request.endpoint and (request.endpoint.startswith('auth.') or request.endpoint.endswith('.login') or request.endpoint == 'main.report_bug' or request.endpoint in ['main.privacy', 'main.terms', 'main.cookies'])) %}
@@ -2219,12 +2248,36 @@
             document.querySelectorAll('.custom-dropdown-container.open').forEach(c => {
                 if (c !== container) {
                     c.classList.remove('open');
+                    const pCard = c.closest('.card');
+                    if (pCard && pCard.dataset.customElevated === 'true') {
+                        pCard.style.zIndex = pCard.dataset.prevZ || '';
+                        delete pCard.dataset.prevZ;
+                        delete pCard.dataset.customElevated;
+                    }
                     const btn = c.querySelector('.custom-dropdown-trigger');
                     if (btn) btn.setAttribute('aria-expanded', 'false');
                 }
             });
-            container.classList.toggle('open', !isOpen);
-            triggerBtn.setAttribute('aria-expanded', String(!isOpen));
+
+            const willOpen = !isOpen;
+            container.classList.toggle('open', willOpen);
+            triggerBtn.setAttribute('aria-expanded', String(willOpen));
+
+            const parentCard = container.closest('.card');
+            if (parentCard) {
+                if (willOpen) {
+                    if (parentCard.dataset.customElevated !== 'true') {
+                        parentCard.dataset.prevZ = parentCard.style.zIndex || '';
+                        parentCard.dataset.customElevated = 'true';
+                    }
+                    parentCard.style.zIndex = '1050';
+                    parentCard.style.position = 'relative';
+                } else if (parentCard.dataset.customElevated === 'true') {
+                    parentCard.style.zIndex = parentCard.dataset.prevZ || '';
+                    delete parentCard.dataset.prevZ;
+                    delete parentCard.dataset.customElevated;
+                }
+            }
         });
 
         selectEl.addEventListener('change', () => {
@@ -2269,6 +2322,12 @@
         if (!e.target.closest('.custom-dropdown-container')) {
             document.querySelectorAll('.custom-dropdown-container.open').forEach(c => {
                 c.classList.remove('open');
+                const pCard = c.closest('.card');
+                if (pCard && pCard.dataset.customElevated === 'true') {
+                    pCard.style.zIndex = pCard.dataset.prevZ || '';
+                    delete pCard.dataset.prevZ;
+                    delete pCard.dataset.customElevated;
+                }
                 const btn = c.querySelector('.custom-dropdown-trigger');
                 if (btn) btn.setAttribute('aria-expanded', 'false');
             });
@@ -2279,6 +2338,12 @@
         if (e.key === 'Escape') {
             document.querySelectorAll('.custom-dropdown-container.open').forEach(c => {
                 c.classList.remove('open');
+                const pCard = c.closest('.card');
+                if (pCard && pCard.dataset.customElevated === 'true') {
+                    pCard.style.zIndex = pCard.dataset.prevZ || '';
+                    delete pCard.dataset.prevZ;
+                    delete pCard.dataset.customElevated;
+                }
                 const btn = c.querySelector('.custom-dropdown-trigger');
                 if (btn) btn.setAttribute('aria-expanded', 'false');
             });

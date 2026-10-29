@@ -129,7 +129,7 @@ def dashboard():
         or_(Timetable.faculty_id == faculty.id, Timetable.collaborator_id == faculty.id)
     ).order_by(Timetable.day_of_week, Timetable.start_time).all()
     
-    all_faculties = User.query.filter_by(role=User.ROLE_FACULTY).order_by(User.name).all()
+    all_faculties = User.query.filter_by(role=User.ROLE_FACULTY, is_active=True).order_by(User.name).all()
     my_adhoc = AdHocBooking.query.options(
         joinedload(AdHocBooking.room).joinedload(Room.floor)
     ).filter(
@@ -223,6 +223,27 @@ def dashboard():
         joinedload(Room.room_bookings)
     ).order_by(Room.floor_id, Room.number).all()
 
+    # Active / Pending Check-In Bookings for Today (Ghost Protocol 1-Tap Quick Check-In)
+    pending_checkins = []
+    for b in bookings_this_week_raw:
+        if b.status == RoomBooking.STATUS_ACTIVE and not b.checked_in:
+            b_start = to_ist(b.slot_start) if b.slot_start else None
+            b_end = to_ist(b.slot_end) if b.slot_end else None
+            if b_start and b_end and b_end > now_ist:
+                minutes_to_start = (b_start - now_ist).total_seconds() / 60
+                can_check_in_now = minutes_to_start <= 15
+                pending_checkins.append({
+                    'id': b.id,
+                    'room_number': b.room.number if b.room else '',
+                    'room_name': b.room.name if b.room else '',
+                    'floor_level': b.room.floor.level if b.room and b.room.floor else '',
+                    'subject': b.subject,
+                    'time_str': f"{b_start.strftime('%I:%M %p')} - {b_end.strftime('%I:%M %p')}",
+                    'can_check_in_now': can_check_in_now,
+                    'minutes_to_start': max(0, int(minutes_to_start)),
+                    'is_live': b_start <= now_ist <= b_end
+                })
+
     return render_template('faculty/dashboard.html',
                            faculty=faculty,
                            floors=floors,
@@ -236,6 +257,7 @@ def dashboard():
                            booking_history=history_pagination.items,
                            history_pagination=history_pagination,
                            bookings_this_week=bookings_this_week,
+                           pending_checkins=pending_checkins,
                            current_day=current_day,
                            recent_strikes_count=recent_strikes_count,
                            current_user_id=user_id)

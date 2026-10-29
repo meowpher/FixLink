@@ -100,6 +100,12 @@ def init_db(app):
                     if 'adhoc_suspension_reason' not in u_columns:
                         conn.execute(sqlalchemy.text("ALTER TABLE users ADD COLUMN adhoc_suspension_reason VARCHAR(255);"))
                         logger.info("Added adhoc_suspension_reason column to users table.")
+                    if 'designation' not in u_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE users ADD COLUMN designation VARCHAR(100);"))
+                        logger.info("Added designation column to users table.")
+                    if 'is_active' not in u_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE users ADD COLUMN is_active BOOLEAN DEFAULT TRUE;"))
+                        logger.info("Added is_active column to users table.")
                     conn.commit()
 
             # Ensure noshow_strikes table exists
@@ -111,6 +117,48 @@ def init_db(app):
             if not inspector.has_table('schedule_submissions'):
                 db.create_all()
                 logger.info("Created schedule_submissions table.")
+
+            # Ensure audit_logs table exists and has all required columns
+            if not inspector.has_table('audit_logs'):
+                db.create_all()
+                logger.info("Created audit_logs table.")
+            else:
+                a_columns = [c['name'] for c in inspector.get_columns('audit_logs')]
+                with db.engine.connect() as conn:
+                    if 'ticket_id' not in a_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE audit_logs ADD COLUMN ticket_id INTEGER;"))
+                        logger.info("Added ticket_id column to audit_logs table.")
+                    if 'performed_by_id' not in a_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE audit_logs ADD COLUMN performed_by_id INTEGER;"))
+                        logger.info("Added performed_by_id column to audit_logs table.")
+                    if 'timestamp' not in a_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE audit_logs ADD COLUMN timestamp TIMESTAMP;"))
+                        logger.info("Added timestamp column to audit_logs table.")
+                    conn.commit()
+
+            # Ensure Supervisor Verification columns exist on tickets table
+            if inspector.has_table('tickets'):
+                t_columns = [c['name'] for c in inspector.get_columns('tickets')]
+                with db.engine.connect() as conn:
+                    if 'assigned_vendor_or_tech_name' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN assigned_vendor_or_tech_name VARCHAR(150);"))
+                        logger.info("Added assigned_vendor_or_tech_name column to tickets table.")
+                    if 'verified_by_id' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN verified_by_id INTEGER;"))
+                        logger.info("Added verified_by_id column to tickets table.")
+                    if 'proof_image_url' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN proof_image_url VARCHAR(500);"))
+                        logger.info("Added proof_image_url column to tickets table.")
+                    if 'proof_of_completion_url' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN proof_of_completion_url VARCHAR(500);"))
+                        logger.info("Added proof_of_completion_url column to tickets table.")
+                    if 'resolution_notes' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN resolution_notes TEXT;"))
+                        logger.info("Added resolution_notes column to tickets table.")
+                    if 'resolved_at' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN resolved_at TIMESTAMP;"))
+                        logger.info("Added resolved_at column to tickets table.")
+                    conn.commit()
         except Exception as e:
             logger.warning(f"Could not verify schema migrations: {e}")
 

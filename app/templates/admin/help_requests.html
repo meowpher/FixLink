@@ -295,10 +295,10 @@
                 <!-- Action Buttons (for pending) -->
                 {% if req.status == 'pending' %}
                 <div class="help-req-actions">
-                    <button class="btn btn-sm btn-success help-req-btn flex-fill" onclick="approveRequest({{ req.id }})">
+                    <button class="btn btn-sm btn-success help-req-btn flex-fill" data-action="approveRequest" data-req-id="{{ req.id }}">
                         <i class="bi bi-check-lg"></i><span>Approve</span>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger help-req-btn flex-fill" onclick="rejectRequest({{ req.id }})">
+                    <button class="btn btn-sm btn-outline-danger help-req-btn flex-fill" data-action="rejectRequest" data-req-id="{{ req.id }}">
                         <i class="bi bi-x-lg"></i><span>Reject</span>
                     </button>
                 </div>
@@ -493,5 +493,15 @@
             }
         });
     }
+
+    // Delegated listener for help request action buttons (avoids Jinja expressions in onclick attrs)
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('[data-action]');
+        if (!btn) return;
+        var action = btn.dataset.action;
+        var reqId = parseInt(btn.dataset.reqId, 10);
+        if (action === 'approveRequest') approveRequest(reqId);
+        else if (action === 'rejectRequest') rejectRequest(reqId);
+    });
 </script>
 {% endblock %}

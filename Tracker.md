@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.23** | 2026-10-30 | **Deployed** | **Universal Smooth Theme Curtain Transition (Login & Report Form Restoration)** (Restored smooth GSAP curtain drop/lift transition across all views by removing endpoint script exclusions in `base.html`; wired mobile theme toggles and status icons across public report and login screens). |
 | **v1.7.22** | 2026-10-30 | **Deployed** | **Universal CSRF Token Injection & Developer Deletion Fix** (Resolved 400 "Session or security token expired" error on developer admin and professional deletions by implementing auto-attaching CSRF headers in `base.html` fetch interceptor and adding explicit `X-CSRFToken` to deletion API calls). |
 | **v1.7.21** | 2026-10-30 | **Deployed** | **Native Built-in WebApp Modal & Dialog System** (Replaced raw native browser `confirm()` and `alert()` popups with self-hosted, theme-aware FixLink SweetAlert2 modals across SuperAdmin, Admin Console, Status Map, and Faculty portals; added glassmorphism card styling and automatic Light/Dark mode palette adapting). |
 | **v1.7.20** | 2026-10-30 | **Deployed** | **Admin Map Issue Detection & Attention Card State Synchronization** (Resolved status mismatch where rooms with active open tickets erroneously rendered the "Everything is Normal" placeholder in the side panel; mapped open tickets to visual 'issue' state and enforced Needs Attention alert banner rendering with red ISSUE badge). |
@@ -27,6 +28,15 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.23 (2026-10-30)
+- `fix(ui)`: **Theme Switch Curtain Transition Restoration (Report & Login Views)**
+  - Resolved missing Light/Dark theme animation on `/report` and `/login` where themes snapped instantly without the smooth GSAP curtain transition.
+  - Removed template endpoint exclusion condition in `app/templates/base.html`, ensuring `gsap.min.js`, `animations.js`, and `page_transitions.js` load globally across every route.
+  - Connected mobile topbar theme toggle button (`#mobileThemeToggle`) directly to the curtain transition coordinator (`handleToggle`).
+  - Added bidirectional icon synchronization for `#mobileThemeIcon` (`bi-moon-fill` ⇄ `bi-sun-fill`) during transitions.
+
+---
 
 ### Release v1.7.22 (2026-10-30)
 - `fix(security)`: **Universal Fetch CSRF Token Injection & Developer Deletion Hardening**

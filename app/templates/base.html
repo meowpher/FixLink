@@ -637,8 +637,7 @@
     <!-- SweetAlert2 Built-in App Dialog & Notification Engine (self-hosted) -->
     <script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
 
-    {% if request.endpoint not in ['main.report_form', 'main.report_bug', 'auth.login'] %}
-    <!-- Core GSAP for Smooth Animations (self-hosted, deferred) -->
+    <!-- Core GSAP for Smooth Animations & Theme Transitions (self-hosted, deferred) -->
     <script defer src="{{ url_for('static', filename='js/gsap.min.js') }}"></script>
 
     <!-- Custom JS -->
@@ -648,7 +647,6 @@
     <script defer src="{{ url_for('static', filename='js/skeleton_loader.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/dashboard_stats.js') }}"></script>
     <script defer src="{{ url_for('static', filename='js/carousels.js') }}"></script>
-    {% endif %}
     {% endif %}
     
     {% if session.get('is_admin') or session.get('user_role') == 'faculty' %}
@@ -693,6 +691,11 @@
                     iconMobile.classList.remove('bi-moon-fill');
                     iconMobile.classList.add('bi-sun-fill');
                 }
+                const iconMobileSimple = document.getElementById('mobileThemeIcon');
+                if (iconMobileSimple) {
+                    iconMobileSimple.classList.remove('bi-moon-fill');
+                    iconMobileSimple.classList.add('bi-sun-fill');
+                }
                 const logos = document.querySelectorAll('.mitwpu-logo');
                 logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-dm.webp') }}");
                 window.dispatchEvent(new CustomEvent('themeChanged', { detail: { isDark: true } }));
@@ -715,6 +718,11 @@
                 if (iconMobile) {
                     iconMobile.classList.remove('bi-sun-fill');
                     iconMobile.classList.add('bi-moon-fill');
+                }
+                const iconMobileSimple = document.getElementById('mobileThemeIcon');
+                if (iconMobileSimple) {
+                    iconMobileSimple.classList.remove('bi-sun-fill');
+                    iconMobileSimple.classList.add('bi-moon-fill');
                 }
                 const logos = document.querySelectorAll('.mitwpu-logo');
                 logos.forEach(logo => logo.src = "{{ url_for('static', filename='images/logo-lm.webp') }}");
@@ -755,6 +763,9 @@
 
         const btnMobile = document.getElementById('mobileThemeToggleBtn');
         if (btnMobile) btnMobile.addEventListener('click', handleToggle);
+
+        const btnMobileSimple = document.getElementById('mobileThemeToggle');
+        if (btnMobileSimple) btnMobileSimple.addEventListener('click', handleToggle);
             // Automatically attach X-CSRFToken to mutable fetch requests if missing
         const _origFetch = window.fetch;
         window.fetch = function(resource, init) {

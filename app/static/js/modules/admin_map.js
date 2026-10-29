@@ -206,7 +206,8 @@ export async function assignTechnician(ticketId) {
     }
 }
 export async function completeTicket(ticketId) {
-    if (!confirm('Mark this ticket as resolved?')) return;
+    const confirmed = await window.FixLinkDialog.confirm('Mark this ticket as resolved?', 'Resolve Ticket', { confirmText: 'Yes, Resolve' });
+    if (!confirmed) return;
     try {
         const response = await fetch(`/admin/tickets/${ticketId}/status`, {
             method: 'POST',
@@ -222,7 +223,8 @@ export async function completeTicket(ticketId) {
 }
 
 export async function deleteTicketFromMap(ticketId) {
-    if (!confirm('Are you sure you want to delete this ticket?')) return;
+    const confirmed = await window.FixLinkDialog.confirm('Are you sure you want to delete this ticket? This action cannot be undone.', 'Delete Ticket', { isDanger: true, confirmText: 'Yes, Delete' });
+    if (!confirmed) return;
     try {
         const response = await fetch(`/admin/tickets/${ticketId}/delete`, {
             method: 'POST',

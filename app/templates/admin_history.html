@@ -633,10 +633,13 @@
     });
 
     // Update ticket status via AJAX
-    function updateStatus(ticketId, newStatus) {
-        if (!confirm(`Are you sure you want to mark this ticket as ${newStatus}?`)) {
-            return;
-        }
+    async function updateStatus(ticketId, newStatus) {
+        const confirmed = await window.FixLinkDialog.confirm(
+            `Are you sure you want to mark this ticket as ${newStatus}?`,
+            'Update Ticket Status',
+            { confirmText: 'Yes, Update' }
+        );
+        if (!confirmed) return;
 
         fetch(`/admin/tickets/${ticketId}/update-status`, {
             method: 'POST',
@@ -662,10 +665,13 @@
     }
 
     // Delete ticket functionality
-    function deleteTicket(ticketId) {
-        if (!confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
-            return;
-        }
+    async function deleteTicket(ticketId) {
+        const confirmed = await window.FixLinkDialog.confirm(
+            'Are you sure you want to delete this ticket? This action cannot be undone.',
+            'Delete Ticket',
+            { isDanger: true, confirmText: 'Yes, Delete Ticket' }
+        );
+        if (!confirmed) return;
 
         const modalEl = document.getElementById('ticketModal');
         if (modalEl) {

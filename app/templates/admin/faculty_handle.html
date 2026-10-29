@@ -2583,7 +2583,7 @@
             });
             shouldProceed = confirmRes.isConfirmed;
         } else {
-            shouldProceed = confirm(`Assign ${selected.length} selected class slot(s) to ${facultyName}?`);
+            shouldProceed = await window.FixLinkDialog.confirm(`Assign ${selected.length} selected class slot(s) to ${facultyName}?`, 'Assign Classes');
         }
         if (!shouldProceed) return;
 

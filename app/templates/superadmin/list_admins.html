@@ -128,30 +128,33 @@
         });
     });
 
-    function deleteAdmin(adminId) {
-        if (!confirm('Are you sure you want to delete this admin? This action cannot be undone.')) {
-            return;
-        }
+    async function deleteAdmin(adminId) {
+        const confirmed = await window.FixLinkDialog.confirm(
+            'Are you sure you want to delete this admin? This action cannot be undone.',
+            'Delete Administrator',
+            { isDanger: true, confirmText: 'Yes, Delete Admin' }
+        );
+        if (!confirmed) return;
         
-        fetch(`/developer/api/admin/${adminId}/delete`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            const response = await fetch(`/developer/api/admin/${adminId}/delete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
             if (data.success) {
-                document.getElementById(`admin-row-${adminId}`).remove();
-                alert('Admin deleted successfully');
+                const row = document.getElementById(`admin-row-${adminId}`);
+                if (row) row.remove();
+                window.FixLinkDialog.success('Admin deleted successfully', 'Deleted');
             } else {
-                alert('Error: ' + (data.error || 'Failed to delete admin'));
+                window.FixLinkDialog.error(data.error || 'Failed to delete admin', 'Deletion Failed');
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error:', error);
-            alert('An error occurred');
-        });
+            window.FixLinkDialog.error('An error occurred while deleting the administrator.', 'Network Error');
+        }
     }
 </script>
 {% endblock %}

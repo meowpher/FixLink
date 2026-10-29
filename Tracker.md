@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.21** | 2026-10-30 | **Deployed** | **Native Built-in WebApp Modal & Dialog System** (Replaced raw native browser `confirm()` and `alert()` popups with self-hosted, theme-aware FixLink SweetAlert2 modals across SuperAdmin, Admin Console, Status Map, and Faculty portals; added glassmorphism card styling and automatic Light/Dark mode palette adapting). |
 | **v1.7.20** | 2026-10-30 | **Deployed** | **Admin Map Issue Detection & Attention Card State Synchronization** (Resolved status mismatch where rooms with active open tickets erroneously rendered the "Everything is Normal" placeholder in the side panel; mapped open tickets to visual 'issue' state and enforced Needs Attention alert banner rendering with red ISSUE badge). |
 | **v1.7.19** | 2026-10-30 | **Deployed** | **Admin Status Map Room Status Payload & Null-Safe Inspection Fix** (Resolved frontend JavaScript `TypeError: Cannot read properties of undefined (reading 'toUpperCase')` on `/admin/map` by returning explicit `status` from `/admin/api/room-status/<room_number>` and adding defensive fallback properties for room and ticket details). |
 | **v1.7.18** | 2026-10-30 | **Deployed** | **Ghost Protocol Naive/Aware DateTime Bug Fix & Faculty Live Clock Widget** (Resolved 500 TypeError on /admin/faculty-handle by harmonizing offset-naive database timestamps with UTC comparisons; integrated live real-time clock and date widget inside Faculty Dashboard hero card with glassmorphism styling and zero-jitter tabular figures). |
@@ -25,6 +26,21 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.21 (2026-10-30)
+- `feat(ui)`: **Built-in Native WebApp Modal & Dialog Engine (Browser Popup Replacement)**
+  - Replaced browser-native popup dialogs (`confirm()`, `alert()`) across all modules with FixLink's self-hosted, theme-aware modal dialogue system (`window.FixLinkDialog`).
+  - Integrated SweetAlert2 globally into `app/templates/base.html` with custom `.fixlink-swal-popup` glassmorphic styling, rounded edges, and adaptive Light/Dark OLED palettes.
+  - Refactored confirmation flows to use async/await promises with customized destructive action styling (`isDanger: true` with red confirm button) for critical operations:
+    - Admin deletion (`app/templates/superadmin/list_admins.html`)
+    - User permanent deletion and role updates (`app/templates/superadmin/list_users.html`)
+    - Professional deletion (`app/templates/superadmin/list_professionals.html`, `app/templates/admin/professionals.html`)
+    - SuperAdmin bulk approvals and bug report deletion (`app/templates/superadmin/dashboard.html`)
+    - Status Map and ticket resolution & deletion operations (`app/static/js/modules/admin_map.js`, `app/templates/admin.html`, `app/templates/admin_history.html`)
+    - Faculty schedule slot assignments (`app/templates/admin/faculty_handle.html`)
+  - Added safety interceptor for legacy `window.alert` calls to seamlessly route through FixLinkDialog notification banners.
+
+---
 
 ### Release v1.7.20 (2026-10-30)
 - `fix(admin-map)`: **Room Details Pop-Up Issue Banner & Status State Alignment**

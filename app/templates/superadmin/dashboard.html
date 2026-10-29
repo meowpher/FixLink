@@ -2303,9 +2303,12 @@
 
     // Super Admin override bulk approval
     async function overrideApproveBatch(deptName, btnEl) {
-        if (!confirm(`Execute Super Admin Override Bulk Approval for [${deptName}]?\n\nThis will immediately approve all pending faculty timetables and sync to the live campus map.`)) {
-            return;
-        }
+        const confirmed = await window.FixLinkDialog.confirm(
+            `Execute Super Admin Override Bulk Approval for [${deptName}]?\n\nThis will immediately approve all pending faculty timetables and sync to the live campus map.`,
+            'Bulk Approval Override',
+            { isDanger: false, confirmText: 'Yes, Approve All' }
+        );
+        if (!confirmed) return;
 
         if (!btnEl) return;
         const origHtml = btnEl.innerHTML;
@@ -2491,7 +2494,12 @@
 
     // Single bug delete
     async function singleDeleteBug(bugId, btnEl) {
-        if (!confirm('Permanently delete this bug report?')) return;
+        const confirmed = await window.FixLinkDialog.confirm(
+            'Permanently delete this bug report?',
+            'Delete Bug Report',
+            { isDanger: true, confirmText: 'Yes, Delete' }
+        );
+        if (!confirmed) return;
         if (!btnEl) return;
         const origHtml = btnEl.innerHTML;
         btnEl.disabled = true;
@@ -2679,7 +2687,12 @@
             const bugIds = getSelectedBugIds();
             if (bugIds.length === 0) return;
 
-            if (!confirm(`Permanently delete ${bugIds.length} selected bug report(s)?`)) return;
+            const confirmed = await window.FixLinkDialog.confirm(
+                `Permanently delete ${bugIds.length} selected bug report(s)?`,
+                'Bulk Delete Bug Reports',
+                { isDanger: true, confirmText: `Delete ${bugIds.length} Reports` }
+            );
+            if (!confirmed) return;
 
             const btn = this;
             const origHtml = btn.innerHTML;
@@ -2961,9 +2974,12 @@
             const uname = btn.getAttribute('data-user-name') || 'this user';
             const uemail = btn.getAttribute('data-user-email') || '';
 
-            if (!confirm(`Are you sure you want to demote Supervisor "${uname}" back to the FACULTY role?`)) {
-                return;
-            }
+            const confirmed = await window.FixLinkDialog.confirm(
+                `Are you sure you want to demote Supervisor "${uname}" back to the FACULTY role?`,
+                'Demote Supervisor',
+                { isDanger: true, confirmText: 'Yes, Demote' }
+            );
+            if (!confirmed) return;
 
             const origHtml = btn.innerHTML;
             btn.disabled = true;

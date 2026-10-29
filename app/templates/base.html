@@ -634,6 +634,8 @@
 
     <!-- Bootstrap 5 JS (self-hosted) -->
     <script defer src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <!-- SweetAlert2 Built-in App Dialog & Notification Engine (self-hosted) -->
+    <script src="{{ url_for('static', filename='js/sweetalert2.all.min.js') }}"></script>
 
     {% if request.endpoint not in ['main.report_form', 'main.report_bug', 'auth.login'] %}
     <!-- Core GSAP for Smooth Animations (self-hosted, deferred) -->
@@ -2367,5 +2369,100 @@
     });
     </script>
 
-    </body>
+    
+    <!-- FixLink Built-in Modal & Dialog System (Native SweetAlert2 Replacements for Browser alert/confirm) -->
+    <style>
+    .fixlink-swal-popup {
+        border-radius: 20px !important;
+        padding: 1.5rem !important;
+        box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25) !important;
+        font-family: inherit !important;
+    }
+    [data-theme="dark"] .fixlink-swal-popup {
+        background: #1e222d !important;
+        color: #f1f5f9 !important;
+        border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    }
+    .fixlink-swal-btn {
+        border-radius: 10px !important;
+        font-weight: 600 !important;
+        padding: 0.55rem 1.25rem !important;
+        font-size: 0.95rem !important;
+    }
+    </style>
+    <script>
+    (function() {
+        // Universal FixLink Dialog Helpers
+        window.FixLinkDialog = {
+            isDark: function() {
+                return document.documentElement.getAttribute('data-theme') === 'dark' || document.body.getAttribute('data-theme') === 'dark';
+            },
+            alert: function(message, title, icon) {
+                if (typeof Swal === 'undefined') {
+                    window.alert(message);
+                    return Promise.resolve();
+                }
+                const isDark = this.isDark();
+                return Swal.fire({
+                    title: title || (icon === 'error' ? 'Notice' : (icon === 'success' ? 'Success' : 'Notification')),
+                    text: message,
+                    icon: icon || 'info',
+                    customClass: {
+                        popup: 'fixlink-swal-popup',
+                        confirmButton: 'btn btn-primary fixlink-swal-btn'
+                    },
+                    background: isDark ? '#1e222d' : '#ffffff',
+                    color: isDark ? '#f1f5f9' : '#1e293b',
+                    confirmButtonColor: '#0072CE'
+                });
+            },
+            confirm: function(message, title, options) {
+                if (typeof Swal === 'undefined') {
+                    return Promise.resolve(window.confirm(message));
+                }
+                const isDark = this.isDark();
+                options = options || {};
+                return Swal.fire({
+                    title: title || 'Are you sure?',
+                    text: message,
+                    icon: options.icon || 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: options.confirmText || 'Confirm',
+                    cancelButtonText: options.cancelText || 'Cancel',
+                    confirmButtonColor: options.confirmColor || (options.isDanger ? '#ef4444' : '#0072CE'),
+                    cancelButtonColor: isDark ? '#475569' : '#64748b',
+                    customClass: {
+                        popup: 'fixlink-swal-popup',
+                        confirmButton: `btn ${options.isDanger ? 'btn-danger' : 'btn-primary'} fixlink-swal-btn me-2`,
+                        cancelButton: 'btn btn-secondary fixlink-swal-btn'
+                    },
+                    background: isDark ? '#1e222d' : '#ffffff',
+                    color: isDark ? '#f1f5f9' : '#1e293b',
+                    reverseButtons: true
+                }).then(result => result.isConfirmed);
+            },
+            success: function(message, title) {
+                return this.alert(message, title || 'Success', 'success');
+            },
+            error: function(message, title) {
+                return this.alert(message, title || 'Error', 'error');
+            }
+        };
+
+        // Safety fallback: Intercept raw window.alert and route to FixLink dialog
+        const _nativeAlert = window.alert;
+        window.alert = function(msg) {
+            if (typeof Swal !== 'undefined') {
+                const msgStr = String(msg || '');
+                const isError = msgStr.toLowerCase().includes('error') || msgStr.toLowerCase().includes('fail');
+                const isSuccess = msgStr.toLowerCase().includes('success') || msgStr.toLowerCase().includes('verified');
+                window.FixLinkDialog.alert(msgStr, isError ? 'Error' : (isSuccess ? 'Success' : 'Notification'), isError ? 'error' : (isSuccess ? 'success' : 'info'));
+            } else {
+                _nativeAlert(msg);
+            }
+        };
+    })();
+    </script>
+
+</body>
 </html>

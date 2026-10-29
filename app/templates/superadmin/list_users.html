@@ -729,8 +729,13 @@
     }
 
     async function updateUserRole(userId, newRole) {
-        if (!confirm(`Are you sure you want to change this user's role to ${newRole}? This will update their administrative permissions.`)) {
-            location.reload(); // Reset select
+        const confirmed = await window.FixLinkDialog.confirm(
+            `Are you sure you want to change this user's role to ${newRole}? This will update their administrative permissions.`,
+            'Update User Role',
+            { isDanger: false, confirmText: 'Yes, Change Role' }
+        );
+        if (!confirmed) {
+            location.reload();
             return;
         }
 
@@ -747,12 +752,12 @@
             if (result.success) {
                 window.location.reload();
             } else {
-                alert(result.error || 'Failed to update role');
+                await window.FixLinkDialog.error(result.error || 'Failed to update role', 'Update Failed');
                 location.reload();
             }
         } catch (err) {
             console.error(err);
-            alert('Network error');
+            await window.FixLinkDialog.error('Network error while updating user role.', 'Network Error');
         }
     }
 
@@ -803,7 +808,12 @@
     }
 
     async function deleteUser(userId, name) {
-        if (!confirm(`CRITICAL ACTION: Are you sure you want to PERMANENTLY delete user "${name}"? This action cannot be undone.`)) return;
+        const confirmed = await window.FixLinkDialog.confirm(
+            `CRITICAL ACTION: Are you sure you want to PERMANENTLY delete user "${name}"? This action cannot be undone.`,
+            'Permanently Delete User',
+            { isDanger: true, confirmText: 'Yes, Delete User' }
+        );
+        if (!confirmed) return;
 
         try {
             const res = await fetch(`/developer/api/user/${userId}/delete`, { 
@@ -825,12 +835,13 @@
                     const current = parseInt(counterEl.textContent, 10) || 0;
                     counterEl.textContent = Math.max(0, current - 1);
                 }
+                window.FixLinkDialog.success(`User "${name}" has been permanently deleted.`, 'Deleted');
             } else {
-                alert(result.error || 'Failed to delete user');
+                window.FixLinkDialog.error(result.error || 'Failed to delete user', 'Deletion Failed');
             }
         } catch (err) {
             console.error(err);
-            alert('Network error');
+            window.FixLinkDialog.error('Network error while deleting user.', 'Network Error');
         }
     }
 </script>

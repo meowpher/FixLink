@@ -930,10 +930,13 @@
         });
     }
     
-    function deleteProfessional(id) {
-        if (!confirm('Are you sure you want to delete this professional? This action cannot be undone.')) {
-            return;
-        }
+    async function deleteProfessional(id) {
+        const confirmed = await window.FixLinkDialog.confirm(
+            'Are you sure you want to delete this professional? This action cannot be undone.',
+            'Delete Professional',
+            { isDanger: true, confirmText: 'Yes, Delete' }
+        );
+        if (!confirmed) return;
         
         fetch(`/admin/professionals/${id}/delete`, {
             method: 'POST',

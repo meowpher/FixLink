@@ -587,7 +587,8 @@
     }
 
     function startJob(ticketId) {
-        if (!confirm('Are you at the location and ready to start the job?')) return;
+        const confirmed = await window.FixLinkDialog.confirm('Are you at the location and ready to start the job?', 'Start Work Order');
+        if (!confirmed) return;
 
         fetch(`/professional/api/task/${ticketId}/start`, {
             method: 'POST',

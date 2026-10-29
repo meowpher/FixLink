@@ -561,7 +561,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     window.removeAvatar = async function() {
-        if (!confirm('Are you sure you want to remove your profile picture?')) return;
+        const confirmed = await window.FixLinkDialog.confirm('Are you sure you want to remove your profile picture?', 'Remove Picture', { isDanger: true });
+        if (!confirmed) return;
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
         try {
             const response = await fetch('/professional/api/profile/picture', {

@@ -205,10 +205,13 @@
 
 {% block extra_js %}
 <script>
-    function deleteProfessional(profId) {
-        if (!confirm('Are you sure you want to delete this professional? This action cannot be undone.')) {
-            return;
-        }
+    async function deleteProfessional(profId) {
+        const confirmed = await window.FixLinkDialog.confirm(
+            'Are you sure you want to delete this professional? This action cannot be undone.',
+            'Delete Professional',
+            { isDanger: true, confirmText: 'Yes, Delete' }
+        );
+        if (!confirmed) return;
         
         fetch(`/developer/api/professional/${profId}/delete`, {
             method: 'POST',

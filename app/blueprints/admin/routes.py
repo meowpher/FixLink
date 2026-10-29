@@ -1560,8 +1560,11 @@ def api_room_status(room_number):
         Ticket.status.in_([Ticket.STATUS_OPEN, Ticket.STATUS_ASSIGNED, Ticket.STATUS_IN_PROGRESS])
     ).order_by(Ticket.created_at.desc()).first()
     
+    room_dict = room.to_dict()
+    status = active_ticket.status if active_ticket else room.status
     return api_response(success=True, data={
-        'room': room.to_dict(),
+        'room': room_dict,
+        'status': status,
         'active_ticket': active_ticket.to_dict() if active_ticket else None
     })
 

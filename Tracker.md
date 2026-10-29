@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.19** | 2026-10-30 | **Deployed** | **Admin Status Map Room Status Payload & Null-Safe Inspection Fix** (Resolved frontend JavaScript `TypeError: Cannot read properties of undefined (reading 'toUpperCase')` on `/admin/map` by returning explicit `status` from `/admin/api/room-status/<room_number>` and adding defensive fallback properties for room and ticket details). |
 | **v1.7.18** | 2026-10-30 | **Deployed** | **Ghost Protocol Naive/Aware DateTime Bug Fix & Faculty Live Clock Widget** (Resolved 500 TypeError on /admin/faculty-handle by harmonizing offset-naive database timestamps with UTC comparisons; integrated live real-time clock and date widget inside Faculty Dashboard hero card with glassmorphism styling and zero-jitter tabular figures). |
 | **v1.7.17** | 2026-10-22 | **Deployed** | **Architectural Pivot: Supervisor-Verified Closure (QA), Supervisor Blueprint & Role Management** (Eradicated the legacy standalone technician self-service portal, views, and login routes; locked down ticket resolution strictly to Higher Authority / Admin / Supervisor roles; upgraded the Ticket model with supervisor verification fields, audit proof file path, and technician reference string; implemented a dark-mode mobile-first camera-ready Bootstrap 5 modal `#verifyCompletionModal`; built the secure backend endpoint `/admin/issues/<ticket_id>/verify-close` and supervisor workspace). |
 | **v1.7.16** | 2026-10-15 | **Deployed** | **Zero-Trust Cross-Tab Session Conflict Lockout Eradication & Faculty Booking Fixes** (Completely removed the disruptive "Session Conflict Detected" lockout modal, window focus/visibility integrity checks, BroadcastChannel listeners, and backend 403 `session_conflict` middleware to restore seamless, persistent multi-tab user navigation; resolved 500 error on faculty slot booking). |
@@ -23,6 +24,14 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.19 (2026-10-30)
+- `fix(admin-map)`: **Admin Interactive Status Map Room Status & Null-Safety Hardening**
+  - Resolved `TypeError: Cannot read properties of undefined (reading 'toUpperCase')` error banner displayed when clicking room polygons (e.g. `VY025C`) on `/admin/map`.
+  - Added top-level `status` resolution to `/admin/api/room-status/<room_number>` endpoint in `app/blueprints/admin/routes.py`, dynamically returning active ticket status or physical room state.
+  - Hardened `renderRoomDetails` in `app/static/js/modules/admin_map.js` with defensive fallbacks and null-coalescing for `room`, `status`, and `active_ticket.issue_type`.
+
+---
 
 ### Release v1.7.18 (2026-10-30)
 - `fix(ghost-protocol)`: **Ghost Protocol Naive vs. Offset-Aware DateTime Bug Fix**

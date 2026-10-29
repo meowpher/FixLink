@@ -83,7 +83,9 @@ export function showRoomDetails(roomNumber, roomId) {
 }
 
 function renderRoomDetails(container, data) {
-    const { room, status, active_ticket } = data;
+    const room = data.room || {};
+    const active_ticket = data.active_ticket || null;
+    const status = data.status || (active_ticket ? (active_ticket.status === 'open' ? 'issue' : active_ticket.status) : (room.status || 'normal'));
     
     let html = `
         <div class="mb-3 px-3 pt-3">

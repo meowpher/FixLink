@@ -85,8 +85,16 @@ export function showRoomDetails(roomNumber, roomId) {
 function renderRoomDetails(container, data) {
     const room = data.room || {};
     const active_ticket = data.active_ticket || null;
-    const status = data.status || (active_ticket ? (active_ticket.status === 'open' ? 'issue' : active_ticket.status) : (room.status || 'normal'));
+    let status = data.status || (active_ticket ? active_ticket.status : (room.status || 'normal'));
+    if (status === 'open') {
+        status = 'issue';
+    }
     
+    const isIssue = (status === 'issue' || status === 'open');
+    const isMaintenance = (status === 'in-progress' || status === 'assigned');
+    const badgeClass = isIssue ? 'bg-danger' : (isMaintenance ? 'bg-warning text-dark' : 'bg-success');
+    const badgeText = isIssue ? 'ISSUE' : (isMaintenance ? 'IN PROGRESS' : (status || 'NORMAL').toUpperCase());
+
     let html = `
         <div class="mb-3 px-3 pt-3">
             <div class="d-flex justify-content-between align-items-start">
@@ -94,8 +102,8 @@ function renderRoomDetails(container, data) {
                     <h6 class="mb-0 fw-bold">${room.name || room.number}</h6>
                     <p class="text-muted x-small mb-0 uppercase fw-bold">${room.room_type}</p>
                 </div>
-                <div class="badge ${status === 'issue' ? 'bg-danger' : (['in-progress', 'assigned'].includes(status) ? 'bg-warning text-dark' : 'bg-success')} px-2 py-1">
-                    ${status.toUpperCase()}
+                <div class="badge ${badgeClass} px-2 py-1">
+                    ${badgeText}
                 </div>
             </div>
         </div>
@@ -116,26 +124,26 @@ function renderRoomDetails(container, data) {
         <div class="px-3 pb-3">
     `;
 
-    if (status === 'issue' && active_ticket) {
+    if (active_ticket && (isIssue || status === 'issue' || status === 'open')) {
         html += `
             <div class="alert alert-danger border-0 shadow-sm mb-4">
                 <div class="d-flex align-items-center mb-2">
                     <i class="bi bi-exclamation-octagon-fill fs-5 me-2"></i>
                     <strong>Needs Attention</strong>
                 </div>
-                <div class="mb-1"><strong>${active_ticket.issue_type.toUpperCase()}</strong></div>
-                <div class="small opacity-75">${active_ticket.description}</div>
+                <div class="mb-1"><strong>${(active_ticket.issue_type || 'Issue').toUpperCase()}</strong></div>
+                <div class="small opacity-75">${active_ticket.description || 'No description provided.'}</div>
             </div>
         `;
-    } else if (['in-progress', 'assigned'].includes(status) && active_ticket) {
+    } else if (active_ticket && isMaintenance) {
         html += `
             <div class="alert alert-warning border-0 shadow-sm mb-4">
                 <div class="d-flex align-items-center mb-2">
                     <i class="bi bi-tools fs-5 me-2"></i>
                     <strong>Under Maintenance</strong>
                 </div>
-                <div class="small mb-1"><strong>${active_ticket.issue_type.toUpperCase()}</strong></div>
-                <div class="small opacity-75">${active_ticket.description}</div>
+                <div class="small mb-1"><strong>${(active_ticket.issue_type || 'Issue').toUpperCase()}</strong></div>
+                <div class="small opacity-75">${active_ticket.description || 'No description provided.'}</div>
             </div>
         `;
     } else {

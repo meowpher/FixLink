@@ -1561,10 +1561,11 @@ def api_room_status(room_number):
     ).order_by(Ticket.created_at.desc()).first()
     
     room_dict = room.to_dict()
-    status = active_ticket.status if active_ticket else room.status
+    # Map raw ticket status to UI status: 'open' is displayed as 'issue'
+    ui_status = 'issue' if (active_ticket and active_ticket.status == 'open') else (active_ticket.status if active_ticket else room.status)
     return api_response(success=True, data={
         'room': room_dict,
-        'status': status,
+        'status': ui_status,
         'active_ticket': active_ticket.to_dict() if active_ticket else None
     })
 

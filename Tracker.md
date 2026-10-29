@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.20** | 2026-10-30 | **Deployed** | **Admin Map Issue Detection & Attention Card State Synchronization** (Resolved status mismatch where rooms with active open tickets erroneously rendered the "Everything is Normal" placeholder in the side panel; mapped open tickets to visual 'issue' state and enforced Needs Attention alert banner rendering with red ISSUE badge). |
 | **v1.7.19** | 2026-10-30 | **Deployed** | **Admin Status Map Room Status Payload & Null-Safe Inspection Fix** (Resolved frontend JavaScript `TypeError: Cannot read properties of undefined (reading 'toUpperCase')` on `/admin/map` by returning explicit `status` from `/admin/api/room-status/<room_number>` and adding defensive fallback properties for room and ticket details). |
 | **v1.7.18** | 2026-10-30 | **Deployed** | **Ghost Protocol Naive/Aware DateTime Bug Fix & Faculty Live Clock Widget** (Resolved 500 TypeError on /admin/faculty-handle by harmonizing offset-naive database timestamps with UTC comparisons; integrated live real-time clock and date widget inside Faculty Dashboard hero card with glassmorphism styling and zero-jitter tabular figures). |
 | **v1.7.17** | 2026-10-22 | **Deployed** | **Architectural Pivot: Supervisor-Verified Closure (QA), Supervisor Blueprint & Role Management** (Eradicated the legacy standalone technician self-service portal, views, and login routes; locked down ticket resolution strictly to Higher Authority / Admin / Supervisor roles; upgraded the Ticket model with supervisor verification fields, audit proof file path, and technician reference string; implemented a dark-mode mobile-first camera-ready Bootstrap 5 modal `#verifyCompletionModal`; built the secure backend endpoint `/admin/issues/<ticket_id>/verify-close` and supervisor workspace). |
@@ -24,6 +25,14 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.20 (2026-10-30)
+- `fix(admin-map)`: **Room Details Pop-Up Issue Banner & Status State Alignment**
+  - Resolved logic bug where classrooms with active open tickets (e.g. `VY327`) displayed "Everything is Normal" instead of the problem breakdown.
+  - Aligned backend `/admin/api/room-status/<room_number>` in `app/blueprints/admin/routes.py` to map ticket state `open` to UI state `issue`.
+  - Updated `renderRoomDetails` in `app/static/js/modules/admin_map.js` to accurately evaluate `open` and `issue` tickets, render the red **ISSUE** badge (`bg-danger`), and reliably display the **Needs Attention** card with full issue type and description.
+
+---
 
 ### Release v1.7.19 (2026-10-30)
 - `fix(admin-map)`: **Admin Interactive Status Map Room Status & Null-Safety Hardening**

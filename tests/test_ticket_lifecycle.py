@@ -33,6 +33,7 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, run_app_context
     
     with run_app_context:
         t = db.session.get(Ticket, ticket_id)
+        assert t is not None
         assert t.status == Ticket.STATUS_OPEN
         assert t.reporter_id == student_user.id
         
@@ -62,6 +63,7 @@ def test_full_ticket_lifecycle(client, student_user, admin_user, run_app_context
     # 3. Verify Database State and Immutable AuditLog entry
     with run_app_context:
         t = db.session.get(Ticket, ticket_id)
+        assert t is not None
         assert t.status == Ticket.STATUS_RESOLVED
         assert t.verified_by_id == admin_user.id
         assert t.assigned_vendor_or_tech_name == 'Ramesh (Electrical)'
@@ -180,6 +182,7 @@ def test_spam_detection_and_auto_strike(client, student_user, run_app_context):
 
     with run_app_context:
         user = db.session.get(User, student_user.id)
+        assert user is not None
         assert user.is_adhoc_suspended is True
         assert user.adhoc_suspended_until is not None
 
@@ -269,6 +272,7 @@ def test_supervisor_verification_security_and_validation(client, student_user, a
     # 5. Verify immutable Audit Log entry format
     with run_app_context:
         ticket_db = db.session.get(Ticket, ticket_id)
+        assert ticket_db is not None
         assert ticket_db.status == Ticket.STATUS_RESOLVED
         assert ticket_db.verified_by_id == admin_user.id
         assert ticket_db.assigned_vendor_or_tech_name == 'Voltas External Services'

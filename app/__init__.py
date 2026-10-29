@@ -16,7 +16,7 @@ db = SQLAlchemy()
 csrf = CSRFProtect()
 
 try:
-    from flask_migrate import Migrate
+    from flask_migrate import Migrate  # type: ignore[import-untyped]
     migrate = Migrate()
 except ImportError:
     migrate = None
@@ -142,7 +142,7 @@ def create_app(config_name=None):
     # Initialize extensions
     db.init_app(app)
     if migrate:
-        migrate.init_app(app, db)
+        migrate.init_app(app, db)  # type: ignore[arg-type]
     
     # Initialize Cache
     from .cache import init_cache
@@ -206,7 +206,7 @@ def create_app(config_name=None):
     def inject_floor_svg_processor():
         return dict(get_floor_svg=get_floor_svg)
 
-    app.jinja_env.globals['get_floor_svg'] = get_floor_svg
+    app.jinja_env.globals['get_floor_svg'] = get_floor_svg  # type: ignore[assignment]
 
     # Pusher is initialized lazily in realtime.py
     

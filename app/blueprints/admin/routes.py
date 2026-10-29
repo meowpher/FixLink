@@ -2,7 +2,8 @@
 Admin Routes Blueprint - Maintenance Dashboard
 """
 from functools import wraps
-from datetime import datetime, timedelta
+import logging
+from datetime import datetime, timedelta, timezone
 from flask import Blueprint, render_template, request, jsonify, session, redirect, url_for, flash, abort, current_app
 from sqlalchemy import or_, func, case
 from ... import db
@@ -14,6 +15,7 @@ from ...api_utils import handle_api_errors, api_response
 from ...realtime import emit_room_status_change
 
 admin_bp = Blueprint('admin', __name__)
+logger = logging.getLogger(__name__)
 
 
 def map_issue_to_category(issue_type, description=""):
@@ -50,10 +52,10 @@ def dashboard():
     # Base query with eager loading to prevent N+1 query overhead
     from sqlalchemy.orm import joinedload
     query = Ticket.query.options(
-        joinedload(Ticket.room).joinedload(Room.floor),
-        joinedload(Ticket.assigned_professional),
-        joinedload(Ticket.asset),
-        joinedload(Ticket.reporter)
+        joinedload(Ticket.room).joinedload(Room.floor),  # type: ignore[arg-type]
+        joinedload(Ticket.assigned_professional),  # type: ignore[arg-type]
+        joinedload(Ticket.asset),  # type: ignore[arg-type]
+        joinedload(Ticket.reporter)  # type: ignore[arg-type]
     )
     
     if status_filter != 'all':
@@ -144,7 +146,7 @@ def dashboard():
     # Filtered queries for the status boxes on the dashboard
     from sqlalchemy.orm import joinedload
     
-    base_box_query = Ticket.query.options(joinedload(Ticket.room), joinedload(Ticket.assigned_professional))
+    base_box_query = Ticket.query.options(joinedload(Ticket.room), joinedload(Ticket.assigned_professional))  # type: ignore[arg-type]
     base_box_query = apply_dashboard_filters(base_box_query)
 
     if status_filter == 'all':
@@ -219,7 +221,7 @@ def _get_faculty_handle_context():
     ).order_by(EventBooking.created_at.desc()).limit(50).all()
 
     # 2. CMM Data
-    unassigned_classes = Timetable.query.options(joinedload(Timetable.room)).filter(
+    unassigned_classes = Timetable.query.options(joinedload(Timetable.room)).filter(  # type: ignore[arg-type]
         Timetable.faculty_id.is_(None)
     ).order_by(Timetable.day_of_week, Timetable.start_time).all()
 
@@ -227,10 +229,10 @@ def _get_faculty_handle_context():
 
     vyas = Building.query.filter_by(name='Vyas').first()
     if vyas:
-        floors = Floor.query.options(joinedload(Floor.rooms)).filter_by(building_id=vyas.id).order_by(Floor.level).all()
+        floors = Floor.query.options(joinedload(Floor.rooms)).filter_by(building_id=vyas.id).order_by(Floor.level).all()  # type: ignore[arg-type]
         rooms = Room.query.join(Floor).filter(Floor.building_id == vyas.id).order_by(Room.number).all()
     else:
-        floors = Floor.query.options(joinedload(Floor.rooms)).order_by(Floor.level).all()
+        floors = Floor.query.options(joinedload(Floor.rooms)).order_by(Floor.level).all()  # type: ignore[arg-type]
         rooms = Room.query.order_by(Room.number).all()
 
     academic_floors = []
@@ -287,7 +289,7 @@ def _get_faculty_handle_context():
 
     # 3. Ghost Protocol Data
     IST = timezone(timedelta(hours=5, minutes=30))
-    now_utc = datetime.utcnow()
+    now_utc = datetime.now(timezone.utc)
     cutoff_30d = now_utc - timedelta(days=30)
 
     strike_counts = (
@@ -358,11 +360,11 @@ def _get_faculty_handle_context():
         User.adhoc_suspended_until > now_utc,
         User.role == User.ROLE_FACULTY
     ).count()
-    red_flag_count = len([f for f in flagged_faculty if f['strikes_30d'] >= 3])
+    red_flag_count = len([f for f in flagged_faculty if f['strikes_30d'] >= 3])  # type: ignore[operator]
 
     suspension_history = (
         SuspensionLog.query
-        .options(joinedload(SuspensionLog.faculty), joinedload(SuspensionLog.lifted_by))
+        .options(joinedload(SuspensionLog.faculty), joinedload(SuspensionLog.lifted_by))  # type: ignore[arg-type]
         .order_by(SuspensionLog.created_at.desc())
         .limit(200)
         .all()
@@ -382,8 +384,8 @@ def _get_faculty_handle_context():
     # 4. Room Booking History Data
     from ...models import RoomBooking
     booking_history_list = RoomBooking.query.options(
-        joinedload(RoomBooking.faculty),
-        joinedload(RoomBooking.room).joinedload(Room.floor)
+        joinedload(RoomBooking.faculty),  # type: ignore[arg-type]
+        joinedload(RoomBooking.room).joinedload(Room.floor)  # type: ignore[arg-type]
     ).order_by(RoomBooking.slot_start.desc()).limit(150).all()
     total_bookings_count = RoomBooking.query.count()
 
@@ -467,11 +469,11 @@ def status_map():
             from sqlalchemy.orm import joinedload
             from ...models import RoomBooking, Timetable, EventBooking
             rooms = Room.query.options(
-                joinedload(Room.tickets),
-                joinedload(Room.assets),
-                joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
-                joinedload(Room.timetables).joinedload(Timetable.faculty),
-                joinedload(Room.booked_events).joinedload(EventBooking.faculty)
+                joinedload(Room.tickets),  # type: ignore[arg-type]
+                joinedload(Room.assets),  # type: ignore[arg-type]
+                joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),  # type: ignore[arg-type]
+                joinedload(Room.timetables).joinedload(Timetable.faculty),  # type: ignore[arg-type]
+                joinedload(Room.booked_events).joinedload(EventBooking.faculty)  # type: ignore[arg-type]
             ).filter_by(floor_id=selected_floor.id).all()
             
     rooms_data = [room.to_map_dict() for room in rooms] if rooms else []
@@ -493,7 +495,7 @@ def history():
     
     # Base query for all fixed tickets
     from sqlalchemy.orm import joinedload
-    query = Ticket.query.options(joinedload(Ticket.room).joinedload(Room.floor)).filter_by(status=Ticket.STATUS_FIXED)
+    query = Ticket.query.options(joinedload(Ticket.room).joinedload(Room.floor)).filter_by(status=Ticket.STATUS_FIXED)  # type: ignore[arg-type]
     
     if search_query:
         search_filter = f"%{search_query}%"
@@ -526,9 +528,9 @@ def booking_history():
     search_query = request.args.get('search', '').strip()
     from sqlalchemy.orm import joinedload
     query = RoomBooking.query.options(
-        joinedload(RoomBooking.faculty),
-        joinedload(RoomBooking.room).joinedload(Room.floor)
-    ).join(RoomBooking.faculty).join(RoomBooking.room)
+        joinedload(RoomBooking.faculty),  # type: ignore[arg-type]
+        joinedload(RoomBooking.room).joinedload(Room.floor)  # type: ignore[arg-type]
+    ).join(RoomBooking.faculty).join(RoomBooking.room)  # type: ignore[arg-type]
     
     if search_query:
         search = f"%{search_query}%"
@@ -674,7 +676,7 @@ def promote_user():
         user_id=admin_id,
         target_type="User",
         target_id=target_user.id,
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.session.add(audit_entry)
     db.session.commit()
@@ -761,12 +763,12 @@ def demote_user():
         ticket_id=None,
         action="USER_DEMOTED_TO_FACULTY",
         performed_by_id=admin_id,
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         details=f"Supervisor {target_user.name} ({target_user.email}) was demoted to FACULTY by Super Admin {demoter_name}.",
         user_id=admin_id,
         target_type="User",
         target_id=target_user.id,
-        created_at=datetime.utcnow()
+        created_at=datetime.now(timezone.utc)
     )
     db.session.add(audit_entry)
     db.session.commit()
@@ -818,9 +820,9 @@ def audit_trail():
 
     # Eager load relationships to prevent N+1 queries
     query = query.options(
-        joinedload(AuditLog.ticket),
-        joinedload(AuditLog.performed_by),
-        joinedload(AuditLog.user)
+        joinedload(AuditLog.ticket),  # type: ignore[arg-type]
+        joinedload(AuditLog.performed_by),  # type: ignore[arg-type]
+        joinedload(AuditLog.user)  # type: ignore[arg-type]
     )
 
     # Ensure uniqueness: For TICKET_VERIFIED_CLOSED, only show the latest verification log per ticket
@@ -935,8 +937,8 @@ def get_ticket_proof_details(ticket_id):
             'resolved_at': ticket.resolved_at.strftime('%Y-%m-%d %H:%M:%S UTC') if ticket.resolved_at else (ticket.fixed_at.strftime('%Y-%m-%d %H:%M:%S UTC') if ticket.fixed_at else None),
             'supervisor_name': supervisor.name if supervisor else (ticket.assigned_vendor_or_tech_name or 'Supervisor'),
             'supervisor_role': getattr(supervisor, 'role', 'SUPERVISOR') if supervisor else 'SUPERVISOR',
-            'room_number': ticket.room.number if ticket.room else None,
-            'floor_name': ticket.room.floor.name if (ticket.room and ticket.room.floor) else None
+            'room_number': ticket.room.number if ticket.room else None,  # type: ignore[attr-defined]
+            'floor_name': ticket.room.floor.name if (ticket.room and ticket.room.floor) else None  # type: ignore[attr-defined]
         }
     )
 
@@ -986,7 +988,7 @@ def analytics():
     query = Ticket.query
     
     # 1. Date Range Handling
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     if start_date_str and end_date_str:
         try:
             start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
@@ -1114,7 +1116,7 @@ def analytics():
             label_expr.label('label'),
             func.count(Ticket.id)
         ).filter(Ticket.created_at >= start_date, Ticket.status == Ticket.STATUS_FIXED).group_by('label').order_by('label').all()
-        res_dict = dict(res_trend_query)
+        res_dict = dict(res_trend_query)  # type: ignore[call-overload]
         res_points = [res_dict.get(row[0], 0) for row in trend_data]
     except Exception:
         res_points = []
@@ -1323,13 +1325,13 @@ def update_ticket_status(ticket_id):
         return api_response(success=False, error="Invalid status", status=400)
     
     ticket.status = new_status
-    ticket.updated_at = datetime.utcnow()
+    ticket.updated_at = datetime.now(timezone.utc)
     
     # If marking as fixed or resolved, update asset status and record audit log
     if new_status in [Ticket.STATUS_FIXED, Ticket.STATUS_RESOLVED, Ticket.STATUS_CLOSED]:
-        ticket.fixed_at = datetime.utcnow()
+        ticket.fixed_at = datetime.now(timezone.utc)
         if not ticket.resolved_at:
-            ticket.resolved_at = datetime.utcnow()
+            ticket.resolved_at = datetime.now(timezone.utc)
         if not ticket.verified_by_id and session.get('user_id'):
             ticket.verified_by_id = session['user_id']
         if ticket.asset_id:
@@ -1348,8 +1350,8 @@ def update_ticket_status(ticket_id):
             existing_audit.user_id = session.get('user_id')
             existing_audit.performed_by_id = session.get('user_id')
             existing_audit.details = f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached."
-            existing_audit.timestamp = datetime.utcnow()
-            existing_audit.created_at = datetime.utcnow()
+            existing_audit.timestamp = datetime.now(timezone.utc)
+            existing_audit.created_at = datetime.now(timezone.utc)
         elif ticket.proof_of_completion_url or ticket.proof_image_url:
             audit_entry = AuditLog(
                 action="TICKET_VERIFIED_CLOSED",
@@ -1357,7 +1359,7 @@ def update_ticket_status(ticket_id):
                 user_id=session.get('user_id'),
                 target_type="Ticket",
                 target_id=ticket.id,
-                created_at=datetime.utcnow()
+                created_at=datetime.now(timezone.utc)
             )
             db.session.add(audit_entry)
     
@@ -1428,7 +1430,7 @@ def verify_and_close_ticket(ticket_id):
     if not resolution_notes:
         return api_response(success=False, error="Supervisor inspection notes are required.", status=400)
 
-    now_utc = datetime.utcnow()
+    now_utc = datetime.now(timezone.utc)
     supervisor_id = session.get('user_id')
     supervisor = db.session.get(User, supervisor_id) if supervisor_id else None
     if not supervisor and session.get('super_admin_email'):
@@ -1529,11 +1531,11 @@ def get_floor_data(floor_id):
     from sqlalchemy.orm import joinedload
     from ...models import RoomBooking, Timetable, EventBooking
     rooms = Room.query.options(
-        joinedload(Room.tickets),
-        joinedload(Room.assets),
-        joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),
-        joinedload(Room.timetables).joinedload(Timetable.faculty),
-        joinedload(Room.booked_events).joinedload(EventBooking.faculty)
+        joinedload(Room.tickets),  # type: ignore[arg-type]
+        joinedload(Room.assets),  # type: ignore[arg-type]
+        joinedload(Room.room_bookings).joinedload(RoomBooking.faculty),  # type: ignore[arg-type]
+        joinedload(Room.timetables).joinedload(Timetable.faculty),  # type: ignore[arg-type]
+        joinedload(Room.booked_events).joinedload(EventBooking.faculty)  # type: ignore[arg-type]
     ).filter_by(floor_id=floor_id).all()
     
     result = {
@@ -1800,7 +1802,7 @@ def assign_ticket(ticket_id):
         try:
             ticket.assigned_professional_id = professional_id
             ticket.time_limit_hours = time_limit_hours
-            ticket.deadline_datetime = datetime.utcnow() + timedelta(hours=time_limit_hours)
+            ticket.deadline_datetime = datetime.now(timezone.utc) + timedelta(hours=time_limit_hours)
             ticket.status = Ticket.STATUS_ASSIGNED
             db.session.commit()
             
@@ -1893,7 +1895,9 @@ def respond_to_help_request(help_request_id):
         return api_response(success=False, data={'error': "Helper professional required for approval"}), 400
     
     admin = db.session.get(User, session['user_id'])
-    
+    if not admin:
+        return api_response(success=False, data={'error': "Admin user not found"}), 401
+
     if action == 'approve':
         helper = db.session.get(Professional, helper_professional_id)
         if not helper or not helper.is_active:
@@ -1902,7 +1906,7 @@ def respond_to_help_request(help_request_id):
         help_request.status = HelpRequest.STATUS_APPROVED
         help_request.helper_professional_id = helper_professional_id
         help_request.admin_id = admin.id
-        help_request.responded_at = datetime.utcnow()
+        help_request.responded_at = datetime.now(timezone.utc)
         
         from ...realtime import notify_help_request_approved
         notify_help_request_approved(help_request)
@@ -1910,7 +1914,7 @@ def respond_to_help_request(help_request_id):
     else:
         help_request.status = HelpRequest.STATUS_REJECTED
         help_request.admin_id = admin.id
-        help_request.responded_at = datetime.utcnow()
+        help_request.responded_at = datetime.now(timezone.utc)
         
         from ...realtime import notify_help_request_rejected
         notify_help_request_rejected(help_request)
@@ -2073,7 +2077,7 @@ def export_report(fmt):
             pdf.set_text_color(*TEXT_DARK)
             for tech in tech_stats[:5]: # Top 5
                 pdf.cell(60, 8, f" {tech['name']}", border=1)
-                pdf.cell(40, 8, f" {tech['category'].title()}", border=1)
+                pdf.cell(40, 8, f" {tech['category'].title()}", border=1)  # type: ignore[attr-defined]
                 pdf.cell(30, 8, str(tech['fixed_count']), border=1, align='C')
                 pdf.cell(60, 8, f"{tech['avg_ttr_hours']} hours", border=1, align='C')
                 pdf.ln()
@@ -2256,7 +2260,7 @@ def import_timetable():
                     df = df.iloc[i+1:].reset_index(drop=True)
                     break
                     
-        df.columns = [str(col).strip().lower() for col in df.columns]
+        df.columns = [col.strip().lower() if isinstance(col, str) else str(col).strip().lower() for col in df.columns]  # type: ignore[assignment]
         
         # Find room column
         room_col = next((col for col in df.columns if 'room' in col), None)
@@ -2322,7 +2326,7 @@ def import_timetable():
             room_num = row.get('clean_room')
             if not room_num or room_num not in room_map:
                 if room_num:
-                    errors.append(f"Row {index+2}: Room '{room_num}' not found in database.")
+                    errors.append(f"Row {int(index)+2}: Room '{room_num}' not found in database.")  # type: ignore[arg-type]
                 continue
                 
             room_id = room_map[room_num]
@@ -2380,7 +2384,7 @@ def import_timetable():
         try:
             db.session.bulk_save_objects(records_to_insert)
             db.session.commit()
-            summary['message'] = "Import completed successfully."
+            summary['message'] = "Import completed successfully."  # type: ignore[index]
             return api_response(success=True, data=summary)
         except Exception as e:
             db.session.rollback()
@@ -2487,9 +2491,9 @@ def assign_faculty(class_id):
         faculty_name = faculty.name if faculty else "Unassigned"
 
         try:
-            if tt.room:
+            if tt.room:  # type: ignore[attr-defined]
                 from ...realtime import emit_room_status_change
-                emit_room_status_change(tt.room, tt.room.current_occupancy_status)
+                emit_room_status_change(tt.room, tt.room.current_occupancy_status)  # type: ignore[attr-defined]
         except Exception:
             pass
 
@@ -2618,11 +2622,11 @@ def lift_ghost_suspension(faculty_id):
     if not user:
         return api_response(success=False, error="Faculty not found.", status=404)
 
-    was_suspended = bool(user.adhoc_suspended_until and user.adhoc_suspended_until > datetime.utcnow())
+    was_suspended = bool(user.adhoc_suspended_until and user.adhoc_suspended_until > datetime.now(timezone.utc))
     original_suspended_until = user.adhoc_suspended_until
 
     data = request.get_json() or {}
-    cutoff_30d = datetime.utcnow() - timedelta(days=30)
+    cutoff_30d = datetime.now(timezone.utc) - timedelta(days=30)
     strike_count_now = NoShowStrike.query.filter(
         NoShowStrike.faculty_id == faculty_id,
         NoShowStrike.created_at >= cutoff_30d

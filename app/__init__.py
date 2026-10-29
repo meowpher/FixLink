@@ -75,14 +75,17 @@ def create_app(config_name=None):
         database_url = 'sqlite:///:memory:'
         logger.info('Using in-memory SQLite for testing.')
     else:
-        database_url = os.environ.get('DATABASE_URL')
+        # 1. Fetch URI via DATABASE_URL or SQLALCHEMY_DATABASE_URI
+        database_url = os.environ.get('DATABASE_URL') or os.environ.get('SQLALCHEMY_DATABASE_URI')
         if not database_url:
             raise RuntimeError(
                 'DATABASE_URL is not set. A persistent PostgreSQL (Supabase) '
                 'connection is required for the application to start.'
             )
+        # 2. Sanitize string: strip whitespace, quotes, and hidden newline characters
+        database_url = database_url.strip().strip('"').strip("'")
     
-    # Supabase Connection Hardening (Vercel/SSL & Transaction Pooler Migration)
+    # 3. Fix SQLAlchemy dialect: If URI starts with postgres://, replace with postgresql://
     if database_url and database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
         
@@ -92,32 +95,32 @@ def create_app(config_name=None):
         logger.info("Routing Supabase pooler connection from Session port 5432 to Transaction port 6543.")
         database_url = database_url.replace('pooler.supabase.com:5432', 'pooler.supabase.com:6543')
 
-    # Add SSL mode if missing for Supabase/Vercel
-    if 'sslmode=' not in database_url and ('pooler.supabase.com' in database_url or os.environ.get('VERCEL')):
-        separator = '&' if '?' in database_url else '?'
-        database_url += f'{separator}sslmode=require'
+    # 4. Enforce SSL: If connecting to a remote PostgreSQL host and sslmode is missing, append sslmode=require
+    if database_url.startswith('postgresql') and 'localhost' not in database_url and '127.0.0.1' not in database_url:
+        if 'sslmode=' not in database_url:
+            separator = '&' if '?' in database_url else '?'
+            database_url += f'{separator}sslmode=require'
 
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # High-concurrency SQLAlchemy connection pooling (100+ concurrent users)
-    if database_url.startswith(('postgresql', 'mysql')):
-        connect_args = {'connect_timeout': 10}
-        if database_url.startswith('postgresql'):
-            connect_args.update({
-                'keepalives': 1,
-                'keepalives_idle': 30,
-                'keepalives_interval': 10,
-                'keepalives_count': 5,
-            })
-        if os.environ.get('VERCEL'):
-            # Vercel is serverless — use NullPool to avoid stale connections
-            from sqlalchemy.pool import NullPool
-            app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-                'poolclass': NullPool,
-                'connect_args': connect_args,
-            }
-        else:
+    # 5. Serverless Pooling Hardening: Check if os.environ.get('VERCEL') == '1'
+    if os.environ.get('VERCEL') == '1' or bool(os.environ.get('VERCEL')):
+        from sqlalchemy.pool import NullPool
+        app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+            'poolclass': NullPool,
+            'pool_pre_ping': True,
+        }
+    else:
+        if database_url.startswith(('postgresql', 'mysql')):
+            connect_args = {'connect_timeout': 10}
+            if database_url.startswith('postgresql'):
+                connect_args.update({
+                    'keepalives': 1,
+                    'keepalives_idle': 30,
+                    'keepalives_interval': 10,
+                    'keepalives_count': 5,
+                })
             app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
                 'pool_size': int(os.environ.get('DB_POOL_SIZE', 5)),
                 'max_overflow': int(os.environ.get('DB_MAX_OVERFLOW', 10)),

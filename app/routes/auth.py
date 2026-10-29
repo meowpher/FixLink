@@ -12,10 +12,11 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
 from app import db, csrf
 from app.models import User, Professional
-from app.utils import send_verification_email, send_password_reset_email, ALLOWED_EXTENSIONS, allowed_file, save_webapp_file, remove_webapp_file
+from app.services.email_service import send_verification_email, send_password_reset_email
+from app.utils import ALLOWED_EXTENSIONS, allowed_file, save_webapp_file, remove_webapp_file
 from app.decorators import user_login_required
 from app.api_utils import handle_api_errors, api_response
-from app.realtime import get_pusher
+from app.services.realtime_service import get_pusher
 
 auth_bp = Blueprint('auth', __name__)
 

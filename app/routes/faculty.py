@@ -10,7 +10,7 @@ from app import db
 from app.models import User, Building, Floor, Room, AdHocBooking, Timetable, RoomBooking, Notification, NoShowStrike, ScheduleSubmission, EventBooking
 from app.decorators import faculty_login_required
 from app.api_utils import handle_api_errors, api_response
-from app.realtime import emit_room_status_change, emit_faculty_nudge
+from app.services.realtime_service import emit_room_status_change, emit_faculty_nudge
 
 logger = logging.getLogger(__name__)
 
@@ -2178,7 +2178,7 @@ def book_event():
             
         db.session.commit()
         
-        from app.realtime import trigger_event
+        from app.services.realtime_service import trigger_event
         trigger_event('admin-notifications', 'new-event-request', {
             'title': title,
             'faculty': session.get('user_name')
@@ -2197,7 +2197,7 @@ def book_event():
 def cancel_event(event_id):
     """Allow faculty to cancel their pending or approved events anytime."""
     from app.models import EventBooking, Notification, User
-    from app.realtime import trigger_event
+    from app.services.realtime_service import trigger_event
     
     faculty_id = session.get('user_id')
     event = EventBooking.query.get(event_id)

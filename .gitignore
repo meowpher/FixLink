@@ -14,3 +14,5 @@ app/.cache/
 .env.*
 .env
 .env/*
+
+*.sql

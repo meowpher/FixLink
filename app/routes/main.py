@@ -7,7 +7,8 @@ from flask import Blueprint, render_template, request, jsonify, current_app, ses
 from werkzeug.utils import secure_filename
 from app import db
 from app.models import Building, Floor, Room, Asset, Ticket, User, Notification, Professional
-from app.utils import send_ticket_email, ALLOWED_EXTENSIONS, allowed_file, save_webapp_file
+from app.services.email_service import send_ticket_email
+from app.utils import ALLOWED_EXTENSIONS, allowed_file, save_webapp_file
 from app.decorators import user_login_required, login_required
 from app.api_utils import handle_api_errors, api_response
 
@@ -155,7 +156,7 @@ def report_form():
             selected_floor = floors[0].id
         
         if selected_floor:
-            from app.cache import get_cached_floor_data
+            from app.services.map_service import get_cached_floor_data
             rooms_data = get_cached_floor_data(selected_floor)
     
     issue_types = [
@@ -174,7 +175,7 @@ def report_form():
     ]
     
     user = db.session.get(User, session['user_id'])
-    from app.spam_detector import get_user_daily_reports_count, MAX_DAILY_REPORTS
+    from app.services.spam_service import get_user_daily_reports_count, MAX_DAILY_REPORTS
     reports_today = get_user_daily_reports_count(user.id if user else None, user.email if user else None)
     daily_limit = MAX_DAILY_REPORTS
     daily_remaining = max(0, daily_limit - reports_today) if user and not user.is_super_admin else daily_limit
@@ -206,7 +207,7 @@ def submit_report():
     Enforces maximum 3 reports/day and automated spam detection / strikes.
     """
     user = db.session.get(User, session['user_id'])
-    from app.spam_detector import is_daily_report_limit_exceeded, detect_report_spam, apply_spam_strike_to_user
+    from app.services.spam_service import is_daily_report_limit_exceeded, detect_report_spam, apply_spam_strike_to_user
     
     # Check daily reporting limit (Max 3/day for non-superadmins)
     if is_daily_report_limit_exceeded(user):
@@ -298,7 +299,7 @@ def submit_report():
         # Invalidate map cache for this floor
         room_obj = db.session.get(Room, r_id)
         if room_obj:
-            from app.cache import invalidate_floor_cache
+            from app.services.map_service import invalidate_floor_cache
             invalidate_floor_cache(room_obj.floor_id)
         
         # Trigger EmailJS notification for ticket creation
@@ -350,7 +351,7 @@ def get_floors(building_id):
 @handle_api_errors
 def get_rooms_by_floor(floor_id):
     """Get all rooms for a floor (JSON) - Optimized with eager loading and caching."""
-    from app.cache import get_cached_floor_data
+    from app.services.map_service import get_cached_floor_data
     rooms_data = get_cached_floor_data(floor_id)
     return api_response(data={'rooms': rooms_data})
 

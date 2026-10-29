@@ -114,7 +114,7 @@ def logout():
 def dashboard():
     """Developer dashboard - manage admins, roles, and timetable SLA escalations."""
     from app.models import BugReport
-    from app.sla_service import get_pending_batches_sla_status
+    from app.services.sla_service import get_pending_batches_sla_status
     # Load active Supervisors
     supervisors = User.query.filter(
         or_(
@@ -877,7 +877,7 @@ def bulk_upload_users():
 @super_admin_required
 def get_sla_status_api():
     """Returns JSON payload of real-time SLA metrics across all department batches."""
-    from app.sla_service import get_pending_batches_sla_status
+    from app.services.sla_service import get_pending_batches_sla_status
     status = get_pending_batches_sla_status()
     # Serialize datetime objects
     serialized_batches = []
@@ -902,7 +902,7 @@ def get_sla_status_api():
 @super_admin_required
 def ping_department_head_api():
     """Trigger an automated email escalation ping to the responsible Department Head."""
-    from app.sla_service import trigger_department_sla_escalation
+    from app.services.sla_service import trigger_department_sla_escalation
     data = request.get_json() or {}
     dept_name = data.get('department_name', '').strip()
     target_email = data.get('target_email', '').strip() or None
@@ -925,7 +925,7 @@ def ping_department_head_api():
 @super_admin_required
 def override_approve_batch_api():
     """Super Admin high-privilege override to immediately approve a department's pending batch."""
-    from app.sla_service import superadmin_override_bulk_approve
+    from app.services.sla_service import superadmin_override_bulk_approve
     data = request.get_json() or {}
     dept_name = data.get('department_name', '').strip()
     

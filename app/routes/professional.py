@@ -276,7 +276,7 @@ def start_task(ticket_id):
     db.session.commit()
     
     # Notify admin via notification system
-    from app.realtime import notify_admin_job_started
+    from app.services.realtime_service import notify_admin_job_started
     notify_admin_job_started(ticket, professional)
     
     # Notify reporter via EmailJS (Best effort)
@@ -329,7 +329,7 @@ def complete_task(ticket_id):
     db.session.commit()
     
     # Notify admin
-    from app.realtime import notify_admin_job_completed
+    from app.services.realtime_service import notify_admin_job_completed
     notify_admin_job_completed(ticket, professional)
     
     # Notify reporter via EmailJS
@@ -368,7 +368,7 @@ def cancel_task(ticket_id):
     db.session.commit()
     
     # Notify admin via Socket.IO, WebPush and Persistent Notification
-    from app.realtime import notify_admin_job_cancelled
+    from app.services.realtime_service import notify_admin_job_cancelled
     notify_admin_job_cancelled(ticket, professional, reason)
     
     return api_response(success=True, message="Job cancelled successfully. Admin will reassign.", data={'cancelled_at': ticket.cancelled_at.isoformat()})
@@ -424,7 +424,7 @@ def request_help(ticket_id):
     db.session.commit()
     
     # Notify admin
-    from app.realtime import notify_admin_help_requested
+    from app.services.realtime_service import notify_admin_help_requested
     notify_admin_help_requested(help_request, professional, ticket)
     
     return api_response(success=True, message="Help request submitted for admin approval", data={'help_request_id': help_request.id})

@@ -8,11 +8,12 @@ from flask import Blueprint, render_template, request, jsonify, session, redirec
 from sqlalchemy import or_, func, case
 from app import db
 from app.models import Building, Floor, Room, Asset, Ticket, User, Professional, HelpRequest, Timetable, Notification, ScheduleSubmission, AuditLog
-from app.utils import send_ticket_email, allowed_file, save_webapp_file
+from app.services.email_service import send_ticket_email
+from app.utils import allowed_file, save_webapp_file
 from app.decorators import admin_required
-from app.analytics import get_technician_efficiency, get_system_trends, get_critical_assets
+from app.services.analytics_service import get_technician_efficiency, get_system_trends, get_critical_assets
 from app.api_utils import handle_api_errors, api_response
-from app.realtime import emit_room_status_change
+from app.services.realtime_service import emit_room_status_change
 
 admin_bp = Blueprint('admin', __name__)
 logger = logging.getLogger(__name__)
@@ -1369,7 +1370,7 @@ def update_ticket_status(ticket_id):
     if ticket.room_id:
         room = db.session.get(Room, ticket.room_id)
         if room:
-            from app.cache import invalidate_floor_cache
+            from app.services.map_service import invalidate_floor_cache
             invalidate_floor_cache(room.floor_id)
     
     # Trigger EmailJS notification for ticket update
@@ -1485,7 +1486,7 @@ def verify_and_close_ticket(ticket_id):
     if ticket.room_id:
         room = db.session.get(Room, ticket.room_id)
         if room:
-            from app.cache import invalidate_floor_cache
+            from app.services.map_service import invalidate_floor_cache
             invalidate_floor_cache(room.floor_id)
 
     try:
@@ -1519,7 +1520,7 @@ def get_ticket_detail(ticket_id):
 @handle_api_errors
 def get_floor_data(floor_id):
     """Get floor data with room statuses for map (AJAX) - Optimized."""
-    from app.cache import cache
+    from app.services.map_service import cache
     
     cache_key = f'admin_floor_{floor_id}'
     cached = cache.get(cache_key)
@@ -1810,7 +1811,7 @@ def assign_ticket(ticket_id):
             ticket.status = Ticket.STATUS_ASSIGNED
             db.session.commit()
             
-            from app.realtime import notify_professional_assigned
+            from app.services.realtime_service import notify_professional_assigned
             notify_professional_assigned(ticket, professional)
             
             flash(f'Ticket #{ticket_id} assigned to {professional.name}!', 'success')
@@ -1912,7 +1913,7 @@ def respond_to_help_request(help_request_id):
         help_request.admin_id = admin.id
         help_request.responded_at = datetime.now(timezone.utc)
         
-        from app.realtime import notify_help_request_approved
+        from app.services.realtime_service import notify_help_request_approved
         notify_help_request_approved(help_request)
         
     else:
@@ -1920,7 +1921,7 @@ def respond_to_help_request(help_request_id):
         help_request.admin_id = admin.id
         help_request.responded_at = datetime.now(timezone.utc)
         
-        from app.realtime import notify_help_request_rejected
+        from app.services.realtime_service import notify_help_request_rejected
         notify_help_request_rejected(help_request)
     
     db.session.commit()
@@ -2496,7 +2497,7 @@ def assign_faculty(class_id):
 
         try:
             if tt.room:  # type: ignore[attr-defined]
-                from app.realtime import emit_room_status_change
+                from app.services.realtime_service import emit_room_status_change
                 emit_room_status_change(tt.room, tt.room.current_occupancy_status)  # type: ignore[attr-defined]
         except Exception:
             pass
@@ -2572,7 +2573,7 @@ def bulk_assign_faculty():
 
         # Emit room status updates if realtime is enabled
         try:
-            from app.realtime import emit_room_status_change
+            from app.services.realtime_service import emit_room_status_change
             rooms_to_update = db.session.query(Timetable.room_id).filter(Timetable.id.in_(valid_class_ids)).distinct().all()
             for (rid,) in rooms_to_update:
                 if rid:
@@ -2706,7 +2707,7 @@ def manage_events():
 @handle_api_errors
 def approve_event(event_id):
     from app.models import EventBooking, Timetable, Notification
-    from app.realtime import trigger_event
+    from app.services.realtime_service import trigger_event
     from datetime import timedelta
     
     event = EventBooking.query.with_for_update().get(event_id)
@@ -2783,7 +2784,7 @@ def approve_event(event_id):
 @handle_api_errors
 def reject_event(event_id):
     from app.models import EventBooking, Notification
-    from app.realtime import trigger_event
+    from app.services.realtime_service import trigger_event
     
     data = request.json or {}
     reason = data.get('reason', 'No reason provided.').strip()

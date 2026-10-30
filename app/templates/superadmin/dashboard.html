@@ -2084,7 +2084,7 @@
                         </div>
                         <div>
                             <h6 class="fw-bold mb-0" style="color: var(--text-main);">Promote Faculty to Supervisor</h6>
-                            <p class="text-muted small mb-0">Select a faculty member or enter their email address.</p>
+                            <p class="text-muted small mb-0">Select an eligible faculty member to grant supervisor privileges.</p>
                         </div>
                     </div>
 
@@ -2100,31 +2100,9 @@
                     <form id="promoteUserForm" action="{{ url_for('admin.promote_user') }}" method="POST">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-                        <!-- Search Faculty by Name -->
-                        <div class="mb-3">
-                            <label for="promoteNameSearch" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
-                                <i class="bi bi-search me-1"></i>Search Faculty by Name
-                            </label>
-                            <div class="input-group input-group-lg flex-nowrap">
-                                <span class="input-group-text bg-transparent border-end-0">
-                                    <i class="bi bi-search text-muted"></i>
-                                </span>
-                                <input type="text" id="promoteNameSearch" class="form-control border-start-0" 
-                                       placeholder="Type name to filter (e.g. Anuradha, Swapna, Sachin...)" autocomplete="off">
-                                <button class="btn btn-outline-secondary border-start-0 d-none" type="button" id="clearPromoteNameSearch" title="Clear search">
-                                    <i class="bi bi-x-circle"></i>
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Option A: Select from eligible faculty dropdown -->
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label for="promoteUserSelect" class="form-label small fw-bold text-muted text-uppercase mb-0" style="letter-spacing: 0.5px;">
-                                    <i class="bi bi-person-lines-fill me-1"></i>Select Eligible Faculty Member
-                                </label>
-                                <span id="facultyFilterBadge" class="badge bg-secondary-subtle text-secondary small fw-normal">{{ faculty_users|length }} Imported Staff</span>
-                            </div>
+                        <!-- Unified Faculty Selection Dropdown -->
+                        <div class="mb-4">
+                            <label for="promoteUserSelect" class="form-label small fw-medium text-muted mb-2">Search faculty by name or email</label>
                             <select id="promoteUserSelect" name="user_id" class="form-select form-select-lg rounded-3">
                                 <option value="" selected>-- Choose faculty from registered list --</option>
                                 {% for fac in faculty_users %}
@@ -2133,30 +2111,6 @@
                                 </option>
                                 {% endfor %}
                             </select>
-                        </div>
-
-                        <!-- Divider -->
-                        <div class="d-flex align-items-center my-3">
-                            <hr class="flex-grow-1 my-0 opacity-25">
-                            <span class="px-3 small text-muted text-uppercase fw-semibold" style="letter-spacing: 0.8px; font-size: 0.72rem;">OR LOOK UP BY EMAIL</span>
-                            <hr class="flex-grow-1 my-0 opacity-25">
-                        </div>
-
-                        <!-- Option B: Direct Email Lookup -->
-                        <div class="mb-4">
-                            <label for="promoteEmailInput" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
-                                <i class="bi bi-envelope-at me-1"></i>Faculty Email Address
-                            </label>
-                            <div class="input-group input-group-lg flex-nowrap">
-                                <span class="input-group-text bg-transparent border-end-0">
-                                    <i class="bi bi-envelope-at text-muted"></i>
-                                </span>
-                                <input type="email" id="promoteEmailInput" name="email" class="form-control border-start-0" 
-                                       placeholder="e.g., faculty.member@mitwpu.edu.in" autocomplete="off">
-                            </div>
-                            <div class="form-text small text-muted">
-                                Entering a registered faculty email will automatically select or look up their account.
-                            </div>
                         </div>
 
                         <!-- Security Note -->
@@ -3133,7 +3087,6 @@
         const promoteForm = document.getElementById('promoteUserForm');
         const promoteSubmitBtn = document.getElementById('promoteSubmitBtn');
         const promoteUserSelect = document.getElementById('promoteUserSelect');
-        const promoteEmailInput = document.getElementById('promoteEmailInput');
         const promoteFeedback = document.getElementById('promoteFeedback');
         const promoteFeedbackMsg = document.getElementById('promoteFeedbackMsg');
         const promoteFeedbackIcon = document.getElementById('promoteFeedbackIcon');
@@ -3141,117 +3094,22 @@
         const supervisorsHeaderCount = document.getElementById('supervisorsHeaderCount');
         const facultyHeaderCount = document.getElementById('facultyHeaderCount');
 
-        const promoteNameSearch = document.getElementById('promoteNameSearch');
-        const clearPromoteNameSearch = document.getElementById('clearPromoteNameSearch');
-        const facultyFilterBadge = document.getElementById('facultyFilterBadge');
-
-        // Cache all imported faculty options for instant client-side search
-        let allFacultyOptions = [];
-        if (promoteUserSelect) {
-            allFacultyOptions = Array.from(promoteUserSelect.options).slice(1).map(opt => ({
-                value: opt.value,
-                text: opt.textContent.trim(),
-                name: opt.getAttribute('data-name') || '',
-                email: opt.getAttribute('data-email') || '',
-                designation: opt.getAttribute('data-designation') || ''
-            }));
-        }
-
-        function filterFacultyDropdown(searchTerm) {
-            if (!promoteUserSelect) return;
-            const term = (searchTerm || '').trim().toLowerCase();
-            const currentSelectedVal = promoteUserSelect.value;
-
-            // Rebuild options with filtered subset
-            promoteUserSelect.innerHTML = '<option value="">-- Choose faculty from registered list --</option>';
-
-            const matches = allFacultyOptions.filter(f => {
-                if (!term) return true;
-                return f.name.toLowerCase().includes(term) ||
-                       f.email.toLowerCase().includes(term) ||
-                       f.designation.toLowerCase().includes(term);
-            });
-
-            matches.forEach(f => {
-                const opt = document.createElement('option');
-                opt.value = f.value;
-                opt.textContent = f.text;
-                opt.setAttribute('data-name', f.name);
-                opt.setAttribute('data-email', f.email);
-                opt.setAttribute('data-designation', f.designation);
-                if (f.value === currentSelectedVal) {
-                    opt.selected = true;
-                }
-                promoteUserSelect.appendChild(opt);
-            });
-
-            // If exactly one match, select it and update email input
-            if (term && matches.length === 1) {
-                promoteUserSelect.selectedIndex = 1;
-                if (promoteEmailInput) promoteEmailInput.value = matches[0].email;
-            } else if (!promoteUserSelect.value) {
-                promoteUserSelect.selectedIndex = 0;
-            }
-
-            if (facultyFilterBadge) {
-                facultyFilterBadge.textContent = term ? `${matches.length} of ${allFacultyOptions.length} Matches` : `${allFacultyOptions.length} Imported Staff`;
-            }
-
-            if (clearPromoteNameSearch) {
-                if (term) {
-                    clearPromoteNameSearch.classList.remove('d-none');
-                } else {
-                    clearPromoteNameSearch.classList.add('d-none');
-                }
-            }
-        }
-
-        if (promoteNameSearch) {
-            promoteNameSearch.addEventListener('input', function() {
-                filterFacultyDropdown(this.value);
-            });
-        }
-
-        if (clearPromoteNameSearch && promoteNameSearch) {
-            clearPromoteNameSearch.addEventListener('click', function() {
-                promoteNameSearch.value = '';
-                filterFacultyDropdown('');
-                promoteNameSearch.focus();
-            });
-        }
-
-        if (promoteUserSelect && promoteEmailInput) {
-            promoteUserSelect.addEventListener('change', function() {
-                if (this.value) {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const email = selectedOption.getAttribute('data-email');
-                    if (email) promoteEmailInput.value = email;
-                }
-            });
-
-            promoteEmailInput.addEventListener('input', function() {
-                const enteredEmail = this.value.trim().toLowerCase();
-                if (!enteredEmail) return;
-                for (let i = 0; i < promoteUserSelect.options.length; i++) {
-                    const optEmail = (promoteUserSelect.options[i].getAttribute('data-email') || '').toLowerCase();
-                    if (optEmail === enteredEmail) {
-                        promoteUserSelect.selectedIndex = i;
-                        return;
-                    }
-                }
-                promoteUserSelect.selectedIndex = 0;
-            });
+        function showPromoteFeedback(isSuccess, message) {
+            if (!promoteFeedback) return;
+            promoteFeedback.className = `alert alert-${isSuccess ? 'success' : 'danger'} alert-dismissible fade show mb-3 shadow-sm`;
+            if (promoteFeedbackMsg) promoteFeedbackMsg.textContent = message;
+            if (promoteFeedbackIcon) promoteFeedbackIcon.className = `bi ${isSuccess ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-1`;
+            promoteFeedback.classList.remove('d-none');
         }
 
         if (promoteForm) {
             promoteForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
 
-                const userId = promoteUserSelect.value;
-                const email = promoteEmailInput.value.trim();
+                const userId = promoteUserSelect ? promoteUserSelect.value : null;
 
-                if (!userId && !email) {
-                    showPromoteFeedback(false, "Please select an eligible faculty member from the dropdown or enter an email address.");
+                if (!userId) {
+                    showPromoteFeedback(false, "Please select an eligible faculty member from the dropdown.");
                     return;
                 }
 
@@ -3268,8 +3126,7 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         },
                         body: JSON.stringify({
-                            user_id: userId || null,
-                            email: email || null
+                            user_id: userId
                         })
                     });
 
@@ -3278,17 +3135,16 @@
                         showPromoteFeedback(true, data.message || "User successfully promoted to SUPERVISOR.");
                         
                         const user = data.data && data.data.user ? data.data.user : null;
-                        const userName = user ? user.name : (promoteUserSelect.options[promoteUserSelect.selectedIndex]?.getAttribute('data-name') || 'Faculty');
-                        const userEmail = user ? user.email : email;
+                        const selectedOption = promoteUserSelect.options[promoteUserSelect.selectedIndex];
+                        const userName = user ? user.name : (selectedOption?.getAttribute('data-name') || 'Faculty');
+                        const userEmail = user ? user.email : (selectedOption?.getAttribute('data-email') || '');
                         const uid = user ? user.id : userId;
 
-                        // Remove from faculty dropdown and cached options
-                        const remIdx = allFacultyOptions.findIndex(o => o.value == uid || o.email.toLowerCase() === userEmail.toLowerCase());
-                        if (remIdx !== -1) {
-                            allFacultyOptions.splice(remIdx, 1);
+                        // Remove selected faculty from dropdown
+                        if (promoteUserSelect.selectedIndex > 0) {
+                            promoteUserSelect.remove(promoteUserSelect.selectedIndex);
+                            promoteUserSelect.value = '';
                         }
-                        filterFacultyDropdown(promoteNameSearch ? promoteNameSearch.value : '');
-                        promoteEmailInput.value = '';
 
                         // Add to Active Supervisors Table
                         if (supervisorsTableBody) {
@@ -3299,6 +3155,7 @@
                             tr.className = 'supervisor-row';
                             tr.dataset.name = userName.toLowerCase();
                             tr.dataset.email = userEmail.toLowerCase();
+                            tr.dataset.userId = uid;
                             tr.innerHTML = `
                                 <td>
                                     <div class="d-flex align-items-center gap-2.5">
@@ -3321,13 +3178,25 @@
                                     </span>
                                     <div class="small text-muted mt-1" style="font-size: 0.7rem;">Verification Authority</div>
                                 </td>
-                                <td class="text-end">
+                                <td class="text-center">
                                     <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1" style="font-size: 0.7rem;">
                                         <i class="bi bi-check-circle-fill me-1"></i>Active
                                     </span>
                                 </td>
+                                <td class="text-end">
+                                    <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-2.5 py-1 demote-user-btn"
+                                            data-user-id="${uid}"
+                                            data-user-name="${userName}"
+                                            data-user-email="${userEmail}"
+                                            title="Demote Supervisor to Faculty">
+                                        <i class="bi bi-arrow-down-circle me-1"></i>Demote
+                                    </button>
+                                </td>
                             `;
                             supervisorsTableBody.prepend(tr);
+                            if (typeof updateSupervisorPagination === 'function') {
+                                updateSupervisorPagination();
+                            }
                         }
 
                         // Update header count badges
@@ -3348,14 +3217,6 @@
                     promoteSubmitBtn.innerHTML = origHtml;
                 }
             });
-        }
-
-        function showPromoteFeedback(isSuccess, message) {
-            if (!promoteFeedback) return;
-            promoteFeedback.className = `alert alert-${isSuccess ? 'success' : 'danger'} alert-dismissible fade show mb-3 shadow-sm`;
-            promoteFeedbackMsg.textContent = message;
-            promoteFeedbackIcon.className = `bi ${isSuccess ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'} me-1`;
-            promoteFeedback.classList.remove('d-none');
         }
 
         // Live Demote action handler for Active Supervisors Registry

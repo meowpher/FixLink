@@ -208,11 +208,12 @@ def verify_and_close_ticket(ticket_id):
 
     # 6. Atomic state update and immutable AuditLog entry
     now_utc = datetime.utcnow()
+    valid_supervisor_id = current_user_obj.id if current_user_obj else None
     supervisor_name = current_user_obj.name if current_user_obj else session.get('super_admin_email', 'Supervisor')
 
     ticket.status = Ticket.STATUS_RESOLVED
     ticket.assigned_vendor_or_tech_name = technician_name
-    ticket.verified_by_id = supervisor_id
+    ticket.verified_by_id = valid_supervisor_id
     ticket.proof_image_url = proof_url
     ticket.proof_of_completion_url = proof_url
     ticket.completion_photo_filename = unique_filename
@@ -236,8 +237,8 @@ def verify_and_close_ticket(ticket_id):
 
     if existing_audit:
         existing_audit.ticket_id = ticket.id
-        existing_audit.performed_by_id = supervisor_id
-        existing_audit.user_id = supervisor_id
+        existing_audit.performed_by_id = valid_supervisor_id
+        existing_audit.user_id = valid_supervisor_id
         existing_audit.details = f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached."
         existing_audit.timestamp = now_utc
         existing_audit.created_at = now_utc
@@ -245,16 +246,22 @@ def verify_and_close_ticket(ticket_id):
         audit_entry = AuditLog(
             ticket_id=ticket.id,
             action="TICKET_VERIFIED_CLOSED",
-            performed_by_id=supervisor_id,
+            performed_by_id=valid_supervisor_id,
             timestamp=now_utc,
             details=f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached.",
-            user_id=supervisor_id,
+            user_id=valid_supervisor_id,
             target_type="Ticket",
             target_id=ticket.id,
             created_at=now_utc
         )
         db.session.add(audit_entry)
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except Exception as commit_err:
+        db.session.rollback()
+        logger.error(f"Commit error in supervisor verify_and_close_ticket: {commit_err}")
+        return api_response(success=False, error=f"Database commit failed: {str(commit_err)}", status=500)
 
     success_msg = f"Ticket #{ticket.id} verified and marked as RESOLVED by Supervisor {supervisor_name}."
     

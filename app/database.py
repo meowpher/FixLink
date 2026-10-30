@@ -134,6 +134,18 @@ def init_db(app):
                     if 'timestamp' not in a_columns:
                         conn.execute(sqlalchemy.text("ALTER TABLE audit_logs ADD COLUMN timestamp TIMESTAMP;"))
                         logger.info("Added timestamp column to audit_logs table.")
+                    if 'user_id' not in a_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE audit_logs ADD COLUMN user_id INTEGER;"))
+                        logger.info("Added user_id column to audit_logs table.")
+                    if 'target_type' not in a_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE audit_logs ADD COLUMN target_type VARCHAR(50);"))
+                        logger.info("Added target_type column to audit_logs table.")
+                    if 'target_id' not in a_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE audit_logs ADD COLUMN target_id INTEGER;"))
+                        logger.info("Added target_id column to audit_logs table.")
+                    if 'created_at' not in a_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE audit_logs ADD COLUMN created_at TIMESTAMP;"))
+                        logger.info("Added created_at column to audit_logs table.")
                     conn.commit()
 
             # Ensure Supervisor Verification columns exist on tickets table
@@ -158,6 +170,15 @@ def init_db(app):
                     if 'resolved_at' not in t_columns:
                         conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN resolved_at TIMESTAMP;"))
                         logger.info("Added resolved_at column to tickets table.")
+                    if 'completion_photo_filename' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN completion_photo_filename VARCHAR(255);"))
+                        logger.info("Added completion_photo_filename column to tickets table.")
+                    if 'job_completed_at' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN job_completed_at TIMESTAMP;"))
+                        logger.info("Added job_completed_at column to tickets table.")
+                    if 'fixed_at' not in t_columns:
+                        conn.execute(sqlalchemy.text("ALTER TABLE tickets ADD COLUMN fixed_at TIMESTAMP;"))
+                        logger.info("Added fixed_at column to tickets table.")
                     conn.commit()
         except Exception as e:
             logger.warning(f"Could not verify schema migrations: {e}")

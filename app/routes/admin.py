@@ -1435,14 +1435,17 @@ def verify_and_close_ticket(ticket_id):
     if not resolution_notes:
         return api_response(success=False, error="Supervisor inspection notes are required.", status=400)
 
-    now_utc = datetime.now(timezone.utc)
+    now_utc = datetime.utcnow()
     supervisor_id = session.get('user_id')
     supervisor = db.session.get(User, supervisor_id) if supervisor_id else None
     if not supervisor and session.get('super_admin_email'):
         supervisor = User.query.filter_by(email=session['super_admin_email']).first()
-        if supervisor:
-            supervisor_id = supervisor.id
-    supervisor_name = supervisor.name if supervisor else (session.get('super_admin_email') or f"Supervisor #{supervisor_id}")
+    if supervisor:
+        supervisor_id = supervisor.id
+        supervisor_name = supervisor.name
+    else:
+        supervisor_id = None
+        supervisor_name = session.get('super_admin_email') or "Supervisor"
 
     # Atomic ticket update and audit commit
     ticket.status = Ticket.STATUS_RESOLVED
@@ -1469,6 +1472,7 @@ def verify_and_close_ticket(ticket_id):
     ).first()
 
     if existing_audit:
+        existing_audit.ticket_id = ticket.id
         existing_audit.user_id = supervisor_id
         existing_audit.performed_by_id = supervisor_id
         existing_audit.details = f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached."
@@ -1476,15 +1480,24 @@ def verify_and_close_ticket(ticket_id):
         existing_audit.created_at = now_utc
     else:
         audit_entry = AuditLog(
+            ticket_id=ticket.id,
             action="TICKET_VERIFIED_CLOSED",
             details=f"Ticket #{ticket.id} inspected, verified, and closed by Supervisor {supervisor_name} with proof attached.",
             user_id=supervisor_id,
+            performed_by_id=supervisor_id,
             target_type="Ticket",
             target_id=ticket.id,
+            timestamp=now_utc,
             created_at=now_utc
         )
         db.session.add(audit_entry)
-    db.session.commit()
+
+    try:
+        db.session.commit()
+    except Exception as commit_err:
+        db.session.rollback()
+        logger.error(f"Commit error in verify_and_close_ticket: {commit_err}")
+        return api_response(success=False, error=f"Database commit failed: {str(commit_err)}", status=500)
 
     # Invalidate map cache for affected floor
     if ticket.room_id:

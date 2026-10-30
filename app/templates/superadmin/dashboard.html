@@ -1570,6 +1570,80 @@
     [data-theme="dark"] .supervisor-row:hover {
         background-color: rgba(99, 102, 241, 0.1);
     }
+
+    /* Mobile Responsive Optimizations for Superadmin Dashboard */
+    @media (max-width: 768px) {
+        .dev-hero {
+            padding: 1.5rem 1.25rem !important;
+            margin-bottom: 1.5rem !important;
+            border-radius: 16px !important;
+        }
+        .dev-hero h1, .dev-hero-title {
+            font-size: 1.4rem !important;
+            line-height: 1.2 !important;
+            flex-wrap: wrap !important;
+        }
+        .hero-code-icon {
+            font-size: 1.25rem !important;
+            margin-right: 0.5rem !important;
+        }
+        .dev-hero-subtitle {
+            font-size: 0.88rem !important;
+        }
+        .dev-hero-logout {
+            font-size: 0.85rem !important;
+            padding: 0.4rem 1.1rem !important;
+        }
+        .role-management-card {
+            padding: 1.25rem 1rem !important;
+            border-radius: 16px !important;
+        }
+        .role-mgmt-badges {
+            width: 100% !important;
+        }
+    }
+
+    /* Input Group & Badge Unification Rules */
+    .role-mgmt-badges .btn,
+    .role-mgmt-badges .badge {
+        font-size: 0.78rem !important;
+        padding: 0.4rem 0.85rem !important;
+        line-height: 1.35 !important;
+        font-weight: 600 !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .role-management-card .input-group {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        width: 100% !important;
+    }
+
+    .role-management-card .input-group > .input-group-text {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+        border-top-left-radius: 0.5rem !important;
+        border-bottom-left-radius: 0.5rem !important;
+        padding-left: 1rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .role-management-card .input-group > .form-control {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+        border-top-right-radius: 0.5rem !important;
+        border-bottom-right-radius: 0.5rem !important;
+        min-width: 0 !important;
+        flex: 1 1 auto !important;
+        width: auto !important;
+    }
 </style>
 {% endblock %}
 
@@ -1593,10 +1667,10 @@
 
     <!-- Hero Section -->
     <div class="dev-hero animate-on-load" style="opacity: 0; transform: translateY(20px);">
-        <div class="dev-hero-content d-flex justify-content-between align-items-center">
+        <div class="dev-hero-content d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3">
             <div>
-                <h1 class="dev-hero-title">
-                    <i class="bi bi-code-square me-3 hero-code-icon"></i>
+                <h1 class="dev-hero-title mb-2">
+                    <i class="bi bi-code-square me-2 me-sm-3 hero-code-icon"></i>
                     <span class="flip-cylinder">
                         <span class="flip-face flip-front">
                             {% if current_user.email in ['om.mahadik@mitwpu.edu.in', 'taha.piplodwala@mitwpu.edu.in'] %}
@@ -1616,10 +1690,10 @@
                         </span>
                     </span>
                 </h1>
-                <p class="mb-0">System administration and high-level platform management.</p>
+                <p class="mb-0 dev-hero-subtitle">System administration and high-level platform management.</p>
             </div>
-            <div>
-                <a href="{{ url_for('superadmin.logout') }}" class="btn btn-outline-danger btn-lg rounded-pill px-4 dev-hero-logout">
+            <div class="align-self-start align-self-sm-center flex-shrink-0">
+                <a href="{{ url_for('superadmin.logout') }}" class="btn btn-outline-danger btn-sm btn-sm-lg rounded-pill px-3 px-sm-4 py-2 dev-hero-logout d-inline-flex align-items-center">
                     <i class="bi bi-box-arrow-right me-2"></i>Logout
                 </a>
             </div>
@@ -1742,7 +1816,7 @@
 
     <!-- Role Management: Supervisor Elevation (Phase 2 RBAC) -->
     <div class="mb-5 animate-on-load" style="opacity: 0; transform: translateY(20px);" id="roleManagementSection">
-        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-3 gap-3">
             <div>
                 <h5 class="mb-0 fw-bold d-flex align-items-center gap-2">
                     <span class="d-inline-flex align-items-center justify-content-center" style="width: 32px; height: 32px; border-radius: 10px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(79, 70, 229, 0.1) 100%); border: 1px solid rgba(99, 102, 241, 0.3); color: #818cf8;">
@@ -1752,14 +1826,14 @@
                 </h5>
                 <p class="text-muted small mb-0 mt-1">Manual assignment of Supervisor roles to existing Faculty accounts for quality assurance.</p>
             </div>
-            <div class="d-flex align-items-center gap-2 flex-wrap">
-                <a href="{{ url_for('admin.audit_trail') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-semibold">
+            <div class="role-mgmt-badges d-flex align-items-center gap-2 flex-wrap mt-2 mt-md-0">
+                <a href="{{ url_for('admin.audit_trail') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center">
                     <i class="bi bi-shield-shaded me-1"></i>Audit Trail
                 </a>
-                <span class="badge border rounded-pill px-3 py-1.5 fw-semibold" style="background: rgba(99, 102, 241, 0.12); color: #6366f1; border-color: rgba(99, 102, 241, 0.25);">
+                <span class="badge border rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center" style="background: rgba(99, 102, 241, 0.12); color: #6366f1; border-color: rgba(99, 102, 241, 0.25);">
                     <i class="bi bi-shield-check me-1"></i><span id="supervisorsHeaderCount">{{ supervisors|length }}</span> Active Supervisors
                 </span>
-                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1.5 fw-semibold">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center">
                     <i class="bi bi-mortarboard me-1"></i><span id="facultyHeaderCount">{{ faculty_users|length }}</span> Eligible Faculty
                 </span>
             </div>
@@ -1796,7 +1870,7 @@
                             <label for="promoteNameSearch" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
                                 <i class="bi bi-search me-1"></i>Search Faculty by Name
                             </label>
-                            <div class="input-group input-group-lg">
+                            <div class="input-group input-group-lg flex-nowrap">
                                 <span class="input-group-text bg-transparent border-end-0">
                                     <i class="bi bi-search text-muted"></i>
                                 </span>
@@ -1838,9 +1912,9 @@
                             <label for="promoteEmailInput" class="form-label small fw-bold text-muted text-uppercase" style="letter-spacing: 0.5px;">
                                 <i class="bi bi-envelope-at me-1"></i>Faculty Email Address
                             </label>
-                            <div class="input-group input-group-lg">
+                            <div class="input-group input-group-lg flex-nowrap">
                                 <span class="input-group-text bg-transparent border-end-0">
-                                    <i class="bi bi-search text-muted"></i>
+                                    <i class="bi bi-envelope-at text-muted"></i>
                                 </span>
                                 <input type="email" id="promoteEmailInput" name="email" class="form-control border-start-0" 
                                        placeholder="e.g., faculty.member@mitwpu.edu.in" autocomplete="off">

@@ -913,6 +913,38 @@
             width: 100% !important;
         }
 
+        .vyas-admin-header .admin-header-actions,
+        .admin-header .admin-header-actions {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+            width: 100% !important;
+            margin-top: 0.75rem !important;
+        }
+
+        .admin-header-actions .btn {
+            font-size: 0.82rem !important;
+            padding: 0.35rem 0.95rem !important;
+            line-height: 1.4 !important;
+            white-space: nowrap !important;
+        }
+
+        .admin-header-actions .role-manager-btn {
+            background: rgba(255, 255, 255, 0.16) !important;
+            border-color: rgba(255, 255, 255, 0.45) !important;
+            color: #ffffff !important;
+            backdrop-filter: blur(6px);
+        }
+
+        .admin-header-actions .role-manager-btn:hover {
+            background: #ffffff !important;
+            color: #0b437e !important;
+            border-color: #ffffff !important;
+        }
+
         .admin-title {
             text-align: center !important;
             display: inline-flex !important;
@@ -945,15 +977,17 @@
                 </h1>
                 <p class="admin-subtitle">Vyas Building Maintenance Management</p>
             </div>
-            <div class="col-md-6 text-center text-md-end mt-3 mt-md-0 d-flex justify-content-center justify-content-md-end gap-2 flex-wrap">
-                <a href="{{ url_for('admin.audit_trail') }}" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-semibold">
-                    <i class="bi bi-shield-shaded me-1"></i>Audit Trail
-                </a>
-                {% if session.get('is_super_admin') or (session.get('user_role') or '').upper() == 'SUPER_ADMIN' %}
-                <a href="{{ url_for('superadmin.dashboard') }}" class="btn btn-light btn-sm rounded-pill px-3 fw-semibold text-primary">
-                    <i class="bi bi-person-gear me-1"></i>Role Manager
-                </a>
-                {% endif %}
+            <div class="col-md-6 text-center text-md-end mt-3 mt-md-0">
+                <div class="admin-header-actions d-inline-flex align-items-center justify-content-center justify-content-md-end gap-2 flex-wrap">
+                    <a href="{{ url_for('admin.audit_trail') }}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center shadow-sm">
+                        <i class="bi bi-shield-shaded me-1"></i>Audit Trail
+                    </a>
+                    {% if session.get('is_super_admin') or (session.get('user_role') or '').upper() == 'SUPER_ADMIN' %}
+                    <a href="{{ url_for('superadmin.dashboard') }}" class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center shadow-sm role-manager-btn">
+                        <i class="bi bi-person-gear me-1"></i>Role Manager
+                    </a>
+                    {% endif %}
+                </div>
             </div>
 
         </div>

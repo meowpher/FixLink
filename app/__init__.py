@@ -178,17 +178,18 @@ def create_app(config_name=None):
     csrf.init_app(app)
 
     # Security: Rate Limiting (Optional)
-    try:
-        from flask_limiter import Limiter
-        from flask_limiter.util import get_remote_address
-        limiter = Limiter(
-            key_func=get_remote_address,
-            app=app,
-            default_limits=["1000 per day", "100 per hour"],
-            storage_uri="memory://",
-        )
-    except ImportError:
-        limiter = None
+    # try:
+    # from flask_limiter import Limiter
+    # from flask_limiter.util import get_remote_address
+    # limiter = Limiter(
+    # key_func=get_remote_address,
+    # app=app,
+    # default_limits=["1000 per day", "100 per hour"],
+    # storage_uri="memory://",
+    # )
+    # except ImportError:
+    # limiter = None
+    limiter = None
 
     # Initialize database and run migrations (Skipped on Vercel to eliminate 16s+ cold-start timeouts)
     if not os.environ.get('VERCEL'):

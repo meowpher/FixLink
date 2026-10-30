@@ -1420,7 +1420,6 @@ def verify_and_close_ticket(ticket_id):
     safe_name = secure_filename(file.filename) or 'proof.jpg'
     unique_filename = f"proof_{ticket_id}_{int(time.time())}_{uuid.uuid4().hex[:8]}_{safe_name}"
     upload_dir = os.path.join(current_app.config.get('UPLOAD_FOLDER', os.path.join(current_app.root_path, 'static', 'uploads')), 'proofs')
-    os.makedirs(upload_dir, exist_ok=True)
     full_save_path = os.path.join(upload_dir, unique_filename)
     save_webapp_file(file, full_save_path)
     proof_url = f"/static/uploads/proofs/{unique_filename}"

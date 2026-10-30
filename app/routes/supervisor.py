@@ -173,33 +173,36 @@ def verify_and_close_ticket(ticket_id):
     uuid_prefix = str(uuid.uuid4())
     unique_filename = f"{uuid_prefix}_{base_name}{out_ext}"
     upload_dir = os.path.join(current_app.config.get('UPLOAD_FOLDER', os.path.join(current_app.root_path, 'static', 'uploads')), 'proofs')
-    os.makedirs(upload_dir, exist_ok=True)
     full_save_path = os.path.join(upload_dir, unique_filename)
 
-    # Perform PIL image compression: Convert to RGB, resize (max-width 1200px maintaining aspect ratio), quality=70
-    file.seek(0)
-    try:
-        with Image.open(file) as img:
-            # Convert to RGB (handles RGBA, Palette, Grayscale, CMYK, etc.)
-            if img.mode != 'RGB':
-                img = img.convert('RGB')
-
-            # Resize maintaining aspect ratio if image exceeds 1200px width
-            max_width = 1200
-            if img.width > max_width:
-                aspect_ratio = img.height / float(img.width)
-                new_height = int(max_width * aspect_ratio)
-                img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
-
-            # Save as highly compressed image (quality=70)
-            if img_format == 'JPEG':
-                img.save(full_save_path, 'JPEG', quality=70, optimize=True)
-            else:
-                img.save(full_save_path, 'WEBP', quality=70, method=6)
-    except Exception as img_err:
-        logger.warning(f"PIL compression encountered error ({img_err}); falling back to safe direct persistence.")
+    # Perform PIL image compression if not on serverless Vercel (read-only filesystem)
+    if not os.environ.get('VERCEL'):
         file.seek(0)
-        save_webapp_file(file, full_save_path)
+        try:
+            os.makedirs(upload_dir, exist_ok=True)
+            with Image.open(file) as img:
+                # Convert to RGB (handles RGBA, Palette, Grayscale, CMYK, etc.)
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+
+                # Resize maintaining aspect ratio if image exceeds 1200px width
+                max_width = 1200
+                if img.width > max_width:
+                    aspect_ratio = img.height / float(img.width)
+                    new_height = int(max_width * aspect_ratio)
+                    img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+
+                # Save as highly compressed image (quality=70)
+                if img_format == 'JPEG':
+                    img.save(full_save_path, 'JPEG', quality=70, optimize=True)
+                else:
+                    img.save(full_save_path, 'WEBP', quality=70, method=6)
+        except Exception as img_err:
+            logger.warning(f"PIL compression encountered error ({img_err}); falling back to safe direct persistence.")
+            file.seek(0)
+            save_webapp_file(file, full_save_path)
+    else:
+        logger.info(f"Vercel detected. Skipping local image compression to: {full_save_path}")
 
     proof_url = f"/static/uploads/proofs/{unique_filename}"
 

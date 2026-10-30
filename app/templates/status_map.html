@@ -660,6 +660,69 @@
             margin-top: 0.85rem !important;
         }
     }
+
+    /* Verify & Log Completion Modal Theme Synchronization */
+    .verify-map-modal-content {
+        background-color: var(--bg-card, #ffffff) !important;
+        color: var(--text-main, #0f172a) !important;
+        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12)) !important;
+    }
+    .verify-map-modal-header {
+        background: var(--bg-hover, #f8fafc) !important;
+        border-bottom: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+    }
+    .verify-map-ticket-banner {
+        background-color: rgba(99, 102, 241, 0.08) !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+    }
+    .verify-map-input {
+        background-color: var(--bg-card, #ffffff) !important;
+        color: var(--text-main, #0f172a) !important;
+        border-color: var(--border-color, #cbd5e1) !important;
+    }
+    .verify-map-input:focus {
+        background-color: var(--bg-card, #ffffff) !important;
+        color: var(--text-main, #0f172a) !important;
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25) !important;
+    }
+    .verify-map-label {
+        color: var(--text-main, #1e293b) !important;
+    }
+    .verify-map-modal-footer {
+        border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+    }
+
+    [data-theme="dark"] .verify-map-modal-content,
+    [data-bs-theme="dark"] .verify-map-modal-content {
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    }
+    [data-theme="dark"] .verify-map-modal-header,
+    [data-bs-theme="dark"] .verify-map-modal-header {
+        background: linear-gradient(135deg, #1e293b, #0f172a) !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    [data-theme="dark"] .verify-map-ticket-banner,
+    [data-bs-theme="dark"] .verify-map-ticket-banner {
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+    [data-theme="dark"] .verify-map-input,
+    [data-bs-theme="dark"] .verify-map-input {
+        background-color: #1e293b !important;
+        color: #ffffff !important;
+        border-color: #334155 !important;
+    }
+    [data-theme="dark"] .verify-map-label,
+    [data-bs-theme="dark"] .verify-map-label {
+        color: #f8fafc !important;
+    }
+    [data-theme="dark"] .verify-map-modal-footer,
+    [data-bs-theme="dark"] .verify-map-modal-footer {
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
 </style>
 {% endblock %}
 
@@ -827,46 +890,46 @@
 </aside>
 
 <!-- Supervisor Verify & Log Completion Modal -->
-<div class="modal fade" id="verifyCompletionModal" tabindex="-1" aria-labelledby="verifyCompletionModalLabel" aria-hidden="true" data-bs-theme="dark" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;">
+<div class="modal fade" id="verifyCompletionModal" tabindex="-1" aria-labelledby="verifyCompletionModalLabel" aria-hidden="true" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:1060;">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; background-color: #0f172a; color: #f8fafc; border: 1px solid rgba(255,255,255,0.15);">
-            <div class="modal-header border-bottom border-secondary border-opacity-25 py-3" style="background: linear-gradient(135deg, #1e293b, #0f172a);">
+        <div class="modal-content verify-map-modal-content border shadow-lg" style="border-radius: 16px;">
+            <div class="modal-header verify-map-modal-header py-3">
                 <h5 class="modal-title d-flex align-items-center gap-2" id="verifyCompletionModalLabel">
                     <i class="bi bi-patch-check-fill text-success fs-4"></i>
                     <span class="fw-bold">Verify & Log Completion</span>
                 </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="verifyCompletionForm" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="X-Tab-Guard-ID" value="{{ session.get('tab_guard_id', '') }}">
                 <div class="modal-body p-4 d-flex flex-column gap-3">
                     <input type="hidden" id="verifyTicketId" name="ticket_id" value="">
-                    <div class="p-2.5 rounded-3 bg-secondary bg-opacity-10 border border-secondary border-opacity-25 d-flex align-items-center gap-2">
+                    <div class="verify-map-ticket-banner p-2.5 rounded-3 d-flex align-items-center gap-2">
                         <i class="bi bi-shield-check text-success fs-5"></i>
                         <span class="small">Supervisor Quality Verification for <strong id="verifyTicketDisplayId" class="text-warning">Ticket #--</strong></span>
                     </div>
                     <div>
-                        <label for="verifyTechName" class="form-label small fw-bold text-light mb-1">
+                        <label for="verifyTechName" class="form-label verify-map-label small fw-bold mb-1">
                             Technician / Vendor Name <span class="text-danger">*</span>
                         </label>
-                        <input type="text" class="form-control bg-dark text-white border-secondary" id="verifyTechName" name="technician_name" placeholder="e.g., Ramesh (Electrical) or External Vendor" required>
+                        <input type="text" class="form-control verify-map-input" id="verifyTechName" name="technician_name" placeholder="e.g., Ramesh (Electrical) or External Vendor" required>
                     </div>
                     <div>
-                        <label for="verifyProofImage" class="form-label small fw-bold text-light mb-1">
+                        <label for="verifyProofImage" class="form-label verify-map-label small fw-bold mb-1">
                             <i class="bi bi-camera-fill me-1 text-primary"></i>Proof of Completion (Camera-Ready) <span class="text-danger">*</span>
                         </label>
-                        <input type="file" class="form-control bg-dark text-white border-secondary" id="verifyProofImage" name="proof_image" accept="image/*" capture="environment" required>
+                        <input type="file" class="form-control verify-map-input" id="verifyProofImage" name="proof_image" accept="image/*" capture="environment" required>
                         <small class="text-muted d-block mt-1">Mobile devices will launch the rear camera to photograph the physical resolution.</small>
                     </div>
                     <div>
-                        <label for="verifyNotes" class="form-label small fw-bold text-light mb-1">
+                        <label for="verifyNotes" class="form-label verify-map-label small fw-bold mb-1">
                             Supervisor Inspection Notes <span class="text-danger">*</span>
                         </label>
-                        <textarea class="form-control bg-dark text-white border-secondary" id="verifyNotes" name="resolution_notes" rows="3" placeholder="Detail physical inspection results, test run verification, and QA sign-off remarks..." required></textarea>
+                        <textarea class="form-control verify-map-input" id="verifyNotes" name="resolution_notes" rows="3" placeholder="Detail physical inspection results, test run verification, and QA sign-off remarks..." required></textarea>
                     </div>
                 </div>
-                <div class="modal-footer border-top border-secondary border-opacity-25 pt-3">
+                <div class="modal-footer verify-map-modal-footer pt-3">
                     <button type="button" class="btn btn-outline-secondary px-3" data-bs-dismiss="modal">Cancel</button>
                     <button type="submit" class="btn btn-success fw-bold px-4" id="verifySubmitBtn">
                         <i class="bi bi-check2-circle me-1"></i>Verify Work & Commit to Log

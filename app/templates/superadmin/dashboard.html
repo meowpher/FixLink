@@ -1601,6 +1601,241 @@
         .role-mgmt-badges {
             width: 100% !important;
         }
+
+        /* Prevent horizontal scrolling on mobile tables */
+        .role-management-card .table-responsive,
+        .bugs-tracking-card .table-responsive {
+            overflow-x: visible !important;
+            max-height: none !important;
+        }
+
+        /* --- 1. Active Supervisors Mobile Card Layout --- */
+        #supervisorsTable,
+        #supervisorsTable tbody {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            gap: 0.65rem !important;
+        }
+
+        #supervisorsTable thead {
+            display: none !important;
+        }
+
+        #supervisorsTable .supervisor-row {
+            display: grid !important;
+            grid-template-columns: 1fr auto !important;
+            grid-template-rows: auto auto !important;
+            gap: 0.65rem 0.5rem !important;
+            align-items: center !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            border: 1px solid var(--border-color, #e2e8f0) !important;
+            border-radius: 14px !important;
+            padding: 0.95rem 1rem !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        [data-theme="dark"] #supervisorsTable .supervisor-row {
+            background: linear-gradient(160deg, rgba(28, 28, 34, 0.95) 0%, rgba(18, 18, 22, 0.95) 100%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+        }
+
+        #supervisorsTable .supervisor-row td {
+            display: block !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        #supervisorsTable .supervisor-row td:nth-child(1) {
+            grid-column: 1 / -1 !important;
+            width: 100% !important;
+        }
+
+        #supervisorsTable .supervisor-row td:nth-child(2) {
+            grid-column: 1 / 2 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        #supervisorsTable .supervisor-row td:nth-child(2) .small {
+            display: none !important;
+        }
+
+        #supervisorsTable .supervisor-row td:nth-child(3) {
+            display: none !important;
+        }
+
+        #supervisorsTable .supervisor-row td:nth-child(4) {
+            grid-column: 2 / 3 !important;
+            text-align: right !important;
+        }
+
+        #supervisorsTable .supervisor-row.supervisor-overflow-hidden {
+            display: none !important;
+        }
+
+        /* --- 2. Reported Bugs Mobile Card Layout --- */
+        .bugs-tracking-card .table-responsive {
+            padding: 0.75rem !important;
+        }
+
+        #reportedBugsTable,
+        #reportedBugsTable tbody {
+            display: flex !important;
+            flex-direction: column !important;
+            width: 100% !important;
+            gap: 0.75rem !important;
+        }
+
+        #reportedBugsTable thead {
+            display: none !important;
+        }
+
+        #reportedBugsTable .bug-table-row {
+            display: grid !important;
+            grid-template-columns: auto auto 1fr !important;
+            grid-template-rows: auto auto auto !important;
+            gap: 0.6rem 0.55rem !important;
+            align-items: center !important;
+            width: 100% !important;
+            background: #ffffff !important;
+            border: 1px solid var(--border-color, #e2e8f0) !important;
+            border-radius: 14px !important;
+            padding: 0.95rem 1rem !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            transition: all 0.2s ease !important;
+        }
+
+        [data-theme="dark"] #reportedBugsTable .bug-table-row {
+            background: linear-gradient(160deg, rgba(28, 28, 34, 0.95) 0%, rgba(18, 18, 22, 0.95) 100%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+        }
+
+        #reportedBugsTable .bug-table-row td {
+            display: block !important;
+            padding: 0 !important;
+            border: none !important;
+            background: transparent !important;
+        }
+
+        /* Top Row: Checkbox + Status Badge + Date */
+        #reportedBugsTable .bug-table-row td:nth-child(1) {
+            grid-column: 1 / 2 !important;
+            grid-row: 1 / 2 !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(1) .bug-checkbox {
+            width: 1.15rem !important;
+            height: 1.15rem !important;
+            margin: 0 !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(2) {
+            grid-column: 2 / 3 !important;
+            grid-row: 1 / 2 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(2) .bug-status-badge {
+            font-size: 0.72rem !important;
+            padding: 0.22rem 0.65rem !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(5) {
+            grid-column: 3 / 4 !important;
+            grid-row: 1 / 2 !important;
+            text-align: right !important;
+            font-size: 0.74rem !important;
+            color: var(--text-muted) !important;
+            white-space: nowrap !important;
+        }
+
+        /* Middle Row: Title & Description */
+        #reportedBugsTable .bug-table-row td:nth-child(3) {
+            grid-column: 1 / -1 !important;
+            grid-row: 2 / 3 !important;
+            max-width: 100% !important;
+            padding: 0.2rem 0 !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(3) .bug-title-text {
+            font-size: 0.95rem !important;
+            font-weight: 700 !important;
+            color: var(--text-main) !important;
+            line-height: 1.35 !important;
+            margin-bottom: 0.25rem !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(3) .small {
+            font-size: 0.82rem !important;
+            line-height: 1.4 !important;
+            color: var(--text-muted) !important;
+            white-space: normal !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+        }
+
+        /* Bottom Row: Reporter on left, Actions on right */
+        #reportedBugsTable .bug-table-row td:nth-child(4) {
+            grid-column: 1 / 3 !important;
+            grid-row: 3 / 4 !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 0.4rem !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(4) .badge {
+            font-size: 0.72rem !important;
+            padding: 0.2rem 0.55rem !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(4) .small {
+            display: none !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(6) {
+            grid-column: 3 / 4 !important;
+            grid-row: 3 / 4 !important;
+            text-align: right !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(6) .btn-group {
+            display: inline-flex !important;
+            gap: 0.35rem !important;
+        }
+
+        #reportedBugsTable .bug-table-row td:nth-child(6) .btn {
+            padding: 0.3rem 0.6rem !important;
+            font-size: 0.8rem !important;
+        }
+
+        #reportedBugsTable .bug-table-row.bug-mobile-hidden {
+            display: none !important;
+        }
+    }
+
+    /* Common Mobile Load More Controls */
+    .mobile-load-more-btn {
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        font-weight: 600 !important;
+        font-size: 0.82rem !important;
+    }
+    .mobile-load-more-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2) !important;
     }
 
     /* Input Group & Badge Unification Rules */
@@ -1973,7 +2208,7 @@
                             </thead>
                             <tbody id="supervisorsTableBody">
                                 {% for sup in supervisors %}
-                                <tr class="supervisor-row" data-name="{{ sup.name|lower }}" data-email="{{ sup.email|lower }}" data-user-id="{{ sup.id }}">
+                                <tr class="supervisor-row {% if loop.index > 4 %}supervisor-overflow-hidden{% endif %}" data-name="{{ sup.name|lower }}" data-email="{{ sup.email|lower }}" data-user-id="{{ sup.id }}">
                                     <td>
                                         <div class="d-flex align-items-center gap-2.5">
                                             <div class="supervisor-avatar-circle">
@@ -2020,6 +2255,14 @@
                             </tbody>
                         </table>
                     </div>
+                    {% if supervisors|length > 4 %}
+                    <div id="supervisorsLoadMoreContainer" class="d-md-none text-center pt-2 border-top mt-2">
+                        <button type="button" id="supervisorsLoadMoreBtn" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5 mobile-load-more-btn">
+                            <i class="bi bi-chevron-down"></i>
+                            <span class="btn-text">Load More (+{{ supervisors|length - 4 }})</span>
+                        </button>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -2202,7 +2445,7 @@
                     </thead>
                     <tbody id="reportedBugsTableBody">
                         {% for bug in bugs %}
-                        <tr class="bug-table-row" id="bugRow-{{ bug.id }}" data-bug-id="{{ bug.id }}" data-status="{{ bug.status }}" data-text="{{ (bug.title ~ ' ' ~ bug.description ~ ' ' ~ bug.reporter_type ~ ' ' ~ (bug.reporter_id or '')) | lower }}">
+                        <tr class="bug-table-row {% if loop.index > 4 %}bug-mobile-hidden{% endif %}" id="bugRow-{{ bug.id }}" data-bug-id="{{ bug.id }}" data-status="{{ bug.status }}" data-text="{{ (bug.title ~ ' ' ~ bug.description ~ ' ' ~ bug.reporter_type ~ ' ' ~ (bug.reporter_id or '')) | lower }}">
                             <td class="ps-3 text-center">
                                 <input type="checkbox" class="form-check-input bug-checkbox" value="{{ bug.id }}" data-status="{{ bug.status }}" style="cursor: pointer;">
                             </td>
@@ -2265,6 +2508,17 @@
                     </tbody>
                 </table>
             </div>
+            {% if bugs|length > 4 %}
+            <div id="bugsLoadMoreContainer" class="d-md-none text-center p-3 border-top">
+                <div class="small text-muted mb-2" id="bugsShowingText">
+                    Showing <strong id="bugsVisibleCount">4</strong> of <strong id="bugsTotalCount">{{ bugs|length }}</strong> bugs
+                </div>
+                <button type="button" id="bugsLoadMoreBtn" class="btn btn-sm btn-outline-primary rounded-pill px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-sm mobile-load-more-btn">
+                    <i class="bi bi-chevron-down"></i>
+                    <span class="btn-text">Load More (+{{ [bugs|length - 4, 4]|min }} remaining)</span>
+                </button>
+            </div>
+            {% endif %}
         </div>
     </div>
     {% endif %}
@@ -2446,10 +2700,13 @@
         if (openBugsCount) openBugsCount.textContent = openCount;
     }
 
+    let mobileBugsLimit = 4;
+    let isBugsExpanded = false;
+
     function applyBugFilters() {
         const query = (document.getElementById('bugSearchInput')?.value || '').toLowerCase().trim();
         const rows = document.querySelectorAll('.bug-table-row');
-        let visibleCount = 0;
+        let matchingRows = [];
 
         rows.forEach(row => {
             const status = row.dataset.status;
@@ -2459,9 +2716,10 @@
 
             if (matchesStatus && matchesSearch) {
                 row.classList.remove('d-none');
-                visibleCount++;
+                matchingRows.push(row);
             } else {
                 row.classList.add('d-none');
+                row.classList.remove('bug-mobile-hidden');
                 // Uncheck hidden rows if needed
                 const cb = row.querySelector('.bug-checkbox');
                 if (cb && cb.checked) {
@@ -2471,9 +2729,52 @@
             }
         });
 
+        // Mobile progressive Load More handling
+        const loadMoreContainer = document.getElementById('bugsLoadMoreContainer');
+        const loadMoreBtn = document.getElementById('bugsLoadMoreBtn');
+        const bugsVisibleCount = document.getElementById('bugsVisibleCount');
+        const bugsTotalCount = document.getElementById('bugsTotalCount');
+
+        if (window.innerWidth <= 768 && !query) {
+            const totalMatching = matchingRows.length;
+            let displayCount = 0;
+
+            matchingRows.forEach((row, idx) => {
+                if (isBugsExpanded || idx < mobileBugsLimit) {
+                    row.classList.remove('bug-mobile-hidden');
+                    displayCount++;
+                } else {
+                    row.classList.add('bug-mobile-hidden');
+                }
+            });
+
+            if (loadMoreContainer) {
+                if (totalMatching > 4) {
+                    loadMoreContainer.classList.remove('d-none');
+                    if (bugsVisibleCount) bugsVisibleCount.textContent = displayCount;
+                    if (bugsTotalCount) bugsTotalCount.textContent = totalMatching;
+                    if (loadMoreBtn) {
+                        const remaining = totalMatching - displayCount;
+                        if (isBugsExpanded || displayCount >= totalMatching) {
+                            loadMoreBtn.innerHTML = `<i class="bi bi-chevron-up me-1"></i><span class="btn-text">Show Less</span>`;
+                        } else {
+                            const nextBatch = Math.min(remaining, 4);
+                            loadMoreBtn.innerHTML = `<i class="bi bi-chevron-down me-1"></i><span class="btn-text">Load More (+${nextBatch} remaining)</span>`;
+                        }
+                    }
+                } else {
+                    loadMoreContainer.classList.add('d-none');
+                }
+            }
+        } else {
+            // Desktop or search filter active: show all matching rows
+            matchingRows.forEach(row => row.classList.remove('bug-mobile-hidden'));
+            if (loadMoreContainer) loadMoreContainer.classList.add('d-none');
+        }
+
         const noMatchRow = document.getElementById('noMatchingBugsRow');
         if (noMatchRow) {
-            if (visibleCount === 0 && rows.length > 0) {
+            if (matchingRows.length === 0 && rows.length > 0) {
                 noMatchRow.classList.remove('d-none');
             } else {
                 noMatchRow.classList.add('d-none');
@@ -2621,6 +2922,8 @@
                 document.querySelectorAll('.bug-filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentBugFilter = btn.dataset.filter || 'all';
+                mobileBugsLimit = 4;
+                isBugsExpanded = false;
                 applyBugFilters();
             });
         });
@@ -2632,6 +2935,22 @@
                 applyBugFilters();
             });
         }
+
+        // Mobile load more button for reported bugs
+        document.getElementById('bugsLoadMoreBtn')?.addEventListener('click', function() {
+            const matchingRows = Array.from(document.querySelectorAll('.bug-table-row:not(.d-none)'));
+            if (isBugsExpanded || mobileBugsLimit >= matchingRows.length) {
+                isBugsExpanded = false;
+                mobileBugsLimit = 4;
+                document.getElementById('reportedBugsSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                mobileBugsLimit += 4;
+                if (mobileBugsLimit >= matchingRows.length) {
+                    isBugsExpanded = true;
+                }
+            }
+            applyBugFilters();
+        });
 
         // Master select all checkbox
         const selectAllCb = document.getElementById('selectAllBugs');
@@ -3114,6 +3433,62 @@
             }
         });
 
+        // Supervisors Registry mobile pagination & progressive load more
+        let isSupervisorsExpanded = false;
+
+        function updateSupervisorPagination() {
+            const rows = document.querySelectorAll('.supervisor-row');
+            const container = document.getElementById('supervisorsLoadMoreContainer');
+            const btn = document.getElementById('supervisorsLoadMoreBtn');
+            const searchInput = document.getElementById('supervisorFilterInput');
+            const query = searchInput ? searchInput.value.trim().toLowerCase() : '';
+
+            if (window.innerWidth > 768) {
+                rows.forEach(r => r.classList.remove('supervisor-overflow-hidden'));
+                if (container) container.classList.add('d-none');
+                return;
+            }
+
+            if (query) {
+                if (container) container.classList.add('d-none');
+                return;
+            }
+
+            let visibleCount = 0;
+            rows.forEach((r, idx) => {
+                if (isSupervisorsExpanded || idx < 4) {
+                    r.classList.remove('supervisor-overflow-hidden');
+                    visibleCount++;
+                } else {
+                    r.classList.add('supervisor-overflow-hidden');
+                }
+            });
+
+            if (container) {
+                if (rows.length > 4) {
+                    container.classList.remove('d-none');
+                    if (btn) {
+                        const remaining = rows.length - visibleCount;
+                        if (isSupervisorsExpanded) {
+                            btn.innerHTML = `<i class="bi bi-chevron-up me-1"></i><span class="btn-text">Show Less</span>`;
+                        } else {
+                            btn.innerHTML = `<i class="bi bi-chevron-down me-1"></i><span class="btn-text">Load More (+${remaining})</span>`;
+                        }
+                    }
+                } else {
+                    container.classList.add('d-none');
+                }
+            }
+        }
+
+        document.getElementById('supervisorsLoadMoreBtn')?.addEventListener('click', function() {
+            isSupervisorsExpanded = !isSupervisorsExpanded;
+            updateSupervisorPagination();
+            if (!isSupervisorsExpanded) {
+                document.getElementById('roleManagementSection')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+
         // Live filter for supervisors registry table
         const supervisorFilterInput = document.getElementById('supervisorFilterInput');
         if (supervisorFilterInput) {
@@ -3125,12 +3500,28 @@
                     const email = r.dataset.email || '';
                     if (name.includes(query) || email.includes(query)) {
                         r.style.display = '';
+                        r.classList.remove('supervisor-overflow-hidden');
                     } else {
                         r.style.display = 'none';
                     }
                 });
+                if (!query) {
+                    updateSupervisorPagination();
+                } else {
+                    const container = document.getElementById('supervisorsLoadMoreContainer');
+                    if (container) container.classList.add('d-none');
+                }
             });
         }
+
+        // Keep mobile pagination in sync on viewport resize
+        window.addEventListener('resize', () => {
+            updateSupervisorPagination();
+            applyBugFilters();
+        });
+
+        // Initial trigger
+        updateSupervisorPagination();
 
         // Staggered entry animation using GSAP
         if (window.gsap) {

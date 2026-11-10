@@ -36,7 +36,8 @@
 
 ### Release v1.7.28 (2026-11-10)
 - `style(ui)`: **Admin Status Map Legend Static Top-Left Overlay (`app/templates/status_map.html`)**
-  - Replaced the bottom-left collapsible toggle button (`#mapLegendFloatingWidget` / `#mapLegendCollapse`) with a clean, permanent frosted glassmorphism overlay (`top: 14px; left: 14px;`).
+  - Replaced the bottom-left collapsible toggle button (`#mapLegendFloatingWidget` / `#mapLegendCollapse`) with a clean, permanent frosted glassmorphism overlay.
+  - Positioned overlay with `top: 60px; left: 14px;` offset inside `.floor-map-wrapper` to prevent visual collision with the floor header title and room count badge (`.floor-map-header`).
   - Aligned typography and swatch scaling (`8px` indicators, `0.72rem` labels) to match the `/report` page design.
   - Displayed both operational status indicators (*Normal, Issue Reported, In Progress, Assigned*) and room types (*Classroom, Lab, Washroom, Faculty, Conference, Meeting, Encave, Kitchen / Bar*) instantly on load without requiring user interaction.
   - Fully supports light and dark theme adaptation (`rgba(255, 255, 255, 0.92)` / `rgba(18, 18, 18, 0.92)`).

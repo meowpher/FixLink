@@ -20,6 +20,92 @@
 <!-- Minified Report Stylesheet -->
 <link rel="preload" href="{{ url_for('static', filename='css/report.min.css') }}?v=1.0" as="style">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/report.min.css') }}?v=1.0">
+<style>
+    /* Static & Permanently Visible Map Legend */
+    .map-key-widget.static-legend {
+        position: static !important;
+        width: 100% !important;
+        display: block !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        z-index: 10 !important;
+    }
+    .map-key-widget.static-legend .map-key-card {
+        position: static !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: none !important;
+        pointer-events: auto !important;
+        max-height: none !important;
+        min-width: 100% !important;
+        width: 100% !important;
+        background: var(--bg-card, #ffffff) !important;
+        border: none !important;
+        border-top: 1px solid var(--border-color, rgba(0, 0, 0, 0.08)) !important;
+        border-radius: 0 0 20px 20px !important;
+        padding: 12px 18px !important;
+        box-shadow: none !important;
+    }
+    body[data-theme="dark"] .map-key-widget.static-legend .map-key-card,
+    body[data-bs-theme="dark"] .map-key-widget.static-legend .map-key-card {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+    }
+    .map-key-widget.static-legend .map-key-header {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.6px !important;
+        color: var(--text-muted, #64748b) !important;
+        margin-bottom: 8px !important;
+        padding-bottom: 0 !important;
+        border-bottom: none !important;
+    }
+    .map-key-widget.static-legend .map-key-items {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
+        gap: 8px 14px !important;
+    }
+    .map-key-widget.static-legend .legend-item {
+        font-size: 0.78rem !important;
+        font-weight: 500 !important;
+        color: var(--text-main, #334155) !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        background: var(--bg-surface, rgba(0, 0, 0, 0.03)) !important;
+        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.06)) !important;
+        border-radius: 20px !important;
+        padding: 3px 10px !important;
+        white-space: nowrap !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease !important;
+    }
+    body[data-theme="dark"] .map-key-widget.static-legend .legend-item,
+    body[data-bs-theme="dark"] .map-key-widget.static-legend .legend-item {
+        color: #e4e4e7 !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+    .map-key-widget.static-legend .legend-color {
+        width: 10px !important;
+        height: 10px !important;
+        border-radius: 3px !important;
+        border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    }
+    @media (max-width: 767.98px) {
+        .map-key-widget.static-legend .map-key-card {
+            padding: 10px 14px !important;
+        }
+        .map-key-widget.static-legend .map-key-items {
+            gap: 6px 8px !important;
+        }
+        .map-key-widget.static-legend .legend-item {
+            font-size: 0.72rem !important;
+            padding: 2px 8px !important;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -145,12 +231,12 @@
                             </div>
                         </div>
 
-                        <!-- Floating Map Key Widget (Collapsible Mobile-Friendly) -->
-                        <div class="map-key-widget" id="mapKeyWidget">
+                        <!-- Static Visible Map Legend Bar -->
+                        <div class="map-key-widget static-legend" id="mapKeyWidget">
                             <div class="map-key-card" id="mapKeyCard" role="region" aria-label="Map Legend">
-                                <div class="map-key-header d-flex justify-content-between align-items-center">
-                                    <span><i class="bi bi-info-circle me-1 text-primary"></i>Room Types</span>
-                                    <button type="button" class="btn-close" id="mapKeyClose" aria-label="Close legend" style="font-size: 8px;"></button>
+                                <div class="map-key-header d-flex align-items-center gap-1">
+                                    <i class="bi bi-palette-fill text-primary"></i>
+                                    <span>Room Types Key</span>
                                 </div>
                                 <div class="map-key-items">
                                     <div class="legend-item">
@@ -191,11 +277,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <button type="button" class="map-key-toggle" id="mapKeyToggle" aria-expanded="false" aria-controls="mapKeyCard">
-                                <i class="bi bi-palette-fill text-primary"></i>
-                                <span>Map Key</span>
-                                <i class="bi bi-chevron-up toggle-icon"></i>
-                            </button>
                         </div>
                     </div>
                 </div>

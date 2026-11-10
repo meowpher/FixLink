@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.28** | 2026-11-10 | **Staged** | **Admin Status Map & Report Portal Static Top-Left Legend Harmonization** (Harmonized the Admin Live Status Map `/admin/map` legend with `/report`; converted collapsible floating button widget into a clean, permanent, frosted glassmorphism card in the top-left corner displaying both operational Statuses and Room Types without click or scroll friction). |
 | **v1.7.27** | 2026-11-10 | **Deployed** | **Report Portal Top-Left Compact Legend & Mobile Verification Enhancements** (Relocated map key to a permanent, frosted glassmorphism overlay in the top-left corner of the interactive floor map on `/report`; adapted supervisor verification modal to light/dark themes and protected file uploads from Vercel read-only filesystem errors; bypassed rate limiter for Locust load testing with safe role-based execution). |
 | **v1.7.26** | 2026-10-30 | **Deployed** | **Frontend Integration, Static Asset Wiring & Template Routing Finalization (Phase 4)** (Scanned 55 templates to ensure 100% namespaced `url_for` blueprint resolution; fixed legacy admin signup endpoint; registered `professional_bp`; wired GSAP interactive map loader and template preloads to `app/static/svg_maps/` with automatic fallback; verified local server and test suite). |
 | **v1.7.25** | 2026-10-30 | **Deployed** | **Domain Model Decoupling & Modular Service Layer Architecture (Phase 3)** (Decoupled 19 SQLAlchemy models into domain modules inside `app/models/` under strict read-only database constraints; extracted business logic into `app/services/` with QR, interactive SVG map, real-time messaging, email, and analytics services; refactored routes to delegate to services; deleted `docs/plan.txt`). |
@@ -32,6 +33,13 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.28 (2026-11-10)
+- `style(ui)`: **Admin Status Map Legend Static Top-Left Overlay (`app/templates/status_map.html`)**
+  - Replaced the bottom-left collapsible toggle button (`#mapLegendFloatingWidget` / `#mapLegendCollapse`) with a clean, permanent frosted glassmorphism overlay (`top: 14px; left: 14px;`).
+  - Aligned typography and swatch scaling (`8px` indicators, `0.72rem` labels) to match the `/report` page design.
+  - Displayed both operational status indicators (*Normal, Issue Reported, In Progress, Assigned*) and room types (*Classroom, Lab, Washroom, Faculty, Conference, Meeting, Encave, Kitchen / Bar*) instantly on load without requiring user interaction.
+  - Fully supports light and dark theme adaptation (`rgba(255, 255, 255, 0.92)` / `rgba(18, 18, 18, 0.92)`).
 
 ### Release v1.7.27 (2026-11-10)
 - `style(ui)`: **Compact Top-Left Map Legend Overlay (`app/templates/report.html`)**

@@ -285,124 +285,73 @@
         box-shadow: none !important;
     }
 
-    /* ── Floating Map Legend Inside Map Container ── */
+    /* ── Compact Top-Left Map Legend Inside Map Container ── */
     .map-legend-floating-widget {
         position: absolute;
-        bottom: 18px;
-        left: 18px;
-        z-index: 100;
-        display: flex;
-        flex-direction: column-reverse;
-        align-items: flex-start;
-        gap: 8px;
+        top: 14px;
+        left: 14px;
+        bottom: auto;
+        right: auto;
+        z-index: 25;
+        max-width: 145px;
         pointer-events: none;
     }
 
-    .map-legend-toggle-btn {
-        pointer-events: auto;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.45rem;
-        padding: 0.42rem 0.9rem;
-        font-size: 0.8rem;
-        font-weight: 600;
-        border-radius: 50px;
-        background: var(--bg-card, rgba(255, 255, 255, 0.9));
+    .map-legend-overlay-card {
+        position: static;
+        width: 100%;
+        min-width: 130px;
+        max-width: 145px;
+        max-height: calc(82vh - 40px);
+        overflow-y: auto;
+        background: rgba(255, 255, 255, 0.92);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.12));
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-        color: var(--text-main, #1e293b);
-        cursor: pointer;
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .map-legend-toggle-btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.14);
-        background: var(--bg-card, #ffffff);
-        color: var(--mitwpu-blue, #0b4d8c);
-    }
-
-    .map-legend-toggle-btn[aria-expanded="true"] {
-        background: var(--mitwpu-blue, #0b4d8c);
-        color: #ffffff;
-        border-color: var(--mitwpu-blue, #0b4d8c);
-    }
-
-    .map-legend-toggle-btn[aria-expanded="true"] i {
-        color: #ffffff !important;
-    }
-
-    .map-legend-overlay-card {
-        pointer-events: auto;
-        width: 225px;
-        max-height: calc(82vh - 80px);
-        overflow-y: auto;
-        background: var(--bg-card, rgba(255, 255, 255, 0.95));
-        backdrop-filter: blur(14px);
-        -webkit-backdrop-filter: blur(14px);
-        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.14));
+        border: 1px solid var(--border-color, rgba(0, 0, 0, 0.1));
         border-radius: 12px;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.16);
-        padding: 0.75rem 0.85rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        padding: 8px 10px;
+        pointer-events: auto;
         scrollbar-width: thin;
     }
 
-    /* Dark Mode Styling for Floating Legend */
-    [data-theme="dark"] .map-legend-toggle-btn,
-    [data-bs-theme="dark"] .map-legend-toggle-btn {
-        background: rgba(30, 41, 59, 0.9);
-        border-color: rgba(255, 255, 255, 0.14);
-        color: #f1f5f9;
-        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-    }
-
-    [data-theme="dark"] .map-legend-toggle-btn:hover,
-    [data-bs-theme="dark"] .map-legend-toggle-btn:hover {
-        background: rgba(45, 58, 80, 0.95);
-        color: #ffffff;
-    }
-
-    [data-theme="dark"] .map-legend-toggle-btn[aria-expanded="true"],
-    [data-bs-theme="dark"] .map-legend-toggle-btn[aria-expanded="true"] {
-        background: #1d4ed8 !important;
-        border-color: #2563eb !important;
-        color: #ffffff !important;
-    }
-
+    /* Dark Mode Styling for Top-Left Legend */
     [data-theme="dark"] .map-legend-overlay-card,
     [data-bs-theme="dark"] .map-legend-overlay-card {
-        background: rgba(30, 41, 59, 0.96);
-        border-color: rgba(255, 255, 255, 0.14);
+        background: rgba(18, 18, 18, 0.92);
+        border-color: rgba(255, 255, 255, 0.12);
         color: #f1f5f9;
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.5);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
     }
 
     .legend-box {
-        width: 13px;
-        height: 13px;
-        border-radius: 3px;
+        width: 8px;
+        height: 8px;
+        border-radius: 2px;
         flex-shrink: 0;
         box-sizing: border-box;
     }
 
     .legend-dot {
-        width: 10px;
-        height: 10px;
+        width: 8px;
+        height: 8px;
         border-radius: 50%;
         flex-shrink: 0;
         box-sizing: border-box;
     }
 
     .legend-label {
-        font-size: 0.76rem;
+        font-size: 0.72rem;
         font-weight: 500;
         color: var(--text-main, #334155);
         transition: color 0.15s ease;
+        line-height: 1.2;
     }
 
     .legend-heading {
+        font-size: 0.65rem !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.5px !important;
         color: var(--text-muted, #64748b);
     }
 
@@ -788,82 +737,77 @@
                         </div>
                     </div>
 
-                    <!-- Floating Map Legend Inside Map Container -->
+                    <!-- Compact Top-Left Map Legend Inside Map Container -->
                     <div class="map-legend-floating-widget" id="mapLegendFloatingWidget">
-                        <div class="collapse map-legend-overlay-card" id="mapLegendCollapse">
-                            <div class="d-flex justify-content-between align-items-center pb-2 mb-2 border-bottom">
-                                <span class="fw-bold" style="font-size: 0.78rem;"><i class="bi bi-palette me-2 text-primary"></i>Map Legend</span>
-                                <button type="button" class="btn-close" data-bs-toggle="collapse" data-bs-target="#mapLegendCollapse" aria-label="Close legend" style="font-size: 0.65rem;"></button>
+                        <div class="map-legend-overlay-card" id="mapLegendCollapse">
+                            <div class="d-flex align-items-center gap-1 pb-1 mb-1.5 border-bottom">
+                                <i class="bi bi-palette-fill text-primary" style="font-size: 0.72rem;"></i>
+                                <span class="fw-bold" style="font-size: 0.72rem; letter-spacing: 0.3px;">Map Legend</span>
                             </div>
                             <!-- Status Section -->
-                            <div class="legend-section mb-2">
-                                <div class="fw-bold text-uppercase mb-1 legend-heading" style="font-size: 0.65rem; letter-spacing: 0.05em;">Status</div>
+                            <div class="legend-section mb-1.5">
+                                <div class="fw-bold text-uppercase mb-1 legend-heading">Status</div>
                                 <div class="d-flex flex-column gap-1">
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-dot normal me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-dot normal"></span>
                                         <span class="legend-label">Normal</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-dot issue me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-dot issue"></span>
                                         <span class="legend-label">Issue Reported</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-dot me-2" style="background-color: rgba(234, 179, 8, 0.2); border: 1.5px solid #eab308;"></span>
-                                        <span class="legend-label">Issue In Progress</span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-dot" style="background-color: rgba(234, 179, 8, 0.2); border: 1.5px solid #eab308;"></span>
+                                        <span class="legend-label">In Progress</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-dot me-2" style="background-color: rgba(37, 99, 235, 0.2); border: 1.5px solid #3b82f6;"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-dot" style="background-color: rgba(37, 99, 235, 0.2); border: 1.5px solid #3b82f6;"></span>
                                         <span class="legend-label">Assigned</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <hr class="my-2 opacity-25">
+                            <hr class="my-1.5 opacity-25">
 
                             <!-- Room Types Section -->
                             <div class="legend-section">
-                                <div class="fw-bold text-uppercase mb-1 legend-heading" style="font-size: 0.65rem; letter-spacing: 0.05em;">Room Types</div>
+                                <div class="fw-bold text-uppercase mb-1 legend-heading">Room Types</div>
                                 <div class="d-flex flex-column gap-1">
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-box class room-classroom me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-box class room-classroom"></span>
                                         <span class="legend-label">Classroom</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-box lab room-lab me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-box lab room-lab"></span>
                                         <span class="legend-label">Lab</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-box washroom room-washroom me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-box washroom room-washroom"></span>
                                         <span class="legend-label">Washroom</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-box faculty room-faculty me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-box faculty room-faculty"></span>
                                         <span class="legend-label">Faculty</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-box conference room-conference me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-box conference room-conference"></span>
                                         <span class="legend-label">Conference</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-box meeting room-meeting me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-box meeting room-meeting"></span>
                                         <span class="legend-label">Meeting</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-box encave room-encave me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-box encave room-encave"></span>
                                         <span class="legend-label">Encave</span>
                                     </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="legend-box kitchen room-kitchen me-2"></span>
+                                    <div class="d-flex align-items-center gap-1.5">
+                                        <span class="legend-box kitchen room-kitchen"></span>
                                         <span class="legend-label">Kitchen / Bar</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <button type="button" class="map-legend-toggle-btn" data-bs-toggle="collapse" data-bs-target="#mapLegendCollapse" aria-expanded="false" aria-controls="mapLegendCollapse">
-                            <i class="bi bi-palette text-primary"></i>
-                            <span>Map Legend</span>
-                        </button>
                     </div>
                 </div>
                 {% else %}

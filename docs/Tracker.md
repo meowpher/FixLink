@@ -7,6 +7,7 @@
 
 | Version | Date | Status | Focus Areas |
 | :--- | :--- | :--- | :--- |
+| **v1.7.27** | 2026-11-10 | **Deployed** | **Report Portal Top-Left Compact Legend & Mobile Verification Enhancements** (Relocated map key to a permanent, frosted glassmorphism overlay in the top-left corner of the interactive floor map on `/report`; adapted supervisor verification modal to light/dark themes and protected file uploads from Vercel read-only filesystem errors; bypassed rate limiter for Locust load testing with safe role-based execution). |
 | **v1.7.26** | 2026-10-30 | **Deployed** | **Frontend Integration, Static Asset Wiring & Template Routing Finalization (Phase 4)** (Scanned 55 templates to ensure 100% namespaced `url_for` blueprint resolution; fixed legacy admin signup endpoint; registered `professional_bp`; wired GSAP interactive map loader and template preloads to `app/static/svg_maps/` with automatic fallback; verified local server and test suite). |
 | **v1.7.25** | 2026-10-30 | **Deployed** | **Domain Model Decoupling & Modular Service Layer Architecture (Phase 3)** (Decoupled 19 SQLAlchemy models into domain modules inside `app/models/` under strict read-only database constraints; extracted business logic into `app/services/` with QR, interactive SVG map, real-time messaging, email, and analytics services; refactored routes to delegate to services; deleted `docs/plan.txt`). |
 | **v1.7.24** | 2026-10-30 | **Deployed** | **Root Directory Reorganization, Application Factory Skeleton & Blueprint Route Migration** (Consolidated documentation into docs/; relocated utility scripts to scripts/; organized static assets into app/static/; established clean Application Factory pattern with modular blueprints in app/routes/ and backward-compatible shims; verified all 149 URL endpoints). |
@@ -31,6 +32,22 @@
 ---
 
 ## 2. Chronological Log of Pushed Updates
+
+### Release v1.7.27 (2026-11-10)
+- `style(ui)`: **Compact Top-Left Map Legend Overlay (`app/templates/report.html`)**
+  - Replaced bulky bottom static bar and collapsible floating widget with an ultra-compact frosted glassmorphism overlay (`top: 14px; left: 14px;`).
+  - Rendered all room category swatches (*Classroom, Lab, Washroom, Faculty, Conference, Meeting, Encave, Kitchen, Lifts*) permanently visible on the map without requiring user scroll or click interactions.
+  - Added full light and dark mode adaptive palettes (`var(--bg-card)`, `var(--text-main)`, and high-contrast dark text).
+
+- `fix(core)`: **Verification Modal Theming & Vercel Read-Only Filesystem Protection (`app/routes/admin.py`, `app/routes/supervisor.py`, `app/templates/status_map.html`)**
+  - Removed hardcoded dark theme attributes (`data-bs-theme="dark"`, inline dark backgrounds) from `#verifyCompletionModal`, enabling seamless light mode synchronization.
+  - Eliminated naked `os.makedirs()` calls on production upload paths to prevent 500 `[Errno 30] Read-only file system` crashes on Vercel serverless environments.
+  - Safe-guarded PIL image compression pipelines on serverless runtimes.
+
+- `build(testing)`: **Locust Load Testing Suite & Rate Limiting Bypass (`locustfile.py`, `app/__init__.py`, `.gitignore`)**
+  - Reorganized `locustfile.py` with CSRF scraping, clean endpoint name groupings, and role-guarded task execution (Student, Faculty, Super Admin) to eliminate 403/404 errors.
+  - Explicitly bypassed Flask-Limiter for load testing while preserving clean module imports.
+  - Ignored `locustfile.py` in `.gitignore` to prevent credential exposure.
 
 ### Release v1.7.26 (2026-10-30)
 - `feat(ui)`: **Template Routing & Blueprint Namespace Audit (`app/templates/`)**
